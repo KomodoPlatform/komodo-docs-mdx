@@ -100,3 +100,8 @@ These methods (and others with a `task::` prefix) will be linked to a numeric `t
 which is usedto query the status or outcome of the task.
 </Note>
 ```
+
+## Templates
+Use the linked templates below as a starting point for new documentation pages.
+
+ - [AtomicDEX API methods](templates/atomicdex_method.mdx)
