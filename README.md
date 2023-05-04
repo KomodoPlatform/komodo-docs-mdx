@@ -6,4 +6,4 @@ Content for the Komodo Docs lives in this repo in `.mdx` format
 
 ## Pending
 
-List of mdx components available and their descriptions.
+List of mdx components available and their descriptions
