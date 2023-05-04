@@ -26,6 +26,8 @@ These guidelines are currently a work in progress. Please also refer to https://
  - Where a method or parameter is deprecated, this should be clearly communicated in the method heading or request parameters table. 
  - Use bullet points and numbered lists to break up long paragraphs to make the content more readable.
  - Separate sections of content with subheadings to make it easier to scan and find the information they need. Two line breaks should be used before and one line break after each subheading.
+ - In parameter tables, optional parameters should be identified at the start of the parameter's description, along with the default value (if applicable).
+ - Optional parameters should be listed at the bottom of the parameter table
 
 
 ## General
