@@ -64,32 +64,27 @@ Use the `json {{ mm2MethodDecorate : true }}` decoration to generate code blocks
 
 Each response should be wrapped with `CollapsibleSection` tags, for example:
 
-```mdx
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+    <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+    #### Response (ready, successful)
 
-#### Response (ready, successful)
+    ```json
+    {
+       "mmrpc": "2.0",
+       "result": "success",
+       "id": null
+    }
+    ```
+    </CollapsibleSection>
 
-\`\`\`json
-{
-  "mmrpc": "2.0",
-  "result": "success",
-  "id": null
-}
-\`\`\`
-</CollapsibleSection>
-```
 
 The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to 'Show Error Responses' and 'Hide Error Responses' respectively.
-
 
 Use `Note` tags to highlight important information, for example:
 
 ```mdx
-
 <Note>
-
-These methods (and others with a \`task::\` prefix) will be linked to a numeric \`task_id\` value which is used to query the status or outcome of the task.
-
+These methods (and others with a `task::` prefix) will be linked to a numeric `task_id` value
+which is usedto query the status or outcome of the task.
 </Note>
 ```
