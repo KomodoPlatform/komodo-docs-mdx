@@ -1,0 +1,95 @@
+# Common Objects and Structures
+
+## AtomicDEX Request / Response Objects
+
+### AddressInfos
+
+The `addressInfos` object includes the following items for a given address:
+
+| Parameter              | Type      | Description                                                                                                                                      |
+| ---------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| balances               | object    | A standard [balanceInfos](src/pages/atomicdex/common/structures#balanceInfos) object. Not included in responses where `get_balances` is `false`  |
+| derivation_method      | object    | A standard [derivationMethod](src/pages/atomicdex/common/structures#derivationMethod) object                                                    |
+| pubkey                 | string    | The public key associated with the seed used to launch AtomicDEX                                                                                 |
+| tickers                | array     | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                                   |
+
+
+<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
+
+#### Example with balances
+
+```json
+"bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
+    "derivation_method": {
+        "type": "Iguana"
+    },
+    "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
+    "balances": {
+        "spendable": "0.11398301",
+        "unspendable": "0.00001"
+    }
+}
+```
+
+
+#### Example without balances
+
+```json
+"bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
+    "derivation_method": {
+        "type": "Iguana"
+    },
+    "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
+    "tickers": ["ASLP-SLP"]
+}
+```
+
+</CollapsibleSection>
+
+
+### BalanceInfos
+
+The `balanceInfos` object includes the following items for a given coin or token:
+
+| Parameter     | Type             | Description                                                                                                               |
+| ------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| spendable     | string (numeric) | The available amount of a coin or token which is ready to be traded or withdrawn.                                         |
+| unspendable   | string (numeric) | The amount of a coin or token which is awaiting confirmation on the block chain for an incoming or outgoing transaction.  |
+
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "spendable": "12.11398301",
+    "unspendable": "0.53"
+}
+```
+
+</CollapsibleSection>
+
+
+### derivationMethod
+
+The `derivationMethod` object includes the following items for a given coin or token:
+
+| Parameter     | Type   | Description                                                                                                               |
+| ------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
+| type          | string | Possible values: `Iguana` <!-- TODO: insert more types here -->                                                           |
+
+Where the value indicates:
+ - `Iguana`: The coin or token is was activated using Iguana derivation (default).
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "type": "Iguana"
+}
+```
+
+</CollapsibleSection>
