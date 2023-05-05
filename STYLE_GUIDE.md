@@ -50,6 +50,7 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 
 
 ## Syntax
+
  - Use `#` for page headings.
  - Use `##` for subheadings.
  - Use `###` for request/response parameter tables.
@@ -64,9 +65,18 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
  - Optional parameters should be listed at the bottom of the parameter table
 
 
-## Decorations
+## Templates
 
-AtomicDEX methods would be wrapped with `CodeGroup` tags, using the method name as the label value, and the tag value set to POST.
+Use the linked templates below as a starting point for new documentation pages.
+
+ - [AtomicDEX API methods](templates/atomicdex_method.mdx)
+
+
+## Components
+
+#### CodeGroup
+
+AtomicDEX methods should be wrapped with `CodeGroup` tags, using the method name as the label value, and the tag value set to POST.
 Use the `json {{ mm2MethodDecorate : true }}` decoration to generate code blocks for
  - JSON: The pure request body.
  - Python3: Using the requests library.
@@ -75,6 +85,9 @@ Use the `json {{ mm2MethodDecorate : true }}` decoration to generate code blocks
  - PHP: Using curl.
  - GO: Using net/http. (need to confirm this is correct)
  - Ruby: Using net/http. 
+
+
+#### CollapsibleSection
 
 Each response should be wrapped with `CollapsibleSection` tags, for example:
 
@@ -92,6 +105,9 @@ Each response should be wrapped with `CollapsibleSection` tags, for example:
 
 The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to 'Show Error Responses' and 'Hide Error Responses' respectively.
 
+
+#### Note
+
 Use `Note` tags to highlight important information, for example:
 
 ```mdx
@@ -101,7 +117,13 @@ which is usedto query the status or outcome of the task.
 </Note>
 ```
 
-## Templates
-Use the linked templates below as a starting point for new documentation pages.
 
- - [AtomicDEX API methods](templates/atomicdex_method.mdx)
+#### OptimizedImage
+
+Images should be added to the related subfolder within the `src/images` folder, and referenced using the `OptimizedImage` component. At the top of the file which will include the image, import the image using the following syntax:
+
+`import trezorpin from "@/images/api-images/trezor_pin.png";`
+
+Now you can reference the image using the `OptimizedImage` component, for example:
+
+`<OptimizedImage src={trezorpin} classNaming="w-full" alt="Trezor Pin" />`
