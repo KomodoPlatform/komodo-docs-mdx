@@ -9,7 +9,7 @@ The `addressInfos` object includes the following items for a given address:
 | Parameter              | Type      | Description                                                                                                                                      |
 | ---------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
 | balances               | object    | A standard [balanceInfos](src/pages/atomicdex/common/structures#balanceInfos) object. Not included in responses where `get_balances` is `false`  |
-| derivation_method      | object    | A standard [derivationMethod](src/pages/atomicdex/common/structures#derivationMethod) object                                                    |
+| derivation_method      | object    | A standard [DerivationMethod](src/pages/atomicdex/common/structures#DerivationMethod) object                                                    |
 | pubkey                 | string    | The public key associated with the seed used to launch AtomicDEX                                                                                 |
 | tickers                | array     | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                                   |
 
@@ -30,7 +30,6 @@ The `addressInfos` object includes the following items for a given address:
     }
 }
 ```
-
 
 #### Example without balances
 
@@ -71,9 +70,9 @@ The `balanceInfos` object includes the following items for a given coin or token
 </CollapsibleSection>
 
 
-### derivationMethod
+### DerivationMethod
 
-The `derivationMethod` object includes the following items for a given coin or token:
+The `DerivationMethod` object includes the following items for a given coin or token:
 
 | Parameter     | Type   | Description                                                                                                               |
 | ------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
@@ -93,3 +92,52 @@ Where the value indicates:
 ```
 
 </CollapsibleSection>
+
+
+### EvmNode
+
+The `EvmNode` object includes the following items for a given coin or token:
+
+| Parameter | Type    | Description                                                                                                                                                                            |
+| --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url       | string  | URL of an RPC node                                                                                                                                                                     |
+| gui_auth  | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team                                                                        |
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "url": "http://eth1.cipig.net:8555",
+    "gui_auth": false
+}
+```
+
+</CollapsibleSection>
+
+
+### TokensRequest
+
+The `TokensRequest` object includes the following items for a given coin or token:
+
+| Parameter              | Type    | Description                                                                                                                                                                            |
+| ---------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker                 | string  | Ticker of the token to be enabled                                                                                                                                                      |
+| required_confirmations | integer | How many confirmations to wait during the transaction steps of an atomic swap. Overwrites value in coins file; defaults to `3`                                                         |
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "ticker": "MINDS-ERC20",
+    "required_confirmations": 4
+}
+```
+
+</CollapsibleSection>
+
+
+
