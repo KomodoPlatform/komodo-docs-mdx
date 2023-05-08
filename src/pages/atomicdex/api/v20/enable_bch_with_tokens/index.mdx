@@ -15,7 +15,7 @@ The AtomicDEX-API supports Bitcoin Cash SLP tokens. Using this method, you can e
 | address_format.format  | string           | Optional. Overwrites the address format from coins file, if set. Options: `{"format":"standard"}` for legacy/standard address format, `{"format":"cashaddress"}` for cash address format                                                                                                                                                                                                                      |
 | address_format.network | string           | Optional. Overwrites the address network from coins file, if set. Options: `{"network":"bitcoincash"}` for mainnet, `{"network":"bchreg"}` for regtest, or `{"network":"bchtest"}` for testnet                                                                                                                                                                                                                |
 | allow_slp_unsafe_conf  | boolean          | Optional, defaults to `false`. If `true`, allows bchd_urls to be empty. **Warning:** it is highly unsafe to do so as it may lead to invalid SLP transactions generation and tokens burning.                                                                                                                                                                                                                   |
-| get_balances           | boolean          | Optional, defaults to `false`. If `true`, coin and token balances will be returned in the response (which takes a little longer to reply).                                                                                                                                                                                                                                                                    |
+| get_balances           | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                                                                                                                                                       |
 | required_confirmations | integer          | Optional, defaults to value in the coins file, or `3` if not set. Confirmations to wait for steps in swap.                                                                                                                                                                                                                                                                                                    |
 | requires_notarization  | boolean          | Optional, defaults to `true`. Has no effect on BCH.                                                                                                                                                                                                                                                                                                                                                           |
 | tx_history             | boolean          | Optional, defaults to `true`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my_tx_history](/atomicdex/api/legacy/my_tx_history#my-tx-history) method                                                                                                                                                                       |
@@ -33,7 +33,7 @@ The AtomicDEX-API supports Bitcoin Cash SLP tokens. Using this method, you can e
 
 ### 📌 Examples
 
-#### Request with tx_history, cashaddress format, automated utxo merging and get_balances set to true.
+#### Request with tx_history, cashaddress format, and automated utxo merging.
 
 <CodeGroup title="" tag="POST" label="enable_bch_with_tokens">
 ```json {{ mm2MethodDecorate : true }}
@@ -61,7 +61,6 @@ The AtomicDEX-API supports Bitcoin Cash SLP tokens. Using this method, you can e
 			}
 		},
 		"tx_history": true,
-		"get_balances": true,
 		"slp_tokens_requests": [{
 			"ticker": "ASLP-SLP",
 			"required_confirmations": 4

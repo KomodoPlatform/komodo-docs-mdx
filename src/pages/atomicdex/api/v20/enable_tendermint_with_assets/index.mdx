@@ -9,12 +9,12 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 | --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ticker                      | string           | Ticker of the platform protocol coin.  Options: `ATOM`, `IRIS`, `OSMOSIS`                                                                                                                                                                                                   |
 | mm2                         | integer          | Required if not set in `coins` file. Informs the AtomicDEX API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                              |
-| tokens_params               | array of objects | A list of standard [TokensRequest](/atomicdex/api/v20#TokensRequest) objects.                                                                                                                                                                            |
+| tokens_params               | array of objects | A list of standard [TokensRequest](/atomicdex/api/v20#TokensRequest) objects.                                                                                                                                                                                               |
 | priv_key_policy             | string           | Optional, defaults to `ContextPrivKey`. value can be `ContextPrivKey`,`Trezor` when AtomicDEX-API is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the AtomicDEX-API is built targeting `wasm`                                       |
-| tx_history                  | boolean          | Optional, defaults to `false`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my_tx_history](/atomicdex/api/legacy/my_tx_history#my-tx-history) method                                    |
+| tx_history                  | boolean          | Optional, defaults to `false`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my_tx_history](/atomicdex/api/legacy/my_tx_history#my-tx-history) method                                             |
 | required_confirmations      | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the AtomicDEX API to wait during the transaction steps of an atomic swap                                                                                                     |
 | requires_notarization       | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.   |
-| get_balances                | boolean          | Optional, defaults to `false`. If `true`, coin and token balances will be returned in the response (which takes a little longer to reply).                                                                                                                                  |
+| get_balances                | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                     |
 
 
 ### Response Parameters
@@ -31,7 +31,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 
 ### 📌 Examples
 
-#### Request with `get_balances` set to `true`
+#### Request default optional values
 
 <CodeGroup title="" tag="POST" label="enable_tendermint_with_assets">
 ```json {{ mm2MethodDecorate : true }}
@@ -46,9 +46,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 		"rpc_urls": [
 			"https://iris.komodo.live/",
 			"https://rpc.irishub-1.irisnet.org"
-		],
-		"tx_history": true,
-		"get_balances": true
+		]
 	},
 	"userpass": "$userpass"
 }
