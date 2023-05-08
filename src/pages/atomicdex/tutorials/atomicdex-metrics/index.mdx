@@ -9,9 +9,9 @@ import graphana7 from "@/images/atomic-dex-tutorials/graphana7.png";
 import graphana8 from "@/images/atomic-dex-tutorials/graphana8.png";
 import graphana9 from "@/images/atomic-dex-tutorials/graphana9.png";
 
-# DEX Metrics
+# AtomicDEX Metrics
 
-AtomicDEX API 2.0 collects data metrics that allow interested users to view the history of events of an AtomicDEX API session. For example, metrics recorded by the AtomicDEX API include incoming and outgoing traffic.
+The AtomicDEX-API collects data metrics that allow interested users to view a history of events of an AtomicDEX API session, such as incoming and outgoing traffic.
 
 The metrics can be:
 
@@ -19,35 +19,19 @@ The metrics can be:
 - Requested using AtomicDEX API in JSON format
 - Visualized using Prometheus and Grafana
 
-## Setting Up the Log Recording
 
-By default, the collected metrics are recorded to a log file every five minutes.
+## Setting Up Log Recording
 
-A custom time interval can be set during the initiation of the AtomicDEX API 2.0 software.
-
-For example, to set the interval to two minutes, initiate AtomicDEX API with the additional argument `\"metrics\":120`, as follows.
-
-<Note>
-
-Note that in the examples below, the you will need to change the text to reflect your own password and passphrase.
-
-</Note>
-
-Example:
+By default, collected metrics are recorded to a log file every five minutes, but this value can be defined with the `metrics` parameter in a user's [MM2.json file](/atomicdex/api/setup/configure-mm2-json).
 
 ```bash
-stdbuf -oL ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":7777, \"userhome\":\"/${HOME#"/"}\", \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\", \"metrics\":120}" &
+"metrics\": 0,
 ```
 
-To prohibit the recording of metrics to the log file, set the `metrics` argument to 0.
+To disable the collection of metrics, set the `metrics` parameter to 0.
 
-Example:
 
-```bash
-stdbuf -oL ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":7777, \"userhome\":\"/${HOME#"/"}\", \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\", \"metrics\":0}" &
-```
-
-## API Calling
+### Requesting Metrics Manually
 
 Execute the following command to request a metrics snapshot.
 
@@ -59,86 +43,229 @@ Execute the following command to request a metrics snapshot.
 ```
 </CodeGroup>
 
-The response should be similar to the following.
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 ```json
 {
-  "metrics": [
-    {
-      "type": "gauge",
-      "key": "p2p.received_messages.period_in_secs",
-      "labels": {},
-      "value": 60.0
-    },
-    {
-      "type": "gauge",
-      "key": "p2p.connected_relays.len",
-      "labels": {},
-      "value": 4.0
-    },
-    {
-      "type": "gauge",
-      "key": "orderbook.len",
-      "labels": {},
-      "value": 0.0
-    },
-    {
-      "type": "gauge",
-      "key": "p2p.relay_mesh.len",
-      "labels": {},
-      "value": 2.0
-    },
-    {
-      "type": "gauge",
-      "key": "p2p.received_messages.count",
-      "labels": {},
-      "value": 0.0
-    },
-    {
-      "type": "gauge",
-      "key": "p2p.connected_peers.count",
-      "labels": {},
-      "value": 4.0
-    },
-    {
-      "type": "gauge",
-      "key": "orderbook.memory_db",
-      "labels": {},
-      "value": 297800386624.0
-    }
-  ]
+	"metrics": [{
+		"type": "counter",
+		"key": "tx.history.response.count",
+		"labels": {
+			"coin": "MORTY",
+			"method": "tx_detail_by_hash"
+		},
+		"value": 25
+	}, {
+		"type": "counter",
+		"key": "rpc_client.request.count",
+		"labels": {
+			"client": "electrum",
+			"coin": "RICK"
+		},
+		"value": 1224
+	}, {
+		"type": "counter",
+		"key": "tx.history.response.count",
+		"labels": {
+			"method": "tx_detail_by_hash",
+			"coin": "RICK"
+		},
+		"value": 27
+	}, {
+		"type": "counter",
+		"key": "tx.history.request.count",
+		"labels": {
+			"coin": "RICK",
+			"method": "tx_detail_by_hash"
+		},
+		"value": 27
+	}, {
+		"type": "counter",
+		"key": "rpc_client.traffic.in",
+		"labels": {
+			"client": "electrum",
+			"coin": "RICK"
+		},
+		"value": 823841
+	}, {
+		"type": "counter",
+		"key": "rpc_client.traffic.out",
+		"labels": {
+			"coin": "MORTY",
+			"client": "electrum"
+		},
+		"value": 139396
+	}, {
+		"type": "counter",
+		"key": "tx.history.response.total_length",
+		"labels": {
+			"client": "electrum",
+			"coin": "MORTY",
+			"method": "blockchain.scripthash.get_history"
+		},
+		"value": 1041
+	}, {
+		"type": "counter",
+		"key": "tx.history.response.count",
+		"labels": {
+			"client": "electrum",
+			"coin": "MORTY",
+			"method": "blockchain.scripthash.get_history"
+		},
+		"value": 11
+	}, {
+		"type": "counter",
+		"key": "tx.history.response.count",
+		"labels": {
+			"method": "blockchain.scripthash.get_history",
+			"client": "electrum",
+			"coin": "RICK"
+		},
+		"value": 6
+	}, {
+		"type": "counter",
+		"key": "tx.history.request.count",
+		"labels": {
+			"coin": "MORTY",
+			"method": "tx_detail_by_hash"
+		},
+		"value": 25
+	}, {
+		"type": "counter",
+		"key": "rpc_client.response.count",
+		"labels": {
+			"coin": "RICK",
+			"client": "electrum"
+		},
+		"value": 1351
+	}, {
+		"type": "counter",
+		"key": "rpc_client.request.count",
+		"labels": {
+			"client": "electrum",
+			"coin": "MORTY"
+		},
+		"value": 1237
+	}, {
+		"type": "counter",
+		"key": "rpc_client.traffic.in",
+		"labels": {
+			"client": "electrum",
+			"coin": "MORTY"
+		},
+		"value": 772964
+	}, {
+		"type": "counter",
+		"key": "tx.history.response.total_length",
+		"labels": {
+			"coin": "RICK",
+			"client": "electrum",
+			"method": "blockchain.scripthash.get_history"
+		},
+		"value": 767
+	}, {
+		"type": "counter",
+		"key": "tx.history.request.count",
+		"labels": {
+			"coin": "RICK",
+			"client": "electrum",
+			"method": "blockchain.scripthash.get_history"
+		},
+		"value": 6
+	}, {
+		"type": "counter",
+		"key": "rpc_client.traffic.out",
+		"labels": {
+			"coin": "RICK",
+			"client": "electrum"
+		},
+		"value": 136368
+	}, {
+		"type": "counter",
+		"key": "tx.history.request.count",
+		"labels": {
+			"coin": "MORTY",
+			"client": "electrum",
+			"method": "blockchain.scripthash.get_history"
+		},
+		"value": 11
+	}, {
+		"type": "counter",
+		"key": "rpc_client.response.count",
+		"labels": {
+			"client": "electrum",
+			"coin": "MORTY"
+		},
+		"value": 1361
+	}, {
+		"type": "gauge",
+		"key": "p2p.connected_peers.count",
+		"labels": {},
+		"value": 8.0
+	}, {
+		"type": "gauge",
+		"key": "p2p.received_messages.count",
+		"labels": {},
+		"value": 24.0
+	}, {
+		"type": "gauge",
+		"key": "p2p.connected_relays.len",
+		"labels": {},
+		"value": 8.0
+	}, {
+		"type": "gauge",
+		"key": "p2p.relay_mesh.len",
+		"labels": {},
+		"value": 2.0
+	}, {
+		"type": "gauge",
+		"key": "orderbook.memory_db",
+		"labels": {},
+		"value": 297800390224.0
+	}, {
+		"type": "gauge",
+		"key": "orderbook.len",
+		"labels": {},
+		"value": 15.0
+	}, {
+		"type": "gauge",
+		"key": "p2p.received_messages.period_in_secs",
+		"labels": {},
+		"value": 60.0
+	}, {
+		"type": "histogram",
+		"key": "peer.outgoing_request.timing",
+		"labels": {
+			"peer": "12D3KooWJDoV9vJdy6PnzwVETZ3fWGMhV41VhSbocR1h2geFqq9Y"
+		},
+		"count": 2.0,
+		"max": 0.801318629,
+		"min": 0.699428848
+	}]
 }
 ```
+</CollapsibleSection>
+
 
 ## Prometheus Integration
 
 AtomicDEX API 2.0 supports integration with [Prometheus](https://github.com/prometheus/prometheus#install). This software allows users to setup automated scraping of metrics at regular intervals and enables sophisticated queries on the stored [timeseries](https://en.wikipedia.org/wiki/Time_series) data. It also allows users to configure an elegant dashboard using built-in [graphs,](https://prometheus.io/docs/prometheus/latest/getting_started/#using-the-expression-browser) or to export data for graphical processing using [Grafana](https://prometheus.io/docs/visualization/grafana/).
 
-Prometheus scrapes metrics using an HTTP pull model.
-
-To provide Prometheus with the ability to scrape the metrics at [localhost:9001](localhost:9001), initiate AtomicDEX API with the following additional argument:
+Prometheus scrapes metrics using an HTTP pull model. To provide Prometheus with the ability to scrape the metrics at [localhost:9001](localhost:9001), you need to add the `prometheusport` parameter to your [MM2.json file](/atomicdex/api/setup/configure-mm2-json):
 
 ```
-\"prometheusport\":9001
+"prometheusport": 9001
 ```
 
-You may optionally specify the username and password for Prometheus to enforce basic authorization security. For this effect, add one more argument as follows:
+You can also define your username and password for Prometheus to enforce basic authorization security with the `prometheus_credentials` in your [MM2.json file](/atomicdex/api/setup/configure-mm2-json). Note that this additional argument is NOT necessary.
 
 ```
-\"prometheus_credentials\":\"PROM_USERNAME:PROM_PASSWORD\"
+"prometheus_credentials": "PROM_USERNAME:PROM_PASSWORD"
 ```
 
-Note that this additional argument is NOT necessary.
+Replace `PROM_USERNAME` and `PROM_PASSWORD` with your actual Prometheus username and password. Make sure your username and password are separated by `:`.
 
-Replace PROM_USERNAME and PROM_PASSWORD with your actual Prometheus username and password.
-
-Note that the username and password should be separated by `:`.
-
-Example:
-
-```bash
-stdbuf -oL ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":7777, \"userhome\":\"/${HOME#"/"}\", \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\", \"prometheusport\":9001, \"prometheus_credentials\":\"PROM_USERNAME:PROM_PASSWORD\"}" &
-```
 
 ### Configuring Prometheus to monitor the AtomicDEX API
 
@@ -161,13 +288,14 @@ scrape_configs:
           group: "atomicdex"
 ```
 
-Replace PROM_USERNAME and PROM_PASSWORD with your actual Prometheus username and password.
+Replace `PROM_USERNAME` and `PROM_PASSWORD` with your actual Prometheus username and password.
 
 To learn more about creating a Prometheus configuration file, [read this documentation.](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)
 
+
 ### Starting Prometheus and Grafana
 
-A simple way to initiate Prometheus and Grafana is to have the standard Prometheus and Grafana docker containers run together using `docker-compose`.
+A simple way to initiate Prometheus and Grafana is to have the standard Prometheus and Grafana [docker containers](https://www.infoworld.com/article/3310941/why-you-should-use-docker-and-containers.html) run together using `docker-compose`.
 
 Name the following compose file as `docker-compose.yml`.
 
@@ -220,6 +348,7 @@ To visualize one of the available metrics, open the metric explorer (next to the
 />
 
 More graphs can be added to the same page using the "Add Panel" button available.
+
 
 #### Grafana
 
@@ -290,7 +419,7 @@ Optionally, you can tweak the query options (shown in the image below).
   alt="Grafana"
 />
 
-Once complete, click on "Run queries" to see the data displayed on the graph. If you like, you can also customise the graph, by adding a title, changing the colors, or using a different graph type. Click "Apply in the top right corner) once complete.
+Once complete, click on `Run queries` to see the data displayed on the graph. If you like, you can also customise the graph, by adding a title, changing the colors, or using a different graph type. Click `Apply` in the top right corner once complete.
 
 <OptimizedImage
   title="Grafana"
