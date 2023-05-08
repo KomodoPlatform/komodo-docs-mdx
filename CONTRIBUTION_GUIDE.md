@@ -20,7 +20,7 @@ Using these priority labels in GitHub Issues can help our prioritize and manage 
 
 
 ## 3. Create a new branch
- - Create a new local branch from the `dev` branch (`master` for hotfixes), name it according to [branch naming conventions](GITFLOW_BRANCHING.md#branch-naming-conventions)
+ - Create a new local branch from the `dev` branch (`main` for hotfixes), name it according to [branch naming conventions](GITFLOW_BRANCHING.md#branch-naming-conventions)
 
 
 ## 4. Work on the issue
@@ -33,7 +33,7 @@ Using these priority labels in GitHub Issues can help our prioritize and manage 
 
 
 ## 5. Before creating or updating a PR (checklist)
- - [ ] Sync your work branch with the latest changes from the target branch (`dev` or `master`), resolve merge conflicts if any
+ - [ ] Sync your work branch with the latest changes from the target branch (`dev` or `main`), resolve merge conflicts if any
  - [ ] (Re)read original issue and comments, make sure that changes are solving the issue or adding the feature
  - [ ] Consider adding integration tests for your changes (if applicable)
  - [ ] Test your changes manually in different browsers: Chrome, Firefox, Safari, Edge, Brave
@@ -41,7 +41,7 @@ Using these priority labels in GitHub Issues can help our prioritize and manage 
 
 ## 6. Create a PR (checklist)
  - [ ] Sync your work branch with the latest changes from the target branch (again :), push it to the remote
- - [ ] Make sure that you're opening a PR from your work branch to the proper target branch (`dev` or `master`)
+ - [ ] Make sure that you're opening a PR from your work branch to the proper target branch (`dev` or `main`)
  - [ ] Provide a clear and concise title for your PR
    - [ ] Avoid using generic titles like "Fix" or "Update"
    - [ ] Avoid using the issue number in the title
@@ -60,7 +60,7 @@ Using these priority labels in GitHub Issues can help our prioritize and manage 
  - Once your PR is created, you should maintain it until it's merged
  - Check the PR on daily basis for comments, changes requests, questions, etc.
  - Address any comments or questions from the code review, or from QA testing
- - Make sure that your PR is up to date with the target branch (`dev` or `master`), resolve merge conflicts proactively
+ - Make sure that your PR is up to date with the target branch (`dev` or `main`), resolve merge conflicts proactively
  - After merging, delete your work branch
 
 
