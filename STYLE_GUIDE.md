@@ -27,7 +27,7 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
     - Where a request includes optional parameters which will result in different response structures, the file should contain a code block for each possible request variation, followed by a code block for the response of each example.
     - Below the request/response examples, include code blocks for each potential error response, along with details on what causes the error and how it might be resolved.
  - In some cases, it may be appropriate to group related methods together in a single `index.mdx` file. For example, the `index.mdx` file within the `trezor_initialisation` folder contains documentation for all methods for initialisation and authentication with a Trezor hardware wallet.
-  - Where common structures exist in the request or response of mulitple methods, these should be documented in a separate `index.mdx` file in the `common_structures` folder, and linked to from request/response parameter tables when required.
+ - Where common structures exist in the request or response of mulitple methods, these should be documented in the `index.mdx` file in the base folder for a section (e.g. [src/pages/atomicdex/api/v20/index.mdx](src/pages/atomicdex/api/v20/index.mdx)), and linked to from request/response parameter tables where required.
  - Where a method or parameter is deprecated, this should be clearly communicated in the method heading or request parameters table. 
   - Separate sections of content with subheadings to make it easier to scan and find the information they need. Two line breaks should be used before and one line break after each subheading.
 
