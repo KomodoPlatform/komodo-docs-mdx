@@ -1,0 +1,129 @@
+# Lightning Network Activation Tasks
+
+
+## task::enable_lightning::init
+
+Starts a task to run a lightning node. Use the returned `task_id` as an input to check the status of the lightning node (i.e, running or still initiating). An error will be returned if a lightning node was already running since only 1 lightning node is able to run from each instance of AtomicDEX.
+
+
+### Request Parameters
+
+| Parameter            | Type    | Description                                     |
+|----------------------|---------|-------------------------------------------------|
+| ticker               | string  | Ticker of coin to activate                      |
+| activation_params    | object  | standard `LightningActivationParams` object     |
+
+
+### `LightningActivationParams` Object
+
+| Parameter            | Type    | Description                                                                                                                  |
+|----------------------|---------|------------------------------------------------------------------------------------------------------------------------------|
+| name                 | string  | The name of the node that will be announced to other nodes in the network.                                                   |
+| listening port       | integer | The port that this node listens for incoming connections on.                                                                 |
+| color                | string  | A hexidecimal color string which will be announced to other nodes, and used in network graphs on [lightning explorers](https://mempool.space/testnet/lightning/node/024e2a940e0cbeda84a0d5e00fa8e83b3f4e7f98382eedb488d058e0f5636dd164/r/n) |
+| payment_retries      | integer | Optional, defaults to `X`. Number of times a payment will be retried if it fails.                                            |
+| backup_path          | string  | Optional. NEED MORE INFO! |
+
+
+#### 📌 Example(s)
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="METHOD_NAME">
+```json {{ mm2MethodDecorate : true }}
+{
+    "method": "task::enable_lightning::init",
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "params": {
+        "ticker": "tBTC-TEST-lightning",
+        "activation_params": {
+            "name": "AtomicDEX-Docs-Node-1",
+            "listening_port": 9735,
+            "color": "000000",
+            "payment_retries": 5,
+            "backup_path": null
+        },
+        "id": 2
+    }
+}
+</CodeGroup>
+
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+### task::enable_lightning::status
+
+Checks the status of lightning node initialization.
+
+| Parameter            | Type    | Description                                                                                                                 |
+|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------- |
+| task_id              | integer | The task id returned from `task::enable_lightning::init`                                                                    |
+| forget_if_finished   | boolean | Optional, defaults to `true`. If `false`, the status of the `task_id` will still be available after the task has completed. |
+
+<CodeGroup title="" tag="POST" label="METHOD_NAME">
+```json {{ mm2MethodDecorate : true }}
+{
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "method": "task::enable_lightning::status",
+    "params": {
+        "task_id": 0,
+        "forget_if_finished": true
+    },
+    "id": 2
+}
+```
+
+</CodeGroup>
+
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+### task::enable_lightning::cancel
+
+Cancels lightning node initialization.
+
+| Parameter            | Type    | Description                                                                                                                 |
+|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------- |
+| task_id              | integer | The task id returned from `task::enable_lightning::init`                                                                    |
+
+
+<CodeGroup title="" tag="POST" label="METHOD_NAME">
+```json {{ mm2MethodDecorate : true }}
+{
+    "userpass": "{{userpass}}",
+    "mmrpc": "2.0",
+    "method": "task::enable_lightning::cancel",
+    "params": {
+        "task_id": 0
+    },
+    "id": 1
+}
+```
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
