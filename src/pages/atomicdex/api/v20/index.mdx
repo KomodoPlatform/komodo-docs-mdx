@@ -54,6 +54,7 @@ It includes a uniform request, successful and error response formats. At the mom
 ```
 </CodeGroup>
 
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 #### Response (success)
 
@@ -81,6 +82,9 @@ It includes a uniform request, successful and error response formats. At the mom
   "id": 0
 }
 ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText='Hide Error Response' collapsedText='Show Error Response'>
 
 #### Response (error)
 
@@ -97,3 +101,149 @@ It includes a uniform request, successful and error response formats. At the mom
   "id": 0
 }
 ```
+
+</CollapsibleSection>
+
+## Common AtomicDEX-API Request / Response Objects
+
+The folowing objects are used in the request or response of multiple AtomicDEX-API methods.
+
+### AddressInfos
+
+The `addressInfos` object includes the following items for a given address:
+
+| Parameter              | Type      | Description                                                                                                                                      |
+| ---------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| balances               | object    | A standard [balanceInfos](/atomicdex/api/v20#balanceInfos) object. Not included in responses where `get_balances` is `false`  |
+| derivation_method      | object    | A standard [DerivationMethod](/atomicdex/api/v20#DerivationMethod) object                                                    |
+| pubkey                 | string    | The public key associated with the seed used to launch AtomicDEX                                                                                 |
+| tickers                | array     | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                                   |
+
+
+<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
+
+#### Example with balances
+
+```json
+"bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
+    "derivation_method": {
+        "type": "Iguana"
+    },
+    "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
+    "balances": {
+        "spendable": "0.11398301",
+        "unspendable": "0.00001"
+    }
+}
+```
+
+#### Example without balances
+
+```json
+"bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
+    "derivation_method": {
+        "type": "Iguana"
+    },
+    "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
+    "tickers": ["ASLP-SLP"]
+}
+```
+
+</CollapsibleSection>
+
+
+### BalanceInfos
+
+The `balanceInfos` object includes the following items for a given coin or token:
+
+| Parameter     | Type             | Description                                                                                                               |
+| ------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| spendable     | string (numeric) | The available amount of a coin or token which is ready to be traded or withdrawn.                                         |
+| unspendable   | string (numeric) | The amount of a coin or token which is awaiting confirmation on the block chain for an incoming or outgoing transaction.  |
+
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "spendable": "12.11398301",
+    "unspendable": "0.53"
+}
+```
+
+</CollapsibleSection>
+
+
+### DerivationMethod
+
+The `DerivationMethod` object includes the following items for a given coin or token:
+
+| Parameter     | Type   | Description                                                                                                               |
+| ------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
+| type          | string | Possible values: `Iguana` <!-- TODO: insert more types here -->                                                           |
+
+Where the value indicates:
+ - `Iguana`: The coin or token is was activated using Iguana derivation (default).
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "type": "Iguana"
+}
+```
+
+</CollapsibleSection>
+
+
+### EvmNode
+
+The `EvmNode` object includes the following items for a given coin or token:
+
+| Parameter | Type    | Description                                                                                                                                                                            |
+| --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url       | string  | URL of an RPC node                                                                                                                                                                     |
+| gui_auth  | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team                                                                        |
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "url": "http://eth1.cipig.net:8555",
+    "gui_auth": false
+}
+```
+
+</CollapsibleSection>
+
+
+### TokensRequest
+
+The `TokensRequest` object includes the following items for a given coin or token:
+
+| Parameter              | Type    | Description                                                                                                                                                                            |
+| ---------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker                 | string  | Ticker of the token to be enabled                                                                                                                                                      |
+| required_confirmations | integer | How many confirmations to wait during the transaction steps of an atomic swap. Overwrites value in coins file; defaults to `3`                                                         |
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "ticker": "MINDS-ERC20",
+    "required_confirmations": 4
+}
+```
+
+</CollapsibleSection>
+
+
+
