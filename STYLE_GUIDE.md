@@ -56,6 +56,9 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
  - Use `##` for subheadings.
  - Use `###` for request/response parameter tables.
  - Use `####` for request/response examples.
+ - Use mdx comments like this: `{/* comment comment */}` . Markdown comments like `<!--- comment comment--->` don't work.
+ - No markdown/mdx comments in tables' rows
+
 
 
 ## Tables
