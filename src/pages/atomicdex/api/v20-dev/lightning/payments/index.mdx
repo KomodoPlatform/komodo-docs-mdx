@@ -1,0 +1,331 @@
+# Lightning Network Payments
+
+<Note>
+Lightning methods are currently only available using the native AtomicDEX-API. WASM support should be available in late 2023.
+</Note>
+
+## lightning::payments::generate_invoice
+
+Generates an invoice to be paid by another node.
+
+### Request Parameters
+
+| Parameter            | Type    | Description                                                                                                                                                      |
+|----------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| coin                 | string  | Ticker of coin to activate.                                                                                                                                      |
+| description          | string  | A note to indicate the purpose of the invoice.                                                                                                                   |
+| amount_in_msat       | integer | Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin.)  |
+| expiry               | integer | Optional, defaults to `3600`. Seconds until the invoice expires.                                                                                                 |
+
+
+#### 📌 Example
+
+<CodeGroup title="" tag="POST" label="lightning::payments::generate_invoice">
+```json {{ mm2MethodDecorate : true }}
+{
+    "method": "lightning::payments::generate_invoice",
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "params": {
+        "ticker": "tBTC-TEST-lightning",
+        "description": "For the burger on Tuesday",
+        "amount_in_msat": 10000,
+        "expiry": 600
+    },
+    "id": 1
+}
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+## lightning::payments::send_payment
+
+Used to pay an invoice or send a payment via pubkey/address.
+
+
+### Request Parameters
+
+| Parameter  | Type    | Description                                                                                                                           |
+|------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| type       | string  | Ticker of the coin to query.                                                                                                          |
+| payment    | object  | A standard `LightningPayment` object                                                                                                  |
+
+
+### `LightningPayment` Object
+
+| Parameter            | Type    | Description                                                                                                                           |
+|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| type                 | string  | The payment type. Accepted values are `invoice` or `keysend`.                                                                         |
+| invoice              | string  | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                 |
+| destination          | string  | Only used if `type` is `keysend`. A pubkey or address which will receive the payment.                                                 |
+| amount_in_msat       | string  | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin.) |
+| expiry               | string  | Only used if `type` is `keysend`. Optional, defaults to `3600`. Seconds until the payment expires.                                    |
+
+
+#### 📌 Example using `invoice`
+
+<CodeGroup title="" tag="POST" label="lightning::payments::send_payment">
+```json {{ mm2MethodDecorate : true }}
+{
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "method": "lightning::payments::send_payment",
+    "params": {
+        "coin": "tBTC-TEST-lightning",
+        "payment": {
+            "type": "invoice",
+            "invoice": "lntb20u1p32wwxapp5p8gjy2e79jku5tshhq2nkdauv0malqqhzefnqmx9pjwa8h83cmwqdp8xys9xcmpd3sjqsmgd9czq3njv9c8qatrvd5kumcxqrrsscqp79qy9qsqsp5m473qknpecv6ajmwwtjw7keggrwxerymehx6723avhdrlnxmuvhs54zmyrumkasvjp0fvvk2np30cx5xpjs329alvm60rwy3payrnkmsd3n8ahnky3kuxaraa3u4k453yf3age7cszdxhjxjkennpt75erqpsfmy4y" 
+        }
+    }
+    "id": 6
+}
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+#### 📌 Example using `keysend`
+
+<CodeGroup title="" tag="POST" label="lightning::payments::send_payment">
+```json {{ mm2MethodDecorate : true }}
+{
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "method": "lightning::payments::send_payment",
+    "params": {
+        "coin": "tBTC-TEST-lightning",
+        "payment": {
+            "type": "keysend",
+            "destination": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9",
+            "amount_in_msat": 1000,
+            "expiry": 24
+        }
+    }
+    "id": 6
+}
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+## lightning::payments::get_payment_details
+
+Returns details about a lightning payment from a given `payment_hash`.
+
+
+### Request Parameters
+
+| Parameter            | Type    | Description                                                                                                                           |
+|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| coin                 | string  | Ticker of the coin to query.                                                                                                          |
+| payment_hash         | string  | The hexidecimal string which identifies a invoice. The `payment_hash` is returned from a `lightning::payments::send_payment` request. |
+
+
+#### 📌 Example
+
+<CodeGroup title="" tag="POST" label="lightning::payments::get_payment_details">
+```json {{ mm2MethodDecorate : true }}
+{
+    "method": "lightning::payments::get_payment_details",
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "params": {
+        "ticker": "tBTC-TEST-lightning",
+        "description": "For the burger on tuesday",
+        "amount_in_msat": 10000,
+        "expiry": 600
+    },
+    "id": 1
+}
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+## lightning::payments::list_payments_by_filter
+
+Lists all payment and invoice details for a given coin which match the given filter.
+
+
+### Request Parameters
+
+| Parameter         | Type    | Description                                                                                                                  |
+|-------------------|---------|------------------------------------------------------------------------------------------------------------------------------|
+| coin              | string  | Ticker of the coin to query.                                                                                                 |
+| filter            | object  | Optional, defaults to `null`. A standard `LightningPaymentFilter` object.                                                    |
+| paging_options    | object  | Optional. A standard [Pagination](/atomicdex/api/v20#Pagination) object.                                                     |
+| limit             | integer | Optional, defaults to `10`. Maximum number of results to return.                                                             |
+
+
+### `LightningPaymentFilter` Object
+
+| Parameter            | Type    | Description                                                                                                                           |
+|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| payment_type         | object  | A standard `LightningPaymentType` object.                                                                                             |
+| description          | string  | Optional. A note to indicate the purpose of the invoice.                                                                              |
+| status               | string  | Optional. Accepted values: `pending`, `succeeded`, `failed`.                                                                          |
+| from_amount_msat     | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                             |
+| to_amount_msat       | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                             |
+| from_fee_paid_msat   | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                    |
+| to_fee_paid_msat     | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                    |
+| from_timestamp       | string  | Optional. Minimum timestamp (in milliseconds) of payment results to return.                                                           |
+| to_timestamp         | string  | Optional. Maximum timestamp (in milliseconds) of payment results to return.                                                           |
+
+
+### `LightningPaymentType` Object
+
+| Parameter    | Type    | Description                                                                                                                           |
+|--------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| type         | object  | Accepted values are `Outbound Payment` or `Inbound Payment`.                                                                          |
+| destination  | string  | Only used if `type` is `Outbound Payment`. A pubkey or address which will receive the payment.                                        |
+
+
+#### 📌 Example without filter
+
+<CodeGroup title="" tag="POST" label="lightning::payments::list_payments_by_filter">
+```json {{ mm2MethodDecorate : true }}
+{
+    "method": "lightning::payments::list_payments_by_filter",
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "params": {
+        "coin": "tBTC-TEST-lightning"
+    },
+    "id": 1
+}
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+#### 📌 Example for Inbound Payment `payment_type`, `limit` and `pagination`
+
+<CodeGroup title="" tag="POST" label="lightning::payments::list_payments_by_filter">
+```json {{ mm2MethodDecorate : true }}
+{
+    "method": "lightning::payments::list_payments_by_filter",
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "params": {
+        "coin": "tBTC-TEST-lightning"
+        "filter": {
+            "payment_type": {
+                "type": "Inbound Payment"
+            },
+        },
+        "limit": 10,
+        "paging_options": {
+            "PageNumber": 3
+        }
+    },
+    "id": 1
+}
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+
+#### 📌 Example for `pending` payments between 10000 and 40000 millisatoshis
+
+<CodeGroup title="" tag="POST" label="lightning::payments::list_payments_by_filter">
+```json {{ mm2MethodDecorate : true }}
+{
+    "method": "lightning::payments::list_payments_by_filter",
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "params": {
+        "coin": "tBTC-TEST-lightning"
+        "filter": {
+            "status": "pending",
+            "from_amount_msat": 10000,
+            "to_amount_msat": 40000
+        }
+    },
+    "id": 1
+}
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
+
+
+#### 📌 Example for successful payments on the 20th of April 2023
+
+<CodeGroup title="" tag="POST" label="lightning::payments::list_payments_by_filter">
+```json {{ mm2MethodDecorate : true }}
+{
+    "method": "lightning::payments::list_payments_by_filter",
+    "userpass": "$userpass",
+    "mmrpc": "2.0",
+    "params": {
+        "coin": "tBTC-TEST-lightning"
+        "filter": {
+            "status": "succeeded",
+            "from_timestamp": 1681948800,
+            "to_timestamp": 1682035199
+        }
+    },
+    "id": 1
+}
+</CodeGroup>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+#### Response
+
+```json
+
+```
+</CollapsibleSection>
+
