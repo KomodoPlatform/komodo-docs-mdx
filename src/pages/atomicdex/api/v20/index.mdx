@@ -249,3 +249,134 @@ The `TokensRequest` object includes the following items for a given coin or toke
 
 
 
+### Pagination
+
+For requests which return many results, pagination offsets may be applied. ** Use either value, not both. **
+
+| Parameter  | Type    | Description                                                |
+|------------|---------|------------------------------------------------------------|
+| PageNumber | integer | Optional, defaults to `1`. Offset for paginated results    |
+| FromId     | integer | Optional. Ignores any results prior to this UUID           |
+
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+
+#### Example
+
+```json
+{
+    "PageNumber": 1
+}
+```
+
+```json
+{
+    "FromId": 4
+}
+```
+</CollapsibleSection>
+
+
+### `LightningPayment` Object
+
+| Parameter            | Type    | Description                                                                                                                           |
+|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| type                 | string  | The payment type. Accepted values are `invoice` or `keysend`.                                                                         |
+| invoice              | string  | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                 |
+| destination          | string  | Only used if `type` is `keysend`. A pubkey or address which will receive the payment.                                                 |
+| amount_in_msat       | string  | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin.) |
+| expiry               | string  | Only used if `type` is `keysend`. Optional, defaults to `3600`. Seconds until the payment expires.                                    |
+
+
+### `LightningPaymentFilter` Object
+
+| Parameter            | Type    | Description                                                                                                                           |
+|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| payment_type         | object  | A standard `LightningPaymentType` object.                                                                                             |
+| description          | string  | Optional. A note to indicate the purpose of the invoice.                                                                              |
+| status               | string  | Optional. Accepted values: `pending`, `succeeded`, `failed`.                                                                          |
+| from_amount_msat     | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                             |
+| to_amount_msat       | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                             |
+| from_fee_paid_msat   | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                    |
+| to_fee_paid_msat     | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                    |
+| from_timestamp       | string  | Optional. Minimum timestamp (in milliseconds) of payment results to return.                                                           |
+| to_timestamp         | string  | Optional. Maximum timestamp (in milliseconds) of payment results to return.                                                           |
+
+
+### `LightningPaymentType` Object
+
+| Parameter    | Type    | Description                                                                                                                           |
+|--------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
+| type         | object  | Accepted values are `Outbound Payment` or `Inbound Payment`.                                                                          |
+| destination  | string  | Only used if `type` is `Outbound Payment`. A pubkey or address which will receive the payment.                                        |
+
+
+### `LightningChannelAmount` object
+
+| Parameter  | Type    | Description                                                                                   |
+|------------|---------|-----------------------------------------------------------------------------------------------|
+| type       | string  | `Exact` for a specific amount or `Max` for whole balance.                                     |
+| value      | object  | Only required if type is `Exact`. The amount in BTC you want to open the channel with.        |
+
+
+### `LightningChannelOptions` object
+
+| Parameter                              | Type    | Description                                                                                   |
+|----------------------------------------|---------|-----------------------------------------------------------------------------------------------|
+| proportional_fee_in_millionths_sats    | string  | Optional, defaults to value in `coins` file. Fee per kb in millisatoshis. CONFIRM             |
+| base_fee_msat                          | integer | Optional, defaults to value in `coins` file. Base fee in millisatoshis.                       |
+| cltv_expiry_delta                      | integer | Optional, defaults to value in `coins` file. Seconds until CheckLockTimeVerify (CLTV) expiry. |
+| max_dust_htlc_exposure_msat            | integer | Optional, defaults to value in `coins` file. Maximum exposure to dust from HashTimeLockContract (HTLC) transactions. CONFIRM  |
+| force_close_avoidance_max_fee_satoshis | integer | Optional, defaults to value in `coins` file. Maximum fee to avoid forced closure in satoshis. CONFIRM  |
+
+
+### `LightningChannelConfig` object
+
+| Parameter                          | Type    | Description                                                                                        |
+|------------------------------------|---------|----------------------------------------------------------------------------------------------------|
+| counterparty_locktime              | integer | Optional, defaults to value in `coins` file. Locktime in seconds for counterparty transactions.    |
+| our_htlc_minimum_msat              | integer | Optional, defaults to value in `coins` file. Minimum msat reserved for HTLC transactions,          |
+| negotiate_scid_privacy             | boolean | Optional, defaults to value in `coins` file. If `true`, I HAVE NO IDEA WHAT THIS MEANS             |
+| max_inbound_in_flight_htlc_percent | integer | Optional, defaults to value in `coins` file. Maximum percentage of of HTLC funds inbound. CONFIRM  |
+| announced_channel                  | boolean | Optional, defaults to value in `coins` file. If `true`, the channel has been announced.            |
+| commit_upfront_shutdown_pubkey     | boolean | Optional, defaults to value in `coins` file. If `true`, I HAVE NO IDEA WHAT THIS MEANS             |
+
+
+### `LightningOpenChannelsFilter` Object
+
+| Parameter                   | Type    | Description                                                                                                     |
+|-----------------------------|---------|-----------------------------------------------------------------------------------------------------------------|
+| channel_id                  | string  | Optional. Unique string identifying a channel by its ID.                                                        |
+| counterparty_node_id        | string  | Optional. A hexidecimal string identifying a counterparty node. |
+| funding_tx                  | string  | Optional. A transaction ID which added funds.                   |
+| from_funding_value_sats     | integer | Optional. The minimum value of channel funding in satoshis.     |
+| to_funding_value_sats       | integer | Optional. The maximum value of channel funding in satoshis.     |
+| is_outbound                 | boolean | Optional. If `true`, limits the response to outbound channels only. |
+| from_balance_msat           | integer | Optional. The minimum channel balance in millisatoshis.     |
+| to_balance_msat             | integer | Optional. The maximum channel balance in millisatoshis.     |
+| from_outbound_capacity_msat | integer | Optional. The minimum outbound capacity of the channel balance in millisatoshis.  |
+| to_outbound_capacity_msat   | integer | Optional. The maximum outbound capacity of the channel balance in millisatoshis.  |
+| from_inbound_capacity_msat  | integer | Optional. The minimum inbound capacity of the channel balance in millisatoshis.   |
+| to_inbound_capacity_msat    | integer | Optional. The maximum inbound capacity of the channel balance in millisatoshis.   |
+| confirmed                   | boolean | Optional. If `true`, channel is confirmed NEED MORE INFO |
+| is_usable                   | boolean | Optional. If `true`, channel is usable NEED MORE INFO    |
+| is_public                   | boolean | Optional. If `true`, channel is public NEED MORE INFO    |
+
+
+### `LightningClosedChannelsFilter` Object
+
+| Parameter                   | Type    | Description                                                                                                     |
+|-----------------------------|---------|-----------------------------------------------------------------------------------------------------------------|
+| channel_id                  | string  | Optional. Unique string identifying a channel by its ID.                                                        |
+| counterparty_node_id        | string  | Optional. A hexidecimal string identifying a counterparty node. |
+| funding_tx                  | string  | Optional. A transaction ID which added funds.                   |
+| from_funding_value          | integer | Optional. The minimum value of channel funding in satoshis. PARAM NAME NOT CONSISTENT.     |
+| to_funding_value            | integer | Optional. The maximum value of channel funding in satoshis. PARAM NAME NOT CONSISTENT.     |
+| channel_type                | string  | Optional. `Inbound` or `Outbound`. INCONSISTENT WITH `is_outbound` PARAM  |
+| closing_tx                  | integer | Optional. A transaction ID which closed the channel.    |
+| closure_reason              | integer | Optional. The reason a channel was closed.   |
+| claiming_tx                 | integer | Optional. A transaction ID which claimed funds from the channel.    |
+| from_claimed_balance        | integer | Optional. The minimum balance of channel funds claimed in satoshis.    |
+| to_claimed_balance          | integer | Optional. The maximum balance of channel funds claimed in satoshis.    |
+| channel_visibility          | integer | Optional. `Public` or `Private`.   |
+

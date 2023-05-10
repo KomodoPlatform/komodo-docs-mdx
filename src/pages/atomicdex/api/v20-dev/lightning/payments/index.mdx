@@ -60,17 +60,6 @@ Used to pay an invoice or send a payment via pubkey/address.
 | payment    | object  | A standard `LightningPayment` object                                                                                                  |
 
 
-### `LightningPayment` Object
-
-| Parameter            | Type    | Description                                                                                                                           |
-|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
-| type                 | string  | The payment type. Accepted values are `invoice` or `keysend`.                                                                         |
-| invoice              | string  | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                 |
-| destination          | string  | Only used if `type` is `keysend`. A pubkey or address which will receive the payment.                                                 |
-| amount_in_msat       | string  | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin.) |
-| expiry               | string  | Only used if `type` is `keysend`. Optional, defaults to `3600`. Seconds until the payment expires.                                    |
-
-
 #### 📌 Example using `invoice`
 
 <CodeGroup title="" tag="POST" label="lightning::payments::send_payment">
@@ -186,29 +175,6 @@ Lists all payment and invoice details for a given coin which match the given fil
 | filter            | object  | Optional, defaults to `null`. A standard `LightningPaymentFilter` object.                                                    |
 | paging_options    | object  | Optional. A standard [Pagination](/atomicdex/api/v20#Pagination) object.                                                     |
 | limit             | integer | Optional, defaults to `10`. Maximum number of results to return.                                                             |
-
-
-### `LightningPaymentFilter` Object
-
-| Parameter            | Type    | Description                                                                                                                           |
-|----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
-| payment_type         | object  | A standard `LightningPaymentType` object.                                                                                             |
-| description          | string  | Optional. A note to indicate the purpose of the invoice.                                                                              |
-| status               | string  | Optional. Accepted values: `pending`, `succeeded`, `failed`.                                                                          |
-| from_amount_msat     | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                             |
-| to_amount_msat       | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                             |
-| from_fee_paid_msat   | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                    |
-| to_fee_paid_msat     | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                    |
-| from_timestamp       | string  | Optional. Minimum timestamp (in milliseconds) of payment results to return.                                                           |
-| to_timestamp         | string  | Optional. Maximum timestamp (in milliseconds) of payment results to return.                                                           |
-
-
-### `LightningPaymentType` Object
-
-| Parameter    | Type    | Description                                                                                                                           |
-|--------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
-| type         | object  | Accepted values are `Outbound Payment` or `Inbound Payment`.                                                                          |
-| destination  | string  | Only used if `type` is `Outbound Payment`. A pubkey or address which will receive the payment.                                        |
 
 
 #### 📌 Example without filter
