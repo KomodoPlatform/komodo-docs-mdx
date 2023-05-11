@@ -4,6 +4,7 @@
 Lightning methods are currently only available using the native AtomicDEX-API. WASM support should be available in late 2023.
 </Note>
 
+
 ## init
 
 The `task::enable_lightning::init` request a task to run a lightning node. Use the returned `task_id` as an input to check the status of the lightning node (i.e, running or still initiating). An error will be returned if a lightning node was already running since only 1 lightning node is able to run from each instance of AtomicDEX.
@@ -11,6 +12,7 @@ The `task::enable_lightning::init` request a task to run a lightning node. Use t
 <Note>
 Any methods with a `task::` prefix will be linked to a numeric `task_id` value which is used to query the status or outcome of the task.
 </Note>
+
 
 ### Request Parameters
 
@@ -41,8 +43,6 @@ Any methods with a `task::` prefix will be linked to a numeric `task_id` value w
 }
 ```
 </CodeGroup>
-
-
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
@@ -84,11 +84,12 @@ Coin is not in `coins` file. Refer to the [coins file configuration for lightnin
 }
 ```
 
+
 #### UnexpectedL2Protocol Error
 
 Coin is wrong protocol type.
 
-```
+```json
 {
 	"mmrpc": "2.0",
 	"error": "Unexpected layer 2 protocol UTXO for tBTC-segwit",
@@ -105,11 +106,12 @@ Coin is wrong protocol type.
 }
 ```
 
+
 #### Internal Error
 
 Address already in use.
 
-```
+```json
 {
     "mmrpc": "2.0",
     "result": {
@@ -126,6 +128,7 @@ Address already in use.
 }
 ```
 
+
 #### PlatformCoinIsNotActivated Error
 
 The selected coin is not activated. It needs to be activated before the lightning node can be initialized.
@@ -141,6 +144,7 @@ The selected coin is not activated. It needs to be activated before the lightnin
 	"id": 2
 }
 ```
+
 
 #### InvalidPlatformConfiguration Error
 
@@ -193,7 +197,6 @@ The `task::enable_lightning::status` request checks the status of lightning node
 ```
 </CodeGroup>
 
-
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 ### Response Parameters
@@ -203,6 +206,7 @@ The `task::enable_lightning::status` request checks the status of lightning node
 | platform_coin   | string  | An identifying number which is used to query task status.          |
 | address         | string  | This node's address for the activated coin.                        |
 | balance         | object  | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object. |
+
 
 #### Response (ready, success)
 
@@ -223,11 +227,13 @@ The `task::enable_lightning::status` request checks the status of lightning node
     "id": null
 }
 ```
+
 <Note>
 In the above response spendable will always be 0 since the balance is unspendable until connections with lightning channels counterparties are established.
 Using the [my_balance](/atomicdex/api/legacy/my_balance) method after the coin is activated will get the spendable balance depending on how many channel counterparties are online.
 For exact channels balances and which channels are usable, there is a [different RPC](ADD LINK HERE) that will be documented in upcoming comments.
 </Note>
+
 
 #### Response (in progress state)
 
@@ -258,6 +264,7 @@ Possible in progress statuses:
 
 The `task::enable_lightning::cancel` request cancels lightning node initialization.
 
+
 ### Request Parameters
 
 | Parameter            | Type    | Description                                                                                                                 |
@@ -283,6 +290,7 @@ The `task::enable_lightning::cancel` request cancels lightning node initializati
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
+
 #### Response
 
 ```json
@@ -295,6 +303,7 @@ The `task::enable_lightning::cancel` request cancels lightning node initializati
 </CollapsibleSection>
 
 <CollapsibleSection expandedText='Hide Error Responses' collapsedText='Show Error Responses'>
+
 
 #### TaskFinished Error
 
