@@ -69,6 +69,10 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
  - Optional parameters should be listed at the bottom of the parameter table
 
 
+## Variables
+
+ - For AtomicDEX-API methods, the userpass variable should always be `MM2_RPC_PASSWORD`
+
 ## Templates
 
 Use the linked templates below as a starting point for new documentation pages.
