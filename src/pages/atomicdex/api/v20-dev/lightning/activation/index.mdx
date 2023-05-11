@@ -66,6 +66,105 @@ Any methods with a `task::` prefix will be linked to a numeric `task_id` value w
 ```
 </CollapsibleSection>
 
+<CollapsibleSection expandedText='Hide Error Responses' collapsedText='Show Error Responses'>
+
+### Error Responses
+
+#### L2ConfigIsNotFound
+
+Coin is not in `coins` file. Refer to the [coins file configuration for lightning](ADD LINK HERE WHEN AVAILABLE) for more information.
+
+```json
+{
+	"mmrpc": "2.0",
+	"error": "Layer 2 tBTC-lightning config is not found",
+	"error_path": "init_l2.prelude",
+	"error_trace": "init_l2:82] prelude:82]",
+	"error_type": "L2ConfigIsNotFound",
+	"error_data": "tBTC-lightning",
+	"id": 2
+}
+```
+
+#### UnexpectedL2Protocol
+
+Coin is wrong protocol type.
+
+```
+{
+	"mmrpc": "2.0",
+	"error": "Unexpected layer 2 protocol UTXO for tBTC-segwit",
+	"error_path": "init_l2.prelude.lightning_activation",
+	"error_trace": "init_l2:82] prelude:93] lightning_activation:92]",
+	"error_type": "UnexpectedL2Protocol",
+	"error_data": {
+		"ticker": "tBTC-segwit",
+		"protocol": {
+			"type": "UTXO"
+		}
+	},
+	"id": 2
+}
+```
+
+#### Internal
+
+Address already in use.
+
+```
+{
+    "mmrpc": "2.0",
+    "result": {
+        "status": "Error",
+        "details": {
+            "error": "I/O error Address already in use (os error 48)",
+            "error_path": "lib.lightning_activation.ln_p2p",
+            "error_trace": "lib:103] lightning_activation:280] ln_p2p:196]",
+            "error_type": "Internal",
+            "error_data": "I/O error Address already in use (os error 48)"
+        }
+    },
+    "id": null
+}
+```
+
+#### PlatformCoinIsNotActivated
+
+The selected coin is not activated. It needs to be activated before the lightning node can be initialized.
+
+```json
+{
+	"mmrpc": "2.0",
+	"error": "Platform coin tBTC-lightning is not activated",
+	"error_path": "init_l2.lp_coins",
+	"error_trace": "init_l2:87] lp_coins:3087]",
+	"error_type": "PlatformCoinIsNotActivated",
+	"error_data": "tBTC-lightning",
+	"id": 2
+}
+```
+
+#### InvalidPlatformConfiguration
+
+Coin's configuration is missing a required parameter.  Refer to the [coins file configuration for lightning](ADD LINK HERE WHEN AVAILABLE) for more information.
+
+On init if missing config
+```json
+{
+	"mmrpc": "2.0",
+	"error": "Invalid config for platform coin: tBTC-segwit, error: 'avg_blocktime' field is not found in platform coin config",
+	"error_path": "init_l2.lightning_activation",
+	"error_trace": "init_l2:95] lightning_activation:254]",
+	"error_type": "InvalidPlatformConfiguration",
+	"error_data": {
+		"platform_coin_ticker": "tBTC-segwit",
+		"err": ""avg_blocktime" field is not found in platform coin config"
+	},
+	"id": 2
+}
+```
+</CollapsibleSection>
+
 
 ## status
 
@@ -197,79 +296,23 @@ The `task::enable_lightning::cancel` request cancels lightning node initializati
 ```
 </CollapsibleSection>
 
+<CollapsibleSection expandedText='Hide Error Responses' collapsedText='Show Error Responses'>
 
+### Error Response
 
+#### TaskFinished
 
+Task has already been completed.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### ERROR MESSAGES
-
-On init where coin not in coins file
-```
-{'mmrpc': '2.0', 'error': 'Layer 2 tBTC-lightning config is not found', 'error_path': 'init_l2.prelude', 'error_trace': 'init_l2:82] prelude:82]', 'error_type': 'L2ConfigIsNotFound', 'error_data': 'tBTC-lightning', 'id': 2}
-```
-
-On init where coin exists but is wrong type
-```
-{'mmrpc': '2.0', 'error': 'Unexpected layer 2 protocol UTXO for tBTC-segwit', 'error_path': 'init_l2.prelude.lightning_activation', 'error_trace': 'init_l2:82] prelude:93] lightning_activation:92]', 'error_type': 'UnexpectedL2Protocol', 'error_data': {'ticker': 'tBTC-segwit', 'protocol': {'type': 'UTXO'}}, 'id': 2}
-```
-
-On init where address already in use
-```
-{
-    "mmrpc": "2.0",
-    "result": {
-        "status": "Error",
-        "details": {
-            "error": "I/O error Address already in use (os error 48)",
-            "error_path": "lib.lightning_activation.ln_p2p",
-            "error_trace": "lib:103] lightning_activation:280] ln_p2p:196]",
-            "error_type": "Internal",
-            "error_data": "I/O error Address already in use (os error 48)"
-        }
-    },
-    "id": null
-}
-```
-
-On init if coin not activated
-```
-{'mmrpc': '2.0', 'error': 'Platform coin tBTC-lightning is not activated', 'error_path': 'init_l2.lp_coins', 'error_trace': 'init_l2:87] lp_coins:3087]', 'error_type': 'PlatformCoinIsNotActivated', 'error_data': 'tBTC-lightning', 'id': 2}
-```
-
-On init if missing config
-```
-{'mmrpc': '2.0', 'error': "Invalid config for platform coin: tBTC-segwit, error: 'avg_blocktime' field is not found in platform coin config", 'error_path': 'init_l2.lightning_activation', 'error_trace': 'init_l2:95] lightning_activation:254]', 'error_type': 'InvalidPlatformConfiguration', 'error_data': {'platform_coin_ticker': 'tBTC-segwit', 'err': "'avg_blocktime' field is not found in platform coin config"}, 'id': 2}
-```
-
-On cancel when already completed
-```
+```json
 {
     "mmrpc": "2.0",
     "error": "Task is finished already",
     "error_path": "init_l2.manager",
     "error_trace": "init_l2:157] manager:104]",
     "error_type": "TaskFinished",
-    "error_data": TASK_ID,
+    "error_data": 3,
     "id": null
 }
 ```
+</CollapsibleSection>
