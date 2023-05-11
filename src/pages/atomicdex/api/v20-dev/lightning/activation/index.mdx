@@ -34,8 +34,7 @@ Any methods with a `task::` prefix will be linked to a numeric `task_id` value w
             "name": "AtomicDEX-Docs-Node-1",
             "listening_port": 9735,
             "color": "000000",
-            "payment_retries": 5,
-            "backup_path": null
+            "payment_retries": 5
         }
     },
     "id": 2
@@ -49,7 +48,13 @@ Any methods with a `task::` prefix will be linked to a numeric `task_id` value w
 #### Response
 
 ```json
-
+{
+    "mmrpc": "2.0",
+    "result": {
+        "task_id": 1
+    },
+    "id": null
+}
 ```
 </CollapsibleSection>
 
@@ -75,8 +80,8 @@ The `task::enable_lightning::status` request checks the status of lightning node
     "mmrpc": "2.0",
     "method": "task::enable_lightning::status",
     "params": {
-        "task_id": 0,
-        "forget_if_finished": true
+        "task_id": 1,
+        "forget_if_finished": false
     },
     "id": 2
 }
@@ -86,11 +91,55 @@ The `task::enable_lightning::status` request checks the status of lightning node
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
-#### Response
+#### Response (ready, success)
 
 ```json
-
+{
+    "mmrpc": "2.0",
+    "result": {
+        "status": "Ok",
+        "details": {
+            "platform_coin": "BTC-segwit",
+            "address": "0321937a095229510bd2b02a930d7b7eb273147e348ef1086b22e8790e3c609804",
+            "balance": {
+                "spendable": "0",
+                "unspendable": "0"
+            }
+        }
+    },
+    "id": null
+}
 ```
+<Note>
+In the above response spendable will always be 0 since the balance is unspendable until connections with lightning channels counterparties are established.
+Using the [my_balance](ADD LINK HERE) method after the coin is activated will get the spendable balance depending on how many channel counterparties are online.
+For exact channels balances and which channels are usable, there is a [different RPC](ADD LINK HERE) that will be documented in upcoming comments.
+</Note>
+</CollapsibleSection>
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+#### Response (in progress state)
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": {
+        "status": "InProgress",
+        "details": "ReadingNetworkGraphFromFile"
+    },
+    "id": null
+}
+```
+Possible in progress statuses:
+ - ActivatingCoin
+ - GettingFeesFromRPC
+ - ReadingNetworkGraphFromFile
+ - InitializingChannelManager
+ - InitializingPeerManager
+ - ReadingScorerFromFile
+ - InitializingBackgroundProcessor
+ - ReadingChannelsAddressesFromFile
+
 </CollapsibleSection>
 
 
@@ -114,7 +163,7 @@ The `task::enable_lightning::cancel` request cancels lightning node initializati
     "mmrpc": "2.0",
     "method": "task::enable_lightning::cancel",
     "params": {
-        "task_id": 0
+        "task_id": 1
     },
     "id": 1
 }
@@ -126,6 +175,69 @@ The `task::enable_lightning::cancel` request cancels lightning node initializati
 #### Response
 
 ```json
-
+{
+    "mmrpc": "2.0",
+    "result": "success",
+    "id": null
+}
 ```
 </CollapsibleSection>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ERROR MESSAGES
+
+On init where coin not in coins file
+{'mmrpc': '2.0', 'error': 'Layer 2 tBTC-lightning config is not found', 'error_path': 'init_l2.prelude', 'error_trace': 'init_l2:82] prelude:82]', 'error_type': 'L2ConfigIsNotFound', 'error_data': 'tBTC-lightning', 'id': 2}
+
+On init where coin exists but is wrong type
+{'mmrpc': '2.0', 'error': 'Unexpected layer 2 protocol UTXO for tBTC-segwit', 'error_path': 'init_l2.prelude.lightning_activation', 'error_trace': 'init_l2:82] prelude:93] lightning_activation:92]', 'error_type': 'UnexpectedL2Protocol', 'error_data': {'ticker': 'tBTC-segwit', 'protocol': {'type': 'UTXO'}}, 'id': 2}
+
+On init where address already in use
+{
+    "mmrpc": "2.0",
+    "result": {
+        "status": "Error",
+        "details": {
+            "error": "I/O error Address already in use (os error 48)",
+            "error_path": "lib.lightning_activation.ln_p2p",
+            "error_trace": "lib:103] lightning_activation:280] ln_p2p:196]",
+            "error_type": "Internal",
+            "error_data": "I/O error Address already in use (os error 48)"
+        }
+    },
+    "id": null
+}
+
+On cancel when already completed
+{
+    "mmrpc": "2.0",
+    "error": "Task is finished already",
+    "error_path": "init_l2.manager",
+    "error_trace": "init_l2:157] manager:104]",
+    "error_type": "TaskFinished",
+    "error_data": TASK_ID,
+    "id": null
+}

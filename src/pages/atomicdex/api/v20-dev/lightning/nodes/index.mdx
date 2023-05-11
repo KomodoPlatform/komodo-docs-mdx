@@ -14,7 +14,7 @@ The `lightning::nodes::connect_to_node` method allows you to connect to a lightn
 | Parameter            | Type    | Description            |
 |----------------------|---------|------------------------|
 | coin                 | string  | A coin ticker          |
-| node_address         | string  | URI to a lighning node |
+| node_address         | string  | Lightning nodes addresses always have a format of `pubkey`@`ip_address`:`port` |
 
 
 #### 📌 Example
@@ -34,13 +34,33 @@ The `lightning::nodes::connect_to_node` method allows you to connect to a lightn
 ```
 </CodeGroup>
 
+<Note>
+The node address in the above request is for the WalletOfSatoshi lightning node, which is one of the most connected lightning nodes. Other node addresses can be retrieved from any lightning explorer, such as:
+- https://1ml.com/node/035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226
+- https://mempool.space/lightning/node/035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226
+</Note>
+
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
-#### Response
+#### Response (success)
 
 ```json
+{
+    "mmrpc": "2.0",
+    "result": "Connected successfully to node : 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226@170.75.163.209:9735",
+    "id": null
+}
+```
 
+#### Response (already connected)
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": "Connected successfully to node : 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226@170.75.163.209:9735",
+    "id": null
+}
 ```
 </CollapsibleSection>
 
@@ -164,3 +184,30 @@ The `lightning::nodes::add_trusted_node` method allows you to add a node to your
 
 ```
 </CollapsibleSection>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Errors
+
+{
+    "mmrpc": "2.0",
+    "error": "Error connecting to node: Timeout error: Failed to connect to node: 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226",
+    "error_path": "connect_to_node",
+    "error_trace": "connect_to_node:78]",
+    "error_type": "ConnectionError",
+    "error_data": "Timeout error: Failed to connect to node: 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226",
+    "id": null
+}
