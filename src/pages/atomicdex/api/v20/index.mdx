@@ -4,6 +4,7 @@ Starting with version [beta-2.1.3434](https://github.com/KomodoPlatform/atomicDE
 
 It includes a uniform request, successful and error response formats. At the moment, only a few RPC methods support the `mmrpc 2.0` protocol.
 
+
 ## Request
 
 | Structure | Type              | Description                                                                                                                                                       |
@@ -14,6 +15,7 @@ It includes a uniform request, successful and error response formats. At the mom
 | params    | object (optional) | a structured value that holds the parameter values to be used during the invocation of the method. This field may be omitted if the method doesn't take arguments |
 | id        | number (optional) | the identifier is established by the client. AtomicDEX API will reply with the same value in the Response object if the `id` field is included and not `NULL`     |
 
+
 ### Response (Success)
 
 | Structure | Type              | Description                                                                                 |
@@ -21,6 +23,7 @@ It includes a uniform request, successful and error response formats. At the mom
 | mmrpc     | string            | the string specifying the version of the AtomicDEX API RPC protocol                         |
 | result    | object            | the value of this field is determined by the method invoked on AtomicDEX API                |
 | id        | number (optional) | the identifier established by the client. The same value as in the Request if it was passed |
+
 
 ### Response (Error)
 
@@ -34,9 +37,8 @@ It includes a uniform request, successful and error response formats. At the mom
 | error_data  | object            | an object containing the error data of the corresponding `error_type`                       |
 | id          | number (optional) | the identifier established by the client. The same value as in the Request if it was passed |
 
-### 📌 Examples
 
-#### Command
+### 📌 Examples
 
 <CodeGroup title="" tag="POST" label="withdraw">
 ```json {{ mm2MethodDecorate : true }}
@@ -55,9 +57,7 @@ It includes a uniform request, successful and error response formats. At the mom
 </CodeGroup>
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
 #### Response (success)
-
 ```json
 {
   "mmrpc": "2.0",
@@ -84,9 +84,9 @@ It includes a uniform request, successful and error response formats. At the mom
 ```
 </CollapsibleSection>
 
+
 <CollapsibleSection expandedText='Hide Error Response' collapsedText='Show Error Response'>
 #### Response (error)
-
 ```json
 {
   "mmrpc": "2.0",
@@ -121,7 +121,6 @@ The `addressInfos` object includes the following items for a given address:
 
 
 <CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
-
 #### Example with balances
 
 ```json
@@ -148,7 +147,6 @@ The `addressInfos` object includes the following items for a given address:
     "tickers": ["ASLP-SLP"]
 }
 ```
-
 </CollapsibleSection>
 
 
@@ -163,16 +161,12 @@ The `balanceInfos` object includes the following items for a given coin or token
 
 
 <CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-
-#### Example
-
 ```json
 {
     "spendable": "12.11398301",
     "unspendable": "0.53"
 }
 ```
-
 </CollapsibleSection>
 
 
@@ -189,16 +183,13 @@ The `DerivationMethod` object includes the following items for a given coin or t
 Where the value indicates:
  - `Iguana`: The coin or token is was activated using Iguana derivation (default).
 
+
 <CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-
-#### Example
-
 ```json
 {
     "type": "Iguana"
 }
 ```
-
 </CollapsibleSection>
 
 
@@ -211,17 +202,14 @@ The `EvmNode` object includes the following items for a given coin or token:
 | url       | string  | URL of an RPC node                                                                                                                                                                     |
 | gui_auth  | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team                                                                        |
 
+
 <CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-
-#### Example
-
 ```json
 {
     "url": "http://eth1.cipig.net:8555",
     "gui_auth": false
 }
 ```
-
 </CollapsibleSection>
 
 
@@ -234,17 +222,14 @@ The `TokensRequest` object includes the following items for a given coin or toke
 | ticker                 | string  | Ticker of the token to be enabled                                                                                                                                                      |
 | required_confirmations | integer | How many confirmations to wait during the transaction steps of an atomic swap. Overwrites value in coins file; defaults to `3`                                                         |
 
+
 <CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-
-#### Example
-
 ```json
 {
     "ticker": "MINDS-ERC20",
     "required_confirmations": 4
 }
 ```
-
 </CollapsibleSection>
 
 
@@ -277,6 +262,49 @@ For requests which return many results, pagination offsets may be applied. ** Us
 </CollapsibleSection>
 
 
+### CoinProtocol
+
+| Parameter     | Type    | Description                                                                  |
+|---------------|---------|------------------------------------------------------------------------------|
+| type          | integer | One of the supported [coin types](link TBA)                                  |
+| protocol_data | object  | A standard [CoinProtocolData](/atomicdex/api/v20#coin-protocol-data) object. |
+
+
+### CoinProtocolData
+
+| Parameter            | Type    | Description                                                                                      |
+|----------------------|---------|--------------------------------------------------------------------------------------------------|
+| platform             | string  | Indicates the platform parent coin for EMV-like protocols, or the coin used for lightning nodes. |
+| network              | string  | Either `mainnet` or `testnet                                                                     |
+| confirmation_targets | object  | A standard [ConfirmationTargets](/atomicdex/api/v20#confirmation-targets) object.                |
+
+
+### ConfirmationTargets
+
+| Parameter     | Type    | Description                                                                  |
+|---------------|---------|------------------------------------------------------------------------------|
+| background    | integer |                                                                              |
+| normal        | integer |                                                                              |
+| high_priority | integer |                                                                              |
+
+
+### CounterpartyChannelConfig
+
+| Parameter                          | Type    | Description                                                              |
+|------------------------------------|---------|--------------------------------------------------------------------------|
+| allow_outbound_0conf               | boolean | Optional. When set an outbound channel can be used straight away [without waiting](https://docs.rs/lightning/latest/lightning/util/config/struct.ChannelHandshakeLimits.html#structfield.trust_own_funding_0conf) for any on-chain confirmations. |
+| force_announced_channel_preference | boolean | Optional. Set to force an incoming channel to match our announced channel preference in ChannelOptions announced_channel.                                                                  |
+| outbound_channels_confirmations    | integer | Optional. Confirmations we will wait for before considering an inbound channel locked in.   |
+| our_locktime_limit                 | boolean | Optional. Set to the amount of time we're willing to wait to claim money back to us.                                                                                                       |
+| min_funding_sats                   | boolean | Optional. Minimum allowed satoshis when an inbound channel is funded.                                                                         |
+| max_funding_sats                   | boolean | Optional. Maximum allowed satoshis when an inbound channel is funded.                                                                         |
+| max_htlc_minimum_msat              | boolean | Optional. The remote node sets a limit on the minimum size of HTLCs we can send to them. This allows us to limit the maximum minimum-size they can require.                                |
+| min_max_htlc_value_in_flight_msat  | boolean | Optional. The remote node sets a limit on the maximum value of pending HTLCs to them at any given time to limit their funds exposure to [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract). This allows us to set a minimum such value. |
+| max_channel_reserve_sats           | boolean | Optional. The remote node will require us to keep a certain amount in direct payment to ourselves at all time, ensuring that we are able to be punished if we broadcast an old state. This allows us to limit the amount which we will have to keep to ourselves (and cannot use for [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)). |
+| min_max_accepted_htlcs             | boolean | Optional. The remote node sets a limit on the maximum number of pending HTLCs to them at any given time. This allows us to set a minimum such value.                                       |
+
+
+
 ### LightningPayment
 
 | Parameter            | Type    | Description                                                                                                                           |
@@ -295,10 +323,10 @@ For requests which return many results, pagination offsets may be applied. ** Us
 | payment_type         | object  | A standard `LightningPaymentType` object.                                                                                             |
 | description          | string  | Optional. A note to indicate the purpose of the invoice.                                                                              |
 | status               | string  | Optional. Accepted values: `pending`, `succeeded`, `failed`.                                                                          |
-| from_amount_msat     | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                             |
-| to_amount_msat       | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                             |
-| from_fee_paid_msat   | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                    |
-| to_fee_paid_msat     | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html                    |
+| from_amount_msat     | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html)                            |
+| to_amount_msat       | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html)                            |
+| from_fee_paid_msat   | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html)                   |
+| to_fee_paid_msat     | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html)                   |
 | from_timestamp       | string  | Optional. Minimum timestamp (in milliseconds) of payment results to return.                                                           |
 | to_timestamp         | string  | Optional. Maximum timestamp (in milliseconds) of payment results to return.                                                           |
 
@@ -323,23 +351,30 @@ For requests which return many results, pagination offsets may be applied. ** Us
 
 | Parameter                              | Type    | Description                                                                                   |
 |----------------------------------------|---------|-----------------------------------------------------------------------------------------------|
-| proportional_fee_in_millionths_sats    | string  | Optional, defaults to value in `coins` file. Fee per kb in millisatoshis. CONFIRM             |
-| base_fee_msat                          | integer | Optional, defaults to value in `coins` file. Base fee in millisatoshis.                       |
-| cltv_expiry_delta                      | integer | Optional, defaults to value in `coins` file. Seconds until CheckLockTimeVerify (CLTV) expiry. |
-| max_dust_htlc_exposure_msat            | integer | Optional, defaults to value in `coins` file. Maximum exposure to dust from HashTimeLockContract (HTLC) transactions. CONFIRM  |
-| force_close_avoidance_max_fee_satoshis | integer | Optional, defaults to value in `coins` file. Maximum fee to avoid forced closure in satoshis. CONFIRM  |
+| their_channel_reserve_sats             | string  | Optional. Amount (in millionths of a satoshi) charged per satoshi for payments forwarded outbound over the channel.                             |
+| base_fee_msat                          | integer | Optional. Amount (in milli-satoshi) charged for payments forwarded outbound over the channel, in excess of proportional_fee_in_millionths_sats. |
+| cltv_expiry_delta                      | integer | Optional. Seconds until [CheckLockTimeVerify (CLTV)](https://academy.bit2me.com/en/que-es-cltv-bitcoin/) expiry.                                |
+| max_dust_htlc_exposure_msat            | integer | Optional. Limit our total exposure to in-flight [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract) which are burned to fees as they are too small to claim on-chain.  |
+| force_close_avoidance_max_fee_sats     | integer | Optional. The additional fee we're willing to pay to avoid waiting for the counterparty's locktime to reclaim funds.                            |
 
 
 ### LightningChannelConfig
 
+<Note>
+The values in this object are only used if the channel is being opened by the user. If the channel is being opened by the counterparty, the values in this object are ignored.
+If not specified when using the [open_channel](/atomicdex/api/v20-dev/lightning/channels#open_channel) or [update_channel](/atomicdex/api/v20-dev/lightning/channels#update_channel) methods, the values in this object will default to the values set in the `coins` configuration file.
+</Note>
+
 | Parameter                          | Type    | Description                                                                                        |
 |------------------------------------|---------|----------------------------------------------------------------------------------------------------|
-| counterparty_locktime              | integer | Optional, defaults to value in `coins` file. Locktime in seconds for counterparty transactions.    |
-| our_htlc_minimum_msat              | integer | Optional, defaults to value in `coins` file. Minimum msat reserved for HTLC transactions,          |
-| negotiate_scid_privacy             | boolean | Optional, defaults to value in `coins` file. If `true`, I HAVE NO IDEA WHAT THIS MEANS             |
-| max_inbound_in_flight_htlc_percent | integer | Optional, defaults to value in `coins` file. Maximum percentage of of HTLC funds inbound. CONFIRM  |
-| announced_channel                  | boolean | Optional, defaults to value in `coins` file. If `true`, the channel has been announced.            |
-| commit_upfront_shutdown_pubkey     | boolean | Optional, defaults to value in `coins` file. If `true`, I HAVE NO IDEA WHAT THIS MEANS             |
+| inbound_channels_confirmations     | string  | Must be set in coins file, and applies to all channels. Confirmations we will wait for before considering an inbound channel locked in.                                         |
+| max_inbound_in_flight_htlc_percent | integer | Must be set in coins file, and applies to all channels. Sets the percentage of the channel value we will cap the total value of outstanding inbound HTLCs to.                   |
+| our_htlc_minimum_msat              | integer | Optional. The smallest value HTLC we will accept to process. The channel gets closed any time our counterparty misbehaves by sending us an HTLC with a value smaller than this. |
+| announced_channel                  | boolean | Set to announce the channel publicly and notify all nodes that they can route via this channel.                                                                                 |
+| commit_upfront_shutdown_pubkey     | boolean | Optional, defaults to value in `coins` file. If `true`, When set, we commit to an upfront shutdown_pubkey at channel open.                                                      |
+| counterparty_locktime              | integer | Optional. The number of blocks we require our counterparty to wait to claim their money on chainif they broadcast a revoked transaction. We have to be online at least once during this time to punish our counterparty for broadcasting a revoked transaction. We have to account also for the time to broadcast and confirm our transaction, possibly with time in between to [RBF (Replace-By-Fee)](https://bitcoinops.org/en/topics/replace-by-fee/) the spending transaction.  |
+| negotiate_scid_privacy             | integer | Optional. If set, we attempt to negotiate the `scid_privacy` (referred to as `scid_alias` in the [BOLTs](https://github.com/lightning/bolts)) option for outbound private channels. This provides better privacy by not including our real on-chain channel UTXO in each invoice and requiring that our counterparty only relay HTLCs to us using the channel's SCID alias.  |
+| their_channel_reserve_sats         | boolean | Optional, defaults to value in `coins` file. The minimum balance that the other node has to maintain on their side, at all times. This ensures that if our counterparty broadcasts a revoked state, we can punish them by claiming at least this value on chain. `Default value:` 1% of channel value. `Minimum value:` 1000 sats |
 
 
 ### LightningOpenChannelsFilter
