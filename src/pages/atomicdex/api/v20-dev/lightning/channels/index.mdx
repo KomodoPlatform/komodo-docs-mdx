@@ -37,8 +37,8 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
             "type": "Exact",
             "value": 0.004
         }
-    }
-    "id": null
+    },
+    "id": 22
 }
 ```
 </CodeGroup>
@@ -49,7 +49,14 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
 #### Response
 
 ```json
-
+{
+	"mmrpc": "2.0",
+	"result": {
+		"uuid": "434681f8-95e5-484f-af49-fa80d8ae857b",
+		"node_address": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@233.112.95.142:9735"
+	},
+	"id": 22
+}
 ```
 </CollapsibleSection>
 
@@ -84,7 +91,7 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
             "announced_channel": false,
             "commit_upfront_shutdown_pubkey": true
         }
-    }
+    },
     "id": null
 }
 ```
@@ -149,10 +156,10 @@ The `lightning::channels::update_channel` method updates channel options.
 
 ### Request Parameters
 
-| Parameter         | Type    | Description                                                                              |
-|-------------------|---------|------------------------------------------------------------------------------------------|
-| coin              | string  | The ticker of the coin you would like to view closed channels for.                       |
-| rpc_channel_id    | integer | Then channel ID number.                                                                  |
+| Parameter         | Type    | Description                                                                                |
+|-------------------|---------|--------------------------------------------------------------------------------------------|
+| coin              | string  | The ticker of the coin you would like to view closed channels for.                         |
+| uuid              | string  | Unique channel identifier.                                                                 |
 | channel_options   | object  | A standard [LightningChannelOptions](/atomicdex/api/v20#lightning-channel-options) object. |
 
 
@@ -166,7 +173,7 @@ The `lightning::channels::update_channel` method updates channel options.
     "method": "lightning::channels::update_channel",
     "params": {
         "coin": "tBTC-lightning",
-        "rpc_channel_id": 1,
+        "uuid": "434681f8-95e5-484f-af49-fa80d8ae857b",
         "channel_options": {
             "proportional_fee_in_millionths_sats": 0,
             "base_fee_msat": 1000,
@@ -174,7 +181,7 @@ The `lightning::channels::update_channel` method updates channel options.
             "max_dust_htlc_exposure_msat": 5000000,
             "force_close_avoidance_max_fee_satoshis": 1000
         }
-    }
+    },
     "id": 2
 }
 ```
@@ -187,6 +194,26 @@ The `lightning::channels::update_channel` method updates channel options.
 
 ```json
 
+```
+</CollapsibleSection>
+
+
+<CollapsibleSection expandedText='Hide Error Responses' collapsedText='Show Error Responses'>
+
+#### NoSuchChannel Error
+
+Coin is not in `coins` file. Refer to the [coins file configuration for lightning](ADD LINK HERE WHEN AVAILABLE) for more information.
+
+```json
+{
+	"mmrpc": "2.0",
+	"error": "No such channel with uuid dc33b998-8589-44fd-a246-256a582e8942",
+	"error_path": "update_channel",
+	"error_trace": "update_channel:61]",
+	"error_type": "NoSuchChannel",
+	"error_data": "dc33b998-8589-44fd-a246-256a582e8942",
+	"id": 2
+}
 ```
 </CollapsibleSection>
 
@@ -266,7 +293,11 @@ The `lightning::channels::get_claimable_balances` method returns a list of claim
 #### Response
 
 ```json
-
+{
+    "mmrpc": "2.0",
+    "result": [],
+    "id": 762
+}
 ```
 </CollapsibleSection>
 
@@ -309,7 +340,36 @@ The `lightning::channels::list_open_channels_by_filter` method returns a list of
 #### Response
 
 ```json
-
+{
+	"mmrpc": "2.0",
+	"result": {
+		"open_channels": [{
+			"uuid": "434681f8-95e5-484f-af49-fa80d8ae857b",
+			"channel_id": "ebfbf19193ee26f25c6e236e863786e59818c11e136ce9c50dba63ec44b0c89a",
+			"counterparty_node_id": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9",
+			"funding_tx": None,
+			"funding_tx_output_index": None,
+			"funding_tx_value_sats": 4000,
+			"is_outbound": True,
+			"balance_msat": 4000000,
+			"outbound_capacity_msat": 4000000,
+			"inbound_capacity_msat": 0,
+			"current_confirmations": 0,
+			"required_confirmations": None,
+			"is_ready": False,
+			"is_usable": False,
+			"is_public": False
+		}],
+		"limit": 10,
+		"skipped": 0,
+		"total": 1,
+		"total_pages": 1,
+		"paging_options": {
+			"PageNumber": 1
+		}
+	},
+	"id": 55
+}
 ```
 </CollapsibleSection>
 
@@ -450,7 +510,39 @@ The `lightning::channels::list_closed_channels_by_filter` method returns a list 
 #### Response
 
 ```json
-
+{"mmrpc": "2.0",
+	"result": {
+		"closed_channels": [{
+			"uuid": "434681f8-95e5-484f-af49-fa80d8ae857b",
+			"channel_id": "ebfbf19193ee26f25c6e236e863786e59818c11e136ce9c50dba63ec44b0c89a",
+			"counterparty_node_id": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9",
+			"closure_reason": "Channel closed because counterparty force-closed with message chan size of 0.00004 BTC is below min chan size of 0.0002 BTC",
+			"is_outbound": True,
+			"is_public": False,
+			"is_closed": True,
+			"created_at": 1683864431,
+			"closed_at": 1683864432
+		},
+        {
+            "uuid": "de006b65-bd30-41e1-9b44-5e04518a3d98",
+            "channel_id": "928a041767f23c461fe3b41a387bd3f91a10b284cd7f90fb04544eda4f38f967",
+            "counterparty_node_id": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9",
+            "closure_reason": "Channel closed because of an exception: We consider the minimum depth to be unreasonably large. Expected minimum: (1). Actual: (3)",
+            "is_outbound": True,
+            "is_public": False,
+            "is_closed": True,
+            "created_at": 1683866505,
+            "closed_at": 1683866505
+        }],
+		"limit": 10,
+		"skipped": 0,
+		"total": 1,
+		"total_pages": 1,
+		"paging_options": {
+			"PageNumber": 1
+		}
+	}, "id": 55
+}
 ```
 </CollapsibleSection>
 
