@@ -12,7 +12,7 @@ The `lightning::payments::generate_invoice` method generates an invoice to be pa
 
 | Parameter            | Type    | Description                                                                                                                                                      |
 |----------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| coin                 | string  | Ticker of coin to activate.                                                                                                                                      |
+| coin                 | string  | Ticker of coin to generate invoice for.                                                                                                                          |
 | description          | string  | A note to indicate the purpose of the invoice.                                                                                                                   |
 | amount_in_msat       | integer | Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin.)  |
 | expiry               | integer | Optional, defaults to `3600`. Seconds until the invoice expires.                                                                                                 |
@@ -27,7 +27,7 @@ The `lightning::payments::generate_invoice` method generates an invoice to be pa
     "userpass": "MM2_RPC_PASSWORD",
     "mmrpc": "2.0",
     "params": {
-        "ticker": "tBTC-lightning",
+        "coin": "tBTC-lightning",
         "description": "For the burger on Tuesday",
         "amount_in_msat": 10000,
         "expiry": 600
@@ -42,7 +42,14 @@ The `lightning::payments::generate_invoice` method generates an invoice to be pa
 #### Response
 
 ```json
-
+{
+	"mmrpc": "2.0",
+	"result": {
+		"payment_hash": "3ff39605f214a4b4159f9c4f44c94de3a273f300042ca18b7cb3d62f270a9ebc",
+		"invoice": "lntb100n1pj9aq73dpggehhygr5dpjjqcn4wfnk2u3qdahzq4r4v4ekgctenp4qf3dqylh55jd8m5x5hh0g5q82h9p86yghwhl2s0t826nlyp8zdgjzpp58leevp0jzjjtg9vln385fj2duw388ucqqsk2rzmuk0tz7fc2n67qsp5k33rvvq46xtuppl22ggcq5q7qqywyekcemhzazt4m6vulwsarcrq9qyysgqcqpcxqzjcrzjqwyx8nu2hygyvgc02cwdtvuxe0lcxz06qt3lpsldzcdr46my5epmjfgaasqqqvqqqqqqqqlgqqqqqqgq9qpwesnhre7xmdg6tajvp939vl72vxm8csecy6hfcah9fzgazd5eyzjskgtt7u9xshj7gq2vkejjcquem08tqfrc2pj78xa95teazzf0qq7pnyqj"
+	},
+	"id": 1
+}
 ```
 </CollapsibleSection>
 
@@ -76,7 +83,7 @@ Used to pay an invoice or send a payment via pubkey/address.
             "type": "invoice",
             "invoice": "lntb20u1p32wwxapp5p8gjy2e79jku5tshhq2nkdauv0malqqhzefnqmx9pjwa8h83cmwqdp8xys9xcmpd3sjqsmgd9czq3njv9c8qatrvd5kumcxqrrsscqp79qy9qsqsp5m473qknpecv6ajmwwtjw7keggrwxerymehx6723avhdrlnxmuvhs54zmyrumkasvjp0fvvk2np30cx5xpjs329alvm60rwy3payrnkmsd3n8ahnky3kuxaraa3u4k453yf3age7cszdxhjxjkennpt75erqpsfmy4y" 
         }
-    }
+    },
     "id": 6
 }
 ```
@@ -124,6 +131,36 @@ Used to pay an invoice or send a payment via pubkey/address.
 </CollapsibleSection>
 
 
+<CollapsibleSection expandedText='Hide Error Responses' collapsedText='Show Error Responses'>
+### PaymentError (attempt to pay self)
+```
+{
+	"mmrpc": "2.0",
+	"error": "Payment error: Error paying invoice: Routing(LightningError { err: "Cannot generate a route to ourselves", action: IgnoreError })",
+	"error_path": "send_payment.lightning",
+	"error_trace": "send_payment:102] lightning:231]",
+	"error_type": "PaymentError",
+	"error_data": "Error paying invoice: Routing(LightningError { err: "Cannot generate a route to ourselves", action: IgnoreError })",
+	"id": 6
+}
+```
+
+
+### PaymentError (no path to destination pubkey)
+```
+{
+	"mmrpc": "2.0",
+	"error": "Payment error: Keysend error: Routing(LightningError { err: "Failed to find a path to the given destination", action: IgnoreError })",
+	"error_path": "send_payment.lightning",
+	"error_trace": "send_payment:107] lightning:256]",
+	"error_type": "PaymentError",
+	"error_data": "Keysend error: Routing(LightningError { err: "Failed to find a path to the given destination", action: IgnoreError })",
+	"id": 6
+}
+```
+</CollapsibleSection>
+
+
 ## get_payment_details
 
 The `lightning::payments::get_payment_details` method returns details about a lightning payment from a given `payment_hash`.
@@ -146,7 +183,7 @@ The `lightning::payments::get_payment_details` method returns details about a li
     "userpass": "MM2_RPC_PASSWORD",
     "mmrpc": "2.0",
     "params": {
-        "ticker": "tBTC-lightning",
+        "coin": "tBTC-lightning",
         "payment_hash": "414f9b3524fc4e48c99f2723952732d8bc2eba1b35ce3bf2a70f5144b40f599e"
     },
     "id": 1
@@ -154,12 +191,26 @@ The `lightning::payments::get_payment_details` method returns details about a li
 ```
 </CodeGroup>
 
+
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-#### Response
-
 ```json
 
+```
+</CollapsibleSection>
+
+
+<CollapsibleSection expandedText='Hide Error Responses' collapsedText='Show Error Responses'>
+### NoSuchPayment (payment hash not found)
+```
+{
+	"mmrpc": "2.0",
+	"error": "Payment with hash: 414f9b3524fc4e48c99f2723952732d8bc2eba1b35ce3bf2a70f5144b40f599e is not found",
+	"error_path": "get_payment_details",
+	"error_trace": "get_payment_details:75]",
+	"error_type": "NoSuchPayment",
+	"error_data": "414f9b3524fc4e48c99f2723952732d8bc2eba1b35ce3bf2a70f5144b40f599e",
+	"id": 1
+}
 ```
 </CollapsibleSection>
 
@@ -173,7 +224,7 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
 | Parameter         | Type    | Description                                                                                                                  |
 |-------------------|---------|------------------------------------------------------------------------------------------------------------------------------|
 | coin              | string  | Ticker of the coin to query.                                                                                                 |
-| filter            | object  | Optional. A standard [LightningPaymentFilter](/atomicdex/api/v20#lightning-payment-filter) object.                                                 |
+| filter            | object  | Optional. A standard [LightningPaymentFilter](/atomicdex/api/v20#lightning-payment-filter) object.                           |
 | paging_options    | object  | Optional. A standard [Pagination](/atomicdex/api/v20#pagination) object.                                                     |
 | limit             | integer | Optional, defaults to `10`. Maximum number of results to return.                                                             |
 
@@ -199,7 +250,60 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
 #### Response
 
 ```json
-
+{
+	"mmrpc": "2.0",
+	"result": {
+		"payments": [{
+			"payment_hash": "59175643db24fc79c77da073994d596444b6909fb2d452bde662ae386115c758",
+			"payment_type": {
+				"type": "Inbound Payment"
+			},
+			"description": "For the burger on Tuesday",
+			"amount_in_msat": 10000,
+			"status": "pending",
+			"created_at": 1683917593,
+			"last_updated": 1683917593
+		}, {
+			"payment_hash": "3ff39605f214a4b4159f9c4f44c94de3a273f300042ca18b7cb3d62f270a9ebc",
+			"payment_type": {
+				"type": "Outbound Payment"
+			},
+			"description": "A 1:24 scale model of a 1981 DeLorean DMC-12",
+			"amount_in_msat": 88000,
+			"status": "succeeded",
+			"created_at": 1683815625,
+			"last_updated": 1683815721
+		}, {
+			"payment_hash": "c4f44c94214a4b4159f9273f30de3a3ff39605f18b7c27b3d62f0a9ebc",
+			"payment_type": {
+				"type": "Outbound Payment"
+			},
+			"description": "Grays Sports Almanac, 1950-2000",
+			"amount_in_msat": 1000000000,
+			"status": "succeeded",
+			"created_at": 1683714225,
+			"last_updated": 1683805721
+		}, {
+			"payment_hash": "c4f44c94214a4b4159f9273f30de3a3ff39605f18b7c27b3d62f0a9ebc",
+			"payment_type": {
+				"type": "Outbound Payment"
+			},
+			"description": "ACME shrink ray",
+			"amount_in_msat": 4000012,
+			"status": "succeeded",
+			"created_at": 1683814625,
+			"last_updated": 1683815321
+		}],
+		"limit": 10,
+		"skipped": 0,
+		"total": 6,
+		"total_pages": 1,
+		"paging_options": {
+			"PageNumber": 1
+		}
+	},
+	"id": 1
+}
 ```
 </CollapsibleSection>
 
@@ -213,15 +317,15 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
     "userpass": "MM2_RPC_PASSWORD",
     "mmrpc": "2.0",
     "params": {
-        "coin": "tBTC-lightning"
+        "coin": "tBTC-lightning",
         "filter": {
             "payment_type": {
                 "type": "Inbound Payment"
             },
         },
-        "limit": 10,
+        "limit": 2,
         "paging_options": {
-            "PageNumber": 3
+            "PageNumber": 2
         }
     },
     "id": 1
@@ -230,14 +334,43 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
 </CodeGroup>
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-#### Response
-
 ```json
-
+{
+	"mmrpc": "2.0",
+	"result": {
+		"payments": [{
+			"payment_hash": "e51f1526d3322ddc0aaa0e893e5875418ddd12f206b7e1545c8e4375c97d0e31",
+			"payment_type": {
+				"type": "Inbound Payment"
+			},
+			"description": "For the burger on Tuesday",
+			"amount_in_msat": 10000,
+			"status": "pending",
+			"created_at": 1683916900,
+			"last_updated": 1683916900
+		}, {
+			"payment_hash": "605f214a4b4b159f9c4f44c94de3a273f3ff39300042ca18b7cbb4159f3d62f2",
+			"payment_type": {
+				"type": "Inbound Payment"
+			},
+			"description": "14 pallets of frozen spinach",
+			"amount_in_msat": 56005000,
+			"status": "succeeded",
+			"created_at": 1683815625,
+			"last_updated": 1683815721
+		}],
+		"limit": 2,
+		"skipped": 2,
+		"total": 7,
+		"total_pages": 4,
+		"paging_options": {
+			"PageNumber": 2
+		}
+	},
+	"id": 1
+}
 ```
 </CollapsibleSection>
-
 
 
 #### 📌 Example for `pending` payments between 10000 and 40000 millisatoshis
@@ -249,7 +382,7 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
     "userpass": "MM2_RPC_PASSWORD",
     "mmrpc": "2.0",
     "params": {
-        "coin": "tBTC-lightning"
+        "coin": "tBTC-lightning",
         "filter": {
             "status": "pending",
             "from_amount_msat": 10000,
@@ -266,10 +399,32 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
 #### Response
 
 ```json
-
+{
+	"mmrpc": "2.0",
+	"result": {
+		"payments": [{
+			"payment_hash": "e51f1526d3322ddc0aaa0e893e5875418ddd12f206b7e1545c8e4375c97d0e31",
+			"payment_type": {
+				"type": "Inbound Payment"
+			},
+			"description": "For the burger on Tuesday",
+			"amount_in_msat": 10000,
+			"status": "pending",
+			"created_at": 1683916900,
+			"last_updated": 1683916900
+		}],
+		"limit": 10,
+		"skipped": 6,
+		"total": 1,
+		"total_pages": 1,
+		"paging_options": {
+			"PageNumber": 1
+		}
+	},
+	"id": 1
+}
 ```
 </CollapsibleSection>
-
 
 
 #### 📌 Example for successful payments on the 20th of April 2023
@@ -281,7 +436,7 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
     "userpass": "MM2_RPC_PASSWORD",
     "mmrpc": "2.0",
     "params": {
-        "coin": "tBTC-lightning"
+        "coin": "tBTC-lightning",
         "filter": {
             "status": "succeeded",
             "from_timestamp": 1681948800,
@@ -298,7 +453,29 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
 #### Response
 
 ```json
-
+{
+	"mmrpc": "2.0",
+	"result": {
+		"payments": [{
+			"payment_hash": "c4f44c94214a4b4159f9273f30de3a3ff39605f18b7c27b3d62f0a9ebc",
+			"payment_type": {
+				"type": "Outbound Payment"
+			},
+			"description": "Grays Sports Almanac, 1950-2000",
+			"amount_in_msat": 1000000000,
+			"status": "succeeded",
+			"created_at": 1681998480,
+			"last_updated": 1682008491
+		}],
+		"limit": 10,
+		"skipped": 6,
+		"total": 1,
+		"total_pages": 1,
+		"paging_options": {
+			"PageNumber": 1
+		}
+	},
+	"id": 1
+}
 ```
 </CollapsibleSection>
-
