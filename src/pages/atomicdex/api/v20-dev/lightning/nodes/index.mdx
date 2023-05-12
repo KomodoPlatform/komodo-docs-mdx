@@ -9,6 +9,7 @@ Lightning methods are currently only available using the native AtomicDEX-API. W
 
 The `lightning::nodes::connect_to_node` method allows you to connect to a lightning node.
 
+
 ### Request Parameters
 
 | Parameter            | Type    | Description            |
@@ -43,9 +44,7 @@ Other node addresses can be retrieved from any lightning explorer, such as:
 
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
 #### Response (success)
-
 ```json
 {
     "mmrpc": "2.0",
@@ -55,11 +54,10 @@ Other node addresses can be retrieved from any lightning explorer, such as:
 ```
 
 #### Response (already connected)
-
 ```json
 {
     "mmrpc": "2.0",
-    "result": "Connected successfully to node : 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226@170.75.163.209:9735",
+    "result": "Already connected to node : 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226@170.75.163.209:9735",
     "id": null
 }
 ```
@@ -96,52 +94,15 @@ The `lightning::nodes::list_trusted_nodes` method allows you to list all nodes i
 
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
 #### Response
-
 ```json
-
-```
-</CollapsibleSection>
-
-
-## remove_trusted_node
-
-The `lightning::nodes::remove_trusted_node` method allows you to remove a node from your trusted list.
-
-
-### Request Parameters
-
-| Parameter            | Type    | Description                                               |
-|----------------------|---------|-----------------------------------------------------------|
-| coin                 | string  | A coin ticker.                                            |
-| node_id              | string  | ID of node you would like to remove to your trusted list. |
-
-
-#### 📌 Example
-
-<CodeGroup title="" tag="POST" label="lightning::nodes::remove_trusted_node">
-```json {{ mm2MethodDecorate : true }}
 {
-    "userpass": "MM2_RPC_PASSWORD",
-    "mmrpc": "2.0",
-    "method": "lightning::nodes::remove_trusted_node",
-    "params": {
-        "coin": "tBTC-lightning",
-        "node_id": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9"
-    },
-    "id": 1
+	"mmrpc": "2.0",
+	"result": {
+		"trusted_nodes": ["038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9"]
+	},
+	"id": 1
 }
-```
-</CodeGroup>
-
-
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-#### Response
-
-```json
-
 ```
 </CollapsibleSection>
 
@@ -178,11 +139,60 @@ The `lightning::nodes::add_trusted_node` method allows you to add a node to your
 
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
 #### Response
-
 ```json
+{
+	"mmrpc": "2.0",
+	"result": {
+		"added_node": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9"
+	},
+	"id": 1
+}
+```
+</CollapsibleSection>
 
+
+## remove_trusted_node
+
+The `lightning::nodes::remove_trusted_node` method allows you to remove a node from your trusted list.
+
+
+### Request Parameters
+
+| Parameter            | Type    | Description                                               |
+|----------------------|---------|-----------------------------------------------------------|
+| coin                 | string  | A coin ticker.                                            |
+| node_id              | string  | ID of node you would like to remove to your trusted list. |
+
+
+#### 📌 Example
+
+<CodeGroup title="" tag="POST" label="lightning::nodes::remove_trusted_node">
+```json {{ mm2MethodDecorate : true }}
+{
+    "userpass": "MM2_RPC_PASSWORD",
+    "mmrpc": "2.0",
+    "method": "lightning::nodes::remove_trusted_node",
+    "params": {
+        "coin": "tBTC-lightning",
+        "node_id": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9"
+    },
+    "id": 1
+}
+```
+</CodeGroup>
+
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+#### Response
+```json
+{
+	"mmrpc": "2.0",
+	"result": {
+		"removed_node": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9"
+	},
+	"id": 1
+}
 ```
 </CollapsibleSection>
 
