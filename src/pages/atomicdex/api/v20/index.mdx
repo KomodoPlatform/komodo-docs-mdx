@@ -213,55 +213,6 @@ The `EvmNode` object includes the following items for a given coin or token:
 </CollapsibleSection>
 
 
-### TokensRequest
-
-The `TokensRequest` object includes the following items for a given coin or token:
-
-| Parameter              | Type    | Description                                                                                                                                                                            |
-| ---------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ticker                 | string  | Ticker of the token to be enabled                                                                                                                                                      |
-| required_confirmations | integer | How many confirmations to wait during the transaction steps of an atomic swap. Overwrites value in coins file; defaults to `3`                                                         |
-
-
-<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-```json
-{
-    "ticker": "MINDS-ERC20",
-    "required_confirmations": 4
-}
-```
-</CollapsibleSection>
-
-
-
-### Pagination
-
-For requests which return many results, pagination offsets may be applied. ** Use either value, not both. **
-
-| Parameter  | Type    | Description                                                |
-|------------|---------|------------------------------------------------------------|
-| PageNumber | integer | Optional, defaults to `1`. Offset for paginated results    |
-| FromId     | integer | Optional. Ignores any results prior to this UUID           |
-
-
-<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-
-#### Example
-
-```json
-{
-    "PageNumber": 1
-}
-```
-
-```json
-{
-    "FromId": 4
-}
-```
-</CollapsibleSection>
-
-
 ### CoinProtocol
 
 | Parameter     | Type    | Description                                                                  |
@@ -304,12 +255,99 @@ For requests which return many results, pagination offsets may be applied. ** Us
 | min_max_accepted_htlcs             | boolean | Optional. The remote node sets a limit on the maximum number of pending HTLCs to them at any given time. This allows us to set a minimum such value.                                       |
 
 
+### LightningActivationParams
+
+| Parameter            | Type    | Description                                                                                                                  |
+|----------------------|---------|------------------------------------------------------------------------------------------------------------------------------|
+| name                 | string  | The name of the node that will be used in [lightning explorers](https://mempool.space/testnet/lightning/node/024e2a940e0cbeda84a0d5e00fa8e83b3f4e7f98382eedb488d058e0f5636dd164/r/n) |
+| listening port       | integer | The port that this node listens for incoming connections on.                                                                 |
+| color                | string  | A hexidecimal color string which will be used in network graphs on [lightning explorers](https://mempool.space/testnet/lightning/node/024e2a940e0cbeda84a0d5e00fa8e83b3f4e7f98382eedb488d058e0f5636dd164/r/n) |
+| payment_retries      | integer | Optional, defaults to `X`. Number of times a payment will be retried if it fails.    CONFIRM DEFAULT VALUE                                        |
+| backup_path          | string  | Optional. The backup path for channel backups, preferably on an external drive. |
+
+
+### LightningChannelAmount
+
+| Parameter  | Type    | Description                                                                                   |
+|------------|---------|-----------------------------------------------------------------------------------------------|
+| type       | string  | `Exact` for a specific amount or `Max` for whole balance.                                     |
+| value      | object  | Only required if type is `Exact`. The amount in BTC you want to open the channel with.        |
+
+
+### LightningChannelConfig
+
+<Note>
+The values in this object are only used if the channel is being opened by the user. If the channel is being opened by the counterparty, the values in this object are ignored.
+If not specified when using the [open_channel](/atomicdex/api/v20-dev/lightning/channels#open_channel) or [update_channel](/atomicdex/api/v20-dev/lightning/channels#update_channel) methods, the values in this object will default to the values set in the `coins` configuration file.
+</Note>
+
+| Parameter                          | Type    | Description                                                                                        |
+|------------------------------------|---------|----------------------------------------------------------------------------------------------------|
+| inbound_channels_confirmations     | string  | Must be set in coins file, and applies to all channels. Confirmations we will wait for before considering an inbound channel locked in.                                         |
+| max_inbound_in_flight_htlc_percent | integer | Must be set in coins file, and applies to all channels. Sets the percentage of the channel value we will cap the total value of outstanding inbound HTLCs to.                   |
+| our_htlc_minimum_msat              | integer | Optional. The smallest value HTLC we will accept to process. The channel gets closed any time our counterparty misbehaves by sending us an HTLC with a value smaller than this. |
+| announced_channel                  | boolean | Set to announce the channel publicly and notify all nodes that they can route via this channel.                                                                                 |
+| commit_upfront_shutdown_pubkey     | boolean | Optional, defaults to value in `coins` file. If `true`, When set, we commit to an upfront shutdown_pubkey at channel open.                                                      |
+| counterparty_locktime              | integer | Optional. The number of blocks we require our counterparty to wait to claim their money on chainif they broadcast a revoked transaction. We have to be online at least once during this time to punish our counterparty for broadcasting a revoked transaction. We have to account also for the time to broadcast and confirm our transaction, possibly with time in between to [RBF (Replace-By-Fee)](https://bitcoinops.org/en/topics/replace-by-fee/) the spending transaction.  |
+| negotiate_scid_privacy             | integer | Optional. If set, we attempt to negotiate the `scid_privacy` (referred to as `scid_alias` in the [BOLTs](https://github.com/lightning/bolts)) option for outbound private channels. This provides better privacy by not including our real on-chain channel UTXO in each invoice and requiring that our counterparty only relay HTLCs to us using the channel's SCID alias.  |
+| their_channel_reserve_sats         | boolean | Optional, defaults to value in `coins` file. The minimum balance that the other node has to maintain on their side, at all times. This ensures that if our counterparty broadcasts a revoked state, we can punish them by claiming at least this value on chain. `Default value:` 1% of channel value. `Minimum value:` 1000 sats |
+
+
+### LightningChannelOptions
+
+| Parameter                              | Type    | Description                                                                                   |
+|----------------------------------------|---------|-----------------------------------------------------------------------------------------------|
+| their_channel_reserve_sats             | string  | Optional. Amount (in millionths of a satoshi) charged per satoshi for payments forwarded outbound over the channel.                             |
+| base_fee_msat                          | integer | Optional. Amount (in milli-satoshi) charged for payments forwarded outbound over the channel, in excess of proportional_fee_in_millionths_sats. |
+| cltv_expiry_delta                      | integer | Optional. Seconds until [CheckLockTimeVerify (CLTV)](https://academy.bit2me.com/en/que-es-cltv-bitcoin/) expiry.                                |
+| max_dust_htlc_exposure_msat            | integer | Optional. Limit our total exposure to in-flight [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract) which are burned to fees as they are too small to claim on-chain.  |
+| force_close_avoidance_max_fee_sats     | integer | Optional. The additional fee we're willing to pay to avoid waiting for the counterparty's locktime to reclaim funds.                            |
+
+
+### LightningClosedChannelsFilter
+
+| Parameter                   | Type    | Description                                                                                                     |
+|-----------------------------|---------|-----------------------------------------------------------------------------------------------------------------|
+| channel_id                  | string  | Optional. Unique string identifying a channel by its ID.                                                        |
+| counterparty_node_id        | string  | Optional. A hexidecimal string identifying a counterparty node. |
+| funding_tx                  | string  | Optional. A transaction ID which added funds.                   |
+| from_funding_value          | integer | Optional. The minimum value of channel funding in satoshis. PARAM NAME NOT CONSISTENT.     |
+| to_funding_value            | integer | Optional. The maximum value of channel funding in satoshis. PARAM NAME NOT CONSISTENT.     |
+| channel_type                | string  | Optional. `Inbound` or `Outbound`. INCONSISTENT WITH `is_outbound` PARAM  |
+| closing_tx                  | integer | Optional. A transaction ID which closed the channel.    |
+| closure_reason              | integer | Optional. The reason a channel was closed.   |
+| claiming_tx                 | integer | Optional. A transaction ID which claimed funds from the channel.    |
+| from_claimed_balance        | integer | Optional. The minimum balance of channel funds claimed in satoshis.    |
+| to_claimed_balance          | integer | Optional. The maximum balance of channel funds claimed in satoshis.    |
+| channel_visibility          | integer | Optional. `Public` or `Private`.   |
+
+
+### LightningOpenChannelsFilter
+
+| Parameter                   | Type    | Description                                                                                                     |
+|-----------------------------|---------|-----------------------------------------------------------------------------------------------------------------|
+| channel_id                  | string  | Optional. Unique string identifying a channel by its ID.                                                        |
+| counterparty_node_id        | string  | Optional. A hexidecimal string identifying a counterparty node. |
+| funding_tx                  | string  | Optional. A transaction ID which added funds.                   |
+| from_funding_value_sats     | integer | Optional. The minimum value of channel funding in satoshis.     |
+| to_funding_value_sats       | integer | Optional. The maximum value of channel funding in satoshis.     |
+| is_outbound                 | boolean | Optional. If `true`, limits the response to outbound channels only. |
+| from_balance_msat           | integer | Optional. The minimum channel balance in millisatoshis.     |
+| to_balance_msat             | integer | Optional. The maximum channel balance in millisatoshis.     |
+| from_outbound_capacity_msat | integer | Optional. The minimum outbound capacity of the channel balance in millisatoshis.  |
+| to_outbound_capacity_msat   | integer | Optional. The maximum outbound capacity of the channel balance in millisatoshis.  |
+| from_inbound_capacity_msat  | integer | Optional. The minimum inbound capacity of the channel balance in millisatoshis.   |
+| to_inbound_capacity_msat    | integer | Optional. The maximum inbound capacity of the channel balance in millisatoshis.   |
+| confirmed                   | boolean | Optional. If `true`, channel is confirmed NEED MORE INFO |
+| is_usable                   | boolean | Optional. If `true`, channel is usable NEED MORE INFO    |
+| is_public                   | boolean | Optional. If `true`, channel is public NEED MORE INFO    |
+
 
 ### LightningPayment
 
 | Parameter            | Type    | Description                                                                                                                           |
 |----------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
-| type                 | string  | The payment type. Accepted values are `invoice` or `keysend`.                                                                         |
+| type                 | string  | The payment type. Accepted values are `invoice` or [`keysend`](https://lightning.readthedocs.io/lightning-keysend.7.html).                                                                         |
 | invoice              | string  | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                 |
 | destination          | string  | Only used if `type` is `keysend`. A pubkey or address which will receive the payment.                                                 |
 | amount_in_msat       | string  | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin.) |
@@ -338,90 +376,49 @@ For requests which return many results, pagination offsets may be applied. ** Us
 | type         | object  | Accepted values are `Outbound Payment` or `Inbound Payment`.                                                                          |
 | destination  | string  | Only used if `type` is `Outbound Payment`. A pubkey which will receive the payment.                                                   |
 
+### Pagination
 
-### LightningChannelAmount
+For requests which return many results, pagination offsets may be applied. ** Use either value, not both. **
 
-| Parameter  | Type    | Description                                                                                   |
-|------------|---------|-----------------------------------------------------------------------------------------------|
-| type       | string  | `Exact` for a specific amount or `Max` for whole balance.                                     |
-| value      | object  | Only required if type is `Exact`. The amount in BTC you want to open the channel with.        |
-
-
-### LightningChannelOptions
-
-| Parameter                              | Type    | Description                                                                                   |
-|----------------------------------------|---------|-----------------------------------------------------------------------------------------------|
-| their_channel_reserve_sats             | string  | Optional. Amount (in millionths of a satoshi) charged per satoshi for payments forwarded outbound over the channel.                             |
-| base_fee_msat                          | integer | Optional. Amount (in milli-satoshi) charged for payments forwarded outbound over the channel, in excess of proportional_fee_in_millionths_sats. |
-| cltv_expiry_delta                      | integer | Optional. Seconds until [CheckLockTimeVerify (CLTV)](https://academy.bit2me.com/en/que-es-cltv-bitcoin/) expiry.                                |
-| max_dust_htlc_exposure_msat            | integer | Optional. Limit our total exposure to in-flight [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract) which are burned to fees as they are too small to claim on-chain.  |
-| force_close_avoidance_max_fee_sats     | integer | Optional. The additional fee we're willing to pay to avoid waiting for the counterparty's locktime to reclaim funds.                            |
+| Parameter  | Type    | Description                                                |
+|------------|---------|------------------------------------------------------------|
+| PageNumber | integer | Optional, defaults to `1`. Offset for paginated results    |
+| FromId     | integer | Optional. Ignores any results prior to this UUID           |
 
 
-### LightningChannelConfig
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
 
-<Note>
-The values in this object are only used if the channel is being opened by the user. If the channel is being opened by the counterparty, the values in this object are ignored.
-If not specified when using the [open_channel](/atomicdex/api/v20-dev/lightning/channels#open_channel) or [update_channel](/atomicdex/api/v20-dev/lightning/channels#update_channel) methods, the values in this object will default to the values set in the `coins` configuration file.
-</Note>
+#### Example
 
-| Parameter                          | Type    | Description                                                                                        |
-|------------------------------------|---------|----------------------------------------------------------------------------------------------------|
-| inbound_channels_confirmations     | string  | Must be set in coins file, and applies to all channels. Confirmations we will wait for before considering an inbound channel locked in.                                         |
-| max_inbound_in_flight_htlc_percent | integer | Must be set in coins file, and applies to all channels. Sets the percentage of the channel value we will cap the total value of outstanding inbound HTLCs to.                   |
-| our_htlc_minimum_msat              | integer | Optional. The smallest value HTLC we will accept to process. The channel gets closed any time our counterparty misbehaves by sending us an HTLC with a value smaller than this. |
-| announced_channel                  | boolean | Set to announce the channel publicly and notify all nodes that they can route via this channel.                                                                                 |
-| commit_upfront_shutdown_pubkey     | boolean | Optional, defaults to value in `coins` file. If `true`, When set, we commit to an upfront shutdown_pubkey at channel open.                                                      |
-| counterparty_locktime              | integer | Optional. The number of blocks we require our counterparty to wait to claim their money on chainif they broadcast a revoked transaction. We have to be online at least once during this time to punish our counterparty for broadcasting a revoked transaction. We have to account also for the time to broadcast and confirm our transaction, possibly with time in between to [RBF (Replace-By-Fee)](https://bitcoinops.org/en/topics/replace-by-fee/) the spending transaction.  |
-| negotiate_scid_privacy             | integer | Optional. If set, we attempt to negotiate the `scid_privacy` (referred to as `scid_alias` in the [BOLTs](https://github.com/lightning/bolts)) option for outbound private channels. This provides better privacy by not including our real on-chain channel UTXO in each invoice and requiring that our counterparty only relay HTLCs to us using the channel's SCID alias.  |
-| their_channel_reserve_sats         | boolean | Optional, defaults to value in `coins` file. The minimum balance that the other node has to maintain on their side, at all times. This ensures that if our counterparty broadcasts a revoked state, we can punish them by claiming at least this value on chain. `Default value:` 1% of channel value. `Minimum value:` 1000 sats |
+```json
+{
+    "PageNumber": 1
+}
+```
 
-
-### LightningOpenChannelsFilter
-
-| Parameter                   | Type    | Description                                                                                                     |
-|-----------------------------|---------|-----------------------------------------------------------------------------------------------------------------|
-| channel_id                  | string  | Optional. Unique string identifying a channel by its ID.                                                        |
-| counterparty_node_id        | string  | Optional. A hexidecimal string identifying a counterparty node. |
-| funding_tx                  | string  | Optional. A transaction ID which added funds.                   |
-| from_funding_value_sats     | integer | Optional. The minimum value of channel funding in satoshis.     |
-| to_funding_value_sats       | integer | Optional. The maximum value of channel funding in satoshis.     |
-| is_outbound                 | boolean | Optional. If `true`, limits the response to outbound channels only. |
-| from_balance_msat           | integer | Optional. The minimum channel balance in millisatoshis.     |
-| to_balance_msat             | integer | Optional. The maximum channel balance in millisatoshis.     |
-| from_outbound_capacity_msat | integer | Optional. The minimum outbound capacity of the channel balance in millisatoshis.  |
-| to_outbound_capacity_msat   | integer | Optional. The maximum outbound capacity of the channel balance in millisatoshis.  |
-| from_inbound_capacity_msat  | integer | Optional. The minimum inbound capacity of the channel balance in millisatoshis.   |
-| to_inbound_capacity_msat    | integer | Optional. The maximum inbound capacity of the channel balance in millisatoshis.   |
-| confirmed                   | boolean | Optional. If `true`, channel is confirmed NEED MORE INFO |
-| is_usable                   | boolean | Optional. If `true`, channel is usable NEED MORE INFO    |
-| is_public                   | boolean | Optional. If `true`, channel is public NEED MORE INFO    |
+```json
+{
+    "FromId": 4
+}
+```
+</CollapsibleSection>
 
 
-### LightningClosedChannelsFilter
+### TokensRequest
 
-| Parameter                   | Type    | Description                                                                                                     |
-|-----------------------------|---------|-----------------------------------------------------------------------------------------------------------------|
-| channel_id                  | string  | Optional. Unique string identifying a channel by its ID.                                                        |
-| counterparty_node_id        | string  | Optional. A hexidecimal string identifying a counterparty node. |
-| funding_tx                  | string  | Optional. A transaction ID which added funds.                   |
-| from_funding_value          | integer | Optional. The minimum value of channel funding in satoshis. PARAM NAME NOT CONSISTENT.     |
-| to_funding_value            | integer | Optional. The maximum value of channel funding in satoshis. PARAM NAME NOT CONSISTENT.     |
-| channel_type                | string  | Optional. `Inbound` or `Outbound`. INCONSISTENT WITH `is_outbound` PARAM  |
-| closing_tx                  | integer | Optional. A transaction ID which closed the channel.    |
-| closure_reason              | integer | Optional. The reason a channel was closed.   |
-| claiming_tx                 | integer | Optional. A transaction ID which claimed funds from the channel.    |
-| from_claimed_balance        | integer | Optional. The minimum balance of channel funds claimed in satoshis.    |
-| to_claimed_balance          | integer | Optional. The maximum balance of channel funds claimed in satoshis.    |
-| channel_visibility          | integer | Optional. `Public` or `Private`.   |
+The `TokensRequest` object includes the following items for a given coin or token:
+
+| Parameter              | Type    | Description                                                                                                                                                                            |
+| ---------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker                 | string  | Ticker of the token to be enabled                                                                                                                                                      |
+| required_confirmations | integer | How many confirmations to wait during the transaction steps of an atomic swap. Overwrites value in coins file; defaults to `3`                                                         |
 
 
-### LightningActivationParams
-
-| Parameter            | Type    | Description                                                                                                                  |
-|----------------------|---------|------------------------------------------------------------------------------------------------------------------------------|
-| name                 | string  | The name of the node that will be used in [lightning explorers](https://mempool.space/testnet/lightning/node/024e2a940e0cbeda84a0d5e00fa8e83b3f4e7f98382eedb488d058e0f5636dd164/r/n) |
-| listening port       | integer | The port that this node listens for incoming connections on.                                                                 |
-| color                | string  | A hexidecimal color string which will be used in network graphs on [lightning explorers](https://mempool.space/testnet/lightning/node/024e2a940e0cbeda84a0d5e00fa8e83b3f4e7f98382eedb488d058e0f5636dd164/r/n) |
-| payment_retries      | integer | Optional, defaults to `X`. Number of times a payment will be retried if it fails.    CONFIRM DEFAULT VALUE                                        |
-| backup_path          | string  | Optional. The backup path for channel backups, preferably on an external drive. |
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+```json
+{
+    "ticker": "MINDS-ERC20",
+    "required_confirmations": 4
+}
+```
+</CollapsibleSection>
