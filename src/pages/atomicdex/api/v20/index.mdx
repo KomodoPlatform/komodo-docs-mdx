@@ -248,4 +248,68 @@ The `TokensRequest` object includes the following items for a given coin or toke
 </CollapsibleSection>
 
 
+### WithdrawFee
+
+The `WithdrawFee` object varies epending on the coin or token type. Refer to the examples to view the object structure for each type.
+
+
+| Parameter     | Type             | Description                                                                                                                |
+| ------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------|
+| type          | string           | The fee type. Either `Utxo`, `Tendermint`, `Qrc20` or `Eth`.                                                               |
+| amount        | numeric string   | `Utxo` or `Tendermint` type only. The fee amount.                                                                          |
+| coin          | string           | The coin which will be used to pay the transaction fee.                                                                    |
+| gas           | integer          | `Eth` type only. The amount of gas to be used for the transaction.                                                         |
+| gas_price     | numeric string   | `Eth` or `Qrc20` type only. Price per unit of gas to be used for the transaction.                                          |
+| gas_limit     | numeric string   | `Tendermint` or `Qrc20` type only. Maximum gas to be used for the transaction.                                             |
+| miner_fee     | numeric string   | `Tendermint` type only. Fee to mine the transaction.                                                                       |
+| total_fee     | numeric string   | `Eth` type only. Gas price multiplied by gas amount.                                                                       |
+| total_gas_fee | numeric string   | `Qrc20` type only. Gas price multiplied by gas amount.                                                                     |
+
+
+<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
+
+### Example of Eth type
+
+```json
+{
+    "type": "Eth",
+    "coin": "BNB",
+    "gas": 109739,
+    "gas_price": "0.000000003",
+    "total_fee": "0.000329217"
+}
+```
+
+### Example of Qrc20 type
+
+```json
+{
+    "type": "Qrc20",
+    "coin": "tQTUM",
+    "miner_fee": "0.00000447",
+    "gas_limit": 100000,
+    "gas_price": 40,
+    "total_gas_fee": "0.04"
+}
+```
+
+### Example of Tendermint type
+
+```json
+{
+    "type": "Tendermint",
+    "coin": "IRIS",
+    "amount": "0.038553",
+    "gas_limit": 100000
+}
+```
+
+### Example of Utxo type
+
+```json
+{
+    "type": "Utxo",
+    "amount": "0.00001"
+}
+```
 
