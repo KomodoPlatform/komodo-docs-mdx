@@ -394,6 +394,31 @@ const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
       ]
     },
     {
+      "title": "Non-Fungible Tokens",
+      "links": [
+        {
+          "title": "Overview",
+          "href": "/atomicdex/api/v20-dev/non-fungible-tokens"
+        },
+        {
+          "title": "Get a list of NFTs",
+          "href": "/atomicdex/api/v20-dev/non-fungible-tokens#get-nft-list"
+        },
+        {
+          "title": "Get a list of NFT transfers",
+          "href": "/atomicdex/api/v20-dev/non-fungible-tokens#get-nft-transfers"
+        },
+        {
+          "title": "Get NFT metadata",
+          "href": "/atomicdex/api/v20-dev/non-fungible-tokens#get-nft-metadata"
+        },
+        {
+          "title": "Withdraw NFTs",
+          "href": "/atomicdex/api/v20-dev/non-fungible-tokens#withdraw-nft"
+        }
+      ]
+    },
+    {
       "title": "Coin Activation Tasks",
       "titleLink": "/atomicdex/api/v20-dev/coin_activation_tasks/",
       "links": []
