@@ -1,6 +1,6 @@
 ## 1. Get to know the project
-  - Read the [README](/README.md) file
-  - Read the [Code of Conduct](CODE_OF_CONDUCT.md) file
+  - Read the [README](/README.md)
+  - Read the [Code of Conduct](CODE_OF_CONDUCT.md)
   - Read the [Contribution guide](CONTRIBUTION_GUIDE.md) (this file)
   - Read the [Style guide](STYLE_GUIDE.md)
   
@@ -37,6 +37,7 @@ Using these priority labels in GitHub Issues can help our prioritize and manage 
  - [ ] (Re)read original issue and comments, make sure that changes are solving the issue or adding the feature
  - [ ] Consider adding integration tests for your changes (if applicable)
  - [ ] Test your changes manually in different browsers: Chrome, Firefox, Safari, Edge, Brave
+ - [ ] Add each new page to the [sidebar file](https://github.com/KomodoPlatform/komodo-docs-mdx/blob/main/src/data/sidebar.ts)
 
 
 ## 6. Create a PR (checklist)
