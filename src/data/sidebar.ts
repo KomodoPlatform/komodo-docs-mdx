@@ -414,7 +414,7 @@ const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
         },
         {
           "title": "Withdraw NFTs",
-          "href": "/atomicdex/api/v20-dev/non_fungible_tokens#withdraw-nft"
+          "href": "/atomicdex/api/v20-dev/non_fungible_tokens#withdraw-nfts"
         }
       ]
     },
