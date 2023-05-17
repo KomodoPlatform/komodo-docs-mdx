@@ -401,8 +401,22 @@ const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
           "href": "/atomicdex/api/v20-dev/lightning/"
         },
         {
-          "title": "Lightning Initialization",
-          "href": "/atomicdex/api/v20-dev/lightning/activation"
+            "title": "Activation",
+            "titleLink": "/atomicdex/api/v20-dev/lightning/activation",
+            "links": [
+                {
+                    "title": "Lightning Initialization",
+                    "href": "/atomicdex/api/v20-dev/lightning/activation#initialize-lightning"
+                },
+                {
+                    "title": "Initialization Status",
+                    "href": "/atomicdex/api/v20-dev/lightning/activation#initialization-status"
+                },
+                {
+                    "title": "Cancel Initialization",
+                    "href": "/atomicdex/api/v20-dev/lightning/activation#cancel-initialization"
+                }
+            ]
         },
         {
           "title": "Lightning Channels",
