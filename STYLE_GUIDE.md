@@ -75,34 +75,15 @@ Use the linked templates below as a starting point for new documentation pages.
 
 ## How to contribute
 
-Pages are heavily [**Markdown-based**](https://mdxjs.com/) (MDX) which allows us to use JSX in markdown content. You can also have imported components (JSX) within your contents and more. In short? You can almost pretend to be working in a `.tsx || .jsx` file. [Read more about MDX](https://mdxjs.com/docs/what-is-mdx/).
-
-We've got a few **MDX-specific** components we use across the Docs and you can find them in the `src/components/mdx` folder. Another folder you might want to look at is the `mdx` folder at the root of the project.
-
-Depending on what you're trying to contribute, there's a chance you wouldn't have to look up these files.
-
-In summary? Here's how you could go about understanding the repo in a few minutes
-
-1. Go to the [package.json](./package.json) file and visit the respective dependency repos. This will give you an overview of what is being used
-2. Read up on [**MDX**](https://mdxjs.com/). If you already know some [GFM](https://github.github.com/gfm/) or [Markdown](https://commonmark.org/), then you're ~60% ready to start contributing.
-3. The [MDX](./mdx) folder. Lots of magic happens here, and, if you read up on the `package.json` file. You'd realize this is where we **plugged-in** most of our MDX **Plug-ins**. Code theming, exposing of top-level identifiers via `getStaticProps`, Slugging of headings etc. All happens here. **Sometimes** you might have to restart your local server when making changes to the files here.
-4. The [src/components/mdx](src/components/mdx) folder. This file contains all the custom components used in writing the Docs. This is explained in more detail later in this guide.
-5. Open a few `.mdx` Docs and read through them.
-
-Once you've done all these, you're about ready to start contributing. Below is a walkthrough of how to start writing and using the components that make up the Docs.
-
-## Writing the Docs
-
 MDX supports standard markdown by default [CommonMark](https://commonmark.org/). However, this project also has [GFM](https://github.github.com/gfm/) installed.
-More often than not, as regards components in the `src/components/mdx` folder you'll use `Note` && `CodeGroup`.
 
-> Many of the components mentioned here contain more `props` and possibly do more than **explicitly pointed out**. Best to cross-reference the component samples with the ones in the `src/components/mdx` folder.
+> Many of the components mentioned here are simplified and possibly do more than **explicitly pointed out**.
 
 ### CodeGroup
 
 The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbed content (or not, if it's a single block) with properties such as **title, tags, labels and more**. An example would look something like this:
 
-````
+````Jsx
 <CodeGroup title="Code Sample" tag="post" label="/kmd/jwt/post" >
 
 ```ts
@@ -131,7 +112,7 @@ And rendered as:
 
 If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
 
-````
+````mdx
 ```ts {{title: "Single Block", tag: "post", label: "/kmd/jwt/post"}}
 // ...
 ```
@@ -155,7 +136,7 @@ You only need to include the `json` data, and the `mm2MethodDecorate` annotation
 
 A working code sample would look like this:
 
-````
+````Jsx
 <CodeGroup title="Generate Invoice" tag="POST" label="generate_invoice">
 
 ```json {{ mm2MethodDecorate : true }}
@@ -187,23 +168,47 @@ Use `Note` tags to **highlight important information**. `Note`s can be one of th
 - **warning**
 - **error**
 
+```jsx
+<Note type="info">
+  Komodo Platform is an open-source, decentralized blockchain project committed
+  to privacy and security. It offers flexibility for developers with support for
+  multiple programming languages and a modular architecture.
+</Note>
 ```
-   <Note type='info'>
-      Komodo Platform is an open-source, decentralized blockchain project committed to privacy and security. It offers flexibility for developers with support for multiple programming languages and a modular architecture.
-   </Note>
+
+Rendered as:
+
+```jsx
+<Note type="warning">
+  Komodo Platform is an open-source, decentralized blockchain project committed
+  to privacy and security. It offers flexibility for developers with support for
+  multiple programming languages and a modular architecture.
+</Note>
+```
+
+```jsx
+<Note type="error">
+  Komodo Platform is an open-source, decentralized blockchain project committed
+  to privacy and security. It offers flexibility for developers with support for
+  multiple programming languages and a modular architecture.
+</Note>
 ```
 
 Rendered as:
 
 ![Note-info](src/images/style-guide-images/notes-info-UI.png)
 
+![Note-warning](src/images/style-guide-images/notes-warning-UI.png)
+
+![Note-error](src/images/style-guide-images/notes-error-UI.png)
+
 ### CollapsibleSection
 
-How do we explain this one? Well, "**it is**" a section that you can **collapse!**. It takes a `{children,collapsedText = "Show",expandedText = "Hide"}` prop and renders a button with a specified text based on its state (expanded || collapsed).
+This renders a button with a specified text based on its state (expanded or collapsed).
 
 You'll mostly use this for API, Commands, etc. Responses, which should be wrapped with the `CollapsibleSection` tags, for example:
 
-````
+````jsx
    <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
       #### Response (ready, successful)
 
@@ -217,12 +222,13 @@ You'll mostly use this for API, Commands, etc. Responses, which should be wrappe
    </CollapsibleSection>
 ````
 
-The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to 'Show Error Responses' and 'Hide Error Responses' respectively.
+The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to '**Show Error Responses**' and '**Hide Error Responses' respectively**.
 
 A working code would look like this:
 
-````
+````jsx
 <CollapsibleSection expandedText='Hide code' collapsedText='Show code'>
+
 ```json
 {
   "sad_story": "What did the robot say to the dead robot? Rust-in-peace",
@@ -240,7 +246,7 @@ Rendered as:
 
 ![collapsible Section UI](src/images/style-guide-images/collapsible-section-UI.png)
 
-### OptimizedImage
+### Images
 
 Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component. To render an image in the `src/image` folder, you'd have to import the image using the following syntax:
 
@@ -252,29 +258,7 @@ Now you can render the image using the `OptimizedImage` component, for example:
 
 ![Atomic Maniq](src/images/style-guide-images/atomic-maniq.png)
 
-[You can read more about the magic behind OptimizedImage](https://github.com/Niels-IO/next-image-export-optimizer#readme)
-
-### UseInjectScript
-
-We use this for **Injecting** script inline. This hook takes two props `{properties, attributes = {}}` and returns an inline `script`.
-
-Here's an example:
-
-````
-```
-<UseInjectScript
-  properties={{
-    src: "https://asciinema.org/a/RuOAzT29eEl51cOrsnX1yEFyo.js",
-    id: "asciicast-RuOAzT29eEl51cOrsnX1yEFyo",
-    async: true,
-  }}
-  attributes={{
-    dataspeed: "3",
-    datasize: "small",
-  }}
-/>
-```
-````
+<!-- [You can read more about the magic behind OptimizedImage](https://github.com/Niels-IO/next-image-export-optimizer#readme) -->
 
 ### Heading
 
@@ -284,7 +268,7 @@ To use this component, you need to have it imported: `import { Heading } from "@
 
 Then render it:
 
-```
+```jsx
 <Heading label="get_all_tokens" tag="API-v2" anchor={false}>
   How to get your tokens
 </Heading>
@@ -294,7 +278,7 @@ To save time, you can use the `Heading` component without importing it. And this
 
 Here's how:
 
-```
+```md
 ## How to get your tokens {{label : 'get_all_tokens', tag : 'API-v2'}}
 ```
 
@@ -302,15 +286,23 @@ Rendered as:
 
 ![heading tag UI](src/images/style-guide-images/heading-tag-UI.png)
 
-> Note: either the `Heading` or native **heading tag** with `Heading` specific annotations **should only** be used to render `h2` || `h3`.
-
 ### TaggedSection
 
-`TaggedSection`s are used to **tag && label** a section. Just like the `Heading` component. The heading component uses the `TaggedSection` component under the hood (It's a secret contract).
+`TaggedSection`s are used to **tag && label** a section. Just like the `Heading` component. The heading component uses the `TaggedSection` component under the hood.
 
 To use this component, you need to have it imported: `import { TaggedSection } from "@/components/mdx/Heading";`
 
-However, it is only reserved for tagging/labelling headings (`h2 || h1`). If you happen to find a use for it in a non-heading section, feel free to use it.
+However, it is often used for tagging/labelling headings (`h2 || h1`). If you happen to find a use for it in a non-heading section, feel free to use it.
+
+Here's how to use it:
+
+```jsx
+<TaggedSection tag={"Post"} label={"kmd/token/token_id"} />
+```
+
+Rendered as:
+
+![Tagged section](src/images/style-guide-images/tagged-section-UI.png)
 
 ### Tag
 
@@ -335,36 +327,22 @@ Rendered as:
 
 ![Tag component](src/images/style-guide-images/crude-tag-ui.png)
 
-### DevComment
-
-Use this for comments. Especially if it's multiline. This can also be useful when doing a search.
-
-```
-<DevComment>TODO: Remember to do a grammar and spellcheck on this page</DevComment>
-```
-
 ## Sidebar (Left)
 
-Sidebar navigation is manually populated. This file can be found at `src/data/sidebar.ts`. If you're working on a new page, this is where to link them.
+Sidebar navigation is manually populated. If you're working on a new page, this is where to link them.
+
+![Sidebar left](src/images/style-guide-images/sidebar-left-UI.png)
 
 ## Sidebar (Right)
 
-The right sidebar is automatically populated based on the **Heading hierarchy** of the current page. Check the `getSections` function in the `mdx/rehype.mjs` file to see how this is done.
+![Sidebar right](src/images/style-guide-images/sidebar-right-UI.png)
+
+The right sidebar is automatically populated based on the **Heading hierarchy** of the current page.
 
 ## Conclusion
 
-We deploy the HTML version of the app via [`next export`](https://nextjs.org/docs/advanced-features/static-html-export#next-export). This means we lose some [goodies](https://nextjs.org/docs/advanced-features/static-html-export#unsupported-features).
-in the case of the `<Image>`, we've opted for [next-image-export-optimizer](https://github.com/Niels-IO/next-image-export-optimizer#readme). This fills in the gap for `<Image>`
-
 As much as we can, we try to make every file as readable as possible, so you won't be needing help figuring out **how to do/use {A || B}**.
 We encourage you to do the same when you're contributing and you just might get a medal of binary from the community.
-
-### To generate preview images
-
-- commit your changes
-- run `yarn export`
-- run `yarn serve out`, make sure the port is `3000`
-- run `yarn gen:previewImgs`
 
 Thats it! You've completed the KMD-Docs contribution boot camp!
 
