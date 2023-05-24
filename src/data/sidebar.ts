@@ -405,12 +405,12 @@ const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
           "href": "/atomicdex/api/v20-dev/lightning/activation"
         },
         {
-          "title": "Lightning Channels",
-          "href": "/atomicdex/api/v20-dev/lightning/channels"
-        },
-        {
           "title": "Lightning Nodes",
           "href": "/atomicdex/api/v20-dev/lightning/nodes"
+        },
+        {
+          "title": "Lightning Channels",
+          "href": "/atomicdex/api/v20-dev/lightning/channels"
         },
         {
           "title": "Lightning Payments",
