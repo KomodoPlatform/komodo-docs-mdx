@@ -75,6 +75,18 @@ Use the linked templates below as a starting point for new documentation pages.
 
 ## How to contribute
 
+Read the [Contribution guide](CONTRIBUTION_GUIDE.md) first.
+
+Pages are heavily [**MDX**](https://mdxjs.com/) ("markdown extension") based, which allows us to use JSX in markdown content. You can have imported components (JSX) within your content and more. Read more about MDX here [https://mdxjs.com/docs/what-is-mdx/](https://mdxjs.com/docs/what-is-mdx/).
+
+### Adding a Title and Description
+
+Titles and descriptions are mandatory on every documentation page and must be added at the top level. To add a title use this syntax: `export const title = "Documentation page title";`. To add a description use: `export const description = "documentation page description";`
+
+### Components
+
+We've got a few **MDX** components we use across the Docs. Below is a walkthrough of how to start writing and using the components that make up the Docs.
+
 MDX supports standard markdown by default [CommonMark](https://commonmark.org/). However, this project also has [GFM](https://github.github.com/gfm/) installed.
 
 > Many of the components mentioned here are simplified and possibly do more than **explicitly pointed out**.
@@ -83,7 +95,7 @@ MDX supports standard markdown by default [CommonMark](https://commonmark.org/).
 
 The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbed content (or not, if it's a single block) with properties such as **title, tags, labels and more**. An example would look something like this:
 
-````Jsx
+````mdx
 <CodeGroup title="Code Sample" tag="post" label="/kmd/jwt/post" >
 
 ```ts
@@ -103,7 +115,6 @@ The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbe
 ```
 
 </CodeGroup>
-
 ````
 
 And rendered as:
@@ -136,24 +147,23 @@ You only need to include the `json` data, and the `mm2MethodDecorate` annotation
 
 A working code sample would look like this:
 
-````Jsx
+````mdx
 <CodeGroup title="Generate Invoice" tag="POST" label="generate_invoice">
 
 ```json {{ mm2MethodDecorate : true }}
 {
-    "userpass": "userpass",
-    "mmrpc": "2.0",
-    "method": "lightning::payments::generate_invoice",
-    "params": {
-        "coin": "tBTC-TEST-lightning",
-        "description": "test invoice"
-    },
-    "id": 56
+  "userpass": "userpass",
+  "mmrpc": "2.0",
+  "method": "lightning::payments::generate_invoice",
+  "params": {
+    "coin": "tBTC-TEST-lightning",
+    "description": "test invoice"
+  },
+  "id": 56
 }
 ```
 
 </CodeGroup>
-
 ````
 
 Rendered as:
@@ -168,7 +178,7 @@ Use `Note` tags to **highlight important information**. `Note`s can be one of th
 - **warning**
 - **error**
 
-```jsx
+```mdx
 <Note type="info">
   Komodo Platform is an open-source, decentralized blockchain project committed
   to privacy and security. It offers flexibility for developers with support for
@@ -178,7 +188,7 @@ Use `Note` tags to **highlight important information**. `Note`s can be one of th
 
 Rendered as:
 
-```jsx
+```mdx
 <Note type="warning">
   Komodo Platform is an open-source, decentralized blockchain project committed
   to privacy and security. It offers flexibility for developers with support for
@@ -186,7 +196,7 @@ Rendered as:
 </Note>
 ```
 
-```jsx
+```mdx
 <Note type="error">
   Komodo Platform is an open-source, decentralized blockchain project committed
   to privacy and security. It offers flexibility for developers with support for
@@ -208,7 +218,7 @@ This renders a button with a specified text based on its state (expanded or coll
 
 You'll mostly use this for API, Commands, etc. Responses, which should be wrapped with the `CollapsibleSection` tags, for example:
 
-````jsx
+````mdx
    <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
       #### Response (ready, successful)
 
@@ -219,6 +229,7 @@ You'll mostly use this for API, Commands, etc. Responses, which should be wrappe
          "id": null
       }
       ```
+
    </CollapsibleSection>
 ````
 
@@ -226,7 +237,7 @@ The `CollapsibleSection` tags should also wrap all error responses (as a group),
 
 A working code would look like this:
 
-````jsx
+````mdx
 <CollapsibleSection expandedText='Hide code' collapsedText='Show code'>
 
 ```json
@@ -237,8 +248,8 @@ A working code would look like this:
   "source": "unknown",
   "date": "2078-05-16"
 }
-
 ```
+
 </CollapsibleSection>
 ````
 
@@ -268,7 +279,7 @@ To use this component, you need to have it imported: `import { Heading } from "@
 
 Then render it:
 
-```jsx
+```mdx
 <Heading label="get_all_tokens" tag="API-v2" anchor={false}>
   How to get your tokens
 </Heading>
@@ -278,7 +289,7 @@ To save time, you can use the `Heading` component without importing it. And this
 
 Here's how:
 
-```md
+```mdx
 ## How to get your tokens {{label : 'get_all_tokens', tag : 'API-v2'}}
 ```
 
@@ -296,7 +307,7 @@ However, it is often used for tagging/labelling headings (`h2 || h1`). If you ha
 
 Here's how to use it:
 
-```jsx
+```mdx
 <TaggedSection tag={"Post"} label={"kmd/token/token_id"} />
 ```
 
@@ -329,7 +340,7 @@ Rendered as:
 
 ## Sidebar (Left)
 
-Sidebar navigation is manually populated. If you're working on a new page, this is where to link them.
+Sidebar navigation is manually populated. This file can be found at `src/data/sidebar.ts`. If you're working on a new page, this is where to link them.
 
 ![Sidebar left](src/images/style-guide-images/sidebar-left-UI.png)
 
