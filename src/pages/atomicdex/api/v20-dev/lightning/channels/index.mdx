@@ -127,6 +127,10 @@ The `lightning::channels::close_channel` method closes a channel with a remote n
 | uuid              | string  | Then channel UUID.                                                                       |
 | force_close       | boolean | Optional, defaults to `false`. If `true`, will force closure of the channel.             |
 
+<Note type="warning">
+It is not recommended to force close a channel unless the counterparty is offline or unreachable for a long time.
+Force closure of a channel will makeresult in the party who initiates the force closure to wait for a number of blocks (equal to the `force_close_spend_delay` value returned by [lightning::channels::get_channel_details](/atomicdex/api/v20-dev/lightning/channels#get-channel-details)) before they can get their funds on chain.
+</Note>
 
 #### 📌 Example to force closing a channel
 
