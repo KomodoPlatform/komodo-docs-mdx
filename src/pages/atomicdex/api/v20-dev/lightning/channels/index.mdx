@@ -14,12 +14,11 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
 | Parameter         | Type    | Description                                                                              |
 |-------------------|---------|------------------------------------------------------------------------------------------|
 | coin              | string  | The ticker of the coin you would like to view open channels for.                         |
-| node_address      | object  | A standard `LightningOpenChannelsFilter` object.                                         |
+| node_address      | string  | Lightning node addresses always have a format of `node_pubkey`@`ip_address`:`port`.      |
 | amount            | object  | A standard [LightningChannelAmount](/atomicdex/api/v20#lightning-channel-amount) object. |
-| push_msat         | integer | Optional. The amount in millisatoshi to push to the counterparty while openning, to create inbound liquidity for the channel. Using the `push_msat` parameter avoids having to send funds in a separate request later.                                          |
+| push_msat         | integer | Optional. The amount in millisatoshi to push to the counterparty while openning, to create inbound liquidity for the channel. Using the `push_msat` parameter avoids having to send funds in a separate request later. Please note that the funds given using push_msat is given unconditionally, meaning that there is no proof of payment in a preimage as with paying an invoice.                                          |
 | channel_options   | object  | Optional. A standard [LightningChannelOptions](/atomicdex/api/v20#lightning-channel-options) object. |
 | channel_configs   | object  | Optional. A standard [LightningChannelConfig](/atomicdex/api/v20#lightning-channel-config) object.   |
-| limit             | integer | Optional, defaults to `10`. Maximum number of results to return.                         |
 
 
 #### 📌 Example using an exact amount
@@ -88,7 +87,9 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
             "our_htlc_minimum_msat": 1,
             "negotiate_scid_privacy": false,
             "max_inbound_in_flight_htlc_percent": 10,
-            "commit_upfront_shutdown_pubkey": true
+            "commit_upfront_shutdown_pubkey": true,
+	        "inbound_channels_confirmations": 3,
+			"their_channel_reserve_sats": 10000
         }
     },
     "id": null
@@ -122,7 +123,7 @@ The `lightning::channels::close_channel` method closes a channel with a remote n
 
 | Parameter         | Type    | Description                                                                              |
 |-------------------|---------|------------------------------------------------------------------------------------------|
-| coin              | string  | The ticker of the coin you would like to view closed channels for.                       |
+| coin              | string  | The ticker of the coin you would like closed a channel for.                              |
 | uuid              | string  | Then channel UUID.                                                                       |
 | force_close       | boolean | Optional, defaults to `false`. If `true`, will force closure of the channel.             |
 
