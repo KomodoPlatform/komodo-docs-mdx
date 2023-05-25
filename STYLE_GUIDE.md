@@ -186,8 +186,6 @@ Use `Note` tags to **highlight important information**. `Note`s can be one of th
 </Note>
 ```
 
-Rendered as:
-
 ```mdx
 <Note type="warning">
   Komodo Platform is an open-source, decentralized blockchain project committed
