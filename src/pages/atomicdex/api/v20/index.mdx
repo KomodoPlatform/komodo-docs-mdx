@@ -114,8 +114,8 @@ The `addressInfos` object includes the following items for a given address:
 
 | Parameter              | Type      | Description                                                                                                                                      |
 | ---------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| balances               | object    | A standard [balanceInfos](/atomicdex/api/v20#balanceInfos) object. Not included in responses where `get_balances` is `false`  |
-| derivation_method      | object    | A standard [DerivationMethod](/atomicdex/api/v20#DerivationMethod) object                                                    |
+| balances               | object    | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object. Not included in responses where `get_balances` is `false`  |
+| derivation_method      | object    | A standard [DerivationMethod](/atomicdex/api/v20#derivation-method) object                                                     |
 | pubkey                 | string    | The public key associated with the seed used to launch AtomicDEX                                                                                 |
 | tickers                | array     | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                                   |
 
@@ -180,14 +180,17 @@ The `balanceInfos` object includes the following items for a given coin or token
 
 The `DerivationMethod` object includes the following items for a given coin or token:
 
-| Parameter     | Type   | Description                                                                                                               |
-| ------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
-| type          | string | Possible values: `Iguana`                                                            |
+| Parameter     | Type   | Description                                                                                        |
+| ------------- | ------ | -------------------------------------------------------------------------------------------------- |
+| type          | string | Defines how keypairs will be generated. Possible values: `Iguana` or `HDWallet`                    |
 
-{/* <!-- TODO: insert more types in the above table --> */}
+<Note>
+Using the same seed or private key to generate keypairs using different derivation methods will result in a different address and private key for each method.
+</Note>
 
 Where the value indicates:
  - `Iguana`: The coin or token is was activated using Iguana derivation (default).
+ - `HDWallet`: The coin or token is was activated using a Heirarchical Deterministic (HD) Wallet derivation path.
 
 <CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
 
