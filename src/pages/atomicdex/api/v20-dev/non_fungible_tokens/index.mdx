@@ -24,9 +24,12 @@ The AtomicDEX API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1
 
 | Parameter     | Type             | Description                                                                                               |
 | ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
-| chains        | array            | List of chains to scan for NFTs. Chains must be [activated](/atomicdex/api/legacy/coin_activation) first. |
-| url           | string           | URL link to [Moralis API](https://docs.moralis.io/) (or proxy).                                           |
+| chains        | array            | List of chains to scan for NFTs.                                                                          |
+| url           | string           | URL link to the Moralis API proxy base url (https://moralis-proxy.komodo.earth) or equivalent.            |
 
+<Note>
+In future, users will be able to also define their own Moralis API key.
+</Note>
 
 #### 📌 Example(s)
 
@@ -52,24 +55,24 @@ The AtomicDEX API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1
 
 | Parameter            | Type             | Description                                                                                      |
 | ---------------------| ---------------- | ------------------------------------------------------------------------------------------------ |
-| amount               | string           | Amount of tokens.                                                                                |
-| block_number_minted  | integer          | Block height when the token was minted.                                                          |
-| block_number         | integer          | Current block height.                                                                            |
+| amount               | string           | The amount of this NFT the user owns (used by `ERC1155`).                                        |
+| block_number_minted  | integer          | The block height when the NFT was minted.                                                        |
+| block_number         | integer          | The block height when the amount or owner changed.                                               |
 | chain                | string           | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                            |
-| collection_name      | string           | Collection name. May be `null`.                                                                  |
-| contract_type        | string           | Contract type. `ERC721` or `ERC1155`.                                                            |
-| owner_of             | string           | Address of the token owner.                                                                      |
-| token_address        | string           | Token address.                                                                                   |
-| token_id             | string           | Token ID.                                                                                        |
-| token_hash           | string           | Token hash.                                                                                      |
-| symbol               | string           | Token symbol.                                                                                    |
-| token_uri            | string           | Token URI.                                                                                       |
-| metadata             | string           | Token metadata.                                                                                  |
-| last_token_uri_sync  | string           | Last time the token URI was synced.                                                              |
-| last_metadata_sync   | string           | Last time the token metadata was synced.                                                         |
+| collection_name      | string           | May be `null`. An NFT collection name.                                                                          |
+| contract_type        | string           | The type of NFT contract standard. One of `ERC721` or `ERC1155`.                                 |
+| last_token_uri_sync  | string           | When the token_uri was last updated.                                                             |
+| last_metadata_sync   | string           | When the metadata was last updated.                                                              |
+| metadata             | string           | The metadata of the token.                                                                       |
 | minter_address       | string           | Minter address.                                                                                  |
-| possible_spam        | boolean          | Possible spam.                                                                                   |
-| uri_meta             | object           | A Standard [TokenMetadata](LINK TO COMMON STRUCTURE) object.                                     |
+| owner_of             | string           | The wallet address of the owner of the NFT.                                                      |
+| possible_spam        | boolean          | May be `null`. If `true`, the contract address is has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam, phishing attempts, or suspicious activities. |
+| symbol               | string           | The symbol of the NFT contract.                                                                  |
+| token_address        | string           | The address of the NFT contract.                                                                 |
+| token_id             | string           | The token ID of the NFT.                                                                         |
+| token_hash           | string           | The token hash.                                                                                  |
+| token_uri            | string           | The URI to the metadata of the token.                                                            |
+| uri_meta             | object           | A TokenMetadata object. The contents of this object varies, but may include values for `image`, `token_name`, `description`, `attributes` or `animation_url`. |
 
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
@@ -194,7 +197,7 @@ The AtomicDEX API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1
 | contract_type        | string           | Contract type. `ERC721` or `ERC1155`.                                                            |
 | token_address        | string           | Address of token transferred.                                                                    |
 | token_id             | string           | Token ID.                                                                                        |
-| possible_spam        | boolean          | Possible spam.  MORE  INFO?                                                                      |
+| possible_spam        | boolean          | May be `null`. If `true`, the contract address is has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam, phishing attempts, or suspicious activities. |
 | transaction_hash     | string           | Transaction ID of the transfer.                                                                  |
 | transaction_index    | string           | Transaction index of the transfer.                                                               |
 | log_index            | string           | Log index of the transfer.                                                                       |
@@ -202,9 +205,9 @@ The AtomicDEX API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1
 | transaction_type     | string           | Transation type. `Single` or `WHAT IS THE OTHER TYPE?`.                                          |
 | from_address         | string           | Address of previous owner which sent the token(s).                                               |
 | to_address           | string           | Address of new owner which received the token(s).                                                |
-| status               | string           | Transfer status. WHAT ARE THE POSSIBLE VALUES?                                                   |
+| status               | string           | Transfer status. Will be either `Send` or `Receive`.                                             |
 | verified             | integer          | I HAVE NO IDEA WHAT THIS MEANS                                                                   |
-| operator             | string           | I HAVE NO IDEA WHAT THIS MEANS                                                                   |
+| operator             | string           | May be `null`.                                                                    |
 
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
@@ -404,10 +407,10 @@ The AtomicDEX API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1
 | token_address        | string           | Token address.                                                                                   |
 | token_id             | string           | Token ID.                                                                                        |
 | fee_details          | object           | A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                                |
-| coin                 | string           | Coin name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`. CONFIRM: EVERYWHERE ELSE THIS PARAM IS `chain`.                            |
+| coin                 | string           | Coin name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`. CONFIRM: EVERYWHERE ELSE THIS PARAM IS `chain`. |
 | block_height         | integer          | Block height of the transaction. If the value is `0`, the transaction is unconfirmed.            |
 | timestamp            | integer          | Timestamp of the block containing the withdrawl transaction.                                     |
-| internal_id          | integer          | I HAVE NO IDEA WHAT THIS MEANS.                                                                  |
+| internal_id          | integer          | Defaults to `0`, but may be used in future for backend referencing to identify a transaction in local database data. |
 | transaction_type     | string           | This will always be `NftTransfer`. CONFIRM                                                       |
 
 
