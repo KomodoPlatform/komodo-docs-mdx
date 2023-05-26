@@ -166,6 +166,11 @@ Force closure of a channel will makeresult in the party who initiates the force 
 To see if the channel is closed or not, use the [lightning::channels::get_channel_details](/atomicdex/api/v20-dev/lightning/channels#get-channel-details) method.
 </Note>
 
+<DevComment>
+Already added this message to the response in this upcoming PR KomodoPlatform/atomicDEX-API#1814, also added force_close_spend_delay to the close channel response. No need to change the docs now until this PR is merged KomodoPlatform/atomicDEX-API#1814, I will write a comment about all the changes when opening the PR for review.
+https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion_r1202462310
+</DevComment>
+
 </CollapsibleSection>
 
 
@@ -264,7 +269,7 @@ The `lightning::channels::update_channel` method updates channel options.
 
 #### NoSuchChannel Error
 
-Coin is not in `coins` file. Refer to the [coins file configuration for lightning](/atomicdex/api/v20-dev#lightning-network-coins-file-configuration) for more information.
+Channel with the given uuid is not foun on the lightning network.
 
 ```json
 {
@@ -340,6 +345,13 @@ The `lightning::channels::get_channel_details` method returns details about a ch
 	"id": 54
 }
 ```
+
+<DevComment>
+`force_close_spend_delay` is not currently available in get_channel_details response, but should be aded soon.
+It's configured by the other side using counterparty_locktime where we are the counterparty to the other side, the other side gets to set it since it's part of their security considerations since they have to be online at least once during this period if we tried to steal funds by broadcasting an old commitment transaction. We set our own too in our configs where it shows in the channel details of the other side as force_close_spend_delay. The other side can't set counterparty_locktime to any value when opening the channel though, since they can set it to a very long time and our funds will be locked for a very long time if we force closed the channel, this is where counterparty_channel_config_limits::our_locktime_limit comes in as the other side can't make counterparty_locktime larger than this limit otherwise the channel gets rejected and is never opened in the first place.
+https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion_r1206109172
+</DevComment>
+
 </CollapsibleSection>
 
 
