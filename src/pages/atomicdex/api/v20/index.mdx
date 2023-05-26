@@ -316,20 +316,26 @@ The `WithdrawFee` object varies epending on the coin or token type. Refer to the
 }
 ```
 
-### WithdrawType
+### WithdrawNftType
 
-The `WithdrawType` object is used for NFT withdrawals. It includes the following items for a given coin or token:
+The `WithdrawNftType` object is used for NFT withdrawals. It includes the following items for a given coin or token:
 
 
 | Parameter     | Type             | Description                                                                                               |
 | ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
 | type          | string           | The withdrawl type. Either `withdraw_erc721` or `withdraw_erc1155`.                                       |
-| withdraw_data | object           | A standard [WithdrawData](/atomicdex/api/v20#withdraw-data) object.                                       |
+| withdraw_data | object           | A standard [WithdrawDataErc721](/atomicdex/api/v20#withdraw-data-erc721) or [WithdrawDataErc1155](/atomicdex/api/v20#withdraw-data-erc155) object.                                       |
 
 
-### WithdrawData
+<Note>
+When the `type` value in `WithdrawType` is `withdraw_erc721` it means the NFT is absolutely unique - it has only 1 owner and the owner can own only 1 NFT which has this `token_id` in its `token_address` (also referred to as contract address).
+When the `type` value in `WithdrawType` is `withdraw_erc1155`, it means that it is possible for more than 1 user to own one or more of the same NFT (with an identical `token_id`).
+Due to this difference, the `amount` and `max` fields are only used the when `type` value in `WithdrawType` is `withdraw_erc1155`.
+</Note>
 
-The `WithdrawData` object is used for NFT withdrawals. It includes the following items for a given coin or token:
+### WithdrawDataErc721
+
+The `WithdrawDataErc721` object is used for withdrawals of NFTs on ERC721 contracts. It includes the following items for a given coin or token:
 
 
 | Parameter     | Type             | Description                                                                                               |
@@ -338,7 +344,20 @@ The `WithdrawData` object is used for NFT withdrawals. It includes the following
 | to            | string           | Destination address to withdraw the token to.                                                             |
 | token_address | string           | Token address.                                                                                            |
 | token_id      | string           | Token ID.                                                                                                 |
-| amount        | string           | Optional, defaults to `1`. When sending more than one NFT, use the `withdraw_erc1155` withdraw type. Amount of NFTs to withdraw. |
-| max           | boolean          | Optional, defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with the `token_address` will be sent.   |
+
+
+### WithdrawDataErc1155
+
+The `WithdrawDataErc1155` object is used for withdrawals of NFTs on ERC1155 contracts. It includes the following items for a given coin or token:
+
+
+| Parameter     | Type             | Description                                                                                               |
+| ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
+| chain         | string           | The token chain. Chain must be [activated](/atomicdex/api/legacy/coin_activation) first.                  |
+| to            | string           | Destination address to withdraw the token to.                                                             |
+| token_address | string           | Token address.                                                                                            |
+| token_id      | string           | Token ID.                                                                                                 |
+| amount        | string           | Optional, defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is `true.                         |
+| max           | boolean          | Optional, defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent.   |
 | fee           | string           | Optional. A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                                                      |
 

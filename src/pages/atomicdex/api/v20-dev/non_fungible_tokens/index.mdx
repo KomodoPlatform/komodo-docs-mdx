@@ -206,10 +206,10 @@ For uri_meta, I think only the values under the `attributes` key are variable. T
 | transaction_index    | string           | Transaction index of the transfer.                                                               |
 | log_index            | string           | Log index of the transfer.                                                                       |
 | value                | string           | Tranfer value.                                                                                   |
-| transaction_type     | string           | Transation type. Possible values are `Single`.                                          |
+| transaction_type     | string           | Transation type. Possible values are `Single`.                                                   |
 | from_address         | string           | Address of previous owner which sent the token(s).                                               |
 | to_address           | string           | Address of new owner which received the token(s).                                                |
-| status               | string           | Transfer status. Will be either `Send` or `Receive`.                                             |
+| status               | string           | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`. |
 | verified             | integer          |                                                                                                  |
 | operator             | string           | May be `null`.                                                                                   |
 
@@ -217,7 +217,8 @@ For uri_meta, I think only the values under the `attributes` key are variable. T
 `block timestamp` is a date time string, though I would expect a unix timestamp
 `verified` has no description.
 What are the other possible values for `transaction_type`?
-
+What is `operator`?
+What does `verified` mean?
 </DevComment>
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
@@ -381,7 +382,13 @@ To withdraw NFTs, you must [activate the coin](/atomicdex/api/legacy/coin_activa
 | Parameter     | Type             | Description                                                                                               |
 | ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
 | url           | string           | URL link to [Moralis API](https://docs.moralis.io/) (or proxy).                                           |
-| withdraw_type | object           | A standard [WithdrawType](/atomicdex/api/v20#withdraw-type) object.                                       |
+| withdraw_type | object           | A standard [WithdrawNftType](/atomicdex/api/v20#withdraw-nft-type) object.                                |
+
+<Note>
+When the `type` value in `WithdrawType` is `withdraw_erc721` it means the NFT is absolutely unique - it has only 1 owner and the owner can own only 1 NFT which has this `token_id` in its `token_address` (also referred to as contract address).
+When the `type` value in `WithdrawType` is `withdraw_erc1155`, it means that it is possible for more than 1 user to own one or more of the same NFT (with an identical `token_id`).
+Due to this difference, the `amount` and `max` fields are only used the `type` value in `WithdrawType` is `withdraw_erc1155`.
+</Note>
 
 
 #### 📌 ERC721 Withdraw Example
@@ -408,6 +415,11 @@ To withdraw NFTs, you must [activate the coin](/atomicdex/api/legacy/coin_activa
 ```
 </CodeGroup>
 
+<DevComment>
+May change in future. See https://github.com/KomodoPlatform/komodo-docs-mdx/pull/42#discussion_r1197745312
+Right now `internal_id` is always zero and actually I dont save TransactionNftDetails in db as we use info from moralis (NftTransferHistory), but may be in the future. I will need it...
+</DevComment>
+
 ### Response Parameters
 
 | Parameter            | Type             | Description                                                                                      |
@@ -426,6 +438,7 @@ To withdraw NFTs, you must [activate the coin](/atomicdex/api/legacy/coin_activa
 | timestamp            | integer          | Timestamp of the block containing the withdrawl transaction.                                     |
 | internal_id          | integer          | Defaults to `0`, but may be used in future for backend referencing to identify a transaction in local database data. |
 | transaction_type     | string           | This will always be `NftTransfer`.                                                               |
+
 
 <DevComment>
 Is `transaction_type` always `NftTransfer`?
