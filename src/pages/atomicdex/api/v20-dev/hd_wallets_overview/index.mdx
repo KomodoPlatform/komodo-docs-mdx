@@ -6,37 +6,43 @@ For example, you can activate DOC with seed phrase or private key in Iguana mode
 
 To get started, [configure and launch the AtomicDEX API](/atomicdex/setup/), then plug in your Trezor hardware wallet device.
 
-Initialisation and authentication:
+
+## Initialisation and authentication:
 
 - Initialise connection with your Trezor with [task::init_trezor::init](trezor_initialisation.html#task-init-trezor-init)
 - Check the status of the connecton with [task::init_trezor::status](trezor_initialisation.html#task-init-trezor-status)
 - Cancel authentication process with [task::init_trezor::cancel](trezor_initialisation.html#task-init-trezor-cancel)
 - Authenticate using PIN or phrase with [task::init_trezor::user_action](trezor_initialisation.html#task-init-trezor-user-action)
 
-UTXO Coin Activation in Hardware Mode:
+
+## UTXO Coin Activation in Hardware Mode:
 
 - Use [task::enable_utxo::init](coin_activation_tasks.html#task-enable-utxo-init) for UTXO coins like KMD, BTC and DOGE.
 - Check the activation status with [task::enable_utxo::status](coin_activation_tasks.html#task-enable-utxo-status)
 - Authenticate the activation with [task::enable_utxo::user_action](coin_activation_tasks.html#task-enable-utxo-user-action)
 
-QTUM Coin Activation in Hardware Mode:
+
+## QTUM Coin Activation in Hardware Mode:
 
 - Use [task::enable_qtum::init](coin_activation_tasks.html#task-enable-qtum-init) for QTUM Ecosystem coins.
 - Check the activation status with [task::enable_qtum::status](coin_activation_tasks.html#task-enable-qtum-status)
 - Authenticate the activation with [task::enable_qtum::user_action](coin_activation_tasks.html#task-enable-qtum-user-action)
 
-Withdrawing your Funds:
+
+## Withdrawing your Funds:
 
 - Prepare a transaction with [task::withdraw::init](withdraw_tasks.html#withdraw-init)
 - Check the status of the transaction preparation with [task::withdraw::status](withdraw_tasks.html#withdraw-status)
 - Cancel the transaction preparation with [task::withdraw::cancel](withdraw_tasks.html#withdraw-cancel)
 
-Viewing Hardware Wallet Coin Balances:
+
+## Viewing Hardware Wallet Coin Balances:
 
 - Initialise the balance request with [task::account_balance::init](account_balance_tasks.html#task-account-balance-init)
 - Check the status of the balance request with [task::account_balance::status](account_balance_tasks.html#task-account-balance-status)
 
-Creating New Addresses:
+
+## Creating New Addresses:
 
 - Use [can_get_new_address](hd_address_management.html#can-get-new-address) to determine if your current address has been used, or should be updated.
 - Use [get_new_address](hd_address_management.html#get-new-address) to generate a new address
@@ -48,11 +54,15 @@ These methods (and others with a `task::` prefix) will be linked to a numeric
 
 </Note>
 
+
 ## Details for HwError error type
 
 When requesting the status of a task, if an `error_type` of `HwError` is returned, the GUI / User should check the details in `error_data` field to know which action is required (as detailed below).
 
-- `FoundUnexpectedDevice` - The connected Trezor device has a different pubkey value than what was specified in the `device_pubkey` parameter
+
+### FoundUnexpectedDevice
+
+The connected Trezor device has a different pubkey value than what was specified in the `device_pubkey` parameter
 
 ```json
 {
@@ -71,7 +81,10 @@ When requesting the status of a task, if an `error_type` of `HwError` is returne
 }
 ```
 
-- `FoundMultipleDevices` - Multiple Trezor devices are plugged in. Remove the additional devices, and keep the one you want to use plugged in.
+
+### FoundMultipleDevices
+
+Multiple Trezor devices are plugged in. Remove the additional devices, and keep the one you want to use plugged in.
 
 ```json
 {
@@ -90,7 +103,9 @@ When requesting the status of a task, if an `error_type` of `HwError` is returne
 }
 ```
 
-- `NoTrezorDeviceAvailable` - No Trezor device detected by the AtomicDEX API. Make sure it is plugged in, or try a different USB cable / port.
+### NoTrezorDeviceAvailable
+
+No Trezor device detected by the AtomicDEX API. Make sure it is plugged in, or try a different USB cable / port.
 
 ```json
 {
