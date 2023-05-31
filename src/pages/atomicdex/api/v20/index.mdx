@@ -451,6 +451,71 @@ The `TokensRequest` object includes the following items for a given coin or toke
 </CollapsibleSection>
 
 
+### TokenMetadata
+
+The `TokenMetadata` object includes the following items for a given coin or token:
+
+| Parameter              | Type    | Description                                                                                                                                                                            |
+| ---------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------|
+| image                  | string  | Optional. Url to the NFT's image.                                                                                                 |
+| token_name             | string  | Optional. Name of the token.                                                                                                      |
+| description            | string  | Optional. Description of the token.                                                                                               |
+| attributes             | object or array of objects  | Optional. The values within this parameter will vary, and are set by the creator. Often used to store traits. |
+| animation_url          | string  | Optional. Url to an animationto be displaye instead of a static image.                                                            |
+
+
+<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
+```json
+[
+    {
+        "trait_type": "Specialization",
+        "value": "Thief"
+    },
+    {
+        "trait_type": "Skin Tone",
+        "value": "#0013b0"
+    },
+    {
+        "trait_type": "Weapon",
+        "value": "Crossbow"
+    },
+    {
+        "trait_type": "Species",
+        "value": "Dark Elf"
+    },
+    {
+        "trait_type": "Gender",
+        "value": "Female"
+    },
+    {
+        "trait_type": "Strength",
+        "value": "8"
+    },
+    {
+        "trait_type": "Dexterity",
+        "value": "12"
+    },
+    {
+        "trait_type": "Intelligence",
+        "value": "10"
+    },
+    {
+        "trait_type": "Perks",
+        "value": ["Steath", "Eagle Eye", "Lockpicking", "Pickpocketing", "Fire resistance"]
+    },
+    {
+        "trait_type": "Weakness",
+        "value": ["Slow healing", "Elfbark Addict", "Lockpicking", "Fear of cats", "Unconvincing liar"]
+    },
+    {
+        "trait_type": "Personality",
+        "value": "Aggressive"
+    }
+]
+```
+</CollapsibleSection>
+
+
 ### WithdrawFee
 
 The `WithdrawFee` object varies epending on the coin or token type. Refer to the examples to view the object structure for each type.
@@ -471,7 +536,7 @@ The `WithdrawFee` object varies epending on the coin or token type. Refer to the
 
 <CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
 
-### Example of Eth type
+#### Example of Eth type
 
 ```json
 {
@@ -483,7 +548,7 @@ The `WithdrawFee` object varies epending on the coin or token type. Refer to the
 }
 ```
 
-### Example of Qrc20 type
+#### Example of Qrc20 type
 
 ```json
 {
@@ -496,7 +561,7 @@ The `WithdrawFee` object varies epending on the coin or token type. Refer to the
 }
 ```
 
-### Example of Tendermint type
+#### Example of Tendermint type
 
 ```json
 {
@@ -507,7 +572,7 @@ The `WithdrawFee` object varies epending on the coin or token type. Refer to the
 }
 ```
 
-### Example of Utxo type
+#### Example of Utxo type
 
 ```json
 {
@@ -515,6 +580,7 @@ The `WithdrawFee` object varies epending on the coin or token type. Refer to the
     "amount": "0.00001"
 }
 ```
+
 
 ### WithdrawNftType
 
@@ -533,6 +599,7 @@ When the `type` value in `WithdrawType` is `withdraw_erc1155`, it means that it 
 Due to this difference, the `amount` and `max` fields are only used the when `type` value in `WithdrawType` is `withdraw_erc1155`.
 </Note>
 
+
 ### WithdrawDataErc721
 
 The `WithdrawDataErc721` object is used for withdrawals of NFTs on ERC721 contracts. It includes the following items for a given coin or token:
@@ -544,6 +611,7 @@ The `WithdrawDataErc721` object is used for withdrawals of NFTs on ERC721 contra
 | to            | string           | Destination address to withdraw the token to.                                                             |
 | token_address | string           | Token address.                                                                                            |
 | token_id      | string           | Token ID.                                                                                                 |
+| fee           | string           | Optional. A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                               |
 
 
 ### WithdrawDataErc1155
@@ -559,5 +627,5 @@ The `WithdrawDataErc1155` object is used for withdrawals of NFTs on ERC1155 cont
 | token_id      | string           | Token ID.                                                                                                 |
 | amount        | string           | Optional, defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is `true.                         |
 | max           | boolean          | Optional, defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent.   |
-| fee           | string           | Optional. A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                                                      |
+| fee           | string           | Optional. A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                               |
 
