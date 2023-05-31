@@ -419,6 +419,31 @@ const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
       ]
     },
     {
+      "title": "Lightning Network",
+      "links": [
+        {
+          "title": "Overview",
+          "href": "/atomicdex/api/v20-dev/lightning/"
+        },
+        {
+          "title": "Lightning Initialization",
+          "href": "/atomicdex/api/v20-dev/lightning/activation"
+        },
+        {
+          "title": "Lightning Nodes",
+          "href": "/atomicdex/api/v20-dev/lightning/nodes"
+        },
+        {
+          "title": "Lightning Channels",
+          "href": "/atomicdex/api/v20-dev/lightning/channels"
+        },
+        {
+          "title": "Lightning Payments",
+          "href": "/atomicdex/api/v20-dev/lightning/payments"
+        }
+      ]
+    },
+    {
       "title": "Coin Activation Tasks",
       "titleLink": "/atomicdex/api/v20-dev/coin_activation_tasks/",
       "links": []
