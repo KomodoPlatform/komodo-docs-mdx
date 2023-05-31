@@ -19,36 +19,16 @@ The AtomicDEX API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1
 
 ## Get a list of NFTs {{label : 'get_nft_list', tag : 'API-v2'}}
 
+Returns a list of the NFTs owned by the user, shown in descending order of the `block_number` value (the block height when the amount or owner changed). If the request is for NFTs on more than one chain, this means that the order may not be chronological.
 
 ### Request Parameters
 
 | Parameter     | Type             | Description                                                                                               |
 | ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
 | chains        | array            | List of chains to scan for NFTs.                                                                          |
-| url           | string           | URL link to the Moralis API proxy base url (https://moralis-proxy.komodo.earth) or equivalent.            |
-
-<Note>
-In future, users will be able to also define their own Moralis API key.
-</Note>
-
-#### 📌 Example(s)
-
-<CodeGroup title="" tag="POST" label="get_nft_list">
-```json {{ mm2MethodDecorate : true }}
-{
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "get_nft_list",
-  "mmrpc": "2.0",
-  "params": {
-    "chains": [
-      "BSC",
-      "POLYGON"
-    ],
-    "url": "https://moralis-proxy.komodo.earth"
-  }
-}
-```
-</CodeGroup>
+| max           | boolean          | Optional, defaults to `false`. If `true`, response will return all NFTs without pagination, and will ignore the `limit` and `page_number` values.               |
+| limit         | integer          | Optional, defaults to `10`. The number of NFTs displayed per page in response.                            |
+| page_number   | integer          | Optional, defaults to `0`. The page offset for items in response.                                         |
 
 
 ### Response Parameters
@@ -75,9 +55,24 @@ In future, users will be able to also define their own Moralis API key.
 | uri_meta             | object           | A standard [TokenMetadata](/atomicdex/api/v20#token-metadata) object.                            |
 
 
-<DevComment>
-For uri_meta, I think only the values under the `attributes` key are variable. The other keys are always present, but may be `null`. This should link to a standard object.
-</DevComment>
+#### 📌 Example with no optional params
+
+<CodeGroup title="" tag="POST" label="get_nft_list">
+```json {{ mm2MethodDecorate : true }}
+{
+  "userpass": "MM2_RPC_PASSWORD",
+  "method": "get_nft_list",
+  "mmrpc": "2.0",
+  "params": {
+    "chains": [
+      "BSC",
+      "POLYGON"
+    ]
+  }
+}
+```
+</CodeGroup>
+
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 ```json
@@ -151,7 +146,81 @@ For uri_meta, I think only the values under the `attributes` key are variable. T
           "animation_url": null
         }
       }
-    ]
+    ],
+    "skipped": 0,
+    "total": 2
+  },
+  "id": null
+}
+```
+</CollapsibleSection>
+
+
+#### 📌 Example with no optional params
+
+<CodeGroup title="" tag="POST" label="get_nft_list">
+```json {{ mm2MethodDecorate : true }}
+{
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "get_nft_list",
+    "mmrpc": "2.0",
+    "params": {
+        "chains": [
+            "BSC",
+            "POLYGON"
+        ],
+        "limit": 1,
+        "page_number": 2
+    }
+}
+```
+</CodeGroup>
+
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "nfts": [
+      {
+        "chain": "POLYGON",
+        "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+        "token_id": "5",
+        "amount": "1",
+        "owner_of": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+        "token_hash": "28f970585fd743b056859a6e41f50a8e",
+        "block_number_minted": 36781490,
+        "block_number": 42491885,
+        "contract_type": "ERC1155",
+        "collection_name": null,
+        "symbol": null,
+        "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+        "metadata": "{\"name\":\"Forest Mushrooms\",\"description\":\"Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.\",\"image\":\"https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg\",\"animation_url\":null,\"external_url\":\"https://app.thesmurfssociety.com/detail/ingredients/5\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Ingredient\"},{\"trait_type\":\"Category\",\"value\":\"COMMON\"}]}",
+        "last_token_uri_sync": "2022-12-13T13:12:50.840Z",
+        "last_metadata_sync": "2023-05-15T07:30:04.882Z",
+        "minter_address": "ERC1155 tokens don't have a single minter",
+        "possible_spam": false,
+        "uri_meta": {
+          "image": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+          "token_name": "Forest Mushrooms",
+          "description": "Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.",
+          "attributes": [
+            {
+              "trait_type": "Type",
+              "value": "Ingredient"
+            },
+            {
+              "trait_type": "Category",
+              "value": "COMMON"
+            }
+          ],
+          "animation_url": null
+        }
+      }
+    ],
+    "skipped": 1,
+    "total": 1
   },
   "id": null
 }
@@ -161,31 +230,18 @@ For uri_meta, I think only the values under the `attributes` key are variable. T
 
 ## Get a list of NFT transfers {{label : 'get_nft_transfers', tag : 'API-v2'}}
 
+Returns a list of the NFT transfers involving the user, shown in descending order of the `block_timestamp` value of the NFT's last transfer.
+
+
 ### Request Parameters
 
 | Parameter     | Type             | Description                                                                                               |
 | ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
 | chains        | array            | List of chains to scan for NFTs.                                                                          |
-| url           | string           | URL link to [Moralis API](https://docs.moralis.io/) (or proxy).                                           |
-
-
-#### 📌 Example(s)
-
-<CodeGroup title="" tag="POST" label="get_nft_transfers">
-```json {{ mm2MethodDecorate : true }}
-{
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "get_nft_transfers",
-  "mmrpc": "2.0",
-  "params": {
-    "chains": [
-      "POLYGON"
-    ],
-    "url": "https://moralis-proxy.komodo.earth"
-  }
-}
-```
-</CodeGroup>
+| max           | boolean          | Optional, defaults to `false`. If `true`, response will return all NFTs without pagination, and will ignore the `limit` and `page_number` values.               |
+| limit         | integer          | Optional, defaults to `10`. The number of NFTs displayed per page in response.                            |
+| page_number   | integer          | Optional, defaults to `0`. The page offset for items in response.                                         |
+| filters       | object           | Optional. A standard [TokenFilter](/atomicdex/api/v20#token-filter) object.                               |
 
 
 ### Response Parameters
@@ -220,6 +276,29 @@ What is `operator`?
 What does `verified` mean?
 </DevComment>
 
+#### 📌 Example with date and `send` filters
+
+<CodeGroup title="" tag="POST" label="get_nft_transfers">
+```json {{ mm2MethodDecorate : true }}
+{
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "get_nft_transfers",
+    "mmrpc": "2.0",
+    "params": {
+        "chains": [
+            "POLYGON"
+        ],
+        "max": true,
+        "filters": {
+            "send": true,
+            "from_date": "2023-03-08"
+        }
+    }
+}
+```
+</CodeGroup>
+
+
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 ```json
 {
@@ -247,30 +326,10 @@ What does `verified` mean?
         "verified": 1,
         "operator": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
         "possible_spam": false
-      },
-      {
-        "chain": "POLYGON",
-        "block_number": 40059494,
-        "block_timestamp": "2023-03-07T05:59:40.000Z",
-        "block_hash": "0x74ed1956f9ddd850639086985eda441dd984b6cdd657608be19e42e66bd911af",
-        "transaction_hash": "0x03653c73b8540d166e94382345cb1e028c08c3c9d4fd809e8c1cf307407f91e8",
-        "transaction_index": 51,
-        "log_index": 232,
-        "value": "0",
-        "contract_type": "ERC1155",
-        "transaction_type": "Single",
-        "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
-        "token_id": "5",
-        "collection_name": null,
-        "from_address": "0x32c5a026cb212cf18de790400763df8b64b4d028",
-        "to_address": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
-        "status": "Receive",
-        "amount": "2",
-        "verified": 1,
-        "operator": "0x32c5a026cb212cf18de790400763df8b64b4d028",
-        "possible_spam": false
       }
-    ]
+    ],
+    "skipped": 1,
+    "total": 2
   },
   "id": null
 }
@@ -287,26 +346,6 @@ What does `verified` mean?
 | chain         | string           | The token chain.                                                                                          |
 | token_address | string           | The token address.                                                                                        |
 | token_id      | string           | Token ID.                                                                                                 |
-| url           | string           | URL link to [Moralis API](https://docs.moralis.io/) (or proxy).                                           |
-
-
-#### 📌 Example(s)
-
-<CodeGroup title="" tag="POST" label="get_nft_metadata">
-```json {{ mm2MethodDecorate : true }}
-{
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "get_nft_metadata",
-  "mmrpc": "2.0",
-  "params": {
-    "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f81",
-    "token_id": "214300044414",
-    "chain": "BSC",
-    "url": "https://moralis-proxy.komodo.earth"
-  }
-}
-```
-</CodeGroup>
 
 
 ### Response Parameters
@@ -332,6 +371,23 @@ What does `verified` mean?
 | possible_spam        | boolean          | Possible spam.                                                                                   |
 | uri_meta             | object           | A standard [TokenMetadata](/atomicdex/api/v20#token-metadata) object.                            |
 
+
+#### 📌 Example
+
+<CodeGroup title="" tag="POST" label="get_nft_metadata">
+```json {{ mm2MethodDecorate : true }}
+{
+  "userpass": "MM2_RPC_PASSWORD",
+  "method": "get_nft_metadata",
+  "mmrpc": "2.0",
+  "params": {
+    "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f81",
+    "token_id": "214300044414",
+    "chain": "BSC",
+  }
+}
+```
+</CodeGroup>
 
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
@@ -380,15 +436,33 @@ To withdraw NFTs, you must [activate the coin](/atomicdex/api/legacy/coin_activa
 
 | Parameter     | Type             | Description                                                                                               |
 | ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
-| url           | string           | URL link to [Moralis API](https://docs.moralis.io/) (or proxy).                                           |
 | withdraw_type | object           | A standard [WithdrawNftType](/atomicdex/api/v20#withdraw-nft-type) object.                                |
+
+
+### Response Parameters
+
+| Parameter            | Type             | Description                                                                                      |
+| ---------------------| ---------------- | ------------------------------------------------------------------------------------------------ |
+| amount               | string           | Amount of tokens to withdraw.                                                                    |
+| tx_hex               | string           | Raw hex of signed transaction. Use this with the [send_raw_transaction](/atomicdex/api/legacy/send_raw_transaction) RPC to broadcast the transaction. |
+| tx_hash              | string           | Transaction ID of the withdrawl.                                                                 |
+| from                 | array            | List of source addresses.                                                                        |
+| to                   | array            | List of destination addresses.                                                                   |
+| contract_type        | string           | Contract type. `ERC721` or `ERC1155`.                                                            |
+| token_address        | string           | Token address.                                                                                   |
+| token_id             | string           | Token ID.                                                                                        |
+| fee_details          | object           | A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                                |
+| coin                 | string           | Coin name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                             |
+| block_height         | integer          | Block height of the transaction. If the value is `0`, the transaction is unconfirmed.            |
+| timestamp            | integer          | Timestamp of the block containing the withdrawl transaction.                                     |
+| internal_id          | integer          | Used for internal transaction identification, for some coins it may be equal to transaction hash. |
+| transaction_type     | string           | This will always be `NftTransfer`.                                                               |
 
 <Note>
 When the `type` value in `WithdrawType` is `withdraw_erc721` it means the NFT is absolutely unique - it has only 1 owner and the owner can own only 1 NFT which has this `token_id` in its `token_address` (also referred to as contract address).
 When the `type` value in `WithdrawType` is `withdraw_erc1155`, it means that it is possible for more than 1 user to own one or more of the same NFT (with an identical `token_id`).
 Due to this difference, the `amount` and `max` fields are only used the `type` value in `WithdrawType` is `withdraw_erc1155`.
 </Note>
-
 
 #### 📌 ERC721 Withdraw Example
 
@@ -413,31 +487,6 @@ Due to this difference, the `amount` and `max` fields are only used the `type` v
 }
 ```
 </CodeGroup>
-
-<DevComment>
-May change in future. See https://github.com/KomodoPlatform/komodo-docs-mdx/pull/42#discussion_r1197745312
-Right now `internal_id` is always zero and actually I dont save TransactionNftDetails in db as we use info from moralis (NftTransferHistory), but may be in the future. I will need it...
-</DevComment>
-
-### Response Parameters
-
-| Parameter            | Type             | Description                                                                                      |
-| ---------------------| ---------------- | ------------------------------------------------------------------------------------------------ |
-| amount               | string           | Amount of tokens to withdraw.                                                                    |
-| tx_hex               | string           | Raw transaction hex of the withdrawl.                                                            |
-| tx_hash              | string           | Transaction ID of the withdrawl.                                                                 |
-| from                 | array            | List of source addresses.                                                                        |
-| to                   | array            | List of destination addresses.                                                                   |
-| contract_type        | string           | Contract type. `ERC721` or `ERC1155`.                                                            |
-| token_address        | string           | Token address.                                                                                   |
-| token_id             | string           | Token ID.                                                                                        |
-| fee_details          | object           | A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                                |
-| coin                 | string           | Coin name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                             |
-| block_height         | integer          | Block height of the transaction. If the value is `0`, the transaction is unconfirmed.            |
-| timestamp            | integer          | Timestamp of the block containing the withdrawl transaction.                                     |
-| internal_id          | integer          | Defaults to `0`, but may be used in future for backend referencing to identify a transaction in local database data. |
-| transaction_type     | string           | This will always be `NftTransfer`.                                                               |
-
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 ```json
