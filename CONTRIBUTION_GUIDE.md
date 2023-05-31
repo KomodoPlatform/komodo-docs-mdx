@@ -3,6 +3,7 @@
   - Read the [Code of Conduct](CODE_OF_CONDUCT.md)
   - Read the [Contribution guide](CONTRIBUTION_GUIDE.md) (this file)
   - Read the [Style guide](STYLE_GUIDE.md)
+  - Read the [QA testing guide](QA_GUIDE.md)
   
 
 ## 2. Find an issue to work on
