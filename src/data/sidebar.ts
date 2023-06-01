@@ -41,7 +41,7 @@ const startHerePageNavigation: NavigationRouteType = {
       "links": [
         {
           "title": "Introduction",
-          "href": "/start-here/core-technology-discussions/introduction/"
+          "href": "/start-here/core-technology-discussions/"
         },
         {
           "title": "Delayed Proof of Work",
