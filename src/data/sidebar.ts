@@ -255,8 +255,16 @@ const atomicdexApi20MasterPageNavigation: NavigationRouteType = {
       "title": "Message Signing",
       "links": [
         {
-          "title": "Signing and verifying messages",
+          "title": "Configuring supported coins",
           "href": "/atomicdex/api/v20/message_signing/"
+        },
+        {
+          "title": "Signing a message",
+          "href": "/atomicdex/api/v20/message_signing/#message-signing"
+        },
+        {
+          "title": "Verifying a signed message",
+          "href": "/atomicdex/api/v20/message_signing/#message-verification"
         }
       ]
     },
