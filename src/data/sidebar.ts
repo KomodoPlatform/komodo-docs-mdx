@@ -468,7 +468,15 @@ const atomicdexApiLegacyPageNavigation: NavigationRouteType = {
         {
           "title": "Activation Methods",
           "href": "/atomicdex/api/legacy/coin_activation/"
+        },       
+        {
+          "title": "Native Mode Activation",
+          "href": "/atomicdex/api/legacy/coin_activation/#native-mode-activation"
         },
+        {
+          "title": "Lite Mode Methods",
+          "href": "/atomicdex/api/legacy/coin_activation/#lite-mode-activation"
+        }, 
         {
           "title": "coins_needed_for_kick_start",
           "href": "/atomicdex/api/legacy/coins_needed_for_kick_start/"
