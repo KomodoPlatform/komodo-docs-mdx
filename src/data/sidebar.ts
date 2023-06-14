@@ -27,11 +27,11 @@ const startHerePageNavigation: NavigationRouteType = {
       "title": "Learning Launchpad",
       "links": [
         {
-          "title": "Learning path outline",
+          "title": "Learning Path Outline",
           "href": "/start-here/learning-launchpad/"
         },
         {
-          "title": "Common technologies and concepts",
+          "title": "Common Technologies and Concepts",
           "href": "/start-here/learning-launchpad/common-terminology-and-concepts/"
         }
       ]
@@ -183,10 +183,10 @@ const atomicdexPageNavigation: NavigationRouteType = {
       ]
     },
     {
-      "title": "Change Logs",
+      "title": "Changelog",
       "links": [
         {
-          "title": "changelog",
+          "title": "Changelog",
           "href": "/atomicdex/changelog/"
         }
       ]
