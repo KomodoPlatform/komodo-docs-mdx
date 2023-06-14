@@ -6,15 +6,15 @@ const startHerePageNavigation: NavigationRouteType = {
       "title": "About Komodo Platform",
       "links": [
         {
-          "title": "Platform overview",
-          "href": "/start-here/about-komodo-platform//"
+          "title": "Platform Overview",
+          "href": "/start-here/about-komodo-platform/"
         },
         {
-          "title": "Product introductions",
+          "title": "Product Introductions",
           "href": "/start-here/about-komodo-platform/product-introductions/"
         },
         {
-          "title": "Doc orientation",
+          "title": "Doc Orientation",
           "href": "/start-here/about-komodo-platform/orientation/"
         },
         {
@@ -24,20 +24,20 @@ const startHerePageNavigation: NavigationRouteType = {
       ]
     },
     {
-      "title": "Learning launchpad",
+      "title": "Learning Launchpad",
       "links": [
         {
-          "title": "Learning path outline",
-          "href": "/start-here/learning-launchpad/learning-path-outline/"
+          "title": "Learning Path Outline",
+          "href": "/start-here/learning-launchpad/"
         },
         {
-          "title": "Common technologies and concepts",
+          "title": "Common Technologies and Concepts",
           "href": "/start-here/learning-launchpad/common-terminology-and-concepts/"
         }
       ]
     },
     {
-      "title": "Core technology discussions",
+      "title": "Core Technology Discussions",
       "links": [
         {
           "title": "Introduction",
@@ -183,10 +183,10 @@ const atomicdexPageNavigation: NavigationRouteType = {
       ]
     },
     {
-      "title": "Change Logs",
+      "title": "Changelog",
       "links": [
         {
-          "title": "changelog",
+          "title": "Changelog",
           "href": "/atomicdex/changelog/"
         }
       ]
