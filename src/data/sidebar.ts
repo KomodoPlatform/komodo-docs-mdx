@@ -394,6 +394,31 @@ const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
       ]
     },
     {
+      "title": "Non-Fungible Tokens",
+      "links": [
+        {
+          "title": "Overview",
+          "href": "/atomicdex/api/v20-dev/non_fungible_tokens"
+        },
+        {
+          "title": "Get a list of NFTs",
+          "href": "/atomicdex/api/v20-dev/non_fungible_tokens#get-a-list-of-nfts"
+        },
+        {
+          "title": "Get a list of NFT transfers",
+          "href": "/atomicdex/api/v20-dev/non_fungible_tokens#get-a-list-of-nft-transfers"
+        },
+        {
+          "title": "Get NFT metadata",
+          "href": "/atomicdex/api/v20-dev/non_fungible_tokens#get-nft-metadata"
+        },
+        {
+          "title": "Withdraw NFTs",
+          "href": "/atomicdex/api/v20-dev/non_fungible_tokens#withdraw-nfts"
+        }
+      ]
+    },
+    {
       "title": "Lightning Network",
       "links": [
         {
