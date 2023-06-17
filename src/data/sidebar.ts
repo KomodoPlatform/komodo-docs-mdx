@@ -447,7 +447,7 @@ const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
 };
 
 const atomicdexApiLegacyPageNavigation: NavigationRouteType = {
-  "/atomicdex-api-legacy": [
+  "/atomicdex/api/legacy": [
     {
       "title": "AtomicDEX API (Legacy)",
       "links": [
