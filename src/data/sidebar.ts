@@ -201,7 +201,7 @@ const atomicdexPageNavigation: NavigationRouteType = {
 };
 
 const atomicdexApi20MasterPageNavigation: NavigationRouteType = {
-  "/atomicdex/api/v20": [
+  "/atomicdex/api/v20/": [
     {
       title: "AtomicDEX API 2.0 (Master)",
       links: [
@@ -359,7 +359,7 @@ const atomicdexApi20MasterPageNavigation: NavigationRouteType = {
 };
 
 const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
-  "/atomicdex/api/v20-dev": [
+  "/atomicdex/api/v20-dev/": [
     {
       title: "AtomicDEX API 2.0 (Dev)",
       links: [
@@ -453,7 +453,7 @@ const atomicdexApi_20_Dev_PageNavigation: NavigationRouteType = {
 };
 
 const atomicdexApiLegacyPageNavigation: NavigationRouteType = {
-  "/atomicdex/api/legacy": [
+  "/atomicdex/api/legacy/": [
     {
       title: "AtomicDEX API (Legacy)",
       titleLink: "/atomicdex/api/legacy/",
@@ -704,7 +704,7 @@ const atomicdexApiLegacyPageNavigation: NavigationRouteType = {
 };
 
 const antaraFrameworkPageNavigation: NavigationRouteType = {
-  "/antara": [
+  "/antara/": [
     {
       title: "Introduction to Antara Documentation",
       titleLink: "/antara/",
@@ -1023,7 +1023,7 @@ const historicalPageNavigation: NavigationRouteType = {
 };
 
 const smartChainPageNavigation: NavigationRouteType = {
-  "/smart-chains": [
+  "/smart-chains/": [
     {
       title: "Introduction to Smart Chain Documentation",
       titleLink: "/smart-chains/",
