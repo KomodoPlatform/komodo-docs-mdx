@@ -1,3 +1,11 @@
+export const title = "Adding a new coin to the AtomicDEX-API";
+export const description = "This guide describes how to add a new coin to the AtomicDEX-API";
+
+import geckoapi from "@/images/api-images/gecko_api.png";
+import paprikaapi from "@/images/api-images/paprika_api.png";
+import nomicsapi from "@/images/api-images/nomics_api.png";
+import qtum from "@/images/api-images/qtum.png";
+
 # Prerequisites for a coin to be compatible with AtomicDEX-API
 
 Before a coin can be listed in AtomicDEX, it needs to be confirmed for compatibility, and present within the [Komodo Platform coins repository](https://github.com/KomodoPlatform/coins).
@@ -65,6 +73,7 @@ sendrawtransaction
 
 
 ### UTXO coin example
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 ```json
         {
@@ -86,8 +95,11 @@ sendrawtransaction
                 }
         }
 ```
+</CollapsibleSection>
 
 ### Antara smartchain example
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 ```json
         {
@@ -106,6 +118,7 @@ sendrawtransaction
                 }
         }
 ```
+</CollapsibleSection>
 
 
 ## 1c. EVM-like tokens (ETH/ERC20, MATIC/PLG20, BNB/BEP20)
@@ -126,6 +139,7 @@ The token's contract **must** have `approve` and `transferFrom` methods. Additio
 
 
 ### ERC20 token example
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 ```json
         {
@@ -146,8 +160,11 @@ The token's contract **must** have `approve` and `transferFrom` methods. Additio
                 }
         }
 ```
+</CollapsibleSection>
 
 ### BEP20 token example
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 ```json
         {
@@ -168,10 +185,13 @@ The token's contract **must** have `approve` and `transferFrom` methods. Additio
                 }
         },
 ```
+</CollapsibleSection>
 
 ## 1d. QRC20 tokens
 
 QTUM & QRC20 tokens are a special case which also support all fields of UTXO specific config.
+
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 ```json
         {
@@ -197,6 +217,7 @@ QTUM & QRC20 tokens are a special case which also support all fields of UTXO spe
                 }
         }
 ```
+</CollapsibleSection>
 
 ## 2. Icon file (required)
 
@@ -228,8 +249,9 @@ QTUM & QRC20 tokens are a special case which also support all fields of UTXO spe
 - The status of currently listed [ElectrumX](https://electrumx.readthedocs.io/en/latest/) servers is monitored via a public [API](https://electrum-status.dragonhound.info/api/v1/electrums_status) and [Dashboard](https://stats.kmd.io/atomicdex/electrum_status/). For help setting up Telegram or Discord alerts for your servers, join the `#dev-support` channel in the [Komodo Platform Discord](https://komodoplatform.com/discord).
 
 
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
-```JSON
+```json
 [
   {
     "url": "nmc.bitcoins.sk:50002",
@@ -255,6 +277,8 @@ QTUM & QRC20 tokens are a special case which also support all fields of UTXO spe
   }
 ]
 ```
+</CollapsibleSection>
+
 
 
 ## 5. Ethereum info file (Required for EVM-like platforms)
@@ -267,7 +291,9 @@ QTUM & QRC20 tokens are a special case which also support all fields of UTXO spe
 - The RPC node URL can either be a DNS or an IP address with port.
 - It must be a valid JSON format as shown in the following example:
 
-```JSON
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+
+```json
 {
   "swap_contract_address":"0x8500AFc0bc5214728082163326C2FF0C73f4a871",
   "rpc_nodes": [
@@ -292,6 +318,7 @@ QTUM & QRC20 tokens are a special case which also support all fields of UTXO spe
   ]
 }
 ```
+</CollapsibleSection>
 
 
 ## 5. Forex, Nomics, CoinGecko & CoinPaprika Price IDs (optional)
@@ -300,15 +327,30 @@ The API IDs are stored in json files within the `/api_ids` folder, and used to s
 
 For [CoinGecko](https://www.coingecko.com/en/coins/komodo) it is conveniently displayed on the right had side of a coins page as below -
 
-<img src="/api_images/gecko_api.png" />
+<OptimizedImage
+  title="Gecko"
+  src={geckoapi}
+  classNaming="w-full"
+  alt="Gecko"
+/>
 
 For [CoinPaprika](https://coinpaprika.com/coin/kmd-komodo/) it is the same as displayed in a coin's URL -
 
-<img src="/api_images/paprika_api.png" />
+<OptimizedImage
+  title="Paprika"
+  src={paprikaapi}
+  classNaming="w-full"
+  alt="Paprika"
+/>
 
 For [Nomics](https://nomics.com/assets/kmd-komodo/widget) you can find it under the "widget" tab for a coin.
 
-<img src="/api_images/nomics_api.png" />
+<OptimizedImage
+  title="Nomics"
+  src={nomicsapi}
+  classNaming="w-full"
+  alt="Nomics"
+/>
 
 For For Forex the API ID is the same as the [ISO 4217 currency code](https://en.wikipedia.org/wiki/ISO_4217).
 
@@ -323,7 +365,7 @@ The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044
 
 For Trezor compatibility, this field is required. You can find this value at [https://trezor.io/coins](https://trezor.io/coins). Not all coins are listed on this page by default, but if compatible can be found by searching the supported coins. The value is the name of the coin in larger black text (not the grey text in brackets). E.g. for the image below, the Trezor coin name would be `Qtum`.
 
-<img src="/api_images/qtum.png" />
+<OptimizedImage title="Qtum" src={qtum} classNaming="w-full" alt="Qtum" />
 
 ## 8. Successful swap confirmation
 
