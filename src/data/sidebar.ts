@@ -572,10 +572,6 @@ const atomicdexApiLegacyPageNavigation: NavigationRouteType = {
           href: "/atomicdex/api/legacy/order_status/",
         },
         {
-          title: "recover_funds_of_swap",
-          href: "/atomicdex/api/legacy/recover_funds_of_swap/",
-        },
-        {
           title: "sell",
           href: "/atomicdex/api/legacy/sell/",
         },
@@ -625,8 +621,12 @@ const atomicdexApiLegacyPageNavigation: NavigationRouteType = {
           href: "/atomicdex/api/legacy/my_swap_status/",
         },
         {
-          title: "trade_preimag",
+          title: "trade_preimage",
           href: "/atomicdex/api/legacy/trade_preimage/",
+        },
+        {
+          title: "recover_funds_of_swap",
+          href: "/atomicdex/api/legacy/recover_funds_of_swap/",
         },
       ],
     },
