@@ -338,7 +338,7 @@ Rendered as:
 
 ## Sidebar (Left)
 
-Sidebar navigation is manually populated. This file can be found at `src/data/sidebar.ts`. If you're working on a new page, this is where to link them.
+Sidebar navigation is manually populated. This file can be found at `src/data/sidebar.json`. If you're working on a new page, this is where to link them.
 
 ![Sidebar left](src/images/style-guide-images/sidebar-left-UI.png)
 
