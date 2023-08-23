@@ -127,9 +127,20 @@ The `ActivationParams` object defines additional parameters used for activation.
 | zcash_params_path         | string    | ZHTLC coins only. Path to folder containing [Zcash parameters](https://z.cash/technology/paramgen/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                |
 | scan_blocks_per_iteration | integer   | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                                    |
 | scan_interval_ms          | integer   | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                                      |
-| sync_params               | integer or string | ZHTLC coins only. Optional, defaults to `"earliest"`. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (full scan), `height` (a specific block height) or `date` (a linux timestamp).            |
+| sync_params               | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling_activation_height), `height` (a specific block height) or `date` (a linux timestamp).            |
 | mode                      | object    | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/v20#activation-mode) object.                                                                          |
 
+<Note>
+  For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
+  first transaction to see all balance and history. This may take a long time on the first 
+  activation, but subsequent activations will be much faster.
+  Using a smaller `scan_blocks_per_iteration` and larger `scan_interval_ms`,
+  will reduce the average CPU load during ZHTLC coin activation (at the cost of a
+  longer activation time). These optional fields are recommended when developing
+  for iOS, where a high CPU load may kill the activation process. Android &
+  desktop operating systems do not appear to have any problems with high CPU
+  load during ZHTLC coin activation.
+</Note>
 
 ### ActivationMode
 
