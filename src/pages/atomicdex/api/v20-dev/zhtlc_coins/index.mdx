@@ -20,31 +20,11 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](withdraw_tasks) me
 
 #### Arguments
 
-| Structure                                     | Type            | Description                                                                                                                                                                                                                          |
-| --------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ticker                                        | string          | Ticker of coin to activate                                                                                                                                                                                                           |
-| activation_params                             | object          | Contains details required for activation as explained below                                                                                                                                                                          |
-| activation_params.required_confirmations      | integer         | Block confirmations to wait for transactions when doing a swap. Optional, defaults to `3`. Overrides value if set in `coins` file.                                                                                                   |
-| activation_params.requires_notarization       | boolean         | For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Optional, defaults to `false`. Overrides value if set in `coins` file. |
-| activation_params.mode.rpc                    | string          | Set as `Light` to use external electrum & lightwallet_d servers or `Native` to use local block chain data. If native, the `rpc_data` fields below are not required.                                                                  |
-| activation_params.mode.rpc_data               | list of objects | Contains details about servers to be used for `Light` mode operation.                                                                                                                                                                |
-| ..rpc_data.light_wallet_d_servers             | list of strings | Urls which are hosting lightwallet_d servers                                                                                                                                                                                         |
-| ..rpc_data.electrum_servers                   | list of objects | Contains additional details about a coins electrum servers.                                                                                                                                                                          |
-| ...electrum_servers.protocol                  | string          | Transport protocol used by AtomicDEX API to connect to the electrum server (`TCP` or `SSL`). Optional, defaults to `TCP`                                                                                                             |
-| ...electrum_servers.url                       | string          | The URL and port of an electrum server.                                                                                                                                                                                              |
-| ...electrum_servers.disable_cert_verification | boolean         | If `true`, this disables server SSL/TLS certificate verification (e.g. to use self-signed certificate). Optional, defaults to `false` <b>Use at your own risk!</b>                                                                   |
-| activation_params.zcash_params_path           | string          | Path to folder containing [Zcash parameters](https://z.cash/technology/paramgen/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                |
-| activation_params.scan_blocks_per_iteration   | integer         | Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                                    |
-| activation_params.scan_interval_ms            | integer         | Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                                      |
+| Structure                                     | Type            | Description                                                                     |
+| --------------------------------------------- | --------------- | ------------------------------------------------------------------------------- |
+| ticker                                        | string          | Ticker of coin to activate                                                      |
+| activation_params                             | object          | A standard [ActivationRpcData](/atomicdex/api/v20#activation-rpc-data) object.  |
 
-<Note>
-  Using a smaller `scan_blocks_per_iteration` and larger `scan_interval_ms`,
-  will reduce the average CPU load during Z coin activation (at the cost of a
-  longer activation time). These optional fields are recommended when developing
-  for iOS, where a high CPU load may kill the activation process. Android &
-  desktop operating systems do not appear to have any problems with high CPU
-  load during Z coin activation.
-</Note>
 
 #### Response
 
@@ -54,7 +34,59 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](withdraw_tasks) me
 
 #### 📌 Examples
 
-#### Command
+#### Command with only required parameters
+
+<CodeGroup title="" tag="POST" label="task::enable_z_coin::init">
+```json {{ mm2MethodDecorate : true }}
+{
+  "userpass": "MM2_RPC_PASSWORD",
+  "method": "task::enable_z_coin::init",
+  "mmrpc": "2.0",
+  "params": {
+    "ticker": "ZOMBIE",
+    "activation_params": {
+      "mode": {
+        "rpc": "Light",
+        "rpc_data": {
+          "electrum_servers": [{"url":"zombie.dragonhound.info:10033"}],
+          "light_wallet_d_servers": ["http://zombie.dragonhound.info:443"]
+        }
+      }
+    }
+  }
+}
+```
+</CodeGroup>
+
+#### Command to sync from block 2528700, with custom .zcash-params path and scan params
+
+<CodeGroup title="" tag="POST" label="task::enable_z_coin::init">
+```json {{ mm2MethodDecorate : true }}
+{
+  "userpass": "MM2_RPC_PASSWORD",
+  "method": "task::enable_z_coin::init",
+  "mmrpc": "2.0",
+  "params": {
+    "ticker": "ZOMBIE",
+    "activation_params": {
+      "mode": {
+        "rpc": "Light",
+        "rpc_data": {
+          "electrum_servers": [{"url":"zombie.dragonhound.info:10033"}],
+          "light_wallet_d_servers": ["http://zombie.dragonhound.info:443"]
+        }
+      },
+      "zcash_params_path": "/home/username/path_to/.zcash-params",
+      "scan_blocks_per_iteration": 100,
+      "scan_interval_ms": 200,
+      "sync_params": {"height":  2528700}
+    }
+  }
+}
+```
+</CodeGroup>
+
+#### Command using websockets to sync from [Proof of Keys Day](https://hackernoon.com/not-your-keys-not-your-bitcoin-jan3bitcoin-z6k3ktb), 2023.
 
 <CodeGroup title="" tag="POST" label="task::enable_z_coin::init">
 ```json {{ mm2MethodDecorate : true }}
@@ -70,26 +102,21 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](withdraw_tasks) me
         "rpc_data": {
           "electrum_servers": [
             {
-              "url": "zombie.sirseven.me:10033"
-            },
-            {
-              "url":"zombie.dragonhound.info:10033"
+              "protocol":"SSL",
+              "url":"zombie.dragonhound.info:20133",
+              "ws_url":"zombie.dragonhound.info:30059"
             }
           ],
-          "light_wallet_d_servers": [
-            "http://zombie.sirseven.me:443",
-            "http://zombie.dragonhound.info:443"
-          ]
+          "light_wallet_d_servers": ["http://zombie.dragonhound.info:443"]
         }
       },
-      "zcash_params_path": "/home/username/path_to/.zcash-params",
-      "scan_blocks_per_iteration": 100,
-      "scan_interval_ms": 200
+      "sync_params": {"date":  1672704000}
     }
   }
 }
 ```
 </CodeGroup>
+
 
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 #### Response
