@@ -106,7 +106,7 @@ It includes a uniform request, successful and error response formats. At the mom
 </CollapsibleSection>
 
 
-## Common the Komodo DeFi SDK Request / Response Objects
+## Common Komodo DeFi SDK Request / Response Objects
 
 The folowing objects are used in the request or response of multiple Komodo DeFi SDK methods.
 
@@ -115,9 +115,6 @@ The folowing objects are used in the request or response of multiple Komodo DeFi
 
 The `ActivationParams` object defines additional parameters used for activation. These params may vary depending on the coin type.
 
-<DevComment>
-TODO: Where possible, indicate which activation methods / coins are supported for each parameter.
-</DevComment>
 
 | Parameter                 | Type      | Description                                                                                                                                      |
 | ------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -130,7 +127,8 @@ TODO: Where possible, indicate which activation methods / coins are supported fo
 | zcash_params_path         | string    | ZHTLC coins only. Path to folder containing [Zcash parameters](https://z.cash/technology/paramgen/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                |
 | scan_blocks_per_iteration | integer   | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                                    |
 | scan_interval_ms          | integer   | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                                      |
-| mode                      | object    | QTUM, BCH, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/v20#activation-mode) object.                                                                          |
+| sync_params               | integer or string | ZHTLC coins only. Optional, defaults to `"earliest"`. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (full scan), `height` (a specific block height) or `date` (a linux timestamp).            |
+| mode                      | object    | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/v20#activation-mode) object.                                                                          |
 
 
 ### ActivationMode
@@ -147,11 +145,11 @@ Defines the activation mode for QTUM, BCH, UTXO & ZHTLC coins.
 
 Contains information about electrum & lightwallet_d servers for coins being used in `Electrum` or `Light` mode.
 
-| Parameter               | Type      | Description                                                                              |
-| ----------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| light_wallet_d_servers  | list      | ZHTLC only. A list of urls which are hosting lightwallet_d servers for a coin.           |
-| electrum_servers        | object    | ZHTLC only. Contains additional details about a coins electrum servers.                  |
-| electrum                | object    | QTUM, BCH & UTXO coins only. Contains additional details about a coins electrum servers. |
+| Parameter               | Type            | Description                                                                              |
+| ----------------------- | --------------- | ---------------------------------------------------------------------------------------- |
+| light_wallet_d_servers  | list            | ZHTLC only. A list of urls which are hosting lightwallet_d servers for a coin.           |
+| electrum_servers        | list of objects | ZHTLC only. A list of standard [ActivationServers](/atomicdex/api/v20#activation-servers) objects. |
+| electrum                | list of objects | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/atomicdex/api/v20#activation-servers) objects. |
 
 
 ### ActivationServers
@@ -160,40 +158,68 @@ Contains information electrum servers for coins being used in `Electrum` or `Lig
 
 | Parameter                 | Type      | Description                                                                              |
 | ------------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| protocol                  | string    | Transport protocol used by the KomoDeFi SDK to connect to the electrum server (`TCP` or `SSL`). Optional, defaults to `TCP`                                                                                                             |
-| url                       | string    | The URL and port of an electrum server.                                                                                                                                                                                              |
-| disable_cert_verification | boolean   | If `true`, this disables server SSL/TLS certificate verification (e.g. to use self-signed certificate). Optional, defaults to `false` <b>Use at your own risk!</b>                                                                   |
-
-
+| url                       | string    | The URL and port for an electrum server.                                                 |
+| ws_url                    | string    | Optional, for WSS only. The URL and port for an electrum server's WSS port.              |
+| protocol                  | string    | Optional, defaults to `TCP`. Transport protocol used to connect to the server. Options: `TCP` or `SSL` |
+| disable_cert_verification | boolean   | Optional, defaults to `false`. If `true`, this disables server SSL/TLS certificate verification (e.g. for self-signed certificates). <b>Use at your own risk!</b> |
 
 
 <CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
-#### Example with balances
+#### ZHTLC Example
 
 ```json
-"bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
-    "derivation_method": {
-        "type": "Iguana"
+{
+  "activation_params": {
+    "mode": {
+      "rpc": "Light",
+      "rpc_data": {
+        "electrum_servers": [
+          {
+            "url": "zombie.sirseven.me:10033"
+          },
+          {
+            "url":"zombie.dragonhound.info:10033"
+          }
+        ],
+        "light_wallet_d_servers": [
+          "http://zombie.sirseven.me:443",
+          "http://zombie.dragonhound.info:443"
+        ]
+      }
     },
-    "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
-    "balances": {
-        "spendable": "0.11398301",
-        "unspendable": "0.00001"
+    "zcash_params_path": "/home/username/path_to/.zcash-params",
+    "scan_blocks_per_iteration": 100,
+    "scan_interval_ms": 200,
+    "sync_params": { 
+        "height":  2528700
     }
+  }
 }
 ```
 
-#### Example without balances
-
-```json
-"bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
-    "derivation_method": {
-        "type": "Iguana"
+#### HD UTXO Activation (v2)
+"activation_params": {
+    "mode": {
+        "rpc": "Electrum",
+        "rpc_data": {
+            "servers": [
+                {
+                    "url": "electrum2.cipig.net:10001"
+                },
+                {
+                    "url": "electrum3.cipig.net:20001",
+                    "ws_url": "electrum3.cipig.net:30001",
+                    "protocol": "SSL"
+                }
+            ]
+        }
     },
-    "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
-    "tickers": ["ASLP-SLP"]
+    "scan_policy": "scan_if_new_wallet",
+    "priv_key_policy": "Trezor",
+    "min_addresses_number": 3,
+    "gap_limit": 20
 }
-```
+
 </CollapsibleSection>
 
 
