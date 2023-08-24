@@ -86,6 +86,34 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](withdraw_tasks) me
 ```
 </CodeGroup>
 
+#### Command to sync sapling activation height (earliest)
+
+<CodeGroup title="" tag="POST" label="task::enable_z_coin::init">
+```json {{ mm2MethodDecorate : true }}
+{
+  "userpass": "MM2_RPC_PASSWORD",
+  "method": "task::enable_z_coin::init",
+  "mmrpc": "2.0",
+  "params": {
+    "ticker": "ZOMBIE",
+    "activation_params": {
+      "mode": {
+        "rpc": "Light",
+        "rpc_data": {
+          "electrum_servers": [{"url":"zombie.dragonhound.info:10033"}],
+          "light_wallet_d_servers": ["http://zombie.dragonhound.info:443"]
+        }
+      },
+      "zcash_params_path": "/home/username/path_to/.zcash-params",
+      "scan_blocks_per_iteration": 100,
+      "scan_interval_ms": 200,
+      "sync_params": "earliest"
+    }
+  }
+}
+```
+</CodeGroup>
+
 #### Command using websockets to sync from [Proof of Keys Day](https://hackernoon.com/not-your-keys-not-your-bitcoin-jan3bitcoin-z6k3ktb), 2023.
 
 <CodeGroup title="" tag="POST" label="task::enable_z_coin::init">
@@ -162,7 +190,7 @@ After initiating z coin enabling, you can use the `task_id` to check progress.
   "method": "task::enable_z_coin::status",
   "mmrpc": "2.0",
   "params": {
-    "task_id": "$TASK_ID",
+    "task_id": 0,
     "forget_if_finished": false
   }
 }
@@ -243,29 +271,22 @@ After initiating z coin enabling, you can use the `task_id` to check progress.
 }
 ```
 
-#### Response (no Zcash Params)
+#### Response (CoinCreationError - no Zcash Params)
 
 ```json
 {
-  "mmrpc": "2.0",
-  "result": {
-    "status": "Error",
-    "details": {
-      "error": "Error on platform coin ZOMBIE creation: ZCashParamsNotFound",
-      "error_path": "lib.z_coin_activation.z_coin",
-      "error_trace": "lib:103] z_coin_activation:192] z_coin:761]",
-      "error_type": "CoinCreationError",
-      "error_data": {
-        "ticker": "ZOMBIE",
-        "error": "ZCashParamsNotFound"
-      }
-    }
-  },
-  "id": null
+	'error': 'Error on platform coin ZOMBIE creation: ZCashParamsNotFound',
+	'error_path': 'lib.z_coin_activation.z_coin',
+	'error_trace': 'lib:104] z_coin_activation:218] z_coin:1007]',
+	'error_type': 'CoinCreationError',
+	'error_data': {
+		'ticker': 'ZOMBIE',
+		'error': 'ZCashParamsNotFound'
+	}
 }
 ```
 
-#### Response (error - no such task)
+#### Response (error - NoSuchTask)
 
 You'll see this if the task number does not exist, or the task has already completed.
 
@@ -280,6 +301,21 @@ You'll see this if the task number does not exist, or the task has already compl
   "id": null
 }
 ```
+
+#### Response (error - InvalidRequest)
+
+```json
+{
+	'mmrpc': '2.0',
+	'error': 'Error parsing request: invalid value: integer `-205`, expected u64',
+	'error_path': 'dispatcher',
+	'error_trace': 'dispatcher:109]',
+	'error_type': 'InvalidRequest',
+	'error_data': 'invalid value: integer `-205`, expected u64',
+	'id': None
+}
+```
+
 
 </CollapsibleSection>
 
