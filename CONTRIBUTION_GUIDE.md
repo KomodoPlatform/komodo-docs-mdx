@@ -29,7 +29,19 @@ Using these priority labels in GitHub Issues can help our prioritize and manage 
 - Make sure that you understand the issue, requirements, security details, etc.
 - Move related issue to the "In progress" column on the project board
 - Be sure to follow the project's coding style and best practices
-- Add your info to the [Authors info file](authors.json)
+- Add your info to the [Authors info file](authors.json). Just the following is enough. Rest of the info is filled in automatically
+
+```json
+"<your username>": {
+    "username": "<your username>",
+        "commit_emails": [<your emails, seperated by commas>],
+        "socials": {
+            "twitter": "<your twitter username>",
+            "linkedin": "your linkedin profile url"
+        }
+}
+```
+
 - Commit your changes in small, logical units with [clear and descriptive commit messages](https://cbea.ms/git-commit/)
 - Upload your work branch to the remote, even if it's not finished yet. Update it with new commits as you work on the issue
 
