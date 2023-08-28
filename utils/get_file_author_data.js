@@ -33,7 +33,6 @@ const fileData = {};
             authorsData[contributor.login].id = contributor.id
             authorsData[contributor.login].avatar_url = contributor.avatar_url
         });
-        fs.writeFileSync("authors.json", JSON.stringify(authorsData, null, 4))
     } catch (error) {
         console.error(error);
     }
@@ -46,8 +45,12 @@ const fileData = {};
         // const fileExt = respHeaders["content-type"].split("/")[1]
         // const imgFilename = `./src/images/authors/${username}.${fileExt}`
         // fs.writeFileSync(imgFilename, imgResponse)
-        await downloadImage(imageUrl, username)
+        const imgName = await downloadImage(imageUrl, username)
+        authorsData[username].image = imgName
     }
+
+    fs.writeFileSync("authors.json", JSON.stringify(authorsData, null, 4))
+
 
     walkDir("./src/pages", getAllFileData);
     fs.writeFileSync("./utils/_fileData.json", JSON.stringify(fileData, null, 2));
@@ -104,7 +107,7 @@ async function downloadImage(url, username) {
             file.on('finish', () => {
                 file.close();
                 console.log('Image downloaded successfully: ' + filename);
-                resolve(true)
+                resolve(`${username}.${fileExt}`)
             });
         }).on('error', (error) => {
             fs.unlink(filename);
