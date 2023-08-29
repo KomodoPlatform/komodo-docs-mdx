@@ -39,12 +39,6 @@ const fileData = {};
 
     for (const username in authorsData) {
         const imageUrl = authorsData[username].avatar_url
-
-        // const { response: imgResponse, headers: respHeaders } = await httpsGet(imageUrl, options)
-
-        // const fileExt = respHeaders["content-type"].split("/")[1]
-        // const imgFilename = `./src/images/authors/${username}.${fileExt}`
-        // fs.writeFileSync(imgFilename, imgResponse)
         const imgName = await downloadImage(imageUrl, username)
         authorsData[username].image = imgName
     }
@@ -165,9 +159,6 @@ const getAllFileData = (filepath) => {
 };
 
 function filePathToRoute(filePath) {
-    // Convert Windows-style path separators to Unix-style
-    // const normalizedPath = filePath.replace(/\\/g, "/");
-
     const route = filePath
         .replace(/(\/index)?\.[^.]+$/, "") // Remove the file extension and "index" suffix if present
         .replace(/^.*\/pages\/?/, ""); // Remove the "pages" directory prefix and add a leading slash
