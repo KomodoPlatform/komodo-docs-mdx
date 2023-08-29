@@ -127,20 +127,18 @@ const getAllFileData = (filepath) => {
         filepath,
     ]); //, { cwd: gitDir }
 
+    if (getLastEditedTime.error) {
+        console.error(
+            "An error occurred while executing the git command:",
+            getLastEditedTime.error.message
+        );
+        throw new Error(
+            `An error occurred while executing the git command: ${getLastEditedTime.error.message}`
+        );
+    }
+
     const date = new Date(parseInt(getLastEditedTime.stdout.toString()) * 1000);
 
-    const getContributors = spawnSync("git", [
-        "log",
-        '--format={"author": "%an", "email": "%ae"}',
-        filepath,
-    ]);
-
-    let getLastContributor = spawnSync("git", [
-        "log",
-        "-n 1",
-        '--format={"author": "%an", "email": "%ae"}',
-        filepath,
-    ]);
     if (
         date.toString() == "Invalid Date"
     ) {
@@ -152,60 +150,18 @@ const getAllFileData = (filepath) => {
             "Date is invalid:",
             date
         );
-    } else if (getLastEditedTime.error) {
-        console.error(
-            "An error occurred while executing the git command:",
-            getLastEditedTime.error.message
-        );
-        throw new Error(
-            `An error occurred while executing the git command: ${getLastEditedTime.error.message}`
-        );
-    } else if (getContributors.error) {
-        console.error(
-            "An error occurred while executing the git command:",
-            getContributors.error.message
-        );
-        throw new Error(
-            `An error occurred while executing the git command: ${getContributors.error.message}`
-        );
-    } else if (getLastContributor.error) {
-        console.error(
-            "An error occurred while executing the git command:",
-            getLastContributor.error.message
-        );
-        throw new Error(
-            `An error occurred while executing the git command: ${getLastContributor.error.message}`
-        );
-    } else {
-        const contributorsList = getContributors.stdout
-            .toString()
-            .split("\n")
-            .filter((el) => {
-                return el !== "";
-            });
-
-        const updatedContributors = contributorsList.map((contributor) => {
-            const parsedContributor = JSON.parse(contributor);
-            return parsedContributor;
-        });
-
-        const contributorsArray = updatedContributors.filter((item, index) => {
-            return index === updatedContributors.findIndex(obj => {
-                return JSON.stringify(obj) === JSON.stringify(item);
-            });
-        });
-
-        getLastContributor = JSON.parse(
-            getLastContributor.stdout.toString().replace("\n", "")
-        );
-
-        fileData[filePathToRoute(filepath)] = {};
-        fileData[filePathToRoute(filepath)]["dateModified"] = date.toISOString();
-        fileData[filePathToRoute(filepath)]["contributors"] = contributorsArray;
-
-        fileData[filePathToRoute(filepath)]["lastContributor"] =
-            getLastContributor;
     }
+
+    let lastContributor = getLastContributor(filepath)
+    let allContributors = getAllContributors(filepath)
+
+    fileData[filePathToRoute(filepath)] = fileData[filePathToRoute(filepath)] ? fileData[filePathToRoute(filepath)] : {};
+    fileData[filePathToRoute(filepath)]["dateModified"] = date.toISOString();
+    fileData[filePathToRoute(filepath)]["contributors"] = allContributors;
+
+    fileData[filePathToRoute(filepath)]["lastContributor"] =
+        lastContributor;
+
 };
 
 function filePathToRoute(filePath) {
@@ -216,4 +172,99 @@ function filePathToRoute(filePath) {
         .replace(/(\/index)?\.[^.]+$/, "") // Remove the file extension and "index" suffix if present
         .replace(/^.*\/pages\/?/, ""); // Remove the "pages" directory prefix and add a leading slash
     return "/" + route;
+}
+
+function getLastContributor(filepath) {
+    let nameCommand = spawnSync("git", [
+        "log",
+        "-n 1",
+        '--format=%an',
+        filepath,
+    ]);
+    if (nameCommand.error) {
+        console.error(
+            "An error occurred while executing the git command:",
+            nameCommand.error.message
+        );
+        throw new Error(
+            `An error occurred while executing the git command: ${nameCommand.error.message}`
+        );
+    }
+    let emailCommand = spawnSync("git", [
+        "log",
+        "-n 1",
+        '--format=%ae',
+        filepath,
+    ]);
+    if (emailCommand.error) {
+        console.error(
+            "An error occurred while executing the git command:",
+            emailCommand.error.message
+        );
+        throw new Error(
+            `An error occurred while executing the git command: ${emailCommand.error.message}`
+        );
+    }
+    let name = JSON.stringify(
+        nameCommand.stdout.toString().replace("\n", "")
+    );
+    let email =
+        emailCommand.stdout.toString().replace("\n", "")
+    return { name, email }
+}
+
+function getAllContributors(filepath) {
+    let nameCommand = spawnSync("git", [
+        "log",
+        '--format=%an',
+        filepath,
+    ]);
+    if (nameCommand.error) {
+        console.error(
+            "An error occurred while executing the git command:",
+            nameCommand.error.message
+        );
+        throw new Error(
+            `An error occurred while executing the git command: ${nameCommand.error.message}`
+        );
+    }
+    let emailCommand = spawnSync("git", [
+        "log",
+        '--format=%ae',
+        filepath,
+    ]);
+    if (emailCommand.error) {
+        console.error(
+            "An error occurred while executing the git command:",
+            emailCommand.error.message
+        );
+        throw new Error(
+            `An error occurred while executing the git command: ${emailCommand.error.message}`
+        );
+    }
+    let names =
+        nameCommand.stdout.toString().split("\n").filter((el) => {
+            return el !== "";
+        }).map(name => JSON.stringify(name))
+
+    let emails =
+        emailCommand.stdout.toString().split("\n").filter((el) => {
+            return el !== "";
+        })
+    if (names.length !== emails.length) {
+        throw new Error("length of emails list and names list for allContributors isn't the same")
+    }
+    let contributorsArray = []
+    for (let index = 0; index < names.length; index++) {
+        let contributor = {
+            name: names[index],
+            email: emails[index]
+        }
+        contributorsArray.push(contributor)
+    }
+    return contributorsArray.filter((item, index) => { //filter repeated entries
+        return index === contributorsArray.findIndex(obj => {
+            return JSON.stringify(obj) === JSON.stringify(item);
+        });
+    });
 }
