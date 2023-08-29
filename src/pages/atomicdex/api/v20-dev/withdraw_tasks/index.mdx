@@ -7,7 +7,7 @@ export const description = "The methods in this document allow withdrawal of coi
 
 The `task::withdraw::init` method generates, signs, and returns a transaction that transfers the `amount` of `coin` to the address indicated in the `to` argument. The status of this method can be queried via the [withdraw_status](#withdraw-status) method.
 
-It will return the transaction hex (via `task::withdraw::status`), which then needs to be broadcast with the [sendrawtransaction](../atomicdex/api/legacy/send_raw_transaction.html) to complete the withdrawal. This method is uses the same input fields as the [standard v2 withdraw method](../atomicdex/api/v20/withdraw.html), with additional optional fields to specify the `from` address when using a hardware or HD wallet. There are two way to indicate which HW/HD address to send funds from:
+It will return the transaction hex (via `task::withdraw::status`), which then needs to be broadcast with the [sendrawtransaction](/atomicdex/api/legacy/send_raw_transaction/) to complete the withdrawal. This method is uses the same input fields as the [standard v2 withdraw method](/atomicdex/api/v20/withdraw/), with additional optional fields to specify the `from` address when using a hardware or HD wallet. There are two way to indicate which HW/HD address to send funds from:
 
 - Using `derivation_path` as a single input. E.g `m/44'/20'/0'/0/2`
 - Using `account_id` (0), `chain` (External) & `address_id` (2) inputs. The bracketed values are the equavalent of the derivation path above.
@@ -27,7 +27,7 @@ To cancel the transaction generation, use the [withdraw_cancel](#withdraw-cancel
 | to                   | string           | Coins are withdrawn to this address                                                                                                                                                                                                                                                                         |
 | amount               | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                                                                                                                                                                                                                            |
 | memo                 | string           | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.                                                                                                                                                                                                                     |
-| from                 | string           | Optional, used only for transactions using a hardware wallet. For more information, see the [Trezor Integration guide](trezor_integration)                                                                                                                                                                  |
+| from                 | string           | Optional, used only for transactions using a hardware wallet. For more information, see the [Trezor Integration guide](/atomicdex/api/v20-dev/trezor_initialisation/)                                                                                                                                                                  |
 | from.derivation_path | string           | Optional, HW/HD wallets only. Follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID`                                                                                                                                                                                                              |
 | from.account_id      | integer          | Optional, HW/HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HW/HD wallet                                                                                                                                                                                  |
 | from.chain           | string           | Optional, HW/HD wallets only. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
@@ -185,7 +185,7 @@ To cancel the transaction generation, use the [withdraw_cancel](#withdraw-cancel
 
 ## task_withdraw_status
 
-To get the status of your withdrawal transaction generation, use the `task::withdraw::status` method. Once ready, it will provide the raw hex used to broadcast your transaction with [sendrawtransaction](../atomicdex/api/legacy/send_raw_transaction.html). The response returned is the same as what is returned from the [standard v2 withdraw method](../atomicdex/api/v20/withdraw.html#response)
+To get the status of your withdrawal transaction generation, use the `task::withdraw::status` method. Once ready, it will provide the raw hex used to broadcast your transaction with [sendrawtransaction](/atomicdex/api/legacy/send_raw_transaction/). The response returned is the same as what is returned from the [standard v2 withdraw method](/atomicdex/api/v20/withdraw/#response)
 
 #### Arguments
 
