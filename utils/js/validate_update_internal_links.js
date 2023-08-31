@@ -26,7 +26,6 @@ import path from 'path'
     } catch (error) {
         if (error) throw error;
     }
-
 })()
 
 // Function to process a link
