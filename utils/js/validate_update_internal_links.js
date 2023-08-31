@@ -51,29 +51,19 @@ async function processLink(link, currFilePath) {
         newStrippedPart = newStrippedPart.join(".")
         newStrippedPart = newStrippedPart.split("/")
         let fileName = newStrippedPart.pop()
-        //console.log("bb: " + fileName)
-
         if (fileName !== "index") {
-            //throw new Error(`File: ${currFilePath} has a link that doesn't end with index: ${link}`)
             correctUrl = strippedPath.replace(".html", "/").replace(".md", "/").replace(".mdx", "/")
-            //console.log("aa: " + correctUrl)
-            //correctUrl = path.resolve(currFilePath.replace("index.mdx", ""), correctUrl) + (hash ? `#${hash}` : "")
-
             correctUrl = path.join(path.resolve(currNormalisedDir, correctUrl) + "/") + (hash ? `#${hash}` : "")
-            console.log("ee:" + correctUrl)
-
         }
         newStrippedPart = newStrippedPart.join("/")
         strippedPath = newStrippedPart
     }
     if (!correctUrl) {
         if (strippedPath === "") {
-            correctUrl = currFilePath.replace("index.mdx", "").replace(path.join(filePath + "/").slice(0, -1), "")
-            console.log("cc:" + correctUrl)
+            correctUrl = currFilePath.replace("index.mdx", "").replace(path.join(filePath + "/").slice(0, -1), "") + (hash ? `#${hash}` : "")
+
         } else {
-            //correctUrl = path.join(strippedPath, "/") + (hash ? `#${hash}` : "")
             correctUrl = path.join(path.resolve(currNormalisedDir, strippedPath), "/") + (hash ? `#${hash}` : "")
-            console.log("dd:" + correctUrl)
         }
     }
     correctUrl = correctUrl.replace(path.join(currentWorkingDirectory, filePath), "")
@@ -82,9 +72,11 @@ async function processLink(link, currFilePath) {
     // console.log("currNormalisedDir:" + currNormalisedDir)
     // console.log(currFilePath)
     // console.log(hash)
+    // console.log(strippedPath)
     // console.log(link)
     // console.log(correctUrl)
     // console.log("--------------------------------")
+
     const internalLinkFile = path.join(filePath, correctUrl.split("#")[0] + "index.mdx")
     try {
         await fs.access(internalLinkFile, constants.F_OK)
@@ -92,6 +84,8 @@ async function processLink(link, currFilePath) {
         console.log("currNormalisedDir:" + currNormalisedDir)
         console.log(currFilePath)
         console.log(hash)
+        console.log(strippedPath)
+
         console.log(link)
         console.log(correctUrl)
 
