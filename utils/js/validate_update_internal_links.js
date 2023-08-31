@@ -15,9 +15,9 @@ import path from 'path'
             const markdown = await fs.readFile(filePath, 'utf-8');
             const file = await remark()
                 .use(() => (tree) => {
-                    visit(tree, 'link', (node) => {
+                    visit(tree, 'link', async (node) => {
                         //Process the link
-                        node.url = processLink(node.url, filePath);
+                        node.url = await processLink(node.url, filePath);
                     });
                 })
                 .process(markdown);
