@@ -21,7 +21,7 @@ import path from 'path'
                     });
                 })
                 .process(markdown);
-            //fs.writeFileSync(filePath, String(file));
+            await fs.writeFile(filePath, String(file));
         });
     } catch (error) {
         if (error) throw error;
@@ -93,7 +93,7 @@ async function processLink(link, currFilePath) {
         throw new Error(err)
     }
 
-    return '';
+    return correctUrl;
 }
 
 async function walkDir(dir, callback) {
