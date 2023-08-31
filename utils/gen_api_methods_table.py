@@ -23,7 +23,7 @@ def gen_api_methods_table():
                     if section in methods_dict:
                         if 'CodeGroup' in line and "label" in line:
                             method = line.split('label="')[1].split('"')[0]
-                            link = f"[{method}]({doc_path}#{method})"
+                            link = f"[{method}]({doc_path}/#{method})"
                             methods_dict[section].append({
                                 "link": link,
                                 "method": method,

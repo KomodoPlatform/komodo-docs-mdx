@@ -34,24 +34,33 @@ async function processLink(link, currFilePath) {
     const isExternalURL = /^https?:\/\//;
     if (isExternalURL.test(link)) return;
     let filePath = "src/pages";
-    let strippedPath = link.split(/[?#]/)[0]; // strips hash
-    const hash = link.split(/[?#]/)[1];
-    let correctUrl
+    let strippedPath = link.split("#")[0]; // strips hash
+    if (strippedPath.endsWith("/")) {
+        strippedPath = strippedPath.slice(0, -1)
+    }
+    const hash = link.split("#")[1];
+    let correctUrl;
+    let currNormalisedDir
+    const currentWorkingDirectory = process.cwd();
+    currNormalisedDir = currFilePath.replace("/index.mdx", "").split("/")
+    currNormalisedDir.pop()
+    currNormalisedDir = currNormalisedDir.join("/")
     if (strippedPath.endsWith(".md") || strippedPath.endsWith(".html") || strippedPath.endsWith(".mdx")) {
         let newStrippedPart = strippedPath.split(".")
         newStrippedPart.pop()
         newStrippedPart = newStrippedPart.join(".")
         newStrippedPart = newStrippedPart.split("/")
         let fileName = newStrippedPart.pop()
+        //console.log("bb: " + fileName)
+
         if (fileName !== "index") {
             //throw new Error(`File: ${currFilePath} has a link that doesn't end with index: ${link}`)
             correctUrl = strippedPath.replace(".html", "/").replace(".md", "/").replace(".mdx", "/")
+            //console.log("aa: " + correctUrl)
             //correctUrl = path.resolve(currFilePath.replace("index.mdx", ""), correctUrl) + (hash ? `#${hash}` : "")
-            let currNormalisedDir
-            currNormalisedDir = currFilePath.replace("/index.mdx", "").split("/")
-            currNormalisedDir.pop()
-            currNormalisedDir = currNormalisedDir.join("/")
-            correctUrl = path.resolve(currNormalisedDir, correctUrl) + "/" + (hash ? `#${hash}` : "")
+
+            correctUrl = path.join(path.resolve(currNormalisedDir, correctUrl) + "/") + (hash ? `#${hash}` : "")
+            console.log("ee:" + correctUrl)
 
         }
         newStrippedPart = newStrippedPart.join("/")
@@ -59,22 +68,28 @@ async function processLink(link, currFilePath) {
     }
     if (!correctUrl) {
         if (strippedPath === "") {
-            correctUrl = currFilePath.replace("index.mdx", "").replace(filePath + "/", "")
+            correctUrl = currFilePath.replace("index.mdx", "").replace(path.join(filePath + "/").slice(0, -1), "")
+            console.log("cc:" + correctUrl)
         } else {
-            correctUrl = path.join(strippedPath, "/") + (hash ? `#${hash}` : "")
+            //correctUrl = path.join(strippedPath, "/") + (hash ? `#${hash}` : "")
+            correctUrl = path.join(path.resolve(currNormalisedDir, strippedPath), "/") + (hash ? `#${hash}` : "")
+            console.log("dd:" + correctUrl)
         }
     }
+    correctUrl = correctUrl.replace(path.join(currentWorkingDirectory, filePath), "")
 
-    console.log("--------------------------------")
-    console.log(currFilePath)
-    console.log(hash)
-    console.log(link)
-    console.log(correctUrl)
-    console.log("--------------------------------")
+    // console.log("--------------------------------")
+    // console.log("currNormalisedDir:" + currNormalisedDir)
+    // console.log(currFilePath)
+    // console.log(hash)
+    // console.log(link)
+    // console.log(correctUrl)
+    // console.log("--------------------------------")
     const internalLinkFile = path.join(filePath, correctUrl.split("#")[0] + "index.mdx")
     try {
         await fs.access(internalLinkFile, constants.F_OK)
     } catch (err) {
+        console.log("currNormalisedDir:" + currNormalisedDir)
         console.log(currFilePath)
         console.log(hash)
         console.log(link)
