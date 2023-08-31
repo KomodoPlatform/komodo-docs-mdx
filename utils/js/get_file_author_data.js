@@ -1,8 +1,7 @@
-const https = require('https');
-const fs = require('fs');
-const path = require("path");
-const child_process = require("child_process");
-const spawnSync = child_process.spawnSync;
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
+import { spawnSync } from 'child_process';
 
 const authorsData = JSON.parse(fs.readFileSync("./authors.json", 'utf8'));
 const fileData = {};
