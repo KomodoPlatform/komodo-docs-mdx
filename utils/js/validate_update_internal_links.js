@@ -3,6 +3,7 @@ import { visit, SKIP } from 'unist-util-visit'
 import { promises as fs } from 'fs';
 import { constants } from "fs"
 import { remark } from 'remark'
+import remarkMdx from 'remark-mdx'
 import path from 'path'
 
 (async function () {
@@ -14,6 +15,7 @@ import path from 'path'
             }
             const markdown = await fs.readFile(filePath, 'utf-8');
             const file = await remark()
+                .use(remarkMdx)
                 .use(() => (tree) => {
                     visit(tree, 'link', async (node) => {
                         //Process the link
@@ -21,7 +23,9 @@ import path from 'path'
                     });
                 })
                 .process(markdown);
-            await fs.writeFile(filePath, String(file));
+            if (file) {
+                await fs.writeFile(filePath, String(file));
+            }
         });
     } catch (error) {
         if (error) throw error;
