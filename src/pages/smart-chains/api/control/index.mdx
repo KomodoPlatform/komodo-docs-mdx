@@ -6,22 +6,20 @@ export const description = "This document contains Control methods for a Smart C
 The following RPC calls interact with the `komodod` software, and are made available through the `komodo-cli` software.
 
 <DevComment>
+  These work for KMDLabs chains now, must revisit after they are modded to work for KMD
 
-These work for KMDLabs chains now, must revisit after they are modded to work for KMD
+  ## getnotarysendmany
 
-## getnotarysendmany
+  **getnotarysendmany**
 
-**getnotarysendmany**
+  The `getnotarysendmany` method returns a sendmany JSON array with Raddresses of the current notaries.
 
-The `getnotarysendmany` method returns a sendmany JSON array with Raddresses of the current notaries.
+  Examples:
 
-Examples:
+  > komodo-cli getnotarysendmany 10
+  > curl --user myusername --data-binary '\{"jsonrpc": "1.0", "id":"curltest", "method": "getnotarysendmany", "params": \[10] }' -H 'content-type: text/plain;' http://127.0.0.1:7771/
 
-> komodo-cli getnotarysendmany 10
-> curl --user myusername --data-binary '\{"jsonrpc": "1.0", "id":"curltest", "method": "getnotarysendmany", "params": [10] \}' -H 'content-type: text/plain;' http://127.0.0.1:7771/
-
-## getiguanajson
-
+  ## getiguanajson
 </DevComment>
 
 ## getinfo
@@ -52,7 +50,7 @@ The `getinfo` method returns an object containing various state info.
 | "testnet"         | (boolean)          | if the server is using testnet or not                                                                                                  |
 | "keypoololdest"   | (numeric)          | the timestamp (seconds since GMT epoch) of the oldest pre-generated key in the key pool                                                |
 | "keypoolsize"     | (numeric)          | how many new keys are pre-generated                                                                                                    |
-| "unlocked_until"  | (numeric)          | the timestamp in seconds since epoch (midnight Jan 1 1970 GMT) that the wallet is unlocked for transfers, or 0 if the wallet is locked |
+| "unlocked\_until"  | (numeric)          | the timestamp in seconds since epoch (midnight Jan 1 1970 GMT) that the wallet is unlocked for transfers, or 0 if the wallet is locked |
 | "paytxfee"        | (numeric)          | the transaction fee set in COIN/kB                                                                                                     |
 | "relayfee"        | (numeric)          | minimum relay fee for non-free transactions in COIN/kB                                                                                 |
 | "errors"          | (string)           | any error messages                                                                                                                     |
@@ -65,58 +63,9 @@ Command:
 ./komodo-cli getinfo
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```json
-{
-  "version": 1001550,
-  "protocolversion": 170003,
-  "KMDversion": "0.2.0",
-  "notarized": 0,
-  "prevMoMheight": 0,
-  "notarizedhash": "0000000000000000000000000000000000000000000000000000000000000000",
-  "notarizedtxid": "0000000000000000000000000000000000000000000000000000000000000000",
-  "notarizedtxid_height": "mempool",
-  "KMDnotarized_height": 0,
-  "notarized_confirms": 0,
-  "walletversion": 60000,
-  "balance": 10.16429765,
-  "blocks": 459,
-  "longestchain": 0,
-  "timeoffset": 0,
-  "tiptime": 1536624090,
-  "connections": 0,
-  "proxy": "",
-  "difficulty": 1.000026345948652,
-  "testnet": false,
-  "keypoololdest": 1536262464,
-  "keypoolsize": 101,
-  "paytxfee": 0.0,
-  "relayfee": 0.000001,
-  "errors": "",
-  "name": "SIDD",
-  "p2pport": 9800,
-  "rpcport": 9801,
-  "magic": -759875707,
-  "premine": 10
-}
-```
-
-</CollapsibleSection>
-
-You can find your `rpcuser`, `rpcpassword`, and `rpcport` in the coin's `.conf` file.
-
-Command:
-
-```bash
-curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getinfo", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:$rpcport/
-```
-
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```json
-{
-  "result": {
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
     "version": 1001550,
     "protocolversion": 170003,
     "KMDversion": "0.2.0",
@@ -139,20 +88,65 @@ curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curlte
     "testnet": false,
     "keypoololdest": 1536262464,
     "keypoolsize": 101,
-    "relayfee": 1e-6,
-    "paytxfee": 0,
+    "paytxfee": 0.0,
+    "relayfee": 0.000001,
     "errors": "",
     "name": "SIDD",
     "p2pport": 9800,
     "rpcport": 9801,
     "magic": -759875707,
     "premine": 10
-  },
-  "error": null,
-  "id": "curltest"
-}
+  }
+  ```
+</CollapsibleSection>
+
+You can find your `rpcuser`, `rpcpassword`, and `rpcport` in the coin's `.conf` file.
+
+Command:
+
+```bash
+curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getinfo", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:$rpcport/
 ```
 
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "result": {
+      "version": 1001550,
+      "protocolversion": 170003,
+      "KMDversion": "0.2.0",
+      "notarized": 0,
+      "prevMoMheight": 0,
+      "notarizedhash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notarizedtxid": "0000000000000000000000000000000000000000000000000000000000000000",
+      "notarizedtxid_height": "mempool",
+      "KMDnotarized_height": 0,
+      "notarized_confirms": 0,
+      "walletversion": 60000,
+      "balance": 10.16429765,
+      "blocks": 459,
+      "longestchain": 0,
+      "timeoffset": 0,
+      "tiptime": 1536624090,
+      "connections": 0,
+      "proxy": "",
+      "difficulty": 1.000026345948652,
+      "testnet": false,
+      "keypoololdest": 1536262464,
+      "keypoolsize": 101,
+      "relayfee": 1e-6,
+      "paytxfee": 0,
+      "errors": "",
+      "name": "SIDD",
+      "p2pport": 9800,
+      "rpcport": 9801,
+      "magic": -759875707,
+      "premine": 10
+    },
+    "error": null,
+    "id": "curltest"
+  }
+  ```
 </CollapsibleSection>
 
 ## help
@@ -181,36 +175,34 @@ Command:
 ./komodo-cli help
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  == Addressindex ==
+  getaddressbalance
+  getaddressdeltas
+  getaddressmempool
+  getaddresstxids
+  getaddressutxos
+  getsnapshot
 
-```bash
-== Addressindex ==
-getaddressbalance
-getaddressdeltas
-getaddressmempool
-getaddresstxids
-getaddressutxos
-getsnapshot
+  == Auction ==
+  auctionaddress [pubkey]
 
-== Auction ==
-auctionaddress [pubkey]
+  == Blockchain ==
+  coinsupply <height>
+  getbestblockhash
+  getblock "hash|height" ( verbose )
+  getblockchaininfo
+  getblockcount
 
-== Blockchain ==
-coinsupply <height>
-getbestblockhash
-getblock "hash|height" ( verbose )
-getblockchaininfo
-getblockcount
+  getblockhash index
+  getblockhashes timestamp
+  getblockheader "hash" ( verbose )
+  getchaintips
+  getdifficulty
 
-getblockhash index
-getblockhashes timestamp
-getblockheader "hash" ( verbose )
-getchaintips
-getdifficulty
-
-........ (other responses omitted for brevity)
-```
-
+  ........ (other responses omitted for brevity)
+  ```
 </CollapsibleSection>
 
 Command:
@@ -219,31 +211,29 @@ Command:
 ./komodo-cli help getaddressbalance
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  Returns the balance for an address(es) (requires addressindex to be enabled).
 
-```bash
-Returns the balance for an address(es) (requires addressindex to be enabled).
+  Arguments:
+  {
+    "addresses"
+      [
+        "address"  (string) The base58check encoded address
+        ,...
+      ]
+  }
 
-Arguments:
-{
-  "addresses"
-    [
-      "address"  (string) The base58check encoded address
-      ,...
-    ]
-}
+  Result:
+  {
+    "balance"  (string) The current balance in satoshis
+    "received"  (string) The total number of satoshis received (including change)
+  }
 
-Result:
-{
-  "balance"  (string) The current balance in satoshis
-  "received"  (string) The total number of satoshis received (including change)
-}
-
-Examples:
-> komodo-cli getaddressbalance '{"addresses": ["RY5LccmGiX9bUHYGtSWQouNy1yFhc5rM87"]}'
-> curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getaddressbalance", "params": [{"addresses": ["RY5LccmGiX9bUHYGtSWQouNy1yFhc5rM87"]}] }' -H 'content-type: text/plain;' http://127.0.0.1:7771/
-```
-
+  Examples:
+  > komodo-cli getaddressbalance '{"addresses": ["RY5LccmGiX9bUHYGtSWQouNy1yFhc5rM87"]}'
+  > curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getaddressbalance", "params": [{"addresses": ["RY5LccmGiX9bUHYGtSWQouNy1yFhc5rM87"]}] }' -H 'content-type: text/plain;' http://127.0.0.1:7771/
+  ```
 </CollapsibleSection>
 
 ## stop
@@ -271,7 +261,7 @@ The amount of time it takes to shut down the chain will vary depending on the ch
 | Name                          | Type | Description |
 | ----------------------------- | ---- | ----------- |
 | Komodo server stopping        |      |
-| [COIN] Komodo server stopping |      |
+| \[COIN] Komodo server stopping |      |
 
 #### 📌 Examples
 
@@ -281,12 +271,10 @@ Command:
 ./komodo-cli stop
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```bash
-"Komodo server stopping"
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  "Komodo server stopping"
+  ```
 </CollapsibleSection>
 
 You can find your `rpcuser`, `rpcpassword`, and `rpcport` in the coin's `.conf` file.
@@ -297,10 +285,8 @@ Command:
 curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "stop", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:$rpcport/
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```json
-{ "result": "Komodo server stopping", "error": null, "id": "curltest" }
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  { "result": "Komodo server stopping", "error": null, "id": "curltest" }
+  ```
 </CollapsibleSection>

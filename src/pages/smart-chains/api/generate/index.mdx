@@ -36,15 +36,13 @@ Command:
 ./komodo-cli generate 2
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```bash
-[
-  "0475316d63fe48bb9d58373595cb334fc2553f65496edfb2fb17b9ed06f4c480",
-  "00d29a2b7dec52baa9ab8e4264363f32b4989eef7dbb0a9932fbc11274195b5a"
-]
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  [
+    "0475316d63fe48bb9d58373595cb334fc2553f65496edfb2fb17b9ed06f4c480",
+    "00d29a2b7dec52baa9ab8e4264363f32b4989eef7dbb0a9932fbc11274195b5a"
+  ]
+  ```
 </CollapsibleSection>
 
 ## getgenerate
@@ -79,12 +77,10 @@ Command:
 ./komodo-cli getgenerate
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```bash
-false
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  false
+  ```
 </CollapsibleSection>
 
 You can find your `rpcuser`, `rpcpassword`, and `rpcport` in the coin's `.conf` file.
@@ -95,16 +91,14 @@ Command:
 curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getgenerate", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:$rpcport/
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```json
-{
-  "result": false,
-  "error": null,
-  "id": "curltest"
-}
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "result": false,
+    "error": null,
+    "id": "curltest"
+  }
+  ```
 </CollapsibleSection>
 
 ## setgenerate
@@ -146,12 +140,10 @@ Command:
 ./komodo-cli setgenerate true -1
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```bash
-(none)
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  (none)
+  ```
 </CollapsibleSection>
 
 ##### Activate staking
@@ -162,12 +154,10 @@ Command:
 ./komodo-cli setgenerate true 0
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```bash
-(none)
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  (none)
+  ```
 </CollapsibleSection>
 
 ##### Activate mining with 4 threads
@@ -178,12 +168,10 @@ Command:
 ./komodo-cli setgenerate true 4
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```bash
-(none)
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  (none)
+  ```
 </CollapsibleSection>
 
 ##### Check the setting
@@ -194,12 +182,10 @@ Command:
 ./komodo-cli getgenerate
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```bash
-true
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  true
+  ```
 </CollapsibleSection>
 
 ##### Turn off generation
@@ -210,12 +196,10 @@ Command:
 ./komodo-cli setgenerate false
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```bash
-(none)
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```bash
+  (none)
+  ```
 </CollapsibleSection>
 
 ##### Turning the setting on via json RPC
@@ -226,79 +210,72 @@ Command:
 curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "setgenerate", "params": [true, 1] }' -H 'content-type: text/plain;' http://127.0.0.1:$rpcport/
 ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```json
-{
-  "result": null,
-  "error": null,
-  "id": "curltest"
-}
-```
-
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "result": null,
+    "error": null,
+    "id": "curltest"
+  }
+  ```
 </CollapsibleSection>
 
 <DevComment>
-FIXME: get confirmation from alright
+  FIXME: get confirmation from alright
 
-setstakingsplit
+  setstakingsplit
 
-**setstakingsplit split_percentage**
+  **setstakingsplit split\_percentage**
 
-The `setstakingsplit` method allows the user to decide what happens to a UTXO that is successfully able to stake a block in the POS64 staking system (i.e. a Smart Chain started using the [-ac_staked](/antara/setup/antara-customizations.md#ac-staked) parameter).
+  The `setstakingsplit` method allows the user to decide what happens to a UTXO that is successfully able to stake a block in the POS64 staking system (i.e. a Smart Chain started using the [-ac\_staked](/antara/setup/antara-customizations.md#ac-staked) parameter).
 
-The argument `split_percentage` defines the percentage of the staking UTXO value to leave in the same address. The rest of of the staking UTXO value is added to the new UTXO created to the coinbase address.
+  The argument `split_percentage` defines the percentage of the staking UTXO value to leave in the same address. The rest of of the staking UTXO value is added to the new UTXO created to the coinbase address.
 
-Examples:
+  Examples:
 
-- `split_percentage` = `0` merges the staking UTXO value and the coinbase value to the coinbase address
-- `split_percentage` = `50` takes half of the staking UTXO value and sends it to the coinbase address
-- `split_percentage` = `100` does not change the staking UTXO
+  *   `split_percentage` = `0` merges the staking UTXO value and the coinbase value to the coinbase address
+  *   `split_percentage` = `50` takes half of the staking UTXO value and sends it to the coinbase address
+  *   `split_percentage` = `100` does not change the staking UTXO
 
-### Arguments
+  ### Arguments
 
-| Name             | Type                | Description                                                                                                                                                                                              |
-| ---------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| split_percentage | (numeric, required) | allowed value range: `0` to `100`; the percentage of the staking UTXO value to leave in the same address; the rest of of the staking UTXO value is added to the new UTXO created to the coinbase address |
+  | Name             | Type                | Description                                                                                                                                                                                              |
+  | ---------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | split\_percentage | (numeric, required) | allowed value range: `0` to `100`; the percentage of the staking UTXO value to leave in the same address; the rest of of the staking UTXO value is added to the new UTXO created to the coinbase address |
 
-### Response
+  ### Response
 
-| Name             | Type      | Description           |
-| ---------------- | --------- | --------------------- |
-| split_percentage | (numeric) | the supplied argument |
+  | Name             | Type      | Description           |
+  | ---------------- | --------- | --------------------- |
+  | split\_percentage | (numeric) | the supplied argument |
 
-#### 📌 Examples
+  #### 📌 Examples
 
-Command:
+  Command:
 
-```bash
-./komodo-cli -ac_name=HELLOWORLD setstakingsplit 0
-```
+  ```bash
+  ./komodo-cli -ac_name=HELLOWORLD setstakingsplit 0
+  ```
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+  <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+    ```json
+    {
+      "split_percentage": 0
+    }
+    ```
+  </CollapsibleSection>
 
-```json
-{
-  "split_percentage": 0
-}
-```
+  Command:
 
-</CollapsibleSection>
+  ```bash
+  curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "setstakingsplit", "params": [100] }' -H 'content-type: text/plain;' http://127.0.0.1:$rpcport/
+  ```
 
-Command:
-
-```bash
-curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "setstakingsplit", "params": [100] }' -H 'content-type: text/plain;' http://127.0.0.1:$rpcport/
-```
-
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```json
-{
-  "split_percentage": 100
-}
-```
-
-</CollapsibleSection>
-
+  <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+    ```json
+    {
+      "split_percentage": 100
+    }
+    ```
+  </CollapsibleSection>
 </DevComment>

@@ -16,11 +16,11 @@ A complete working example of this simplified Heir Antara module tutorial can be
 
 The source files are found in the following directories.
 
-- src/cc/heir.cpp
-- src/cc/CCheir.h
-- src/wallet/rpcwallet.cpp
-- src/rpc/server.cpp
-- src/rpc/server.h
+*   src/cc/heir.cpp
+*   src/cc/CCheir.h
+*   src/wallet/rpcwallet.cpp
+*   src/rpc/server.cpp
+*   src/rpc/server.h
 
 #### Downloading and Installing From Source
 
@@ -34,13 +34,13 @@ Instructions to download and build Komodo software is found here.
 
 Our tasks are the following:
 
-- Add a new `EVAL` code to represent this module
-- Create a global CC address
-- Define the Heir Module transactions
-  - vouts, or logical conditions
-  - vins, or logical fulfillments
-- Implement the RPC interface
-- Create the validation code
+*   Add a new `EVAL` code to represent this module
+*   Create a global CC address
+*   Define the Heir Module transactions
+    *   vouts, or logical conditions
+    *   vins, or logical fulfillments
+*   Implement the RPC interface
+*   Create the validation code
 
 ## Create the EVAL Code
 
@@ -72,19 +72,19 @@ When you are finished with your attempt, compare your results with the downloada
 
 We require three types of module transactions
 
-- an initial transaction with which a user creates the fund for inheritance
-- a transaction for additional funding
-- a transaction for spending funds by the owner or heir
+*   an initial transaction with which a user creates the fund for inheritance
+*   a transaction for additional funding
+*   a transaction for spending funds by the owner or heir
 
 #### The Initial Transaction: Creating a Fund
 
 | Input/Output | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vins.*`     | <b>Normal input</b> <br/> - The `*` notation implies that this can apply to any number of inputs <br/> - These vins are typical of core blockchain software and not related to CC                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `vins.*`     | <b>Normal input</b> <br /> - The `*` notation implies that this can apply to any number of inputs <br /> - These vins are typical of core blockchain software and not related to CC                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | `vout.0`     | <b>The `1of2` CC address that holds the funds that belong to the owner and, once available, to the heir</b>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `vout.1`     | <b>The transaction fee to account for the `vout.0` amount above</b> <br/> - The amount in `vout.1` is used as a marker. We will discuss markers and their uses cases further on in the tutorial                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `vout.2`     | <b>Normal change</b> <br/> - Recall that `change` is the leftover amount from the original utxo that the user does not intend to send to the destination address, and which the user desires to keep <br/> - Any amount of leftover funds not included in the `change` utxo is forfeited to the miner of the block; this is how miners receive their mining fee                                                                                                                                                                                                                                                                                     |
-| `vout.n-1`   | <b>OP_RETURN EVAL_HEIR 'F' ownerpk heirpk inactivitytime heirname</b> <br/> - This is the is the opreturn vout, and it contains any data relevant to the module <br/> - The 'F' is a flag that indicates that this transaction is a "Funding" CC transaction <br/> - `ownerpk` and `heirpk` respectively represent the pubkeys of the owner and heir <br/> - Concerning `inactivitytime`, the owner should either make a donation to or spend from the `1of2` address within the `inactivitytime` amount of time to prevent opening the `1of2` address to the heir for spending. <br/> - `heirname` is the name of this instance of the Heir Module |
+| `vout.1`     | <b>The transaction fee to account for the `vout.0` amount above</b> <br /> - The amount in `vout.1` is used as a marker. We will discuss markers and their uses cases further on in the tutorial                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `vout.2`     | <b>Normal change</b> <br /> - Recall that `change` is the leftover amount from the original utxo that the user does not intend to send to the destination address, and which the user desires to keep <br /> - Any amount of leftover funds not included in the `change` utxo is forfeited to the miner of the block; this is how miners receive their mining fee                                                                                                                                                                                                                                                                                     |
+| `vout.n-1`   | <b>OP\_RETURN EVAL\_HEIR 'F' ownerpk heirpk inactivitytime heirname</b> <br /> - This is the is the opreturn vout, and it contains any data relevant to the module <br /> - The 'F' is a flag that indicates that this transaction is a "Funding" CC transaction <br /> - `ownerpk` and `heirpk` respectively represent the pubkeys of the owner and heir <br /> - Concerning `inactivitytime`, the owner should either make a donation to or spend from the `1of2` address within the `inactivitytime` amount of time to prevent opening the `1of2` address to the heir for spending. <br /> - `heirname` is the name of this instance of the Heir Module |
 
 Through a funding transaction, the owner of the initial funds creates a "plan," which we can also call a "module data instance," and deposits funds for future spending.
 
@@ -104,11 +104,11 @@ Note the `F` letter in the opreturn structure. The `F` stands for "fund." By con
 
 We also stored other relevant data in the opreturn:
 
-- The owner and inheritor pubkeys
-- Inactivity time
-  - this is the amount of seconds during which the owner must exhibit activity to maintain sole control over the funds
-  - If the owner does not spend funds during this time period, the inheritor will gain the ability to spend these funds as well
-- The descriptive name of this funding plan
+*   The owner and inheritor pubkeys
+*   Inactivity time
+    *   this is the amount of seconds during which the owner must exhibit activity to maintain sole control over the funds
+    *   If the owner does not spend funds during this time period, the inheritor will gain the ability to spend these funds as well
+*   The descriptive name of this funding plan
 
 #### The Add Coins Transaction
 
@@ -117,7 +117,7 @@ We also stored other relevant data in the opreturn:
 | `vins.*`     | normal inputs                                                                                                                                                  |
 | `vout.0`     | the funding CC `1of2` address for the owner and heir. This address consists of two parts: the owner and heir pubkeys. Either owner or heir can spend this vout |
 | `vout.1`     | normal change                                                                                                                                                  |
-| `vout.n-1`   | OP_RETURN 'A' fundingtxid HasHeirSpendingBegun                                                                                                                 |
+| `vout.n-1`   | OP\_RETURN 'A' fundingtxid HasHeirSpendingBegun                                                                                                                 |
 
 This transaction serves the purpose of adding more funds to the owner's address. The transaction uses normal coin inputs (non-CC) and sends them to the CC `1of2` address.
 
@@ -136,7 +136,7 @@ Note the `HasHeirSpendingBegun` flag as well. This is discussed later in the ser
 | vout.0       | normal output, sent to the owner or the heir address          |
 | vout.1       | `change` to CC `1of2` address                                 |
 | vout.2       | `change` to user's address from transaction fee input, if any |
-| vout.n-1     | OP_RETURN EVAL_HEIR 'C' fundingtxid HasHeirSpendingBegun      |
+| vout.n-1     | OP\_RETURN EVAL\_HEIR 'C' fundingtxid HasHeirSpendingBegun      |
 
 This transaction allows either the owner or the heir to spend funds from this plan instance.
 
@@ -185,7 +185,7 @@ To add a new command to `komodo-cli` we open the `src/server.cpp` source file ad
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | heir      | a common name for all heir module RPC calls                                                                                                    |
 | heirfund  | the name of the new command                                                                                                                    |
-| &heirfund | the address of the RPC interface function                                                                                                      |
+| \&heirfund | the address of the RPC interface function                                                                                                      |
 | true      | indicates that the command description will be shown in the help command output; placing `false` here would hide this RPC from the help output |
 
 #### Add the RPC Function Declaration
@@ -219,7 +219,7 @@ UniValue heirfund(const UniValue& params, bool fHelp)
     CCerror.clear(); // clear global error object
 ```
 
-Recall that a Smart Chain must have the [<b>ac_cc</b>](/antara/setup/antara-customizations#ac-cc) and [<b>ac_ccenable</b>](/antara/setup/antara-customizations#ac-ccenable) customization parameters properly initiated for any Antara Module to function.
+Recall that a Smart Chain must have the [<b>ac\_cc</b>](/antara/setup/antara-customizations#ac-cc) and [<b>ac\_ccenable</b>](/antara/setup/antara-customizations#ac-ccenable) customization parameters properly initiated for any Antara Module to function.
 
 Therefore, we check that the wallet and Heir Module features are available in the Smart Chain. We also check the RPC parameter's required number:
 
@@ -253,9 +253,7 @@ We must convert these UniValue objects into normal C/C++ language types, and the
 Convert the parameters from the UniValue type to their basic C++ types and add checks to ensure that the converted parameter values are correct.
 
 <DevComment>
-
-This content is abbreviated. For links to the full source code and example files, click here. /antara/tutorials/heir-module-tutorial#links-to-heir-source-code-and-building-instructions
-
+  This content is abbreviated. For links to the full source code and example files, click here. /antara/tutorials/heir-module-tutorial#links-to-heir-source-code-and-building-instructions
 </DevComment>
 
 Note the method for parsing the hex representation of the pubkey parameter and converting it to a `CPubKey` object.
@@ -290,9 +288,7 @@ The second level of the RPC implementation is the transaction creation code. Thi
 The following content displays the skeleton of the <b>heirfund</b> RPC implementation.
 
 <DevComment>
-
-For links to the full source code and example files, click here. /antara/tutorials/heir-module-tutorial#links-to-heir-source-code-and-building-instructions
-
+  For links to the full source code and example files, click here. /antara/tutorials/heir-module-tutorial#links-to-heir-source-code-and-building-instructions
 </DevComment>
 
 ```cpp
@@ -332,12 +328,12 @@ We use a function in the CC SDK, `AddNormalinputs`, to add the normal inputs to 
 
 The parameters passed to the `AddNormalinputs()` function are:
 
-- The transaction itself
-- The user's pub
-- The total value for the funding amount
-- he marker and the miner fees
-- The limit on the quantity of utxos the daemon can take from the wallet of the user
-  - Naturally, only utxos that are available via the wallet's private keys can be used for these inputs
+*   The transaction itself
+*   The user's pub
+*   The total value for the funding amount
+*   he marker and the miner fees
+*   The limit on the quantity of utxos the daemon can take from the wallet of the user
+    *   Naturally, only utxos that are available via the wallet's private keys can be used for these inputs
 
 #### Adding Outputs to the Transaction
 
@@ -553,7 +549,7 @@ Add a normal output to receive the claimed funds, and a CC change output for the
         mtx.vout.push_back(MakeCC1of2vout(EVAL_HEIR, inputs - amount, ownerPubkey, heirPubkey));
 ```
 
-Add normal change (if any), add OP_RETURN data, and sign the transaction:
+Add normal change (if any), add OP\_RETURN data, and sign the transaction:
 
 ```cpp
      return FinalizeCCTx(0, cp, mtx, myPubkey, txfee, CScript() << OP_RETURN << E_MARSHAL(ss << (uint8_t)EVAL_HEIR << (uint8_t)'C' << fundingtxid << (myPubkey == heirPubkey ? (uint8_t)1 : hasHeirSpendingBegun)));
@@ -564,13 +560,13 @@ In the opreturn we add a pair of standard ids: the CC `EVAL` code, the functiona
 
 The `hasHeirSpendingBegun` value is a special flag. When this value is changed to `1`, it indicates that the heir has spent funds in the fund at least once. Therefore, it is no longer necessary to check the inactivity time of the owner.
 
-Once `hasHeirSpendingBegun` is set to `true`, this flag should also be set to `true` in the following transaction OP_RETURN values.
+Once `hasHeirSpendingBegun` is set to `true`, this flag should also be set to `true` in the following transaction OP\_RETURN values.
 
 #### Implementations for heiradd, heirlist and heirinfo
 
-- `heiradd` allows a user to add more funding to a plan.
-- `heirlist` is a standard RPC for all CC modules. This RPC outputs a list of all initial transaction IDs, which serve as the identifiers for each plan.
-- `heirinfo` provides data about a funding plan.
+*   `heiradd` allows a user to add more funding to a plan.
+*   `heirlist` is a standard RPC for all CC modules. This RPC outputs a list of all initial transaction IDs, which serve as the identifiers for each plan.
+*   `heirinfo` provides data about a funding plan.
 
 The implementation for these RPCs can be found in the github repository with the source code of this contract.
 
@@ -801,30 +797,30 @@ In our Heir Module prototype, we have three transactions to validate: the initia
 
 Here are several common aspects of a module that require validation:
 
-- The basic transaction structure
-- The basic data structure in the OP_RETURN
-  - Validation here ensures data integrity in the chain
-  - All OP_RETURNs should contain the `EVAL` code and functional id in the first two bytes
-- Avoid all foreseeable attack vectors
-  - Ensure DOS attacks are eliminated, especially in the event of a malformed transaction
-  - Check the array size before use of any transaction data
-- Check the previous Heir Module transactions which this transaction spends and which have no cc inputs. This is accomplished by retrieving the transaction id from the opreturn and loading and validating the previous transaction
+*   The basic transaction structure
+*   The basic data structure in the OP\_RETURN
+    *   Validation here ensures data integrity in the chain
+    *   All OP\_RETURNs should contain the `EVAL` code and functional id in the first two bytes
+*   Avoid all foreseeable attack vectors
+    *   Ensure DOS attacks are eliminated, especially in the event of a malformed transaction
+    *   Check the array size before use of any transaction data
+*   Check the previous Heir Module transactions which this transaction spends and which have no cc inputs. This is accomplished by retrieving the transaction id from the opreturn and loading and validating the previous transaction
 
 #### Heir Module Validation Rules
 
 The following are the aspects of validation the Heir Module requires.
 
-- The initial funding transaction
-  - Validate that the `1of2` address accurately matches `pubkeys` in the opreturn
-- The claiming transaction
-  - Validate that this transaction spends transactions from the same funding plan. This funding transaction id's values from the opreturn outputs of the previous transactions should match. (the previous transactions are often referred as `vintx` in code)
-- Validate whether the heir is allowed to spend the funds
-  - Check whether the flag indicates that the Heir is already spending the funds
-  - Check whether enough time has passed since the last time the owner was active on the chain
-- When validating, separate the owner's funding transaction from any other contributions to the `1of2` address
-  - Although the Heir Module is initiated based on the owner's initial transaction, nothing prevents other users on the Smart Chain from contributing funds
-  - Therefore, when validating, for each utxo contained in the `1of2` address, calculate whether or not the utxo's vins contain the owner's pubkey
-- During the course of validation, we fully check opreturn format
+*   The initial funding transaction
+    *   Validate that the `1of2` address accurately matches `pubkeys` in the opreturn
+*   The claiming transaction
+    *   Validate that this transaction spends transactions from the same funding plan. This funding transaction id's values from the opreturn outputs of the previous transactions should match. (the previous transactions are often referred as `vintx` in code)
+*   Validate whether the heir is allowed to spend the funds
+    *   Check whether the flag indicates that the Heir is already spending the funds
+    *   Check whether enough time has passed since the last time the owner was active on the chain
+*   When validating, separate the owner's funding transaction from any other contributions to the `1of2` address
+    *   Although the Heir Module is initiated based on the owner's initial transaction, nothing prevents other users on the Smart Chain from contributing funds
+    *   Therefore, when validating, for each utxo contained in the `1of2` address, calculate whether or not the utxo's vins contain the owner's pubkey
+*   During the course of validation, we fully check opreturn format
 
 This validation logic is performed in the `HeirValidate()` function. The function is invoked whenever a CC transaction bearing the appropriate eval code occurs on the chain. When this eval code appears, the consensus mechanism calls the `HeirValidate()` function, executes the indicated validation code, and adds the transaction to the chain.
 
@@ -832,14 +828,14 @@ This validation logic is performed in the `HeirValidate()` function. The functio
 
 Explanation of code:
 
-- Transaction-validation entry function
-  - (This is actually a callback)
-- Parameters
-  - `cpHeir` - Pointer to the module's variable structure
-  - `eval` - Pointer to the CC dispatching object
-    - Used to return invalid state
-  - `tx` - The transaction itself
-  - `nIn` - Not used in validation code
+*   Transaction-validation entry function
+    *   (This is actually a callback)
+*   Parameters
+    *   `cpHeir` - Pointer to the module's variable structure
+    *   `eval` - Pointer to the CC dispatching object
+        *   Used to return invalid state
+    *   `tx` - The transaction itself
+    *   `nIn` - Not used in validation code
 
 ```cpp
 bool HeirValidate(struct CCcontract_info* cpHeir, Eval* eval, const CTransaction& tx, uint32_t nIn)
@@ -849,9 +845,7 @@ bool HeirValidate(struct CCcontract_info* cpHeir, Eval* eval, const CTransaction
 Check that the basic transaction structure has the opreturn with the correct basic `evalcode` and `funcid`.
 
 <Note>
-
-There is no need to check the function ids of the (`F`) funding transaction or the (`A`) add transaction, as these transactions have no Heir CC vins. Therefore, we do not create validation code for them.
-
+  There is no need to check the function ids of the (`F`) funding transaction or the (`A`) add transaction, as these transactions have no Heir CC vins. Therefore, we do not create validation code for them.
 </Note>
 
 ```cpp
@@ -918,12 +912,12 @@ For `F` and `A`, we return an invalid response, as the process should never be a
 
 Validation for the claiming transaction.
 
-- Check whether we are spending the correct funding transactions
-  - For example, check that the transactions are from the correct module instance, as identified by the `fundingtxid`
-  - If incorrect, return `false`
-- If the heir is claiming the funds, check that he is allowed to do so
-  - For example, check the inactivity time of the owner and whether the heir has already spent funds from the `1of2` address
-- Check whether the new flag, `hasHeirSpendingBegun`, is set correctly
+*   Check whether we are spending the correct funding transactions
+    *   For example, check that the transactions are from the correct module instance, as identified by the `fundingtxid`
+    *   If incorrect, return `false`
+*   If the heir is claiming the funds, check that he is allowed to do so
+    *   For example, check the inactivity time of the owner and whether the heir has already spent funds from the `1of2` address
+*   Check whether the new flag, `hasHeirSpendingBegun`, is set correctly
 
 Both of the following support functions, `CheckSpentTxns` and `CheckInactivityTime`, are in the `heir.cpp` source file.
 
@@ -976,6 +970,6 @@ ERROR: CScriptCheck(): 7961fe4f9f3bdabef154404ea8ec7a11be1546febc34efe67faede8d9
 ERROR: AcceptToMemoryPool: BUG! PLEASE REPORT THIS! ConnectInputs failed against MANDATORY but not STANDARD flags 7961fe4f9f3bdabef154404ea8ec7a11be1546febc34efe67faede8d930c0749
 ```
 
----
+***
 
 [<b>Link to Next Tutorial in Advanced Series</b>](/antara/tutorials/advanced-series-6)

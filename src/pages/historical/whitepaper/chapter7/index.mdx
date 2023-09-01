@@ -2,9 +2,7 @@ export const title = "Whitepaper: Chapter-7";
 export const description = "The features described on this page are deprecated and no longer available.";
 
 <Note>
-
-The features described on this page are deprecated and no longer available.
-
+  The features described on this page are deprecated and no longer available.
 </Note>
 
 # Abstract (Jumblr)
@@ -133,23 +131,23 @@ Komodo ecosystem can integrate Jumblr commands into user interfaces in any desir
 
 There are two main commands, or API calls, available:
 
-- jumblr_deposit `<KMDaddress>`
+*   jumblr\_deposit `<KMDaddress>`
 
-- jumblr_secret `<secretKMDaddress>`
+*   jumblr\_secret `<secretKMDaddress>`
 
-#### jumblr_deposit `<KMDaddress>`
+#### jumblr\_deposit `<KMDaddress>`
 
 This command initiates the anonymization of KMD.
 
 Before executing the command, the user prepares the funds by placing them within
 the chosen `<KMDaddress>`. So long as Komodod has access to the private keys of the
 `<KMDaddress>`, nothingfurther is required. The user simply executes the command
-"jumblr_deposit `<KMDaddress>`" and Jumblr begins watching for and processing any
+"jumblr\_deposit `<KMDaddress>`" and Jumblr begins watching for and processing any
 funds in the `<KMDaddress>`.
 
 <Note>
-	* We call a transparent address a "T address." These are fully accessible to the user, and they are the means of conducting normal transactions. All currency entering and leaving a T address is fully visible to the network.
-	* On the other hand, we call a privacy-enabled address a "Z address," as they utilize the Zcash parameters and zk-SNARK technology. Z addresses are internal to the Jumblr process and a user typically does not directly interact with them.
+  *   We call a transparent address a "T address." These are fully accessible to the user, and they are the means of conducting normal transactions. All currency entering and leaving a T address is fully visible to the network.
+  *   On the other hand, we call a privacy-enabled address a "Z address," as they utilize the Zcash parameters and zk-SNARK technology. Z addresses are internal to the Jumblr process and a user typically does not directly interact with them.
 </Note>
 
 The first step Jumblr takes is to move the user’s funds from a T address to a Z
@@ -157,7 +155,7 @@ address.
 
 The First Step of the Jumblr Anonymization Process
 
----
+***
 
 Moving the funds from a transparent address to a privacy-enabled address.
 
@@ -171,7 +169,7 @@ Jumblr creates a new Z address for each individual lot.
 
 The Second Step of the Jumblr Anonymization Process
 
----
+***
 
 Moving the funds from one unique and untraceable Z address to another
 
@@ -185,7 +183,7 @@ stages (see the Komodo wiki for further details). One command to mention here is
 `z_gettotalbalance`. This reveals to the user the total balance they hold within all their
 Z addresses.
 
-Upon executing the command [jumblr_deposit `<KMDaddress>`], Jumblr begins
+Upon executing the command \[jumblr\_deposit `<KMDaddress>`], Jumblr begins
 continually observing the `<KMDaddress>`. Should the user send more funds into
 their `<KMDaddress>` while Jumblr is already processing the previous amount, Jum-
 blr will simply take these new funds into account, perform any necessary actions to
@@ -198,7 +196,7 @@ down Komodod (and any relevant standalone GUI applications).
 Once the funds have reached their final Z address(es), they lay dormant, awaiting
 the user’s next command.
 
-#### jumblr_secret `<secretKMDaddress>`
+#### jumblr\_secret `<secretKMDaddress>`
 
 The user executes this command to complete the Jumblr process. Jumblr will extract
 all the user’s hidden currency from each Z address and place the funds in a new T
@@ -207,7 +205,7 @@ again.
 
 The Third and Final Step of the Jumblr Anonymization Process
 
----
+***
 
 Moving the funds from one unique and untraceable Z address to another
 
@@ -234,7 +232,7 @@ remainder thereafter into quantities of ~10 KMD. Any final remainder (which woul
 be anything less than ~10 KMD) is ignored.
 
 <Note>
-Jumblr also automatically extracts its 0.3% overall fee during the Jumblr process.
+  Jumblr also automatically extracts its 0.3% overall fee during the Jumblr process.
 </Note>
 
 Therefore, the total amount is broken down into lot sizes of ~7770 KMD, ~100
@@ -260,13 +258,13 @@ next action in the process of anonymization, or it chooses to do nothing.
 
 When Jumblr looks at the next action, it can perform one of three possible steps:
 
-- T → Z If the lot has yet to be moved out of the `<KMDaddress>`, Jumblr can move it from the first T address to the first Z address.
-- Z → Z Assuming the lot is now in the first Z address, Jumblr can move it to the final Z address.
-- Z → T Assuming the `<jumblr_secret>` API call is activated, Jumblr can move the lot from the final Z address to the final T address: `<secretKMDaddress>`.
+*   T → Z If the lot has yet to be moved out of the `<KMDaddress>`, Jumblr can move it from the first T address to the first Z address.
+*   Z → Z Assuming the lot is now in the first Z address, Jumblr can move it to the final Z address.
+*   Z → T Assuming the `<jumblr_secret>` API call is activated, Jumblr can move the lot from the final Z address to the final T address: `<secretKMDaddress>`.
 
 #### Option 2: Does nothing
 
-- At each turn, instead of performing any of the above steps, Jumblr can simply abstain from any action. This happens approximately half of the time.
+*   At each turn, instead of performing any of the above steps, Jumblr can simply abstain from any action. This happens approximately half of the time.
 
 Through these actions, Jumblr adds a layer of obfuscation on top of the Zcash parameters and zk-SNARK technology by adding privacy to the timing and movements of each step for each user.
 
@@ -301,7 +299,7 @@ into Jumblr, and ~1000000 KMD later emerges elsewhere, the sleuth can easily dis
 the user’s `<secretKMDaddress>`.
 
 The process of breaking down the total amount into three equal sized lots (~7770,
-~100, ~10 KMD) for all users provides one layer of security against the Knapsack
+\~100, ~10 KMD) for all users provides one layer of security against the Knapsack
 Attack. Users again can blend their transactions together, using the power of the
 collective to obfuscate their movements.
 
