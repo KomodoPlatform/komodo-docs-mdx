@@ -24,21 +24,21 @@ Transferring funds via the faucet will allow us to perform other tasks further i
 
 #### The Expected Current State of Our TUT1 Smart Chain
 
-- The mining node has ~1000 coins
-- The mining node has several utxos
-  - One large utxo with approximately 1000 coins
-  - Many small utxos, each having 0.0001 coins
-    - These utxos are rewards for mining blocks
-- Both the mining node and the seed node should be running
-  - If you stopped the nodes at the end of the last tutorial, restart them using the `SPINUP` functions found within each node's menu
-- The mining node should be set to mine
-  - To restart the mining node, use the `MINING-START` function in the `MINING-MENU` section
+*   The mining node has ~1000 coins
+*   The mining node has several utxos
+    *   One large utxo with approximately 1000 coins
+    *   Many small utxos, each having 0.0001 coins
+        *   These utxos are rewards for mining blocks
+*   Both the mining node and the seed node should be running
+    *   If you stopped the nodes at the end of the last tutorial, restart them using the `SPINUP` functions found within each node's menu
+*   The mining node should be set to mine
+    *   To restart the mining node, use the `MINING-START` function in the `MINING-MENU` section
 
 #### Next Steps in the Tutorial
 
-- On the mining node we send some of our funds to the chain's built-in faucet
-  - To accomplish this, in this guided tutorial we use an automated version of the [<b>faucetfund</b>](/antara/api/faucet.html/#faucetfund) Remote Procedure Call (RPC)
-- On the seed node, which currently has 0 coins, we send a request to the faucet for funds
+*   On the mining node we send some of our funds to the chain's built-in faucet
+    *   To accomplish this, in this guided tutorial we use an automated version of the [<b>faucetfund</b>](/antara/api/faucet.html/#faucetfund) Remote Procedure Call (RPC)
+*   On the seed node, which currently has 0 coins, we send a request to the faucet for funds
 
 ## Send All Funds to Self
 
@@ -52,24 +52,22 @@ All the utxos in our current mining wallet were generated either in the first bl
 
 To consolidate them in the guided tutorial, we use an automated version of the [<b>sendtoaddress</b>](/smart-chains/api/wallet.html#sendtoaddress) RPC.
 
-- Enter the `MINING-MENU`
-- Enter the `WALLET` submenu and select `SENDALLSELF`
-  - This tutorial function performs several automated tasks
-  - First, the function checks our total balance using the <b>getinfo</b> RPC
-  - The function gathers the address that we saw earlier in the <b>validateaddress</b> RPC
-  - Finally, the function sends the entire amount to this address using the <b>sendtoaddress</b> RPC
-  - This sends everything in our wallet in a circular loop back into our wallet
+*   Enter the `MINING-MENU`
+*   Enter the `WALLET` submenu and select `SENDALLSELF`
+    *   This tutorial function performs several automated tasks
+    *   First, the function checks our total balance using the <b>getinfo</b> RPC
+    *   The function gathers the address that we saw earlier in the <b>validateaddress</b> RPC
+    *   Finally, the function sends the entire amount to this address using the <b>sendtoaddress</b> RPC
+    *   This sends everything in our wallet in a circular loop back into our wallet
 
 Wait for this transaction to be mined in a block. (This process is also called "confirming a transaction.")
 
 One way to check the status of the transaction is to use the `LIST` function from the last tutorial. Right after performing the `SENDALLSELF` function, you will have zero utxos in your wallet. Once a utxo reappears in your wallet, you know that the transaction is successfully mined.
 
 <Note>
+  When you finally have a utxo in your wallet again, you will notice that you have two utxos instead of one. This may be surprising, but this provides a good opportunity to learn about "dust."
 
-When you finally have a utxo in your wallet again, you will notice that you have two utxos instead of one. This may be surprising, but this provides a good opportunity to learn about "dust."
-
-The mathematics behind blockchain technology are complex, and transactions are rarely able to have perfectly clean total amounts. There is often a remnant of funds in the amount of a tiny fraction of a coin. These leftover funds remain in your wallet as a separate utxo, and as they are typically of such little value, they are effectively useless. This is why they are called "dust."
-
+  The mathematics behind blockchain technology are complex, and transactions are rarely able to have perfectly clean total amounts. There is often a remnant of funds in the amount of a tiny fraction of a coin. These leftover funds remain in your wallet as a separate utxo, and as they are typically of such little value, they are effectively useless. This is why they are called "dust."
 </Note>
 
 ## Send Funds to the Faucet
@@ -80,10 +78,10 @@ In this guided tutorial, we use an automated version of the [<b>faucetfund</b>](
 
 Once the funds are in the module, other users on the chain can request to have some of the funds. The funds are disbursed in small amounts, and the module has a feature that discourages users from spamming the faucet to drain all of the funds at once.
 
-- From the `MINING-MENU`, select `FAUCET`
-- Select the `FUNDFAUCET` function
-- Enter `200` as the amount of coins to send
-  - (This amount is arbitrary. We choose `200` for simplicity's sake.)
+*   From the `MINING-MENU`, select `FAUCET`
+*   Select the `FUNDFAUCET` function
+*   Enter `200` as the amount of coins to send
+    *   (This amount is arbitrary. We choose `200` for simplicity's sake.)
 
 ## Claim a Small Amount of Funds from the Faucet
 
@@ -97,16 +95,16 @@ Choose the `SEED-MENU`.
 
 Just as before, we want to make sure that we've imported our tutorial private key before we send any funds to any address.
 
-- Select `WALLET` and then `VALIDATE`
-- If the proper `ismine` is `false`, we need to import the private key
-- From the `WALLET` submenu, select `IMPORT-DEV-WALLET`
-  - This automatically performs the <b>importprivkey</b> RPC for us
+*   Select `WALLET` and then `VALIDATE`
+*   If the proper `ismine` is `false`, we need to import the private key
+*   From the `WALLET` submenu, select `IMPORT-DEV-WALLET`
+    *   This automatically performs the <b>importprivkey</b> RPC for us
 
 #### Claim Funds from the Faucet
 
-- Return to the `SEED-MENU` section.
-- Select `FAUCET`
-- Select `GETFUNDS`
+*   Return to the `SEED-MENU` section.
+*   Select `FAUCET`
+*   Select `GETFUNDS`
 
 The `GETFUNDS` function in this guided tutorial is yet another automated version of an RPC. This time, the RPC is the [<b>faucetget</b>](/antara/api/faucet.html/#faucetget) method.
 
@@ -130,13 +128,13 @@ One of the most common RPC's is the [<b>getbalance</b>](/smart-chains/api/wallet
 
 A final example is the [<b>listunspent</b>](/smart-chains/api/wallet#listunspent) RPC, which returns infromation about all utxos in the user's wallet.
 
-- In the `SEED-MENU` section, select `SEED-GETINFO` to perform an automated <b>getinfo</b> RPC
-  - In the response, look for the `balance` property
-  - There should be at least `0.1` coins in your wallet
-- In the `SEED-MENU` section once again, select `WALLET`
-- Within the `WALLET` submenu, select the `BALANCE` function to perform an automated <b>getbalance</b> RPC
-- Also within the `WALLET` submenu, select `LIST` to perform the automated <b>listunspent</b> RPC
+*   In the `SEED-MENU` section, select `SEED-GETINFO` to perform an automated <b>getinfo</b> RPC
+    *   In the response, look for the `balance` property
+    *   There should be at least `0.1` coins in your wallet
+*   In the `SEED-MENU` section once again, select `WALLET`
+*   Within the `WALLET` submenu, select the `BALANCE` function to perform an automated <b>getbalance</b> RPC
+*   Also within the `WALLET` submenu, select `LIST` to perform the automated <b>listunspent</b> RPC
 
----
+***
 
 [<b>Link to next tutorial section</b>](/antara/tutorials/beginner-series-part-3#introduction)
