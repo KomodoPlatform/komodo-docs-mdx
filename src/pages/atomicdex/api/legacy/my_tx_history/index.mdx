@@ -12,33 +12,33 @@ The coin that is used must have `tx_history` set to true in its [enable](/atomic
 
 ## Arguments
 
-| Structure   | Type   | Description                                                                                                                                                                                           |
-| ----------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin        | string | the name of the coin for the history request                                                                                                                                                          |
-| limit       | number | limits the number of returned transactions; ignored if `max = true`                                                                                                                                   |
-| max         | bool   | whether to return all available records; defaults to `false`                                                                                                                                          |
+| Structure    | Type   | Description                                                                                                                                                                                           |
+| ------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin         | string | the name of the coin for the history request                                                                                                                                                          |
+| limit        | number | limits the number of returned transactions; ignored if `max = true`                                                                                                                                   |
+| max          | bool   | whether to return all available records; defaults to `false`                                                                                                                                          |
 | from\_id     | string | AtomicDEX API will skip records until it reaches this ID, skipping the `from_id` as well; track the `internal_id` of the last displayed transaction to find the value of this field for the next page |
-| page\_number | number | AtomicDEX API will return limit swaps from the selected page; This param will be ignored if from\_uuid is set.                                                                                         |
+| page\_number | number | AtomicDEX API will return limit swaps from the selected page; This param will be ignored if from\_uuid is set.                                                                                        |
 
 ## Response
 
-| Structure                                     | Type             | Description                                                                                                                                    |
-| --------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| transactions                                  | array of objects | transactions data                                                                                                                              |
-| from\_id                                       | string           | the from\_id specified in the request; this value is null if from\_id was not set                                                                |
-| skipped                                       | number           | the number of skipped records (i.e. the position of `from_id` in the list + 1); this value is 0 if `from_id` was not set                       |
-| limit                                         | number           | the limit that was set in the request; note that the actual number of transactions can differ from the specified limit (e.g. on the last page) |
-| total                                         | number           | the total number of transactions available                                                                                                     |
-| page\_number                                   | number           | the page\_number that was set in the request                                                                                                    |
-| total\_pages                                   | number           | total pages available with the selected limit                                                                                                  |
-| current\_block                                 | number           | the number of the latest block of coin blockchain                                                                                              |
-| sync\_status                                   | object           | provides the information that helps to track the progress of transaction history preloading at background                                      |
-| sync\_status.state                             | string           | current state of sync; possible values: `NotEnabled`, `NotStarted`, `InProgress`, `Error`, `Finished`                                          |
-| sync\_status.additional\_info                   | object           | additional info that helps to track the progress; present for `InProgress` and `Error` states only                                             |
+| Structure                                        | Type             | Description                                                                                                                                    |
+| ------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| transactions                                     | array of objects | transactions data                                                                                                                              |
+| from\_id                                         | string           | the from\_id specified in the request; this value is null if from\_id was not set                                                              |
+| skipped                                          | number           | the number of skipped records (i.e. the position of `from_id` in the list + 1); this value is 0 if `from_id` was not set                       |
+| limit                                            | number           | the limit that was set in the request; note that the actual number of transactions can differ from the specified limit (e.g. on the last page) |
+| total                                            | number           | the total number of transactions available                                                                                                     |
+| page\_number                                     | number           | the page\_number that was set in the request                                                                                                   |
+| total\_pages                                     | number           | total pages available with the selected limit                                                                                                  |
+| current\_block                                   | number           | the number of the latest block of coin blockchain                                                                                              |
+| sync\_status                                     | object           | provides the information that helps to track the progress of transaction history preloading at background                                      |
+| sync\_status.state                               | string           | current state of sync; possible values: `NotEnabled`, `NotStarted`, `InProgress`, `Error`, `Finished`                                          |
+| sync\_status.additional\_info                    | object           | additional info that helps to track the progress; present for `InProgress` and `Error` states only                                             |
 | sync\_status.additional\_info.blocks\_left       | number           | present for ETH/ERC20 coins only; displays the number of blocks left to be processed for `InProgress` state                                    |
 | sync\_status.additional\_info.transactions\_left | number           | present for UTXO coins only; displays the number of transactions left to be processed for `InProgress` state                                   |
-| sync\_status.additional\_info.code              | number           | displays the error code for `Error` state                                                                                                      |
-| sync\_status.additional\_info.message           | number           | displays the error message for `Error` state                                                                                                   |
+| sync\_status.additional\_info.code               | number           | displays the error code for `Error` state                                                                                                      |
+| sync\_status.additional\_info.message            | number           | displays the error message for `Error` state                                                                                                   |
 
 #### 📌 Examples
 

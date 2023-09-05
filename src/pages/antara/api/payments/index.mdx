@@ -126,10 +126,10 @@ The `paymentsfund` method is used to add funds to a Payments plan that has been 
 
 #### Arguments
 
-| Name       | Type     | Description                                                                                                                                                                                                                                                               |
-| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| createtxid | (string) | the transaction id of the specific Payments plan the user desires to fund                                                                                                                                                                                                 |
-| amount     | (number) | the amount of funds to send                                                                                                                                                                                                                                               |
+| Name       | Type     | Description                                                                                                                                                                                                                                                                    |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| createtxid | (string) | the transaction id of the specific Payments plan the user desires to fund                                                                                                                                                                                                      |
+| amount     | (number) | the amount of funds to send                                                                                                                                                                                                                                                    |
 | useopret   | (number) | <br /> a flag that instructs the Payments Module on where to send the funds <br /><br /> if `0` (default), funds are sent to the `1of2` address corresponding to the specific Payments plan <br /><br /> if `1`, funds are sent to the to the Payments Module's Global address |
 
 #### Response
@@ -304,7 +304,7 @@ The `paymentsinfo` method returns relevant information about the Payments plan r
 
 | Name                               | Type             | Description                                                                         |
 | ---------------------------------- | ---------------- | ----------------------------------------------------------------------------------- |
-| plan\_type                          | (string)         | the type of the plan                                                                |
+| plan\_type                         | (string)         | the type of the plan                                                                |
 | lockedblocks                       | (number)         | the number of blocks the funding to this Payment plan is locked                     |
 | totalallocations                   | (number)         | sum of the allocation numbers of all the `paytxnids`                                |
 | minrelease                         | (number)         | the miminum amount of funds locked that can be released                             |
@@ -318,7 +318,7 @@ The `paymentsinfo` method returns relevant information about the Payments plan r
 | utxos                              | (number)         | the number of utxos belonging to the above address                                  |
 | totalfunds                         | (number)         | the total amount of funds available                                                 |
 | elegiblefunds                      | (number)         | the total amount of funds eleigible to be released                                  |
-| min\_release\_height                 | (number)         | the block height after which atleast some of the funds can be released              |
+| min\_release\_height               | (number)         | the block height after which atleast some of the funds can be released              |
 | result                             | (string)         | whether the call executed successfully                                              |
 
 #### 📌 Examples
@@ -566,10 +566,10 @@ The `paymentsrelease` method can be executed by anyone to release the **eligible
 
 #### Arguments
 
-| Name        | Type     | Description                                                                                                                                                                                                                                                                                         |
-| ----------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| createtxid  | (string) | the transaction id of the specific Payments plan whose payments the user desires to release                                                                                                                                                                                                         |
-| amount      | (number) | the amount of funds to release; this value must be higher than the minimum-amount requirement originally set in the plan                                                                                                                                                                            |
+| Name        | Type     | Description                                                                                                                                                                                                                                                                                           |
+| ----------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| createtxid  | (string) | the transaction id of the specific Payments plan whose payments the user desires to release                                                                                                                                                                                                           |
+| amount      | (number) | the amount of funds to release; this value must be higher than the minimum-amount requirement originally set in the plan                                                                                                                                                                              |
 | skipminimum | (number) | a flag; if there are recipients whose share is below the dust threshold (`10,000 sats`), setting this flag to `1` will skip payments to them <br /><br /> in the case of a plan created using[paymentsairdrop](#paymentsairdrop), the threshold is `mintoaddress` if it is greated than `10,000 sats` |
 
 #### Response
@@ -667,10 +667,10 @@ Use the `paymentstxidopret` method to create a transaction for each intended rec
 
 #### Arguments
 
-| Name         | Type               | Description                                                                                 |
-| ------------ | ------------------ | ------------------------------------------------------------------------------------------- |
-| allocation   | (number)           | defines the share of a payment to the given `scriptPubkey`                                  |
-| scriptPubKey | (string)           | [scriptPubkey](https://learnmeabitcoin.com/glossary/scriptPubKey) of the recipient          |
+| Name         | Type               | Description                                                                                  |
+| ------------ | ------------------ | -------------------------------------------------------------------------------------------- |
+| allocation   | (number)           | defines the share of a payment to the given `scriptPubkey`                                   |
+| scriptPubKey | (string)           | [scriptPubkey](https://learnmeabitcoin.com/glossary/scriptPubKey) of the recipient           |
 | destopret    | (string, optional) | data to be stored in the OP\_RETURN of the transaction that sends funds to the scriptPubkey. |
 
 #### Response

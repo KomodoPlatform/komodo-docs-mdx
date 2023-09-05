@@ -27,49 +27,49 @@ Depending on the parameters, the function returns different results:
 
 #### Arguments
 
-| Structure   | Type                                  | Description                                                                                                                          |
-| ----------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| base        | string                                | the base currency of the request                                                                                                     |
-| rel         | string                                | the rel currency of the request                                                                                                      |
+| Structure    | Type                                  | Description                                                                                                                          |
+| ------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| base         | string                                | the base currency of the request                                                                                                     |
+| rel          | string                                | the rel currency of the request                                                                                                      |
 | swap\_method | string                                | the name of the method whose preimage is requested. Possible values: `buy`, `sell`, `setprice`                                       |
-| price       | numeric string or rational            | the price in `rel` the user is willing to pay per one unit of the `base` coin                                                        |
-| volume      | numeric string or rational (optional) | the amount the user is willing to trade; ignored if `max = true` **and** `swap_method = setprice`, otherwise, it must be set         |
-| max         | bool (optional)                       | whether to return the maximum available volume for `setprice` method; must not be set or `false` if `swap_method` is `buy` or `sell` |
+| price        | numeric string or rational            | the price in `rel` the user is willing to pay per one unit of the `base` coin                                                        |
+| volume       | numeric string or rational (optional) | the amount the user is willing to trade; ignored if `max = true` **and** `swap_method = setprice`, otherwise, it must be set         |
+| max          | bool (optional)                       | whether to return the maximum available volume for `setprice` method; must not be set or `false` if `swap_method` is `buy` or `sell` |
 
 #### Response
 
-| Structure                    | Type                                 | Description                                                                                                                                    |
-| ---------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| result                       | object                               | an object containing the relevant information                                                                                                  |
-| result.base\_coin\_fee         | object (`ExtendedFeeInfo`)           | the approximate miner fee is paid per the whole swap concerning the `base` coin                                                                |
-| result.rel\_coin\_fee          | object (`ExtendedFeeInfo`)           | the approximate miner fee is paid per the whole swap concerning the `rel` coin                                                                 |
-| result.volume                | string (numeric, optional)           | the max available volume that can be traded (in decimal representation); empty if the `max` argument is missing or false                       |
-| result.volume\_rat            | rational (optional)                  | the max available volume that can be traded (in rational representation); empty if the `max` argument is missing or false                      |
-| result.volume\_fraction       | fraction (optional)                  | the max available volume that can be traded (in fraction representation); empty if the `max` argument is missing or false                      |
-| result.taker\_fee             | object (optional, `ExtendedFeeInfo`) | the dex fee to be paid by Taker; empty if `swap_method` is `setprice`                                                                          |
+| Structure                        | Type                                 | Description                                                                                                                                    |
+| -------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| result                           | object                               | an object containing the relevant information                                                                                                  |
+| result.base\_coin\_fee           | object (`ExtendedFeeInfo`)           | the approximate miner fee is paid per the whole swap concerning the `base` coin                                                                |
+| result.rel\_coin\_fee            | object (`ExtendedFeeInfo`)           | the approximate miner fee is paid per the whole swap concerning the `rel` coin                                                                 |
+| result.volume                    | string (numeric, optional)           | the max available volume that can be traded (in decimal representation); empty if the `max` argument is missing or false                       |
+| result.volume\_rat               | rational (optional)                  | the max available volume that can be traded (in rational representation); empty if the `max` argument is missing or false                      |
+| result.volume\_fraction          | fraction (optional)                  | the max available volume that can be traded (in fraction representation); empty if the `max` argument is missing or false                      |
+| result.taker\_fee                | object (optional, `ExtendedFeeInfo`) | the dex fee to be paid by Taker; empty if `swap_method` is `setprice`                                                                          |
 | result.fee\_to\_send\_taker\_fee | object (optional, `ExtendedFeeInfo`) | the approximate miner fee is paid to send the dex fee; empty if `swap_method` is `setprice`                                                    |
-| result.total\_fees            | array of `TotalFeeInfo` objects      | each element is a sum of fees required to be paid from user's balance of corresponding `ExtendedFeeInfo.coin`; the elements are unique by coin |
+| result.total\_fees               | array of `TotalFeeInfo` objects      | each element is a sum of fees required to be paid from user's balance of corresponding `ExtendedFeeInfo.coin`; the elements are unique by coin |
 
 The `ExtendedFeeInfo` structure is as follows:
 
-| Structure             | Type             | Description                                                                                                                                                   |
-| --------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                  | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas) |
-| amount                | string (numeric) | fee amount (in decimal representation)                                                                                                                        |
-| amount\_rat            | rational         | fee amount (in rational representation)                                                                                                                       |
-| amount\_fraction       | fraction         | fee amount (in fraction representation)                                                                                                                       |
-| amount\_fraction       | fraction         | fee amount (in fraction representation)                                                                                                                       |
+| Structure                | Type             | Description                                                                                                                                                   |
+| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                     | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas) |
+| amount                   | string (numeric) | fee amount (in decimal representation)                                                                                                                        |
+| amount\_rat              | rational         | fee amount (in rational representation)                                                                                                                       |
+| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                       |
+| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                       |
 | paid\_from\_trading\_vol | bool             | whether the fee is paid from trading volume and not use actual `coin` balance                                                                                 |
 
 The `TotalFeeInfo` structure is as follows:
 
-| Structure                 | Type             | Description                                                                                                                                                   |
-| ------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                      | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas) |
-| amount                    | string (numeric) | fee amount (in decimal representation)                                                                                                                        |
-| amount\_rat                | rational         | fee amount (in rational representation)                                                                                                                       |
-| amount\_fraction           | fraction         | fee amount (in fraction representation)                                                                                                                       |
-| required\_balance          | string (numeric) | the required `coin` balance to pay the fee                                                                                                                    |
+| Structure                   | Type             | Description                                                                                                                                                   |
+| --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                        | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas) |
+| amount                      | string (numeric) | fee amount (in decimal representation)                                                                                                                        |
+| amount\_rat                 | rational         | fee amount (in rational representation)                                                                                                                       |
+| amount\_fraction            | fraction         | fee amount (in fraction representation)                                                                                                                       |
+| required\_balance           | string (numeric) | the required `coin` balance to pay the fee                                                                                                                    |
 | required\_balance\_rat      | rational         | `required_balance` in rational representation                                                                                                                 |
 | required\_balance\_fraction | fraction         | `required_balance` in fraction representation                                                                                                                 |
 
