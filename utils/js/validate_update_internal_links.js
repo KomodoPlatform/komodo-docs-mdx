@@ -4,6 +4,7 @@ import { promises as fs } from 'fs';
 import { constants } from "fs"
 import { remark } from 'remark'
 import remarkMdx from 'remark-mdx'
+import remarkGfm from 'remark-gfm'
 import path from 'path'
 
 (async function () {
@@ -15,6 +16,7 @@ import path from 'path'
             }
             const markdown = await fs.readFile(filePath, 'utf-8');
             const file = await remark()
+                .use(remarkGfm)
                 .use(remarkMdx)
                 .use(() => (tree) => {
                     visit(tree, 'link', async (node) => {
@@ -34,6 +36,9 @@ import path from 'path'
 
 // Function to process a link
 async function processLink(link, currFilePath) {
+    if (link.startsWith("mailto:")) {
+        return link
+    }
     const isExternalURL = /^https?:\/\//;
     if (isExternalURL.test(link)) return;
     let filePath = "src/pages";
