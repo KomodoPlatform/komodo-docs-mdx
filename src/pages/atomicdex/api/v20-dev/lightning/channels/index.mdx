@@ -13,14 +13,14 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
 
 ### Request Parameters
 
-| Parameter         | Type    | Description                                                                              |
-|-------------------|---------|------------------------------------------------------------------------------------------|
-| coin              | string  | The ticker of the coin you would like to open a channel for.                             |
-| node\_address      | string  | Lightning node addresses always have a format of `node_pubkey`@`ip_address`:`port`.      |
-| amount            | object  | A standard [LightningChannelAmount](/atomicdex/api/v20#lightning-channel-amount) object. |
-| push\_msat         | integer | Optional. The amount in millisatoshi to push to the counterparty while openning, to create inbound liquidity for the channel. Using the `push_msat` parameter avoids having to send funds in a separate request later. Please note that the funds given using push\_msat is given unconditionally, meaning that there is no proof of payment in a preimage as with paying an invoice.                                          |
-| channel\_options   | object  | Optional. A standard [LightningChannelOptions](/atomicdex/api/v20#lightning-channel-options) object. |
-| channel\_configs   | object  | Optional. A standard [LightningChannelConfig](/atomicdex/api/v20#lightning-channel-config) object.   |
+| Parameter        | Type    | Description                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin             | string  | The ticker of the coin you would like to open a channel for.                                                                                                                                                                                                                                                                                                                          |
+| node\_address    | string  | Lightning node addresses always have a format of `node_pubkey`@`ip_address`:`port`.                                                                                                                                                                                                                                                                                                   |
+| amount           | object  | A standard [LightningChannelAmount](/atomicdex/api/v20#lightning-channel-amount) object.                                                                                                                                                                                                                                                                                              |
+| push\_msat       | integer | Optional. The amount in millisatoshi to push to the counterparty while openning, to create inbound liquidity for the channel. Using the `push_msat` parameter avoids having to send funds in a separate request later. Please note that the funds given using push\_msat is given unconditionally, meaning that there is no proof of payment in a preimage as with paying an invoice. |
+| channel\_options | object  | Optional. A standard [LightningChannelOptions](/atomicdex/api/v20#lightning-channel-options) object.                                                                                                                                                                                                                                                                                  |
+| channel\_configs | object  | Optional. A standard [LightningChannelConfig](/atomicdex/api/v20#lightning-channel-config) object.                                                                                                                                                                                                                                                                                    |
 
 #### 📌 Example using an exact amount
 
@@ -116,11 +116,11 @@ The `lightning::channels::close_channel` method closes a channel with a remote n
 
 ### Request Parameters
 
-| Parameter         | Type    | Description                                                                              |
-|-------------------|---------|------------------------------------------------------------------------------------------|
-| coin              | string  | The ticker of the coin you would like to close a channel for.                            |
-| uuid              | string  | Unique channel identifier.                                                               |
-| force\_close       | boolean | Optional, defaults to `false`. If `true`, will force closure of the channel.             |
+| Parameter    | Type    | Description                                                                  |
+| ------------ | ------- | ---------------------------------------------------------------------------- |
+| coin         | string  | The ticker of the coin you would like to close a channel for.                |
+| uuid         | string  | Unique channel identifier.                                                   |
+| force\_close | boolean | Optional, defaults to `false`. If `true`, will force closure of the channel. |
 
 <Note type="warning">
   It is not recommended to force close a channel unless the counterparty is offline or unreachable for a long time.
@@ -162,7 +162,7 @@ The `lightning::channels::close_channel` method closes a channel with a remote n
 
   <DevComment>
     Already added this message to the response in this upcoming PR KomodoPlatform/atomicDEX-API#1814, also added force\_close\_spend\_delay to the close channel response. No need to change the docs now until this PR is merged KomodoPlatform/atomicDEX-API#1814, I will write a comment about all the changes when opening the PR for review.
-    https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\_r1202462310
+    [https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\\_r1202462310](https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\_r1202462310)
   </DevComment>
 </CollapsibleSection>
 
@@ -202,11 +202,11 @@ The `lightning::channels::update_channel` method updates channel options.
 
 ### Request Parameters
 
-| Parameter         | Type    | Description                                                                                |
-|-------------------|---------|--------------------------------------------------------------------------------------------|
-| coin              | string  | The ticker of the coin you would like to update channel configuration options for.         |
-| uuid              | string  | Unique channel identifier.                                                                 |
-| channel\_options   | object  | A standard [LightningChannelOptions](/atomicdex/api/v20#lightning-channel-options) object. |
+| Parameter        | Type   | Description                                                                                |
+| ---------------- | ------ | ------------------------------------------------------------------------------------------ |
+| coin             | string | The ticker of the coin you would like to update channel configuration options for.         |
+| uuid             | string | Unique channel identifier.                                                                 |
+| channel\_options | object | A standard [LightningChannelOptions](/atomicdex/api/v20#lightning-channel-options) object. |
 
 #### 📌 Example to update all available channel options
 
@@ -276,10 +276,10 @@ The `lightning::channels::get_channel_details` method returns details about a ch
 
 ### Request Parameters
 
-| Parameter         | Type    | Description                                                                              |
-|-------------------|---------|------------------------------------------------------------------------------------------|
-| coin              | string  | The ticker of the coin you would like to view channel details for.                       |
-| uuid              | string  | Unique channel identifier.                                                               |
+| Parameter | Type   | Description                                                        |
+| --------- | ------ | ------------------------------------------------------------------ |
+| coin      | string | The ticker of the coin you would like to view channel details for. |
+| uuid      | string | Unique channel identifier.                                         |
 
 #### 📌 Example to update all available channel options
 
@@ -335,7 +335,7 @@ The `lightning::channels::get_channel_details` method returns details about a ch
   <DevComment>
     `force_close_spend_delay` is not currently available in get\_channel\_details response, but should be added soon.
     It's configured by the other side using counterparty\_locktime where we are the counterparty to the other side, the other side gets to set it since it's part of their security considerations since they have to be online at least once during this period if we tried to steal funds by broadcasting an old commitment transaction. We set our own too in our configs where it shows in the channel details of the other side as force\_close\_spend\_delay. The other side can't set counterparty\_locktime to any value when opening the channel though, since they can set it to a very long time and our funds will be locked for a very long time if we force closed the channel, this is where counterparty\_channel\_config\_limits::our\_locktime\_limit comes in as the other side can't make counterparty\_locktime larger than this limit otherwise the channel gets rejected and is never opened in the first place.
-    https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\_r1206109172
+    [https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\\_r1206109172](https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\_r1206109172)
   </DevComment>
 
   #### Response (closed channel)
@@ -369,7 +369,7 @@ The `lightning::channels::get_channel_details` method returns details about a ch
 
   <DevComment>
     The closed response above was spoofed, so the values are not accurate. Once code is finalised we should generate a real one.
-    https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\_r1206150595
+    [https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\\_r1206150595](https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\_r1206150595)
   </DevComment>
 </CollapsibleSection>
 
@@ -395,10 +395,10 @@ The `lightning::channels::get_claimable_balances` method returns a list of claim
 
 ### Request Parameters
 
-| Parameter                       | Type    | Description                                                                              |
-|---------------------------------|---------|------------------------------------------------------------------------------------------|
-| coin                            | string  | The ticker of the coin you would like to view claimable balances for.                    |
-| include\_open\_channels\_balances  | integer | Optional, defaults to `false`. If `true`, includes balances from open channels.          |
+| Parameter                         | Type    | Description                                                                     |
+| --------------------------------- | ------- | ------------------------------------------------------------------------------- |
+| coin                              | string  | The ticker of the coin you would like to view claimable balances for.           |
+| include\_open\_channels\_balances | integer | Optional, defaults to `false`. If `true`, includes balances from open channels. |
 
 #### 📌 Example to update all available channel options
 
@@ -442,7 +442,7 @@ The `lightning::channels::get_claimable_balances` method returns a list of claim
 
   <DevComment>
     This response may include additional information in future.
-    https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\_r1206152132
+    [https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\\_r1206152132](https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\_r1206152132)
   </DevComment>
 </CollapsibleSection>
 
@@ -452,12 +452,12 @@ The `lightning::channels::list_open_channels_by_filter` method returns a list of
 
 ### Request Parameters
 
-| Parameter         | Type    | Description                                                              |
-|-------------------|---------|--------------------------------------------------------------------------|
-| coin              | string  | The ticker of the coin you would like to view open channels for.         |
-| filter            | object  | A standard [LightningOpenChannelsFilter](/atomicdex/api/v20#lightning-open-channels-filter) object.                         |
-| paging\_options    | object  | Optional. A standard [Pagination](/atomicdex/api/v20#pagination) object. |
-| limit             | integer | Optional, defaults to `10`. Maximum number of results to return.         |
+| Parameter       | Type    | Description                                                                                         |
+| --------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| coin            | string  | The ticker of the coin you would like to view open channels for.                                    |
+| filter          | object  | A standard [LightningOpenChannelsFilter](/atomicdex/api/v20#lightning-open-channels-filter) object. |
+| paging\_options | object  | Optional. A standard [Pagination](/atomicdex/api/v20#pagination) object.                            |
+| limit           | integer | Optional, defaults to `10`. Maximum number of results to return.                                    |
 
 #### 📌 Example without using `filter` parameter
 
@@ -711,12 +711,12 @@ The `lightning::channels::list_closed_channels_by_filter` method returns a list 
 
 ### Request Parameters
 
-| Parameter         | Type    | Description                                                              |
-|-------------------|---------|--------------------------------------------------------------------------|
-| coin              | string  | The ticker of the coin you would like to view closed channels for.       |
-| filter            | object  | A standard [LightningClosedChannelsFilter](/atomicdex/api/v20#lightning-closed-channels-filter) object.                         |
-| paging\_options    | object  | Optional. A standard [Pagination](/atomicdex/api/v20#pagination) object. |
-| limit             | integer | Optional, defaults to `10`. Maximum number of results to return.         |
+| Parameter       | Type    | Description                                                                                             |
+| --------------- | ------- | ------------------------------------------------------------------------------------------------------- |
+| coin            | string  | The ticker of the coin you would like to view closed channels for.                                      |
+| filter          | object  | A standard [LightningClosedChannelsFilter](/atomicdex/api/v20#lightning-closed-channels-filter) object. |
+| paging\_options | object  | Optional. A standard [Pagination](/atomicdex/api/v20#pagination) object.                                |
+| limit           | integer | Optional, defaults to `10`. Maximum number of results to return.                                        |
 
 #### 📌 Example without using `filter` parameter
 

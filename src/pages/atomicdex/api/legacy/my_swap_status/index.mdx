@@ -15,24 +15,24 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
 ## Response
 
-| Structure      | Type                       | Description                                                                                                                                                                                                                                                                                                |
-| -------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| events         | array of objects           | the events that occurred during the swap                                                                                                                                                                                                                                                                   |
-| events.type    | string                     | an event type; the list of event types with their data structure is available below                                                                                                                                                                                                                        |
-| events.data    | object                     | additional data of the event; the list of events with their data structure is available below                                                                                                                                                                                                              |
+| Structure       | Type                       | Description                                                                                                                                                                                                                                                                                                |
+| --------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| events          | array of objects           | the events that occurred during the swap                                                                                                                                                                                                                                                                   |
+| events.type     | string                     | an event type; the list of event types with their data structure is available below                                                                                                                                                                                                                        |
+| events.data     | object                     | additional data of the event; the list of events with their data structure is available below                                                                                                                                                                                                              |
 | success\_events | array of strings           | a list of events that gained a `success` swap state; the contents are listed in the order in which they should occur in the `events` array                                                                                                                                                                 |
 | error\_events   | array of strings           | a list of events that fell into an `error` swap state; if at least 1 of the events happens, the swap is considered a failure                                                                                                                                                                               |
-| type           | string                     | whether the node acted as a market `Maker` or `Taker`                                                                                                                                                                                                                                                      |
-| uuid           | string                     | swap uuid                                                                                                                                                                                                                                                                                                  |
-| gui            | string (optional)          | information about gui; copied from AtomicDEX API configuration (MM2.json)                                                                                                                                                                                                                                  |
+| type            | string                     | whether the node acted as a market `Maker` or `Taker`                                                                                                                                                                                                                                                      |
+| uuid            | string                     | swap uuid                                                                                                                                                                                                                                                                                                  |
+| gui             | string (optional)          | information about gui; copied from AtomicDEX API configuration (MM2.json)                                                                                                                                                                                                                                  |
 | mm\_version     | string (optional)          | AtomicDEX API version                                                                                                                                                                                                                                                                                      |
 | maker\_coin     | string (optional)          | ticker of maker coin                                                                                                                                                                                                                                                                                       |
 | taker\_coin     | string (optional)          | ticker of taker coin                                                                                                                                                                                                                                                                                       |
 | maker\_amount   | string (numeric, optional) | the amount of coins to be swapped by maker                                                                                                                                                                                                                                                                 |
 | taker\_amount   | string (numeric, optional) | the amount of coins to be swapped by taker                                                                                                                                                                                                                                                                 |
 | my\_info        | object (optional)          | this object maps event data to make displaying swap data in a GUI simpler (`my_coin`, `my_amount`, etc.)                                                                                                                                                                                                   |
-| recoverable    | bool                       | whether the swap can be recovered using the `recover_funds_of_swap` API command. Important note: The AtomicDEX API does not record the state regarding whether the swap was recovered or not. The AtomicDEX API allows as many calls to the `recover_funds_of_swap` method as necessary, in case of errors |
-| my\_order\_uuid  | string (uuid, optional)    | the uuid of order that matched to start the swap                                                                                                                                                                                                                                                           |
+| recoverable     | bool                       | whether the swap can be recovered using the `recover_funds_of_swap` API command. Important note: The AtomicDEX API does not record the state regarding whether the swap was recovered or not. The AtomicDEX API allows as many calls to the `recover_funds_of_swap` method as necessary, in case of errors |
+| my\_order\_uuid | string (uuid, optional)    | the uuid of order that matched to start the swap                                                                                                                                                                                                                                                           |
 
 #### Maker Swap Events
 
@@ -43,24 +43,24 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   The swap goes to the negotiation stage after this event occurs.
 
-  | Structure                   | Type                              | Description                                                                                                                                                                                                                  |
-  | --------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | taker\_coin                  | string                            | the ticker of the taker coin                                                                                                                                                                                                 |
-  | maker\_coin                  | string                            | the ticker of the maker coin                                                                                                                                                                                                 |
-  | taker                       | string (hexadecimal)              | the p2p ID of taker node                                                                                                                                                                                                     |
-  | secret                      | string (hexadecimal)              | a random secret, the hash of which is used to lock atomic-swap payments                                                                                                                                                      |
-  | secret\_hash                 | string (hexadecimal)              | the hash of the swap secret                                                                                                                                                                                                  |
-  | my\_persistent\_pub           | string (hexadecimal)              | a persistent secp256k1 public key of maker node                                                                                                                                                                              |
-  | lock\_duration               | number (integer)                  | the lock duration of swap payments in seconds. The sender can refund the transaction when the lock duration is passed. The taker payment is locked for the lock duration. The maker payment is locked for lock duration \* 2 |
-  | maker\_amount                | string (numeric)                  | the amount of coins to be swapped by maker                                                                                                                                                                                   |
-  | taker\_amount                | string (numeric)                  | the amount of coins to be swapped by taker                                                                                                                                                                                   |
-  | maker\_payment\_confirmations | number (integer)                  | the required number of blockchain confirmations for maker payment                                                                                                                                                            |
+  | Structure                      | Type                              | Description                                                                                                                                                                                                                  |
+  | ------------------------------ | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | taker\_coin                    | string                            | the ticker of the taker coin                                                                                                                                                                                                 |
+  | maker\_coin                    | string                            | the ticker of the maker coin                                                                                                                                                                                                 |
+  | taker                          | string (hexadecimal)              | the p2p ID of taker node                                                                                                                                                                                                     |
+  | secret                         | string (hexadecimal)              | a random secret, the hash of which is used to lock atomic-swap payments                                                                                                                                                      |
+  | secret\_hash                   | string (hexadecimal)              | the hash of the swap secret                                                                                                                                                                                                  |
+  | my\_persistent\_pub            | string (hexadecimal)              | a persistent secp256k1 public key of maker node                                                                                                                                                                              |
+  | lock\_duration                 | number (integer)                  | the lock duration of swap payments in seconds. The sender can refund the transaction when the lock duration is passed. The taker payment is locked for the lock duration. The maker payment is locked for lock duration \* 2 |
+  | maker\_amount                  | string (numeric)                  | the amount of coins to be swapped by maker                                                                                                                                                                                   |
+  | taker\_amount                  | string (numeric)                  | the amount of coins to be swapped by taker                                                                                                                                                                                   |
+  | maker\_payment\_confirmations  | number (integer)                  | the required number of blockchain confirmations for maker payment                                                                                                                                                            |
   | maker\_payment\_requires\_nota | bool                              | whether dPoW notarization is required for maker payment; can be null; available since `beta-2.0.1738`                                                                                                                        |
-  | taker\_payment\_confirmations | number (integer)                  | the required number of blockchain confirmations for taker payment                                                                                                                                                            |
+  | taker\_payment\_confirmations  | number (integer)                  | the required number of blockchain confirmations for taker payment                                                                                                                                                            |
   | taker\_payment\_requires\_nota | bool                              | whether dPoW notarization is required for taker payment; can be null; available since `beta-2.0.1738`                                                                                                                        |
-  | maker\_payment\_lock          | number (UTC timestamp in seconds) | the maker payment is locked until this timestamp                                                                                                                                                                             |
-  | uuid                        | string                            | the swap uuid                                                                                                                                                                                                                |
-  | started\_at                  | number (UTC timestamp in seconds) | the timestamp at the start of the swap                                                                                                                                                                                       |
+  | maker\_payment\_lock           | number (UTC timestamp in seconds) | the maker payment is locked until this timestamp                                                                                                                                                                             |
+  | uuid                           | string                            | the swap uuid                                                                                                                                                                                                                |
+  | started\_at                    | number (UTC timestamp in seconds) | the timestamp at the start of the swap                                                                                                                                                                                       |
   | maker\_coin\_start\_block      | number (integer)                  | the maker coin block number at the start of the swap                                                                                                                                                                         |
   | taker\_coin\_start\_block      | number (integer)                  | the taker coin block number at the start of the swap                                                                                                                                                                         |
 
@@ -80,10 +80,10 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   Maker starts waiting for taker to send the dex fee after this event occurs.
 
-  | Structure              | Type                              | Description                                      |
-  | ---------------------- | --------------------------------- | ------------------------------------------------ |
+  | Structure                | Type                              | Description                                      |
+  | ------------------------ | --------------------------------- | ------------------------------------------------ |
   | taker\_payment\_locktime | number (UTC timestamp in seconds) | the taker payment is locked until this timestamp |
-  | taker\_pubkey           | string (hexadecimal)              | a persistent secp256k1 public key of taker node  |
+  | taker\_pubkey            | string (hexadecimal)              | a persistent secp256k1 public key of taker node  |
 
   ##### NegotiateFailed
 
@@ -103,8 +103,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### TakerFeeValidateFailed
 
@@ -134,8 +134,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### MakerPaymentDataSendFailed
 
@@ -164,8 +164,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### TakerPaymentWaitConfirmStarted
 
@@ -219,8 +219,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### TakerPaymentSpendConfirmStarted
 
@@ -250,8 +250,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   The `MakerPaymentWaitRefundStarted` event indicates that maker started waiting for lock time expiration to refund the payment.
 
-  | Structure  | Type                   | Description                                |
-  | ---------- | ---------------------- | ------------------------------------------ |
+  | Structure   | Type                   | Description                                |
+  | ----------- | ---------------------- | ------------------------------------------ |
   | wait\_until | number (UTC timestamp) | the timestamp at which a refund will occur |
 
   ##### MakerPaymentRefundFailed
@@ -272,8 +272,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### Finished
 
@@ -291,23 +291,23 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   The swap goes to negotiation stage after this event occurs.
 
-  | Structure                   | Type                              | Description                                                                                                                                                                                                                  |
-  | --------------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | taker\_coin                  | string                            | the ticker of taker coin                                                                                                                                                                                                     |
-  | maker\_coin                  | string                            | the ticker of maker coin                                                                                                                                                                                                     |
-  | maker                       | string (hexadecimal)              | the p2p ID of maker node                                                                                                                                                                                                     |
-  | my\_persistent\_pub           | string (hexadecimal)              | a persistent secp256k1 public key of taker node                                                                                                                                                                              |
-  | lock\_duration               | number (integer)                  | the lock duration of swap payments in seconds. The sender can refund the transaction when the lock duration is passed. The taker payment is locked for the lock duration. The maker payment is locked for lock duration \* 2 |
-  | maker\_amount                | string (numeric)                  | the amount of coins to be swapped by maker                                                                                                                                                                                   |
-  | taker\_amount                | string (numeric)                  | the amount of coins to be swapped by taker                                                                                                                                                                                   |
-  | maker\_payment\_confirmations | number (integer)                  | the required number of blockchain confirmations for maker payment                                                                                                                                                            |
+  | Structure                      | Type                              | Description                                                                                                                                                                                                                  |
+  | ------------------------------ | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | taker\_coin                    | string                            | the ticker of taker coin                                                                                                                                                                                                     |
+  | maker\_coin                    | string                            | the ticker of maker coin                                                                                                                                                                                                     |
+  | maker                          | string (hexadecimal)              | the p2p ID of maker node                                                                                                                                                                                                     |
+  | my\_persistent\_pub            | string (hexadecimal)              | a persistent secp256k1 public key of taker node                                                                                                                                                                              |
+  | lock\_duration                 | number (integer)                  | the lock duration of swap payments in seconds. The sender can refund the transaction when the lock duration is passed. The taker payment is locked for the lock duration. The maker payment is locked for lock duration \* 2 |
+  | maker\_amount                  | string (numeric)                  | the amount of coins to be swapped by maker                                                                                                                                                                                   |
+  | taker\_amount                  | string (numeric)                  | the amount of coins to be swapped by taker                                                                                                                                                                                   |
+  | maker\_payment\_confirmations  | number (integer)                  | the required number of blockchain confirmations for maker payment                                                                                                                                                            |
   | maker\_payment\_requires\_nota | bool                              | whether dPoW notarization is required for maker payment; can be null; available since `beta-2.0.1738`                                                                                                                        |
-  | taker\_payment\_confirmations | number (integer)                  | the required number of blockchain confirmations for taker payment                                                                                                                                                            |
+  | taker\_payment\_confirmations  | number (integer)                  | the required number of blockchain confirmations for taker payment                                                                                                                                                            |
   | taker\_payment\_requires\_nota | bool                              | whether dPoW notarization is required for taker payment; can be null; available since `beta-2.0.1738`                                                                                                                        |
-  | taker\_payment\_lock          | number (UTC timestamp in seconds) | the taker payment is locked until this timestamp                                                                                                                                                                             |
-  | uuid                        | string                            | the swap uuid                                                                                                                                                                                                                |
-  | started\_at                  | number (UTC timestamp in seconds) | the timestamp at the start of the swap                                                                                                                                                                                       |
-  | maker\_payment\_wait          | number (UTC timestamp in seconds) | taker will wait for maker payment confirmation until this timestamp                                                                                                                                                          |
+  | taker\_payment\_lock           | number (UTC timestamp in seconds) | the taker payment is locked until this timestamp                                                                                                                                                                             |
+  | uuid                           | string                            | the swap uuid                                                                                                                                                                                                                |
+  | started\_at                    | number (UTC timestamp in seconds) | the timestamp at the start of the swap                                                                                                                                                                                       |
+  | maker\_payment\_wait           | number (UTC timestamp in seconds) | taker will wait for maker payment confirmation until this timestamp                                                                                                                                                          |
   | maker\_coin\_start\_block      | number (integer)                  | the maker coin block number at the start of the swap                                                                                                                                                                         |
   | taker\_coin\_start\_block      | number (integer)                  | the taker coin block number at the start of the swap                                                                                                                                                                         |
 
@@ -327,11 +327,11 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   Taker sends dex fee after this event occurs.
 
-  | Structure              | Type                              | Description                                                       |
-  | ---------------------- | --------------------------------- | ----------------------------------------------------------------- |
+  | Structure                | Type                              | Description                                                       |
+  | ------------------------ | --------------------------------- | ----------------------------------------------------------------- |
   | maker\_payment\_locktime | number (UTC timestamp in seconds) | the maker payment is locked until this timestamp                  |
-  | maker\_pubkey           | string (hexadecimal)              | a persistent secp256k1 public key of maker node                   |
-  | secret\_hash            | string (hexadecimal)              | the swap payments are expected to be locked with this secret hash |
+  | maker\_pubkey            | string (hexadecimal)              | a persistent secp256k1 public key of maker node                   |
+  | secret\_hash             | string (hexadecimal)              | the swap payments are expected to be locked with this secret hash |
 
   ##### NegotiateFailed
 
@@ -351,8 +351,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### TakerFeeSendFailed
 
@@ -382,8 +382,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### MakerPaymentWaitConfirmStarted
 
@@ -417,8 +417,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### TakerPaymentTransactionFailed
 
@@ -456,10 +456,10 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   When this event occurs taker extracts the secret from the transaction and attempts to spend maker payment.
 
-  | Structure           | Type   | Description                                                |
-  | ------------------- | ------ | ---------------------------------------------------------- |
-  | secret              | string | the atomic swap secret extracted from spending transaction |
-  | transaction         | object | transaction object                                         |
+  | Structure            | Type   | Description                                                |
+  | -------------------- | ------ | ---------------------------------------------------------- |
+  | secret               | string | the atomic swap secret extracted from spending transaction |
+  | transaction          | object | transaction object                                         |
   | transaction.tx\_hash | string | the hash of the transaction                                |
   | transaction.tx\_hex  | string | transaction bytes in hexadecimal format                    |
 
@@ -491,15 +491,15 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### TakerPaymentWaitRefundStarted
 
   `TakerPaymentWaitRefundStarted` event indicates that taker started waiting for lock time expiration to refund the payment.
 
-  | Structure  | Type                   | Description                                |
-  | ---------- | ---------------------- | ------------------------------------------ |
+  | Structure   | Type                   | Description                                |
+  | ----------- | ---------------------- | ------------------------------------------ |
   | wait\_until | number (UTC timestamp) | the timestamp at which a refund will occur |
 
   ##### TakerPaymentRefundFailed
@@ -519,8 +519,8 @@ The `my_swap_status` method returns the data of an atomic swap executed on an At
 
   | Structure | Type   | Description                             |
   | --------- | ------ | --------------------------------------- |
-  | tx\_hash   | string | the hash of the transaction             |
-  | tx\_hex    | string | transaction bytes in hexadecimal format |
+  | tx\_hash  | string | the hash of the transaction             |
+  | tx\_hex   | string | transaction bytes in hexadecimal format |
 
   ##### Finished
 
