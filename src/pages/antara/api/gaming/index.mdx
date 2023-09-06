@@ -9,24 +9,22 @@ export const description =
 Welcome to the Antara Gaming SDK documentation. This module-based software is programmed in C++ 17 and is designed for high-speed runtime execution.
 
 <Note>
-
-The modules of the Antara Gaming SDK rely on other modules, such as [Oracles](/antara/api/oracles/)
-
+  The modules of the Antara Gaming SDK rely on other modules, such as [Oracles](/antara/api/oracles/)
 </Note>
 
 ## config
 
 The `antara::gaming::config` class provides a function to load customized configuration settings for the Antara Gaming SDK.
 
-### load_configuration
+### load\_configuration
 
 #### Public Function
 
 The `load_configuration` function loads customizable configuration settings from a path and filename.
 
-- If the parameter path does not exist the function attempts to create the directories of the given path
-- If the configuration does not exist, the function creates a default configuration
-- If the path and the name of the file exists, the function loads the configuration contents
+*   If the parameter path does not exist the function attempts to create the directories of the given path
+*   If the configuration does not exist, the function creates a default configuration
+*   If the path and the name of the file exists, the function loads the configuration contents
 
 #### Usage Pattern
 
@@ -44,10 +42,10 @@ TConfig antara::gaming::config::load_configuration(std::filesystem::path &&confi
 
 #### Function Parameters
 
-| Name        | Type                  | Description                                                          |
-| ----------- | --------------------- | -------------------------------------------------------------------- |
-| config_path | std::filesystem::path | the path to the directory in which the configuration file is located |
-| filename    | std::string           | the name of the configuration file                                   |
+| Name         | Type                  | Description                                                          |
+| ------------ | --------------------- | -------------------------------------------------------------------- |
+| config\_path | std::filesystem::path | the path to the directory in which the configuration file is located |
+| filename     | std::string           | the name of the configuration file                                   |
 
 #### Response
 
@@ -73,9 +71,7 @@ the core Antara Gaming SDK library.
 The `version` function returns the current version of the Antara Gaming SDK.
 
 <Note>
-
-The result of this function can be deduced at compile time.
-
+  The result of this function can be deduced at compile time.
 </Note>
 
 #### Usage Pattern
@@ -109,11 +105,11 @@ void print_version() {
 }
 ```
 
-## ecs::system_manager
+## ecs::system\_manager
 
 The `antara::gaming::ecs::system_manager` class provides methods to perform tasks such as the manipulation of systems, the addition, deletion, and update of systems, and the deactivation of a system.
 
-### system_manager
+### system\_manager
 
 #### Public Function
 
@@ -135,10 +131,10 @@ system_manager(entt::registry &registry, bool subscribe_to_internal_events = tru
 
 #### Function Parameters
 
-| Name                         | Type           | Description                                           |
-| ---------------------------- | -------------- | ----------------------------------------------------- |
-| registry                     | entt::registry | an entity_registry object                             |
-| subscribe_to_internal_events | bool           | whether to subscribe to default system_manager events |
+| Name                            | Type           | Description                                            |
+| ------------------------------- | -------------- | ------------------------------------------------------ |
+| registry                        | entt::registry | an entity\_registry object                             |
+| subscribe\_to\_internal\_events | bool           | whether to subscribe to default system\_manager events |
 
 #### Response
 
@@ -161,7 +157,7 @@ int main()
 }
 ```
 
-### receive_add_base_system
+### receive\_add\_base\_system
 
 #### Public Function
 
@@ -177,9 +173,9 @@ void receive_add_base_system(const ecs::event::add_base_system &evt)
 
 #### Function Parameters
 
-| Name | Type                         | Description                     |
-| ---- | ---------------------------- | ------------------------------- |
-| evt  | ecs::event::add_base_system& | {/* need a description here */} |
+| Name | Type                           | Description                     |
+| ---- | ------------------------------ | ------------------------------- |
+| evt  | ecs::event::add\_base\_system& | {/* need a description here */} |
 
 #### Response
 
@@ -196,9 +192,7 @@ void receive_add_base_system(const ecs::event::add_base_system &evt)
 The `start` function informs the system manager instance that the developer's game is initiated and spinning.
 
 <Note>
-
-This function allows for the execution of actions at the end of each frame. For example, an action could be the deletion of a sytem, or the addition of a new system which will continue to receive iterations and updates.
-
+  This function allows for the execution of actions at the end of each frame. For example, an action could be the deletion of a sytem, or the addition of a new system which will continue to receive iterations and updates.
 </Note>
 
 #### Usage Pattern
@@ -248,9 +242,9 @@ The `update` function updates a system-manager instance.
 
 The logic of the function is designed to automatically manage the correct order of updates for the different types of systems the developer has added to their system-manager instance.
 
-- If the developer's logic has not loaded any systems into the system_manager instance the function returns `0`
-- If the developer's logic marks a system for deletion, the function deletes the system is automatically at the end of the current loop tick
-- If the developer's logic adds a system through an `ecs::event::add_base_system` event, the function automatically adds the system at the end of the current loop tick
+*   If the developer's logic has not loaded any systems into the system\_manager instance the function returns `0`
+*   If the developer's logic marks a system for deletion, the function deletes the system is automatically at the end of the current loop tick
+*   If the developer's logic adds a system through an `ecs::event::add_base_system` event, the function automatically adds the system at the end of the current loop tick
 
 #### Usage Pattern
 
@@ -268,9 +262,9 @@ std::size\_t nb\_systems\_updated = system\_manager.update();
 
 #### Response
 
-| Name                      | Type        | Description                   |
-| ------------------------- | ----------- | ----------------------------- |
-| number of systems updated | std::size_t | the number of systems updated |
+| Name                      | Type         | Description                   |
+| ------------------------- | ------------ | ----------------------------- |
+| number of systems updated | std::size\_t | the number of systems updated |
 
 #### 📌 Example
 
@@ -294,11 +288,11 @@ int main()
 }
 ```
 
-### update_systems
+### update\_systems
 
 #### Public Function
 
-The `update_systems` function updates specific systems in a system_manager instance.
+The `update_systems` function updates specific systems in a system\_manager instance.
 
 The [update](#update) (listed above) function calls this `update_systems` function multiple times each time the `update` function executes.
 
@@ -320,9 +314,9 @@ std::size\_t nb\_systems\_updated = system\_manager.update();
 
 #### Response
 
-| Name                      | Type        | Description                   |
-| ------------------------- | ----------- | ----------------------------- |
-| number of systems updated | std::size_t | the number of systems updated |
+| Name                      | Type         | Description                   |
+| ------------------------- | ------------ | ----------------------------- |
+| number of systems updated | std::size\_t | the number of systems updated |
 
 #### 📌 Example
 
@@ -346,7 +340,7 @@ int main()
 }
 ```
 
-### get_system | 1
+### get\_system | 1
 
 #### Public Function
 
@@ -367,13 +361,13 @@ const TSystem &get_system() const
 
 #### Response
 
-| Name    | Type     | Description                                         |
-| ------- | -------- | --------------------------------------------------- |
-| TSystem | &TSystem | a reference to the template chosen by the developer |
+| Name    | Type      | Description                                         |
+| ------- | --------- | --------------------------------------------------- |
+| TSystem | \&TSystem | a reference to the template chosen by the developer |
 
 {/* Need an example here */}
 
-### get_system | 2
+### get\_system | 2
 
 #### Public Function
 
@@ -397,9 +391,9 @@ TSystem &get_system()
 
 #### Response
 
-| Name    | Type     | Description                                         |
-| ------- | -------- | --------------------------------------------------- |
-| TSystem | &TSystem | a reference to the template chosen by the developer |
+| Name    | Type      | Description                                         |
+| ------- | --------- | --------------------------------------------------- |
+| TSystem | \&TSystem | a reference to the template chosen by the developer |
 
 #### 📌 Example
 
@@ -422,13 +416,13 @@ int main()
 }
 ```
 
-### get_systems | 1
+### get\_systems | 1
 
 #### Public Function
 
 The `get_systems` function accepts multiple template parameters and returns multiple systems.
 
-This function recursively calls the [get_system](#get_system) function. Based on the logic of the different kinds of systems requested, this function updates the indicated systems in the correct order.
+This function recursively calls the [get\_system](#get_system) function. Based on the logic of the different kinds of systems requested, this function updates the indicated systems in the correct order.
 
 #### Usage Pattern
 
@@ -439,15 +433,15 @@ std::tuple<std::add_lvalue_reference_t<TSystems>...> get_systems()
 
 #### Function and Template Type
 
-| Name    | Type                                                | Description                                    |
-| ------- | --------------------------------------------------- | ---------------------------------------------- |
-| TSystem | std::tuple\<std::add_lvalue_reference_t\<TSystems\> | a tuple containing multiple TSystems templates |
+| Name    | Type                                                  | Description                                    |
+| ------- | ----------------------------------------------------- | ---------------------------------------------- |
+| TSystem | std::tuple\<std::add\_lvalue\_reference\_t\<TSystems> | a tuple containing multiple TSystems templates |
 
 #### Response
 
-| Name     | Type                                                | Description                                         |
-| -------- | --------------------------------------------------- | --------------------------------------------------- |
-| TSystems | std::tuple\<std::add_lvalue_reference_t\<TSystems\> | a reference to the template chosen by the developer |
+| Name     | Type                                                  | Description                                         |
+| -------- | ----------------------------------------------------- | --------------------------------------------------- |
+| TSystems | std::tuple\<std::add\_lvalue\_reference\_t\<TSystems> | a reference to the template chosen by the developer |
 
 #### 📌 Example
 
@@ -470,16 +464,14 @@ int main()
 }
 ```
 
-### get_systems | 2
+### get\_systems | 2
 
 #### Public Function
 
-An overloaded version of the [get_systems](#get_systems) function.
+An overloaded version of the [get\_systems](#get_systems) function.
 
 <Note>
-
-This function is marked as [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
-
+  This function is marked as [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
 </Note>
 
 #### Usage Pattern
@@ -491,15 +483,15 @@ std::tuple<std::add_lvalue_reference_t<std::add_const_t<TSystems>>...> get_syste
 
 #### Function and Template Type
 
-| Name              | Type                                                                         | Description                                          |
-| ----------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------- |
-| tuple of TSystems | std::tuple\<std::add_lvalue_reference_t\<std::add_const_t\<TSystems\>\>...\> | a tuple containing multiple TSystems templates types |
+| Name              | Type                                                                           | Description                                          |
+| ----------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| tuple of TSystems | std::tuple\<std::add\_lvalue\_reference\_t\<std::add\_const\_t\<TSystems>>...> | a tuple containing multiple TSystems templates types |
 
 #### Response
 
-| Name              | Type                                                                         | Description                                                  |
-| ----------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| tuple of TSystems | std::tuple\<std::add_lvalue_reference_t\<std::add_const_t\<TSystems\>\>...\> | a tuple containing multiple references to TSystems templates |
+| Name              | Type                                                                           | Description                                                  |
+| ----------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| tuple of TSystems | std::tuple\<std::add\_lvalue\_reference\_t\<std::add\_const\_t\<TSystems>>...> | a tuple containing multiple references to TSystems templates |
 
 #### 📌 Example
 
@@ -526,11 +518,11 @@ int main()
 }
 ```
 
-### has_system
+### has\_system
 
 #### Public Function
 
-The `has_system` function verifies whether or not a system is already registered in the [system_manager](#system_manager).
+The `has_system` function verifies whether or not a system is already registered in the [system\_manager](#system_manager).
 
 #### Usage Pattern
 
@@ -572,119 +564,16 @@ int main()
 }
 ```
 
-### has_systems | 1
+### has\_systems | 1
 
 #### Public Function
 
-The `has_systems` function verifies whether or not a list of systems is already registered in the [system_manager](#system_manager).
+The `has_systems` function verifies whether or not a list of systems is already registered in the [system\_manager](#system_manager).
 
-This function recursively calls the [has_system](#has_system) function.
+This function recursively calls the [has\_system](#has_system) function.
 
 <Note>
-
-This function is marked as [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
-
-</Note>
-
-#### Usage Pattern
-
-```cpp
-#include <antara/gaming/ecs/system.manager.hpp>
-
-bool result = system_manager.has_systems<my_game::render_system, my_game::input_systems>();
-```
-
-#### Template Type
-
-| Name             | Type                             | Description                                   |
-| ---------------- | -------------------------------- | --------------------------------------------- |
-| list of TSystems | template\<typename ...TSystems\> | the list of systems that needs to be verified |
-
-#### Response
-
-| Name       | Type | Description                                                                        |
-| ---------- | ---- | ---------------------------------------------------------------------------------- |
-| (variable) | bool | whether or not the indicated systems are registered in the system manager instance |
-
-#### 📌 Example
-
-```c
-#include <entt/entity/registry.hpp>
-#include <entt/dispatcher/dispatcher.hpp>
-#include <antara/gaming/ecs/system.manager.hpp>
-
-int main()
-{
-    entt::registry entity_registry;
-    entt::dispatcher& dispatcher{registry.set<entt::dispatcher>()};
-    antara::gaming::ecs::system_manager system_manager{entity_registry};
-
-    bool result = system_manager.has_systems<my_game::render_system, my_game::input_systems>();
-    if (!result) {
-        // Oh no, atleast one of the systems is not present
-    }
-    return 0;
-}
-```
-
-### has_systems | 2
-
-#### Public Function
-
-The `has_systems` function verifies whether or not a list of systems is already registered in the [system_manager](#system_manager).
-
-#### Usage Pattern
-
-```cpp
-template<typename ...TSystems>
-bool has_systems() const
-```
-
-#### Template Type
-
-| Name             | Type                             | Description                                   |
-| ---------------- | -------------------------------- | --------------------------------------------- |
-| list of TSystems | template\<typename ...TSystems\> | the list of systems that needs to be verified |
-
-#### Response
-
-| Name       | Type | Description                                                                        |
-| ---------- | ---- | ---------------------------------------------------------------------------------- |
-| (variable) | bool | whether or not the indicated systems are registered in the system manager instance |
-
-#### 📌 Example
-
-```c
-#include <entt/entity/registry.hpp>
-#include <entt/dispatcher/dispatcher.hpp>
-#include <antara/gaming/ecs/system.manager.hpp>
-
-int main()
-{
-    entt::registry entity_registry;
-    entt::dispatcher& dispatcher{registry.set<entt::dispatcher>()};
-    antara::gaming::ecs::system_manager system_manager{entity_registry};
-
-    bool result = system_manager.has_systems<my_game::render_system, my_game::input_systems>();
-    if (!result) {
-        // Oh no, atleast one of the systems is not present
-    }
-    return 0;
-}
-```
-
-### has_systems | 3
-
-#### Public Function
-
-The `has_systems` function verifies whether or not a list of systems is already registered in the [system_manager](#system_manager).
-
-This function recursively calls the [has_system](#has_system) function.
-
-<Note>
-
-This function is marked as [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
-
+  This function is marked as [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
 </Note>
 
 #### Usage Pattern
@@ -699,7 +588,7 @@ bool result = system_manager.has_systems<my_game::render_system, my_game::input_
 
 | Name             | Type                            | Description                                   |
 | ---------------- | ------------------------------- | --------------------------------------------- |
-| list of TSystems | templat\<typename ...TSystems\> | the list of systems that needs to be verified |
+| list of TSystems | template\<typename ...TSystems> | the list of systems that needs to be verified |
 
 #### Response
 
@@ -728,18 +617,115 @@ int main()
 }
 ```
 
-### has_systems | 4
+### has\_systems | 2
 
 #### Public Function
 
-The `has_systems` function verifies whether or not a list of systems is already registered in the [system_manager](#system_manager).
+The `has_systems` function verifies whether or not a list of systems is already registered in the [system\_manager](#system_manager).
 
-This function recursively calls the [has_system](#has_system) function.
+#### Usage Pattern
+
+```cpp
+template<typename ...TSystems>
+bool has_systems() const
+```
+
+#### Template Type
+
+| Name             | Type                            | Description                                   |
+| ---------------- | ------------------------------- | --------------------------------------------- |
+| list of TSystems | template\<typename ...TSystems> | the list of systems that needs to be verified |
+
+#### Response
+
+| Name       | Type | Description                                                                        |
+| ---------- | ---- | ---------------------------------------------------------------------------------- |
+| (variable) | bool | whether or not the indicated systems are registered in the system manager instance |
+
+#### 📌 Example
+
+```c
+#include <entt/entity/registry.hpp>
+#include <entt/dispatcher/dispatcher.hpp>
+#include <antara/gaming/ecs/system.manager.hpp>
+
+int main()
+{
+    entt::registry entity_registry;
+    entt::dispatcher& dispatcher{registry.set<entt::dispatcher>()};
+    antara::gaming::ecs::system_manager system_manager{entity_registry};
+
+    bool result = system_manager.has_systems<my_game::render_system, my_game::input_systems>();
+    if (!result) {
+        // Oh no, atleast one of the systems is not present
+    }
+    return 0;
+}
+```
+
+### has\_systems | 3
+
+#### Public Function
+
+The `has_systems` function verifies whether or not a list of systems is already registered in the [system\_manager](#system_manager).
+
+This function recursively calls the [has\_system](#has_system) function.
 
 <Note>
+  This function is marked as [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
+</Note>
 
-This function is marked [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
+#### Usage Pattern
 
+```cpp
+#include <antara/gaming/ecs/system.manager.hpp>
+
+bool result = system_manager.has_systems<my_game::render_system, my_game::input_systems>();
+```
+
+#### Template Type
+
+| Name             | Type                           | Description                                   |
+| ---------------- | ------------------------------ | --------------------------------------------- |
+| list of TSystems | templat\<typename ...TSystems> | the list of systems that needs to be verified |
+
+#### Response
+
+| Name       | Type | Description                                                                        |
+| ---------- | ---- | ---------------------------------------------------------------------------------- |
+| (variable) | bool | whether or not the indicated systems are registered in the system manager instance |
+
+#### 📌 Example
+
+```c
+#include <entt/entity/registry.hpp>
+#include <entt/dispatcher/dispatcher.hpp>
+#include <antara/gaming/ecs/system.manager.hpp>
+
+int main()
+{
+    entt::registry entity_registry;
+    entt::dispatcher& dispatcher{registry.set<entt::dispatcher>()};
+    antara::gaming::ecs::system_manager system_manager{entity_registry};
+
+    bool result = system_manager.has_systems<my_game::render_system, my_game::input_systems>();
+    if (!result) {
+        // Oh no, atleast one of the systems is not present
+    }
+    return 0;
+}
+```
+
+### has\_systems | 4
+
+#### Public Function
+
+The `has_systems` function verifies whether or not a list of systems is already registered in the [system\_manager](#system_manager).
+
+This function recursively calls the [has\_system](#has_system) function.
+
+<Note>
+  This function is marked [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
 </Note>
 
 #### Usage Pattern
@@ -751,9 +737,9 @@ bool has\_systems() const
 
 #### Template Type
 
-| Name             | Type                            | Description                                   |
-| ---------------- | ------------------------------- | --------------------------------------------- |
-| list of TSystems | template\<typename ...TSystem\> | the list of systems that needs to be verified |
+| Name             | Type                           | Description                                   |
+| ---------------- | ------------------------------ | --------------------------------------------- |
+| list of TSystems | template\<typename ...TSystem> | the list of systems that needs to be verified |
 
 #### Response
 
@@ -782,7 +768,7 @@ int main()
 }
 ```
 
-### mark_system
+### mark\_system
 
 #### Public Function
 
@@ -829,7 +815,7 @@ int main()
 }
 ```
 
-### mark_systems | 1
+### mark\_systems | 1
 
 #### Public Function
 
@@ -876,18 +862,16 @@ int main()
 }
 ```
 
-### mark_systems | 2
+### mark\_systems | 2
 
 #### Public Function
 
 The `mark_systems` function marks a list of systems for destruction at the next tick of the game loop.
 
-This function recursively calls the [mark_system](#mark_system) function.
+This function recursively calls the [mark\_system](#mark_system) function.
 
 <Note>
-
-This system is marked as [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
-
+  This system is marked as [nodiscard.](https://en.cppreference.com/w/cpp/language/attributes/nodiscard)
 </Note>
 
 #### Usage Pattern
@@ -931,7 +915,7 @@ int main()
 }
 ```
 
-### enable_system
+### enable\_system
 
 #### Public Function
 
@@ -978,13 +962,13 @@ int main()
 }
 ```
 
-### enable_systems
+### enable\_systems
 
 #### Public Function
 
 The `enable_systems` function enables a list of systems.
 
-This function recursively calls the [enable_system](#enable_system) function.
+This function recursively calls the [enable\_system](#enable_system) function.
 
 #### Usage Pattern
 
@@ -1026,7 +1010,7 @@ int main()
 }
 ```
 
-### disable_system
+### disable\_system
 
 #### Public Function
 
@@ -1074,13 +1058,13 @@ int main()
 }
 ```
 
-### disable_systems
+### disable\_systems
 
 #### Public Function
 
 The `disable_systems` function disables a list of systems.
 
-This function recursively calls the [disable_system](#disable_system) function.
+This function recursively calls the [disable\_system](#disable_system) function.
 
 #### Usage Pattern
 
@@ -1122,7 +1106,7 @@ int main()
 }
 ```
 
-### nb_systems | 1
+### nb\_systems | 1
 
 #### Public Function
 
@@ -1142,9 +1126,9 @@ std::size_t nb_systems() const
 
 #### Response
 
-| Name              | Type        | Description                      |
-| ----------------- | ----------- | -------------------------------- |
-| number of systems | std::size_t | the number of systems registered |
+| Name              | Type         | Description                      |
+| ----------------- | ------------ | -------------------------------- |
+| number of systems | std::size\_t | the number of systems registered |
 
 #### 📌 Example
 
@@ -1167,7 +1151,7 @@ int main()
 }
 ```
 
-### nb_systems | 2
+### nb\_systems | 2
 
 #### Public Function
 
@@ -1181,15 +1165,15 @@ std::size_t nb_systems(system_type sys_type) const
 
 #### Template Type
 
-| Name     | Type        | Description                    |
-| -------- | ----------- | ------------------------------ |
-| sys_type | system_type | represents the type of systems |
+| Name      | Type         | Description                    |
+| --------- | ------------ | ------------------------------ |
+| sys\_type | system\_type | represents the type of systems |
 
 #### Response
 
-| Name              | Type        | Description                               |
-| ----------------- | ----------- | ----------------------------------------- |
-| number of systems | std::size_t | the number of systems of a specified type |
+| Name              | Type         | Description                               |
+| ----------------- | ------------ | ----------------------------------------- |
+| number of systems | std::size\_t | the number of systems of a specified type |
 
 #### 📌 Example
 
@@ -1212,7 +1196,7 @@ int main()
 }
 ```
 
-### create_system
+### create\_system
 
 #### Public Function
 
@@ -1258,7 +1242,7 @@ int main()
 }
 ```
 
-### create_system_rt
+### create\_system\_rt
 
 #### Public Function
 
@@ -1271,7 +1255,7 @@ template<typename TSystem, typename ...TSystemArgs>
 void create_system_rt(TSystemArgs&&... args)
 ```
 
-### load_systems
+### load\_systems
 
 #### Public Function
 
@@ -1279,7 +1263,7 @@ The `load_systems` function loads many os systems.
 
 {/* What does "os" mean above? Operating systems? That would make it operating systems systems */}
 
-This function recursively calls the [create_systems](#create_systems) function.
+This function recursively calls the [create\_systems](#create_systems) function.
 
 #### Usage Pattern
 
@@ -1336,7 +1320,7 @@ syntactic sugar name for a chrono steady clock
 
 ```
 
-### system_ptr
+### system\_ptr
 
 #### Private Type
 
@@ -1350,7 +1334,7 @@ using system_ptr = std::unique_ptr<base_system>
 syntactic sugar name for a pointer to base_system
 ```
 
-### system_array
+### system\_array
 
 #### Private Type
 
@@ -1364,7 +1348,7 @@ using system_array = std::vector<system_ptr>
 syntactic sugar name for an array of system_ptr
 ```
 
-### system_registry
+### system\_registry
 
 #### Private Type
 
@@ -1378,7 +1362,7 @@ using system_registry = std::array<system_array, system_type::size>
 syntactic sugar name for a multidimensional array of system_array (pre_update, logic_update, post_update)
 ```
 
-### systems_queue
+### systems\_queue
 
 #### Private Type
 
@@ -1390,7 +1374,7 @@ using systems_queue = std::queue<system_ptr>
 syntactic sugar name for a queue of system pointer to add.
 ```
 
-### add_system\_
+### add\_system\_
 
 #### Private Function
 
@@ -1402,7 +1386,7 @@ base*system &add_system*(system_ptr &&system, system_type sys_type)
 
 {/* Not clear about any of this, just placing here for now in the format */}
 
-### entity_registry\_
+### entity\_registry\_
 
 #### Private Data Members
 
@@ -1410,21 +1394,19 @@ base*system &add_system*(system_ptr &&system, system_type sys_type)
 
 The `antara::gaming::event` class contains functions and other elements that are common in gaming.
 
-### event::key_pressed
+### event::key\_pressed
 
-**struct key_pressed**
+**struct key\_pressed**
 
 The `key_pressed` struct provides functions that execute when a user presses a key.
 
 <Note>
-
-This class is automatically reflected for scripting systems such as Lua, Python.
-
+  This class is automatically reflected for scripting systems such as Lua, Python.
 </Note>
 
 #### Public Functions
 
-##### key_pressed | 1
+##### key\_pressed | 1
 
 The `key_pressed` function is a constructor that takes arguments to associate a key with logic.
 
@@ -1469,13 +1451,13 @@ int main()
 }
 ```
 
-##### key_pressed | 2
+##### key\_pressed | 2
 
 The `key_pressed` function that takes no arguments is the default constructor, provided for scripting-system convenience.
 
 {/* Is there more information we can provide here? */}
 
-Please see the [key_pressed | 1](#key-pressed-1) function for more information.
+Please see the [key\_pressed | 1](#key-pressed-1) function for more information.
 
 ###### Usage Pattern
 
@@ -1521,19 +1503,17 @@ is shift pressed at the same time.
 is system pressed at the same time.
 ```
 
-### event::key_released
+### event::key\_released
 
 The `antara::gaming::event::key\_released` class provides functions and other elements that associate the release of a key with logic.
 
 <Note>
-
-This class is automatically reflected for scripting systems such as Lua, Python.
-
+  This class is automatically reflected for scripting systems such as Lua, Python.
 </Note>
 
 #### Public Functions
 
-##### key_released
+##### key\_released
 
 The `key_released` function is a constructor that takes arguments to associate a key with logic.
 
@@ -1576,11 +1556,11 @@ int main()
 }
 ```
 
-##### key_released | 2
+##### key\_released | 2
 
 The `key_released` function that takes no arguments is the default constructor, provided for scripting-system convenience.
 
-Please see the [key_released | 1](#key-released-1) function for more information.
+Please see the [key\_released | 1](#key-released-1) function for more information.
 
 ###### Usage Pattern
 
@@ -1624,23 +1604,21 @@ bool system = {"{false}"}
 is system released at the same time.
 ```
 
-## event::quit_game
+## event::quit\_game
 
 The `antara::gaming::event::quit_game` class provides functions and other methods to quit a game.
 
-### quit_game
+### quit\_game
 
 The `quit_game` struct is an event that leaves a game and provides a return value.
 
 <Note>
-
-This class is automatically reflected for scripting systems such as Lua, Python.
-
+  This class is automatically reflected for scripting systems such as Lua, Python.
 </Note>
 
 #### Public Functions
 
-##### quit_game | 1
+##### quit\_game | 1
 
 The `quit_game` function is a constructor that takes arguments and quits the game.
 
@@ -1654,15 +1632,15 @@ quit_game(int return_value)
 
 ###### Template Type
 
-| Name         | Type | Description                                           |
-| ------------ | ---- | ----------------------------------------------------- |
-| return_value | int  | the return value of the program when leaving the game |
+| Name          | Type | Description                                           |
+| ------------- | ---- | ----------------------------------------------------- |
+| return\_value | int  | the return value of the program when leaving the game |
 
 ###### Response
 
-| Name         | Type | Description                                           |
-| ------------ | ---- | ----------------------------------------------------- |
-| return_value | int  | the return value of the program when leaving the game |
+| Name          | Type | Description                                           |
+| ------------- | ---- | ----------------------------------------------------- |
+| return\_value | int  | the return value of the program when leaving the game |
 
 ###### 📌 Example
 
@@ -1679,11 +1657,11 @@ int main()
 }
 ```
 
-##### quit_game | 2
+##### quit\_game | 2
 
 The `quit_game` function that takes no arguments is the default constructor, provided for scripting-system convenience.
 
-Please see the [quit_game | 1](#quit-game-1) function for more information.
+Please see the [quit\_game | 1](#quit-game-1) function for more information.
 
 ###### Usage Pattern
 
@@ -1693,7 +1671,7 @@ quit_game()
 
 #### Public Members
 
-##### return_value\_
+##### return\_value\_
 
 {/* need more information to edit this part */}
 
@@ -1711,7 +1689,7 @@ the return value of the program when leaving the game
 
 #### Public Static Attributes
 
-##### invoker_dispatcher
+##### invoker\_dispatcher
 
 ###### Usage Pattern
 
@@ -1727,7 +1705,7 @@ Static fields.
 
 The `antara::gaming::sfml` class provides functions and other elements for SFML-related (Simple and Fast Multimedia Library) logic purposes.
 
-### sfml::audio_system
+### sfml::audio\_system
 
 The `antara::gaming::sfml::audio_system` class provides audio-related functions and other elements.
 
@@ -1739,7 +1717,7 @@ class audio_system : public antara::gaming::ecs::system<audio_system>
 
 #### Public Functions
 
-##### audio_system
+##### audio\_system
 
 {/* Need a description */}
 
@@ -1751,15 +1729,15 @@ audio_system(entt::registry &registry)
 
 ###### Function Parameters
 
-| Name     | Type          | Description         |
-| -------- | ------------- | ------------------- |
-| registry | ent::registry | the entity_registry |
+| Name     | Type          | Description          |
+| -------- | ------------- | -------------------- |
+| registry | ent::registry | the entity\_registry |
 
 ###### Response
 
-| Name         | Type | Description                                           |
-| ------------ | ---- | ----------------------------------------------------- |
-| return_value | int  | the return value of the program when leaving the game |
+| Name          | Type | Description                                           |
+| ------------- | ---- | ----------------------------------------------------- |
+| return\_value | int  | the return value of the program when leaving the game |
 
 ##### update
 
@@ -1783,7 +1761,7 @@ void update()
 | ------ | ---- | ----------- |
 | (none) | void |             |
 
-### sfml::component_sound
+### sfml::component\_sound
 
 The `antara::gaming::sfml::component_sound` struct contains sound and the sound's attributes (such as volume).
 

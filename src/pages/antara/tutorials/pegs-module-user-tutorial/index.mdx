@@ -4,13 +4,11 @@ export const description = "This tutorial uses the USDKTEST test Smart Chain to 
 # Pegs Module User Tutorial
 
 <Note>
+  The Pegs Module is in the final stages of production.
 
-The Pegs Module is in the final stages of production.
+  The following tutorial is currently only compatible with computer-hardware setups that are running Linux OS's Ubuntu/Debian-based distributions.
 
-The following tutorial is currently only compatible with computer-hardware setups that are running Linux OS's Ubuntu/Debian-based distributions.
-
-For questions and assistance, please reach out to the Komodo team using the `#cc-pegs` channel of the [Komodo Discord](https://komodoplatform.com/discord) live-chat server. Thank you.
-
+  For questions and assistance, please reach out to the Komodo team using the `#cc-pegs` channel of the [Komodo Discord](https://komodoplatform.com/discord) live-chat server. Thank you.
 </Note>
 
 ## Tutorial Overview
@@ -19,19 +17,17 @@ This tutorial uses the `USDKTEST` test and development Smart Chain to introduce 
 
 #### Tutorial Outline
 
-- Connect to the test Smart Chain `USDKTEST`
-- Deposit `KMD` coins (on the `KMD` Smart Chain) in the address associated with the `USDKTEST` Gateways Module
-- Claim tokenized `KMD` on the `USDKTEST` chain
-- Lock tokenized `KMD` in the Pegs Module and receive `USDK` coins
-- Redeem tokenized `KMD` using the `pegsredeem` method
-- Return tokenized `KMD` to the Gateway to receive `KMD` coins on the `KMD` Smart Chain
+*   Connect to the test Smart Chain `USDKTEST`
+*   Deposit `KMD` coins (on the `KMD` Smart Chain) in the address associated with the `USDKTEST` Gateways Module
+*   Claim tokenized `KMD` on the `USDKTEST` chain
+*   Lock tokenized `KMD` in the Pegs Module and receive `USDK` coins
+*   Redeem tokenized `KMD` using the `pegsredeem` method
+*   Return tokenized `KMD` to the Gateway to receive `KMD` coins on the `KMD` Smart Chain
 
 ## Installation
 
-<Note type='warning'>
-
-The following installation procedure creates a version of the Komodo software daemon that should not be used for any purpose other than testing. Several of the customizations active on this particular version of the daemon are intended for testing purposes only.
-
+<Note type="warning">
+  The following installation procedure creates a version of the Komodo software daemon that should not be used for any purpose other than testing. Several of the customizations active on this particular version of the daemon are intended for testing purposes only.
 </Note>
 
 ### Dependencies
@@ -128,26 +124,22 @@ Use the <b>getinfo</b> method, as before, while waiting until the blockchain syn
 
 ## Start Testing
 
-<Note classNaming='flex-col'>
+<Note classNaming="flex-col">
+  Key Information for this Tutorial
 
-Key Information for this Tutorial
+  The following key information is used throughout this tutorial. Refer back to this content as often as needed.
 
-The following key information is used throughout this tutorial. Refer back to this content as often as needed.
-
-- KMD token (tokenid): 1a459712f1e79a544efdf55cfb3e111c5df3300a4da4d16cb3b963bbb50aebf1
-- Oracle (oracletxid): a6a59fbdc0ba8b138a4d14ff334a533f0358144091aa999ef45fd7498ab4189a
-- Gateways (bindtxid): 50384e7668bd6908d8e0b67f1450c56f017186d802b1065c3258302a30b5adb2
-- Faucet: 7bc2dafc4d71c7e178b3a2a89e7ddc894cb14dbeff5937fa869915adf1af5108
-- Pegs (pegstxid): a9539ec8db34ee44ff213cda59f412a02795821cf05844b0bc184660711371f7
-
+  *   KMD token (tokenid): 1a459712f1e79a544efdf55cfb3e111c5df3300a4da4d16cb3b963bbb50aebf1
+  *   Oracle (oracletxid): a6a59fbdc0ba8b138a4d14ff334a533f0358144091aa999ef45fd7498ab4189a
+  *   Gateways (bindtxid): 50384e7668bd6908d8e0b67f1450c56f017186d802b1065c3258302a30b5adb2
+  *   Faucet: 7bc2dafc4d71c7e178b3a2a89e7ddc894cb14dbeff5937fa869915adf1af5108
+  *   Pegs (pegstxid): a9539ec8db34ee44ff213cda59f412a02795821cf05844b0bc184660711371f7
 </Note>
 
 <Note>
+  The types of transactions performed in this tutorial require at least one confirmation from the network before the user should proceed to the next step in the outline.
 
-The types of transactions performed in this tutorial require at least one confirmation from the network before the user should proceed to the next step in the outline.
-
-When performing cross-chain operations, the user may need to wait for two or three confirmations on the source chain before any related activity will appear on the destination chain.
-
+  When performing cross-chain operations, the user may need to wait for two or three confirmations on the source chain before any related activity will appear on the destination chain.
 </Note>
 
 ### Deposit KMD in the Associated USDKTEST Gateways Address
@@ -192,7 +184,7 @@ The first address is the address above, and this should receive the majority of 
 
 The second address is the address corresponding to the tutorial user's `pubkey` used to launch the `USDKTEST` Smart Chain. This second address requires only a small amount of `KMD` (a few satoshis); this part of the transaction creates a marker that indicates to the Gateways Module the owner of the `KMD` funds.
 
-The [z_sendmany](/smart-chains/api/wallet#z-sendmany) allows the user to send coins to two addresses in a single address, as follows.
+The [z\_sendmany](/smart-chains/api/wallet#z-sendmany) allows the user to send coins to two addresses in a single address, as follows.
 
 ```bash
 ./komodo-cli z_sendmany "FROM_ADDRESS" '[{"address":"ADDRESS_CORRESPONDING_TO_USER_PUBLIC_KEY","amount":SMALL_MARKER_AMOUNT},{"address":"GATEWAYS_MULTISIG_ADDRESS","amount":MAIN_AMOUNT_TO_DEPOSIT}]'
@@ -206,7 +198,7 @@ Observe the following example.
 
 #### Obtain the txid of the Deposit Transaction
 
-The [z_sendmany](/smart-chains/api/wallet#z-sendmany) returns an operation id, `opid`. Use this `opid` to obtain the `txid` of the transaction.
+The [z\_sendmany](/smart-chains/api/wallet#z-sendmany) returns an operation id, `opid`. Use this `opid` to obtain the `txid` of the transaction.
 
 (Alternatively, check the website [explorer](https://kmdexplorer.io/) for the `txid` by searching for any of the addresses associated with the transaction and searching for the most recent transaction.)
 
@@ -310,16 +302,16 @@ Structure of the command to be executed:
 
 #### Details
 
-- `gatewaysdeposit` — The name of the method, submitted as-is
-- `bindtxid` — The Gateway's `bindtxid` (see above)
-- `height` — The `height` of the block in which the deposit `txid` was confirmed in the earlier step
-- `coin` — Ticker of the `coin` deposited (`KMD` in this example)
-- `cointxid` — `txid` of the deposit
-- `claimvout` — The marker utxo's vout number in the external deposit transaction; this value is always `0` when the `z_sendmany` method is used, as shown in this tutorial
-- `deposithex` — The hex value from `gettransaction` call for the deposited `txid` (the method for retrieving this value is shown in the following section)
-- `proof` — The `proof` value returned from the `gettxoutproof` method using the deposit `txid` (the method for retrieving this value is shown in the following section)
-- `destpub` — The user's `pubkey` used to launch the `USDKTEST` Smart Chain
-- `amount` — The `amount` of coin (`KMD`) deposited
+*   `gatewaysdeposit` — The name of the method, submitted as-is
+*   `bindtxid` — The Gateway's `bindtxid` (see above)
+*   `height` — The `height` of the block in which the deposit `txid` was confirmed in the earlier step
+*   `coin` — Ticker of the `coin` deposited (`KMD` in this example)
+*   `cointxid` — `txid` of the deposit
+*   `claimvout` — The marker utxo's vout number in the external deposit transaction; this value is always `0` when the `z_sendmany` method is used, as shown in this tutorial
+*   `deposithex` — The hex value from `gettransaction` call for the deposited `txid` (the method for retrieving this value is shown in the following section)
+*   `proof` — The `proof` value returned from the `gettxoutproof` method using the deposit `txid` (the method for retrieving this value is shown in the following section)
+*   `destpub` — The user's `pubkey` used to launch the `USDKTEST` Smart Chain
+*   `amount` — The `amount` of coin (`KMD`) deposited
 
 The following commands retrieve the missing information.
 
@@ -394,12 +386,12 @@ Method structure:
 
 #### Details
 
-- `gatewaysclaim` — The name of the method, executed as-is
-- `bindtxid` — This is the creation txid of the Gateway; supplied at the beginning of the tutorial
-- `coin` — Ticker of the `coin` deposited
-- `deposittxid` — The `txid` returned from the `gatewaysdeposit` transaction
-- `destpubkey` — The user pubkey used to launch the `USDKTEST` daemon
-- `amount` — The `amount` deposited
+*   `gatewaysclaim` — The name of the method, executed as-is
+*   `bindtxid` — This is the creation txid of the Gateway; supplied at the beginning of the tutorial
+*   `coin` — Ticker of the `coin` deposited
+*   `deposittxid` — The `txid` returned from the `gatewaysdeposit` transaction
+*   `destpubkey` — The user pubkey used to launch the `USDKTEST` daemon
+*   `amount` — The `amount` deposited
 
 Observe the following example structure.
 
@@ -450,6 +442,7 @@ Output:
 ```
 
 The description `"KMD_BTC,BTC_USD,*,1"` indicates to the Pegs modules the price to be considered.
+
 {/* Sidd: I don't understand what this means specifically. Can we please get more information here? gcharang: it is an artifact from the Prices module, "KMD_BTC,BTC_USD,*,1" is a synthetic price; it means (KMD/BTC)*(BTC/USD) which is equal to KMD/USD this system should be clear once I add the prices doc */}
 
 ```bash
@@ -638,11 +631,11 @@ Method structure:
 
 #### Details
 
-- `gatewayswithdraw` — The name of the method, executed as-is
-- `bindtxid` — The Gateway Module's `bindtxid`
-- `coin` — Ticker of the `coin` deposited
-- `withdrawpub` — The user's pubkey to which the `KMD` coins should be sent on the `KMD` chain
-- `amount` — The `amount` to be sent
+*   `gatewayswithdraw` — The name of the method, executed as-is
+*   `bindtxid` — The Gateway Module's `bindtxid`
+*   `coin` — Ticker of the `coin` deposited
+*   `withdrawpub` — The user's pubkey to which the `KMD` coins should be sent on the `KMD` chain
+*   `amount` — The `amount` to be sent
 
 ```bash
 ./komodo-cli -ac_name=USDKTEST gatewayswithdraw 50384e7668bd6908d8e0b67f1450c56f017186d802b1065c3258302a30b5adb2 KMD 03fa41b540b99161257c3a51e7c1598666361b739dce6a171d2d426255c92fb0e1 0.01
@@ -678,4 +671,5 @@ A user that does not yet have a pegs account (obtained via the [pegsfund](/antar
 The [pegsworstaccounts](/antara/api/pegs/#pegsworstaccounts) method can be used to retrieve a list of all accounts that are in the "red zone" (where the debt ratio exceeds `90%`).
 
 The [pegsliquidate](/antara/api/pegs/#pegsliquidate) method can be used to liquidate any of these accounts by repaying the account's outstanding debt using the Pegs-related Smart Chain's coins. This gives the executor of the method an immediate `5%` profit.
+
 {/* Sidd: are we sure on the math here? If the executor sends 10% of the coins necessary to pay off the full debt, and receives 5% of the user's account's KMD, then that's a 50% profit. If the executor sends 90% of the coins necessary to pay off the full debt and receives 5% of the remaining coins in the KMD account, then that's a (5/90)% profit, which is heigher than 5% gcharang: similar comment in the Pegs doc; "The third-party user must deposit `USDK` to cover the user's whole debt (which is valued at 90% of the KMD tokens) according to current prices and will receive 95% of the KMD tokens which can be redeemed on the KMD chain and sold in an exchange for Profit" --> The remaining amount in the indebted user's account is disbursed to the Pegs Module for stablecoin price maintenance. */}
