@@ -44,7 +44,7 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 - Use simple language: Where possible, avoid jargon or technical terms that may be unfamiliar to the reader. When unavoidable, provide a link to a definition or explanation of the term.
 - Proofread and test your content: Make sure to proofread your MDX file for errors and test any code snippets or examples to ensure they work as expected.
 - Be generous with hyperlinks: Link to relevant documentation or resources, whether to somewhere else within our internal docs or to a respected external source. This will provide additional context and help users better understand the content.
-- Use absolute links for internal docs: The `pages` folder is the root directory for internal docs. Use absolute links to reference other pages within the `pages` folder, for example: `[AtomicDEX API methods](/atomicdex/api)`.
+- Use absolute links for internal docs: The `pages` folder is the root directory for internal docs. Use absolute links to reference other pages within the `pages` folder, for example: `[AtomicDEX API methods](/atomicdex/api/#sub-section-header)`. The url must end with a slash.
 - Use bullet points and numbered lists to break up long paragraphs to make the content more readable.
 
 ## Syntax
@@ -338,7 +338,7 @@ Rendered as:
 
 ## Sidebar (Left)
 
-Sidebar navigation is manually populated. This file can be found at `src/data/sidebar.ts`. If you're working on a new page, this is where to link them.
+Sidebar navigation is manually populated. This file can be found at `src/data/sidebar.json`. If you're working on a new page, this is where to link them.
 
 ![Sidebar left](src/images/style-guide-images/sidebar-left-UI.png)
 

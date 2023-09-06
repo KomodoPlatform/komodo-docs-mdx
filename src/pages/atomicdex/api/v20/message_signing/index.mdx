@@ -1,10 +1,11 @@
 export const title = "AtomicDEX: Signing and Verifying Messages";
 export const description = "The methods in this document allow you to sign and verify messages for all coins supported by AtomicDEX.";
 
-# Signing_and_Verifying_Messages
+# Signing\_and\_Verifying\_Messages
 
 Cryptographically signed messages are a useful feature which can be used to [prove ownership of an address](https://www.coindesk.com/policy/2020/05/25/craig-wright-called-fraud-in-message-signed-with-bitcoin-addresses-he-claims-to-own/).
-If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the correct [message prefix](https://bitcoin.stackexchange.com/questions/77324/how-are-bitcoin-signed-messages-generated/77325#77325) definitions for a coin, you can sign messages with the AtomicDEX-API(https://github.com/KomodoPlatform/atomicDEX-API). This can generally be found [within a coin's github repository](https://github.com/KomodoPlatform/komodo/blob/master/src/main.cpp#L146) and is assigned via the `sign_message_prefix` value as below.
+
+If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the correct [`sign_message_prefix`](https://bitcoin.stackexchange.com/questions/77324/how-are-bitcoin-signed-messages-generated/77325#77325) parameter value for a coin, you can sign messages with the [AtomicDEX API](https://github.com/KomodoPlatform/atomicDEX-API).
 
 ```json
 {
@@ -40,20 +41,20 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
 #### Command
 
 <CodeGroup title="" tag="POST" label="sign_message">
-```json {{ mm2MethodDecorate : true }}
-{
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "sign_message",
-  "mmrpc": "2.0",
-  "id": 0,
-  "params": {
-    "coin": "KMD",
-    "message": "Between subtle shading and the absence of light lies the nuance illusion"
+  ```json {{ mm2MethodDecorate : true }}
+  {
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "sign_message",
+    "mmrpc": "2.0",
+    "id": 0,
+    "userpass": "testpsw",
+    "params": {
+      "coin": "DOC",
+      "message": "Between subtle shading and the absence of light lies the nuance illusion"
+    }
   }
-}
-```
+  ```
 </CodeGroup>
-
 
 #### Response (success)
 
@@ -69,7 +70,7 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
 
 ### ⚠ Error types
 
-**PrefixNotFound:** sign_message_prefix is not set in coin config file
+**PrefixNotFound:** sign\_message\_prefix is not set in coin config file
 **CoinIsNotFound:** Specified coin is not found
 **InvalidRequest:** Message signing is not supported by the given coin type
 **InternalError:** An internal error occured during the signing process
@@ -89,27 +90,27 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
 
 | Structure | Type    | Description                                                 |
 | --------- | ------- | ----------------------------------------------------------- |
-| is_valid  | boolean | `true` is message signature is valid; `false` if it is not. |
+| is\_valid | boolean | `true` is message signature is valid; `false` if it is not. |
 
 #### Command
 
 <CodeGroup title="" tag="POST" label="verify_message">
-```json {{ mm2MethodDecorate : true }}
-{
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "verify_message",
-  "mmrpc": "2.0",
-  "id": 0,
-  "params": {
-    "coin": "KMD",
-    "message": "Between subtle shading and the absence of light lies the nuance illusion",
-    "signature": "H43eTmJxBKEPiHkrCe/8NsRidkKCIkXDxLyp30Ez/RwoApGdg89Hlvj9mTMSPGp8om5297zvdL8EVx3IdIe2swY=",
-    "address": "RUYJYSTuCKm9gouWzQN1LirHFEYThwzA2d"
+  ```json {{ mm2MethodDecorate : true }}
+  {
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "verify_message",
+    "mmrpc": "2.0",
+    "id": 0,
+    "userpass": "testpsw",
+    "params": {
+      "coin": "DOC",
+      "message": "Between subtle shading and the absence of light lies the nuance illusion",
+      "signature": "H43eTmJxBKEPiHkrCe/8NsRidkKCIkXDxLyp30Ez/RwoApGdg89Hlvj9mTMSPGp8om5297zvdL8EVx3IdIe2swY=",
+      "address": "RUYJYSTuCKm9gouWzQN1LirHFEYThwzA2d"
+    }
   }
-}
-```
+  ```
 </CodeGroup>
-
 
 #### Response (valid)
 
@@ -137,7 +138,7 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
 
 ### ⚠ Error types
 
-**PrefixNotFound:** sign_message_prefix is not set in coin config
+**PrefixNotFound:** sign\_message\_prefix is not set in coin config
 **CoinIsNotFound:** Specified coin is not found
 **InvalidRequest:** Message verification is not supported by the given coin type
 **InternalError:** An internal error occured during the verification process
