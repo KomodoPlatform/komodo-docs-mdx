@@ -7,12 +7,12 @@ export const description = "Create a new Komodo Smart Chain with simple paramete
 
 #### Requirements for Creating a New Chain
 
-- 2 nodes with the ability to open ports (a node can be either a computer or a VPS)
-- At least 4GB RAM each
-- At least 2 CPU cores each
-- 64-bit Operating System (Ubuntu 18.04 recommended)
-- Komodo Smart Chain software installed on each
-  - (when the goal is only to build a new Smart Chain, there is no need to sync the KMD main chain)
+*   2 nodes with the ability to open ports (a node can be either a computer or a VPS)
+*   At least 4GB RAM each
+*   At least 2 CPU cores each
+*   64-bit Operating System (Ubuntu 18.04 recommended)
+*   Komodo Smart Chain software installed on each
+    *   (when the goal is only to build a new Smart Chain, there is no need to sync the KMD main chain)
 
 <Note>
   When you are building and testing a Komodo Smart Chain, please do not hesitate
@@ -91,7 +91,7 @@ On your first node, change into the directory where Komodo's `komodod` and `komo
 
 <Note>
   If you want the Smart Chain to have Antara Modules enabled, please include the
-  [-ac_cc](/antara/setup/antara-customizations#ac-cc) parameter with the
+  [-ac\_cc](/antara/setup/antara-customizations#ac-cc) parameter with the
   required value in your launch parameters on both the nodes.
 </Note>
 
@@ -117,7 +117,7 @@ This completes the first half of the Smart Chain creation process. Scroll down t
 
 <Note>
   Please note the requirements for
-  [ac_supply](/antara/setup/antara-customizations#ac-supply), and instructions
+  [ac\_supply](/antara/setup/antara-customizations#ac-supply), and instructions
   for using [addnode](/smart-chains/setup/common-runtime-parameters#addnode)
   under various network conditions, including firewalls and LANs.
 </Note>
@@ -140,7 +140,7 @@ Mining can be started on a node using the following command:
 
 `$(nproc)` in the above command makes the daemon mine using all the available CPU threads, which might be necessary in a low end VPS.
 
-On a Komodo-based blockchain, all of the pre-mined coins are mined in the first block. Therefore, whichever machine executes the mining command will receive the entirety of the blockchain's pre-mined coin supply, as set in the [ac_supply](/antara/setup/antara-customizations#ac-supply) parameter. Upon mining the first block, these coins are available in the default `wallet.dat` file.
+On a Komodo-based blockchain, all of the pre-mined coins are mined in the first block. Therefore, whichever machine executes the mining command will receive the entirety of the blockchain's pre-mined coin supply, as set in the [ac\_supply](/antara/setup/antara-customizations#ac-supply) parameter. Upon mining the first block, these coins are available in the default `wallet.dat` file.
 
 To collect all the mining rewards from the node to a single address, execute the following commands before issuing the `setgenerate` command:
 
@@ -173,37 +173,35 @@ You can check the contents of the wallet by executing the following command in t
 
 To verify that everything is properly initiated, send a few coins from the second node to the first node:
 
-<CollapsibleSection expandedText='Hide Commands' collapsedText='Show Commands'>
+<CollapsibleSection expandedText="Hide Commands" collapsedText="Show Commands">
+  ### Node1
 
-### Node1
+  ```bash
+  newaddress=$(./komodo-cli -ac_name=HELLOWORLD getnewaddress)
+  echo $newaddress
+  # Copy the returned address for use on the other node
+  ```
 
-```bash
-newaddress=$(./komodo-cli -ac_name=HELLOWORLD getnewaddress)
-echo $newaddress
-# Copy the returned address for use on the other node
-```
+  ### Node2
 
-### Node2
+  ```bash
+  # Send ten coins to the address generated on the first node
+  ./komodo-cli -ac_name=HELLOWORLD sendtoaddress Address_from_the_first_node 10
+  ```
 
-```bash
-# Send ten coins to the address generated on the first node
-./komodo-cli -ac_name=HELLOWORLD sendtoaddress Address_from_the_first_node 10
-```
+  ### Node1
 
-### Node1
-
-```bash
-./komodo-cli -ac_name=HELLOWORLD getreceivedbyaddress <insert address_from_the_first_node> 0
-# The 0 argument in the above command instructs the daemon to include the unconfirmed coin balance in the response
-```
-
+  ```bash
+  ./komodo-cli -ac_name=HELLOWORLD getreceivedbyaddress <insert address_from_the_first_node> 0
+  # The 0 argument in the above command instructs the daemon to include the unconfirmed coin balance in the response
+  ```
 </CollapsibleSection>
 
 More info can be found in the debug.log of the chain found at:
 
-- **MacOS:** `~/.komodo/HELLOWORLD/debug.log`
-- **Windows:** `%appdata%\komodo\HELLOWORLD\debug.log`
-- **GNU/Linux:** `~/.komodo/HELLOWORLD/debug.log`
+*   **MacOS:** `~/.komodo/HELLOWORLD/debug.log`
+*   **Windows:** `%appdata%\komodo\HELLOWORLD\debug.log`
+*   **GNU/Linux:** `~/.komodo/HELLOWORLD/debug.log`
 
 ## Querying the Smart Chain
 

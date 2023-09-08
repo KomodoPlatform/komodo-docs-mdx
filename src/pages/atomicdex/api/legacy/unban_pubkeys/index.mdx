@@ -1,116 +1,108 @@
 export const title = "AtomicDEX Method: Unban Pubkeys";
 export const description = "The unban_pubkeys method will remove all currently banned pubkeys from your ban list, or specific pubkeys from a user defined list.";
 
-# unban_pubkeys
+# unban\_pubkeys
 
-**unban_pubkeys type data**
+**unban\_pubkeys type data**
 
 The `unban_pubkeys` method will remove all currently banned pubkeys from your ban list, or specific pubkeys from a user defined list.
 
 <Note>
-
-Use the secp256k1 pubkey without prefix for this method input. E.g. if pubkey is `022cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420` you should submit `2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420`.
-
+  Use the secp256k1 pubkey without prefix for this method input. E.g. if pubkey is `022cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420` you should submit `2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420`.
 </Note>
 
 ## Arguments
 
-| Structure     | Type   | Description                                                                |
-| ------------- | ------ | -------------------------------------------------------------------------- |
-| pubkey        | string | the pubkey to ban                                                          |
-| unban_by.type | string | `All` to unban all pubkeys, or `Few` to provide a list of pubkeys to unban |
-| unban_by.data | list   | A list of pubkeys to unbanned. Only required when `type` is `Few`.         |
+| Structure      | Type   | Description                                                                |
+| -------------- | ------ | -------------------------------------------------------------------------- |
+| pubkey         | string | the pubkey to ban                                                          |
+| unban\_by.type | string | `All` to unban all pubkeys, or `Few` to provide a list of pubkeys to unban |
+| unban\_by.data | list   | A list of pubkeys to unbanned. Only required when `type` is `Few`.         |
 
 ## Response
 
-| Structure              | Type   | Description                                                                                                                                             |
-| ---------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| result                 | string | Whether the ban was successful                                                                                                                          |
-| result.still_banned    | list   | List of pubkeys which remain banned. For each `pubkey`, the reason it was banned `pubkey.reason` and the type of of ban `pubkey.type` is also returned. |
-| result.unbanned        | list   | List of pubkeys which were unbanned. For each `pubkey`, the reason it was banned `pubkey.reason` and the type of of ban `pubkey.type` is also returned. |
-| result.were_not_banned | list   | If using `unban_by.type: Few` this will return a list of pubkeys which were not banned, but had been requested to be unbanned.                          |
+| Structure                | Type   | Description                                                                                                                                             |
+| ------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| result                   | string | Whether the ban was successful                                                                                                                          |
+| result.still\_banned     | list   | List of pubkeys which remain banned. For each `pubkey`, the reason it was banned `pubkey.reason` and the type of of ban `pubkey.type` is also returned. |
+| result.unbanned          | list   | List of pubkeys which were unbanned. For each `pubkey`, the reason it was banned `pubkey.reason` and the type of of ban `pubkey.type` is also returned. |
+| result.were\_not\_banned | list   | If using `unban_by.type: Few` this will return a list of pubkeys which were not banned, but had been requested to be unbanned.                          |
 
 #### 📌 Examples
 
 #### Command
 
 <CodeGroup title="" tag="POST" label="unban_pubkeys">
-```json {{ mm2MethodDecorate : true }}
-{
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "unban_pubkeys",
-  "unban_by": {
-    "type": "All"
+  ```json {{ mm2MethodDecorate : true }}
+  {
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "unban_pubkeys",
+    "unban_by": {
+      "type": "All"
+    }
   }
-}
-```
+  ```
 </CodeGroup>
 
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-#### Response (success)
-
-```json
-{
-  "result": {
-    "still_banned": {},
-    "unbanned": {
-      "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420": {
-        "type": "Manual",
-        "reason": "testing"
-      }
-    },
-    "were_not_banned": []
+  ```json
+  {
+    "result": {
+      "still_banned": {},
+      "unbanned": {
+        "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420": {
+          "type": "Manual",
+          "reason": "testing"
+        }
+      },
+      "were_not_banned": []
+    }
   }
-}
-```
-
+  ```
 </CollapsibleSection>
 
 #### Command
 
 <CodeGroup title="" tag="POST" label="unban_pubkeys">
-```json {{ mm2MethodDecorate : true }}
-{
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "unban_pubkeys",
-  "unban_by": {
-    "type": "Few"
-  },
-  "data": [
-    "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420",
-    "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520422"
-  ]
-}
-```
-</CodeGroup>
-
-
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-#### Response (success)
-
-```json
-{
-  "result": {
-    "still_banned": {
-      "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520421": {
-        "type": "Manual",
-        "reason": "testing"
-      }
+  ```json {{ mm2MethodDecorate : true }}
+  {
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "unban_pubkeys",
+    "unban_by": {
+      "type": "Few"
     },
-    "unbanned": {
-      "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420": {
-        "type": "Manual",
-        "reason": "testing"
-      }
-    },
-    "were_not_banned": [
+    "data": [
+      "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420",
       "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520422"
     ]
   }
-}
-```
+  ```
+</CodeGroup>
 
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+    "result": {
+      "still_banned": {
+        "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520421": {
+          "type": "Manual",
+          "reason": "testing"
+        }
+      },
+      "unbanned": {
+        "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520420": {
+          "type": "Manual",
+          "reason": "testing"
+        }
+      },
+      "were_not_banned": [
+        "2cd3021a2197361fb70b862c412bc8e44cff6951fa1de45ceabfdd9b4c520422"
+      ]
+    }
+  }
+  ```
 </CollapsibleSection>

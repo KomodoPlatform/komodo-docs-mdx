@@ -23,7 +23,7 @@ def gen_api_methods_table():
                     if section in methods_dict:
                         if 'CodeGroup' in line and "label" in line:
                             method = line.split('label="')[1].split('"')[0]
-                            link = f"[{method}]({doc_path}#{method})"
+                            link = f"[{escape_underscores(method)}]({doc_path}/#{method})"
                             methods_dict[section].append({
                                 "link": link,
                                 "method": method,
@@ -52,6 +52,14 @@ def gen_api_methods_table():
                 line = "| {:^108} | {:^108} | {:^108} |".format(legacy, v20, v20_dev)
                 f2.write(f"{line}\n")
 
+def escape_underscores(s):
+    output = ""
+    for letter in s:
+        if letter == "_":
+            output += "\_"
+        else:
+            output += letter
+    return output
 
 if __name__ == '__main__':
     gen_api_methods_table()
