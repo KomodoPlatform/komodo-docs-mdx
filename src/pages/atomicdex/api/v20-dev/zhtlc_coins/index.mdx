@@ -38,20 +38,30 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20
 #### Enable Z coin without any optional parameters
 
 <CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
-```json
-{
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "task::enable_z_coin::init",
-  "mmrpc": "2.0",
-  "params": {
-    "ticker": "ZOMBIE",
-    "activation_params": {
-      "mode": {
-        "rpc": "Light",
-        "rpc_data": {
-          "electrum_servers": [{"url":"zombie.dragonhound.info:10033"}],
-          "light_wallet_d_servers": ["http://zombie.dragonhound.info:443"]
-        }
+  ```json
+  {
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "task::enable_z_coin::init",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ZOMBIE",
+      "activation_params": {
+        "mode": {
+          "rpc": "Light",
+          "rpc_data": {
+            "electrum_servers": [
+              {
+                "url": "zombie.dragonhound.info:10033"
+              }
+            ],
+            "light_wallet_d_servers": [
+              "http://zombie.dragonhound.info:443"
+            ]
+          }
+        },
+        "zcash_params_path": "/home/username/path_to/.zcash-params",
+        "scan_blocks_per_iteration": 100,
+        "scan_interval_ms": 200
       }
     }
   }
@@ -193,7 +203,8 @@ Z coins need to build sync a local block cache and wallet database before they c
     "task_id": 0,
     "forget_if_finished": false
   }
-  ```
+}
+```
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
@@ -393,7 +404,7 @@ If you want to cancel the enabling process before it has completed, you can use 
     "method": "task::enable_z_coin::cancel",
     "mmrpc": "2.0",
     "params": {
-      "task_id": "$TASK_ID"
+      "task_id": "<TASK_ID>"
     }
   }
   ```
