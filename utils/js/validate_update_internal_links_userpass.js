@@ -186,6 +186,7 @@ function isValidTitleDescExports(str) {
     try {
         const parsed = acorn.parse(str, {
             sourceType: 'module',
+             ecmaVersion: 2020 
         });
 
         let titleExported = false;
