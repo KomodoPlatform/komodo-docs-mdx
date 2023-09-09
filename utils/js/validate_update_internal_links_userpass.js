@@ -10,15 +10,19 @@ import path from 'path'
 (async function () {
     try {
         await walkDir("./src/pages", async (filePath) => {
-            //console.log("Processing: " + filePath)
+
             if (!filePath.endsWith("/index.mdx")) {
                 throw new Error("File path doesn't end with '/index.mdx': " + filePath)
             }
-            const markdown = await fs.readFile(filePath, 'utf-8');
+            if (!filePath.includes("non_fungible_token")) {
+                return
+            }
+            console.log("Processing: " + filePath)
+
             const file = await remark()
                 .use(remarkGfm)
                 .use(remarkMdx)
-                .use(() => (tree) => {
+                .use(() => async (tree) => {
                     visit(tree, 'link', async (node) => {
                         //Process the link
                         node.url = await processLink(node.url, filePath);
@@ -57,7 +61,7 @@ import path from 'path'
 
                     });
                 })
-                .process(markdown);
+                .process(await fs.readFile(filePath, 'utf-8'));
             if (file) {
                 await fs.writeFile(filePath, String(file));
             }
@@ -73,7 +77,7 @@ async function processLink(link, currFilePath) {
         return link
     }
     const isExternalURL = /^https?:\/\//;
-    if (isExternalURL.test(link)) return;
+    if (isExternalURL.test(link)) return link;
     let filePath = "src/pages";
     let strippedPath = link.split("#")[0]; // strips hash
     if (strippedPath.endsWith("/")) {
