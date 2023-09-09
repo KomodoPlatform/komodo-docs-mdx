@@ -4,6 +4,7 @@ on:
   push:
     branches: ["dev"]
   pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
   pre_job:
@@ -61,7 +62,7 @@ jobs:
         run: node utils/js/h1_presence_checker.js
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "[Bot] File and author data updated, validated and updated internal links, formatted md content, checked presence of file and dirs based on sidebar, checked presence of h1 in every file, update atomicdex methods table"
