@@ -64,9 +64,10 @@ jobs:
       
       - name: Set lint-fix branch name
         id: vars
+        shell: bash
         run: |
           branch-name="lint-fix-patches/${{ github.head_ref }}"
-          echo "branch-name=$branch-name" >> $GITHUB_OUTPUT
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
@@ -75,7 +76,7 @@ jobs:
           commit-message: "[Bot] File and author data updated, validated and updated internal links, formatted md content, checked presence of file and dirs based on sidebar, checked presence of h1 in every file, update atomicdex methods table"
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          branch: ${{ steps.vars.outputs.branch-name }}
+          branch: ${{ steps.vars.outputs.branch_name}}
           delete-branch: true
           title: "[BOT] Lints file structure, file contents, gets author data, Updates AtomicDEX API Methods Table"
           body: |
