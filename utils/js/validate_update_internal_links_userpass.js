@@ -1,5 +1,5 @@
 import { visit, SKIP } from 'unist-util-visit'
-
+import { is } from "unist-util-is";
 import { promises as fs } from 'fs';
 import { constants } from "fs"
 import { remark } from 'remark'
@@ -22,6 +22,39 @@ import path from 'path'
                     visit(tree, 'link', async (node) => {
                         //Process the link
                         node.url = await processLink(node.url, filePath);
+                    });
+                })
+                .use(() => (tree) => {
+                    visit(tree, (node, nodeIndex, parentNode) => {
+                        if (!filePath.includes("src/pages/atomicdex")) {
+                            return SKIP;
+                        }
+                        // if (
+                        //     is(node, { name: "CodeGroup" })) {
+                        //     console.log(node)
+                        // }
+                        try {
+                            if (
+                                is(node, { name: "CodeGroup" }) &&
+                                node.attributes.some(attr => attr.type === 'mdxJsxAttribute' && attr.name === "mm2MethodDecorate" && attr.value === "true")
+                            ) {
+                                // console.log(node)
+                                const originalChild = node.children[0];
+                                if (node.children.length !== 1 || originalChild.lang !== "json") {
+                                    throw new Error(`unexpected code block in file ${filePath} : ` + JSON.stringify())
+                                }
+                                const clonedChild = JSON.parse(JSON.stringify(originalChild));
+                                let methodObj = JSON.parse(clonedChild.value)
+                                methodObj.userpass = "MM2_RPC_PASSWORD"
+                                clonedChild.value = JSON.stringify(methodObj, null, 2)
+                                //console.log(clonedChild)
+                                node.children = [clonedChild];
+                                return SKIP;
+                            }
+                        } catch (error) {
+                            throw new Error(error)
+                        }
+
                     });
                 })
                 .process(markdown);
