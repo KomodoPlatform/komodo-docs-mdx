@@ -65,7 +65,7 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 
 ## Variables
 
-- For AtomicDEX-API methods, the userpass variable should always be `MM2_RPC_PASSWORD`
+- For AtomicDEX-API methods, the userpass variable should always be `testpsw`
 
 ## Templates
 
@@ -152,7 +152,7 @@ A working code sample would look like this:
 
 ```json
 {
-  "userpass": "MM2_RPC_PASSWORD",
+  "userpass": "testpsw",
   "mmrpc": "2.0",
   "method": "lightning::payments::generate_invoice",
   "params": {
