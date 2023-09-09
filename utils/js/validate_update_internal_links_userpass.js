@@ -155,8 +155,8 @@ function processLink(link, currFilePath, filepathSlugs) {
 
     const internalLinkFile = path.join(filePath, correctUrl.split("#")[0] + "index.mdx")
     const slug = correctUrl.split("#")[1]
-    if (!filepathSlugs[internalLinkFile].some(slugO => slug === slugO)) {
-        throw new Error(`Processing file: ${filePath}, slug: ${slug} not present in file: ${internalLinkFile}`)
+    if (slug && !filepathSlugs[internalLinkFile].some(slugO => slug === slugO)) {
+        throw new Error(`Processing file: ${currFilePath}, slug: ${slug} not present in file: ${internalLinkFile}`)
     }
     try {
         fs.accessSync(internalLinkFile, constants.F_OK)
