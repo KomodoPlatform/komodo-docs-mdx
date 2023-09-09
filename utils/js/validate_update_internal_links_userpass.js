@@ -6,6 +6,8 @@ import { remark } from 'remark'
 import remarkMdx from 'remark-mdx'
 import remarkGfm from 'remark-gfm'
 import path from 'path'
+import { slugifyWithCounter } from "@sindresorhus/slugify";
+import * as acorn from "acorn"
 
 (async function () {
     try {
@@ -32,7 +34,13 @@ async function processFile(filePath) {
         .use(remarkGfm)
         .use(remarkMdx)
         .use(() => (tree) => {
-            console.log("Processing: " + filePath)
+            //console.log("Processing: " + filePath)
+            const hasTitleAndDesc = tree.children.some(node => node.type === 'mdxjsEsm' && isValidTitleDescExports(node.value))
+            if (!hasTitleAndDesc) {
+                throw new Error("File doesn't have title/description: " + filePath)
+            }
+        })
+        .use(() => (tree) => {
             visit(tree, 'link', (node) => {
                 //Process the link
                 node.url = processLink(node.url, filePath);
@@ -128,6 +136,7 @@ function processLink(link, currFilePath) {
     // console.log("--------------------------------")
 
     const internalLinkFile = path.join(filePath, correctUrl.split("#")[0] + "index.mdx")
+    const slug = correctUrl.split("#")[1]
     try {
         fs.accessSync(internalLinkFile, constants.F_OK)
     } catch (err) {
@@ -139,7 +148,7 @@ function processLink(link, currFilePath) {
         console.log(link)
         console.log(correctUrl)
 
-        console.error("Internal link doesn't exist: " + internalLinkFile);
+        console.error("Internal link file doesn't exist: " + internalLinkFile);
         throw new Error(err)
     }
 
@@ -171,4 +180,40 @@ export function walkDir(dirPath, callback) {
             callback(filePath);
         }
     });
+}
+
+function isValidTitleDescExports(str) {
+    try {
+        const parsed = acorn.parse(str, {
+            sourceType: 'module',
+        });
+
+        let titleExported = false;
+        let descriptionExported = false;
+        for (const node of parsed.body) {
+            if (node.type === 'ExportNamedDeclaration') {
+                if (node.declaration && node.declaration.declarations) {
+                    for (const declaration of node.declaration.declarations) {
+                        if (
+                            declaration.id.name === 'title' &&
+                            declaration.init.type === 'Literal'
+                        ) {
+                            titleExported = true;
+                        }
+                        if (
+                            declaration.id.name === 'description' &&
+                            declaration.init.type === 'Literal'
+                        ) {
+                            descriptionExported = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return titleExported && descriptionExported;
+    } catch (e) {
+        //console.log(e)
+        return false;  // Parsing error means the string is not valid JS
+    }
 }
