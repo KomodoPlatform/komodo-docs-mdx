@@ -1,5 +1,6 @@
 export const title = "AtomicDEX API RPC Protocol v2.0";
-export const description = "Starting with version beta-2.1.3434, the AtomicDEX API supports the standardized protocol format called mmrpc 2.0.";
+export const description =
+  "Starting with version beta-2.1.3434, the AtomicDEX API supports the standardized protocol format called mmrpc 2.0.";
 
 # AtomicDEX API RPC Protocol v2.0
 
@@ -173,7 +174,9 @@ The `DerivationMethod` object includes the following items for a given coin or t
 | type      | string | Defines how keypairs will be generated. Possible values: `Iguana` or `HDWallet` |
 
 <Note>
-  Using the same seed or private key to generate keypairs using different derivation methods will result in a different address and private key for each method.
+  Using the same seed or private key to generate keypairs using different
+  derivation methods will result in a different address and private key for each
+  method.
 </Note>
 
 Where the value indicates:
@@ -276,8 +279,13 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
 ### LightningChannelConfig
 
 <Note>
-  The values in this object are only used if the channel is being opened by the user. If the channel is being opened by the counterparty, the values in this object are ignored.
-  If not specified when using the [open\_channel](/atomicdex/api/v20-dev/lightning/channels#open_channel) or [update\_channel](/atomicdex/api/v20-dev/lightning/channels#update_channel) methods, the values in this object will default to the values set in the `coins` configuration file.
+  The values in this object are only used if the channel is being opened by the
+  user. If the channel is being opened by the counterparty, the values in this
+  object are ignored. If not specified when using the
+  [open\_channel](/atomicdex/api/v20-dev/lightning/channels#open_channel) or
+  [update\_channel](/atomicdex/api/v20-dev/lightning/channels#update_channel)
+  methods, the values in this object will default to the values set in the
+  `coins` configuration file.
 </Note>
 
 | Parameter                               | Type    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -292,7 +300,9 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
 | their\_channel\_reserve\_sats           | boolean | Optional, defaults to `10000` or 1% of channel value. The minimum balance that the other node has to maintain on their side, at all times. This ensures that if our counterparty broadcasts a revoked state, we can punish them by claiming at least this value on chain.                                                                                                                                                                                                                              |
 
 <Note>
-  For GUIs and wallet apps, it is recommended to set `announced_channel` to `false` (the default value), as the node is not expected to be reliably online.
+  For GUIs and wallet apps, it is recommended to set `announced_channel` to
+  `false` (the default value), as the node is not expected to be reliably
+  online.
 </Note>
 
 ### LightningChannelOptions
@@ -379,8 +389,8 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
 | destination | string | Only used if `type` is `Outbound Payment`. A pubkey which will receive the payment. |
 
 <DevComment>
-  Response may change in future.
-  See [https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\\_r1206176530](https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\_r1206176530)
+  Response may change in future. See
+  [https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\\_r1206176530](https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\_r1206176530)
 </DevComment>
 
 ### Pagination
@@ -397,104 +407,99 @@ For requests which return many results, pagination offsets may be applied. \*\* 
 
   ```json
   {
-      "PageNumber": 1
+    "PageNumber": 1
   }
   ```
 
   ```json
   {
-      "FromId": 4
+    "FromId": 4
   }
   ```
 </CollapsibleSection>
-
 
 ### TokenFilter
 
 The `TokenFilter` object includes the following items for a given coin or token:
 
-| Parameter              | Type    | Description                                                                                                                         |
-| ---------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------|
-| receive                | boolean | Optional, defaults to `false`. If `true`, only transfers where user received NFTs are included in the response.                     |
-| send                   | boolean | Optional, defaults to `false`. If `true`, only transfers where user sent NFTs are included in the response.                         |
-| from_date              | string  | Optional. A UTC date string in the format `YYYY-MM-DD HH:MM:SS.SSS`. Only transfers after this date are included in the response.   |
-| to_date                | string  | Optional. A UTC date string in the format `YYYY-MM-DD HH:MM:SS.SSS`. Only transfers before this date are included in the response.  |
+| Parameter  | Type    | Description                                                                                                                        |
+| ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| receive    | boolean | Optional, defaults to `false`. If `true`, only transfers where user received NFTs are included in the response.                    |
+| send       | boolean | Optional, defaults to `false`. If `true`, only transfers where user sent NFTs are included in the response.                        |
+| from\_date | string  | Optional. A UTC date string in the format `YYYY-MM-DD HH:MM:SS.SSS`. Only transfers after this date are included in the response.  |
+| to\_date   | string  | Optional. A UTC date string in the format `YYYY-MM-DD HH:MM:SS.SSS`. Only transfers before this date are included in the response. |
 
-
-<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-```json
-{
-    "ticker": "MINDS-ERC20",
-    "required_confirmations": 4
-}
-```
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "ticker": "MINDS-ERC20",
+      "required_confirmations": 4
+  }
+  ```
 </CollapsibleSection>
-
 
 ### TokenMetadata
 
 The `TokenMetadata` object includes the following items for a given coin or token:
 
-| Parameter              | Type    | Description                                                                                                                                                                            |
-| ---------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------|
-| image                  | string  | Optional. Url to the NFT's image.                                                                                                 |
-| token_name             | string  | Optional. Name of the token.                                                                                                      |
-| description            | string  | Optional. Description of the token.                                                                                               |
-| attributes             | object or array of objects  | Optional. The values within this parameter will vary, and are set by the creator. Often used to store traits. |
-| animation_url          | string  | Optional. Url to an animationto be displaye instead of a static image.                                                            |
+| Parameter      | Type                       | Description                                                                                                   |
+| -------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| image          | string                     | Optional. Url to the NFT's image.                                                                             |
+| token\_name    | string                     | Optional. Name of the token.                                                                                  |
+| description    | string                     | Optional. Description of the token.                                                                           |
+| attributes     | object or array of objects | Optional. The values within this parameter will vary, and are set by the creator. Often used to store traits. |
+| animation\_url | string                     | Optional. Url to an animationto be displaye instead of a static image.                                        |
 
-
-<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-```json
-[
-    {
-        "trait_type": "Specialization",
-        "value": "Thief"
-    },
-    {
-        "trait_type": "Skin Tone",
-        "value": "#0013b0"
-    },
-    {
-        "trait_type": "Weapon",
-        "value": "Crossbow"
-    },
-    {
-        "trait_type": "Species",
-        "value": "Dark Elf"
-    },
-    {
-        "trait_type": "Gender",
-        "value": "Female"
-    },
-    {
-        "trait_type": "Strength",
-        "value": "8"
-    },
-    {
-        "trait_type": "Dexterity",
-        "value": "12"
-    },
-    {
-        "trait_type": "Intelligence",
-        "value": "10"
-    },
-    {
-        "trait_type": "Perks",
-        "value": ["Steath", "Eagle Eye", "Lockpicking", "Pickpocketing", "Fire resistance"]
-    },
-    {
-        "trait_type": "Weakness",
-        "value": ["Slow healing", "Elfbark Addict", "Lockpicking", "Fear of cats", "Unconvincing liar"]
-    },
-    {
-        "trait_type": "Personality",
-        "value": "Aggressive"
-    }
-]
-```
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  [
+      {
+          "trait_type": "Specialization",
+          "value": "Thief"
+      },
+      {
+          "trait_type": "Skin Tone",
+          "value": "#0013b0"
+      },
+      {
+          "trait_type": "Weapon",
+          "value": "Crossbow"
+      },
+      {
+          "trait_type": "Species",
+          "value": "Dark Elf"
+      },
+      {
+          "trait_type": "Gender",
+          "value": "Female"
+      },
+      {
+          "trait_type": "Strength",
+          "value": "8"
+      },
+      {
+          "trait_type": "Dexterity",
+          "value": "12"
+      },
+      {
+          "trait_type": "Intelligence",
+          "value": "10"
+      },
+      {
+          "trait_type": "Perks",
+          "value": ["Steath", "Eagle Eye", "Lockpicking", "Pickpocketing", "Fire resistance"]
+      },
+      {
+          "trait_type": "Weakness",
+          "value": ["Slow healing", "Elfbark Addict", "Lockpicking", "Fear of cats", "Unconvincing liar"]
+      },
+      {
+          "trait_type": "Personality",
+          "value": "Aggressive"
+      }
+  ]
+  ```
 </CollapsibleSection>
-
 
 ### TokensRequest
 
@@ -514,117 +519,111 @@ The `TokensRequest` object includes the following items for a given coin or toke
   ```
 </CollapsibleSection>
 
-
 ### WithdrawFee
 
 The `WithdrawFee` object varies epending on the coin or token type. Refer to the examples to view the object structure for each type.
 
+| Parameter       | Type           | Description                                                                       |
+| --------------- | -------------- | --------------------------------------------------------------------------------- |
+| type            | string         | The fee type. Either `Utxo`, `Tendermint`, `Qrc20` or `Eth`.                      |
+| amount          | numeric string | `Utxo` or `Tendermint` type only. The fee amount.                                 |
+| coin            | string         | The coin which will be used to pay the transaction fee.                           |
+| gas             | integer        | `Eth` type only. The amount of gas to be used for the transaction.                |
+| gas\_price      | numeric string | `Eth` or `Qrc20` type only. Price per unit of gas to be used for the transaction. |
+| gas\_limit      | numeric string | `Tendermint` or `Qrc20` type only. Maximum gas to be used for the transaction.    |
+| miner\_fee      | numeric string | `Tendermint` type only. Fee to mine the transaction.                              |
+| total\_fee      | numeric string | `Eth` type only. Gas price multiplied by gas amount.                              |
+| total\_gas\_fee | numeric string | `Qrc20` type only. Gas price multiplied by gas amount.                            |
 
-| Parameter     | Type             | Description                                                                                                                |
-| ------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------|
-| type          | string           | The fee type. Either `Utxo`, `Tendermint`, `Qrc20` or `Eth`.                                                               |
-| amount        | numeric string   | `Utxo` or `Tendermint` type only. The fee amount.                                                                          |
-| coin          | string           | The coin which will be used to pay the transaction fee.                                                                    |
-| gas           | integer          | `Eth` type only. The amount of gas to be used for the transaction.                                                         |
-| gas_price     | numeric string   | `Eth` or `Qrc20` type only. Price per unit of gas to be used for the transaction.                                          |
-| gas_limit     | numeric string   | `Tendermint` or `Qrc20` type only. Maximum gas to be used for the transaction.                                             |
-| miner_fee     | numeric string   | `Tendermint` type only. Fee to mine the transaction.                                                                       |
-| total_fee     | numeric string   | `Eth` type only. Gas price multiplied by gas amount.                                                                       |
-| total_gas_fee | numeric string   | `Qrc20` type only. Gas price multiplied by gas amount.                                                                     |
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example of Eth type
 
-
-<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
-
-#### Example of Eth type
-
-```json
-{
+  ```json
+  {
     "type": "Eth",
     "coin": "BNB",
     "gas": 109739,
     "gas_price": "0.000000003",
     "total_fee": "0.000329217"
-}
-```
+  }
+  ```
 
-#### Example of Qrc20 type
+  #### Example of Qrc20 type
 
-```json
-{
+  ```json
+  {
     "type": "Qrc20",
     "coin": "tQTUM",
     "miner_fee": "0.00000447",
     "gas_limit": 100000,
     "gas_price": 40,
     "total_gas_fee": "0.04"
-}
-```
+  }
+  ```
 
-#### Example of Tendermint type
+  #### Example of Tendermint type
 
-```json
-{
+  ```json
+  {
     "type": "Tendermint",
     "coin": "IRIS",
     "amount": "0.038553",
     "gas_limit": 100000
-}
-```
+  }
+  ```
 
-#### Example of Utxo type
+  #### Example of Utxo type
 
-```json
-{
+  ```json
+  {
     "type": "Utxo",
     "amount": "0.00001"
-}
-```
-
+  }
+  ```
+</CollapsibleSection>
 
 ### WithdrawNftType
 
 The `WithdrawNftType` object is used for NFT withdrawals. It includes the following items for a given coin or token:
 
-
-| Parameter     | Type             | Description                                                                                               |
-| ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
-| type          | string           | The withdrawl type. Either `withdraw_erc721` or `withdraw_erc1155`.                                       |
-| withdraw_data | object           | A standard [WithdrawDataErc721](/atomicdex/api/v20#withdraw-data-erc721) or [WithdrawDataErc1155](/atomicdex/api/v20#withdraw-data-erc155) object.                                       |
-
+| Parameter      | Type   | Description                                                                                                                                        |
+| -------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type           | string | The withdrawl type. Either `withdraw_erc721` or `withdraw_erc1155`.                                                                                |
+| withdraw\_data | object | A standard [WithdrawDataErc721](/atomicdex/api/v20#withdraw-data-erc721) or [WithdrawDataErc1155](/atomicdex/api/v20#withdraw-data-erc155) object. |
 
 <Note>
-When the `type` value in `WithdrawType` is `withdraw_erc721` it means the NFT is absolutely unique - it has only 1 owner and the owner can own only 1 NFT which has this `token_id` in its `token_address` (also referred to as contract address).
-When the `type` value in `WithdrawType` is `withdraw_erc1155`, it means that it is possible for more than 1 user to own one or more of the same NFT (with an identical `token_id`).
-Due to this difference, the `amount` and `max` fields are only used the when `type` value in `WithdrawType` is `withdraw_erc1155`.
+  When the `type` value in `WithdrawType` is `withdraw_erc721` it means the NFT
+  is absolutely unique - it has only 1 owner and the owner can own only 1 NFT
+  which has this `token_id` in its `token_address` (also referred to as contract
+  address). When the `type` value in `WithdrawType` is `withdraw_erc1155`, it
+  means that it is possible for more than 1 user to own one or more of the same
+  NFT (with an identical `token_id`). Due to this difference, the `amount` and
+  `max` fields are only used the when `type` value in `WithdrawType` is
+  `withdraw_erc1155`.
 </Note>
-
 
 ### WithdrawDataErc721
 
 The `WithdrawDataErc721` object is used for withdrawals of NFTs on ERC721 contracts. It includes the following items for a given coin or token:
 
-
-| Parameter     | Type             | Description                                                                                               |
-| ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
-| chain         | string           | The token chain. Chain must be [activated](/atomicdex/api/legacy/coin_activation) first.                  |
-| to            | string           | Destination address to withdraw the token to.                                                             |
-| token_address | string           | Token address.                                                                                            |
-| token_id      | string           | Token ID.                                                                                                 |
-| fee           | string           | Optional. A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                               |
-
+| Parameter      | Type   | Description                                                                              |
+| -------------- | ------ | ---------------------------------------------------------------------------------------- |
+| chain          | string | The token chain. Chain must be [activated](/atomicdex/api/legacy/coin_activation) first. |
+| to             | string | Destination address to withdraw the token to.                                            |
+| token\_address | string | Token address.                                                                           |
+| token\_id      | string | Token ID.                                                                                |
+| fee            | string | Optional. A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.              |
 
 ### WithdrawDataErc1155
 
 The `WithdrawDataErc1155` object is used for withdrawals of NFTs on ERC1155 contracts. It includes the following items for a given coin or token:
 
-
-| Parameter     | Type             | Description                                                                                               |
-| ------------- | ---------------- | ----------------------------------------------------------------------------------------------------------|
-| chain         | string           | The token chain. Chain must be [activated](/atomicdex/api/legacy/coin_activation) first.                  |
-| to            | string           | Destination address to withdraw the token to.                                                             |
-| token_address | string           | Token address.                                                                                            |
-| token_id      | string           | Token ID.                                                                                                 |
-| amount        | string           | Optional, defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is `true.                         |
-| max           | boolean          | Optional, defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent.   |
-| fee           | string           | Optional. A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                               |
-
+| Parameter      | Type    | Description                                                                                                                |
+| -------------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| chain          | string  | The token chain. Chain must be [activated](/atomicdex/api/legacy/coin_activation) first.                                   |
+| to             | string  | Destination address to withdraw the token to.                                                                              |
+| token\_address | string  | Token address.                                                                                                             |
+| token\_id      | string  | Token ID.                                                                                                                  |
+| amount         | string  | Optional, defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is \`true.                                         |
+| max            | boolean | Optional, defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent. |
+| fee            | string  | Optional. A standard [WithdrawFee](/atomicdex/api/v20#withdraw-fee) object.                                                |

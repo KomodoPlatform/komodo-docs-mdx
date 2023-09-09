@@ -87,6 +87,22 @@ Titles and descriptions are mandatory on every documentation page and must be ad
 
 We've got a few **MDX** components we use across the Docs. Below is a walkthrough of how to start writing and using the components that make up the Docs.
 
+IMPORTANT: Alwats use double quotes inside mdx tags.
+
+Example:
+
+Correct:
+
+```
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+```
+
+Wrong:
+
+```
+<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
+```
+
 MDX supports standard markdown by default [CommonMark](https://commonmark.org/). However, this project also has [GFM](https://github.github.com/gfm/) installed.
 
 > Many of the components mentioned here are simplified and possibly do more than **explicitly pointed out**.
