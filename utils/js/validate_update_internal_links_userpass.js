@@ -6,23 +6,43 @@ import { remark } from 'remark'
 import remarkMdx from 'remark-mdx'
 import remarkGfm from 'remark-gfm'
 import path from 'path'
+import { toString } from "mdast-util-to-string";
+
 import { slugifyWithCounter } from "@sindresorhus/slugify";
 import * as acorn from "acorn"
 
 (async function () {
     try {
         let filepaths = []
+        const filepathSlugs = {}
         walkDir("./src/pages", filepath => filepaths.push(filepath));
+        console.log(filepaths.length)
         for (let index = 0; index < filepaths.length; index++) {
             const filePath = filepaths[index];
-            await processFile(filePath)
+            await remark().use(() => (tree) => {
+                const slugs = [];
+
+                let slugify = slugifyWithCounter();
+                // Visit all heading nodes and collect their values
+                visit(tree, 'heading', (node) => {
+                    const slug = slugify(toString(node));
+                    slugs.push(slug);
+                });
+                filepathSlugs[filePath] = slugs
+                // console.log(slugs);
+            }).process(fs.readFileSync(filePath, 'utf-8'));
+        }
+        console.log(Object.keys(filepathSlugs).length)
+        for (let index = 0; index < filepaths.length; index++) {
+            const filePath = filepaths[index];
+            await processFile(filePath, filepathSlugs)
         }
     } catch (error) {
         if (error) throw error;
     }
 })()
 
-async function processFile(filePath) {
+async function processFile(filePath, filepathSlugs) {
     if (!filePath.endsWith("/index.mdx")) {
         throw new Error("File path doesn't end with '/index.mdx': " + filePath)
     }
@@ -43,7 +63,7 @@ async function processFile(filePath) {
         .use(() => (tree) => {
             visit(tree, 'link', (node) => {
                 //Process the link
-                node.url = processLink(node.url, filePath);
+                node.url = processLink(node.url, filePath, filepathSlugs);
             });
         })
         .use(() => (tree) => {
@@ -85,7 +105,7 @@ async function processFile(filePath) {
     }
 }
 // Function to process a link
-function processLink(link, currFilePath) {
+function processLink(link, currFilePath, filepathSlugs) {
     if (link.startsWith("mailto:")) {
         return link
     }
@@ -186,7 +206,7 @@ function isValidTitleDescExports(str) {
     try {
         const parsed = acorn.parse(str, {
             sourceType: 'module',
-             ecmaVersion: 2020 
+            ecmaVersion: 2020
         });
 
         let titleExported = false;
