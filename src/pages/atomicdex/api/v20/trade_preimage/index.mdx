@@ -1,62 +1,58 @@
 export const title = "AtomicDEX Method: Trade Preimage";
 export const description = "The trade_preimage method returns the approximate fee amounts that are paid per the whole swap.";
 
-# trade_preimage
+# trade\_preimage
 
 The `trade_preimage` method returns the approximate fee amounts that are paid per the whole swap.
 Depending on the parameters, the function returns different results:
 
-- If the `swap_method` is `buy` or `sell`, then the result will include the `taker_fee` and the `fee_to_send_taker_fee`.
-  The `taker_fee` amount is paid from the `base` coin balance if the `swap_method` is `sell`, else it is paid from the `rel` coin balance;
-- If the `max` field is true, then the result will include the `volume`.
+*   If the `swap_method` is `buy` or `sell`, then the result will include the `taker_fee` and the `fee_to_send_taker_fee`.
+    The `taker_fee` amount is paid from the `base` coin balance if the `swap_method` is `sell`, else it is paid from the `rel` coin balance;
+*   If the `max` field is true, then the result will include the `volume`.
 
 <Note>
-
-This method can be used instead of **max_taker_vol**, if the `max` field is true and the `swap_method` is `buy` or `sell`.
-Use the resulting `volume` as an argument of the `buy` or `sell` requests.
-
+  This method can be used instead of **max\_taker\_vol**, if the `max` field is true and the `swap_method` is `buy` or `sell`.
+  Use the resulting `volume` as an argument of the `buy` or `sell` requests.
 </Note>
 
-<Note type='warning'>
-
-Use the `trade_preimage` request with `max = true` and `swap_method = "setprice"` arguments to approximate the fee amounts **only**. Do not use the resulting `volume` as an argument of the `setprice`.
-
+<Note type="warning">
+  Use the `trade_preimage` request with `max = true` and `swap_method = "setprice"` arguments to approximate the fee amounts **only**. Do not use the resulting `volume` as an argument of the `setprice`.
 </Note>
 
 ## Arguments
 
-| Structure   | Type                                  | Description                                                                                                                          |
-| ----------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| base        | string                                | the base currency of the request                                                                                                     |
-| rel         | string                                | the rel currency of the request                                                                                                      |
-| swap_method | string                                | the name of the method whose preimage is requested. Possible values: `buy`, `sell`, `setprice`                                       |
-| price       | numeric string or rational            | the price in `rel` the user is willing to pay per one unit of the `base` coin                                                        |
-| volume      | numeric string or rational (optional) | the amount the user is willing to trade; ignored if `max = true` **and** `swap_method = setprice`, otherwise, it must be set         |
-| max         | bool (optional)                       | whether to return the maximum available volume for `setprice` method; must not be set or `false` if `swap_method` is `buy` or `sell` |
+| Structure    | Type                                  | Description                                                                                                                          |
+| ------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| base         | string                                | the base currency of the request                                                                                                     |
+| rel          | string                                | the rel currency of the request                                                                                                      |
+| swap\_method | string                                | the name of the method whose preimage is requested. Possible values: `buy`, `sell`, `setprice`                                       |
+| price        | numeric string or rational            | the price in `rel` the user is willing to pay per one unit of the `base` coin                                                        |
+| volume       | numeric string or rational (optional) | the amount the user is willing to trade; ignored if `max = true` **and** `swap_method = setprice`, otherwise, it must be set         |
+| max          | bool (optional)                       | whether to return the maximum available volume for `setprice` method; must not be set or `false` if `swap_method` is `buy` or `sell` |
 
 ### Result
 
-| Structure                    | Type                                 | Description                                                                                                                                    |
-| ---------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| result                       | object                               | an object containing the relevant information                                                                                                  |
-| result.base_coin_fee         | object (`ExtendedFeeInfo`)           | the approximate miner fee is paid per the whole swap concerning the `base` coin                                                                |
-| result.rel_coin_fee          | object (`ExtendedFeeInfo`)           | the approximate miner fee is paid per the whole swap concerning the `rel` coin                                                                 |
-| result.volume                | string (numeric, optional)           | the max available volume that can be traded (in decimal representation); empty if the `max` argument is missing or false                       |
-| result.volume_rat            | rational (optional)                  | the max available volume that can be traded (in rational representation); empty if the `max` argument is missing or false                      |
-| result.volume_fraction       | fraction (optional)                  | the max available volume that can be traded (in fraction representation); empty if the `max` argument is missing or false                      |
-| result.taker_fee             | object (optional, `ExtendedFeeInfo`) | the dex fee to be paid by Taker; empty if `swap_method` is `setprice`                                                                          |
-| result.fee_to_send_taker_fee | object (optional, `ExtendedFeeInfo`) | the approximate miner fee is paid to send the dex fee; empty if `swap_method` is `setprice`                                                    |
-| result.total_fees            | array of `ExtendedFeeInfo` objects   | each element is a sum of fees required to be paid from user's balance of corresponding `ExtendedFeeInfo.coin`; the elements are unique by coin |
+| Structure                        | Type                                 | Description                                                                                                                                    |
+| -------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| result                           | object                               | an object containing the relevant information                                                                                                  |
+| result.base\_coin\_fee           | object (`ExtendedFeeInfo`)           | the approximate miner fee is paid per the whole swap concerning the `base` coin                                                                |
+| result.rel\_coin\_fee            | object (`ExtendedFeeInfo`)           | the approximate miner fee is paid per the whole swap concerning the `rel` coin                                                                 |
+| result.volume                    | string (numeric, optional)           | the max available volume that can be traded (in decimal representation); empty if the `max` argument is missing or false                       |
+| result.volume\_rat               | rational (optional)                  | the max available volume that can be traded (in rational representation); empty if the `max` argument is missing or false                      |
+| result.volume\_fraction          | fraction (optional)                  | the max available volume that can be traded (in fraction representation); empty if the `max` argument is missing or false                      |
+| result.taker\_fee                | object (optional, `ExtendedFeeInfo`) | the dex fee to be paid by Taker; empty if `swap_method` is `setprice`                                                                          |
+| result.fee\_to\_send\_taker\_fee | object (optional, `ExtendedFeeInfo`) | the approximate miner fee is paid to send the dex fee; empty if `swap_method` is `setprice`                                                    |
+| result.total\_fees               | array of `ExtendedFeeInfo` objects   | each element is a sum of fees required to be paid from user's balance of corresponding `ExtendedFeeInfo.coin`; the elements are unique by coin |
 
 Where the `ExtendedFeeInfo` has
 
-| Structure             | Type             | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
-| --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                  | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas)                                                                                                                                                                                                                                                        |
-| amount                | string (numeric) | fee amount (in decimal representation)                                                                                                                                                                                                                                                                                                                                                                               |
-| amount_rat            | rational         | fee amount (in rational representation)                                                                                                                                                                                                                                                                                                                                                                              |
-| amount_fraction       | fraction         | fee amount (in fraction representation)                                                                                                                                                                                                                                                                                                                                                                              |
-| paid_from_trading_vol | boolean          | If `true`, fees are deducted from the payment amount for the spend/refund UTXO HTLC transaction. If `false`, fees are not deducted from the traded volume. This is where an additional miner fee is needed to broadcast a swap transaction and/or where gas paid (e.g in ETH for an ERC20 trade) - in this case, user requires a sufficient current ETH balance to cover the fees before they can initiate the swap. |
+| Structure                | Type             | Description                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                     | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas)                                                                                                                                                                                                                                                        |
+| amount                   | string (numeric) | fee amount (in decimal representation)                                                                                                                                                                                                                                                                                                                                                                               |
+| amount\_rat              | rational         | fee amount (in rational representation)                                                                                                                                                                                                                                                                                                                                                                              |
+| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                                                                                                                                                                                                                                                                              |
+| paid\_from\_trading\_vol | boolean          | If `true`, fees are deducted from the payment amount for the spend/refund UTXO HTLC transaction. If `false`, fees are not deducted from the traded volume. This is where an additional miner fee is needed to broadcast a swap transaction and/or where gas paid (e.g in ETH for an ERC20 trade) - in this case, user requires a sufficient current ETH balance to cover the fees before they can initiate the swap. |
 
 ### ⚠ Error types
 
@@ -64,12 +60,12 @@ Where the `ExtendedFeeInfo` has
 
 The `available` balance of the `coin` is not sufficient to start the swap.
 
-| Structure       | Type                       | Description                                                                               |
-| --------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
-| coin            | string                     | the name of the coin which balance is not sufficient                                      |
-| available       | string (numeric)           | the balance available for swap, including the amount locked by other swaps                |
-| required        | string (numeric)           | the amount required to start the swap. This amount is necessary but may not be sufficient |
-| locked_by_swaps | string (numeric, optional) | the amount locked by other swaps                                                          |
+| Structure         | Type                       | Description                                                                               |
+| ----------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
+| coin              | string                     | the name of the coin which balance is not sufficient                                      |
+| available         | string (numeric)           | the balance available for swap, including the amount locked by other swaps                |
+| required          | string (numeric)           | the amount required to start the swap. This amount is necessary but may not be sufficient |
+| locked\_by\_swaps | string (numeric, optional) | the amount locked by other swaps                                                          |
 
 #### NotSufficientBaseCoinBalance
 
@@ -77,22 +73,20 @@ The available balance of the base `coin` is not sufficient to pay transaction fe
 
 For example, ERC20 fees are paid by ETH (gas), and this error type is returned if the ETH coin balance is not sufficient to start the swap.
 
-| Structure       | Type                       | Description                                                                               |
-| --------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
-| coin            | string                     | the name of the base coin which balance is not sufficient                                 |
-| available       | string (numeric)           | the balance available for swap, including the amount locked by other swaps                |
-| required        | string (numeric)           | the amount required to start the swap. This amount is necessary but may not be sufficient |
-| locked_by_swaps | string (numeric, optional) | the amount is locked by other swaps                                                       |
+| Structure         | Type                       | Description                                                                               |
+| ----------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
+| coin              | string                     | the name of the base coin which balance is not sufficient                                 |
+| available         | string (numeric)           | the balance available for swap, including the amount locked by other swaps                |
+| required          | string (numeric)           | the amount required to start the swap. This amount is necessary but may not be sufficient |
+| locked\_by\_swaps | string (numeric, optional) | the amount is locked by other swaps                                                       |
 
 #### VolumeTooLow
 
 The specified `volume` is too low. Required at least `threshold`.
 
 <Note>
-
-If the `coin` field returned in Response is the same as the `rel` argument in Request, then the base volume threshold can be calculated as follows:
-`base_coin_threshold = rel_vol_threshold / price`
-
+  If the `coin` field returned in Response is the same as the `rel` argument in Request, then the base volume threshold can be calculated as follows:
+  `base_coin_threshold = rel_vol_threshold / price`
 </Note>
 
 | Structure | Type             | Description                                        |
@@ -163,24 +157,23 @@ The request was failed due to a AtomicDEX API internal error.
 
 #### Command (setprice)
 
-<CodeGroup title="" tag="POST" label="trade_preimage">
-```json {{ mm2MethodDecorate : true }}
-{
-  "mmrpc": "2.0",
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "trade_preimage",
-  "params": {
-    "base": "BTC",
-    "rel": "DOC",
-    "price": "1",
-    "volume": "0.1",
-    "swap_method": "setprice"
-  },
-  "id": 0
-}
-```
+<CodeGroup title="" tag="POST" label="trade_preimage" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "trade_preimage",
+    "params": {
+      "base": "BTC",
+      "rel": "DOC",
+      "price": "1",
+      "volume": "0.1",
+      "swap_method": "setprice"
+    },
+    "id": 0
+  }
+  ```
 </CodeGroup>
-
 
 #### Response
 
@@ -274,24 +267,23 @@ The request was failed due to a AtomicDEX API internal error.
 
 #### Command (buy)
 
-<CodeGroup title="" tag="POST" label="trade_preimage">
-```json {{ mm2MethodDecorate : true }}
-{
-  "mmrpc": "2.0",
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "trade_preimage",
-  "params": {
-    "base": "BTC",
-    "rel": "DOC",
-    "price": "1",
-    "volume": "0.1",
-    "swap_method": "buy"
-  },
-  "id": 0
-}
-```
+<CodeGroup title="" tag="POST" label="trade_preimage" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "trade_preimage",
+    "params": {
+      "base": "BTC",
+      "rel": "DOC",
+      "price": "1",
+      "volume": "0.1",
+      "swap_method": "buy"
+    },
+    "id": 0
+  }
+  ```
 </CodeGroup>
-
 
 #### Response
 
@@ -402,24 +394,23 @@ The request was failed due to a AtomicDEX API internal error.
 
 #### Command (sell, max)
 
-<CodeGroup title="" tag="POST" label="trade_preimage">
-```json {{ mm2MethodDecorate : true }}
-{
-  "mmrpc": "2.0",
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "trade_preimage",
-  "params": {
-    "base": "BTC",
-    "rel": "DOC",
-    "price": "1",
-    "volume": "2.21363478",
-    "swap_method": "sell"
-  },
-  "id": 0
-}
-```
+<CodeGroup title="" tag="POST" label="trade_preimage" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "trade_preimage",
+    "params": {
+      "base": "BTC",
+      "rel": "DOC",
+      "price": "1",
+      "volume": "2.21363478",
+      "swap_method": "sell"
+    },
+    "id": 0
+  }
+  ```
 </CodeGroup>
-
 
 #### Response
 
@@ -530,24 +521,23 @@ The request was failed due to a AtomicDEX API internal error.
 
 #### Command (ERC20 and QRC20)
 
-<CodeGroup title="" tag="POST" label="trade_preimage">
-```json {{ mm2MethodDecorate : true }}
-{
-  "mmrpc": "2.0",
-  "userpass": "MM2_RPC_PASSWORD",
-  "method": "trade_preimage",
-  "params": {
-    "base": "BAT",
-    "rel": "QC",
-    "price": "1",
-    "volume": "2.21363478",
-    "swap_method": "setprice"
-  },
-  "id": 0
-}
-```
+<CodeGroup title="" tag="POST" label="trade_preimage" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "userpass": "MM2_RPC_PASSWORD",
+    "method": "trade_preimage",
+    "params": {
+      "base": "BAT",
+      "rel": "QC",
+      "price": "1",
+      "volume": "2.21363478",
+      "swap_method": "setprice"
+    },
+    "id": 0
+  }
+  ```
 </CodeGroup>
-
 
 #### Response
 

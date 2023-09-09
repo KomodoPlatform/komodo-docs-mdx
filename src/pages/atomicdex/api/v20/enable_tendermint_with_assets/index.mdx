@@ -1,265 +1,261 @@
 export const title = "AtomicDEX Method: Enable Tendermint Token with Assets";
 export const description = "Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC assets in a single command.";
 
-# enable_tendermint_with_assets
+# enable\_tendermint\_with\_assets
 
 Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC assets in a single command.
 
-
 ### Request Parameters
 
-| Parameter                   | Type             | Description                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ticker                      | string           | Ticker of the platform protocol coin.  Options: `ATOM`, `IRIS`, `OSMOSIS`                                                                                                                                                                                                   |
-| mm2                         | integer          | Required if not set in `coins` file. Informs the AtomicDEX API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                              |
-| tokens_params               | array of objects | A list of standard [TokensRequest](/atomicdex/api/v20#tokens-request) objects.                                                                                                                                                                                               |
-| priv_key_policy             | string           | Optional, defaults to `ContextPrivKey`. value can be `ContextPrivKey`,`Trezor` when AtomicDEX-API is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the AtomicDEX-API is built targeting `wasm`                                       |
-| tx_history                  | boolean          | Optional, defaults to `false`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my_tx_history](/atomicdex/api/legacy/my_tx_history#my-tx-history) method                                             |
-| required_confirmations      | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the AtomicDEX API to wait during the transaction steps of an atomic swap                                                                                                     |
-| requires_notarization       | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.   |
-| get_balances                | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                     |
-
+| Parameter               | Type             | Description                                                                                                                                                                                                                                                               |
+| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker                  | string           | Ticker of the platform protocol coin.  Options: `ATOM`, `IRIS`, `OSMOSIS`                                                                                                                                                                                                 |
+| mm2                     | integer          | Required if not set in `coins` file. Informs the AtomicDEX API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                            |
+| tokens\_params          | array of objects | A list of standard [TokensRequest](/atomicdex/api/v20#tokens-request) objects.                                                                                                                                                                                            |
+| priv\_key\_policy       | string           | Optional, defaults to `ContextPrivKey`. value can be `ContextPrivKey`,`Trezor` when AtomicDEX-API is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the AtomicDEX-API is built targeting `wasm`                                     |
+| tx\_history             | boolean          | Optional, defaults to `false`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/atomicdex/api/legacy/my_tx_history#my-tx-history) method                                         |
+| required\_confirmations | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the AtomicDEX API to wait during the transaction steps of an atomic swap                                                                                                   |
+| requires\_notarization  | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
+| get\_balances           | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                   |
 
 ### Response Parameters
 
-| Parameter        | Type             | Description                                                                                                                                                     |
-| ---------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| current_block    | integer          | Block height of the coin being activated                                                                                                                        |
-| ticker           | string           | Ticker of the platform protocol coin, as input in the request.                                                                                                  |
-| address          | string           | An address for the activated coin                                                                                                                               |
+| Parameter        | Type             | Description                                                                                                                                   |
+| ---------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| current\_block   | integer          | Block height of the coin being activated                                                                                                      |
+| ticker           | string           | Ticker of the platform protocol coin, as input in the request.                                                                                |
+| address          | string           | An address for the activated coin                                                                                                             |
 | balance          | object           | Only returned when `get_balances` is `true`. A standard [BalanceInfos](/atomicdex/api/v20#balance-infos) object.                              |
-| tokens_balances  | array of objects | Only returned when `get_balances` is `true`. A list of standard [addressInfos](/atomicdex/api/v20#address-infos) objects, one for each token. |
-| tokens_tickers   | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                                         |
-
+| tokens\_balances | array of objects | Only returned when `get_balances` is `true`. A list of standard [addressInfos](/atomicdex/api/v20#address-infos) objects, one for each token. |
+| tokens\_tickers  | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                       |
 
 ### 📌 Examples
 
 #### Request default optional values
 
-<CodeGroup title="" tag="POST" label="enable_tendermint_with_assets">
-```json {{ mm2MethodDecorate : true }}
-{
-	"method": "enable_tendermint_with_assets",
-	"mmrpc": "2.0",
-	"params": {
-		"ticker": "IRIS",
-		"tokens_params": [{
-			"ticker": "ATOM-IBC_IRIS"
-		}],
-		"rpc_urls": [
-			"https://iris.komodo.earth/",
-			"https://rpc.irishub-1.irisnet.org"
-		]
-	},
-	"userpass": "MM2_RPC_PASSWORD"
-}
-```
+<CodeGroup title="" tag="POST" label="enable_tendermint_with_assets" mm2MethodDecorate="true">
+  ```json
+  {
+    "method": "enable_tendermint_with_assets",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "IRIS",
+      "tokens_params": [
+        {
+          "ticker": "ATOM-IBC_IRIS"
+        }
+      ],
+      "rpc_urls": [
+        "https://iris.komodo.earth/",
+        "https://rpc.irishub-1.irisnet.org"
+      ]
+    },
+    "userpass": "MM2_RPC_PASSWORD"
+  }
+  ```
 </CodeGroup>
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
 
-#### Response
-```json
-{
-	"mmrpc": "2.0",
-	"result": {
-		"ticker": "IRIS",
-		"address": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
-		"current_block": 19769638,
-		"balance": {
-			"spendable": "44.147264",
-			"unspendable": "0"
-		},
-		"tokens_balances": {
-			"ATOM-IBC_IRIS": {
-				"spendable": "0.028306",
-				"unspendable": "0"
-			}
-		}
-	},
-	"id": null
-}
-```
+  ```json
+  {
+  	"mmrpc": "2.0",
+  	"result": {
+  		"ticker": "IRIS",
+  		"address": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
+  		"current_block": 19769638,
+  		"balance": {
+  			"spendable": "44.147264",
+  			"unspendable": "0"
+  		},
+  		"tokens_balances": {
+  			"ATOM-IBC_IRIS": {
+  				"spendable": "0.028306",
+  				"unspendable": "0"
+  			}
+  		}
+  	},
+  	"id": null
+  }
+  ```
 </CollapsibleSection>
-
 
 #### Request with `get_balances` set to `false`
 
-<CodeGroup title="" tag="POST" label="enable_tendermint_with_assets">
-```json {{ mm2MethodDecorate : true }}
-{
-	"method": "enable_tendermint_with_assets",
-	"mmrpc": "2.0",
-	"params": {
-		"ticker": "IRIS",
-		"tokens_params": [{
-			"ticker": "ATOM-IBC_IRIS"
-		}],
-		"rpc_urls": [
-			"https://iris.komodo.earth/",
-			"https://rpc.irishub-1.irisnet.org"
-		],
-		"tx_history": true,
-		"get_balances": false
-	},
-	"userpass": "MM2_RPC_PASSWORD"
-}
-```
+<CodeGroup title="" tag="POST" label="enable_tendermint_with_assets" mm2MethodDecorate="true">
+  ```json
+  {
+    "method": "enable_tendermint_with_assets",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "IRIS",
+      "tokens_params": [
+        {
+          "ticker": "ATOM-IBC_IRIS"
+        }
+      ],
+      "rpc_urls": [
+        "https://iris.komodo.earth/",
+        "https://rpc.irishub-1.irisnet.org"
+      ],
+      "tx_history": true,
+      "get_balances": false
+    },
+    "userpass": "MM2_RPC_PASSWORD"
+  }
+  ```
 </CodeGroup>
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
 
-#### Response
-```json
-{
-	"mmrpc": "2.0",
-	"result": {
-		"ticker": "IRIS",
-		"address": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
-		"current_block": 19769628,
-		"tokens_tickers": ["ATOM-IBC_IRIS"]
-	},
-	"id": null
-}
-```
+  ```json
+  {
+  	"mmrpc": "2.0",
+  	"result": {
+  		"ticker": "IRIS",
+  		"address": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
+  		"current_block": 19769628,
+  		"tokens_tickers": ["ATOM-IBC_IRIS"]
+  	},
+  	"id": null
+  }
+  ```
 </CollapsibleSection>
 
-<CollapsibleSection expandedText='Hide Errors' collapsedText='Show Errors'>
+<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
+  ### Error Types
 
-### Error Types
- 
-| Structure                  | Type   | Description                                                                         |
-| -------------------------- | ------ | ----------------------------------------------------------------------------------- |
-| CoinProtocolParseError     | string | Parsing the protocol of the platform coin you are trying to activate failed         |
-| InternalError              | string | The request was failed due to an AtomicDEX API internal error                       |
-| PlatformCoinCreationError  | string | There was an error when trying to activate the platform coin                        |
-| PlatformConfigIsNotFound   | string | Config of the platform coin you are trying to activate is not found                 |
-| PlatformIsAlreadyActivated | string | The platform coin you are trying to activate is already activated                   |
-| PrivKeyNotAllowed          | string | The privkey is not allowed                                                          |
-| TokenConfigIsNotFound      | string | Config of the token you are trying to activate is not found                         |
-| TokenProtocolParseError    | string | Parsing the protocol of the token you are trying to activate failed                 |
-| Transport                  | string | The request was failed due to a network error                                       |
-| UnexpectedDerivationMethod | string | The derivation method used is unexpected                                            |
-| UnexpectedPlatformProtocol | string | Unexpected platform protocol found for the platform coin you are trying to activate |
-| UnexpectedTokenProtocol    | string | Unexpected protocol is found in the config of the token you are trying to activate  |
+  | Structure                  | Type   | Description                                                                         |
+  | -------------------------- | ------ | ----------------------------------------------------------------------------------- |
+  | CoinProtocolParseError     | string | Parsing the protocol of the platform coin you are trying to activate failed         |
+  | InternalError              | string | The request was failed due to an AtomicDEX API internal error                       |
+  | PlatformCoinCreationError  | string | There was an error when trying to activate the platform coin                        |
+  | PlatformConfigIsNotFound   | string | Config of the platform coin you are trying to activate is not found                 |
+  | PlatformIsAlreadyActivated | string | The platform coin you are trying to activate is already activated                   |
+  | PrivKeyNotAllowed          | string | The privkey is not allowed                                                          |
+  | TokenConfigIsNotFound      | string | Config of the token you are trying to activate is not found                         |
+  | TokenProtocolParseError    | string | Parsing the protocol of the token you are trying to activate failed                 |
+  | Transport                  | string | The request was failed due to a network error                                       |
+  | UnexpectedDerivationMethod | string | The derivation method used is unexpected                                            |
+  | UnexpectedPlatformProtocol | string | Unexpected platform protocol found for the platform coin you are trying to activate |
+  | UnexpectedTokenProtocol    | string | Unexpected protocol is found in the config of the token you are trying to activate  |
 
+  #### PlatformConfigIsNotFound Error
 
-#### PlatformConfigIsNotFound Error
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Platform WALDO config is not found",
+    "error_path": "platform_coin_with_tokens.prelude",
+    "error_trace": "platform_coin_with_tokens:302] prelude:79]",
+    "error_type": "PlatformConfigIsNotFound",
+    "error_data": "WALDO",
+    "id": null
+  }
+  ```
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Platform WALDO config is not found",
-  "error_path": "platform_coin_with_tokens.prelude",
-  "error_trace": "platform_coin_with_tokens:302] prelude:79]",
-  "error_type": "PlatformConfigIsNotFound",
-  "error_data": "WALDO",
-  "id": null
-}
-```
+  #### PlatformIsAlreadyActivated Error
 
-#### PlatformIsAlreadyActivated Error
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "IRIS",
+    "error_path": "platform_coin_with_tokens",
+    "error_trace": "platform_coin_with_tokens:297]",
+    "error_type": "PlatformIsAlreadyActivated",
+    "error_data": "IRIS",
+    "id": null
+  }
+  ```
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "IRIS",
-  "error_path": "platform_coin_with_tokens",
-  "error_trace": "platform_coin_with_tokens:297]",
-  "error_type": "PlatformIsAlreadyActivated",
-  "error_data": "IRIS",
-  "id": null
-}
-```
+  #### CoinProtocolParseError
 
-#### CoinProtocolParseError
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Platform coin IRIS protocol parsing failed: invalid type: null, expected adjacently tagged enum CoinProtocol",
+    "error_path": "platform_coin_with_tokens.prelude",
+    "error_trace": "platform_coin_with_tokens:302] prelude:82]",
+    "error_type": "CoinProtocolParseError",
+    "error_data": {
+      "ticker": "IRIS",
+      "error": "invalid type: null, expected adjacently tagged enum CoinProtocol"
+    },
+    "id": null
+  }
+  ```
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Platform coin IRIS protocol parsing failed: invalid type: null, expected adjacently tagged enum CoinProtocol",
-  "error_path": "platform_coin_with_tokens.prelude",
-  "error_trace": "platform_coin_with_tokens:302] prelude:82]",
-  "error_type": "CoinProtocolParseError",
-  "error_data": {
-    "ticker": "IRIS",
-    "error": "invalid type: null, expected adjacently tagged enum CoinProtocol"
-  },
-  "id": null
-}
-```
+  ### UnexpectedPlatformProtocol Error
 
-### UnexpectedPlatformProtocol Error
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Unexpected platform protocol BCH { slp_prefix: \"simpleledger\" } for BCH",
-  "error_path": "platform_coin_with_tokens.prelude.tendermint_with_assets_activation",
-  "error_trace": "platform_coin_with_tokens:302] prelude:90] tendermint_with_assets_activation:92]",
-  "error_type": "UnexpectedPlatformProtocol",
-  "error_data": {
-    "ticker": "BCH",
-    "protocol": {
-      "type": "BCH",
-      "protocol_data": {
-        "slp_prefix": "simpleledger"
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Unexpected platform protocol BCH { slp_prefix: \"simpleledger\" } for BCH",
+    "error_path": "platform_coin_with_tokens.prelude.tendermint_with_assets_activation",
+    "error_trace": "platform_coin_with_tokens:302] prelude:90] tendermint_with_assets_activation:92]",
+    "error_type": "UnexpectedPlatformProtocol",
+    "error_data": {
+      "ticker": "BCH",
+      "protocol": {
+        "type": "BCH",
+        "protocol_data": {
+          "slp_prefix": "simpleledger"
+        }
       }
-    }
-  },
-  "id": null
-}
-```
+    },
+    "id": null
+  }
+  ```
 
-### TokenConfigIsNotFound Error
+  ### TokenConfigIsNotFound Error
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Token GALT config is not found",
-  "error_path": "platform_coin_with_tokens.prelude",
-  "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:79]",
-  "error_type": "TokenConfigIsNotFound",
-  "error_data": "GALT",
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Token GALT config is not found",
+    "error_path": "platform_coin_with_tokens.prelude",
+    "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:79]",
+    "error_type": "TokenConfigIsNotFound",
+    "error_data": "GALT",
+    "id": null
+  }
+  ```
 
-### TokenProtocolParseError Error
+  ### TokenProtocolParseError Error
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Token BABYDOGE-BEP20 protocol parsing failed: unknown variant `WOOF`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `SLPTOKEN`, `BCH`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`",
-  "error_path": "platform_coin_with_tokens.prelude",
-  "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:82]",
-  "error_type": "TokenProtocolParseError",
-  "error_data": {
-    "ticker": "BABYDOGE-BEP20",
-    "error": "unknown variant `WOOF`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `SLPTOKEN`, `BCH`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`"
-  },
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Token BABYDOGE-BEP20 protocol parsing failed: unknown variant `WOOF`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `SLPTOKEN`, `BCH`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`",
+    "error_path": "platform_coin_with_tokens.prelude",
+    "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:82]",
+    "error_type": "TokenProtocolParseError",
+    "error_data": {
+      "ticker": "BABYDOGE-BEP20",
+      "error": "unknown variant `WOOF`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `SLPTOKEN`, `BCH`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`"
+    },
+    "id": null
+  }
+  ```
 
-### UnexpectedTokenProtocol Error
+  ### UnexpectedTokenProtocol Error
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Unexpected token protocol UTXO for KMD",
-  "error_path": "platform_coin_with_tokens.prelude.tendermint_with_assets_activation",
-  "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:90] tendermint_with_assets_activation:101]",
-  "error_type": "UnexpectedTokenProtocol",
-  "error_data": {
-    "ticker": "KMD",
-    "protocol": {
-      "type": "UTXO"
-    }
-  },
-  "id": null
-}
-```
-
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Unexpected token protocol UTXO for KMD",
+    "error_path": "platform_coin_with_tokens.prelude.tendermint_with_assets_activation",
+    "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:90] tendermint_with_assets_activation:101]",
+    "error_type": "UnexpectedTokenProtocol",
+    "error_data": {
+      "ticker": "KMD",
+      "protocol": {
+        "type": "UTXO"
+      }
+    },
+    "id": null
+  }
+  ```
 </CollapsibleSection>
-

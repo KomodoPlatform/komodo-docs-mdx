@@ -85,7 +85,7 @@ Transactions are a data source for Antara-based software.
 
 Transactions can store data in multiple forms. In the simplest form, transaction data records the movement of coins from one address to another. However, blockchain transactions are capable of storing additional data beyond simple coin movement.
 
-When we desire to place additional data into a transaction, we place this data into an <b>OP_RETURN</b>, or "<b>opreturn</b>" for short.
+When we desire to place additional data into a transaction, we place this data into an <b>OP\_RETURN</b>, or "<b>opreturn</b>" for short.
 
 Observe the following transaction data structure for the existing Heir module:
 
@@ -97,120 +97,118 @@ Observe the following transaction data structure for the existing Heir module:
 
 ##### Response (annotated)
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "txid": "9307989767c1d10b3c97834c7e9f50583387907848bc9776b4b77a705791864c",
+    "overwintered": false,
+    "version": 1,
+    "locktime": 0,
 
-```json
-{
-  "txid": "9307989767c1d10b3c97834c7e9f50583387907848bc9776b4b77a705791864c",
-  "overwintered": false,
-  "version": 1,
-  "locktime": 0,
+    // List of transaction inputs
+    // These are the references to the transaction outputs of older transactions
+    // The transactions of older outputs are spent in this transaction input
 
-  // List of transaction inputs
-  // These are the references to the transaction outputs of older transactions
-  // The transactions of older outputs are spent in this transaction input
-
-  "vin": [
-    {
-      "txid": "e5af0f5993d64e68c655e3ca9309d5fd4f10906032ab587fc2142673a3a73109",
-      "vout": 0,
-      "scriptSig": {
-        "asm": "3045022100bae36ff4c95978379391bf1330d964d9cb6bd767386f427099185838ae30a9660220448463c41fa2a4628bde304c922c6d52618f5c427b243dfb24da9c14590118b7[ALL]",
-        "hex": "483045022100bae36ff4c95978379391bf1330d964d9cb6bd767386f427099185838ae30a9660220448463c41fa2a4628bde304c922c6d52618f5c427b243dfb24da9c14590118b701"
+    "vin": [
+      {
+        "txid": "e5af0f5993d64e68c655e3ca9309d5fd4f10906032ab587fc2142673a3a73109",
+        "vout": 0,
+        "scriptSig": {
+          "asm": "3045022100bae36ff4c95978379391bf1330d964d9cb6bd767386f427099185838ae30a9660220448463c41fa2a4628bde304c922c6d52618f5c427b243dfb24da9c14590118b7[ALL]",
+          "hex": "483045022100bae36ff4c95978379391bf1330d964d9cb6bd767386f427099185838ae30a9660220448463c41fa2a4628bde304c922c6d52618f5c427b243dfb24da9c14590118b701"
+        },
+        "sequence": 4294967295
       },
-      "sequence": 4294967295
-    },
-    {
-      "txid": "0a97509be8c178c5c13903844d187148f0c10d309b7a2e260a629ea724d39395",
-      "vout": 0,
-      "scriptSig": {
-        "asm": "3045022100b931e2928b882ebb6adafb906d3480cc3e8537f92190dd355e548bac7405e9ca022047b2c3fc8fadb8483156d05b1acbba97b4bcb357b47fefb5e3ea602205e38f5c[ALL]",
-        "hex": "483045022100b931e2928b882ebb6adafb906d3480cc3e8537f92190dd355e548bac7405e9ca022047b2c3fc8fadb8483156d05b1acbba97b4bcb357b47fefb5e3ea602205e38f5c01"
+      {
+        "txid": "0a97509be8c178c5c13903844d187148f0c10d309b7a2e260a629ea724d39395",
+        "vout": 0,
+        "scriptSig": {
+          "asm": "3045022100b931e2928b882ebb6adafb906d3480cc3e8537f92190dd355e548bac7405e9ca022047b2c3fc8fadb8483156d05b1acbba97b4bcb357b47fefb5e3ea602205e38f5c[ALL]",
+          "hex": "483045022100b931e2928b882ebb6adafb906d3480cc3e8537f92190dd355e548bac7405e9ca022047b2c3fc8fadb8483156d05b1acbba97b4bcb357b47fefb5e3ea602205e38f5c01"
+        },
+        "sequence": 4294967295
+      }
+    ],
+
+    // List of transaction outputs
+
+    "vout": [
+      {
+        "value": 5.0,
+        "valueZat": 500000000,
+        "n": 0,
+        "scriptPubKey": {
+          "asm": "a22c8020676da179ba51a7f6398418c272945433aed27c6d255297a4724693abb5adfa2181031210008203000401 OP_CHECKCRYPTOCONDITION",
+          "hex": "2ea22c8020676da179ba51a7f6398418c272945433aed27c6d255297a4724693abb5adfa2181031210008203000401cc",
+          "reqSigs": 1,
+          "type": "cryptocondition",
+          "addresses": ["RDTm14n15gjwcRaj4BD94NTkJdRiRsV7N7"]
+        }
       },
-      "sequence": 4294967295
-    }
-  ],
 
-  // List of transaction outputs
+      // This is a cryptocondition output
+      // It contains a fingerprinted condition
 
-  "vout": [
-    {
-      "value": 5.0,
-      "valueZat": 500000000,
-      "n": 0,
-      "scriptPubKey": {
-        "asm": "a22c8020676da179ba51a7f6398418c272945433aed27c6d255297a4724693abb5adfa2181031210008203000401 OP_CHECKCRYPTOCONDITION",
-        "hex": "2ea22c8020676da179ba51a7f6398418c272945433aed27c6d255297a4724693abb5adfa2181031210008203000401cc",
-        "reqSigs": 1,
-        "type": "cryptocondition",
-        "addresses": ["RDTm14n15gjwcRaj4BD94NTkJdRiRsV7N7"]
+      {
+        "value": 0.0001,
+        "valueZat": 10000,
+        "n": 1,
+        "scriptPubKey": {
+          "asm": "a22c8020286b36b233cc03c91652560f4ecf9404bcf10b61033916d67edf4a216c92cf758103120c008203000401 OP_CHECKCRYPTOCONDITION",
+          "hex": "2ea22c8020286b36b233cc03c91652560f4ecf9404bcf10b61033916d67edf4a216c92cf758103120c008203000401cc",
+          "reqSigs": 1,
+          "type": "cryptocondition",
+          "addresses": ["RDVHcSekmXgeYBqRupNTmqo3Rn8QRXNduy"]
+        }
+      },
+
+      // A normal output (i.e. not a cryptocondition) with a standard OP_CHECKSIG script
+
+      {
+        "value": 999994.06084534,
+        "valueZat": 99999406084534,
+        "n": 2,
+        "scriptPubKey": {
+          "asm": "02d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b47567 OP_CHECKSIG",
+          "hex": "2102d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b47567ac",
+          "reqSigs": 1,
+          "type": "pubkey",
+          "addresses": ["RN727JeeiZ6NXic7PUKTCiHT1HvuBN4RDa"]
+        }
+      },
+
+      // Normal output with a standard OP_CHECKSIG script
+
+      {
+        "value": 0.9998,
+        "valueZat": 99980000,
+        "n": 3,
+        "scriptPubKey": {
+          "asm": "02d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b47567 OP_CHECKSIG",
+          "hex": "2102d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b47567ac",
+          "reqSigs": 1,
+          "type": "pubkey",
+          "addresses": ["RN727JeeiZ6NXic7PUKTCiHT1HvuBN4RDa"]
+        }
+      },
+
+      // At the end of the output array there is an opreturn output with serialized data
+      // This is created by the Anatara Heir module
+
+      {
+        "value": 0.0,
+        "valueZat": 0,
+        "n": 4,
+        "scriptPubKey": {
+          "asm": "OP_RETURN ea462102d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b4756721037736c263991316c6a23397a982a1f8c18ae8642e944448162a93a824c31f92996400000000000000094d79446f67486569722c687474703a2f2f62696c6c696f6e616972652e636f6d2f6d7977696c6c206d64353d35333835363339383639",
+          "hex": "6a4c85ea462102d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b4756721037736c263991316c6a23397a982a1f8c18ae8642e944448162a93a824c31f92996400000000000000094d79446f67486569722c687474703a2f2f62696c6c696f6e616972652e636f6d2f6d7977696c6c206d64353d35333835363339383639",
+          "type": "nulldata"
+        }
       }
-    },
-
-    // This is a cryptocondition output
-    // It contains a fingerprinted condition
-
-    {
-      "value": 0.0001,
-      "valueZat": 10000,
-      "n": 1,
-      "scriptPubKey": {
-        "asm": "a22c8020286b36b233cc03c91652560f4ecf9404bcf10b61033916d67edf4a216c92cf758103120c008203000401 OP_CHECKCRYPTOCONDITION",
-        "hex": "2ea22c8020286b36b233cc03c91652560f4ecf9404bcf10b61033916d67edf4a216c92cf758103120c008203000401cc",
-        "reqSigs": 1,
-        "type": "cryptocondition",
-        "addresses": ["RDVHcSekmXgeYBqRupNTmqo3Rn8QRXNduy"]
-      }
-    },
-
-    // A normal output (i.e. not a cryptocondition) with a standard OP_CHECKSIG script
-
-    {
-      "value": 999994.06084534,
-      "valueZat": 99999406084534,
-      "n": 2,
-      "scriptPubKey": {
-        "asm": "02d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b47567 OP_CHECKSIG",
-        "hex": "2102d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b47567ac",
-        "reqSigs": 1,
-        "type": "pubkey",
-        "addresses": ["RN727JeeiZ6NXic7PUKTCiHT1HvuBN4RDa"]
-      }
-    },
-
-    // Normal output with a standard OP_CHECKSIG script
-
-    {
-      "value": 0.9998,
-      "valueZat": 99980000,
-      "n": 3,
-      "scriptPubKey": {
-        "asm": "02d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b47567 OP_CHECKSIG",
-        "hex": "2102d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b47567ac",
-        "reqSigs": 1,
-        "type": "pubkey",
-        "addresses": ["RN727JeeiZ6NXic7PUKTCiHT1HvuBN4RDa"]
-      }
-    },
-
-    // At the end of the output array there is an opreturn output with serialized data
-    // This is created by the Anatara Heir module
-
-    {
-      "value": 0.0,
-      "valueZat": 0,
-      "n": 4,
-      "scriptPubKey": {
-        "asm": "OP_RETURN ea462102d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b4756721037736c263991316c6a23397a982a1f8c18ae8642e944448162a93a824c31f92996400000000000000094d79446f67486569722c687474703a2f2f62696c6c696f6e616972652e636f6d2f6d7977696c6c206d64353d35333835363339383639",
-        "hex": "6a4c85ea462102d3431950c2f0f9654217b6ce3d44468d3a9ca7255741767fdeee7c5ec6b4756721037736c263991316c6a23397a982a1f8c18ae8642e944448162a93a824c31f92996400000000000000094d79446f67486569722c687474703a2f2f62696c6c696f6e616972652e636f6d2f6d7977696c6c206d64353d35333835363339383639",
-        "type": "nulldata"
-      }
-    }
-  ],
-  "vjoinsplit": []
-}
-```
-
+    ],
+    "vjoinsplit": []
+  }
+  ```
 </CollapsibleSection>
 
 The <b>opreturn</b> is the last output in a transaction, and this output is never spendable under any circumstances. The <b>opreturn</b> is the location where all Antara Module data is stored. We will demonstrate how this is accomplished further on.
@@ -223,9 +221,9 @@ Taking the value in the fully encoded key-value pair, `hex`, here is an approxim
 
 | Hex Value | Translation                                                                                                                                                                       |
 | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 6a        | OP_RETURN                                                                                                                                                                         |
+| 6a        | OP\_RETURN                                                                                                                                                                        |
 | 4c85      | Encoded length of the following data. This value is not a string, the value is encoded in the Smart Bitcoin variable length format, and the value is not directly readable.       |
-| ea        | Stands for "EVAL_HEIR". The eval code here tells the daemon that this is an Antara Module, and that the specific module is HEIR                                                   |
+| ea        | Stands for "EVAL\_HEIR". The eval code here tells the daemon that this is an Antara Module, and that the specific module is HEIR                                                  |
 | 46        | Stands for "F", which is a letter marker to indicate that this Heir transaction is a "Funding" transaction                                                                        |
 | 210...    | The remaining portion of the hex encoded data is not related to the core software, but rather to the arbitrary data designed by the developer. Maximum data length is 10000 bytes |
 
@@ -249,74 +247,70 @@ Note that the transaction takes value from normal inputs and sends it to CC outp
 
 #### Value Taken From Normal vins
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-```json
-  "vin": [
-    {
-      "txid": "e5af0f5993d64e68c655e3ca9309d5fd4f10906032ab587fc2142673a3a73109",
-      "vout": 0,
-      "scriptSig": {
-        "asm": "3045022100bae36ff4c95978379391bf1330d964d9cb6bd767386f427099185838ae30a9660220448463c41fa2a4628bde304c922c6d52618f5c427b243dfb24da9c14590118b7[ALL]",
-        "hex": "483045022100bae36ff4c95978379391bf1330d964d9cb6bd767386f427099185838ae30a9660220448463c41fa2a4628bde304c922c6d52618f5c427b243dfb24da9c14590118b701"
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+    "vin": [
+      {
+        "txid": "e5af0f5993d64e68c655e3ca9309d5fd4f10906032ab587fc2142673a3a73109",
+        "vout": 0,
+        "scriptSig": {
+          "asm": "3045022100bae36ff4c95978379391bf1330d964d9cb6bd767386f427099185838ae30a9660220448463c41fa2a4628bde304c922c6d52618f5c427b243dfb24da9c14590118b7[ALL]",
+          "hex": "483045022100bae36ff4c95978379391bf1330d964d9cb6bd767386f427099185838ae30a9660220448463c41fa2a4628bde304c922c6d52618f5c427b243dfb24da9c14590118b701"
+        },
+        "sequence": 4294967295
       },
-      "sequence": 4294967295
-    },
-    {
-      "txid": "0a97509be8c178c5c13903844d187148f0c10d309b7a2e260a629ea724d39395",
-      "vout": 0,
-      "scriptSig": {
-        "asm": "3045022100b931e2928b882ebb6adafb906d3480cc3e8537f92190dd355e548bac7405e9ca022047b2c3fc8fadb8483156d05b1acbba97b4bcb357b47fefb5e3ea602205e38f5c[ALL]",
-        "hex": "483045022100b931e2928b882ebb6adafb906d3480cc3e8537f92190dd355e548bac7405e9ca022047b2c3fc8fadb8483156d05b1acbba97b4bcb357b47fefb5e3ea602205e38f5c01"
-      },
-      "sequence": 4294967295
-    }
-  ],
-```
-
+      {
+        "txid": "0a97509be8c178c5c13903844d187148f0c10d309b7a2e260a629ea724d39395",
+        "vout": 0,
+        "scriptSig": {
+          "asm": "3045022100b931e2928b882ebb6adafb906d3480cc3e8537f92190dd355e548bac7405e9ca022047b2c3fc8fadb8483156d05b1acbba97b4bcb357b47fefb5e3ea602205e38f5c[ALL]",
+          "hex": "483045022100b931e2928b882ebb6adafb906d3480cc3e8537f92190dd355e548bac7405e9ca022047b2c3fc8fadb8483156d05b1acbba97b4bcb357b47fefb5e3ea602205e38f5c01"
+        },
+        "sequence": 4294967295
+      }
+    ],
+  ```
 </CollapsibleSection>
 
 #### Value Sent to CC vouts
 
-<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
 
-```json
+      ...
 
-    ...
+      {
+        "value": 5.00000000,
+        "valueZat": 500000000,
+        "n": 0,
+        "scriptPubKey": {
+          "asm": "a22c8020676da179ba51a7f6398418c272945433aed27c6d255297a4724693abb5adfa2181031210008203000401 OP_CHECKCRYPTOCONDITION",
+          "hex": "2ea22c8020676da179ba51a7f6398418c272945433aed27c6d255297a4724693abb5adfa2181031210008203000401cc",
+          "reqSigs": 1,
+          "type": "cryptocondition",
+          "addresses": [
+            "RDTm14n15gjwcRaj4BD94NTkJdRiRsV7N7"
+          ]
+        }
+      },
+      {
+        "value": 0.00010000,
+        "valueZat": 10000,
+        "n": 1,
+        "scriptPubKey": {
+          "asm": "a22c8020286b36b233cc03c91652560f4ecf9404bcf10b61033916d67edf4a216c92cf758103120c008203000401 OP_CHECKCRYPTOCONDITION",
+          "hex": "2ea22c8020286b36b233cc03c91652560f4ecf9404bcf10b61033916d67edf4a216c92cf758103120c008203000401cc",
+          "reqSigs": 1,
+          "type": "cryptocondition",
+          "addresses": [
+            "RDVHcSekmXgeYBqRupNTmqo3Rn8QRXNduy"
+          ]
+        }
+      },
 
-    {
-      "value": 5.00000000,
-      "valueZat": 500000000,
-      "n": 0,
-      "scriptPubKey": {
-        "asm": "a22c8020676da179ba51a7f6398418c272945433aed27c6d255297a4724693abb5adfa2181031210008203000401 OP_CHECKCRYPTOCONDITION",
-        "hex": "2ea22c8020676da179ba51a7f6398418c272945433aed27c6d255297a4724693abb5adfa2181031210008203000401cc",
-        "reqSigs": 1,
-        "type": "cryptocondition",
-        "addresses": [
-          "RDTm14n15gjwcRaj4BD94NTkJdRiRsV7N7"
-        ]
-      }
-    },
-    {
-      "value": 0.00010000,
-      "valueZat": 10000,
-      "n": 1,
-      "scriptPubKey": {
-        "asm": "a22c8020286b36b233cc03c91652560f4ecf9404bcf10b61033916d67edf4a216c92cf758103120c008203000401 OP_CHECKCRYPTOCONDITION",
-        "hex": "2ea22c8020286b36b233cc03c91652560f4ecf9404bcf10b61033916d67edf4a216c92cf758103120c008203000401cc",
-        "reqSigs": 1,
-        "type": "cryptocondition",
-        "addresses": [
-          "RDVHcSekmXgeYBqRupNTmqo3Rn8QRXNduy"
-        ]
-      }
-    },
+      ...
 
-    ...
-
-```
-
+  ```
 </CollapsibleSection>
 
 #### Key Takeaways
@@ -327,6 +321,6 @@ As time progresses, more transactions on the Smart Chain are performed under thi
 
 With each transaction, the <b>opreturn</b> output is never spent, and remains in the blockchain as a source of Antara Module data (read only).
 
----
+***
 
 [<b>Link to Next Tutorial in Advanced Series</b>](/antara/tutorials/advanced-series-4)
