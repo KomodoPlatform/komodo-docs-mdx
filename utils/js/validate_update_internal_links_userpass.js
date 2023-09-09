@@ -16,7 +16,6 @@ import * as acorn from "acorn"
         let filepaths = []
         const filepathSlugs = {}
         walkDir("./src/pages", filepath => filepaths.push(filepath));
-        console.log(filepaths.length)
         for (let index = 0; index < filepaths.length; index++) {
             const filePath = filepaths[index];
             await remark().use(() => (tree) => {
@@ -32,7 +31,6 @@ import * as acorn from "acorn"
                 // console.log(slugs);
             }).process(fs.readFileSync(filePath, 'utf-8'));
         }
-        console.log(Object.keys(filepathSlugs).length)
         for (let index = 0; index < filepaths.length; index++) {
             const filePath = filepaths[index];
             await processFile(filePath, filepathSlugs)
@@ -157,6 +155,9 @@ function processLink(link, currFilePath, filepathSlugs) {
 
     const internalLinkFile = path.join(filePath, correctUrl.split("#")[0] + "index.mdx")
     const slug = correctUrl.split("#")[1]
+    if (!filepathSlugs[internalLinkFile].some(slugO => slug === slugO)) {
+        throw new Error(`Processing file: ${filePath}, slug: ${slug} not present in file: ${internalLinkFile}`)
+    }
     try {
         fs.accessSync(internalLinkFile, constants.F_OK)
     } catch (err) {
