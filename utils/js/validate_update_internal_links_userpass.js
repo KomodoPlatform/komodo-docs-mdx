@@ -45,7 +45,7 @@ import path from 'path'
                                 }
                                 const clonedChild = JSON.parse(JSON.stringify(originalChild));
                                 let methodObj = JSON.parse(clonedChild.value)
-                                methodObj.userpass = "MM2_RPC_PASSWORD"
+                                methodObj.userpass = "testpsw"
                                 clonedChild.value = JSON.stringify(methodObj, null, 2)
                                 //console.log(clonedChild)
                                 node.children = [clonedChild];
