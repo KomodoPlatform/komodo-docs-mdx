@@ -124,7 +124,6 @@ The `ActivationParams` object defines additional parameters used for activation.
 | zcash_params_path         | string    | ZHTLC coins only. Path to folder containing [Zcash parameters](https://z.cash/technology/paramgen/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                |
 | scan_blocks_per_iteration | integer   | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                                    |
 | scan_interval_ms          | integer   | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                                      |
-| sync_params               | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling_activation_height), `height` (a specific block height) or `date` (a unix timestamp).            |
 | mode                      | object    | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/v20#activation-mode) object.                                                                          |
 
 <Note>
@@ -158,6 +157,7 @@ Contains information about electrum & lightwallet_d servers for coins being used
 | light_wallet_d_servers  | list            | ZHTLC only. A list of urls which are hosting lightwallet_d servers for a coin.           |
 | electrum_servers        | list of objects | ZHTLC only. A list of standard [ActivationServers](/atomicdex/api/v20#activation-servers) objects. |
 | electrum                | list of objects | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/atomicdex/api/v20#activation-servers) objects. |
+| sync_params             | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling_activation_height), `height` (a specific block height) or `date` (a unix timestamp).            |
 
 
 ### ActivationServers
@@ -183,24 +183,20 @@ Contains information electrum servers for coins being used in `Electrum` or `Lig
       "rpc_data": {
         "electrum_servers": [
           {
-            "url": "zombie.sirseven.me:10033"
-          },
-          {
             "url":"zombie.dragonhound.info:10033"
           }
         ],
         "light_wallet_d_servers": [
-          "http://zombie.sirseven.me:443",
           "http://zombie.dragonhound.info:443"
         ]
+      },
+      "sync_params": { 
+          "height":  2528700
       }
     },
     "zcash_params_path": "/home/username/path_to/.zcash-params",
     "scan_blocks_per_iteration": 100,
-    "scan_interval_ms": 200,
-    "sync_params": { 
-        "height":  2528700
-    }
+    "scan_interval_ms": 200
   }
 }
 ```
