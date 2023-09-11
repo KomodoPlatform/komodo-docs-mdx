@@ -65,7 +65,7 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 
 ## Variables
 
-- For AtomicDEX-API methods, the userpass variable should always be `MM2_RPC_PASSWORD`
+- For AtomicDEX-API methods, the userpass variable should always be `testpsw`
 
 ## Templates
 
@@ -121,7 +121,7 @@ And rendered as:
 
 ![Code group UI](src/images/style-guide-images/code-group-sample.png)
 
-If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
+<!-- If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
 
 ````mdx
 ```ts {{title: "Single Block", tag: "post", label: "/kmd/jwt/post"}}
@@ -131,9 +131,9 @@ If you have a single block of code, you can use the `CodeGroup` without wrapping
 
 And you'll still have it rendered correctly:
 
-![Single code block UI](src/images/style-guide-images/single-code-block.png)
+![Single code block UI](src/images/style-guide-images/single-code-block.png) -->
 
-It is important to **note that**, "**AtomicDEX methods**" should be wrapped with `CodeGroup` tags, using the **method name** as the **label value**, and the **tag value** set to **POST**. Use the `json {{ mm2MethodDecorate : true }}` decorator to generate code blocks for:
+It is important to **note that**, "**AtomicDEX methods**" should be wrapped with `CodeGroup` tags, using the **method name** as the **label value**, and the **tag value** set to **POST**, an additional **mm2MethodDecorate property** with the value **"true"**. This will generate code blocks for:
 
 - **JSON**: The pure request body.
 - **Python3**: Using the requests library.
@@ -143,16 +143,16 @@ It is important to **note that**, "**AtomicDEX methods**" should be wrapped with
 - **GO**: Using net/http. (need to confirm this is correct)
 - **Ruby**: Using net/http.
 
-You only need to include the `json` data, and the `mm2MethodDecorate` annotation populates for various languages automatically.
+You only need to include the `json` data, and the additional **mm2MethodDecorate property** populates for various languages automatically.
 
 A working code sample would look like this:
 
 ````mdx
-<CodeGroup title="Generate Invoice" tag="POST" label="generate_invoice">
+<CodeGroup title="Generate Invoice" tag="POST" label="generate_invoice" mm2MethodDecorate="true">
 
-```json {{ mm2MethodDecorate : true }}
+```json
 {
-  "userpass": "userpass",
+  "userpass": "testpsw",
   "mmrpc": "2.0",
   "method": "lightning::payments::generate_invoice",
   "params": {
