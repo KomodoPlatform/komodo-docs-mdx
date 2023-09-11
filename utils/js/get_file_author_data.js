@@ -93,7 +93,7 @@ async function downloadImage(url, username) {
         let filename;
         https.get(url, options, (response) => {
             const fileExt = response.headers["content-type"].split("/")[1]
-            filename = `./src/images/author-images/${username}.${fileExt}`
+            filename = `./author-images/${username}.${fileExt}`
             const file = fs.createWriteStream(filename);
 
             response.pipe(file);
