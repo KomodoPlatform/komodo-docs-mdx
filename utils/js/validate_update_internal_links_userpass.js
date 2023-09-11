@@ -5,6 +5,7 @@ import { constants } from "fs"
 import { remark } from 'remark'
 import remarkMdx from 'remark-mdx'
 import remarkGfm from 'remark-gfm'
+import { mdxAnnotations } from 'mdx-annotations'
 import path from 'path'
 import { toString } from "mdast-util-to-string";
 
@@ -18,19 +19,23 @@ import * as acorn from "acorn"
         walkDir("./src/pages", filepath => filepaths.push(filepath));
         for (let index = 0; index < filepaths.length; index++) {
             const filePath = filepaths[index];
-            await remark().use(() => (tree) => {
+            await remark().use(mdxAnnotations.remark).use(remarkMdx).use(() => (tree) => {
                 const slugs = [];
 
                 let slugify = slugifyWithCounter();
                 // Visit all heading nodes and collect their values
                 visit(tree, 'heading', (node) => {
                     const slug = slugify(toString(node));
+                    if (slug.includes("label")) {
+                        console.log(node)
+                    }
                     slugs.push(slug);
                 });
                 filepathSlugs[filePath] = slugs
                 // console.log(slugs);
             }).process(fs.readFileSync(filePath, 'utf-8'));
         }
+        fs.writeFileSync("filepathSlugs.json", JSON.stringify(filepathSlugs, null, 2))
         for (let index = 0; index < filepaths.length; index++) {
             const filePath = filepaths[index];
             await processFile(filePath, filepathSlugs)
@@ -44,10 +49,10 @@ async function processFile(filePath, filepathSlugs) {
     if (!filePath.endsWith("/index.mdx")) {
         throw new Error("File path doesn't end with '/index.mdx': " + filePath)
     }
-    // if (!filePath.includes("/setup/ecosystem-launch-parameters/")) {
-    //     return
-    // }
-    // console.log("Processing: " + filePath)
+    if (!filePath.includes("/non_fungible_token")) {
+        return
+    }
+    console.log("Processing: " + filePath)
     const file = await remark()
         .use(remarkGfm)
         .use(remarkMdx)
