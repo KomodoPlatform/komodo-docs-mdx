@@ -8,7 +8,7 @@ import path from 'path'
     try {
         await walkDir("./src/pages", async (filePath) => {
             const markdown = await fs.readFile(filePath, 'utf-8');
-            console.log(filePath)
+            //console.log(filePath)
             const file = await remark()
                 .use(() => (tree) => {
                     let documentContainsTitleHeading = false;
