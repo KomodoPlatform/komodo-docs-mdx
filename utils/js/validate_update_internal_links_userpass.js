@@ -26,9 +26,6 @@ import * as acorn from "acorn"
                 // Visit all heading nodes and collect their values
                 visit(tree, 'heading', (node) => {
                     const slug = slugify(toString(node));
-                    if (slug.includes("label")) {
-                        console.log(node)
-                    }
                     slugs.push(slug);
                 });
                 filepathSlugs[filePath] = slugs
