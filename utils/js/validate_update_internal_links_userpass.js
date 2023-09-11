@@ -1,79 +1,119 @@
 import { visit, SKIP } from 'unist-util-visit'
 import { is } from "unist-util-is";
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import { constants } from "fs"
 import { remark } from 'remark'
 import remarkMdx from 'remark-mdx'
 import remarkGfm from 'remark-gfm'
+import { mdxAnnotations } from 'mdx-annotations'
 import path from 'path'
+import { toString } from "mdast-util-to-string";
+
+import { slugifyWithCounter } from "@sindresorhus/slugify";
+import * as acorn from "acorn"
 
 (async function () {
     try {
-        await walkDir("./src/pages", async (filePath) => {
-            //console.log("Processing: " + filePath)
-            if (!filePath.endsWith("/index.mdx")) {
-                throw new Error("File path doesn't end with '/index.mdx': " + filePath)
-            }
-            const markdown = await fs.readFile(filePath, 'utf-8');
-            const file = await remark()
-                .use(remarkGfm)
-                .use(remarkMdx)
-                .use(() => (tree) => {
-                    visit(tree, 'link', async (node) => {
-                        //Process the link
-                        node.url = await processLink(node.url, filePath);
-                    });
-                })
-                .use(() => (tree) => {
-                    visit(tree, (node, nodeIndex, parentNode) => {
-                        if (!filePath.includes("src/pages/atomicdex")) {
-                            return SKIP;
-                        }
-                        // if (
-                        //     is(node, { name: "CodeGroup" })) {
-                        //     console.log(node)
-                        // }
-                        try {
-                            if (
-                                is(node, { name: "CodeGroup" }) &&
-                                node.attributes.some(attr => attr.type === 'mdxJsxAttribute' && attr.name === "mm2MethodDecorate" && attr.value === "true")
-                            ) {
-                                // console.log(node)
-                                const originalChild = node.children[0];
-                                if (node.children.length !== 1 || originalChild.lang !== "json") {
-                                    throw new Error(`unexpected code block in file ${filePath} : ` + JSON.stringify())
-                                }
-                                const clonedChild = JSON.parse(JSON.stringify(originalChild));
-                                let methodObj = JSON.parse(clonedChild.value)
-                                methodObj.userpass = "testpsw"
-                                clonedChild.value = JSON.stringify(methodObj, null, 2)
-                                //console.log(clonedChild)
-                                node.children = [clonedChild];
-                                return SKIP;
-                            }
-                        } catch (error) {
-                            throw new Error(error)
-                        }
+        let filepaths = []
+       // const filepathSlugs = {}
+        walkDir("./src/pages", filepath => filepaths.push(filepath));
+/*
+        for (let index = 0; index < filepaths.length; index++) {
+            const filePath = filepaths[index];
+            await remark().use(mdxAnnotations.remark).use(remarkMdx).use(() => (tree) => {
+                const slugs = [];
 
-                    });
-                })
-                .process(markdown);
-            if (file) {
-                await fs.writeFile(filePath, String(file));
-            }
-        });
+                let slugify = slugifyWithCounter();
+                // Visit all heading nodes and collect their values
+                visit(tree, 'heading', (node) => {
+                    const slug = slugify(toString(node));
+                    slugs.push(slug);
+                });
+                filepathSlugs[filePath] = slugs
+                // console.log(slugs);
+            }).process(fs.readFileSync(filePath, 'utf-8'));
+        }
+        */
+        //        fs.writeFileSync("filepathSlugs.json", JSON.stringify(filepathSlugs, null, 2))
+        let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"))
+        for (let index = 0; index < filepaths.length; index++) {
+            const filePath = filepaths[index];
+            await processFile(filePath, filepathSlugs)
+        }
     } catch (error) {
         if (error) throw error;
     }
 })()
 
+async function processFile(filePath, filepathSlugs) {
+    if (!filePath.endsWith("/index.mdx")) {
+        throw new Error("File path doesn't end with '/index.mdx': " + filePath)
+    }
+    // if (!filePath.includes("/non_fungible_token")) {
+    //     return
+    // }
+    console.log("Processing: " + filePath)
+    const file = await remark()
+        .use(remarkGfm)
+        .use(remarkMdx)
+        .use(() => (tree) => {
+            //console.log("Processing: " + filePath)
+            const hasTitleAndDesc = tree.children.some(node => node.type === 'mdxjsEsm' && isValidTitleDescExports(node.value))
+            if (!hasTitleAndDesc) {
+                throw new Error("File doesn't have title/description: " + filePath)
+            }
+        })
+        .use(() => (tree) => {
+            visit(tree, 'link', (node) => {
+                //Process the link
+                node.url = processLink(node.url, filePath, filepathSlugs);
+            });
+        })
+        .use(() => (tree) => {
+            visit(tree, (node, nodeIndex, parentNode) => {
+                if (!filePath.includes("src/pages/atomicdex")) {
+                    return SKIP;
+                }
+                // if (
+                //     is(node, { name: "CodeGroup" })) {
+                //     console.log(node)
+                // }
+                try {
+                    if (
+                        is(node, { name: "CodeGroup" }) &&
+                        node.attributes.some(attr => attr.type === 'mdxJsxAttribute' && attr.name === "mm2MethodDecorate" && attr.value === "true")
+                    ) {
+                        // console.log(node)
+                        const originalChild = node.children[0];
+                        if (node.children.length !== 1 || originalChild.lang !== "json") {
+                            throw new Error(`unexpected code block in file ${filePath} : ` + JSON.stringify())
+                        }
+                        const clonedChild = JSON.parse(JSON.stringify(originalChild));
+                        let methodObj = JSON.parse(clonedChild.value)
+                        methodObj.userpass = "testpsw"
+                        clonedChild.value = JSON.stringify(methodObj, null, 2)
+                        //console.log(clonedChild)
+                        node.children = [clonedChild];
+                        return SKIP;
+                    }
+                } catch (error) {
+                    throw new Error(error)
+                }
+
+            });
+        })
+        .process(fs.readFileSync(filePath, 'utf-8'));
+    if (file) {
+        fs.writeFileSync(filePath, String(file));
+    }
+}
 // Function to process a link
-async function processLink(link, currFilePath) {
+function processLink(link, currFilePath, filepathSlugs) {
     if (link.startsWith("mailto:")) {
         return link
     }
     const isExternalURL = /^https?:\/\//;
-    if (isExternalURL.test(link)) return;
+    if (isExternalURL.test(link)) return link;
     let filePath = "src/pages";
     let strippedPath = link.split("#")[0]; // strips hash
     if (strippedPath.endsWith("/")) {
@@ -119,8 +159,12 @@ async function processLink(link, currFilePath) {
     // console.log("--------------------------------")
 
     const internalLinkFile = path.join(filePath, correctUrl.split("#")[0] + "index.mdx")
+    const slug = correctUrl.split("#")[1]
+    if (slug && !filepathSlugs[internalLinkFile].some(slugO => slug === slugO)) {
+        throw new Error(`Processing file: ${currFilePath}, slug: ${slug} not present in file: ${internalLinkFile}`)
+    }
     try {
-        await fs.access(internalLinkFile, constants.F_OK)
+        fs.accessSync(internalLinkFile, constants.F_OK)
     } catch (err) {
         console.log("currNormalisedDir:" + currNormalisedDir)
         console.log(currFilePath)
@@ -130,22 +174,73 @@ async function processLink(link, currFilePath) {
         console.log(link)
         console.log(correctUrl)
 
-        console.error("Internal link doesn't exist: " + internalLinkFile);
+        console.error("Internal link file doesn't exist: " + internalLinkFile);
         throw new Error(err)
     }
 
     return correctUrl;
 }
 
-async function walkDir(dir, callback) {
-    let files = await fs.readdir(dir);
-    await Promise.all(files.map(async (file) => {
-        const filePath = path.join(dir, file);
-        const stats = await fs.stat(filePath);
-        if (stats.isDirectory()) {
-            await walkDir(filePath, callback);
-        } else if (stats.isFile()) {
-            await callback(filePath);
+// needs import { promises as fs } from 'fs';
+// async function asyncWalkDir(dir, callback) {
+//     let files = await fs.readdir(dir);
+//     await Promise.all(files.map(async (file) => {
+//         const filePath = path.join(dir, file);
+//         const stats = await fs.stat(filePath);
+//         if (stats.isDirectory()) {
+//             await walkDir(filePath, callback);
+//         } else if (stats.isFile()) {
+//             await callback(filePath);
+//         }
+//     }));
+// }
+
+export function walkDir(dirPath, callback) {
+    fs.readdirSync(dirPath).forEach((file) => {
+        const filePath = path.join(dirPath, file);
+        const stat = fs.statSync(filePath);
+        if (stat.isDirectory()) {
+            walkDir(filePath, callback);
+
+        } else {
+            callback(filePath);
         }
-    }));
+    });
+}
+
+function isValidTitleDescExports(str) {
+    try {
+        const parsed = acorn.parse(str, {
+            sourceType: 'module',
+            ecmaVersion: 2020
+        });
+
+        let titleExported = false;
+        let descriptionExported = false;
+        for (const node of parsed.body) {
+            if (node.type === 'ExportNamedDeclaration') {
+                if (node.declaration && node.declaration.declarations) {
+                    for (const declaration of node.declaration.declarations) {
+                        if (
+                            declaration.id.name === 'title' &&
+                            declaration.init.type === 'Literal'
+                        ) {
+                            titleExported = true;
+                        }
+                        if (
+                            declaration.id.name === 'description' &&
+                            declaration.init.type === 'Literal'
+                        ) {
+                            descriptionExported = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return titleExported && descriptionExported;
+    } catch (e) {
+        //console.log(e)
+        return false;  // Parsing error means the string is not valid JS
+    }
 }
