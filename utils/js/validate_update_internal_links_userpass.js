@@ -17,11 +17,24 @@ import { toString } from "mdast-util-to-string";
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    /*
-    const filepathSlugs = {};
+    await createFileSlugs(filepaths);
 
+    let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
       const filePath = filepaths[index];
+      await processFile(filePath, filepathSlugs);
+    }
+  } catch (error) {
+    if (error) throw error;
+  }
+})();
+
+async function createFileSlugs(filepaths) {
+  const filepathSlugs = {};
+
+  for (let index = 0; index < filepaths.length; index++) {
+    const filePath = filepaths[index];
+    try {
       await remark()
         .use(mdxAnnotations.remark)
         .use(remarkMdx)
@@ -35,24 +48,19 @@ import { toString } from "mdast-util-to-string";
             slugs.push(slug);
           });
           filepathSlugs[filePath] = slugs;
-          // console.log(slugs);
         })
         .process(fs.readFileSync(filePath, "utf-8"));
-    }*/
-    /*
-    fs.writeFileSync(
-      "filepathSlugs.json",
-      JSON.stringify(filepathSlugs, null, 2)
-    );*/
-    let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
-    for (let index = 0; index < filepaths.length; index++) {
-      const filePath = filepaths[index];
-      await processFile(filePath, filepathSlugs);
+    } catch (error) {
+      console.log(error);
+      throw new Error(`filePath: ${filePath}`);
     }
-  } catch (error) {
-    if (error) throw error;
   }
-})();
+
+  fs.writeFileSync(
+    "filepathSlugs.json",
+    JSON.stringify(filepathSlugs, null, 2)
+  );
+}
 
 async function processFile(filePath, filepathSlugs) {
   if (!filePath.endsWith("/index.mdx")) {
