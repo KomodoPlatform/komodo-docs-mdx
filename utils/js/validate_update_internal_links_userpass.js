@@ -15,9 +15,9 @@ import * as acorn from "acorn"
 (async function () {
     try {
         let filepaths = []
-       // const filepathSlugs = {}
+        // const filepathSlugs = {}
         walkDir("./src/pages", filepath => filepaths.push(filepath));
-/*
+
         for (let index = 0; index < filepaths.length; index++) {
             const filePath = filepaths[index];
             await remark().use(mdxAnnotations.remark).use(remarkMdx).use(() => (tree) => {
@@ -33,8 +33,8 @@ import * as acorn from "acorn"
                 // console.log(slugs);
             }).process(fs.readFileSync(filePath, 'utf-8'));
         }
-        */
-        //        fs.writeFileSync("filepathSlugs.json", JSON.stringify(filepathSlugs, null, 2))
+
+        fs.writeFileSync("filepathSlugs.json", JSON.stringify(filepathSlugs, null, 2))
         let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"))
         for (let index = 0; index < filepaths.length; index++) {
             const filePath = filepaths[index];
