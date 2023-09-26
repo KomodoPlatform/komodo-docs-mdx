@@ -627,6 +627,32 @@ The `WalletBalanceInfo` object includes the following items in the activation re
 ```
 
 
+### WithdrawFromInfo
+
+The `WithdrawFromInfo` response object includes the following items for HD Wallet [withdraw (v2)](/atomicdex/api/v20/withdraw/) requests. 
+You can use either the `derivation_path` on its own, or the `account_id`, `chain` and `address_id` together.
+
+| Parameter         | Type    | Description                                                                     |
+| ----------------- | --------| ------------------------------------------------------------------------------- |
+| derivation\_path  | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. |
+| account\_id       | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| address\_id       | integer | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. |
+| chain             | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
+
+
+
+### FeeInfo
+
+The `FeeInfo` response object includes the following items for [withdraw (v2)](/atomicdex/api/v20/withdraw/) requests:
+
+| Parameter  | Type             | Description                                                                     |
+| ---------- | ---------------- | ------------------------------------------------------------------------------- |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas` |
+| amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
+| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units           |
+| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction           |
+
+
 ### ScanAddressesInfo
 
 The `ScanAddressesInfo` response object includes the following items for request in HD mode:
@@ -708,3 +734,122 @@ The `AccountAddressInfo` object includes the following items for active addresse
 }
 ```
 </CollapsibleSection>
+
+
+
+
+## Error types
+
+#### NotSufficientBalance
+
+The `available` balance is not sufficient to transfer the specified amount.
+
+| Structure | Type             | Description                                                                                                                                            |
+| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| coin      | string           | the name of the coin which balance is not sufficient. This coin name may differ from the requested coin. For example, ERC20 fees are paid by ETH (gas) |
+| available | string (numeric) | the balance available for transfer                                                                                                                     |
+| required  | string (numeric) | the amount required to transfer the specified amount. This amount is necessary but may not be sufficient                                               |
+
+
+  #### Response (NotSufficientBalance error)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Not enough DOC to withdraw: available 69.75066225, required at least 1000.00001",
+    "error_path": "utxo_common",
+    "error_trace": "utxo_common:1379] utxo_common:449]",
+    "error_type": "NotSufficientBalance",
+    "error_data": {
+      "coin": "DOC",
+      "available": "69.75066225",
+      "required": "1000.00001"
+    },
+    "id": 0
+  }
+  ```
+
+#### ZeroBalanceToWithdrawMax
+
+The available balance is zero.
+
+| Structure | Type | Description |
+| --------- | ---- | ----------- |
+| (none)    |      |             |
+
+#### AmountTooLow
+
+The specified amount is too low. Required at least `threshold`.
+
+| Structure | Type             | Description                                          |
+| --------- | ---------------- | ---------------------------------------------------- |
+| amount    | string (numeric) | the amount the user was willing to transfer          |
+| threshold | string (numeric) | the `amount` has not to be less than the `threshold` |
+
+#### InvalidAddress
+
+The specified `to` address is not valid.
+
+| Structure | Type   | Description           |
+| --------- | ------ | --------------------- |
+| (none)    | string | the error description |
+
+#### InvalidFeePolicy
+
+The specified `fee` is not valid.
+
+| Structure | Type   | Description           |
+| --------- | ------ | --------------------- |
+| (none)    | string | the error description |
+
+  #### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+    "error_path": "utxo_common",
+    "error_trace": "utxo_common:1371]",
+    "error_type": "InvalidFeePolicy",
+    "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+    "id": 0
+  }
+  ```
+
+  #### Response (InvalidFeePolicy error - attempt to use UtxoFixed or UtxoPerKbyte for ETH coin)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Invalid fee policy: Expected 'EthGas' fee type, found UtxoFixed",
+    "error_path": "eth",
+    "error_trace": "eth:535]",
+    "error_type": "InvalidFeePolicy",
+    "error_data": "Expected 'EthGas' fee type, found UtxoFixed",
+    "id": 0
+  }
+  ```
+
+#### NoSuchCoin
+
+The specified coin was not found or is not activated yet.
+
+| Structure | Type   | Description                                   |
+| --------- | ------ | --------------------------------------------- |
+| coin      | string | the not found `coin` specified in the Request |
+
+#### Transport
+
+The request was failed due to a network error.
+
+| Structure | Type   | Description                     |
+| --------- | ------ | ------------------------------- |
+| (none)    | string | the transport error description |
+
+#### InternalError
+
+The request was failed due to an AtomicDEX API internal error.
+
+| Structure | Type   | Description                    |
+| --------- | ------ | ------------------------------ |
+| (none)    | string | the internal error description |
