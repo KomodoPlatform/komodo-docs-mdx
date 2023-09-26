@@ -586,6 +586,39 @@ For requests which return many results, pagination offsets may be applied. \*\* 
   ```
 </CollapsibleSection>
 
+
+### HistoryTarget
+
+Used to specify a HD wallet `account_id` or `address_id` for [my_tx_history (v2)] requests.
+
+| Parameter      | Type    | Description                                             |
+| -------------- | ------- | ------------------------------------------------------- |
+| type           | string  | Filters results by `account_id` or `address_id` part of the derivation path. |
+| account\_id    | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.  |
+| address\_id    | integer | Only required when `type` is `address_id`. `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. |
+| chain          | string  | Only required when `type` is `address_id`. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
+
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Example
+
+  ```json
+  {
+    "type": "account_id",
+    "account_id": 77
+  }
+  ```
+
+  ```json
+  {
+    "type": "address_id",
+    "account_id": 0,
+    "chain": "External", // Accepted values: "External" and "Internal"
+    "address_id": 1
+  }
+  ```
+</CollapsibleSection>
+
 ### TokensRequest
 
 The `TokensRequest` object includes the following items for a given coin or token:
@@ -853,3 +886,62 @@ The request was failed due to an AtomicDEX API internal error.
 | Structure | Type   | Description                    |
 | --------- | ------ | ------------------------------ |
 | (none)    | string | the internal error description |
+
+
+## Error cases
+
+### Error - Coin not active
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "TTT-SLP",
+  "error_path": "my_tx_history_v2.lp_coins",
+  "error_trace": "my_tx_history_v2:389] lp_coins:2847]",
+  "error_type": "CoinIsNotActive",
+  "error_data": "TTT-SLP",
+  "id": null
+}
+```
+
+### Error - Coin not compatible
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "TTT-SLP",
+  "error_path": "my_tx_history_v2",
+  "error_trace": "my_tx_history_v2:336]",
+  "error_type": "NotSupportedFor",
+  "error_data": "TTT-SLP",
+  "id": null
+}
+```
+
+### Error - Coin enabled without tx\_history = true
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Storage is not initialized for TTT-SLP",
+  "error_path": "my_tx_history_v2",
+  "error_trace": "my_tx_history_v2:343]",
+  "error_type": "StorageIsNotInitialized",
+  "error_data": "Storage is not initialized for TTT-SLP",
+  "id": null
+}
+```
+
+### Error - Local database failed
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
+  "error_path": "my_tx_history_v2.sql_tx_history_storage",
+  "error_trace": "my_tx_history_v2:351] sql_tx_history_storage:472]",
+  "error_type": "StorageError",
+  "error_data": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
+  "id": null
+}
+```
