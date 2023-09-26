@@ -290,7 +290,7 @@ The `addressInfos` object includes the following items for a given address:
 
 | Parameter          | Type   | Description                                                                                                                   |
 | ------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| balances           | object | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object. Not included in responses where `get_balances` is `false` |
+| balances           | object | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object. Not included in responses where `get_balances` is `false` |
 | derivation\_method | object | A standard [DerivationMethod](/atomicdex/api/v20#derivation-method) object                                                    |
 | pubkey             | string | The public key associated with the seed used to launch AtomicDEX                                                              |
 | tickers            | array  | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                |
@@ -326,7 +326,7 @@ The `addressInfos` object includes the following items for a given address:
 
 ### BalanceInfos
 
-The `balanceInfos` object includes the following items for a given coin or token:
+The `balanceInfo` object includes the following items for a given coin or token:
 
 | Parameter   | Type             | Description                                                                                                              |
 | ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -627,6 +627,36 @@ The `WalletBalanceInfo` object includes the following items in the activation re
 ```
 
 
+### ScanAddressesInfo
+
+The `ScanAddressesInfo` response object includes the following items for request in HD mode:
+
+| Parameter         | Type    | Description                                                                                                       |
+| ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| account\_index    | integer   | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| derivation\_path  | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the account.       |
+| new\_addresses    | list    | A list of standard [NewAddressInfo](/atomicdex/api/v20#new-address-info) objects.                                 |
+
+<DevComment>
+    Confirm `new_addresses` array has the structure of `NewAddressInfo`.
+</DevComment>
+
+
+
+
+### NewAddressInfo
+
+The `NewAddressInfo` response object includes the following items for request in HD mode:
+
+| Parameter         | Type    | Description                                                                                                       |
+| ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| address           | string  | The account address for a specific derivation path under the `account_index`.                                     |
+| derivation\_path  | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. If there are no more addresses with balances within the gap limit, the address index will increment.       |
+| balance           | object  | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object.                                               |
+| chain             | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
+
+
+
 ### WalletAccountInfo
 
 The `WalletAccountInfo` object includes the following items in the activation response for a coin in HD mode:
@@ -635,7 +665,7 @@ The `WalletAccountInfo` object includes the following items in the activation re
 | ----------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
 | account\_index    | integer   | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
 | derivation\_path  | string    | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                              |
-| total\_balance    | object    | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object.                                                         |
+| total\_balance    | object    | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object.                                                         |
 | addresses         | list      | A list of standard [AccountAddressInfo](/atomicdex/api/v20#account-address-info) objects.                                   |
 
 
@@ -662,7 +692,7 @@ The `AccountAddressInfo` object includes the following items for active addresse
 | address          | string    | The account address for a specific derivation path under the `account_index`.                                      |
 | derivation\_path | string    | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.        |
 | chain            | string    | `External` or `Internal`, as defined in the activation request.                                                    |
-| balance          | object    | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object.                                                |
+| balance          | object    | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object.                                                |
 
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
