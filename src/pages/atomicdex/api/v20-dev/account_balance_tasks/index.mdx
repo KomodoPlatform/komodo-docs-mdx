@@ -65,24 +65,17 @@ Use the `task::account_balance::status` method to view the status / response of 
 | task\_id             | integer | The identifying number returned when initiating the withdrawal process.                   |
 | forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
 
+
 #### Response
 
-| Parameter           | Type            | Description                                                                                                                                                                                                                                                                  |
-| ------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| result              | object          | Object containing status and details of the task                                                                                                                                                                                                                             |
-| .status             | string          | Status of the task (`Ok` or `Error`)                                                                                                                                                                                                                                         |
-| ..account\_index    | integer         | For GUIs, this will return `0`. In CLI it will return the same as the user request input                                                                                                                                                                                     |
-| ..derivation\_path  | string          | The The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the wallet.                                                                                                                                                               |
-| ..total\_balance    | object          | Contains the spendable and unspendable balance for the wallet                                                                                                                                                                                                                |
-| ...spendable        | string(numeric) | Spendable balance for this wallet                                                                                                                                                                                                                                            |
-| ...unspendable      | string(numeric) | Unspendable balance for this wallet (e.g. from unconfirmed incoming transactions)                                                                                                                                                                                            |
-| ..addresses         | list            | Contains information about current active addresses in the wallet                                                                                                                                                                                                            |
-| ...address          | string          | Spendable balance for this address                                                                                                                                                                                                                                           |
-| ...derivation\_path | string          | The The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of an address.                                                                                                                                                               |
-| ...chain            | string(numeric) | `Internal` or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| ...balance          | object          | Contains the spendable and unspendable balance for this address                                                                                                                                                                                                              |
-| ....spendable       | string(numeric) | Spendable balance for this address                                                                                                                                                                                                                                           |
-| ....unspendable     | string(numeric) | Unspendable balance for this address (e.g. from unconfirmed incoming transactions)                                                                                                                                                                                           |
+| Parameter         | Type      | Description                                                                                                                                    |
+| ----------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| status            | string    | Status of the task (`Ok` or `Error`)                                                                                                           |
+| account\_index    | integer   | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.**  |
+| derivation\_path  | string    | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                                                 |
+| total\_balance    | object    | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object.                                                                            |
+| addresses         | list      | A list of standard [AccountAddressInfo](/atomicdex/api/v20#account-address-info) objects.                                                      |
+
 
 #### 📌 Examples
 
@@ -95,7 +88,7 @@ Use the `task::account_balance::status` method to view the status / response of 
     "mmrpc": "2.0",
     "method": "task::account_balance::status",
     "params": {
-      "task_id": "<TASK_ID>",
+      "task_id": "1",
       "forget_if_finished": false
     }
   }
@@ -185,7 +178,7 @@ Use the `task::account_balance::cancel` method to cancel an account balance requ
     "mmrpc": "2.0",
     "method": "task::account_balance::cancel",
     "params": {
-      "task_id": "<TASK_ID>",
+      "task_id": "0",
       "forget_if_finished": false
     }
   }
@@ -216,4 +209,112 @@ Use the `task::account_balance::cancel` method to cancel an account balance requ
     "id": null
   }
   ```
+</CollapsibleSection>
+
+
+
+## account\_balance
+
+The `account_balance` method will return a similarly structured response as `task::account_balance::init`, but allows you to paginate and filter the response to only `External` or `Internal` addresses.
+
+#### Arguments
+
+| Parameter        | Type    | Description                                                                               |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------- |
+| coin             | string  | The ticker of the coin you would like to view account balances for.                       |
+| account\_index   | integer | The derivation path account index value you would like to view account balances for.      |
+| limit            | integer | Optional, defaults to `10`. Maximum number of account addresses/balances to return.       |
+| chain            | string  | The derivation path chain value you would like to view account balances for. `External`, or `Internal` |
+| paging\_options  | object  | Optional. A standard [Pagination](/atomicdex/api/v20#pagination) object.                  |
+
+
+#### Response
+
+| Parameter        | Type    | Description                                                                                                    |
+| ---------------- | ------- | -------------------------------------------------------------------------------------------------------------- |
+| account\_index   | integer | The derivation path account index value you would like to view account balances for.                           |
+| derivation\_path | string  | The The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of an address. |
+| addresses        | list    | A list of standard [AccountAddressInfo](/atomicdex/api/v20#account-address-info) objects.                      |
+| page\_balance    | object  | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object.                                            |
+| paging\_options  | object  | A standard [Pagination](/atomicdex/api/v20#pagination) object.                                                 |
+| skipped          | integer | The number of skipped records, with respect to the values used in `paging_options`.                            |
+| limit            | integer | The limit that was set in the request; note that the actual number of swaps can differ from the specified limit (e.g. on the last page).  |
+| total            | integer | Total number of account addresses available with the selected filters.                                         |
+| total\_pages     | integer | Total pages available with the selected filters and limit.                                                     |
+
+
+
+<CodeGroup title="" tag="POST" label="task::account_balance::cancel" mm2MethodDecorate="true">
+```json
+{
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "account_balance",
+    "params": {
+        "coin": "RICK",
+        "account_index": 0,
+        "chain": "External",
+        "limit": 1,
+        "paging_options": {
+            "PageNumber": 3
+        }
+    }
+}
+```
+</CodeGroup>
+
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+#### Response
+
+```json
+{
+	"mmrpc": "2.0",
+	"result": {
+		"account_index": 0,
+		"derivation_path": "m/44'/141'/0'",
+		"addresses": [
+			{
+				"address": "RXNtAyDSsY3DS3VxTpJegzoHU9bUX54j56",
+				"derivation_path": "m/44'/141'/0'/0/0",
+				"chain": "External",
+				"balance": {
+					"spendable": "7.64018255",
+					"unspendable": "0"
+				}
+			},
+            {
+                "address": "RVyndZp3ZrhGKSwHryyM3Kcz9aq2EJrW1z",
+                "derivation_path": "m/44'/141'/0'/0/1",
+                "chain": "External",
+                "balance": {
+                    "spendable": "15.44692",
+                    "unspendable": "0"
+                }
+            },
+            {
+                "address": "REyacDqfKKjTKooRuA6yrW82AFwK8nMcRT",
+                "derivation_path": "m/44'/141'/0'/0/2",
+                "chain": "External",
+                "balance": {
+                    "spendable": "0",
+                    "unspendable": "0"
+                }
+            }
+		],
+		"page_balance": {
+			"spendable": "23.08710255",
+			"unspendable": "0"
+		},
+		"limit": 10,
+		"skipped": 0,
+		"total": 3,
+		"total_pages": 1,
+		"paging_options": {
+			"PageNumber": 1
+		}
+	},
+	"id": null
+}
+```
 </CollapsibleSection>
