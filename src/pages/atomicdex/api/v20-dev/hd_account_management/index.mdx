@@ -15,8 +15,8 @@ Use the `task::create_new_account::init` method to initialise a HD account.
 | -------------- | ------ | --------------------------------------------------------------------------------------- |
 | coin           | string | Ticker of coin you would like to initialise a HD account for.                           |
 | account\_id    | string | Optional. If not defined, will increment to the next unused account id in the wallet.   |
-| scan           | string | Optional, defaults to `true`. If `true`, will scan the account for funded addresses.    |
-| gap\_limit     | string | Optional, defaults to the value provided on activation, or 20 if no value was provided. |
+| scan           | string | Optional. If `true`, will scan the account for funded addresses. Defaults to `true`.    |
+| gap\_limit     | string | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation, or 20 if no value was provided. |
 
 
 #### Response
@@ -145,7 +145,7 @@ Use the `task::create_new_account::status` method to query the status of a HD ac
       "id": null
   }
   ```
-  
+
   #### Response (in progress)
 
   ```json
@@ -232,7 +232,7 @@ Use the `task::account_balance::status` method to view the status / response of 
 | status            | string    | Status of the task (`Ok` or `Error`)                                                                                                           |
 | account\_index    | integer   | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.**  |
 | derivation\_path  | string    | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                                                 |
-| total\_balance    | object    | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object.                                                                            |
+| total\_balance    | object    | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object.                                                                            |
 | addresses         | list      | A list of standard [AccountAddressInfo](/atomicdex/api/v20#account-address-info) objects.                                                      |
 
 
@@ -394,7 +394,7 @@ The `account_balance` method will return a similarly structured response as `tas
 | account\_index   | integer | The derivation path account index value you would like to view account balances for.                           |
 | derivation\_path | string  | The The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of an address. |
 | addresses        | list    | A list of standard [AccountAddressInfo](/atomicdex/api/v20#account-address-info) objects.                      |
-| page\_balance    | object  | A standard [balanceInfos](/atomicdex/api/v20#balance-infos) object.                                            |
+| page\_balance    | object  | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object.                                            |
 | paging\_options  | object  | A standard [Pagination](/atomicdex/api/v20#pagination) object.                                                 |
 | skipped          | integer | The number of skipped records, with respect to the values used in `paging_options`.                            |
 | limit            | integer | The limit that was set in the request; note that the actual number of swaps can differ from the specified limit (e.g. on the last page).  |
