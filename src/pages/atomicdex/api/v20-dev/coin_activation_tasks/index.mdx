@@ -1,30 +1,28 @@
-export const title = "AtomicDEX: Coin Activation Tasks";
+export const title = "KomoDeFi: Coin Activation Tasks";
 export const description = "The methods in this document allow activation of UTXO coins and specifically QTUM coins.";
 
 import trezorpin from "@/images/api-images/trezor_pin.png";
 
+
 # task\_enable\_utxo\_init
 
-UTXO coins are activated using this method. For QTUM coins, refer to [task::enable\_qtum::init](#task-enable-qtum-init)
+UTXO coins can be activated using this method. For QTUM coins, refer to [task::enable\_qtum::init](#task-enable-qtum-init).
+Though you can use this method (or the legacy alternatives) for non-HD wallets, when using a HD wallet this method must be used.
+As HD mode activation performs address scanning to return addresses and balances for enabled accounts, we use `task` methods because fetching this data can take some time.
+
+<Note>
+  These methods (and others with a `task::` prefix) will be linked to a numeric
+  `task_id` value which is used to query the status or outcome of the task.
+</Note>
+
 
 #### Arguments
 
 | Parameter                       | Type    | Description                                                                                                                                                                                                      |
 | ------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ticker                          | string  | The ticker of the coin you want to enable.                                                                                                                                                                       |
-| activation\_params              | object  | An object containing the actvation parameters below.                                                                                                                                                             |
-| .priv\_key\_policy              | string  | Defaults to `ContextPrivkey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                        |
-| .min\_addresses\_number         | integer | How many additional addreesses to generate at a minimum.                                                                                                                                                         |
-| .scan\_policy                   | string  | Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the AtomicDEX-API.                                      |
-| .gap\_limit                     | integer | The max number of empty addresses in a row. If transactions were sent to an address outside the `gap_limit`, they will not be identified when scanning.                                                          |
-| .mode                           | object  | An object containing RPC type and data parameters as below.                                                                                                                                                      |
-| ..rpc                           | string  | UTXO RPC mode. Options: `{ "rpc":"Native" }` if running a native blockchain node, or `"rpc":"Electrum"` to use electrum RPCs. If using electrum, a list of electrum servers is required under `rpc_data.servers` |
-| ..rpc\_data                     | object  | An object containing electrum server information.                                                                                                                                                                |
-| ...servers                      | list    | A list of electrum server URLs                                                                                                                                                                                   |
-| ....url                         | object  | The url and port of a coins electrum server                                                                                                                                                                      |
-| ....ws\_url                     | object  | Optional. Used to define electrum server url/port for websocket connections.                                                                                                                                     |
-| ....protocol                    | object  | Defines electrum server protocol as `TCP` or `SSL`. Defaults to `TCP`                                                                                                                                            |
-| ....disable\_cert\_verification | boolean | Optional. For `SSL` electrum connections, this will allow expired certificates.                                                                                                                                  |
+| activation\_params              | object  | A standard [ActivationParams](/atomicdex/api/v20#activation-params) object.                                                                                                                                      |
+
 
 #### Response
 
@@ -61,7 +59,6 @@ UTXO coins are activated using this method. For QTUM coins, refer to [task::enab
           }
         },
         "scan_policy": "scan_if_new_wallet",
-        "priv_key_policy": "Trezor",
         "min_addresses_number": 3,
         "gap_limit": 20
       }
@@ -95,10 +92,10 @@ The response will return the following:
 
 #### Arguments
 
-| Parameter            | Type    | Description                                                                               |
-| -------------------- | ------- | ----------------------------------------------------------------------------------------- |
-| task\_id             | integer | The identifying number returned when initiating the initialisation process.               |
-| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
+| Parameter            | Type    | Description                                                                                   |
+| -------------------- | ------- | --------------------------------------------------------------------------------------------- |
+| task\_id             | integer | The identifying number returned when initiating the initialisation process.                   |
+| forget\_if\_finished | boolean | If `false`, will return the final response for completed tasks. Optional, defaults to `true`. |
 
 #### Command
 
@@ -116,29 +113,17 @@ The response will return the following:
   ```
 </CodeGroup>
 
-#### Response (ready, successful, Trezor mode)
 
-| Parameter            | Type            | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| -------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| status               | string          | A short indication of how the requested process is progressing.                                                                                                                                                                                                                                                                                                                                                                                              |
-| details.result       | object          | Depending on the state of process progress, this will contain different information as detailed in the items below.                                                                                                                                                                                                                                                                                                                                          |
-| .ticker              | string          | The ticker of the coin being activated                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| .current\_block      | integer         | The block height of the coin being activated                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| .wallet\_balance     | object          | Information about the addresses of the coin being activated                                                                                                                                                                                                                                                                                                                                                                                                  |
-| ..wallet\_type       | string          | In Trezor mode, this will return `HD`                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ..accounts           | list            | A list of addresses and related information for the coin being activated                                                                                                                                                                                                                                                                                                                                                                                     |
-| ...account\_index    | integer         | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with mm2 global Iguana/HD/HW account.**                                                                                                                                                                                                                                                                                                   |
-| ...derivation\_path  | string          | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                                                                                                                                                                                                                                                                                                                                                               |
-| ...total\_balance    | object          | Combined total spendable and unconfirmed balances of all account addresses                                                                                                                                                                                                                                                                                                                                                                                   |
-| ....spendable        | string(numeric) | Combined total spendable balance of all account addreesses                                                                                                                                                                                                                                                                                                                                                                                                   |
-| ....unspendable      | string(numeric) | Combined total unspendable balance of all account addreesses                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ...addresses         | list            | A list of addresses in the account for the coin being activated                                                                                                                                                                                                                                                                                                                                                                                              |
-| ....address          | string          | One of the addresses in the account for the coin being activated                                                                                                                                                                                                                                                                                                                                                                                             |
-| ....derivation\_path | string          | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.                                                                                                                                                                                                                                                                                                                                                  |
-| ....chain            | string          | Returns `External` when `CHAIN=0` in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` derivation path. Returns `Internal` when `CHAIN=1` in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` derivation path. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| ....balance          | object          | Contains the spendable and unspendable balance for this address                                                                                                                                                                                                                                                                                                                                                                                              |
-| .....spendable       | string(numeric) | Spendable balance for this address                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| .....unspendable     | string(numeric) | Unspendable balance for this address (e.g. from unconfirmed incoming transactions)                                                                                                                                                                                                                                                                                                                                                                           |
+#### Response (ready, successful, HD wallet mode)
+
+| Parameter                | Type            | Description                                                                      |
+| ------------------------ | --------------- | -------------------------------------------------------------------------------- |
+| status                   | string          | A short indication of how the requested process is progressing.                  |
+| details                  | object          | A simple object containing information as detailed in the items below.           |
+| details.ticker           | string          | The ticker of the coin being activated                                           |
+| details.current\_block   | integer         | The block height of the coin being activated                                     |
+| details.wallet\_balance  | object          | A standard [`WalletBalanceInfo`](/atomicdex/api/v20#wallet-balance-info) object. |
+
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json
@@ -200,46 +185,6 @@ The response will return the following:
   ```
 </CollapsibleSection>
 
-#### Response (ready, successful, Iguana mode)
-
-| Parameter        | Type            | Description                                                                                                         |
-| ---------------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
-| status           | string          | A short indication of how the requested process is progressing.                                                     |
-| details.result   | object          | Depending on the state of process progress, this will contain different information as detailed in the items below. |
-| .ticker          | string          | The ticker of the coin being activated                                                                              |
-| .current\_block  | integer         | The block height of the coin being activated                                                                        |
-| .wallet\_balance | object          | Information about the addresses of the coin being activated                                                         |
-| ..wallet\_type   | string          | In Trezor mode, this will return `HD`                                                                               |
-| ..address        | string          | One of the addresses in the account for the coin being activated                                                    |
-| ..balance        | object          | Contains the spendable and unspendable balance for this address                                                     |
-| ...spendable     | string(numeric) | Spendable balance for this address                                                                                  |
-| ...unspendable   | string(numeric) | Unspendable balance for this address (e.g. from unconfirmed incoming transactions)                                  |
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "status": "Ok",
-      "details": {
-        "result": {
-          "current_block": 1531669,
-          "wallet_balance": {
-            "wallet_type": "Iguana",
-            "address": "RKK5UzcZnXBZNGvS5RqrnycHRiFfnL8fMq",
-            "balance": {
-              "spendable": "0",
-              "unspendable": "0"
-            }
-          }
-        }
-      }
-    },
-    "id": null
-  }
-  ```
-</CollapsibleSection>
-
 #### Response (in progress)
 
 | Parameter | Type   | Description                                                 |
@@ -267,6 +212,7 @@ Possible In Progress Cases:
   }
   ```
 </CollapsibleSection>
+
 
 #### Response (ready, error)
 
@@ -352,7 +298,7 @@ QTUM coins are activated using this method. For UTXO coins, refer to [task::enab
 | activation\_params              | object  | An object containing the actvation parameters below.                                                                                                                                                             |
 | .priv\_key\_policy              | string  | Defaults to `ContextPrivkey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                        |
 | .min\_addresses\_number         | integer | How many additional addreesses to generate at a minimum.                                                                                                                                                         |
-| .scan\_policy                   | string  | Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the AtomicDEX-API.                                      |
+| .scan\_policy                   | string  | Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the KomoDeFi-API.                                      |
 | .gap\_limit                     | integer | The max number of empty addresses in a row. If transactions were sent to an address outside the `gap_limit`, they will not be identified when scanning.                                                          |
 | .mode                           | object  | An object containing RPC type and data parameters as below.                                                                                                                                                      |
 | ..rpc                           | string  | UTXO RPC mode. Options: `{ "rpc":"Native" }` if running a native blockchain node, or `"rpc":"Electrum"` to use electrum RPCs. If using electrum, a list of electrum servers is required under `rpc_data.servers` |
