@@ -9,22 +9,22 @@ The Payments Module allows a payment to be distributed between multiple recipien
 
 ### Payments Module Flow
 
-*   Use [paymentstxidopret](#paymentstxidopret) to create as many transactions as there are recipients
+*   Use [paymentstxidopret](/antara/api/payments/#paymentstxidopret) to create as many transactions as there are recipients
     *   Each recipient must have the following data in the associated transaction's opreturn. This step makes the data available on the blockchain so that the data can be used by a later method
         *   Weight (also called "share")
         *   Recipient
         *   Destopret (optional)
             *   This data is stored in the OP\_RETURN of the subsequent payment transaction
     *   The transaction id is called `paytxnid` and it is used as a reference to the data
-*   Use [paymentscreate](#paymentscreate) to create a new Payment plan
+*   Use [paymentscreate](/antara/api/payments/#paymentscreate) to create a new Payment plan
     *   The arguments passed include the following
         *   The number of blocks to lock the funds after funding
         *   The minimum release amount
         *   The `paytxnids`
             *   These contains data about the recipients and their corresponding shares
     *   The returned transaction id is called `createtxid` and it will be the reference for this payment plan used by other methods
-*   Use [paymentsfund](#paymentsfund) to fund any existing Payments plan
-*   Use [paymentsrelease](#paymentsrelease) to release payments of a Payments plan
+*   Use [paymentsfund](/antara/api/payments/#paymentsfund) to fund any existing Payments plan
+*   Use [paymentsrelease](/antara/api/payments/#paymentsrelease) to release payments of a Payments plan
 
 ## paymentscreate
 
@@ -466,7 +466,7 @@ curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curlte
 
 **paymentsmerge '\[“createtxid"]'**
 
-The `paymentsmerge` method merges funds into a single [utxo.](/start-here/core-technology-discussions/miscellaneous#the-utxo-an-elusive-yet-fundamental-concept)
+The `paymentsmerge` method merges funds into a single [utxo.](/start-here/core-technology-discussions/miscellaneous/#the-utxo-an-elusive-yet-fundamental-concept)
 
 The funds merged can be either the funds currently in the `1of2` address, or the funds can be the funds in the Payments Module's Global Address.
 
@@ -566,11 +566,17 @@ The `paymentsrelease` method can be executed by anyone to release the **eligible
 
 #### Arguments
 
-| Name        | Type     | Description                                                                                                                                                                                                                                                                                           |
-| ----------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| createtxid  | (string) | the transaction id of the specific Payments plan whose payments the user desires to release                                                                                                                                                                                                           |
-| amount      | (number) | the amount of funds to release; this value must be higher than the minimum-amount requirement originally set in the plan                                                                                                                                                                              |
-| skipminimum | (number) | a flag; if there are recipients whose share is below the dust threshold (`10,000 sats`), setting this flag to `1` will skip payments to them <br /><br /> in the case of a plan created using[paymentsairdrop](#paymentsairdrop), the threshold is `mintoaddress` if it is greated than `10,000 sats` |
+| Name        | Type     | Description                                                                                                                                  |
+| ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| createtxid  | (string) | the transaction id of the specific Payments plan whose payments the user desires to release                                                  |
+| amount      | (number) | the amount of funds to release; this value must be higher than the minimum-amount requirement originally set in the plan                     |
+| skipminimum | (number) | a flag; if there are recipients whose share is below the dust threshold (`10,000 sats`), setting this flag to `1` will skip payments to them |
+
+<DevComment>
+  cut from above table: paymentairdrop method missing from the docs
+
+  <br /><br /> in the case of a plan created using `[paymentsairdrop](#paymentsairdrop)`, the threshold is `mintoaddress` if it is greated than `10,000 sats`
+</DevComment>
 
 #### Response
 
