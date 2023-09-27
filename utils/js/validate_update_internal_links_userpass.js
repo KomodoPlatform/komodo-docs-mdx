@@ -200,17 +200,6 @@ function processLink(link, currFilePath, filepathSlugs) {
   );
   const slug = correctUrl.split("#")[1];
 
-  console.log("------------------------------------------------")
-  console.log("currNormalisedDir: " + currNormalisedDir)
-  console.log("currFilePath: " + currFilePath)
-  console.log("hash: " + hash)
-  console.log("strippedPath: " + strippedPath)
-  console.log("link: " + link)
-  console.log("correctUrl: " + correctUrl)
-  console.log("internalLinkFile: " + internalLinkFile)
-  console.log("slug: " + slug)
-  console.log("------------------------------------------------")
-
   if (
     slug &&
     !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
