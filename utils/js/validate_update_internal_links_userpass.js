@@ -1,6 +1,7 @@
 import * as acorn from "acorn";
 
 import { SKIP, visit } from "unist-util-visit";
+import slugify, { slugifyWithCounter } from "@sindresorhus/slugify";
 
 import { constants } from "fs";
 import fs from "fs";
@@ -10,7 +11,6 @@ import path from "path";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
-import { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
 
 (async function () {
@@ -125,6 +125,7 @@ async function processFile(filePath, filepathSlugs) {
             return SKIP;
           }
         } catch (error) {
+          console.log(filePath)
           throw new Error(error);
         }
       });
@@ -201,18 +202,22 @@ function processLink(link, currFilePath, filepathSlugs) {
   // console.log(link)
   // console.log(correctUrl)
   // console.log("--------------------------------")
-
+  const correctUrlSplit = correctUrl.split("#");
   const internalLinkFile = path.join(
     filePath,
-    correctUrl.split("#")[0] + "index.mdx"
+    correctUrlSplit[0] + "index.mdx"
   );
-  const slug = correctUrl.split("#")[1];
+  let slug;
+  if (correctUrlSplit[1]) {
+    slug = slugify(correctUrlSplit[1]);
+    correctUrl = correctUrlSplit[0] + "#" + slug;
+  }
   if (
     slug &&
     !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
   ) {
     throw new Error(
-      `Processing file: ${currFilePath}, slug: ${slug} not present in file: ${internalLinkFile}`
+      `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile}`
     );
   }
   try {
