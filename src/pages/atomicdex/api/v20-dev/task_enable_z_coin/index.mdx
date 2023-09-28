@@ -6,13 +6,13 @@ export const description =
 
 ZHTLC coins, like Pirate (ARRR) and the test coin ZOMBIE take a little longer to enable, and use a new two step method to enable. Activation can take a little while the first time, as we need to download some block cache data, and build a wallet database. Subsequent enabling will be faster, but still take a bit longer than other coins. The second step for activation is optional, but allows us to check the status of the activation process.
 
-To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20-dev/withdraw_tasks/) methods:
+To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods:
 
 *   Generate a transaction with `task::withdraw::init`
 *   Query its status with `task::withdraw::status`
 *   Cancel generating the transaction with `task::withdraw::cancel`
 
-## task\_enable\_z\_coin\_init
+## init  {{label : 'task::enable_z_coin::init', tag : 'API-v2'}}
 
 <Note>
   To enable Z coins you also need to [install some Zcash
@@ -21,31 +21,10 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20
 
 #### Arguments
 
-| Structure                                        | Type            | Description                                                                                                                                                                                                                          |
-| ------------------------------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ticker                                           | string          | Ticker of coin to activate                                                                                                                                                                                                           |
-| activation\_params                               | object          | Contains details required for activation as explained below                                                                                                                                                                          |
-| activation\_params.required\_confirmations       | integer         | Block confirmations to wait for transactions when doing a swap. Optional, defaults to `3`. Overrides value if set in `coins` file.                                                                                                   |
-| activation\_params.requires\_notarization        | boolean         | For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Optional, defaults to `false`. Overrides value if set in `coins` file. |
-| activation\_params.mode.rpc                      | string          | Set as `Light` to use external electrum & lightwallet\_d servers or `Native` to use local block chain data. If native, the `rpc_data` fields below are not required.                                                                 |
-| activation\_params.mode.rpc\_data                | list of objects | Contains details about servers to be used for `Light` mode operation.                                                                                                                                                                |
-| ..rpc\_data.light\_wallet\_d\_servers            | list of strings | Urls which are hosting lightwallet\_d servers                                                                                                                                                                                        |
-| ..rpc\_data.electrum\_servers                    | list of objects | Contains additional details about a coins electrum servers.                                                                                                                                                                          |
-| ...electrum\_servers.protocol                    | string          | Transport protocol used by AtomicDEX API to connect to the electrum server (`TCP` or `SSL`). Optional, defaults to `TCP`                                                                                                             |
-| ...electrum\_servers.url                         | string          | The URL and port of an electrum server.                                                                                                                                                                                              |
-| ...electrum\_servers.disable\_cert\_verification | boolean         | If `true`, this disables server SSL/TLS certificate verification (e.g. to use self-signed certificate). Optional, defaults to `false` <b>Use at your own risk!</b>                                                                   |
-| activation\_params.zcash\_params\_path           | string          | Path to folder containing [Zcash parameters](https://z.cash/technology/paramgen/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                |
-| activation\_params.scan\_blocks\_per\_iteration  | integer         | Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                                    |
-| activation\_params.scan\_interval\_ms            | integer         | Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                                      |
-
-<Note>
-  Using a smaller `scan_blocks_per_iteration` and larger `scan_interval_ms`,
-  will reduce the average CPU load during Z coin activation (at the cost of a
-  longer activation time). These optional fields are recommended when developing
-  for iOS, where a high CPU load may kill the activation process. Android &
-  desktop operating systems do not appear to have any problems with high CPU
-  load during Z coin activation.
-</Note>
+| Structure          | Type   | Description                                                                     |
+| ------------------ | ------ | ------------------------------------------------------------------------------- |
+| ticker             | string | Ticker of coin to activate                                                      |
+| activation\_params | object | A standard [ActivationRpcData](/atomicdex/api/v20/#activation-rpc-data) object. |
 
 #### Response
 
@@ -55,9 +34,9 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20
 
 #### 📌 Examples
 
-#### Command
+#### Enable Z coin without any optional parameters
 
-<CodeGroup title="" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "testpsw",
@@ -88,6 +67,113 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20
   ```
 </CodeGroup>
 
+#### Sync from block 2528700, with custom `.zcash-params` path and scan params
+
+<CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::init",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ZOMBIE",
+      "activation_params": {
+        "mode": {
+          "rpc": "Light",
+          "rpc_data": {
+            "electrum_servers": [
+              {
+                "url": "zombie.dragonhound.info:10033"
+              }
+            ],
+            "light_wallet_d_servers": [
+              "http://zombie.dragonhound.info:443"
+            ],
+            "sync_params": {
+              "height": 2528700
+            }
+          }
+        },
+        "zcash_params_path": "/home/username/path_to/.zcash-params",
+        "scan_blocks_per_iteration": 100,
+        "scan_interval_ms": 200
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Sync from sapling activation height (earliest)
+
+The Z coin lightwallet client only supports blocks that are post-sapling. The sapling activation height for Z coins can be found in the [coins file](https://github.com/KomodoPlatform/coins/blob/master/coins)
+
+<CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::init",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ZOMBIE",
+      "activation_params": {
+        "mode": {
+          "rpc": "Light",
+          "rpc_data": {
+            "electrum_servers": [
+              {
+                "url": "zombie.dragonhound.info:10033"
+              }
+            ],
+            "light_wallet_d_servers": [
+              "http://zombie.dragonhound.info:443"
+            ],
+            "sync_params": "earliest"
+          }
+        },
+        "zcash_params_path": "/home/username/path_to/.zcash-params",
+        "scan_blocks_per_iteration": 100,
+        "scan_interval_ms": 200
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Using websockets to sync from [Proof of Keys Day](https://hackernoon.com/not-your-keys-not-your-bitcoin-jan3bitcoin-z6k3ktb), 2023.
+
+<CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::init",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ZOMBIE",
+      "activation_params": {
+        "mode": {
+          "rpc": "Light",
+          "rpc_data": {
+            "electrum_servers": [
+              {
+                "protocol": "SSL",
+                "url": "zombie.dragonhound.info:20133",
+                "ws_url": "zombie.dragonhound.info:30059"
+              }
+            ],
+            "light_wallet_d_servers": [
+              "http://zombie.dragonhound.info:443"
+            ],
+            "sync_params": {
+              "date": 1672704000
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   #### Response
 
@@ -102,9 +188,9 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20
   ```
 </CollapsibleSection>
 
-## task\_enable\_z\_coin\_status
+## status {{label : 'task::enable_z_coin::status', tag : 'API-v2'}}
 
-After initiating z coin enabling, you can use the `task_id` to check progress.
+Z coins need to build sync a local block cache and wallet database before they can be used. Using `task_id` as an input, this method will return the current status of the activation process.
 
 #### Arguments
 
@@ -122,16 +208,16 @@ After initiating z coin enabling, you can use the `task_id` to check progress.
 
 #### 📌 Examples
 
-#### Command
+#### Status of Z coin activation
 
-<CodeGroup title="" tag="POST" label="task::enable_z_coin::status" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::status" tag="POST" label="task::enable_z_coin::status" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "testpsw",
     "method": "task::enable_z_coin::status",
     "mmrpc": "2.0",
     "params": {
-      "task_id": "<TASK_ID>",
+      "task_id": 0,
       "forget_if_finished": false
     }
   }
@@ -184,7 +270,52 @@ After initiating z coin enabling, you can use the `task_id` to check progress.
         }
       }
     },
+  "id": null
+  }
+  ```
+
+  #### Response (CoinCreationError - no Zcash Params)
+
+  ```json
+  {
+  	"error": "Error on platform coin ZOMBIE creation: ZCashParamsNotFound",
+  	"error_path": "lib.z_coin_activation.z_coin",
+  	"error_trace": "lib:104] z_coin_activation:218] z_coin:1007]",
+  	"error_type": "CoinCreationError",
+  	"error_data": {
+  		"ticker": "ZOMBIE",
+  		"error": "ZCashParamsNotFound"
+  	}
+  }
+  ```
+
+  #### Response (error - NoSuchTask)
+
+  You'll see this if the task number does not exist, or the task has already completed.
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "No such task '1'",
+    "error_path": "init_standalone_coin",
+    "error_trace": "init_standalone_coin:119]",
+    "error_type": "NoSuchTask",
+    "error_data": 1,
     "id": null
+  }
+  ```
+
+  #### Response (error - InvalidRequest)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Error parsing request: invalid value: integer `-205`, expected u64",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "invalid value: integer `-205`, expected u64",
+    "id": 42
   }
   ```
 
@@ -251,7 +382,7 @@ After initiating z coin enabling, you can use the `task_id` to check progress.
   ```
 </CollapsibleSection>
 
-## task\_enable\_z\_coin\_cancel
+## cancel {{label : 'task::enable_z_coin::cancel', tag : 'API-v2'}}
 
 If you want to cancel the enabling process before it has completed, you can use this method.
 
@@ -276,7 +407,7 @@ If you want to cancel the enabling process before it has completed, you can use 
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="task::enable_z_coin::cancel" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::cancel" tag="POST" label="task::enable_z_coin::cancel" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "testpsw",
@@ -331,7 +462,7 @@ If you want to cancel the enabling process before it has completed, you can use 
 
 ## z\_coin\_tx\_history
 
-To get the transaction history for ZHTLC coins, you need to use this special method - the [v2 my\_tx\_history](/atomicdex/api/v20/my_tx_history) and [legacy my\_tx\_history](/atomicdex/api/legacy/my_tx_history) methods are not compatible with ZHTLC coins. Currently trasaction memos will not be displayed in output, though they can be added to outgoing transactions with the [task::withdraw](withdraw_tasks) methods.
+To get the transaction history for ZHTLC coins, you need to use this special method - the [v2 my\_tx\_history](/atomicdex/api/v20/my_tx_history/) and [legacy my\_tx\_history](/atomicdex/api/legacy/my_tx_history/) methods are not compatible with ZHTLC coins. Currently trasaction memos will not be displayed in output, though they can be added to outgoing transactions with the [task::withdraw](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods.
 
 #### Arguments
 
@@ -364,9 +495,9 @@ To get the transaction history for ZHTLC coins, you need to use this special met
 
 #### 📌 Examples
 
-#### Command
+#### Z Coin Transaction History {{label : 'z_coin_tx_history', tag : 'API-v2'}}
 
-<CodeGroup title="" tag="POST" label="z_coin_tx_history" mm2MethodDecorate="true">
+<CodeGroup title="z_coin_tx_history" tag="POST" label="z_coin_tx_history" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "testpsw",

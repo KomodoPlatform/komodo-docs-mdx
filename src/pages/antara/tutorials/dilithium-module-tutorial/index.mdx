@@ -11,11 +11,11 @@ This documentation does not discuss the underlying math and principles of quantu
 
 Because quantum computing is not yet realized in the technology industry, Dilithium is listed in the documentation only for display purposes.
 
-The following tutorial should be considered "Advanced," and we recommend that any user attempting to implement Dilithium skim the [Advanced Tutorial Series](/antara/tutorials/advanced-series-0#introduction) to obtain a general understanding of the more technical aspects of working with Antara Module technology.
+The following tutorial should be considered "Advanced," and we recommend that any user attempting to implement Dilithium skim the [Advanced Tutorial Series](/antara/tutorials/advanced-series-0/#introduction) to obtain a general understanding of the more technical aspects of working with Antara Module technology.
 
 ## Installation
 
-Please follow the [instructions for installing Komodo software from source.](/smart-chains/setup/installing-from-source)
+Please follow the [instructions for installing Komodo software from source.](/smart-chains/setup/installing-from-source/)
 
 This installs the normal Komodo software.
 
@@ -33,7 +33,7 @@ To launch the `MUSIG` Smart Chain, enter the command below in the terminal.
 ./komodod -ac_name=MUSIG -ac_supply=100000 -ac_reward=10000000 -ac_cclib=sudoku -ac_cc=2 -addnode=5.9.102.210 -addnode=195.201.20.230 -addnode=195.201.137.5
 ```
 
-Ensure that the chain is syncing properly by watching the returned values from the [<b>getinfo</b>](/smart-chains/api/control#getinfo) method. The count of blocks synced should increase.
+Ensure that the chain is syncing properly by watching the returned values from the [<b>getinfo</b>](/smart-chains/api/control/#getinfo) method. The count of blocks synced should increase.
 
 #### A Note Regarding the Installation of the Necessary Libraries in the Source Code
 
@@ -57,7 +57,7 @@ Stop the `MUSIG` daemon. (If the chain has not finished syncing to the network, 
 
 Return to the instructions for compiling Komodo software from source and follow them again until you complete the `./zcutil/build.sh` step, and pause.
 
-[Instructions for installing Komodo software from source](/smart-chains/setup/installing-from-source)
+[Instructions for installing Komodo software from source](/smart-chains/setup/installing-from-source/)
 
 Now execute the following commands. These add the necessary cclib module for Dilithium.
 
@@ -127,11 +127,11 @@ You should see the correct `pubkey` in the returned json object.
 
 #### Backup the Private Key to Your Pubkey
 
-Use the [dumpprivkey](/smart-chains/api/wallet#dumpprivkey) RPC to export the private key of your pubkey and save this in a safe location.
+Use the [dumpprivkey](/smart-chains/api/wallet/#dumpprivkey) RPC to export the private key of your pubkey and save this in a safe location.
 
 Without this private key, any handles created for Dilithium will not be accessible.
 
-[Link to <b>dumpprivkey</b> RPC](/smart-chains/api/wallet#dumpprivkey)
+[Link to <b>dumpprivkey</b> RPC](/smart-chains/api/wallet/#dumpprivkey)
 
 ## Create a Dilithium Keypair
 
@@ -146,7 +146,7 @@ Use a generated random string to create a keypair.
 ```
 
 <Note>
-  To understand the need for the `%22` strings in the command, [read this linked CC Lib Formatting documentation.](/smart-chains/api/cclib#cclib-formatting)
+  To understand the need for the `%22` strings in the command, [read this linked CC Lib Formatting documentation.](/smart-chains/api/cclib/#cclib-formatting)
 </Note>
 
 ###### Response
@@ -220,7 +220,7 @@ Use the `seed` to register the handle.
   ```
 </CollapsibleSection>
 
-The returned `hex` value is a signed raw transaction and must be broadcast using [<b>sendrawtransaction</b>](/smart-chains/api/rawtransactions#sendrawtransaction).
+The returned `hex` value is a signed raw transaction and must be broadcast using [<b>sendrawtransaction</b>](/smart-chains/api/rawtransactions/#sendrawtransaction).
 
 ###### Broadcast the Raw Transaction
 
@@ -349,7 +349,7 @@ In the next step, we encounter the term "qUTXO" or "qutxo" for simplicity.
 
 A "qutxo" is a utxo that is related to the Dilithium Module.
 
-For more general information about utxos, please [read the Core Technology Disucssion section here.](/start-here/core-technology-discussions/miscellaneous#the-utxo-an-elusive-yet-fundamental-concept)
+For more general information about utxos, please [read the Core Technology Disucssion section here.](/start-here/core-technology-discussions/miscellaneous/#the-utxo-an-elusive-yet-fundamental-concept)
 
 ##### Send Funds Using Qsend
 
@@ -571,7 +571,7 @@ All handles created under the same `pubkey` will store their Qutxos in an Antara
 
 Therefore, the Dilithium handle is tied to the associated Dilithium Antara Address and `pubkey` as well.
 
-Use the [<b>cclibaddress</b>](/smart-chains/api/cclib#cclibaddress) RPC to verify that we have KomodoFan's Antara Address.
+Use the [<b>cclibaddress</b>](/smart-chains/api/cclib/#cclibaddress) RPC to verify that we have KomodoFan's Antara Address.
 
 To achieve this, we use the `pubkey` returned from the `cclib handleinfo 19 "[%22KomodoFan%22]"` command we executed previously.
 
@@ -794,7 +794,7 @@ We now have everything we need to assemble and send the complex Qsend transactio
 
 #### Understanding the inputs and outputs of the above transaction
 
-Use the [<b>getrawtransaction</b>](/smart-chains/api/rawtransactions#getrawtransaction) RPC to observe the inputs and outputs of the response.
+Use the [<b>getrawtransaction</b>](/smart-chains/api/rawtransactions/#getrawtransaction) RPC to observe the inputs and outputs of the response.
 
 ```bash
 ./komodo-cli -ac_name=MUSIG getrawtransaction 5aaf4007d6d9af7883da1ad464b63fff9d97453efe0b181d19558cc15f6ff668 2
@@ -934,7 +934,7 @@ d60d224d7855a40507064c5ca72ed7d84a54340174eb16e31d079e4b4f2309400000000000000000
 
 {/* Sidd: There was something in the paragraph below about q_listunspent, but I didn't understand it. */}
 
-To find the balance in a normal address we might use the [<b>listunspent</b>](/smart-chains/api/wallet#listunspent) RPC.
+To find the balance in a normal address we might use the [<b>listunspent</b>](/smart-chains/api/wallet/#listunspent) RPC.
 
 A handle, however, is based on a Dilithium-related Antara Address, and these are more complicated. In this section of the tutorial, we use a series of RPCs and our own customized code to find all the utxos in a public Dilithium handle of our choosing.
 
@@ -944,7 +944,7 @@ We can call this customized action a "Q listunspent" function, by way of convers
 
 Our target for this example is the `LABSLover` handle.
 
-Use the [<b>handleinfo</b>](/antara/api/dilithium/#handleinfo) and [<b>cclibaddress</b>](/smart-chains/api/cclib#cclibaddress) RPC to obtain the Antara Address of this handle.
+Use the [<b>handleinfo</b>](/antara/api/dilithium/#handleinfo) and [<b>cclibaddress</b>](/smart-chains/api/cclib/#cclibaddress) RPC to obtain the Antara Address of this handle.
 
 ```bash
 ./komodo-cli -ac_name=MUSIG cclib handleinfo 19 "[%22LABSLover%22]"
@@ -989,7 +989,7 @@ Use the returned `pubkey` value with the `cclibaddress` RPC.
 
 The `"PubkeyCCaddress(CClib)"` value is the Antara Address for `LABSLover`: `RGBrSwrGR4ypFFufyvHEuMMbxs7ETD8Xv7`
 
-Use the [getaddressutxos](/smart-chains/api/address#getaddressutxos) RPC to find the utxos in this `PubkeyCCaddress(CClib)` address.
+Use the [getaddressutxos](/smart-chains/api/address/#getaddressutxos) RPC to find the utxos in this `PubkeyCCaddress(CClib)` address.
 
 ```bash
 ./komodo-cli -ac_name=MUSIG getaddressutxos '{"addresses": ["RGBrSwrGR4ypFFufyvHEuMMbxs7ETD8Xv7"]}'
@@ -1246,7 +1246,7 @@ Check whether this transaction has an opreturn vout. If there is no opreturn, mo
 
 This transaction does in fact have an opreturn output.
 
-Use the [<b>decodeccopret</b>](/smart-chains/api/util#decodeccopret) RPC to decode the hex value of the opreturn.
+Use the [<b>decodeccopret</b>](/smart-chains/api/util/#decodeccopret) RPC to decode the hex value of the opreturn.
 
 (The only argument for the <b>decodeccopret</b> RPC here should be the `hex` value of the opreturn output.)
 
@@ -1276,7 +1276,7 @@ By design each Antara Module has its own unique eval code. This allows a develop
 
 The `eval_code` value here matches the eval code for the Dilithium Antara Module, and therefore we know that we are dealing with a Dilithium utxo.
 
-(To learn more about eval codes, [read this linked section of the Advanced Tutorial Series.)](/antara/tutorials/advanced-series-2#the-eval-code)
+(To learn more about eval codes, [read this linked section of the Advanced Tutorial Series.)](/antara/tutorials/advanced-series-2/#the-eval-code)
 
 #### Note the Function Value
 
@@ -1288,7 +1288,7 @@ The `function` key in the structure of the response returned above is this ident
 
 In our response above we see `"function": "Q",`. We need to interpret this `Q` value into a more common term.
 
-To obtain a list of all types of transactions for all Antara Modules on a Smart Chain, use the [<b>cclibinfo</b>](/smart-chains/api/cclib#cclibinfo) RPC.
+To obtain a list of all types of transactions for all Antara Modules on a Smart Chain, use the [<b>cclibinfo</b>](/smart-chains/api/cclib/#cclibinfo) RPC.
 
 ```bash
 ./komodo-cli -ac_name=MUSIG cclibinfo
