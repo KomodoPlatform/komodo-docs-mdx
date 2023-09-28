@@ -22,8 +22,11 @@ def gen_api_methods_table():
                     section = doc_split[3]
                     if section in methods_dict:
                         if 'CodeGroup' in line and "label" in line:
-                            method = line.split('label="')[1].split('"')[0].split("::")[-1]
-                            link = f"[{escape_underscores(method)}]({doc_path}/#{(method.replace('_', '-').replace('::', '_'))})"
+                            method = line.split('label="')[1].split('"')[0]
+                            hash_link = line.split('title="')[1].split('"')[0].replace(" ", "-").lower()
+                            if hash_link == "":
+                                hash_link = method.replace("_", "-").split("::")[-1].lower()
+                            link = f"[{method}]({doc_path}/#{hash_link})"
                             methods_dict[section].append({
                                 "link": link,
                                 "method": method,

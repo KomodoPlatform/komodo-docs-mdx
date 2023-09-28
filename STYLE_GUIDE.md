@@ -336,7 +336,7 @@ To save time, you can use the `Heading` component without importing it. And this
 Here's how:
 
 ```mdx
-## How to get your tokens {{label : 'get_all_tokens', tag : 'API-v2'}}
+## How to get your tokens {{title : '', label : 'get_all_tokens', tag : 'API-v2'}}
 ```
 
 Rendered as:
