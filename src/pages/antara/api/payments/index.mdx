@@ -9,22 +9,22 @@ The Payments Module allows a payment to be distributed between multiple recipien
 
 ### Payments Module Flow
 
-*   Use [paymentstxidopret](#paymentstxidopret) to create as many transactions as there are recipients
+*   Use [paymentstxidopret](/antara/api/payments/#paymentstxidopret) to create as many transactions as there are recipients
     *   Each recipient must have the following data in the associated transaction's opreturn. This step makes the data available on the blockchain so that the data can be used by a later method
         *   Weight (also called "share")
         *   Recipient
         *   Destopret (optional)
             *   This data is stored in the OP\_RETURN of the subsequent payment transaction
     *   The transaction id is called `paytxnid` and it is used as a reference to the data
-*   Use [paymentscreate](#paymentscreate) to create a new Payment plan
+*   Use [paymentscreate](/antara/api/payments/#paymentscreate) to create a new Payment plan
     *   The arguments passed include the following
         *   The number of blocks to lock the funds after funding
         *   The minimum release amount
         *   The `paytxnids`
             *   These contains data about the recipients and their corresponding shares
     *   The returned transaction id is called `createtxid` and it will be the reference for this payment plan used by other methods
-*   Use [paymentsfund](#paymentsfund) to fund any existing Payments plan
-*   Use [paymentsrelease](#paymentsrelease) to release payments of a Payments plan
+*   Use [paymentsfund](/antara/api/payments/#paymentsfund) to fund any existing Payments plan
+*   Use [paymentsrelease](/antara/api/payments/#paymentsrelease) to release payments of a Payments plan
 
 ## paymentscreate
 
@@ -126,11 +126,11 @@ The `paymentsfund` method is used to add funds to a Payments plan that has been 
 
 #### Arguments
 
-| Name       | Type     | Description                                                                                                                                                                                                                                                                    |
-| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| createtxid | (string) | the transaction id of the specific Payments plan the user desires to fund                                                                                                                                                                                                      |
-| amount     | (number) | the amount of funds to send                                                                                                                                                                                                                                                    |
-| useopret   | (number) | <br /> a flag that instructs the Payments Module on where to send the funds <br /><br /> if `0` (default), funds are sent to the `1of2` address corresponding to the specific Payments plan <br /><br /> if `1`, funds are sent to the to the Payments Module's Global address |
+| Name       | Type     | Description                                                                                                                                                                                                                              |
+| ---------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| createtxid | (string) | The transaction id of the specific Payments plan the user desires to fund                                                                                                                                                                |
+| amount     | (number) | The amount of funds to send                                                                                                                                                                                                              |
+| useopret   | (number) | A flag that instructs the Payments Module on where to send the funds. If `0` (default), funds are sent to the `1of2` address corresponding to the specific Payments plan. If `1`, funds are sent to the Payments Module's Global address |
 
 #### Response
 
@@ -466,7 +466,7 @@ curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curlte
 
 **paymentsmerge '\[“createtxid"]'**
 
-The `paymentsmerge` method merges funds into a single [utxo.](/start-here/core-technology-discussions/miscellaneous#the-utxo-an-elusive-yet-fundamental-concept)
+The `paymentsmerge` method merges funds into a single [utxo.](/start-here/core-technology-discussions/miscellaneous/#the-utxo-an-elusive-yet-fundamental-concept)
 
 The funds merged can be either the funds currently in the `1of2` address, or the funds can be the funds in the Payments Module's Global Address.
 
@@ -566,11 +566,11 @@ The `paymentsrelease` method can be executed by anyone to release the **eligible
 
 #### Arguments
 
-| Name        | Type     | Description                                                                                                                                                                                                                                                                                           |
-| ----------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| createtxid  | (string) | the transaction id of the specific Payments plan whose payments the user desires to release                                                                                                                                                                                                           |
-| amount      | (number) | the amount of funds to release; this value must be higher than the minimum-amount requirement originally set in the plan                                                                                                                                                                              |
-| skipminimum | (number) | a flag; if there are recipients whose share is below the dust threshold (`10,000 sats`), setting this flag to `1` will skip payments to them <br /><br /> in the case of a plan created using[paymentsairdrop](#paymentsairdrop), the threshold is `mintoaddress` if it is greated than `10,000 sats` |
+| Name        | Type     | Description                                                                                                                                                                                                                                                                                                     |
+| ----------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| createtxid  | (string) | the transaction id of the specific Payments plan whose payments the user desires to release                                                                                                                                                                                                                     |
+| amount      | (number) | the amount of funds to release; this value must be higher than the minimum-amount requirement originally set in the plan                                                                                                                                                                                        |
+| skipminimum | (number) | a flag; if there are recipients whose share is below the dust threshold (`10,000 sats`), setting this flag to `1` will skip payments to them. In the case of a plan created using [paymentsairdrop](/antara/api/payments/#paymentsairdrop), the threshold is `mintoaddress` if it is greated than `10,000 sats` |
 
 #### Response
 
@@ -658,6 +658,48 @@ curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curlte
   }
   ```
 </CollapsibleSection>
+
+<DevComment>
+  paymentsairdrop and payments\_airdroptokens need review and completion
+</DevComment>
+
+## paymentsairdrop
+
+**paymentsairdrop '\[lockedblocks, minamount, mintoaddress, top, bottom, fixedFlag, "excludeAddress", ... , "excludeAddressN"]'**
+
+The `paymentsairdrop` method allows the creation of a special Payments plan that rewards a certain range of addresses on the Smart Chain based on the specific criteria set by the arguments.
+
+::: tip
+
+The paymentsairdrop RPC requires the [-ac\_snapshot](/antara/setup/antara-customizations/#ac-snapshot) to be active.
+
+:::
+
+#### Arguments
+
+| Name             | Type                       | Description                                                                                                                                                                                                                                                                                                                                          |
+| ---------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| lockedblocks     | (number)                   | the number of confirmations the "Payments create transaction" of a plan must receive on the network before the plan's funds can be released                                                                                                                                                                                                          |
+| minamount        | (number)                   | the minimum amount of funds that can be released                                                                                                                                                                                                                                                                                                     |
+| mintoaddress     | (number)                   | the minimum amount that can be paid to an address setting this value to `0` defaults to `10000` satoshis                                                                                                                                                                                                                                             |
+| top              | (number)                   | having sorted into an array all known addresses by their value from least (top) to greatest (bottom), this `top` value sets the index number of the lowest-value address that should receive a portion of the airdrop; this value must not be equal to `0` nor over `3999`                                                                           |
+| bottom           | (number)                   | having sorted into an array all known addresses by their value from least (top) to greatest (bottom), this `bottom` value sets the index number of the highest-value address that should receive a portion of the airdrop; this value is normally set to `0`, unless the airdrop issuer desires to exclude rich members from the airdrop             |
+| fixedFlag        | (string)                   | set to `0`: all receiving addresses in the rich list are paid based on their balance. Set to `1`: the amount paid is fixed and split evenly over all receiving addresses. Set to `7`: activates a "game mode" that changes the values of the bottom and top index numbers based on the block hash of the block in which the daily airdrop was taken. |
+| "excludeAddress" | (string, accepts multiple) | any address included as an excludeAddress is ommitted from the airdrop                                                                                                                                                                                                                                                                               |
+
+#### Response
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| ( )  |      |             |
+
+## payments\_airdroptokens
+
+**payments\_airdroptokens '\[“tokenid", lockedblocks, minamount, mintoaddress, top, bottom, fixedFlag, "excludePubKey", ... , "excludePubKeyN"]'**
+
+<Note type="danger">
+  The payments\_airdroptokens method is still in development. Please inquire on [Discord](http://komodoplatform.com/discord) for more details.
+</Note>
 
 ## paymentstxidopret
 
