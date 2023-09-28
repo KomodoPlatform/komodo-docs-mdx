@@ -106,7 +106,7 @@ In such a case, we can define the `title`, `label` and/or `tag` properties along
 
 - The `label` property should be the exact same as the RPC method.
 - The `title` property should be blank, unless the section heading is not the same as the `label` property. In that case, the `title` property should be the (human readable) section heading.
-- for methods with a `task::xxxx::` or `lightning::xxxx::` prefix, the `label` property should be the full RPC method name, and the title should be the truncated RPC method without the prefix (only the last bit, after the last set of `::`).
+- for methods with a `task::xxxx::` or `lightning::xxxx::` prefix, the `label` property should be the full RPC method name, and the title should be the truncated RPC method without the prefix (only the last bit, after the last set of `::`), or a human readable title as above (recommended).
 
 For example, with a human readable section heading:
 
@@ -127,6 +127,16 @@ For example, with a `task::xxxx::` prefix:
 ## init {{title : 'init', label : 'task::init_trezor::init', tag : 'POST'}}
 ...
 <CodeGroup title="init" tag="POST" label="task::init_trezor::init" mm2MethodDecorate="true">
+...
+</CodeGroup>
+```
+
+For example, when method and title are the same:
+
+```
+## get_balance {{title : '', label : 'get_balance', tag : 'POST'}}
+...
+<CodeGroup title="" tag="POST" label="get_balance" mm2MethodDecorate="true">
 ...
 </CodeGroup>
 ```
