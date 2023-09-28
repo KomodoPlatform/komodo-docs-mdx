@@ -6,7 +6,7 @@ export const description =
 
 ## Introduction
 
-The following is an abbreviated list of runtime parameters and settings that can be initiated in a [Smart Chain's .conf file.](/smart-chains/setup/interacting-with-smart-chains#location-of-conf-file)
+The following is an abbreviated list of runtime parameters and settings that can be initiated in a [Smart Chain's .conf file.](/smart-chains/setup/interacting-with-smart-chains/#location-of-conf-file)
 
 These commands largely derive from the upstream Bitcoin software, `bitcoind`.
 
@@ -16,9 +16,9 @@ To see additional Bitcoin-based runtime parameters not included here, please vis
 
 ## addnode
 
-`addnode` tells the daemon which nodes are trusted to act as seed nodes. After connecting to a node via `addnode`, the trusted node will send your node the list of all nodes that it is connected to, and your node will then connect to these additional nodes until [the max limit](/smart-chains/setup/common-runtime-parameters#maxconnections) is reached.
+`addnode` tells the daemon which nodes are trusted to act as seed nodes. After connecting to a node via `addnode`, the trusted node will send your node the list of all nodes that it is connected to, and your node will then connect to these additional nodes until [the max limit](/smart-chains/setup/common-runtime-parameters/#maxconnections) is reached.
 
-This contrasts from the [connect](/smart-chains/setup/common-runtime-parameters#connect) runtime parameter, as the latter does not attempt to connect your node to additional nodes.
+This contrasts from the [connect](/smart-chains/setup/common-runtime-parameters/#connect) runtime parameter, as the latter does not attempt to connect your node to additional nodes.
 
 If you are behind a firewall or are having issues connecting to the network, `addnode` is a stronger option.
 
@@ -42,7 +42,7 @@ addnode=69.164.218.197
 
 `addressindex` instructs a Smart Chain to maintain an index of all addresses and balances.
 
-We recommend that the user [manually delete the blockchain data](/smart-chains/setup/smart-chain-maintenance#manually-deleting-blockchain-data) before initiating this parameter.
+We recommend that the user [manually delete the blockchain data](/smart-chains/setup/smart-chain-maintenance/#manually-deleting-blockchain-data) before initiating this parameter.
 
 `addressindex` is enabled by default on any Smart Chain that utilizes Antara.
 
@@ -107,7 +107,7 @@ bind=127.0.0.1:9050
 
 `connect` connects the `komodod` server to a trusted peer node, but not to request or add any additional nodes.
 
-Please refer to the [addnode](/smart-chains/setup/common-runtime-parameters#addnode) parameter entry for more information.
+Please refer to the [addnode](/smart-chains/setup/common-runtime-parameters/#addnode) parameter entry for more information.
 
 #### 📌 Examples:
 
@@ -133,7 +133,7 @@ komodod -conf=/home/username/coinConfs/DEX.conf
 
 `datadir` allows the user to indicate an alternative blockchain-data directory for the Smart Chain daemon. The `datadir` parameter requires an absolute path. For example, `home/user/mydirectory/MYCOIN/MYCOINDATA`. Once this parameter is activated, the daemon will ignore the default data directory.
 
-The name of the alternative directory must match the value provided to the [ac\_name](/antara/setup/antara-customizations#ac-name) parameter.
+The name of the alternative directory must match the value provided to the [ac\_name](/antara/setup/antara-customizations/#ac-name) parameter.
 
 #### 📌 Examples:
 
@@ -169,7 +169,7 @@ exchange=1
 
 ## exportdir
 
-`exportdir` tells the Smart Chain daemon where to store the wallet backup files created through the [backupwallet](/smart-chains/api/wallet#backupwallet) and [dumpwallet](/smart-chains/api/wallet#dumpwallet) calls.
+`exportdir` tells the Smart Chain daemon where to store the wallet backup files created through the [backupwallet](/smart-chains/api/wallet/#backupwallet) and [dumpwallet](/smart-chains/api/wallet/#dumpwallet) calls.
 
 #### 📌 Examples:
 
@@ -183,15 +183,15 @@ exportdir=/home/myusername/mydirectory
 
 `gen` instructs the daemon to attempt to generate new blocks, and thereby mine new coins.
 
-See also [setgenerate](/smart-chains/api/generate#setgenerate).
+See also [setgenerate](/smart-chains/api/generate/#setgenerate).
 
 <Note type="warning">
   This parameter should be avoided. Instead, start the daemon without the `-gen`
   parameter. Once the Smart Chain is launched, wait until the blockchain is
   synced to the current block and then execute the
-  [setgenerate](/smart-chains/api/generate#setgenerate) method. The sync status
+  [setgenerate](/smart-chains/api/generate/#setgenerate) method. The sync status
   of the blockchain can be found by executing the
-  [getinfo](/smart-chains/api/control#getinfo) method and comparing the `blocks`
+  [getinfo](/smart-chains/api/control/#getinfo) method and comparing the `blocks`
   and `longestchain` properties.
 </Note>
 
@@ -202,7 +202,7 @@ See also [setgenerate](/smart-chains/api/generate#setgenerate).
 
 <Note>
   `gen=0` in the .conf file on an Smart Chain where [<b>ac\_staked</b>
-  ](/antara/setup/antara-customizations#ac-staked) is enabled sets the daemon to
+  ](/antara/setup/antara-customizations/#ac-staked) is enabled sets the daemon to
   stake using all available coins
 </Note>
 
@@ -287,7 +287,7 @@ maxconnections=NUMBER
 
 ## port
 
-`port` tells the daemon to listen for p2p connections on the indicated TCP port, overwriting the default. The default p2pport for the Komodo(KMD) blockchain is 7770. The default p2p port of a Smart Chain is solely dependant on the `-ac_` [Antara customization parameters](/antara/setup/antara-customizations) and values used to launch it.
+`port` tells the daemon to listen for p2p connections on the indicated TCP port, overwriting the default. The default p2pport for the Komodo(KMD) blockchain is 7770. The default p2p port of a Smart Chain is solely dependant on the `-ac_` [Antara customization parameters](/antara/setup/antara-customizations/) and values used to launch it.
 
 #### 📌 Examples:
 
@@ -337,7 +337,7 @@ Using pubkey as a startup parameter:
 
 ## regtest
 
-`regtest` instructs the Smart Chain daemon to run a regression test network. Typically, the user will create a disposable Smart Chain for these purposes. The [ac\_supply](/antara/setup/antara-customizations#ac-supply) parameter is not required in this instance.
+`regtest` instructs the Smart Chain daemon to run a regression test network. Typically, the user will create a disposable Smart Chain for these purposes. The [ac\_supply](/antara/setup/antara-customizations/#ac-supply) parameter is not required in this instance.
 
 (A regression-test network is a useful tool for rapid trial and testing. [Please reach out to us](https://komodoplatform.com/discord) if you are curious to implement this tool in your workflow and are unfamiliar with the process.)
 
@@ -468,7 +468,7 @@ rpcconnect=127.0.0.1
 
 ## rpcport
 
-`rpcport` tells the daemon to listen for RPC connections on the indicated TCP port overwriting the default. The default rpcport for the Komodo(KMD) blockchain is 7771. The default rpcport of a Smart Chain is solely dependant on the `-ac_` [Antara customization parameters](/antara/setup/antara-customizations) and values used to launch it.
+`rpcport` tells the daemon to listen for RPC connections on the indicated TCP port overwriting the default. The default rpcport for the Komodo(KMD) blockchain is 7771. The default rpcport of a Smart Chain is solely dependant on the `-ac_` [Antara customization parameters](/antara/setup/antara-customizations/) and values used to launch it.
 
 #### 📌 Examples:
 
@@ -512,7 +512,7 @@ server=1
 
 `spentindex` instructs a Smart Chain to maintain a full index of all spent transactions (txids).
 
-We recommend that the user [manually delete the blockchain data](/smart-chains/setup/smart-chain-maintenance#manually-deleting-blockchain-data) before initiating this parameter.
+We recommend that the user [manually delete the blockchain data](/smart-chains/setup/smart-chain-maintenance/#manually-deleting-blockchain-data) before initiating this parameter.
 
 `spentindex` is enabled by default on any Smart Chain that utilizes Antara.
 
@@ -551,7 +551,7 @@ komodod -stopat=1000000
 
 splitperc
 
-The `splitperc` parameter allows the user to decide what happens to a UTXO that is successfully able to stake a block in the POS64 staking system (i.e. a Smart Chain started using the [-ac\_staked](/antara/setup/antara-customizations.md#ac-staked) Antara customization parameter). This parameter's value defines the percentage of the staking UTXO value to leave in the same address. The rest of of the staking UTXO value is added to the new UTXO created to the coinbase address.
+The `splitperc` parameter allows the user to decide what happens to a UTXO that is successfully able to stake a block in the POS64 staking system (i.e. a Smart Chain started using the [-ac\_staked](/antara/setup/antara-customizations/#ac-staked) Antara customization parameter). This parameter's value defines the percentage of the staking UTXO value to leave in the same address. The rest of of the staking UTXO value is added to the new UTXO created to the coinbase address.
 
 Examples:
 

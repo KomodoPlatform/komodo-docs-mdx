@@ -3,16 +3,16 @@ export const description = "The methods in this document allow withdrawal of coi
 
 # Withdraw Tasks
 
-## task\_withdraw\_init
+## init {{label : 'task::withdraw::init', tag : 'API-v2'}}
 
-The `task::withdraw::init` method generates, signs, and returns a transaction that transfers the `amount` of `coin` to the address indicated in the `to` argument. The status of this method can be queried via the [withdraw\_status](#withdraw-status) method.
+The `task::withdraw::init` method generates, signs, and returns a transaction that transfers the `amount` of `coin` to the address indicated in the `to` argument. The status of this method can be queried via the [withdraw\_status](/atomicdex/api/v20-dev/task_withdraw/#status) method.
 
 It will return the transaction hex (via `task::withdraw::status`), which then needs to be broadcast with the [sendrawtransaction](/atomicdex/api/legacy/send_raw_transaction/) to complete the withdrawal. This method is uses the same input fields as the [standard v2 withdraw method](/atomicdex/api/v20/withdraw/), with additional optional fields to specify the `from` address when using a hardware or HD wallet. There are two way to indicate which HD address to send funds from:
 
 *   Using `derivation_path` as a single input. E.g `m/44'/20'/0'/0/2`
 *   Using `account_id` (0), `chain` (External) & `address_id` (2) inputs. The bracketed values are the equavalent of the derivation path above.
 
-To cancel the transaction generation, use the [withdraw\_cancel](#withdraw-cancel) method.
+To cancel the transaction generation, use the [withdraw\_cancel](/atomicdex/api/v20-dev/task_withdraw/#cancel) method.
 
 <Note>
   When used for ZHTLC coins like ARRR or ZOMBIE, it may take some time to
@@ -183,7 +183,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](#withdraw-cance
   ```
 </CollapsibleSection>
 
-## task\_withdraw\_status
+## status  {{label : 'task::withdraw::status', tag : 'API-v2'}}
 
 To get the status of your withdrawal transaction generation, use the `task::withdraw::status` method. Once ready, it will provide the raw hex used to broadcast your transaction with [sendrawtransaction](/atomicdex/api/legacy/send_raw_transaction/). The response returned is the same as what is returned from the [standard v2 withdraw method](/atomicdex/api/v20/withdraw/#response)
 
@@ -208,7 +208,7 @@ To get the status of your withdrawal transaction generation, use the `task::with
 | details.total\_amount                | string (numeric)           | the total amount of coins transferred                                                                                                                                                            |
 | details.fee\_details                 | object                     | the fee details of the generated transaction; `fee_details.type` is "Utxo" for Z coins. `fee_details.coin` will be the same as `details.coin`, and `fee_details.amount` will be a numeric value. |
 | details.tx\_hash                     | string                     | the hash of the generated transaction                                                                                                                                                            |
-| details.tx\_hex                      | string                     | transaction bytes in hexadecimal format; use this value as input for the [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction)                                                    |
+| details.tx\_hex                      | string                     | transaction bytes in hexadecimal format; use this value as input for the [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction/)                                                   |
 | details.coin                         | string                     | the name of the coin the user wants to withdraw                                                                                                                                                  |
 | details.transaction\_type            | string                     | Transaction type will be `StandardTransfer` for Z coin transactions.                                                                                                                             |
 | details.kmd\_rewards                 | object (optional)          | If supported (e.g. when withdrawing `KMD`), an object containing information about accrued rewards.                                                                                              |
@@ -353,7 +353,7 @@ To get the status of your withdrawal transaction generation, use the `task::with
   ```
 </CollapsibleSection>
 
-## task\_withdraw\_cancel
+## cancel {{label : 'task::withdraw::cancel', tag : 'API-v2'}}
 
 Use the `task::withdraw::cancel` method to cancel the withdrawal preparation task.
 

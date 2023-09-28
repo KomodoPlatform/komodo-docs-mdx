@@ -136,7 +136,7 @@ const getAllFileData = (filepath) => {
         date.toString() == "Invalid Date"
     ) {
         console.error(
-            "Date is invalid:",
+            filepath + " Date is invalid:",
             date
         );
         throw new Error(

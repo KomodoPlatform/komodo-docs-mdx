@@ -17,10 +17,10 @@ The `task::enable_lightning::init` request a task to run a lightning node. Use t
 
 ### Request Parameters
 
-| Parameter          | Type   | Description                                                                                    |
-| ------------------ | ------ | ---------------------------------------------------------------------------------------------- |
-| ticker             | string | Ticker of coin to activate                                                                     |
-| activation\_params | object | A standard [LightningActivationParams](/atomicdex/api/v20#lightning-activation-params) object. |
+| Parameter          | Type   | Description                                                                                     |
+| ------------------ | ------ | ----------------------------------------------------------------------------------------------- |
+| ticker             | string | Ticker of coin to activate                                                                      |
+| activation\_params | object | A standard [LightningActivationParams](/atomicdex/api/v20/#lightning-activation-params) object. |
 
 #### 📌 Example
 
@@ -67,7 +67,7 @@ The `task::enable_lightning::init` request a task to run a lightning node. Use t
 <CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
   #### L2ConfigIsNotFound Error
 
-  Coin is not in `coins` file. Refer to the [coins file configuration for lightning](/atomicdex/api/v20-dev/lightning#lightning-coin-config-parameters) for more information.
+  Coin is not in `coins` file. Refer to the [coins file configuration for lightning](/atomicdex/api/v20-dev/lightning/#lightning-coin-config-parameters) for more information.
 
   ```json
   {
@@ -162,7 +162,7 @@ The `task::enable_lightning::init` request a task to run a lightning node. Use t
 
   #### InvalidPlatformConfiguration Error
 
-  Coin's configuration is missing a required parameter.  Refer to the [coins file configuration for lightning](/atomicdex/api/v20-dev#lightning-network-coins-file-configuration) for more information.
+  Coin's configuration is missing a required parameter.  Refer to the [coins file configuration for lightning](/atomicdex/api/v20-dev/lightning/#lightning-network-coins-file-configuration) for more information.
 
   ```json
   {
@@ -211,11 +211,11 @@ The `task::enable_lightning::status` request checks the status of lightning node
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ### Response Parameters
 
-  | Parameter      | Type   | Description                                                         |
-  | -------------- | ------ | ------------------------------------------------------------------- |
-  | platform\_coin | string | The coin ticker for which the lightning node is being intitialized. |
-  | address        | string | This node's address for the activated coin.                         |
-  | balance        | object | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object. |
+  | Parameter      | Type   | Description                                                          |
+  | -------------- | ------ | -------------------------------------------------------------------- |
+  | platform\_coin | string | The coin ticker for which the lightning node is being intitialized.  |
+  | address        | string | This node's address for the activated coin.                          |
+  | balance        | object | A standard [balanceInfos](/atomicdex/api/v20/#balance-infos) object. |
 
   <Note>
     The unspendable balance for lightning is different to a layer-1 unspendable balance. The channel reserve is part of the unspendable balance in lightning - the user will get this part of the balance on chain when closing the channel, but it can't be spent on layer 2 (lightning) because it's part of the security mechanism to prevent channel breaches and ensure that both parties fulfill their obligations within the channel.
@@ -243,8 +243,8 @@ The `task::enable_lightning::status` request checks the status of lightning node
 
   <Note>
     In the above response spendable will always be 0 since the balance is unspendable until connections with lightning channels counterparties are established.
-    Using the [my\_balance](/atomicdex/api/legacy/my_balance) method after the coin is activated will get the spendable balance depending on how many channel counterparties are online.
-    For exact channels balances and which channels are usable, use [lightning::channels::list\_open\_channels\_by\_filter](/atomicdex/api/v20-dev/lightning/channels#list_open_channels_by_filter).
+    Using the [my\_balance](/atomicdex/api/legacy/my_balance/) method after the coin is activated will get the spendable balance depending on how many channel counterparties are online.
+    For exact channels balances and which channels are usable, use [lightning::channels::list\_open\_channels\_by\_filter](/atomicdex/api/v20-dev/lightning/channels/#list-open-channels-by-filter).
   </Note>
 
   #### Response (in progress state)
