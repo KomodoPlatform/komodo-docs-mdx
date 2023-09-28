@@ -17,7 +17,7 @@ import { toString } from "mdast-util-to-string";
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    //await createFileSlugs(filepaths);
+    await createFileSlugs(filepaths);
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -125,6 +125,8 @@ async function processFile(filePath, filepathSlugs) {
             return SKIP;
           }
         } catch (error) {
+          console.log(filePath);
+          console.log(node)
           throw new Error(error);
         }
       });
@@ -192,25 +194,26 @@ function processLink(link, currFilePath, filepathSlugs) {
     path.join(currentWorkingDirectory, filePath),
     ""
   );
-
-  // console.log("--------------------------------")
-  // console.log("currNormalisedDir:" + currNormalisedDir)
-  // console.log(currFilePath)
-  // console.log(hash)
-  // console.log(strippedPath)
-  // console.log(link)
-  // console.log(correctUrl)
-  // console.log("--------------------------------")
-
   const internalLinkFile = path.join(
     filePath,
     correctUrl.split("#")[0] + "index.mdx"
   );
   const slug = correctUrl.split("#")[1];
+
   if (
     slug &&
     !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
   ) {
+    console.log("------------------------------------------------")
+    console.log("currNormalisedDir: " + currNormalisedDir)
+    console.log("currFilePath: " + currFilePath)
+    console.log("hash: " + hash)
+    console.log("strippedPath: " + strippedPath)
+    console.log("link: " + link)
+    console.log("correctUrl: " + correctUrl)
+    console.log("internalLinkFile: " + internalLinkFile)
+    console.log("slug: " + slug)
+    console.log("------------------------------------------------")
     throw new Error(
       `Processing file: ${currFilePath}, slug: ${slug} not present in file: ${internalLinkFile}`
     );
