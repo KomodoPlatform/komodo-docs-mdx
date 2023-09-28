@@ -452,6 +452,17 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
 | max\_channel\_reserve\_sats             | boolean | Optional, defaults to `18446744073709551615`. The remote node will require us to keep a certain amount in direct payment to ourselves at all time, ensuring that we are able to be punished if we broadcast an old state. This allows us to limit the amount which we will have to keep to ourselves (and cannot use for [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)). |
 | min\_max\_accepted\_htlcs               | boolean | Optional, defaults to `0`. The remote node sets a limit on the maximum number of pending HTLCs to them at any given time. This allows us to set a minimum such value.                                                                                                                                                                                                                                |
 
+### FeeInfo
+
+The `FeeInfo` response object includes the following items for [withdraw (v2)](/atomicdex/api/v20/withdraw/) requests:
+
+| Parameter  | Type             | Description                                                                                                                               |
+| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
+| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
+| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+
 ### LightningActivationParams
 
 | Parameter        | Type    | Description                                                                                                                                                                                                                                   |
