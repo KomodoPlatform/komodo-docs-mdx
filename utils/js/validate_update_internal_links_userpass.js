@@ -108,7 +108,7 @@ async function processFile(filePath, filepathSlugs) {
                 attr.value === "true"
             )
           ) {
-            // console.log(node)
+            //  console.log(node)
             const originalChild = node.children[0];
             if (node.children.length !== 1 || originalChild.lang !== "json") {
               throw new Error(
