@@ -53,15 +53,30 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 - Use `##` for subheadings.
 - Use `###` for request/response parameter tables.
 - Use `####` for request/response examples.
-- Use mdx comments like this: `{/* comment comment */}` . Markdown comments like `<!--- comment comment--->` doesn't work.
+- Use mdx comments like this: `{/* comment comment */}` . Markdown comments like `<!--- comment comment--->` doesn't work. Alternatively, you can use the `<DevComment>` component tags.
 - No markdown/mdx comments in tables' rows
 
 ## Tables
 
 - Include a reference table listing all **request** parameters, their type, a description, and whether it is required or optional.
 - Include a reference table listing all **response** parameters, their type, a description, and whether it is part of the standard response or only returned when using a specific request parameter value.
+- Optional parameters should be listed at the bottom of the parameter table.
 - Optional parameters should be identified at the start of the parameter's description, along with the default value (if applicable).
-- Optional parameters should be listed at the bottom of the parameter table
+- Where specific parameters only apply for a specific action, this should be identified at the start of the parameter's description.
+- Where a group of parameters are nested within a common structure, this should be given its own table, and linked to from the main parameter table.
+- Common structure objects should be listed alphabetically in the file which contains them. This can be the same file as the parent method, unless the structure is used by multiple methods in different files - in that case, it should be listed in the root folder for the method group (e.g. legacy, v20, v20-dev).
+
+
+For example:
+
+| Parameter | Type    | Description                                                                             |
+| --------- | ------- | --------------------------------------------------------------------------------------- |
+| coin      | string  | The name of the coin the user desires to activate.                                      |
+| fee       | object  | Optional. A standard [FeeInfo](/atomicdex/api/v20/#FeeInfo) object.                     |
+| amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                        |
+| max       | boolean | Optional, defaults to `false`. Send whole balance.                                      |
+| memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction. |
+
 
 ## Variables
 
@@ -82,6 +97,39 @@ Pages are heavily [**MDX**](https://mdxjs.com/) ("markdown extension") based, wh
 ### Adding a Title and Description
 
 Titles and descriptions are mandatory on every documentation page and must be added at the top level. To add a title use this syntax: `export const title = "Documentation page title";`. To add a description use: `export const description = "documentation page description";`
+
+
+### Subsections and headings
+
+Though it is good to separate each method into its own document, sometimes it is necessary to group methods together. 
+In such a case, we can define the `title`, `label` and/or `tag` properties alongside a section header and within a `CodeGroup` tag so that anchor links are generated in a consistent manner. 
+
+- The `label` property should be the exact same as the RPC method.
+- The `title` property should be blank, unless the section heading is not the same as the `label` property. In that case, the `title` property should be the (human readable) section heading.
+- for methods with a `task::xxxx::` or `lightning::xxxx::` prefix, the `label` property should be the full RPC method name, and the title should be the truncated RPC method without the prefix (only the last bit, after the last set of `::`).
+
+For example, with a human readable section heading:
+
+```
+## Transaction History
+...
+### my_tx_history with pagination {{title : 'Transaction History', label : 'my_tx_history', tag : 'POST'}}
+<CodeGroup title="Transaction History" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
+...
+</CodeGroup>
+```
+
+For example, with a `task::xxxx::` prefix:
+
+```
+# Trezor Initialisation
+...
+## init {{title : 'init', label : 'task::init_trezor::init', tag : 'POST'}}
+...
+<CodeGroup title="init" tag="POST" label="task::init_trezor::init" mm2MethodDecorate="true">
+...
+</CodeGroup>
+```
 
 ### Components
 
