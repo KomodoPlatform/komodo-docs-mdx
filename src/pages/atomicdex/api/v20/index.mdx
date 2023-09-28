@@ -29,7 +29,7 @@ It includes a uniform request, successful and error response formats. At the mom
 
 | Structure    | Type              | Description                                                                                 |
 | ------------ | ----------------- | ------------------------------------------------------------------------------------------- |
-| mmrpc        | string            | the string specifying the version of the Komodo DeFi API RPC protocol                         |
+| mmrpc        | string            | the string specifying the version of the Komodo DeFi API RPC protocol                       |
 | error        | string            | the common error description                                                                |
 | error\_path  | string            | the error path consisting of file names separated by a dot similar to JSON path notation    |
 | error\_trace | string            | the error path consisting of file and line number pairs separated by ']'                    |
@@ -110,29 +110,27 @@ The folowing objects are used in the request or response of multiple Komodo DeFi
 
 The `ActivationParams` object defines additional parameters used for activation. These params may vary depending on the coin type.
 
+| Parameter               | Type    | Description                                                                                                                                                                                                                          |
+| ----------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| required\_confirmations | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                   |
+| requires\_notarization  | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file. |
+| mode                    | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/v20/#activation-mode) object.                                                                                                                              |
 
-| Parameter                 | Type      | Description                                                                                                                                        |
-| ------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| required_confirmations    | integer   | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                 |
-| requires_notarization     | boolean   | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file. |
-| mode                      | object    | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/v20#activation-mode) object.                                             |
+\| zcash\_params\_path         | string    | ZHTLC coins only. Path to folder containing [Zcash parameters](https://z.cash/technology/paramgen/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                |
+\| scan\_blocks\_per\_iteration | integer   | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                |
+\| scan\_interval\_ms          | integer   | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                  |
 
-| zcash_params_path         | string    | ZHTLC coins only. Path to folder containing [Zcash parameters](https://z.cash/technology/paramgen/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                |
-| scan_blocks_per_iteration | integer   | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                |
-| scan_interval_ms          | integer   | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                  |
+\| tx\_history                | boolean   | Optional. Enable transaction history scanning. When active, the KomoDefi API will collect transaction history data for local storage, and allow use of the [my\_tx\_history (v2)](/atomicdex/api/v20/my_tx_history/) method.     |
+\| min\_addresses\_number      | integer   | Optional, HD wallets only. Number of addresses to generate. If not specified, addresses will be generated up to `path_to_address::address_index`   |
+\| scan\_policy               | string    | Optional, HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Defaults to `scan_if_new_wallet`. Note that `scan` will result in multple requests to the Komodo DeFi API and may take some time to complete. |
+\| gap\_limit                 | integer   | Optional, HD wallets only. The max number of empty addresses in a row. Transactions sent to an address outside the `gap_limit`, will not be identified when scanning. Defaults to `20`. |
+\| path\_to\_address           | object    | Optional, HD wallets only. A standard [AddressDerivationPath](/atomicdex/api/v20/#address-derivation-path) object.                                  |
+\| get\_balances             | boolean   | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly. |
 
-| tx_history                | boolean   | Optional. Enable transaction history scanning. When active, the KomoDefi API will collect transaction history data for local storage, and allow use of the [my_tx_history (v2)](/atomicdex/api/v20/my_tx_history) method.     |
-| min_addresses_number      | integer   | Optional, HD wallets only. Number of addresses to generate. If not specified, addresses will be generated up to `path_to_address::address_index`   |
-| scan_policy               | string    | Optional, HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Defaults to `scan_if_new_wallet`. Note that `scan` will result in multple requests to the Komodo DeFi API and may take some time to complete. |
-| gap_limit                 | integer   | Optional, HD wallets only. The max number of empty addresses in a row. Transactions sent to an address outside the `gap_limit`, will not be identified when scanning. Defaults to `20`. |
-| path_to_address           | object    | Optional, HD wallets only. A standard [AddressDerivationPath](/atomicdex/api/v20#address-derivation-path) object.                                  |
-| get\_balances             | boolean   | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly. |
- 
-
-<DevComment> Are these still a thing?
-| priv_key_policy           | string    | Defaults to `ContextPrivkey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                        |
+<DevComment>
+  Is priv\_key\_policy still a thing?
+  Defaults to `ContextPrivkey`. Set as `Trezor` to activate in Trezor mode.
 </DevComment>
-
 
 <Note>
   For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
@@ -146,40 +144,38 @@ The `ActivationParams` object defines additional parameters used for activation.
   load during ZHTLC coin activation.
 </Note>
 
-
 ### ActivationMode
 
 Defines the activation mode for QTUM, BCH, UTXO & ZHTLC coins.
 
-| Parameter  | Type      | Description                                                                                                     |
-| ---------- | --------- | --------------------------------------------------------------------------------------------------------------- |
-| rpc        | string    | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.  |
-| rpc_data   | object    | `Electrum` or `Light` mode only. A standard [ActivationRpcData](/atomicdex/api/v20#activation-rpc-data) object. |
+| Parameter | Type   | Description                                                                                                      |
+| --------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.   |
+| rpc\_data | object | `Electrum` or `Light` mode only. A standard [ActivationRpcData](/atomicdex/api/v20/#activation-rpc-data) object. |
 
-<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-```json
-{
-    "mode": {
-        "rpc": "Electrum",
-        "rpc_data": {
-            "servers": [
-                {
-                    "url": "electrum1.cipig.net:10020"
-                },
-                {
-                    "url": "electrum2.cipig.net:10020"
-                }
-            ]
-        }
-    },
-}
-```
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "mode": {
+          "rpc": "Electrum",
+          "rpc_data": {
+              "servers": [
+                  {
+                      "url": "electrum1.cipig.net:10020"
+                  },
+                  {
+                      "url": "electrum2.cipig.net:10020"
+                  }
+              ]
+          }
+      },
+  }
+  ```
 </CollapsibleSection>
-
 
 ### ActivationRpcData
 
-Contains information about electrum & lightwallet_d servers for coins being used in `Electrum` or `Light` mode.
+Contains information about electrum & lightwallet\_d servers for coins being used in `Electrum` or `Light` mode.
 
 | Parameter                 | Type              | Description                                                                                                                                                                                                                                                     |
 | ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -253,72 +249,69 @@ Contains information electrum servers for coins being used in `Electrum` or `Lig
       "min_addresses_number": 3,
       "gap_limit": 20
   }
-}
-```
+  }
+  ```
 
-#### HD UTXO Activation (v2)
-```json
-{
-    "activation_params": {
-        "mode": {
-            "rpc": "Electrum",
-            "rpc_data": {
-                "servers": [
-                    {
-                        "url": "electrum2.cipig.net:10001"
-                    },
-                    {
-                        "url": "electrum3.cipig.net:20001",
-                        "ws_url": "electrum3.cipig.net:30001",
-                        "protocol": "SSL"
-                    }
-                ]
-            }
-        },
-        "scan_policy": "scan_if_new_wallet",
-        "min_addresses_number": 3,
-        "gap_limit": 20
-    }
-}
-```
+  #### HD UTXO Activation (v2)
 
+  ```json
+  {
+      "activation_params": {
+          "mode": {
+              "rpc": "Electrum",
+              "rpc_data": {
+                  "servers": [
+                      {
+                          "url": "electrum2.cipig.net:10001"
+                      },
+                      {
+                          "url": "electrum3.cipig.net:20001",
+                          "ws_url": "electrum3.cipig.net:30001",
+                          "protocol": "SSL"
+                      }
+                  ]
+              }
+          },
+          "scan_policy": "scan_if_new_wallet",
+          "min_addresses_number": 3,
+          "gap_limit": 20
+      }
+  }
+  ```
 </CollapsibleSection>
-
 
 ### AddressDerivationPath
 
-The `AddressDerivationPath` object defines the account / change / address_index of the [derivation path](https://medium.com/mycrypto/wtf-is-a-derivation-path-c3493ca2eb52) used for your wallet. Using different values for `account_id` or `address_id` parameters will result in a different address and private key for each combination. The `chain` parameter is used to specify if the change from a transaction. Set to `External` for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction.
+The `AddressDerivationPath` object defines the account / change / address\_index of the [derivation path](https://medium.com/mycrypto/wtf-is-a-derivation-path-c3493ca2eb52) used for your wallet. Using different values for `account_id` or `address_id` parameters will result in a different address and private key for each combination. The `chain` parameter is used to specify if the change from a transaction. Set to `External` for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction.
 
+| Parameter   | Type    | Description                                                                              |
+| ----------- | ------- | ---------------------------------------------------------------------------------------- |
+| account\_id | integer | Optional, defaults to `0`. Used as a layer of separation or hierarchy.                   |
+| chain       | string  | Optional. Accepted values are `External` (0) and `Internal` (1). Defaults to `External`. |
+| address\_id | integer | Optional, defaults to `0`. Used as a layer of separation or hierarchy.                   |
 
-| Parameter     | Type      | Description                                                                                                           |
-| ------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
-| account_id    | integer   | Optional, defaults to `0`. Used as a layer of separation or hierarchy.                                                |
-| chain         | string    | Optional. Accepted values are `External` (0) and `Internal` (1). Defaults to `External`.                              |
-| address_id    | integer   | Optional, defaults to `0`. Used as a layer of separation or hierarchy.                                                |
-
-
-<CollapsibleSection expandedText='Hide Example' collapsedText='Show Example'>
-```json
-{
-    "path_to_address": {
-        "account_id": 0,
-        "chain": "External",
-        "address_id": 1
-    }
-}
-```
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "path_to_address": {
+          "account_id": 0,
+          "chain": "External",
+          "address_id": 1
+      }
+  }
+  ```
 </CollapsibleSection>
 
 ### AddressInfos
 
 The `addressInfos` object includes the following items for a given address:
 
-| Parameter          | Type   | Description                                                                                                                    |
-| ------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| balances           | object | A standard [balanceInfos](/atomicdex/api/v20/#balance-infos) object. Not included in responses where `get_balances` is `false` |
-| derivation\_method | object | A standard [DerivationMethod](/atomicdex/api/v20/#derivation-method) object                                                    |
-| pubkey             | string | The public key associated with the seed used to launch Komodo DeFi                                                               |
-| tickers            | array  | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                 |
+| Parameter          | Type   | Description                                                                                                                  |
+| ------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| balances           | object | A standard [BalanceInfo](/atomicdex/api/v20/#balance-info) object. Not included in responses where `get_balances` is `false` |
+| derivation\_method | object | A standard [DerivationMethod](/atomicdex/api/v20/#derivation-method) object                                                  |
+| pubkey             | string | The public key associated with the seed used to launch Komodo DeFi                                                           |
+| tickers            | array  | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`               |
 
 <CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
   #### Example with balances
@@ -349,7 +342,7 @@ The `addressInfos` object includes the following items for a given address:
   ```
 </CollapsibleSection>
 
-### BalanceInfos
+### BalanceInfo
 
 The `balanceInfo` object includes the following items for a given coin or token:
 
@@ -430,7 +423,7 @@ The `EvmNode` object includes the following items for a given coin or token:
 This object represents the number of blocks required for an on-chain lightning-related transaction to be confirmed.
 It is used for estimating the transaction fee rate (`feerate`) for different transaction types in the context of permissionless transactions performed by the node. Different target types are `background`, `normal`, and `high_priority`.
 
-| Parameter      | Type    | Description                      |
+| Parameter      | Type    | Description                                                                                                                                                                                                                                                                                                                                                              |
 | -------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | background     | integer | Used for transactions that can tolerate slower confirmation times when the transaction fee rate decreases. These transactions are not time-sensitive and can afford to wait longer for confirmation. The recommended range is `12` to `144` blocks to ensure a low `feerate`.                                                                                            |
 | normal         | integer | Used for transactions that we want to confirm promptly, without significant delay (e.g, transactions for opening payment channels). These transactions are important but not critical. Suggested value is `6` blocks to ensure a moderate `feerate`.                                                                                                                     |
@@ -446,7 +439,7 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
 
 ### CounterpartyChannelConfig
 
-| Parameter                               | Type    | Description                                                  |
+| Parameter                               | Type    | Description                                                                                                                                                                                                                                                                                                                                                                                          |
 | --------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | allow\_outbound\_0conf                  | boolean | Optional, defaults to `true`. When setting an outbound channel, it can be used straight away [without waiting](https://docs.rs/lightning/latest/lightning/util/config/struct.ChannelHandshakeLimits.html#structfield.trust_own_funding_0conf) for any on-chain confirmations.                                                                                                                        |
 | force\_announced\_channel\_preference   | boolean | Optional, defaults to `true`. Set to force an incoming channel to match our announced channel preference in ChannelOptions announced\_channel.                                                                                                                                                                                                                                                       |
@@ -483,7 +476,7 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
   If not specified when using the [open\_channel](/atomicdex/api/v20-dev/lightning/channels/#open-channel) or [update\_channel](/atomicdex/api/v20-dev/lightning/channels/#update-channel) methods, the values in this object will default to the values set in the `coins` configuration file.
 </Note>
 
-| Parameter                               | Type    | Description                                                                                                                                                    |
+| Parameter                               | Type    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | --------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | inbound\_channels\_confirmations        | string  | Optional, defaults to `6`. Should be set in coins file, and applies to all channels. Confirmations we will wait for before considering an inbound channel locked in.                                                                                                                                                                                                                                                                                                                                   |
 | max\_inbound\_in\_flight\_htlc\_percent | integer | Optional, defaults to `10`. Should be set in coins file, and applies to all channels. Sets the percentage of the channel value we will cap the total value of outstanding inbound HTLCs to.                                                                                                                                                                                                                                                                                                            |
@@ -611,18 +604,16 @@ For requests which return many results, pagination offsets may be applied. \*\* 
   ```
 </CollapsibleSection>
 
-
 ### HistoryTarget
 
-Used to specify a HD wallet `account_id` or `address_id` for [my_tx_history (v2)] requests.
+Used to specify a HD wallet `account_id` or `address_id` for \[my\_tx\_history (v2)] requests.
 
-| Parameter      | Type    | Description                                             |
-| -------------- | ------- | ------------------------------------------------------- |
-| type           | string  | Filters results by `account_id` or `address_id` part of the derivation path. |
-| account\_id    | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.  |
-| address\_id    | integer | Only required when `type` is `address_id`. `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. |
-| chain          | string  | Only required when `type` is `address_id`. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-
+| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                              |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type        | string  | Filters results by `account_id` or `address_id` part of the derivation path.                                                                                                                                                                                                                                             |
+| account\_id | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                                                              |
+| address\_id | integer | Only required when `type` is `address_id`. `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
+| chain       | string  | Only required when `type` is `address_id`. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   #### Example
@@ -662,16 +653,14 @@ The `TokensRequest` object includes the following items for a given coin or toke
   ```
 </CollapsibleSection>
 
-
-
 ### WalletBalanceInfo
 
 The `WalletBalanceInfo` object includes the following items in the activation response for a coin in HD mode:
 
-| Parameter      | Type   | Description                                                                                      |
-| -------------- | ------ | ------------------------------------------------------------------------------------------------ |
-| wallet\_type   | string | In HD wallet mode, this will return `HD`. <DevComment> What are the other values? </DevComment>  |
-| accounts       | object | A standard [WalletAccountInfo](/atomicdex/api/v20#wallet-account-info) object.                 |
+| Parameter    | Type   | Description                                                                                     |
+| ------------ | ------ | ----------------------------------------------------------------------------------------------- |
+| wallet\_type | string | In HD wallet mode, this will return `HD`. <DevComment> What are the other values? </DevComment> |
+| accounts     | object | A standard [WalletAccountInfo](/atomicdex/api/v20/#wallet-account-info) object.                 |
 
 ```json
 {
@@ -684,74 +673,64 @@ The `WalletBalanceInfo` object includes the following items in the activation re
 }
 ```
 
-
 ### WithdrawFromInfo
 
-The `WithdrawFromInfo` response object includes the following items for HD Wallet [withdraw (v2)](/atomicdex/api/v20/withdraw/) requests. 
+The `WithdrawFromInfo` response object includes the following items for HD Wallet [withdraw (v2)](/atomicdex/api/v20/withdraw/) requests.
 You can use either the `derivation_path` on its own, or the `account_id`, `chain` and `address_id` together.
 
-| Parameter         | Type    | Description                                                                     |
-| ----------------- | --------| ------------------------------------------------------------------------------- |
-| derivation\_path  | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. |
-| account\_id       | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
-| address\_id       | integer | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. |
-| chain             | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-
-
+| Parameter        | Type    | Description                                                                                                                                                                                                                                                                   |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.                                                                                                                                                                   |
+| account\_id      | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.**                                                                                                                                 |
+| address\_id      | integer | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
+| chain            | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
 ### FeeInfo
 
 The `FeeInfo` response object includes the following items for [withdraw (v2)](/atomicdex/api/v20/withdraw/) requests:
 
-| Parameter  | Type             | Description                                                                     |
-| ---------- | ---------------- | ------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas` |
+| Parameter  | Type             | Description                                                                                                                               |
+| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
 | amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units           |
-| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction           |
-
+| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
+| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
 
 ### ScanAddressesInfo
 
 The `ScanAddressesInfo` response object includes the following items for request in HD mode:
 
-| Parameter         | Type    | Description                                                                                                       |
-| ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
-| account\_index    | integer   | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
-| derivation\_path  | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the account.       |
-| new\_addresses    | list    | A list of standard [NewAddressInfo](/atomicdex/api/v20#new-address-info) objects.                                 |
+| Parameter        | Type    | Description                                                                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the account.                                   |
+| new\_addresses   | list    | A list of standard [NewAddressInfo](/atomicdex/api/v20/#new-address-info) objects.                                                            |
 
 <DevComment>
-    Confirm `new_addresses` array has the structure of `NewAddressInfo`.
+  Confirm `new_addresses` array has the structure of `NewAddressInfo`.
 </DevComment>
-
-
-
 
 ### NewAddressInfo
 
 The `NewAddressInfo` response object includes the following items for request in HD mode:
 
-| Parameter         | Type    | Description                                                                                                       |
-| ----------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
-| address           | string  | The account address for a specific derivation path under the `account_index`.                                     |
-| derivation\_path  | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. If there are no more addresses with balances within the gap limit, the address index will increment.       |
-| balance           | object  | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object.                                               |
-| chain             | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-
-
+| Parameter        | Type   | Description                                                                                                                                                                                                                                                                   |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| address          | string | The account address for a specific derivation path under the `account_index`.                                                                                                                                                                                                 |
+| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. If there are no more addresses with balances within the gap limit, the address index will increment.                                                              |
+| balance          | object | A standard [balanceInfo](/atomicdex/api/v20/#balance-info) object.                                                                                                                                                                                                            |
+| chain            | string | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
 ### WalletAccountInfo
 
 The `WalletAccountInfo` object includes the following items in the activation response for a coin in HD mode:
 
-| Parameter         | Type      | Description                                                                                                                 |
-| ----------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
-| account\_index    | integer   | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
-| derivation\_path  | string    | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                              |
-| total\_balance    | object    | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object.                                                         |
-| addresses         | list      | A list of standard [AccountAddressInfo](/atomicdex/api/v20#account-address-info) objects.                                   |
-
+| Parameter        | Type    | Description                                                                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| derivation\_path | string  | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                                                |
+| total\_balance   | object  | A standard [balanceInfo](/atomicdex/api/v20/#balance-info) object.                                                                            |
+| addresses        | list    | A list of standard [AccountAddressInfo](/atomicdex/api/v20/#account-address-info) objects.                                                    |
 
 ```json
 {
@@ -771,30 +750,26 @@ The `WalletAccountInfo` object includes the following items in the activation re
 
 The `AccountAddressInfo` object includes the following items for active addresses in the activation response for a coin in HD mode:
 
-| Parameter        | Type      | Description                                                                                                        |
-| ---------------- | --------- | ------------------------------------------------------------------------------------------------------------------ |
-| address          | string    | The account address for a specific derivation path under the `account_index`.                                      |
-| derivation\_path | string    | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.        |
-| chain            | string    | `External` or `Internal`, as defined in the activation request.                                                    |
-| balance          | object    | A standard [balanceInfo](/atomicdex/api/v20#balance-info) object.                                                |
-
+| Parameter        | Type   | Description                                                                                                 |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
+| address          | string | The account address for a specific derivation path under the `account_index`.                               |
+| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. |
+| chain            | string | `External` or `Internal`, as defined in the activation request.                                             |
+| balance          | object | A standard [balanceInfo](/atomicdex/api/v20/#balance-info) object.                                          |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-```json
-{
-    "address": "RXNtAyDSsY3DS3VxTpJegzoHU9bUX54j56",
-    "derivation_path": "m/44'/141'/0'/0/0",
-    "chain": "External",
-    "balance": {
-        "spendable": "7.64018255",
-        "unspendable": "0"
-    }
-}
-```
+  ```json
+  {
+      "address": "RXNtAyDSsY3DS3VxTpJegzoHU9bUX54j56",
+      "derivation_path": "m/44'/141'/0'/0/0",
+      "chain": "External",
+      "balance": {
+          "spendable": "7.64018255",
+          "unspendable": "0"
+      }
+  }
+  ```
 </CollapsibleSection>
-
-
-
 
 ## Error types
 
@@ -808,24 +783,23 @@ The `available` balance is not sufficient to transfer the specified amount.
 | available | string (numeric) | the balance available for transfer                                                                                                                     |
 | required  | string (numeric) | the amount required to transfer the specified amount. This amount is necessary but may not be sufficient                                               |
 
+#### Response (NotSufficientBalance error)
 
-  #### Response (NotSufficientBalance error)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Not enough DOC to withdraw: available 69.75066225, required at least 1000.00001",
-    "error_path": "utxo_common",
-    "error_trace": "utxo_common:1379] utxo_common:449]",
-    "error_type": "NotSufficientBalance",
-    "error_data": {
-      "coin": "DOC",
-      "available": "69.75066225",
-      "required": "1000.00001"
-    },
-    "id": 0
-  }
-  ```
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Not enough DOC to withdraw: available 69.75066225, required at least 1000.00001",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1379] utxo_common:449]",
+  "error_type": "NotSufficientBalance",
+  "error_data": {
+    "coin": "DOC",
+    "available": "69.75066225",
+    "required": "1000.00001"
+  },
+  "id": 0
+}
+```
 
 #### ZeroBalanceToWithdrawMax
 
@@ -860,33 +834,33 @@ The specified `fee` is not valid.
 | --------- | ------ | --------------------- |
 | (none)    | string | the error description |
 
-  #### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
+#### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
 
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "error_path": "utxo_common",
-    "error_trace": "utxo_common:1371]",
-    "error_type": "InvalidFeePolicy",
-    "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "id": 0
-  }
-  ```
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1371]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "id": 0
+}
+```
 
-  #### Response (InvalidFeePolicy error - attempt to use UtxoFixed or UtxoPerKbyte for ETH coin)
+#### Response (InvalidFeePolicy error - attempt to use UtxoFixed or UtxoPerKbyte for ETH coin)
 
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Invalid fee policy: Expected 'EthGas' fee type, found UtxoFixed",
-    "error_path": "eth",
-    "error_trace": "eth:535]",
-    "error_type": "InvalidFeePolicy",
-    "error_data": "Expected 'EthGas' fee type, found UtxoFixed",
-    "id": 0
-  }
-  ```
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'EthGas' fee type, found UtxoFixed",
+  "error_path": "eth",
+  "error_trace": "eth:535]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'EthGas' fee type, found UtxoFixed",
+  "id": 0
+}
+```
 
 #### NoSuchCoin
 
@@ -911,7 +885,6 @@ The request was failed due to an Komodo DeFi API internal error.
 | Structure | Type   | Description                    |
 | --------- | ------ | ------------------------------ |
 | (none)    | string | the internal error description |
-
 
 ## Error cases
 

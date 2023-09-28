@@ -16,7 +16,7 @@ To avoid generating too many addresses at once, we can use a `gap_limit` constra
 | coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                      |
 | account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                        |
 | chain       | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| gap\_limit  | string  | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation, or 20 if no value was provided. |
+| gap\_limit  | string  | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation, or 20 if no value was provided.                                                                                                                                       |
 
 #### Response
 
@@ -83,25 +83,24 @@ Other reasons you might not be able to get a new address are:
   ```
 </CollapsibleSection>
 
-
 ## get\_new\_address
 
 If we don't already have too many unused addresses, we can use the `get_new_address` method to generate a new address. The generated address will be shown in account\_balance and init\_account\_balance RPCs and on the next coin activation.
 
 #### Arguments
 
-| Parameter   | Type    | Description                                                                                                                                                                                                                                                                   |
-| ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                      |
-| account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                        |
+| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                                 |
+| ----------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                                                                    |
+| account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                                                                      |
 | chain       | string  | `Internal`, or `External`. Defaults to `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
-| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided                                                                                                                                         |
+| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided                                                                                                                                                                                       |
 
 #### Response
 
-| Parameter     | Type     | Description                                                               |
-| ------------- | -------- | ------------------------------------------------------------------------- |
-| new\_address  | object   | A standard [NewAddressInfo](/atomicdex/api/v20#new-address-info) object.  |
+| Parameter    | Type   | Description                                                               |
+| ------------ | ------ | ------------------------------------------------------------------------- |
+| new\_address | object | A standard [NewAddressInfo](/atomicdex/api/v20/#new-address-info) object. |
 
 Some reasons you might not be able to get a new address are:
 
@@ -150,25 +149,21 @@ Some reasons you might not be able to get a new address are:
   ```
 </CollapsibleSection>
 
-
-
 ## task\_scan\_for\_new\_addresses\_init
 
 #### Arguments
 
-| Parameter   | Type    | Description                                                                                                                                                                                                                                                                   |
-| ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin        | string  | The ticker of the coin you want to scan addresses for                                                                                                                                                                                                                      |
-| account\_id | integer | Optional, HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                                                                                                                                                                                  |
-| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided                                                                                                                                         |
-
+| Parameter   | Type    | Description                                                                                                                           |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string  | The ticker of the coin you want to scan addresses for                                                                                 |
+| account\_id | integer | Optional, HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                  |
+| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided |
 
 #### Response
 
 | Parameter | Type    | Description                                               |
 | --------- | ------- | --------------------------------------------------------- |
 | task\_id  | integer | An identifying number which is used to query task status. |
-
 
 #### 📌 Examples
 
@@ -181,9 +176,9 @@ Some reasons you might not be able to get a new address are:
     "mmrpc": "2.0",
     "method": "task::scan_for_new_addresses::init",
     "params": {
-        "coin": "DGB",
-        "account_index": 0,
-        "gap_limit": 20
+      "coin": "DGB",
+      "account_index": 0,
+      "gap_limit": 20
     }
   }
   ```
@@ -203,7 +198,6 @@ Some reasons you might not be able to get a new address are:
   ```
 </CollapsibleSection>
 
-
 ## task\_scan\_for\_new\_addresses\_status
 
 Use the `task::scan_for_new_addresses::status` method to query the status of a HD address scanning task.
@@ -215,14 +209,12 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
 | task\_id             | integer | The identifying number returned when initiating the withdrawal process.                   |
 | forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
 
-
 #### Response
 
-| Parameter  | Type              | Description                                                                                                                                    |
-| ---------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| status     | string            | Status of the task. `Ok`, `InProgress` or `Error`.                                                                                             |
-| details    | string or object  | Once complete, a standard [ScanAddressesInfo](/atomicdex/api/v20#scan-addresses-info) object. |
-
+| Parameter | Type             | Description                                                                                    |
+| --------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| status    | string           | Status of the task. `Ok`, `InProgress` or `Error`.                                             |
+| details   | string or object | Once complete, a standard [ScanAddressesInfo](/atomicdex/api/v20/#scan-addresses-info) object. |
 
 #### 📌 Examples
 
@@ -235,7 +227,7 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
     "mmrpc": "2.0",
     "method": "task::scan_for_new_addresses::status",
     "params": {
-        "task_id": 3
+      "task_id": 3
     }
   }
   ```
@@ -261,7 +253,5 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
 </CollapsibleSection>
 
 <DevComment>
-We should get a response with data in the `new_addresses` array for this section.
+  We should get a response with data in the `new_addresses` array for this section.
 </DevComment>
-
-
