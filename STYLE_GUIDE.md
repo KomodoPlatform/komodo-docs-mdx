@@ -113,7 +113,7 @@ For example, with a human readable section heading:
 ```
 ## Transaction History
 ...
-### my_tx_history with pagination {{title : 'Transaction History', label : 'my_tx_history', tag : 'POST'}}
+### my_tx_history with pagination {{label : 'my_tx_history', tag : 'POST'}}
 <CodeGroup title="Transaction History" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
 ...
 </CodeGroup>
@@ -124,7 +124,7 @@ For example, with a `task::xxxx::` prefix:
 ```
 # Trezor Initialisation
 ...
-## init {{title : 'init', label : 'task::init_trezor::init', tag : 'POST'}}
+## init {{label : 'task::init_trezor::init', tag : 'POST'}}
 ...
 <CodeGroup title="init" tag="POST" label="task::init_trezor::init" mm2MethodDecorate="true">
 ...
@@ -134,7 +134,7 @@ For example, with a `task::xxxx::` prefix:
 For example, when method and title are the same:
 
 ```
-## get_balance {{title : '', label : 'get_balance', tag : 'POST'}}
+## get_balance {{label : 'get_balance', tag : 'POST'}}
 ...
 <CodeGroup title="" tag="POST" label="get_balance" mm2MethodDecorate="true">
 ...
@@ -346,7 +346,7 @@ To save time, you can use the `Heading` component without importing it. And this
 Here's how:
 
 ```mdx
-## How to get your tokens {{title : '', label : 'get_all_tokens', tag : 'API-v2'}}
+## How to get your tokens {{label : 'get_all_tokens', tag : 'API-v2'}}
 ```
 
 Rendered as:
