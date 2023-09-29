@@ -228,14 +228,12 @@ function processLink(link, currFilePath, filepathSlugs) {
     fs.accessSync(internalLinkFile, constants.F_OK);
   } catch (err) {
     console.log("currNormalisedDir:" + currNormalisedDir);
-    console.log(currFilePath);
-    console.log(hash);
-    console.log(strippedPath);
-
-    console.log(link);
-    console.log(correctUrl);
-
-    console.error("Internal link file doesn't exist: " + internalLinkFile);
+    console.log("currFilePath: " + currFilePath)
+    console.log("hash: " + hash)
+    console.log("strippedPath: " + strippedPath)
+    console.log("link: " + link)
+    console.log("correctUrl: " + correctUrl)
+    console.log("Internal link file doesn't exist/can't access it: " + internalLinkFile);
     throw new Error(err);
   }
 
