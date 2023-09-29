@@ -113,7 +113,7 @@ async function processFile(filePath, filepathSlugs) {
             if (node.children.length !== 1 || originalChild.lang !== "json") {
               throw new Error(
                 `unexpected code block in file ${filePath} : ` +
-                  JSON.stringify()
+                JSON.stringify()
               );
             }
             const clonedChild = JSON.parse(JSON.stringify(originalChild));
@@ -194,11 +194,16 @@ function processLink(link, currFilePath, filepathSlugs) {
     path.join(currentWorkingDirectory, filePath),
     ""
   );
+  const correctUrlSplit = correctUrl.split("#");
   const internalLinkFile = path.join(
     filePath,
-    correctUrl.split("#")[0] + "index.mdx"
+    correctUrlSplit[0] + "index.mdx"
   );
-  const slug = correctUrl.split("#")[1];
+  let slug;
+  if (correctUrlSplit[1]) {
+    slug = slugify(correctUrlSplit[1]);
+    correctUrl = correctUrlSplit[0] + "#" + slug;
+  }
 
   if (
     slug &&
@@ -215,7 +220,7 @@ function processLink(link, currFilePath, filepathSlugs) {
     console.log("slug: " + slug)
     console.log("------------------------------------------------")
     throw new Error(
-      `Processing file: ${currFilePath}, slug: ${slug} not present in file: ${internalLinkFile}`
+      `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile}`
     );
   }
   try {
