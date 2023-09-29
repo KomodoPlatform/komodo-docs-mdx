@@ -15,7 +15,7 @@ import remarkMdx from "remark-mdx";
 import { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
 
-const manualLinkFile = 'links-to-manually-check'
+const manualLinkFile = "links-to-manually-check";
 const manualLinkArray = [];
 
 (async function () {
@@ -29,7 +29,7 @@ const manualLinkArray = [];
       const filePath = filepaths[index];
       await processFile(filePath, filepathSlugs);
     }
-    fs.writeFileSync(manualLinkFile,JSON.stringify(manualLinkArray,null,2))
+    fs.writeFileSync(manualLinkFile, JSON.stringify(manualLinkArray, null, 2));
   } catch (error) {
     if (error) throw error;
   }
@@ -149,24 +149,40 @@ async function processLink(link, currFilePath, filepathSlugs) {
   }
   const isExternalURL = /^https?:\/\//;
   if (isExternalURL.test(link)) {
-    if(link.startsWith('http://127.0.0.1') || link.startsWith('https://127.0.0.1') || link.startsWith('http://localhost') || link.startsWith('https://localhost')) {
-      return link
+    if (
+      link.startsWith("http://127.0.0.1") ||
+      link.startsWith("https://127.0.0.1") ||
+      link.startsWith("http://localhost") ||
+      link.startsWith("https://localhost")
+    ) {
+      return link;
     }
-    //TODO: 
-    if(link.startsWith("https://github.com/dimxy/")){
-      return link
+    //TODO:
+    if (link.startsWith("https://github.com/dimxy/")) {
+      return link;
     }
     try {
       const statusCode = await checkUrlStatusCode(link);
       if (statusCode === 200) {
         //console.log("The external URL exists: " + link);
         return link;
-      } else if (statusCode === 301 || statusCode === 302 || statusCode === 308 || statusCode === 307) {
-        console.log(`This link: ${link} has a ${statusCode} redirect `)
+      } else if (
+        statusCode === 301 ||
+        statusCode === 302 ||
+        statusCode === 308 ||
+        statusCode === 307
+      ) {
+        console.log(`This link: ${link} has a ${statusCode} redirect `);
         return link;
-      }else if (statusCode === 403 || statusCode === 405) {
-        console.log(`Check this link manually: ${link}.It responds with statuscode: ${statusCode} `)
-        manualLinkArray.push(link)
+      } else if (
+        statusCode === 403 ||
+        statusCode === 405 ||
+        statusCode === 500
+      ) {
+        console.log(
+          `Check this link manually: ${link}.It responds with statuscode: ${statusCode} `
+        );
+        manualLinkArray.push(link);
         return link;
       } else {
         throw new Error(
@@ -305,7 +321,7 @@ export function walkDir(dirPath, callback) {
 }
 
 function isValidTitleDescExports(str) {
- // console.log(str);
+  // console.log(str);
   try {
     const parsed = acorn.parse(str, {
       sourceType: "module",
@@ -356,17 +372,20 @@ function checkUrlStatusCode(url) {
     }
     let requestOptions = new URL(url);
     requestOptions.headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36',
-        'Referer': 'https://www.google.com/'
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+      Referer: "https://www.google.com/",
     };
-
-    client
-      .get(requestOptions, (response) => {
-        // Resolve the promise with true if status code is 200, else false
-        resolve(response.statusCode);
-      })
-      .on("error", (err) => {
-        reject(err);
-      });
+    const req = client.get(requestOptions, (response) => {
+      // Resolve the promise with true if status code is 200, else false
+      resolve(response.statusCode);
+    });
+    req.on("error", (err) => {
+      reject(err);
+    });
+    req.setTimeout(5000, () => {
+      req.destroy();
+      reject(new Error("Request timed out " + url));
+    });
   });
 }
