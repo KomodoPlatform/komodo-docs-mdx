@@ -4,6 +4,8 @@ import { SKIP, visit } from "unist-util-visit";
 
 import { constants } from "fs";
 import fs from "fs";
+import http from "http";
+import https from "https";
 import { is } from "unist-util-is";
 import { mdxAnnotations } from "mdx-annotations";
 import path from "path";
@@ -13,17 +15,21 @@ import remarkMdx from "remark-mdx";
 import { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
 
+const manualLinkFile = 'links-to-manually-check'
+const manualLinkArray = [];
+
 (async function () {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    await createFileSlugs(filepaths);
+    //await createFileSlugs(filepaths);
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
       const filePath = filepaths[index];
       await processFile(filePath, filepathSlugs);
     }
+    fs.writeFileSync(manualLinkFile,JSON.stringify(manualLinkArray,null,2))
   } catch (error) {
     if (error) throw error;
   }
@@ -84,9 +90,9 @@ async function processFile(filePath, filepathSlugs) {
       }
     })
     .use(() => (tree) => {
-      visit(tree, "link", (node) => {
+      visit(tree, "link", async (node) => {
         //Process the link
-        node.url = processLink(node.url, filePath, filepathSlugs);
+        node.url = await processLink(node.url, filePath, filepathSlugs);
       });
     })
     .use(() => (tree) => {
@@ -113,7 +119,7 @@ async function processFile(filePath, filepathSlugs) {
             if (node.children.length !== 1 || originalChild.lang !== "json") {
               throw new Error(
                 `unexpected code block in file ${filePath} : ` +
-                JSON.stringify()
+                  JSON.stringify()
               );
             }
             const clonedChild = JSON.parse(JSON.stringify(originalChild));
@@ -126,7 +132,7 @@ async function processFile(filePath, filepathSlugs) {
           }
         } catch (error) {
           console.log(filePath);
-          console.log(node)
+          console.log(node);
           throw new Error(error);
         }
       });
@@ -137,12 +143,42 @@ async function processFile(filePath, filepathSlugs) {
   }
 }
 // Function to process a link
-function processLink(link, currFilePath, filepathSlugs) {
+async function processLink(link, currFilePath, filepathSlugs) {
   if (link.startsWith("mailto:")) {
     return link;
   }
   const isExternalURL = /^https?:\/\//;
-  if (isExternalURL.test(link)) return link;
+  if (isExternalURL.test(link)) {
+    if(link.startsWith('http://127.0.0.1') || link.startsWith('https://127.0.0.1') || link.startsWith('http://localhost') || link.startsWith('https://localhost')) {
+      return link
+    }
+    //TODO: 
+    if(link.startsWith("https://github.com/dimxy/")){
+      return link
+    }
+    try {
+      const statusCode = await checkUrlStatusCode(link);
+      if (statusCode === 200) {
+        //console.log("The external URL exists: " + link);
+        return link;
+      } else if (statusCode === 301 || statusCode === 302 || statusCode === 308 || statusCode === 307) {
+        console.log(`This link: ${link} has a ${statusCode} redirect `)
+        return link;
+      }else if (statusCode === 403 || statusCode === 405) {
+        console.log(`Check this link manually: ${link}.It responds with statuscode: ${statusCode} `)
+        manualLinkArray.push(link)
+        return link;
+      } else {
+        throw new Error(
+          `The URL ${link} in the file ${currFilePath} returned a statuscode: ${statusCode}`
+        );
+      }
+    } catch (err) {
+      console.log(`Checking the URL ${link} in the file ${currFilePath}`);
+      throw new Error(err);
+    }
+  }
+
   let filePath = "src/pages";
   let strippedPath = link.split("#")[0]; // strips hash
   if (strippedPath.endsWith("/")) {
@@ -210,16 +246,16 @@ function processLink(link, currFilePath, filepathSlugs) {
     slug &&
     !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
   ) {
-    console.log("------------------------------------------------")
-    console.log("currNormalisedDir: " + currNormalisedDir)
-    console.log("currFilePath: " + currFilePath)
-    console.log("hash: " + hash)
-    console.log("strippedPath: " + strippedPath)
-    console.log("link: " + link)
-    console.log("correctUrl: " + correctUrl)
-    console.log("internalLinkFile: " + internalLinkFile)
-    console.log("slug: " + slug)
-    console.log("------------------------------------------------")
+    console.log("------------------------------------------------");
+    console.log("currNormalisedDir: " + currNormalisedDir);
+    console.log("currFilePath: " + currFilePath);
+    console.log("hash: " + hash);
+    console.log("strippedPath: " + strippedPath);
+    console.log("link: " + link);
+    console.log("correctUrl: " + correctUrl);
+    console.log("internalLinkFile: " + internalLinkFile);
+    console.log("slug: " + slug);
+    console.log("------------------------------------------------");
     throw new Error(
       `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile}`
     );
@@ -228,12 +264,14 @@ function processLink(link, currFilePath, filepathSlugs) {
     fs.accessSync(internalLinkFile, constants.F_OK);
   } catch (err) {
     console.log("currNormalisedDir:" + currNormalisedDir);
-    console.log("currFilePath: " + currFilePath)
-    console.log("hash: " + hash)
-    console.log("strippedPath: " + strippedPath)
-    console.log("link: " + link)
-    console.log("correctUrl: " + correctUrl)
-    console.log("Internal link file doesn't exist/can't access it: " + internalLinkFile);
+    console.log("currFilePath: " + currFilePath);
+    console.log("hash: " + hash);
+    console.log("strippedPath: " + strippedPath);
+    console.log("link: " + link);
+    console.log("correctUrl: " + correctUrl);
+    console.log(
+      "Internal link file doesn't exist/can't access it: " + internalLinkFile
+    );
     throw new Error(err);
   }
 
@@ -267,7 +305,7 @@ export function walkDir(dirPath, callback) {
 }
 
 function isValidTitleDescExports(str) {
-  console.log(str);
+ // console.log(str);
   try {
     const parsed = acorn.parse(str, {
       sourceType: "module",
@@ -302,4 +340,33 @@ function isValidTitleDescExports(str) {
     //console.log(e)
     return false; // Parsing error means the string is not valid JS
   }
+}
+
+function checkUrlStatusCode(url) {
+  return new Promise((resolve, reject) => {
+    let client;
+
+    if (url.startsWith("https://")) {
+      client = https;
+    } else if (url.startsWith("http://")) {
+      client = http;
+    } else {
+      reject(new Error("URL must start with http:// or https://"));
+      return;
+    }
+    let requestOptions = new URL(url);
+    requestOptions.headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36',
+        'Referer': 'https://www.google.com/'
+    };
+
+    client
+      .get(requestOptions, (response) => {
+        // Resolve the promise with true if status code is 200, else false
+        resolve(response.statusCode);
+      })
+      .on("error", (err) => {
+        reject(err);
+      });
+  });
 }
