@@ -16,7 +16,9 @@ import { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
 
 const manualLinkFile = "links-to-manually-check";
-fs.unlinkSync(manualLinkFile);
+if (fs.existsSync(manualLinkFile)) {
+  fs.unlinkSync(manualLinkFile);
+}
 
 (async function () {
   try {
@@ -171,10 +173,10 @@ async function processLink(link, currFilePath, filepathSlugs) {
         statusCode === 308 ||
         statusCode === 307
       ) {
-        console.log(
-          `This link: ${link} has a ${statusCode} redirect to ${newLocation}`
+        throw new Error(
+          `The link: ${link} has a ${statusCode} redirect to ${newLocation}`
         );
-        return newLocation;
+        //return newLocation;
       } else if (
         statusCode === 403 ||
         statusCode === 405 ||
@@ -193,7 +195,11 @@ async function processLink(link, currFilePath, filepathSlugs) {
       }
     } catch (err) {
       console.log(`Checking the URL ${link} in the file ${currFilePath}`);
-      throw new Error(err);
+      if (err.message.startsWith("Request timed out")) {
+        return link;
+      } else {
+        throw new Error(err);
+      }
     }
   }
 
@@ -385,7 +391,6 @@ function checkUrlStatusCode(url) {
         response.statusCode < 400 &&
         response.headers.location
       ) {
-        // The request was redirected. The new URL is in response.headers.location
         resolve({
           newLocation: response.headers.location,
           statusCode: response.statusCode,
@@ -400,9 +405,9 @@ function checkUrlStatusCode(url) {
     req.on("error", (err) => {
       reject(err);
     });
-    // req.setTimeout(10000, () => {
-    //   req.destroy();
-    //   reject(new Error("Request timed out " + url));
-    // });
+    req.setTimeout(5000, () => {
+      req.destroy();
+      reject(new Error("Request timed out " + url));
+    });
   });
 }
