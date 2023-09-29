@@ -201,6 +201,7 @@ function processLink(link, currFilePath, filepathSlugs) {
   );
   let slug;
   if (correctUrlSplit[1]) {
+    let slugify = slugifyWithCounter();
     slug = slugify(correctUrlSplit[1]);
     correctUrl = correctUrlSplit[0] + "#" + slug;
   }
