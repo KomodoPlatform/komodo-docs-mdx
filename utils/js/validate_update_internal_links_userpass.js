@@ -16,7 +16,7 @@ import { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
 
 const manualLinkFile = "links-to-manually-check";
-const manualLinkArray = [];
+fs.unlinkSync(manualLinkFile);
 
 (async function () {
   try {
@@ -29,7 +29,6 @@ const manualLinkArray = [];
       const filePath = filepaths[index];
       await processFile(filePath, filepathSlugs);
     }
-    fs.writeFileSync(manualLinkFile, JSON.stringify(manualLinkArray, null, 2));
   } catch (error) {
     if (error) throw error;
   }
@@ -162,7 +161,7 @@ async function processLink(link, currFilePath, filepathSlugs) {
       return link;
     }
     try {
-      const statusCode = await checkUrlStatusCode(link);
+      const { newLocation, statusCode } = await checkUrlStatusCode(link);
       if (statusCode === 200) {
         //console.log("The external URL exists: " + link);
         return link;
@@ -172,8 +171,10 @@ async function processLink(link, currFilePath, filepathSlugs) {
         statusCode === 308 ||
         statusCode === 307
       ) {
-        console.log(`This link: ${link} has a ${statusCode} redirect `);
-        return link;
+        console.log(
+          `This link: ${link} has a ${statusCode} redirect to ${newLocation}`
+        );
+        return newLocation;
       } else if (
         statusCode === 403 ||
         statusCode === 405 ||
@@ -182,7 +183,8 @@ async function processLink(link, currFilePath, filepathSlugs) {
         console.log(
           `Check this link manually: ${link}.It responds with statuscode: ${statusCode} `
         );
-        manualLinkArray.push(link);
+        fs.appendFileSync(manualLinkFile, link + "\n");
+
         return link;
       } else {
         throw new Error(
@@ -376,16 +378,31 @@ function checkUrlStatusCode(url) {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
       Referer: "https://www.google.com/",
     };
+
     const req = client.get(requestOptions, (response) => {
-      // Resolve the promise with true if status code is 200, else false
-      resolve(response.statusCode);
+      if (
+        response.statusCode >= 300 &&
+        response.statusCode < 400 &&
+        response.headers.location
+      ) {
+        // The request was redirected. The new URL is in response.headers.location
+        resolve({
+          newLocation: response.headers.location,
+          statusCode: response.statusCode,
+        });
+      } else {
+        resolve({
+          newLocation: "",
+          statusCode: response.statusCode,
+        });
+      }
     });
     req.on("error", (err) => {
       reject(err);
     });
-    req.setTimeout(5000, () => {
-      req.destroy();
-      reject(new Error("Request timed out " + url));
-    });
+    // req.setTimeout(10000, () => {
+    //   req.destroy();
+    //   reject(new Error("Request timed out " + url));
+    // });
   });
 }
