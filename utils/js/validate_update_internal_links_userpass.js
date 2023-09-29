@@ -150,57 +150,8 @@ async function processLink(link, currFilePath, filepathSlugs) {
   }
   const isExternalURL = /^https?:\/\//;
   if (isExternalURL.test(link)) {
-    if (
-      link.startsWith("http://127.0.0.1") ||
-      link.startsWith("https://127.0.0.1") ||
-      link.startsWith("http://localhost") ||
-      link.startsWith("https://localhost")
-    ) {
-      return link;
-    }
-    //TODO:
-    if (link.startsWith("https://github.com/dimxy/")) {
-      return link;
-    }
-    try {
-      const { newLocation, statusCode } = await checkUrlStatusCode(link);
-      if (statusCode === 200) {
-        //console.log("The external URL exists: " + link);
-        return link;
-      } else if (
-        statusCode === 301 ||
-        statusCode === 302 ||
-        statusCode === 308 ||
-        statusCode === 307
-      ) {
-        throw new Error(
-          `The link: ${link} has a ${statusCode} redirect to ${newLocation}`
-        );
-        //return newLocation;
-      } else if (
-        statusCode === 403 ||
-        statusCode === 405 ||
-        statusCode === 500
-      ) {
-        console.log(
-          `Check this link manually: ${link}.It responds with statuscode: ${statusCode} `
-        );
-        fs.appendFileSync(manualLinkFile, link + "\n");
-
-        return link;
-      } else {
-        throw new Error(
-          `The URL ${link} in the file ${currFilePath} returned a statuscode: ${statusCode}`
-        );
-      }
-    } catch (err) {
-      console.log(`Checking the URL ${link} in the file ${currFilePath}`);
-      if (err.message.startsWith("Request timed out")) {
-        return link;
-      } else {
-        throw new Error(err);
-      }
-    }
+    await processExternalLink(link, currFilePath);
+    return link;
   }
 
   let filePath = "src/pages";
@@ -410,4 +361,47 @@ function checkUrlStatusCode(url) {
       reject(new Error("Request timed out " + url));
     });
   });
+}
+
+async function processExternalLink(link, currFilePath) {
+  if (
+    link.startsWith("http://127.0.0.1") ||
+    link.startsWith("https://127.0.0.1") ||
+    link.startsWith("http://localhost") ||
+    link.startsWith("https://localhost")
+  ) {
+    return;
+  }
+  try {
+    const { newLocation, statusCode } = await checkUrlStatusCode(link);
+    if (statusCode === 200) {
+      //console.log("The external URL exists: " + link);
+      return;
+    } else if (
+      statusCode === 301 ||
+      statusCode === 302 ||
+      statusCode === 308 ||
+      statusCode === 307
+    ) {
+      throw new Error(
+        `The link: ${link} has a ${statusCode} redirect to ${newLocation}`
+      );
+    } else if (statusCode === 403 || statusCode === 405 || statusCode === 500) {
+      console.log(
+        `Check this link manually: ${link}.It responds with statuscode: ${statusCode} `
+      );
+      fs.appendFileSync(manualLinkFile, link + "\n");
+    } else {
+      throw new Error(
+        `The URL ${link} in the file ${currFilePath} returned a statuscode: ${statusCode}`
+      );
+    }
+  } catch (err) {
+    console.log(`Checking the URL ${link} in the file ${currFilePath}`);
+    if (err.message.startsWith("Request timed out")) {
+      return;
+    } else {
+      throw new Error(err);
+    }
+  }
 }
