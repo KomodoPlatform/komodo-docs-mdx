@@ -23,35 +23,39 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
 
 ### Request Parameters
 
-| Parameter    | Type    | Description                                                                                                                                       |
-| ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chains       | array   | List of chains to scan for NFTs.                                                                                                                  |
-| max          | boolean | Optional, defaults to `false`. If `true`, response will return all NFTs without pagination, and will ignore the `limit` and `page_number` values. |
-| limit        | integer | Optional, defaults to `10`. The number of NFTs displayed per page in response.                                                                    |
-| page\_number | integer | Optional, defaults to `0`. The page offset for items in response.                                                                                 |
+| Parameter           | Type    | Description                                                                                                                                       |
+| ------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains              | array   | List of chains to scan for NFTs.                                                                                                                  |
+| max                 | boolean | Optional, defaults to `false`. If `true`, response will return all NFTs without pagination, and will ignore the `limit` and `page_number` values. |
+| limit               | integer | Optional, defaults to `10`. The number of NFTs displayed per page in response.                                                                    |
+| page\_number        | integer | Optional, defaults to `1`. The page offset for items in response.                                                                                 |
+| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potentially spam link found in collection name, token name, symbol will be censored                 |
+| filters             | object  | Optional. A standard [TokenFilter](/atomicdex/api/v20/#token-filter) object.                                                                      |
 
 ### Response Parameters
 
-| Parameter              | Type    | Description                                                                                                                                                                                                 |
-| ---------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| amount                 | string  | The amount of this NFT the user owns (used by `ERC1155`).                                                                                                                                                   |
-| block\_number\_minted  | integer | The block height when the NFT was minted.                                                                                                                                                                   |
-| block\_number          | integer | The block height when the amount or owner changed.                                                                                                                                                          |
-| chain                  | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                                                       |
-| collection\_name       | string  | May be `null`. An NFT collection name.                                                                                                                                                                      |
-| contract\_type         | string  | The type of NFT contract standard. One of `ERC721` or `ERC1155`.                                                                                                                                            |
-| last\_token\_uri\_sync | string  | When the token\_uri was last updated.                                                                                                                                                                       |
-| last\_metadata\_sync   | string  | When the metadata was last updated.                                                                                                                                                                         |
-| metadata               | string  | The metadata of the token.                                                                                                                                                                                  |
-| minter\_address        | string  | Minter address.                                                                                                                                                                                             |
-| owner\_of              | string  | The wallet address of the owner of the NFT.                                                                                                                                                                 |
-| possible\_spam         | boolean | May be `null`. If `true`, the contract address is has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam, phishing attempts, or suspicious activities. |
-| symbol                 | string  | May be `null`. The symbol of the NFT contract.                                                                                                                                                              |
-| token\_address         | string  | The address of the NFT contract.                                                                                                                                                                            |
-| token\_id              | string  | The token ID of the NFT.                                                                                                                                                                                    |
-| token\_hash            | string  | The token hash.                                                                                                                                                                                             |
-| token\_uri             | string  | The URI to the metadata of the token.                                                                                                                                                                       |
-| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                                                      |
+| Parameter              | Type    | Description                                                                                                                                                             |
+| ---------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount                 | string  | The amount of this NFT the user owns (used by `ERC1155`).                                                                                                               |
+| block\_number\_minted  | integer | The block height when the NFT was minted. May be `null`.                                                                                                                |
+| block\_number          | integer | The block height when the amount or owner changed.                                                                                                                      |
+| chain                  | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                   |
+| name                   | string  | May be `null`. An NFT collection name.                                                                                                                                  |
+| contract\_type         | string  | The type of NFT contract standard. One of `ERC721` or `ERC1155`.                                                                                                        |
+| last\_token\_uri\_sync | string  | When the token\_uri was last updated.                                                                                                                                   |
+| last\_metadata\_sync   | string  | When the metadata was last updated.                                                                                                                                     |
+| metadata               | string  | The metadata of the token. May be `null`.                                                                                                                               |
+| minter\_address        | string  | Minter address. May be `null`.                                                                                                                                          |
+| owner\_of              | string  | The wallet address of the owner of the NFT.                                                                                                                             |
+| possible\_spam         | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities.   |
+| possible\_phishing     | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.            |
+| symbol                 | string  | May be `null`. The symbol of the NFT contract.                                                                                                                          |
+| token\_address         | string  | The address of the NFT contract.                                                                                                                                        |
+| token\_id              | string  | The token ID of the NFT.                                                                                                                                                |
+| token\_hash            | string  | The token hash. May be `null`.                                                                                                                                          |
+| token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                    |
+| token\_domain          | string  | Token domain. May be `null`.                                                                                                                                            |
+| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                  |
 
 #### 📌 Example with no optional params
 
@@ -87,17 +91,21 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
           "block_number_minted": 25465916,
           "block_number": 25919780,
           "contract_type": "ERC1155",
-          "collection_name": null,
+          "name": null,
           "symbol": null,
           "token_uri": "https://tikimetadata.s3.amazonaws.com/tiki_box.json",
+          "token_domain": "tikimetadata.s3.amazonaws.com",
           "metadata": "{\"name\":\"Tiki box\",\"description\":\"Born to usher in Bull markets. Tiki JumpStarters are crazed guardians that worship NGU technology. Tiki guardians attach themselves to their owners to guide and protect them from the evils of the crypto industry. Manifested by the power of community and infused with unlimited creativity, the Unlockable Road Map summons powerful gifts and surprises to all Tiki Holders. Booyaaah!!\",\"external_url\":\"\",\"image\":\"https://tikimetadata.s3.amazonaws.com/tiki_box.png\",\"attributes\":[{\"trait_type\":\"Crypto Logo\",\"value\":\"TIKI NFT CRYPTOLOGO SCAR\"}],\"properties\":{\"category\":\"image\",\"creators\":[]}}",
           "last_token_uri_sync": "2023-02-07T17:10:08.402Z",
           "last_metadata_sync": "2023-02-07T17:10:16.858Z",
           "minter_address": "ERC1155 tokens don't have a single minter",
           "possible_spam": false,
+          "possible_phishing": false,
           "uri_meta": {
             "image": "https://tikimetadata.s3.amazonaws.com/tiki_box.png",
-            "token_name": "Tiki box",
+            "image_url": "https://tikimetadata.s3.amazonaws.com/tiki_box.png",
+            "image_domain": "tikimetadata.s3.amazonaws.com",
+            "name": "Tiki box",
             "description": "Born to usher in Bull markets. Tiki JumpStarters are crazed guardians that worship NGU technology. Tiki guardians attach themselves to their owners to guide and protect them from the evils of the crypto industry. Manifested by the power of community and infused with unlimited creativity, the Unlockable Road Map summons powerful gifts and surprises to all Tiki Holders. Booyaaah!!",
             "attributes": [
               {
@@ -105,7 +113,11 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
                 "value": "TIKI NFT CRYPTOLOGO SCAR"
               }
             ],
-            "animation_url": null
+            "animation_url": null,
+            "animation_domain": null,
+            "external_url": "",
+            "external_domain": null,
+            "image_details": null
           }
         },
         {
@@ -117,18 +129,22 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
           "token_hash": "28f970585fd743b056859a6e41f50a8e",
           "block_number_minted": 36781490,
           "block_number": 42491885,
-          "contract_type": "ERC1155",
-          "collection_name": null,
+          "type": "ERC1155",
+          "name": null,
           "symbol": null,
           "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+          "token_domain": "app.thesmurfssociety.com",
           "metadata": "{\"name\":\"Forest Mushrooms\",\"description\":\"Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.\",\"image\":\"https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg\",\"animation_url\":null,\"external_url\":\"https://app.thesmurfssociety.com/detail/ingredients/5\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Ingredient\"},{\"trait_type\":\"Category\",\"value\":\"COMMON\"}]}",
           "last_token_uri_sync": "2022-12-13T13:12:50.840Z",
           "last_metadata_sync": "2023-05-15T07:30:04.882Z",
           "minter_address": "ERC1155 tokens don't have a single minter",
           "possible_spam": false,
+          "possible_phishing": false,
           "uri_meta": {
             "image": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
-            "token_name": "Forest Mushrooms",
+            "image_url": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+            "image_domain": "metadata.thesmurfssociety.com",
+            "name": "Forest Mushrooms",
             "description": "Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.",
             "attributes": [
               {
@@ -140,7 +156,11 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
                 "value": "COMMON"
               }
             ],
-            "animation_url": null
+            "animation_url": null,
+            "animation_domain": null,
+            "external_url": "https://app.thesmurfssociety.com/detail/ingredients/5",
+            "external_domain": "app.thesmurfssociety.com",
+            "image_details": null
           }
         }
       ],
@@ -188,17 +208,21 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
           "block_number_minted": 36781490,
           "block_number": 42491885,
           "contract_type": "ERC1155",
-          "collection_name": null,
+          "name": null,
           "symbol": null,
           "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+          "token_domain": "app.thesmurfssociety.com",
           "metadata": "{\"name\":\"Forest Mushrooms\",\"description\":\"Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.\",\"image\":\"https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg\",\"animation_url\":null,\"external_url\":\"https://app.thesmurfssociety.com/detail/ingredients/5\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Ingredient\"},{\"trait_type\":\"Category\",\"value\":\"COMMON\"}]}",
           "last_token_uri_sync": "2022-12-13T13:12:50.840Z",
           "last_metadata_sync": "2023-05-15T07:30:04.882Z",
           "minter_address": "ERC1155 tokens don't have a single minter",
           "possible_spam": false,
+          "possible_phishing": false,
           "uri_meta": {
             "image": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
-            "token_name": "Forest Mushrooms",
+            "image_url": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+            "image_domain": "metadata.thesmurfssociety.com",
+            "name": "Forest Mushrooms",
             "description": "Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.",
             "attributes": [
               {
@@ -210,7 +234,11 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
                 "value": "COMMON"
               }
             ],
-            "animation_url": null
+            "animation_url": null,
+            "animation_domain": null,
+            "external_url": "https://app.thesmurfssociety.com/detail/ingredients/5",
+            "external_domain": "app.thesmurfssociety.com",
+            "image_details": null
           }
         }
       ],
@@ -228,38 +256,45 @@ Returns a list of the NFT transfers involving the user, shown in descending orde
 
 ### Request Parameters
 
-| Parameter    | Type    | Description                                                                                                                                       |
-| ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chains       | array   | List of chains to scan for NFTs.                                                                                                                  |
-| max          | boolean | Optional, defaults to `false`. If `true`, response will return all NFTs without pagination, and will ignore the `limit` and `page_number` values. |
-| limit        | integer | Optional, defaults to `10`. The number of NFTs displayed per page in response.                                                                    |
-| page\_number | integer | Optional, defaults to `0`. The page offset for items in response.                                                                                 |
-| filters      | object  | Optional. A standard [TokenFilter](/atomicdex/api/v20/#token-filter) object.                                                                      |
+| Parameter            | Type   | Description                                                                                                                                       |
+| ------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains              | array   | List of chains to scan for NFTs.                                                                                                                  |
+| max                 | boolean | Optional, defaults to `false`. If `true`, response will return all NFTs without pagination, and will ignore the `limit` and `page_number` values. |
+| limit               | integer | Optional, defaults to `10`. The number of NFTs displayed per page in response.                                                                    |
+| page\_number        | integer | Optional, defaults to `1`. The page offset for items in response.                                                                                 |
+| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potentially spam link found in `collection_name`, `token_name` will be censored                     |
+| filters             | object  | Optional. A standard [TokenTransferFilter](/atomicdex/api/v20/#token-transfer-filter) object.                                                     |
 
 ### Response Parameters
 
-| Parameter          | Type    | Description                                                                                                                                                                                                 |
-| ------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| amount             | string  | Amount of tokens transferred.                                                                                                                                                                               |
-| block\_hash        | string  | Hash of block in which transfer occurred.                                                                                                                                                                   |
-| block\_number      | integer | Height of block in which transfer occurred.                                                                                                                                                                 |
-| block\_timestamp   | string  | Block date/time string.                                                                                                                                                                                     |
-| chain              | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                                                       |
-| collection\_name   | string  | May be `null`. Name of collection which token belongs to.                                                                                                                                                   |
-| contract\_type     | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                                                                       |
-| token\_address     | string  | Address of token transferred.                                                                                                                                                                               |
-| token\_id          | string  | Token ID.                                                                                                                                                                                                   |
-| possible\_spam     | boolean | May be `null`. If `true`, the contract address is has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam, phishing attempts, or suspicious activities. |
-| transaction\_hash  | string  | Transaction ID of the transfer.                                                                                                                                                                             |
-| transaction\_index | string  | Transaction index of the transfer.                                                                                                                                                                          |
-| log\_index         | string  | Log index of the transfer.                                                                                                                                                                                  |
-| value              | string  | Tranfer value.                                                                                                                                                                                              |
-| transaction\_type  | string  | Transaction type. Possible values are `Single`.                                                                                                                                                             |
-| from\_address      | string  | Address of previous owner which sent the token(s).                                                                                                                                                          |
-| to\_address        | string  | Address of new owner which received the token(s).                                                                                                                                                           |
-| status             | string  | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`.                                        |
-| verified           | integer |                                                                                                                                                                                                             |
-| operator           | string  | May be `null`.                                                                                                                                                                                              |
+| Parameter          | Type    | Description                                                                                                                                                           |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount             | string  | Amount of tokens transferred.                                                                                                                                         |
+| block\_hash        | string  | May be `null`. Hash of block in which transfer occurred.                                                                                                              |
+| block\_number      | integer | Height of block in which transfer occurred.                                                                                                                           |
+| block\_timestamp   | integer | Block time.                                                                                                                                                           |
+| chain              | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| token\_uri         | string  | May be `null`. The URI to the metadata of the token.                                                                                                                  |
+| token\_domain      | string  | May be `null`. Extracted domain from the `token_uri`, if valid.                                                                                                       |
+| collection\_name   | string  | May be `null`. Name of collection which token belongs to.                                                                                                             |
+| image\_url         | string  | May be `null`. The URI to the token image.                                                                                                                            |
+| image\_domain      | string  | May be `null`. Extracted domain from the `image_url`, if valid.                                                                                                       |
+| token\_name        | string  | May be `null`. Name of the token.                                                                                                                                     |
+| contract\_type     | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                                 |
+| token\_address     | string  | Address of token transferred.                                                                                                                                         |
+| token\_id          | string  | Token ID.                                                                                                                                                             |
+| possible\_spam     | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| transaction\_hash  | string  | Transaction ID of the transfer.                                                                                                                                       |
+| transaction\_index | string  | May be `null`. Transaction index of the transfer.                                                                                                                     |
+| log\_index         | string  | Log index of the transfer.                                                                                                                                            |
+| value              | string  | May be `null`. Tranfer value.                                                                                                                                         |
+| transaction\_type  | string  | May be `null`. Transaction type. Possible values are `Single`.                                                                                                        |
+| from\_address      | string  | Address of previous owner which sent the token(s).                                                                                                                    |
+| to\_address        | string  | Address of new owner which received the token(s).                                                                                                                     |
+| status             | string  | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`.  |
+| verified           | integer | May be `null`.                                                                                                                                                        |
+| operator           | string  | May be `null`.                                                                                                                                                        |
 
 <DevComment>
   `verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incormoprates this.
@@ -299,7 +334,7 @@ Returns a list of the NFT transfers involving the user, shown in descending orde
         {
           "chain": "POLYGON",
           "block_number": 40103927,
-          "block_timestamp": "2023-03-08T10:11:36.000Z",
+          "block_timestamp": 1678270296,
           "block_hash": "0xdd5b1ad793332343e206ee0b566a30821ab39d1f79e921f787f1ea23b8a90dbd",
           "transaction_hash": "0xfe8d5fc480c534625d7e6fc81eadff8b8f6c986cd46f00d5993b6e21d6bd28c9",
           "transaction_index": 114,
@@ -309,14 +344,20 @@ Returns a list of the NFT transfers involving the user, shown in descending orde
           "transaction_type": "Single",
           "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
           "token_id": "5",
-          "collection_name": null,
           "from_address": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
           "to_address": "0x6fad0ec6bb76914b2a2a800686acc22970645820",
           "status": "Send",
           "amount": "1",
           "verified": 1,
           "operator": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
-          "possible_spam": false
+          "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+          "token_domain": "app.thesmurfssociety.com",
+          "collection_name": null,
+          "image_url": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+          "image_domain": "metadata.thesmurfssociety.com",
+          "token_name": "Forest Mushrooms",
+          "possible_spam": false,
+          "possible_phishing": false
         }
       ],
       "skipped": 1,
@@ -339,26 +380,28 @@ Returns a list of the NFT transfers involving the user, shown in descending orde
 
 ### Response Parameters
 
-| Parameter              | Type    | Description                                                            |
-| ---------------------- | ------- | ---------------------------------------------------------------------- |
-| amount                 | string  | Amount of tokens.                                                      |
-| block\_number\_minted  | integer | Block height when the token was minted.                                |
-| block\_number          | integer | Current block height.                                                  |
-| chain                  | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.  |
-| collection\_name       | string  | Collection name. May be `null`.                                        |
-| contract\_type         | string  | Contract type. `ERC721` or `ERC1155`.                                  |
-| owner\_of              | string  | Address of the token owner.                                            |
-| token\_address         | string  | Token address.                                                         |
-| token\_id              | string  | Token ID.                                                              |
-| token\_hash            | string  | Token hash.                                                            |
-| symbol                 | string  | Token symbol.                                                          |
-| token\_uri             | string  | Token URI.                                                             |
-| metadata               | string  | Token metadata.                                                        |
-| last\_token\_uri\_sync | string  | Last time the token URI was synced.                                    |
-| last\_metadata\_sync   | string  | Last time the token metadata was synced.                               |
-| minter\_address        | string  | Minter address.                                                        |
-| possible\_spam         | boolean | Possible spam.                                                         |
-| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object. |
+| Parameter              | Type    | Description                                                                                                                                                             |
+| ---------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount                 | string  | The amount of this NFT the user owns (used by `ERC1155`).                                                                                                               |
+| block\_number\_minted  | integer | The block height when the NFT was minted. May be `null`.                                                                                                                |
+| block\_number          | integer | The block height when the amount or owner changed.                                                                                                                      |
+| chain                  | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                   |
+| name                   | string  | May be `null`. An NFT collection name.                                                                                                                                  |
+| contract\_type         | string  | The type of NFT contract standard. One of `ERC721` or `ERC1155`.                                                                                                        |
+| last\_token\_uri\_sync | string  | When the token\_uri was last updated.                                                                                                                                   |
+| last\_metadata\_sync   | string  | When the metadata was last updated.                                                                                                                                     |
+| metadata               | string  | The metadata of the token. May be `null`.                                                                                                                               |
+| minter\_address        | string  | Minter address. May be `null`.                                                                                                                                          |
+| owner\_of              | string  | The wallet address of the owner of the NFT.                                                                                                                             |
+| possible\_spam         | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities.   |
+| possible\_phishing     | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.            |
+| symbol                 | string  | May be `null`. The symbol of the NFT contract.                                                                                                                          |
+| token\_address         | string  | The address of the NFT contract.                                                                                                                                        |
+| token\_id              | string  | The token ID of the NFT.                                                                                                                                                |
+| token\_hash            | string  | The token hash. May be `null`.                                                                                                                                          |
+| token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                    |
+| token\_domain          | string  | Token domain. May be `null`.                                                                                                                                            |
+| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                  |
 
 #### 📌 Example
 
@@ -391,20 +434,27 @@ Returns a list of the NFT transfers involving the user, shown in descending orde
       "block_number_minted": 25810308,
       "block_number": 28056721,
       "contract_type": "ERC721",
-      "collection_name": "Binance NFT Mystery Box-Back to Blockchain Future",
+      "name": "Binance NFT Mystery Box-Back to Blockchain Future",
       "symbol": "BMBBBF",
       "token_uri": "https://public.nftstatic.com/static/nft/BSC/BMBBBF/214300044414",
+      "token_domain": "public.nftstatic.com",
       "metadata": "{\"image\":\"https://public.nftstatic.com/static/nft/res/4df0a5da04174e1e9be04b22a805f605.png\",\"name\":\"Nebula Nodes\",\"description\":\"Interchain nodes continuously exchange blockchain data amongst each other, supporting blockchain interoperability.\"}",
       "last_token_uri_sync": "2023-02-19T19:12:09.471Z",
       "last_metadata_sync": "2023-02-19T19:12:18.080Z",
       "minter_address": "0xdbdeb0895f3681b87fb3654b5cf3e05546ba24a9",
       "possible_spam": false,
+      "possible_phishing": false,
       "uri_meta": {
         "image": "https://public.nftstatic.com/static/nft/res/4df0a5da04174e1e9be04b22a805f605.png",
-        "token_name": "Nebula Nodes",
+        "image_url": "https://public.nftstatic.com/static/nft/res/4df0a5da04174e1e9be04b22a805f605.png",
+        "name": "Nebula Nodes",
         "description": "Interchain nodes continuously exchange blockchain data amongst each other, supporting blockchain interoperability.",
         "attributes": null,
-        "animation_url": null
+        "animation_url": null,
+        "animation_domain": null,
+        "external_url": null,
+        "external_domain": null,
+        "image_details": null
       }
     },
     "id": null
