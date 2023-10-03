@@ -4,6 +4,8 @@ import { SKIP, visit } from "unist-util-visit";
 
 import { constants } from "fs";
 import fs from "fs";
+import http from "http";
+import https from "https";
 import { is } from "unist-util-is";
 import { mdxAnnotations } from "mdx-annotations";
 import path from "path";
@@ -13,11 +15,16 @@ import remarkMdx from "remark-mdx";
 import { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
 
+const manualLinkFile = "links-to-manually-check";
+if (fs.existsSync(manualLinkFile)) {
+  fs.unlinkSync(manualLinkFile);
+}
+
 (async function () {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    await createFileSlugs(filepaths);
+    //await createFileSlugs(filepaths);
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -84,9 +91,9 @@ async function processFile(filePath, filepathSlugs) {
       }
     })
     .use(() => (tree) => {
-      visit(tree, "link", (node) => {
+      visit(tree, "link", async (node) => {
         //Process the link
-        node.url = processLink(node.url, filePath, filepathSlugs);
+        node.url = await processLink(node.url, filePath, filepathSlugs);
       });
     })
     .use(() => (tree) => {
@@ -126,7 +133,7 @@ async function processFile(filePath, filepathSlugs) {
           }
         } catch (error) {
           console.log(filePath);
-          console.log(node)
+          console.log(node);
           throw new Error(error);
         }
       });
@@ -137,12 +144,16 @@ async function processFile(filePath, filepathSlugs) {
   }
 }
 // Function to process a link
-function processLink(link, currFilePath, filepathSlugs) {
+async function processLink(link, currFilePath, filepathSlugs) {
   if (link.startsWith("mailto:")) {
     return link;
   }
   const isExternalURL = /^https?:\/\//;
-  if (isExternalURL.test(link)) return link;
+  if (isExternalURL.test(link)) {
+    await processExternalLink(link, currFilePath);
+    return link;
+  }
+
   let filePath = "src/pages";
   let strippedPath = link.split("#")[0]; // strips hash
   if (strippedPath.endsWith("/")) {
@@ -210,16 +221,16 @@ function processLink(link, currFilePath, filepathSlugs) {
     slug &&
     !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
   ) {
-    console.log("------------------------------------------------")
-    console.log("currNormalisedDir: " + currNormalisedDir)
-    console.log("currFilePath: " + currFilePath)
-    console.log("hash: " + hash)
-    console.log("strippedPath: " + strippedPath)
-    console.log("link: " + link)
-    console.log("correctUrl: " + correctUrl)
-    console.log("internalLinkFile: " + internalLinkFile)
-    console.log("slug: " + slug)
-    console.log("------------------------------------------------")
+    console.log("------------------------------------------------");
+    console.log("currNormalisedDir: " + currNormalisedDir);
+    console.log("currFilePath: " + currFilePath);
+    console.log("hash: " + hash);
+    console.log("strippedPath: " + strippedPath);
+    console.log("link: " + link);
+    console.log("correctUrl: " + correctUrl);
+    console.log("internalLinkFile: " + internalLinkFile);
+    console.log("slug: " + slug);
+    console.log("------------------------------------------------");
     throw new Error(
       `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile}`
     );
@@ -228,14 +239,14 @@ function processLink(link, currFilePath, filepathSlugs) {
     fs.accessSync(internalLinkFile, constants.F_OK);
   } catch (err) {
     console.log("currNormalisedDir:" + currNormalisedDir);
-    console.log(currFilePath);
-    console.log(hash);
-    console.log(strippedPath);
-
-    console.log(link);
-    console.log(correctUrl);
-
-    console.error("Internal link file doesn't exist: " + internalLinkFile);
+    console.log("currFilePath: " + currFilePath);
+    console.log("hash: " + hash);
+    console.log("strippedPath: " + strippedPath);
+    console.log("link: " + link);
+    console.log("correctUrl: " + correctUrl);
+    console.log(
+      "Internal link file doesn't exist/can't access it: " + internalLinkFile
+    );
     throw new Error(err);
   }
 
@@ -269,7 +280,7 @@ export function walkDir(dirPath, callback) {
 }
 
 function isValidTitleDescExports(str) {
-  console.log(str);
+  // console.log(str);
   try {
     const parsed = acorn.parse(str, {
       sourceType: "module",
@@ -287,12 +298,20 @@ function isValidTitleDescExports(str) {
               declaration.init.type === "Literal"
             ) {
               titleExported = true;
+              // let numChars = declaration.init.value.length;
+              // if (numChars > 60) {
+              //   throw new Error(`Title: "${declaration.init.value}" has ${numChars} characters, which is greater than 60`)
+              // }
             }
             if (
               declaration.id.name === "description" &&
               declaration.init.type === "Literal"
             ) {
               descriptionExported = true;
+              // let numChars = declaration.init.value.length;
+              // if (numChars > 160 || numChars < 140) {
+              //   throw new Error(`Description: "${declaration.init.value}" has ${numChars} characters, which is not between 140 and 160`)
+              // }
             }
           }
         }
@@ -301,7 +320,109 @@ function isValidTitleDescExports(str) {
 
     return titleExported && descriptionExported;
   } catch (e) {
+    throw new Error(e)
     //console.log(e)
-    return false; // Parsing error means the string is not valid JS
+    //return false; // Parsing error means the string is not valid JS
+  }
+}
+
+function checkUrlStatusCode(url) {
+  return new Promise((resolve, reject) => {
+    let client;
+
+    if (url.startsWith("https://")) {
+      client = https;
+    } else if (url.startsWith("http://")) {
+      client = http;
+    } else {
+      reject(new Error("URL must start with http:// or https://"));
+      return;
+    }
+    let requestOptions = new URL(url);
+    requestOptions.headers = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+      Referer: "https://www.google.com/",
+    };
+
+    const req = client.get(requestOptions, (response) => {
+      if (
+        response.statusCode >= 300 &&
+        response.statusCode < 400 &&
+        response.headers.location
+      ) {
+        resolve({
+          newLocation: response.headers.location,
+          statusCode: response.statusCode,
+        });
+      } else {
+        resolve({
+          newLocation: "",
+          statusCode: response.statusCode,
+        });
+      }
+    });
+    req.on("error", (err) => {
+      reject(err);
+    });
+    req.setTimeout(5000, () => {
+      req.destroy();
+      reject(new Error("Request timed out " + url));
+    });
+  });
+}
+
+async function processExternalLink(link, currFilePath) {
+  if (
+    link.startsWith("http://127.0.0.1") ||
+    link.startsWith("https://127.0.0.1") ||
+    link.startsWith("http://localhost") ||
+    link.startsWith("https://localhost")
+  ) {
+    return;
+  }
+  if (
+    link.startsWith("http://twitter.com") ||
+    link.startsWith("https://twitter.com")
+  ) {
+    return;
+  }
+  if (
+    link.startsWith("http://komodoplatform.com/discord") ||
+    link.startsWith("https://komodoplatform.com/discord")
+  ) {
+    return;
+  }
+  try {
+    const { newLocation, statusCode } = await checkUrlStatusCode(link);
+    if (statusCode === 200) {
+      //console.log("The external URL exists: " + link);
+      return;
+    } else if (
+      statusCode === 301 ||
+      statusCode === 302 ||
+      statusCode === 308 ||
+      statusCode === 307
+    ) {
+      throw new Error(
+        `The link: ${link} has a ${statusCode} redirect to ${newLocation}`
+      );
+    } else if (statusCode === 403 || statusCode === 405 || statusCode === 500) {
+      console.log(
+        `Check this link manually: ${link}.It responds with statuscode: ${statusCode} `
+      );
+      fs.appendFileSync(manualLinkFile, link + "\n");
+    } else {
+      throw new Error(
+        `The URL ${link} in the file ${currFilePath} returned a statuscode: ${statusCode}`
+      );
+    }
+  } catch (err) {
+    console.log(`Checking the URL ${link} in the file ${currFilePath}`);
+    if (err.message.startsWith("Request timed out")) {
+      return;
+    } else {
+      throw new Error(err);
+    }
   }
 }
