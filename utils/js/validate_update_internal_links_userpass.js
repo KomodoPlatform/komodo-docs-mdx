@@ -120,7 +120,7 @@ async function processFile(filePath, filepathSlugs) {
             if (node.children.length !== 1 || originalChild.lang !== "json") {
               throw new Error(
                 `unexpected code block in file ${filePath} : ` +
-                  JSON.stringify()
+                JSON.stringify()
               );
             }
             const clonedChild = JSON.parse(JSON.stringify(originalChild));
@@ -298,12 +298,20 @@ function isValidTitleDescExports(str) {
               declaration.init.type === "Literal"
             ) {
               titleExported = true;
+              // let numChars = declaration.init.value.length;
+              // if (numChars > 60) {
+              //   throw new Error(`Title: "${declaration.init.value}" has ${numChars} characters, which is greater than 60`)
+              // }
             }
             if (
               declaration.id.name === "description" &&
               declaration.init.type === "Literal"
             ) {
               descriptionExported = true;
+              // let numChars = declaration.init.value.length;
+              // if (numChars > 160 || numChars < 140) {
+              //   throw new Error(`Description: "${declaration.init.value}" has ${numChars} characters, which is not between 140 and 160`)
+              // }
             }
           }
         }
@@ -312,8 +320,9 @@ function isValidTitleDescExports(str) {
 
     return titleExported && descriptionExported;
   } catch (e) {
+    throw new Error(e)
     //console.log(e)
-    return false; // Parsing error means the string is not valid JS
+    //return false; // Parsing error means the string is not valid JS
   }
 }
 
@@ -368,19 +377,19 @@ async function processExternalLink(link, currFilePath) {
     link.startsWith("http://127.0.0.1") ||
     link.startsWith("https://127.0.0.1") ||
     link.startsWith("http://localhost") ||
-    link.startsWith("https://localhost") 
+    link.startsWith("https://localhost")
   ) {
     return;
   }
-   if (
+  if (
     link.startsWith("http://twitter.com") ||
-    link.startsWith("https://twitter.com") 
+    link.startsWith("https://twitter.com")
   ) {
     return;
   }
   if (
     link.startsWith("http://komodoplatform.com/discord") ||
-    link.startsWith("https://komodoplatform.com/discord") 
+    link.startsWith("https://komodoplatform.com/discord")
   ) {
     return;
   }
