@@ -373,6 +373,9 @@ function checkUrlStatusCode(url) {
 }
 
 async function processExternalLink(link, currFilePath) {
+  let IgnoreURLs = [
+    "https://moralis-proxy.komodo.earth"
+  ]
   if (
     link.startsWith("http://127.0.0.1") ||
     link.startsWith("https://127.0.0.1") ||
@@ -409,8 +412,10 @@ async function processExternalLink(link, currFilePath) {
       );
     } else if (statusCode === 403 || statusCode === 405 || statusCode === 500) {
       console.log(
-        `Check this link manually: ${link}.It responds with statuscode: ${statusCode} `
+        `Check this link manually: [${link}] It responds with statuscode: ${statusCode} `
       );
+      fs.appendFileSync(manualLinkFile, link + "\n");
+    } else if (IgnoreURLs.includes(link)) {
       fs.appendFileSync(manualLinkFile, link + "\n");
     } else {
       throw new Error(
