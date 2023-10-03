@@ -368,7 +368,19 @@ async function processExternalLink(link, currFilePath) {
     link.startsWith("http://127.0.0.1") ||
     link.startsWith("https://127.0.0.1") ||
     link.startsWith("http://localhost") ||
-    link.startsWith("https://localhost")
+    link.startsWith("https://localhost") 
+  ) {
+    return;
+  }
+   if (
+    link.startsWith("http://twitter.com") ||
+    link.startsWith("https://twitter.com") 
+  ) {
+    return;
+  }
+  if (
+    link.startsWith("http://komodoplatform.com/discord") ||
+    link.startsWith("https://komodoplatform.com/discord") 
   ) {
     return;
   }
