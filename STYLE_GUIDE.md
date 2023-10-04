@@ -66,7 +66,6 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 - Where a group of parameters are nested within a common structure, this should be given its own table, and linked to from the main parameter table.
 - Common structure objects should be listed alphabetically in the file which contains them. This can be the same file as the parent method, unless the structure is used by multiple methods in different files - in that case, it should be listed in the root folder for the method group (e.g. legacy, v20, v20-dev).
 
-
 For example:
 
 | Parameter | Type    | Description                                                                             |
@@ -76,7 +75,6 @@ For example:
 | amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                        |
 | max       | boolean | Optional, defaults to `false`. Send whole balance.                                      |
 | memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction. |
-
 
 ## Variables
 
@@ -98,11 +96,10 @@ Pages are heavily [**MDX**](https://mdxjs.com/) ("markdown extension") based, wh
 
 Titles and descriptions are mandatory on every documentation page and must be added at the top level. To add a title use this syntax: `export const title = "Documentation page title";`. To add a description use: `export const description = "documentation page description";`
 
-
 ### Subsections and headings
 
-Though it is good to separate each method into its own document, sometimes it is necessary to group methods together. 
-In such a case, we can define the `title`, `label` and/or `tag` properties alongside a section header and within a `CodeGroup` tag so that anchor links are generated in a consistent manner. 
+Though it is good to separate each method into its own document, sometimes it is necessary to group methods together.
+In such a case, we can define the `title`, `label` and/or `tag` properties alongside a section header and within a `CodeGroup` tag so that anchor links are generated in a consistent manner.
 
 - The `label` property should be the exact same as the RPC method.
 - The `title` property should be blank, unless the section heading is not the same as the `label` property. In that case, the `title` property should be the (human readable) section heading.
@@ -333,7 +330,7 @@ Rendered as:
 
 Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component. To render an image in the `src/image` folder, you'd have to import the image using the following syntax:
 
-`import atomicManiq from "@/images/atomic-dex-maniq.webp";`
+`import atomicManiq from "@/public/images/atomic-dex-maniq.webp";`
 
 Now you can render the image using the `OptimizedImage` component, for example:
 

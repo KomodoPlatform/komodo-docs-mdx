@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 const sidebarNavData = JSON.parse(fs.readFileSync("./src/data/sidebar.json", 'utf8'))
+const navbarNavData = JSON.parse(fs.readFileSync("./src/data/sidebar.json", 'utf8'))
 
 function walkDir(dirPath, callback) {
   fs.readdirSync(dirPath).forEach((file) => {
@@ -86,6 +87,7 @@ function readTitleLinksAndHrefs(data) {
 // Read titleLinks and links.href values from antaraFrameworkPageNavigation
 
 readTitleLinksAndHrefs(sidebarNavData);
+readTitleLinksAndHrefs(navbarNavData);
 
 function compareArrays(fileNames, pagesArray) {
   var differences = [];
