@@ -49,7 +49,7 @@ jobs:
         id: vars
         shell: bash
         run: |
-          branch_name="lint-fix-patches/${{ github.head_ref }}"
+          branch_name="lint-fix-patches/${GITHUB_HEAD_REF:-$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')}"
           echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
