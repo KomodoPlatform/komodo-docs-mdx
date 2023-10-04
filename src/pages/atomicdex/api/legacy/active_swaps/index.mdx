@@ -10,17 +10,16 @@ The `active_swaps` method returns all the swaps that are currently running on th
 
 ## Arguments
 
-| Structure       | Type | Description                                                       |
-| --------------- | ---- | ----------------------------------------------------------------- |
-| include\_status | bool | whether to include swap statuses in response; defaults to `false` |
+| Structure       | Type | Description                                                                   |
+| --------------- | ---- | ----------------------------------------------------------------------------- |
+| include\_status | bool | Optional, defaults to `false`. Whether to include swap statuses in response;  |
 
 ## Response
 
-| Structure       | Type             | Description                                                                                                 |
-| --------------- | ---------------- | ----------------------------------------------------------------------------------------------------------- |
-| result          | result object    |                                                                                                             |
-| result.uuids    | array of strings | uuids of currently running swaps                                                                            |
-| result.statuses | object (map)     | the `uuid -> swap status` map of currently running swaps; `null` if include\_status is false in the request |
+| Structure   | Type             | Description                                                                                                 |
+| ----------- | ---------------- | ----------------------------------------------------------------------------------------------------------- |
+| uuids       | array of strings | A list of currently active swap UUIDs.                                                                      |
+| statuses    | object (map)     | Only visible if `include_status` request parameter is `true`. A map of standard [SwapStatus](/atomicdex/api/v20/#swap-status) objects, delineated by the related UUID. |
 
 #### 📌 Examples
 
@@ -31,18 +30,6 @@ The `active_swaps` method returns all the swaps that are currently running on th
   {
     "userpass": "testpsw",
     "method": "active_swaps"
-  }
-  ```
-</CodeGroup>
-
-#### Command (include\_status = true)
-
-<CodeGroup title="" tag="POST" label="active_swaps" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "method": "active_swaps",
-    "include_status": true
   }
   ```
 </CodeGroup>
@@ -62,7 +49,22 @@ The `active_swaps` method returns all the swaps that are currently running on th
     }
   }
   ```
+</CollapsibleSection>
 
+#### Command (include\_status = true)
+
+<CodeGroup title="" tag="POST" label="active_swaps" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "active_swaps",
+    "include_status": true
+  }
+  ```
+</CodeGroup>
+
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   #### Response (statuses included)
 
   ```json
