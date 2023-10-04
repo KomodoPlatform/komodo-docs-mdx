@@ -1,4 +1,4 @@
-name: Get file and author data, validate and update internal links
+name: Get file and author data, validate and update internal links, deploy
 
 on:
   push:
@@ -61,13 +61,13 @@ jobs:
 
       - name: Verify h1 is present in every file
         run: node utils/js/h1_presence_checker.js
-      
+
       - name: Set lint-fix branch name
         id: vars
         shell: bash
         run: |
-              branch_name="lint-fix-patches/${{ github.head_ref }}"
-              echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          branch_name="lint-fix-patches/${{ github.head_ref }}"
+          echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
@@ -89,29 +89,29 @@ jobs:
   web_build_and_preview:
     name: Build and deploy
     runs-on: ubuntu-latest
-    timeout-minutes: 45        
+    timeout-minutes: 45
     steps:
-      - name: Extract branch name 
+      - name: Extract branch name
         shell: bash
         run: |
-              BRANCH="${{ github.head_ref }}"
-              encoded_branch_name=$(echo "$branch" | sed -e 's/:/%3A/g' -e 's/</%3C/g' -e 's/>/%3E/g' -e 's/|/%7C/g' -e 's/*/%2A/g' -e 's/?/%3F/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g' -e 's/\\/%5C/g' -e 's/\//%2F/g')
-              echo "encoded_branch=${encoded_branch_name}" >> $GITHUB_OUTPUT
+          BRANCH="${{ github.head_ref }}"
+          encoded_branch_name=$(echo "$branch" | sed -e 's/:/%3A/g' -e 's/</%3C/g' -e 's/>/%3E/g' -e 's/|/%7C/g' -e 's/*/%2A/g' -e 's/?/%3F/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g' -e 's/\\/%5C/g' -e 's/\//%2F/g')
+          echo "encoded_branch=${encoded_branch_name}" >> $GITHUB_OUTPUT
         id: extract_and_encode_branch
 
       - name: Shortify commit sha
         shell: bash
         run: |
-            echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
+          echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
         id: shortify_commit
-        
+
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           ssh-key: ${{ secrets.DOCS_UI_SSH_PRIVATE_KEY }}
           repository: KomodoPlatform/website-komodo-docs
-          path: './frontend-repo'
-      
+          path: "./frontend-repo"
+
       - name: Sync updated content to frontend repo dir, change working dir
         run: |
           rsync -avh --delete --exclude='optimized/*' --exclude='next-image-export-optimizer-hashes.json' ./src/images/ ./frontend-repo/public/images/
@@ -135,22 +135,23 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-              .next/cache
+            .next/cache
           # Generate a new cache whenever packages or source files change.
-          key: nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          key:
+            nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
             # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
 
       - name: Install build deps
         run: yarn install
-       
+
       - name: Build
-        run: yarn export:cfp      
+        run: yarn export:cfp
 
       - name: Add no-index headers before pubishing to cloudflare
         run: |
-            echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
-  
+          echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
+
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         id: cf_publish
@@ -160,9 +161,9 @@ jobs:
           projectName: komodo-docs
           directory: ./out
           #gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: '3'
+          wranglerVersion: "3"
           branch: ${{ steps.extract_and_encode_branch.outputs.encoded_branch }}
-                
+
       - name: Post CF preview url
         uses: actions/github-script@v6
         with:
