@@ -128,23 +128,22 @@ jobs:
           ssh-key: ${{ secrets.DOCS_UI_SSH_PRIVATE_KEY }}
           repository: KomodoPlatform/website-komodo-docs
           ref: main
-          submodules: true
+          submodules: recursive
+          fetch-depth: 0
 
       - name: Get updated content (without diff)
         if: needs.update_lint_get_data.outputs.NO_DIFF == 'true'
         run: |
-          cd komodo-docs-mdx
-          git fetch origin
-          git checkout ${{ needs.update_lint_get_data.outputs.BRANCH }}
+          cd utils
+          ./update_mdx_branch.sh ${{ needs.update_lint_get_data.outputs.BRANCH }}
           cd ..
           ./update-content.sh
 
       - name: Get updated content (with diff)
         if: needs.update_lint_get_data.outputs.NO_DIFF == 'false'
         run: |
-          cd komodo-docs-mdx
-          git fetch origin
-          git checkout ${{ needs.update_lint_get_data.outputs.LINT_BRANCH }}
+          cd utils
+          ./update_mdx_branch.sh ${{ needs.update_lint_get_data.outputs.LINT_BRANCH }}
           cd ..
           ./update-content.sh
 
