@@ -234,7 +234,7 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (success)
+  #### Response (success, no new address found)
 
   ```json
   {
@@ -250,8 +250,40 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
     "id": null
   }
   ```
-</CollapsibleSection>
 
-<DevComment>
-  We should get a response with data in the `new_addresses` array for this section.
-</DevComment>
+  #### Response (success, new address found)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "status": "Ok",
+        "details": {
+            "account_index": 0,
+            "derivation_path": "m/44'/141'/0'",
+            "new_addresses": [
+                {
+                    "address": "RXaMK6RtvwPiy67oramBfFXCgMobBofMWv",
+                    "derivation_path": "m/44'/141'/0'/0/3",
+                    "chain": "External",
+                    "balance": {
+                        "spendable": "0",
+                        "unspendable": "0"
+                    }
+                },
+                {
+                    "address": "RJkjq4DeQ5vTNJxa1gHoS4y31ZU9F3aisu",
+                    "derivation_path": "m/44'/141'/0'/0/4",
+                    "chain": "External",
+                    "balance": {
+                        "spendable": "0.444",
+                        "unspendable": "0"
+                    }
+                }
+            ]
+        }
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
