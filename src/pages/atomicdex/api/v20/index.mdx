@@ -110,18 +110,18 @@ The folowing objects are used in the request or response of multiple Komodo DeFi
 
 The `ActivationParams` object defines additional parameters used for activation. These params may vary depending on the coin type.
 
-| Parameter                    | Type    | Description                                                                                                                                                                                                                             |
-| ---------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| required\_confirmations      | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                      |
-| requires\_notarization       | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file.    |
-| priv\_key\_policy            | string  | Defaults to `ContextPrivkey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                                               |
-| min\_addresses\_number       | integer | HD wallets only. How many additional addreesses to generate at a minimum.                                                                                                                                                               |
-| scan\_policy                 | string  | HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the Komodo DeFi SDK.                                          |
-| gap\_limit                   | integer | HD wallets only. The max number of empty addresses in a row. If transactions were sent to an address outside the `gap_limit`, they will not be identified when scanning.                                                                |
-| zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing [Zcash parameters](https://z.cash/technology/paramgen/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603) |
-| scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                     |
-| scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                       |
-| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/v20/#activation-mode) object.                                                                                                                                 |
+| Parameter                    | Type    | Description                                                                                                                                                                                                                          |
+| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| required\_confirmations      | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                   |
+| requires\_notarization       | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file. |
+| priv\_key\_policy            | string  | Defaults to `ContextPrivkey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                                            |
+| min\_addresses\_number       | integer | HD wallets only. How many additional addreesses to generate at a minimum.                                                                                                                                                            |
+| scan\_policy                 | string  | HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the Komodo DeFi SDK.                                       |
+| gap\_limit                   | integer | HD wallets only. The max number of empty addresses in a row. If transactions were sent to an address outside the `gap_limit`, they will not be identified when scanning.                                                             |
+| zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing Zcash parameters. Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                                     |
+| scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                  |
+| scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                    |
+| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/v20/#activation-mode) object.                                                                                                                              |
 
 <Note>
   For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
@@ -374,6 +374,17 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
 | max\_channel\_reserve\_sats             | boolean | Optional, defaults to `18446744073709551615`. The remote node will require us to keep a certain amount in direct payment to ourselves at all time, ensuring that we are able to be punished if we broadcast an old state. This allows us to limit the amount which we will have to keep to ourselves (and cannot use for [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)). |
 | min\_max\_accepted\_htlcs               | boolean | Optional, defaults to `0`. The remote node sets a limit on the maximum number of pending HTLCs to them at any given time. This allows us to set a minimum such value.                                                                                                                                                                                                                                |
 
+### FeeInfo
+
+The `FeeInfo` response object includes the following items for [withdraw (v2)](/atomicdex/api/v20/withdraw/) requests:
+
+| Parameter  | Type             | Description                                                                                                                               |
+| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
+| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
+| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+
 ### LightningActivationParams
 
 | Parameter        | Type    | Description                                                                                                                                                                                                                                   |
@@ -469,7 +480,7 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
 
 | Parameter        | Type   | Description                                                                                                                                                                                       |
 | ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type             | string | The payment type. Accepted values are `invoice` or [`keysend`](https://lightning.readthedocs.io/lightning-keysend.7.html).                                                                        |
+| type             | string | The payment type. Accepted values are `invoice` or [`keysend`](https://cdecker-lightning.readthedocs.io/lightning-keysend.7.html).                                                                |
 | invoice          | string | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                                                                             |
 | destination      | string | Only used if `type` is `keysend`. A `node_pubkey` (which is also the node address in lightning context). Not to be confused with an onchain address.                                              |
 | amount\_in\_msat | string | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin). |
