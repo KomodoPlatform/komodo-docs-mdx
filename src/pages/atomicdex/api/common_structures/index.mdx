@@ -1,0 +1,210 @@
+export const title = "Komodo DeFi SDK RPC Protocol v2.0";
+export const description = "Starting with version beta-2.1.3434, the Komodo DeFi SDK supports the standardized protocol format called mmrpc 2.0.";
+
+# Komodo DeFi SDK RPC Protocol v2.0
+
+Starting with version [beta-2.1.3434](https://github.com/KomodoPlatform/komodo-defi-framework/releases/tag/beta-2.1.3434), the Komodo DeFi SDK supports the standardized protocol format called `mmrpc 2.0`.
+
+It includes a uniform request, successful and error response formats. At the moment, only a few RPC methods support the `mmrpc 2.0` protocol.
+
+## Request
+
+| Structure | Type              | Description                                                                                                                                                       |
+| --------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| mmrpc     | string            | the string specifying the version of the Komodo DeFi SDK RPC protocol. Must be exactly "2.0"                                                                      |
+| userpass  | string (optional) | your password for protected RPC methods. Skip this field if the specified `method` is public                                                                      |
+| method    | string            | the name of the method to be invoked                                                                                                                              |
+| params    | object (optional) | a structured value that holds the parameter values to be used during the invocation of the method. This field may be omitted if the method doesn't take arguments |
+| id        | number (optional) | the identifier is established by the client. Komodo DeFi SDK will reply with the same value in the Response object if the `id` field is included and not `NULL`   |
+
+### Response (Success)
+
+| Structure | Type              | Description                                                                                 |
+| --------- | ----------------- | ------------------------------------------------------------------------------------------- |
+| mmrpc     | string            | the string specifying the version of the Komodo DeFi SDK RPC protocol                       |
+| result    | object            | the value of this field is determined by the method invoked on Komodo DeFi SDK              |
+| id        | number (optional) | the identifier established by the client. The same value as in the Request if it was passed |
+
+### Response (Error)
+
+| Structure    | Type              | Description                                                                                 |
+| ------------ | ----------------- | ------------------------------------------------------------------------------------------- |
+| mmrpc        | string            | the string specifying the version of the AtomicDEX API RPC protocol                         |
+| error        | string            | the common error description                                                                |
+| error\_path  | string            | the error path consisting of file names separated by a dot similar to JSON path notation    |
+| error\_trace | string            | the error path consisting of file and line number pairs separated by ']'                    |
+| error\_type  | string            | the string error identifier used to determine the cause of the error                        |
+| error\_data  | object            | an object containing the error data of the corresponding `error_type`                       |
+| id           | number (optional) | the identifier established by the client. The same value as in the Request if it was passed |
+
+### 📌 Examples
+
+<CodeGroup title="" tag="POST" label="withdraw" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "userpass": "testpsw",
+    "method": "withdraw",
+    "params": {
+      "coin": "KMD",
+      "to": "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh",
+      "amount": "10"
+    },
+    "id": 0
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "tx_hex": "0400008085202f8901ef25b1b7417fe7693097918ff90e90bba1351fff1f3a24cb51a9b45c5636e57e010000006b483045022100b05c870fcd149513d07b156e150a22e3e47fab4bb4776b5c2c1b9fc034a80b8f022038b1bf5b6dad923e4fb1c96e2c7345765ff09984de12bbb40b999b88b628c0f9012102031d4256c4bc9f99ac88bf3dba21773132281f65f9bf23a59928bce08961e2f3ffffffff0200e1f505000000001976a91405aab5342166f8594baf17a7d9bef5d56744332788ac8cbaae5f010000001976a91405aab5342166f8594baf17a7d9bef5d56744332788ace87a5e5d000000000000000000000000000000",
+      "tx_hash": "1ab3bc9308695960bc728fa427ac00d1812c4ae89aaa714c7618cb96d111be58",
+      "from": ["R9o9xTocqr6CeEDGDH6mEYpwLoMz6jNjMW"],
+      "to": ["R9o9xTocqr6CeEDGDH6mEYpwLoMz6jNjMW"],
+      "total_amount": "60.10253836",
+      "spent_by_me": "60.10253836",
+      "received_by_me": "60.00253836",
+      "my_balance_change": "-0.1",
+      "block_height": 0,
+      "timestamp": 1566472936,
+      "fee_details": {
+        "type": "Utxo",
+        "amount": "0.1"
+      },
+      "coin": "DOC",
+      "internal_id": ""
+    },
+    "id": 0
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Error Response" collapsedText="Show Error Response">
+  #### Response (error)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "The amount 0.000005 is too small",
+    "error_path": "utxo_common",
+    "error_trace": "utxo_common:1379] utxo_common:301]",
+    "error_type": "AmountIsTooSmall",
+    "error_data": {
+      "amount": "0.000005"
+    },
+    "id": 0
+  }
+  ```
+</CollapsibleSection>
+
+## Common Komodo DeFi SDK Request / Response Objects
+
+The objects are in the request or response of multiple Komodo DeFi SDK methods have been grouped into the following sections:
+- [Activation](/atomicdex/api/common_structures/activation)
+- [Swaps](/atomicdex/api/common_structures/swaps)
+- [Lightning Network](/atomicdex/api/common_structures/lightning)
+- [Non-fungible Tokens](/atomicdex/api/common_structures/nfts)
+
+Structures which are used in more than one section are listed below:
+
+
+### AddressInfos
+
+The `addressInfos` object includes the following items for a given address:
+
+| Parameter          | Type   | Description                                                                                                                    |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| balances           | object | A standard [balanceInfos](/atomicdex/api/v20/#balance-infos) object. Not included in responses where `get_balances` is `false` |
+| derivation\_method | object | A standard [DerivationMethod](/atomicdex/api/v20/#derivation-method) object                                                    |
+| pubkey             | string | The public key associated with the seed used to launch AtomicDEX                                                               |
+| tickers            | array  | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                 |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example with balances
+
+  ```json
+  "bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
+      "derivation_method": {
+          "type": "Iguana"
+      },
+      "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
+      "balances": {
+          "spendable": "0.11398301",
+          "unspendable": "0.00001"
+      }
+  }
+  ```
+
+  #### Example without balances
+
+  ```json
+  "bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
+      "derivation_method": {
+          "type": "Iguana"
+      },
+      "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
+      "tickers": ["ASLP-SLP"]
+  }
+  ```
+</CollapsibleSection>
+
+### BalanceInfos
+
+The `balanceInfos` object includes the following items for a given coin or token:
+
+| Parameter   | Type             | Description                                                                                                              |
+| ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| spendable   | string (numeric) | The available amount of a coin or token which is ready to be traded or withdrawn.                                        |
+| unspendable | string (numeric) | The amount of a coin or token which is awaiting confirmation on the block chain for an incoming or outgoing transaction. |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "spendable": "12.11398301",
+      "unspendable": "0.53"
+  }
+  ```
+</CollapsibleSection>
+
+
+### FeeInfo
+
+The `FeeInfo` response object includes the following items for [withdraw (v2)](/atomicdex/api/v20/withdraw/) requests:
+
+| Parameter  | Type             | Description                                                                                                                               |
+| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
+| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
+| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+
+
+### Pagination
+
+For requests which return many results, pagination offsets may be applied. \*\* Use either value, not both. \*\*
+
+| Parameter  | Type    | Description                                             |
+| ---------- | ------- | ------------------------------------------------------- |
+| PageNumber | integer | Optional, defaults to `1`. Offset for paginated results |
+| FromId     | integer | Optional. Ignores any results prior to this UUID        |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Example
+
+  ```json
+  {
+      "PageNumber": 1
+  }
+  ```
+
+  ```json
+  {
+      "FromId": 4
+  }
+  ```
+</CollapsibleSection>
