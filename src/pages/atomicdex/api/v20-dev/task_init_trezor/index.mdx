@@ -6,7 +6,7 @@ import trezorpin from "@/public/images/api-images/trezor_pin.png";
 
 # Trezor Initialisation
 
-The methods below prepare your Trezor device for use within the AtomicDEX API. Once completed, you can authenticate using your PIN or phrase with [task::init_trezor::user_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action).
+The methods below prepare your Trezor device for use within the AtomicDEX API. Once completed, you can authenticate using your PIN or phrase with [task::init\_trezor::user\_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action).
 
 ## init {{label : 'task::init_trezor::init', tag : 'API-v2'}}
 
@@ -14,19 +14,19 @@ Before using this method, launch the AtomicDEX API, and plug in your Trezor.
 
 #### Arguments
 
-| Parameter     | Type   | Description                                                                                                                                                          |
-| ------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| device_pubkey | string | Optional. If known, you can specify the device pubkey. If not known, this will be part of the `task::init_trezor::status` response which you can save for future use |
+| Parameter      | Type   | Description                                                                                                                                                          |
+| -------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| device\_pubkey | string | Optional. If known, you can specify the device pubkey. If not known, this will be part of the `task::init_trezor::status` response which you can save for future use |
 
 #### Response
 
 | Parameter | Type    | Description                                               |
 | --------- | ------- | --------------------------------------------------------- |
-| task_id   | integer | An identifying number which is used to query task status. |
+| task\_id  | integer | An identifying number which is used to query task status. |
 
 #### 📌 Examples
 
-#### Command (without device_pubkey)
+#### Command (without device\_pubkey)
 
 <CodeGroup title="" tag="POST" label="task::init_trezor::init" mm2MethodDecorate="true">
   ```json
@@ -39,7 +39,7 @@ Before using this method, launch the AtomicDEX API, and plug in your Trezor.
   ```
 </CodeGroup>
 
-#### Command (with device_pubkey)
+#### Command (with device\_pubkey)
 
 <CodeGroup title="" tag="POST" label="task::init_trezor::init" mm2MethodDecorate="true">
   ```json
@@ -57,16 +57,15 @@ Before using this method, launch the AtomicDEX API, and plug in your Trezor.
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   #### Response (success)
 
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "task_id": 0
-  },
-  "id": null
-}
-```
-
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "task_id": 0
+    },
+    "id": null
+  }
+  ```
 </CollapsibleSection>
 
 ## status {{label : 'task::init_trezor::status', tag : 'API-v2'}}
@@ -75,22 +74,22 @@ After running the `task::init_trezor::init` method, we can query the status of d
 
 #### Arguments
 
-| Parameter          | Type    | Description                                                                               |
-| ------------------ | ------- | ----------------------------------------------------------------------------------------- |
-| task_id            | integer | The identifying number returned when initiating the initialisation process.               |
-| forget_if_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
+| Parameter            | Type    | Description                                                                               |
+| -------------------- | ------- | ----------------------------------------------------------------------------------------- |
+| task\_id             | integer | The identifying number returned when initiating the initialisation process.               |
+| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
 
 #### Response
 
-| Parameter             | Type         | Description                                                                                                                                                         |
-| --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| status                | string       | A short indication of how the requested process is progressing.                                                                                                     |
-| details               | object       | Depending on the state of process progress, this will contain different information as detailed in the items below.                                                 |
-| details.type          | string       | Type of hardware wallet device (e.g. `Trezor`)                                                                                                                      |
-| details.model         | string       | The model of the hardware wallet device (e.g. `One` or `T`)                                                                                                         |
-| details.device_name   | string       | The name of the device as defned by user in Trezor Suite or another wallet application.                                                                             |
-| details.device_id     | string (hex) | An unique identifier of the device, set during manufacturing.                                                                                                       |
-| details.device_pubkey | string (hex) | The hardware wallet device's pubkey. If included in the `task::init_trezor::init` request, it wll be the same as input. If not, it should be stored for future use. |
+| Parameter              | Type         | Description                                                                                                                                                         |
+| ---------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| status                 | string       | A short indication of how the requested process is progressing.                                                                                                     |
+| details                | object       | Depending on the state of process progress, this will contain different information as detailed in the items below.                                                 |
+| details.type           | string       | Type of hardware wallet device (e.g. `Trezor`)                                                                                                                      |
+| details.model          | string       | The model of the hardware wallet device (e.g. `One` or `T`)                                                                                                         |
+| details.device\_name   | string       | The name of the device as defned by user in Trezor Suite or another wallet application.                                                                             |
+| details.device\_id     | string (hex) | An unique identifier of the device, set during manufacturing.                                                                                                       |
+| details.device\_pubkey | string (hex) | The hardware wallet device's pubkey. If included in the `task::init_trezor::init` request, it wll be the same as input. If not, it should be stored for future use. |
 
 #### 📌 Examples
 
@@ -111,133 +110,131 @@ After running the `task::init_trezor::init` method, we can query the status of d
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (in progress)
 
-#### Response (in progress)
+  Possible "In progress" Cases:
 
-Possible "In progress" Cases:
+  *   `Initializing` - This is the normal task state. It does not require any action from the user.
 
-- `Initializing` - This is the normal task state. It does not require any action from the user.
+  *   `WaitingForTrezorToConnect` - The AtomicDEX API is waiting for the user to plugin a Trezor device.
 
-- `WaitingForTrezorToConnect` - The AtomicDEX API is waiting for the user to plugin a Trezor device.
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "InProgress",
+      "details": "WaitingForTrezorToConnect"
+    },
+    "id": null
+  }
+  ```
 
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "InProgress",
-    "details": "WaitingForTrezorToConnect"
-  },
-  "id": null
-}
-```
+  *   `FollowHwDeviceInstructions` - The AtomicDEX API is waiting for the user to follow instructions displayed on the device (e.g. clicking a button to confirm).
 
-- `FollowHwDeviceInstructions` - The AtomicDEX API is waiting for the user to follow instructions displayed on the device (e.g. clicking a button to confirm).
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "InProgress",
+      "details": "FollowHwDeviceInstructions"
+    },
+    "id": null
+  }
+  ```
 
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "InProgress",
-    "details": "FollowHwDeviceInstructions"
-  },
-  "id": null
-}
-```
+  *   `UserActionRequired` - This will either be `EnterTrezorPin` or `EnterTrezorPassphrase`. Refer to the [task::init\_trezor::user\_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action) section for more information.
 
-- `UserActionRequired` - This will either be `EnterTrezorPin` or `EnterTrezorPassphrase`. Refer to the [task::init_trezor::user_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action) section for more information.
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "UserActionRequired",
+      "details": "EnterTrezorPin"
+    },
+    "id": null
+  }
+  ```
 
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "UserActionRequired",
-    "details": "EnterTrezorPin"
-  },
-  "id": null
-}
-```
+  #### Response (ready, successful)
 
-#### Response (ready, successful)
-
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "Ok",
-    "details": {
-      "result": {
-        "type": "Trezor",
-        "model": "One",
-        "device_name": "Fitzchivalry Farseer",
-        "device_id": "A1CCF11243A795A84111955E",
-        "device_pubkey": "066deb87b0d0500ec2e9b85f5314870b03a53517"
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "Ok",
+      "details": {
+        "result": {
+          "type": "Trezor",
+          "model": "One",
+          "device_name": "Fitzchivalry Farseer",
+          "device_id": "A1CCF11243A795A84111955E",
+          "device_pubkey": "066deb87b0d0500ec2e9b85f5314870b03a53517"
+        }
       }
-    }
-  },
-  "id": null
-}
-```
+    },
+    "id": null
+  }
+  ```
 
-#### Error Responses (by `error_type`)
+  #### Error Responses (by `error_type`)
 
-:
+  :
 
-- `HwContextInitializingAlready` - Returned if user calls `task::init_trezor::init` before the previous `task::init_trezor::init` task has been completed.
+  *   `HwContextInitializingAlready` - Returned if user calls `task::init_trezor::init` before the previous `task::init_trezor::init` task has been completed.
 
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "Error",
-    "details": {
-      "error": "Hardware Wallet context is initializing already",
-      "error_path": "init_hw.crypto_ctx",
-      "error_trace": "init_hw:151] crypto_ctx:235]",
-      "error_type": "HwContextInitializingAlready"
-    }
-  },
-  "id": null
-}
-```
-
-- `Timeout` - Task timed out while trying to connect to a device.
-
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "Error",
-    "details": {
-      "error": "RPC timed out 300s",
-      "error_path": "init_hw.crypto_ctx.hw_client",
-      "error_trace": "init_hw:151] crypto_ctx:248] crypto_ctx:354] hw_client:156]",
-      "error_type": "Timeout",
-      "error_data": {
-        "secs": 300,
-        "nanos": 0
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "Error",
+      "details": {
+        "error": "Hardware Wallet context is initializing already",
+        "error_path": "init_hw.crypto_ctx",
+        "error_trace": "init_hw:151] crypto_ctx:235]",
+        "error_type": "HwContextInitializingAlready"
       }
-    }
-  },
-  "id": null
-}
-```
+    },
+    "id": null
+  }
+  ```
 
-- `NoSuchTask` - Something went wrong or `task::init_trezor::init` was not called. Refer to the [task::init_trezor::init](/atomicdex/api/v20-dev/task_init_trezor/#init) section for more information.
+  *   `Timeout` - Task timed out while trying to connect to a device.
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "No such task '0'",
-  "error_path": "init_hw",
-  "error_trace": "init_hw:184]",
-  "error_type": "NoSuchTask",
-  "error_data": 0,
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "Error",
+      "details": {
+        "error": "RPC timed out 300s",
+        "error_path": "init_hw.crypto_ctx.hw_client",
+        "error_trace": "init_hw:151] crypto_ctx:248] crypto_ctx:354] hw_client:156]",
+        "error_type": "Timeout",
+        "error_data": {
+          "secs": 300,
+          "nanos": 0
+        }
+      }
+    },
+    "id": null
+  }
+  ```
 
-- `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/atomicdex/api/v20-dev/hd_wallets_overview/#details-for-hw-error-error-type) for more info.
+  *   `NoSuchTask` - Something went wrong or `task::init_trezor::init` was not called. Refer to the [task::init\_trezor::init](/atomicdex/api/v20-dev/task_init_trezor/#init) section for more information.
 
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "No such task '0'",
+    "error_path": "init_hw",
+    "error_trace": "init_hw:184]",
+    "error_type": "NoSuchTask",
+    "error_data": 0,
+    "id": null
+  }
+  ```
+
+  *   `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/atomicdex/api/v20-dev/hd_wallets_overview/#details-for-hw-error-error-type) for more info.
 </CollapsibleSection>
 
 ## cancel {{label : 'task::init_trezor::cancel', tag : 'API-v2'}}
@@ -248,18 +245,18 @@ Use the `task::init_trezor::cancel` method to cancel the initialisation task.
 
 | Parameter | Type    | Description                                                                 |
 | --------- | ------- | --------------------------------------------------------------------------- |
-| task_id   | integer | The identifying number returned when initiating the initialisation process. |
+| task\_id  | integer | The identifying number returned when initiating the initialisation process. |
 
 #### Response
 
-| Parameter   | Type   | Description                                                                            |
-| ----------- | ------ | -------------------------------------------------------------------------------------- |
-| result      | string | Returns with value `success` when successful, otherwise returns the error values below |
-| error       | string | Description of the error                                                               |
-| error_path  | string | Used for debugging. A reference to the function in code base which returned the error  |
-| error_trace | string | Used for debugging. A trace of lines of code which led to the returned error           |
-| error_type  | string | An enumerated error identifier to indicate the category of error                       |
-| error_data  | string | Additonal context for the error type                                                   |
+| Parameter    | Type   | Description                                                                            |
+| ------------ | ------ | -------------------------------------------------------------------------------------- |
+| result       | string | Returns with value `success` when successful, otherwise returns the error values below |
+| error        | string | Description of the error                                                               |
+| error\_path  | string | Used for debugging. A reference to the function in code base which returned the error  |
+| error\_trace | string | Used for debugging. A trace of lines of code which led to the returned error           |
+| error\_type  | string | An enumerated error identifier to indicate the category of error                       |
+| error\_data  | string | Additonal context for the error type                                                   |
 
 #### 📌 Examples
 
@@ -281,43 +278,42 @@ Use the `task::init_trezor::cancel` method to cancel the initialisation task.
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   #### Response (ready, successful)
 
-```json
-{
-  "mmrpc": "2.0",
-  "result": "success",
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": "success",
+    "id": null
+  }
+  ```
 
-#### Response (error, task already finished)
+  #### Response (error, task already finished)
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Task is finished already",
-  "error_path": "init_hw.manager",
-  "error_trace": "init_hw:209] manager:104]",
-  "error_type": "TaskFinished",
-  "error_data": 0,
-  "id": null
-}
-```
-
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Task is finished already",
+    "error_path": "init_hw.manager",
+    "error_trace": "init_hw:209] manager:104]",
+    "error_type": "TaskFinished",
+    "error_data": 0,
+    "id": null
+  }
+  ```
 </CollapsibleSection>
 
-## user_action {{label : 'task::init_trezor::user_action', tag : 'API-v2'}}
+## user\_action {{label : 'task::init_trezor::user_action', tag : 'API-v2'}}
 
 When you see the pin grid on your device, or it asks for a passphrase word, use this method.
 
 #### Arguments
 
-| Parameter               | Type            | Description                                                                                                                                                                                                                          |
-| ----------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| task_id                 | integer         | The identifying number returned when initiating the initialisation process.                                                                                                                                                          |
-| user_action             | object          | Object containing the params below                                                                                                                                                                                                   |
-| user_action.action_type | string          | Either `TrezorPin` or `TrezorPassphrase`, depending on which is requested by responses from related methods returning `"status": "UserActionRequired"`                                                                               |
-| user_action.pin         | string (number) | When the Trezor device is displaying a grid of numbers for PIN entry, this param will contain your Trezor pin, as mapped through your keyboard numpad. See the image below for more information.                                     |
-| user_action.passphrase  | string          | The [passphrase](https://trezor.io/learn/a/passphrases-and-hidden-wallets) functions like an extra word added to your recovery seed, and it used to access hidden wallets. To access the default wallet, input an empty string here. |
+| Parameter                 | Type            | Description                                                                                                                                                                                                                          |
+| ------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| task\_id                  | integer         | The identifying number returned when initiating the initialisation process.                                                                                                                                                          |
+| user\_action              | object          | Object containing the params below                                                                                                                                                                                                   |
+| user\_action.action\_type | string          | Either `TrezorPin` or `TrezorPassphrase`, depending on which is requested by responses from related methods returning `"status": "UserActionRequired"`                                                                               |
+| user\_action.pin          | string (number) | When the Trezor device is displaying a grid of numbers for PIN entry, this param will contain your Trezor pin, as mapped through your keyboard numpad. See the image below for more information.                                     |
+| user\_action.passphrase   | string          | The [passphrase](https://trezor.io/learn/a/passphrases-and-hidden-wallets) functions like an extra word added to your recovery seed, and it used to access hidden wallets. To access the default wallet, input an empty string here. |
 
 <OptimizedImage src={trezorpin} classNaming="w-full" alt="Trezor Pin" />
 
@@ -328,7 +324,7 @@ When you see the pin grid on your device, or it asks for a passphrase word, use 
 | result    | string | The outcome of the request. |
 
 <Note>
-Even an incorrect PIN will return `success`. This doesn't mean the PIN was accepted, just that it was communicated without errors. If the PIN was incorrect, you will see an error like below in the next response for a method that requires authentication.
+  Even an incorrect PIN will return `success`. This doesn't mean the PIN was accepted, just that it was communicated without errors. If the PIN was incorrect, you will see an error like below in the next response for a method that requires authentication.
 </Note>
 
 ```json
@@ -394,12 +390,11 @@ Even an incorrect PIN will return `success`. This doesn't mean the PIN was accep
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   #### Response (success)
 
-```json
-{
-  "mmrpc": "2.0",
-  "result": "success",
-  "id": null
-}
-```
-
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": "success",
+    "id": null
+  }
+  ```
 </CollapsibleSection>
