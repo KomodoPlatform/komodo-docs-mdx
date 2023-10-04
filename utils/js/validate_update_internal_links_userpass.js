@@ -383,6 +383,10 @@ function checkUrlStatusCode(url) {
 }
 
 async function processExternalLink(link, currFilePath) {
+  let IgnoreURLs = [
+    "https://moralis-proxy.komodo.earth",
+    "https://nft.antispam.dragonhound.info"
+  ]
   if (
     link.startsWith("http://127.0.0.1") ||
     link.startsWith("https://127.0.0.1") ||
@@ -418,9 +422,11 @@ async function processExternalLink(link, currFilePath) {
         `The link: ${link} has a ${statusCode} redirect to ${newLocation}`
       );
     } else if (statusCode === 403 || statusCode === 405 || statusCode === 500) {
-      console.log(
-        `Check this link manually: ${link}.It responds with statuscode: ${statusCode} `
-      );
+      // console.log(
+      //   `Check this link manually: [${link}] It responds with statuscode: ${statusCode} `
+      // );
+      fs.appendFileSync(manualLinkFile, link + "\n");
+    } else if (IgnoreURLs.some(ignoreLink => link.includes(ignoreLink))) {
       fs.appendFileSync(manualLinkFile, link + "\n");
     } else {
       throw new Error(
@@ -428,8 +434,8 @@ async function processExternalLink(link, currFilePath) {
       );
     }
   } catch (err) {
-    console.log(`Checking the URL ${link} in the file ${currFilePath}`);
     if (err.message.startsWith("Request timed out")) {
+      console.log(`Request timed out when checking the URL ${link} in the file ${currFilePath}`);
       return;
     } else {
       throw new Error(err);
