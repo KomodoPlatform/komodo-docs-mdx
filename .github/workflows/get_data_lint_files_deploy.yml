@@ -134,6 +134,8 @@ jobs:
         if: needs.update_lint_get_data.outputs.NO_DIFF == 'true'
         run: |
           cd komodo-docs-mdx
+          git submodule update --init --recursive
+          git submodule update --remote          
           git fetch origin
           git checkout ${{ needs.update_lint_get_data.outputs.BRANCH }}
           cd ..
@@ -143,6 +145,8 @@ jobs:
         if: needs.update_lint_get_data.outputs.NO_DIFF == 'false'
         run: |
           cd komodo-docs-mdx
+          git submodule update --init --recursive
+          git submodule update --remote
           git fetch origin
           git checkout ${{ needs.update_lint_get_data.outputs.LINT_BRANCH }}
           cd ..
