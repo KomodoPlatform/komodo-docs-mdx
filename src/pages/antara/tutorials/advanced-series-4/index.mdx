@@ -34,16 +34,16 @@ Through CryptoConditions and Antara's extensions, the consensus mechanism can ru
 
 A CryptoCondition consists of two parts:
 
-- <b>Part I: A condition that must be met</b>- This is stored in the transaction
-  output's `scriptPubKey`
-- <b>Part II: A fulfillment</b>- This is stored in the `scriptSig` field of the
-  input of the transaction that spends the above output
+*   <b>Part I: A condition that must be met</b>- This is stored in the transaction
+    output's `scriptPubKey`
+*   <b>Part II: A fulfillment</b>- This is stored in the `scriptSig` field of the
+    input of the transaction that spends the above output
 
 ##### Part I: Logical Condition
 
 The <b>condition</b> contains data that checks the CryptoCondition in "fingerprinted" form.
 
-The term ["fingerprinted"](<https://en.wikipedia.org/wiki/Fingerprint_(computing)>) is a common term in the technology industry. To "fingerprint" data means to convert an arbitrary set of data to a fixed-length byte array. In this manner, a fingerprint uniquely identifies the source data. (A fingerprint is similar in nature to a hash.)
+The term ["fingerprinted"](https://en.wikipedia.org/wiki/Fingerprint_\(computing\)) is a common term in the technology industry. To "fingerprint" data means to convert an arbitrary set of data to a fixed-length byte array. In this manner, a fingerprint uniquely identifies the source data. (A fingerprint is similar in nature to a hash.)
 
 To fingerprint data in the CryptoConditions environment, the CC library acquires the target data, combines it with other data that the developer does not need to manage, and then creates the fingerprint.
 
@@ -63,12 +63,7 @@ Each Antara Module has its own unique eval code. The eval code is a number betwe
 
 The process of validation of an Antara Module's transaction is depicted on the diagram below:
 
-<OptimizedImage
-  title=" Advanced Series — Final Conceptual Discussion"
-  src={veryfyWork}
-  classNaming="w-full"
-  alt=" Advanced Series — Final Conceptual Discussion"
-/>
+<OptimizedImage title=" Advanced Series — Final Conceptual Discussion" src={veryfyWork} classNaming="w-full" alt=" Advanced Series — Final Conceptual Discussion" />
 
 #### The Simplest form of a CryptoCondition
 
@@ -126,31 +121,26 @@ A transaction can also send a nominal fee to the global CC address with the inte
 
 Development requirements for each Antara Module:
 
-- Allocate a new `EVAL` code for your module
-- Assign a global address for the module
-- Define the module's transactions
-  - This includes the structure of their inputs, outputs, and opreturn format
-- Implement the common RPC functions that nearly all modules feature
-  - These are typically functions for retrieving a list of all of the module's initial transactions, and for retrieving user addresses and the global CC address
-- Implement the module's specific RPC functions
-  - These are used to create the module-related transactions and to return relevant information about the module's data and state
-- Implement the module's validation code
+*   Allocate a new `EVAL` code for your module
+*   Assign a global address for the module
+*   Define the module's transactions
+    *   This includes the structure of their inputs, outputs, and opreturn format
+*   Implement the common RPC functions that nearly all modules feature
+    *   These are typically functions for retrieving a list of all of the module's initial transactions, and for retrieving user addresses and the global CC address
+*   Implement the module's specific RPC functions
+    *   These are used to create the module-related transactions and to return relevant information about the module's data and state
+*   Implement the module's validation code
 
 ## Antara Module Architecture
 
 From an architectural standpoint, an Antara Module is simply a C/C++ source file.
 
-<OptimizedImage
-  title=" Advanced Series — Final Conceptual Discussion"
-  src={antaraArch}
-  classNaming="w-full"
-  alt=" Advanced Series — Final Conceptual Discussion"
-/>
+<OptimizedImage title=" Advanced Series — Final Conceptual Discussion" src={antaraArch} classNaming="w-full" alt=" Advanced Series — Final Conceptual Discussion" />
 
 There are two parts to the module's source file: the implementation of RPC's and the validation code. You also need to inform the basic komodod source code of your new Antara Module through the following steps.
 
-- Allocate a new eval code for your Antara Module in `src/cc/eval.h`
-- add your module's global addresses and the validation code entry function into the registry of Antara Modules in `src/cc/CCcustom.cpp`
+*   Allocate a new eval code for your Antara Module in `src/cc/eval.h`
+*   add your module's global addresses and the validation code entry function into the registry of Antara Modules in `src/cc/CCcustom.cpp`
 
 #### RPC Implementations
 
@@ -166,11 +156,11 @@ With this properly completed, the Smart Chain daemon's compiler will automatical
 
 Essentially all modules have at least these two RPC's.
 
-- XXXXlist
-  - This lists all initial transactions relevant to the module
-- XXXXinfo
-  - This RPC typically also requires an additional input -- a transaction ID for which information is desired
-  - When called, the method then returns information about this transaction ID
+*   XXXXlist
+    *   This lists all initial transactions relevant to the module
+*   XXXXinfo
+    *   This RPC typically also requires an additional input -- a transaction ID for which information is desired
+    *   When called, the method then returns information about this transaction ID
 
 Include other RPC implementations as desired.
 
@@ -194,12 +184,7 @@ The `EVAL` code itself is actually a simple CryptoCondition. The CryptoCondition
 
 ### Antara Module Transaction Structure
 
-<OptimizedImage
-  title=" Advanced Series — Final Conceptual Discussion"
-  src={srtuctureGuide}
-  classNaming="w-full"
-  alt=" Advanced Series — Final Conceptual Discussion"
-/>
+<OptimizedImage title=" Advanced Series — Final Conceptual Discussion" src={srtuctureGuide} classNaming="w-full" alt=" Advanced Series — Final Conceptual Discussion" />
 
 A CryptoCondition (CC) input is called a "vin" and a CryptoCondition output is called a "vout".
 
@@ -217,13 +202,13 @@ A CC transaction typically also has an opreturn vout that contains module data.
 
 Komodo is building an SDK for Antara Module development. The SDK is still in the early stages. Some of the SDK functions are already available, and can be found in the following source files:
 
-- CCtx.cpp
-- CCutils.cpp
-- cc.cpp
-- eval.cpp
+*   CCtx.cpp
+*   CCutils.cpp
+*   cc.cpp
+*   eval.cpp
 
 We will return to the SDK functions when we discuss the Heir module development process.
 
----
+***
 
 [<b>Link to Next Tutorial in Advanced Series</b>](/antara/tutorials/advanced-series-5/)
