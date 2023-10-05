@@ -16,69 +16,20 @@ The v2 `orderbook` method requests from the network the currently available orde
 
 ## Response
 
-| Structure              | Type             | Description                                                            |
-| ---------------------- | ---------------- | ---------------------------------------------------------------------- |
-| base                   | string           | the name of the coin the user desires to receive                       |
-| rel                    | string           | the name of the coin the user will trade                               |
-| numasks                | integer          | the number of outstanding asks                                         |
-| numbids                | integer          | the number of outstanding bids                                         |
-| netid                  | integer          | the id of the network on which the request is made (default is `7777`) |
-| asks                   | array of objects | an array of standard `Order` objects containing outstanding asks       |
-| bids                   | array of objects | an array of standard `Order` objects containing outstanding bids       |
-| timestamp              | integer          | the time the orderbook was requested                                   |
-| total\_asks\_base\_vol | object           | A standard `OrderAmount` object.                                       |
-| total\_asks\_rel\_vol  | object           | A standard `OrderAmount` object.                                       |
-| total\_bids\_base\_vol | object           | A standard `OrderAmount` object.                                       |
-| total\_bids\_rel\_vol  | object           | A standard `OrderAmount` object.                                       |
-
-**`OrderAddress` object structure**
-
-| Structure     | Type   | Description                                                          |
-| ------------- | ------ | -------------------------------------------------------------------- |
-| address\_type | string | Generally `Transparent`, but may be `Shielded` for supporting coins. |
-| address\_data | string | The actual address text for sending and receiving funds.             |
-
-**`OrderAmount` object structure**
-
-| Structure | Type             | Description                                                              |
-| --------- | ---------------- | ------------------------------------------------------------------------ |
-| decimal   | string (decimal) | Decimal numeric representation of the volume                             |
-| rational  | object           | Rational number representation of the volume (num-rational crate format) |
-| fraction  | object           | A `FractionAmount` object, representing the volume                       |
-
-**`FractionAmount` object structure**
-
-| Structure | Type             | Description                     |
-| --------- | ---------------- | ------------------------------- |
-| numer     | string (decimal) | The numerator of the fraction   |
-| denom     | object           | The denominator of the fraction |
-
-**`Order` object structure**
-
-| Structure               | Type   | Description                                                                                                                                                                                 |
-| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                    | string | The name of the `base` coin; the user desires this                                                                                                                                          |
-| address                 | object | A standard `OrderAddress` object                                                                                                                                                            |
-| price                   | object | The price in `rel` the user is willing to pay per one unit of the `base` coin                                                                                                               |
-| pubkey                  | string | The pubkey of the offer provider                                                                                                                                                            |
-| uuid                    | string | The uuid of order                                                                                                                                                                           |
-| is\_mine                | bool   | Whether the order is placed by me                                                                                                                                                           |
-| conf\_settings          | object | A standard [ConfSettings](/atomicdex/api/common_structures/orders/#conf-settings) object.                                                                                                   |
-| base\_max\_volume       | object | A standard `OrderAmount` object representing the maximum base amount for this order                                                                                                         |
-| base\_min\_volume       | object | A standard `OrderAmount` object representing the minimum base amount for this order                                                                                                         |
-| rel\_max\_volume        | object | A standard `OrderAmount` object representing the maximum rel amount for this order                                                                                                          |
-| rel\_min\_volume        | object | A standard `OrderAmount` object representing the minimum rel amount for this order                                                                                                          |
-| base\_max\_volume\_aggr | object | A standard `OrderAmount` object representing the maximum aggregated base amount at the specified price. The sum of max base volumes of the current order and all orders with a worse price. |
-| rel\_max\_volume\_aggr  | object | A standard `OrderAmount` object representing the maximum aggregated rel amount at the specified price. The sum of max rel volumes of the current order and all orders with a worse price.   |
-
-**`ConfSettings` object structure**
-
-| Structure   | Type   | Description                                                         |
-| ----------- | ------ | ------------------------------------------------------------------- |
-| base\_confs | number | the confirmations settings of `base` coin set by the offer provider |
-| base\_nota  | bool   | the notarisation settings of `base` coin set by the offer provider  |
-| rel\_confs  | number | the confirmations settings of `rel` coin set by the offer provider  |
-| rel\_nota   | bool   | the notarisation settings of `rel` coin set by the offer provider   |
+| Structure              | Type             | Description                                                                                                                    |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| base                   | string           | The name of the coin the user desires to receive                                                                               |
+| rel                    | string           | The name of the coin the user will trade                                                                                       |
+| numasks                | integer          | The number of outstanding asks                                                                                                 |
+| numbids                | integer          | The number of outstanding bids                                                                                                 |
+| netid                  | integer          | The id of the network on which the request is made (default is `8762`)                                                         |
+| asks                   | array of objects | An array of standard [OrderDataV2](/atomicdex/api/common_structures/orders/#order-data-v2) objects containing outstanding asks |
+| bids                   | array of objects | An array of standard [OrderDataV2](/atomicdex/api/common_structures/orders/#order-data-v2) objects containing outstanding bids |
+| timestamp              | integer          | A UNIX timestamp representing when the orderbook was requested                                                                 |
+| total\_asks\_base\_vol | object           | A standard [NumericFormatsValue](/atomicdex/api/common_structures/#numeric-formats-value) object.                              |
+| total\_asks\_rel\_vol  | object           | A standard [NumericFormatsValue](/atomicdex/api/common_structures/#numeric-formats-value) object.                              |
+| total\_bids\_base\_vol | object           | A standard [NumericFormatsValue](/atomicdex/api/common_structures/#numeric-formats-value) object.                              |
+| total\_bids\_rel\_vol  | object           | A standard [NumericFormatsValue](/atomicdex/api/common_structures/#numeric-formats-value) object.                              |
 
 #### 📌 Examples
 
