@@ -18,8 +18,8 @@ The `orderbook` method requests from the network the currently available orders 
 
 | Structure                        | Type             | Description                                                         |
 | -------------------------------- | ---------------- | ------------------------------------------------------------------- |
-| asks                             | array of `Order` | an array of objects containing outstanding asks                     |
-| bids                             | array of `Order` | an array of objects containing outstanding bids                     |
+| asks                             | array of objects | An array of standard [OrderDataV1](/atomicdex/api/common_structures/orders/#order-data-v1) objects containing outstanding asks                     |
+| bids                             | array of objects | An array of standard [OrderDataV1](/atomicdex/api/common_structures/orders/#order-data-v1) objects containing outstanding bids                     |
 | numasks                          | number           | the number of outstanding asks                                      |
 | numbids                          | number           | the number of outstanding bids                                      |
 | base                             | string           | the name of the coin the user desires to receive                    |
@@ -27,62 +27,17 @@ The `orderbook` method requests from the network the currently available orders 
 | timestamp                        | number           | the timestamp of the orderbook request                              |
 | netid                            | number           | the id of the network on which the request is made (default is `0`) |
 | total\_asks\_base\_vol           | string (decimal) | the base volumes sum of all asks                                    |
-| total\_asks\_base\_vol\_rat      | rational         | the `total_asks_base_vol` in num-rational crate format              |
-| total\_asks\_base\_vol\_fraction | fraction         | the `total_asks_base_vol` represented as an object                  |
+| total\_asks\_base\_vol\_rat      | rational         | the `total_asks_base_vol` represented as a standard [RationalValue](/atomicdex/api/common_structures/#rational-value) object.              |
+| total\_asks\_base\_vol\_fraction | fraction         | the `total_asks_base_vol` represented as a standard [FractionalValue](/atomicdex/api/common_structures/#fractional-value) object.                  |
 | total\_asks\_rel\_vol            | string (decimal) | the rel volumes sum of all asks                                     |
-| total\_asks\_rel\_vol\_rat       | rational         | the `total_asks_rel_vol` in num-rational crate format               |
-| total\_asks\_rel\_vol\_fraction  | fraction         | the `total_asks_rel_vol` represented as an object                   |
+| total\_asks\_rel\_vol\_rat       | rational         | the `total_asks_rel_vol` represented as a standard [RationalValue](/atomicdex/api/common_structures/#rational-value) object.               |
+| total\_asks\_rel\_vol\_fraction  | fraction         | the `total_asks_rel_vol` represented as a standard [FractionalValue](/atomicdex/api/common_structures/#fractional-value) object.                   |
 | total\_bids\_base\_vol           | string (decimal) | the base volumes sum of all bids                                    |
-| total\_bids\_base\_vol\_rat      | rational         | the `total_bids_base_vol` in num-rational crate format              |
-| total\_bids\_base\_vol\_fraction | fraction         | the `total_bids_base_vol` represented as an object                  |
+| total\_bids\_base\_vol\_rat      | rational         | the `total_bids_base_vol` represented as a standard [RationalValue](/atomicdex/api/common_structures/#rational-value) object.              |
+| total\_bids\_base\_vol\_fraction | fraction         | the `total_bids_base_vol` represented as a standard [FractionalValue](/atomicdex/api/common_structures/#fractional-value) object.                  |
 | total\_bids\_rel\_vol            | string (decimal) | the rel volumes sum of all bids                                     |
-| total\_bids\_rel\_vol\_rat       | rational         | the `total_bids_rel_vol` in num-rational crate format               |
-| total\_bids\_rel\_vol\_fraction  | fraction         | the `total_bids_rel_vol` represented as an object                   |
-
-Where `Order` object structure is as follows
-
-| Structure                         | Type              | Description                                                                                                                       |
-| --------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| coin                              | string            | the name of the `base` coin; the user desires this                                                                                |
-| address                           | string            | the address offering the trade                                                                                                    |
-| price                             | string (decimal)  | the price in `rel` the user is willing to pay per one unit of the `base` coin                                                     |
-| price\_rat                        | rational          | the price in num-rational crate format                                                                                            |
-| price\_fraction                   | object (rational) | the price represented as an object                                                                                                |
-| maxvolume                         | string (decimal)  | the maximum amount of `base` coin the offer provider is willing to sell                                                           |
-| max\_volume\_rat                  | rational          | the max volume in num-rational crate format                                                                                       |
-| max\_volume\_fraction             | object (rational) | the max volume represented as an object                                                                                           |
-| min\_volume                       | string (decimal)  | the minimum amount of `base` coin the offer provider is willing to sell                                                           |
-| min\_volume\_rat                  | rational          | the min volume in num-rational crate format                                                                                       |
-| min\_volume\_fraction             | object (rational) | the min volume represented as an object                                                                                           |
-| pubkey                            | string            | the pubkey of the offer provider                                                                                                  |
-| age                               | number            | the age of the offer (in seconds)                                                                                                 |
-| zcredits                          | number            | the zeroconf deposit amount                                                                                                       |
-| numasks                           | number            | the total number of asks                                                                                                          |
-| askdepth                          | number            | the depth of the ask requests                                                                                                     |
-| uuid                              | string            | the uuid of order                                                                                                                 |
-| is\_mine                          | bool              | whether the order is placed by me                                                                                                 |
-| base\_confs                       | number            | the confirmations settings of `base` coin set by the offer provider                                                               |
-| base\_nota                        | bool              | the notarisation settings of `base` coin set by the offer provider                                                                |
-| base\_max\_volume                 | string (decimal)  | the maximum amount of `base` coin the offer provider is willing to buy or sell                                                    |
-| base\_max\_volume\_rat            | rational          | the `base` max volume in num-rational crate format                                                                                |
-| base\_max\_volume\_fraction       | object (rational) | the `base` max volume represented as an object                                                                                    |
-| base\_min\_volume                 | string (decimal)  | the minimum amount of `base` coin the offer provider is willing to buy or sell                                                    |
-| base\_min\_volume\_rat            | rational          | the `base` min volume in num-rational crate format                                                                                |
-| base\_min\_volume\_fraction       | object (rational) | the `base` min volume represented as an object                                                                                    |
-| rel\_confs                        | number            | the confirmations settings of `rel` coin set by the offer provider                                                                |
-| rel\_nota                         | bool              | the notarisation settings of `rel` coin set by the offer provider                                                                 |
-| rel\_max\_volume                  | string (decimal)  | the maximum amount of `rel` coin the offer provider is willing to buy or sell                                                     |
-| rel\_max\_volume\_rat             | rational          | the `rel` max volume in num-rational crate format                                                                                 |
-| rel\_max\_volume\_fraction        | object (rational) | the `rel` max volume represented as an object                                                                                     |
-| rel\_min\_volume                  | string (decimal)  | the minimum amount of `rel` coin the offer provider is willing to buy or sell                                                     |
-| rel\_min\_volume\_rat             | rational          | the `rel` min volume in num-rational crate format                                                                                 |
-| rel\_min\_volume\_fraction        | object (rational) | the `rel` min volume represented as an object                                                                                     |
-| base\_max\_volume\_aggr           | string (decimal)  | the base max volume aggregated at the price level; the sum of base volumes of the current order and all orders with a worse price |
-| base\_max\_volume\_aggr\_rat      | rational          | the `base_max_volume_aggr` in num-rational crate format                                                                           |
-| base\_max\_volume\_aggr\_fraction | object (rational) | the `base_max_volume_aggr` represented as an object                                                                               |
-| rel\_max\_volume\_aggr            | string (decimal)  | the rel max volume aggregated at the price level; the sum of rel volumes of the current order and all orders with a worse price   |
-| rel\_max\_volume\_aggr\_rat       | rational          | the `rel_max_volume_aggr` in num-rational crate format                                                                            |
-| rel\_max\_volume\_aggr\_fraction  | object (rational) | the `rel_max_volume_aggr` represented as an object                                                                                |
+| total\_bids\_rel\_vol\_rat       | rational         | the `total_bids_rel_vol` represented as a standard [RationalValue](/atomicdex/api/common_structures/#rational-value) object.               |
+| total\_bids\_rel\_vol\_fraction  | fraction         | the `total_bids_rel_vol` represented as a standard [FractionalValue](/atomicdex/api/common_structures/#fractional-value) object.                   |
 
 #### 📌 Examples
 
