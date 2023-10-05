@@ -240,3 +240,50 @@ The `numerator` and `denominator` are BigInteger numbers represented as a sign a
 `[1,[0,1]]` represents `+0000000000000000000000000000000010000000000000000000000000000000` = `4294967296`
 
 `[-1,[1,1]]` represents `-1000000000000000000000000000000010000000000000000000000000000000` = `-4294967297`
+
+### SyncStatus
+
+| Parameter        | Type   | Description                                                                                                                                                                                          |
+| ---------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| state            | string | current state of sync; possible values: `NotEnabled`, `NotStarted`, `InProgress`, `Error`, `Finished`                                                                                                |
+| additional\_info | object | A standard [SyncStatusExtended](/atomicdex/api/common_structures/#sync-status-extended/) object. Additional info that helps to track the progress; present for `InProgress` and `Error` states only. |
+
+### SyncStatusExtended
+
+| Parameter          | Type   | Description                                                                                                  |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------------------------ |
+| blocks\_left       | number | present for ETH/ERC20 coins only; displays the number of blocks left to be processed for `InProgress` state  |
+| transactions\_left | number | present for UTXO coins only; displays the number of transactions left to be processed for `InProgress` state |
+| code               | number | displays the error code for `Error` state                                                                    |
+| message            | number | displays the error message for `Error` state                                                                 |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Example
+
+  ```json
+  {
+      "sync_status": {
+        "state": "NotStarted"
+      }
+  }
+  ```
+
+  ```json
+  {
+      "sync_status": {
+        "additional_info": {
+          "transactions_left": 126
+        },
+        "state": "InProgress"
+      }
+  }
+  ```
+
+  ```json
+  {
+      "sync_status": {
+        "state": "Finished"
+      }
+  }
+  ```
+</CollapsibleSection>
