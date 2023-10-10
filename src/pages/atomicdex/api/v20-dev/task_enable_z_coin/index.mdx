@@ -21,10 +21,10 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20
 
 #### Arguments
 
-| Structure          | Type   | Description                                                                     |
-| ------------------ | ------ | ------------------------------------------------------------------------------- |
-| ticker             | string | Ticker of coin to activate                                                      |
-| activation\_params | object | A standard [ActivationRpcData](/atomicdex/api/v20/#activation-rpc-data) object. |
+| Structure          | Type   | Description                                                                                              |
+| ------------------ | ------ | -------------------------------------------------------------------------------------------------------- |
+| ticker             | string | Ticker of coin to activate                                                                               |
+| activation\_params | object | A standard [ActivationRpcData](/atomicdex/api/common_structures/activation/#activation-rpc-data) object. |
 
 #### Response
 
@@ -475,23 +475,17 @@ To get the transaction history for ZHTLC coins, you need to use this special met
 
 #### Response
 
-| Structure                                        | Type             | Description                                                                                                                                    |
-| ------------------------------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| transactions                                     | array of objects | transactions data                                                                                                                              |
-| from\_id                                         | string           | the from\_id specified in the request; this value is null if from\_id was not set                                                              |
-| skipped                                          | number           | the number of skipped records (i.e. the position of `from_id` in the list + 1); this value is 0 if `from_id` was not set                       |
-| limit                                            | number           | the limit that was set in the request; note that the actual number of transactions can differ from the specified limit (e.g. on the last page) |
-| total                                            | number           | the total number of transactions available                                                                                                     |
-| page\_number                                     | number           | the page\_number that was set in the request                                                                                                   |
-| total\_pages                                     | number           | total pages available with the selected limit                                                                                                  |
-| current\_block                                   | number           | the number of the latest block of coin blockchain                                                                                              |
-| sync\_status                                     | object           | provides the information that helps to track the progress of transaction history preloading at background                                      |
-| sync\_status.state                               | string           | current state of sync; possible values: `NotEnabled`, `NotStarted`, `InProgress`, `Error`, `Finished`                                          |
-| sync\_status.additional\_info                    | object           | additional info that helps to track the progress; present for `InProgress` and `Error` states only                                             |
-| sync\_status.additional\_info.blocks\_left       | number           | present for ETH/ERC20 coins only; displays the number of blocks left to be processed for `InProgress` state                                    |
-| sync\_status.additional\_info.transactions\_left | number           | present for UTXO coins only; displays the number of transactions left to be processed for `InProgress` state                                   |
-| sync\_status.additional\_info.code               | number           | displays the error code for `Error` state                                                                                                      |
-| sync\_status.additional\_info.message            | number           | displays the error message for `Error` state                                                                                                   |
+| Structure      | Type             | Description                                                                                                                                                                               |
+| -------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| transactions   | array of objects | transactions data                                                                                                                                                                         |
+| from\_id       | string           | the from\_id specified in the request; this value is null if from\_id was not set                                                                                                         |
+| skipped        | number           | the number of skipped records (i.e. the position of `from_id` in the list + 1); this value is 0 if `from_id` was not set                                                                  |
+| limit          | number           | the limit that was set in the request; note that the actual number of transactions can differ from the specified limit (e.g. on the last page)                                            |
+| total          | number           | the total number of transactions available                                                                                                                                                |
+| page\_number   | number           | the page\_number that was set in the request                                                                                                                                              |
+| total\_pages   | number           | total pages available with the selected limit                                                                                                                                             |
+| current\_block | number           | the number of the latest block of coin blockchain                                                                                                                                         |
+| sync\_status   | object           | A standard [SyncStatus](/atomicdex/api/common_structures/#sync-status/) object. Provides the information that helps to track the progress of transaction history preloading at background |
 
 #### 📌 Examples
 

@@ -190,7 +190,7 @@ The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbe
 
 And rendered as:
 
-![Code group UI](src/images/style-guide-images/code-group-sample.png)
+![Code group UI](style-guide-images/code-group-sample.png)
 
 <!-- If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
 
@@ -202,7 +202,7 @@ And rendered as:
 
 And you'll still have it rendered correctly:
 
-![Single code block UI](src/images/style-guide-images/single-code-block.png) -->
+![Single code block UI](style-guide-images/single-code-block.png) -->
 
 It is important to **note that**, "**AtomicDEX methods**" should be wrapped with `CodeGroup` tags, using the **method name** as the **label value**, and the **tag value** set to **POST**, an additional **mm2MethodDecorate property** with the value **"true"**. This will generate code blocks for:
 
@@ -239,7 +239,7 @@ A working code sample would look like this:
 
 Rendered as:
 
-![mm2MethodDecoratorUI](src/images/style-guide-images/mm2MethodDecoratorUI.png)
+![mm2MethodDecoratorUI](style-guide-images/mm2MethodDecoratorUI.png)
 
 ### Note
 
@@ -275,11 +275,11 @@ Use `Note` tags to **highlight important information**. `Note`s can be one of th
 
 Rendered as:
 
-![Note-info](src/images/style-guide-images/notes-info-UI.png)
+![Note-info](style-guide-images/notes-info-UI.png)
 
-![Note-warning](src/images/style-guide-images/notes-warning-UI.png)
+![Note-warning](style-guide-images/notes-warning-UI.png)
 
-![Note-error](src/images/style-guide-images/notes-error-UI.png)
+![Note-error](style-guide-images/notes-error-UI.png)
 
 ### CollapsibleSection
 
@@ -324,7 +324,7 @@ A working code would look like this:
 
 Rendered as:
 
-![collapsible Section UI](src/images/style-guide-images/collapsible-section-UI.png)
+![collapsible Section UI](style-guide-images/collapsible-section-UI.png)
 
 ### Images
 
@@ -336,7 +336,7 @@ Now you can render the image using the `OptimizedImage` component, for example:
 
 `<OptimizedImage title="Atomic Dex" src={atomicManiq} alt="atomic dex" classNaming="w-full" />`
 
-![Atomic Maniq](src/images/style-guide-images/atomic-maniq.png)
+![Atomic Maniq](style-guide-images/atomic-maniq.png)
 
 <!-- [You can read more about the magic behind OptimizedImage](https://github.com/Niels-IO/next-image-export-optimizer#readme) -->
 
@@ -364,7 +364,7 @@ Here's how:
 
 Rendered as:
 
-![heading tag UI](src/images/style-guide-images/heading-tag-UI.png)
+![heading tag UI](style-guide-images/heading-tag-UI.png)
 
 ### TaggedSection
 
@@ -382,7 +382,7 @@ Here's how to use it:
 
 Rendered as:
 
-![Tagged section](src/images/style-guide-images/tagged-section-UI.png)
+![Tagged section](style-guide-images/tagged-section-UI.png)
 
 ### Tag
 
@@ -405,17 +405,23 @@ A working code would look like this:
 
 Rendered as:
 
-![Tag component](src/images/style-guide-images/crude-tag-ui.png)
+![Tag component](style-guide-images/crude-tag-ui.png)
+
+## Navbar (Top)
+
+Top navbar's navigation data/dropdown list is manually populated. This file can be found at [src/data/navbar.json](src/data/navbar.json). If you're working on a very important new page, which links to a whole new category or an index, this is where to add them.
+
+![Navbar top](style-guide-images/navbar-top-UI.png)
 
 ## Sidebar (Left)
 
-Sidebar navigation is manually populated. This file can be found at `src/data/sidebar.json`. If you're working on a new page, this is where to link them.
+Left sidebar's navigation data is manually populated. This file can be found at [src/data/sidebar.json](src/data/sidebar.json). If you're working on a new page, this is where to link them.
 
-![Sidebar left](src/images/style-guide-images/sidebar-left-UI.png)
+![Sidebar left](style-guide-images/sidebar-left-UI.png)
 
 ## Sidebar (Right)
 
-![Sidebar right](src/images/style-guide-images/sidebar-right-UI.png)
+![Sidebar right](style-guide-images/sidebar-right-UI.png)
 
 The right sidebar is automatically populated based on the **Heading hierarchy** of the current page.
 
