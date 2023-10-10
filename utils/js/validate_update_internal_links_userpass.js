@@ -445,6 +445,10 @@ async function processExternalLink(link, currFilePath) {
     if (err.message.startsWith("Request timed out")) {
       console.log(`Request timed out when checking the URL ${link} in the file ${currFilePath}`);
       return;
+    }
+    else if (err.message.includes("ETIMEDOUT")) {
+      console.log(`Request timed out when checking the URL ${link} in the file ${currFilePath}`);
+      return;
     } else {
       throw new Error(err);
     }
