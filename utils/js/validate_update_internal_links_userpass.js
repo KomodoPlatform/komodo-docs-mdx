@@ -14,6 +14,7 @@ import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
 import { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
+import { type } from "os";
 
 const manualLinkFile = "links-to-manually-check";
 if (fs.existsSync(manualLinkFile)) {
@@ -24,7 +25,7 @@ if (fs.existsSync(manualLinkFile)) {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    //await createFileSlugs(filepaths);
+    await createFileSlugs(filepaths);
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -216,22 +217,11 @@ async function processLink(link, currFilePath, filepathSlugs) {
     slug = slugify(correctUrlSplit[1]);
     correctUrl = correctUrlSplit[0] + "#" + slug;
   }
-
-  console.log("------------------------------------------------")
-  console.log("currNormalisedDir: " + currNormalisedDir)
-  console.log("currFilePath: " + currFilePath)
-  console.log("hash: " + hash)
-  console.log("strippedPath: " + strippedPath)
-  console.log("link: " + link)
-  console.log("correctUrl: " + correctUrl)
-  console.log("internalLinkFile: " + internalLinkFile)
-  console.log("slug: " + slug)
-  console.log("------------------------------------------------")
+  
   if (
-    slug &&
-    !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
+    !Object.hasOwn(filepathSlugs, internalLinkFile)
   ) {
-    console.log("------------------------------------------------");
+    console.log("#----------------------------------------------#");
     console.log("currNormalisedDir: " + currNormalisedDir);
     console.log("currFilePath: " + currFilePath);
     console.log("hash: " + hash);
@@ -240,7 +230,25 @@ async function processLink(link, currFilePath, filepathSlugs) {
     console.log("correctUrl: " + correctUrl);
     console.log("internalLinkFile: " + internalLinkFile);
     console.log("slug: " + slug);
-    console.log("------------------------------------------------");
+    console.log("#----------------------------------------------#");
+    throw new Error(
+      `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile} with url ${correctUrl} (original url: ${link})`
+    );
+  }
+  else if (
+    slug &&
+    !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
+  ) {
+    console.log("##------------------------------------------------##");
+    console.log("currNormalisedDir: " + currNormalisedDir);
+    console.log("currFilePath: " + currFilePath);
+    console.log("hash: " + hash);
+    console.log("strippedPath: " + strippedPath);
+    console.log("link: " + link);
+    console.log("correctUrl: " + correctUrl);
+    console.log("internalLinkFile: " + internalLinkFile);
+    console.log("slug: " + slug);
+    console.log("##------------------------------------------------##");
     throw new Error(
       `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile}`
     );
