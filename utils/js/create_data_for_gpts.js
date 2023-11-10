@@ -19,7 +19,7 @@ function readFileAndAddContentToFIle(filePath, contentHolder) {
     contentHolder.content += fileContent;
 }
 
-const pathsNames = [["", "all"], ["atomicdex", "atomicdex"], ["historical", "historical"], ["smart-chains", "smart-chains"], ["start-here", "start-here"]]
+const pathsNames = [["", "all"], ["atomicdex", "atomicdex"], ["historical", "historical"], ["smart-chains", "smart-chains"], ["antara", "antara"], ["start-here", "start-here"]]
 
 for (let index = 0; index < pathsNames.length; index++) {
     const element = pathsNames[index];
