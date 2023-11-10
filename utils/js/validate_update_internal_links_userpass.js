@@ -14,6 +14,7 @@ import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
 import { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
+import { type } from "os";
 
 const manualLinkFile = "links-to-manually-check";
 if (fs.existsSync(manualLinkFile)) {
@@ -24,7 +25,7 @@ if (fs.existsSync(manualLinkFile)) {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    //await createFileSlugs(filepaths);
+    await createFileSlugs(filepaths);
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -216,12 +217,11 @@ async function processLink(link, currFilePath, filepathSlugs) {
     slug = slugify(correctUrlSplit[1]);
     correctUrl = correctUrlSplit[0] + "#" + slug;
   }
-
+  
   if (
-    slug &&
-    !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
+    !Object.hasOwn(filepathSlugs, internalLinkFile)
   ) {
-    console.log("------------------------------------------------");
+    console.log("#----------------------------------------------#");
     console.log("currNormalisedDir: " + currNormalisedDir);
     console.log("currFilePath: " + currFilePath);
     console.log("hash: " + hash);
@@ -230,7 +230,25 @@ async function processLink(link, currFilePath, filepathSlugs) {
     console.log("correctUrl: " + correctUrl);
     console.log("internalLinkFile: " + internalLinkFile);
     console.log("slug: " + slug);
-    console.log("------------------------------------------------");
+    console.log("#----------------------------------------------#");
+    throw new Error(
+      `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile} with url ${correctUrl} (original url: ${link})`
+    );
+  }
+  else if (
+    slug &&
+    !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
+  ) {
+    console.log("##------------------------------------------------##");
+    console.log("currNormalisedDir: " + currNormalisedDir);
+    console.log("currFilePath: " + currFilePath);
+    console.log("hash: " + hash);
+    console.log("strippedPath: " + strippedPath);
+    console.log("link: " + link);
+    console.log("correctUrl: " + correctUrl);
+    console.log("internalLinkFile: " + internalLinkFile);
+    console.log("slug: " + slug);
+    console.log("##------------------------------------------------##");
     throw new Error(
       `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile}`
     );
@@ -372,7 +390,11 @@ function checkUrlStatusCode(url) {
   });
 }
 
-async function processExternalLink(link, currFilePath) {
+async function processExternalLink(link, currFilePath) { //TODO: check the ignore lists ocassionally to determine their status and maybe check for replacements
+  let IgnoreURLs = [
+    "https://moralis-proxy.komodo.earth",
+    "https://nft.antispam.dragonhound.info"
+  ]
   if (
     link.startsWith("http://127.0.0.1") ||
     link.startsWith("https://127.0.0.1") ||
@@ -393,6 +415,12 @@ async function processExternalLink(link, currFilePath) {
   ) {
     return;
   }
+  if (
+    link.startsWith("http://bitcointalk.org") ||
+    link.startsWith("https://bitcointalk.org")
+  ) {
+    return;
+  }
   try {
     const { newLocation, statusCode } = await checkUrlStatusCode(link);
     if (statusCode === 200) {
@@ -408,9 +436,11 @@ async function processExternalLink(link, currFilePath) {
         `The link: ${link} has a ${statusCode} redirect to ${newLocation}`
       );
     } else if (statusCode === 403 || statusCode === 405 || statusCode === 500) {
-      console.log(
-        `Check this link manually: ${link}.It responds with statuscode: ${statusCode} `
-      );
+      // console.log(
+      //   `Check this link manually: [${link}] It responds with statuscode: ${statusCode} `
+      // );
+      fs.appendFileSync(manualLinkFile, link + "\n");
+    } else if (IgnoreURLs.some(ignoreLink => link.includes(ignoreLink))) {
       fs.appendFileSync(manualLinkFile, link + "\n");
     } else {
       throw new Error(
@@ -418,8 +448,8 @@ async function processExternalLink(link, currFilePath) {
       );
     }
   } catch (err) {
-    console.log(`Checking the URL ${link} in the file ${currFilePath}`);
     if (err.message.startsWith("Request timed out")) {
+      console.log(`Request timed out when checking the URL ${link} in the file ${currFilePath}`);
       return;
     } else {
       throw new Error(err);

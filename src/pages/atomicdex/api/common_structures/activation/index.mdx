@@ -1,0 +1,191 @@
+export const title = "Komodo DeFi SDK Common Structures: Activation";
+export const description = "The Komodo DeFi SDK uses a variety of activation methods, depending on the type of coin.";
+
+# Activation Structures
+
+### ActivationParams
+
+The `ActivationParams` object defines additional parameters used for activation. These params may vary depending on the coin type.
+
+The following methods use this structure:
+
+*   TBA
+
+| Parameter                    | Type    | Description                                                                                                                                                                                                                          |
+| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| required\_confirmations      | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                   |
+| requires\_notarization       | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file. |
+| priv\_key\_policy            | string  | Defaults to `ContextPrivkey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                                            |
+| min\_addresses\_number       | integer | HD wallets only. How many additional addreesses to generate at a minimum.                                                                                                                                                            |
+| scan\_policy                 | string  | HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the Komodo DeFi SDK.                                       |
+| gap\_limit                   | integer | HD wallets only. The max number of empty addresses in a row. If transactions were sent to an address outside the `gap_limit`, they will not be identified when scanning.                                                             |
+| zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing Zcash parameters. Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                                     |
+| scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                  |
+| scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                    |
+| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/atomicdex/api/common_structures/activation/#activation-mode) object.                                                                                                     |
+
+<Note>
+  For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
+  first transaction to see all balance and history. This may take a long time on the first
+  activation, but subsequent activations will be much faster.
+  Using a smaller `scan_blocks_per_iteration` and larger `scan_interval_ms`,
+  will reduce the average CPU load during ZHTLC coin activation (at the cost of a
+  longer activation time). These optional fields are recommended when developing
+  for iOS, where a high CPU load may kill the activation process. Android &
+  desktop operating systems do not appear to have any problems with high CPU
+  load during ZHTLC coin activation.
+</Note>
+
+### ActivationMode
+
+Defines the activation mode for QTUM, BCH, UTXO & ZHTLC coins.
+
+The following methods use this structure:
+
+*   TBA
+
+| Parameter | Type   | Description                                                                                                                               |
+| --------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.                            |
+| rpc\_data | object | `Electrum` or `Light` mode only. A standard [ActivationRpcData](/atomicdex/api/common_structures/activation/#activation-rpc-data) object. |
+
+### ActivationRpcData
+
+Contains information about electrum & lightwallet\_d servers for coins being used in `Electrum` or `Light` mode.
+
+| Parameter                 | Type              | Description                                                                                                                                                                                                                                                     |
+| ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| light\_wallet\_d\_servers | list              | ZHTLC only. A list of urls which are hosting lightwallet\_d servers for a coin.                                                                                                                                                                                 |
+| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/atomicdex/api/common_structures/activation/#activation-servers) objects.                                                                                                                                    |
+| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/atomicdex/api/common_structures/activation/#activation-servers) objects.                                                                                                                   |
+| sync\_params              | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling\_activation\_height), `height` (a specific block height) or `date` (a unix timestamp). |
+
+<DevComment>
+  `electrum` and `electrum_servers` are both used for the same purpose. This should be consolidated in the API.
+</DevComment>
+
+### ActivationServers
+
+The following methods use this structure:
+
+*   TBA
+
+Contains information electrum servers for coins being used in `Electrum` or `Light` mode.
+
+| Parameter                   | Type    | Description                                                                                                                                                       |
+| --------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| url                         | string  | The URL and port for an electrum server.                                                                                                                          |
+| ws\_url                     | string  | Optional, for WSS only. The URL and port for an electrum server's WSS port.                                                                                       |
+| protocol                    | string  | Optional, defaults to `TCP`. Transport protocol used to connect to the server. Options: `TCP` or `SSL`                                                            |
+| disable\_cert\_verification | boolean | Optional, defaults to `false`. If `true`, this disables server SSL/TLS certificate verification (e.g. for self-signed certificates). <b>Use at your own risk!</b> |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### ZHTLC Example
+
+  ```json
+  {
+    "activation_params": {
+      "mode": {
+        "rpc": "Light",
+        "rpc_data": {
+          "electrum_servers": [
+            {
+              "url":"zombie.dragonhound.info:10033"
+            }
+          ],
+          "light_wallet_d_servers": [
+            "http://zombie.dragonhound.info:443"
+          ]
+        },
+        "sync_params": { 
+            "height":  2528700
+        }
+      },
+      "zcash_params_path": "/home/username/path_to/.zcash-params",
+      "scan_blocks_per_iteration": 100,
+      "scan_interval_ms": 200
+    }
+  }
+  ```
+
+  #### HD UTXO Activation (v2)
+
+  ```json
+  {
+  "activation_params": {
+      "mode": {
+          "rpc": "Electrum",
+          "rpc_data": {
+              "servers": [
+                  {
+                      "url": "electrum2.cipig.net:10001"
+                  },
+                  {
+                      "url": "electrum3.cipig.net:20001",
+                      "ws_url": "electrum3.cipig.net:30001",
+                      "protocol": "SSL"
+                  }
+              ]
+          }
+      },
+      "scan_policy": "scan_if_new_wallet",
+      "priv_key_policy": "Trezor",
+      "min_addresses_number": 3,
+      "gap_limit": 20
+  }
+  }
+  ```
+</CollapsibleSection>
+
+### CoinProtocol
+
+| Parameter      | Type    | Description                                                                                            |
+| -------------- | ------- | ------------------------------------------------------------------------------------------------------ |
+| type           | integer | One of the supported \[coin types]\(link TBA)                                                          |
+| protocol\_data | object  | A standard [CoinProtocolData](/atomicdex/api/common_structures/activation/#coin-protocol-data) object. |
+
+### CoinProtocolData
+
+| Parameter             | Type   | Description                                                                                                |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| platform              | string | Indicates the platform parent coin for EMV-like protocols, or the coin used for lightning nodes.           |
+| network               | string | Either `mainnet` or \`testnet                                                                              |
+| confirmation\_targets | object | A standard [ConfirmationTargets](/atomicdex/api/common_structures/lightning/#confirmation-targets) object. |
+
+### EvmNode
+
+The `EvmNode` object includes the following items for a given coin or token:
+
+| Parameter | Type    | Description                                                                                                         |
+| --------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| url       | string  | URL of an RPC node                                                                                                  |
+| gui\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "url": "http://eth1.cipig.net:8555",
+      "gui_auth": false
+  }
+  ```
+</CollapsibleSection>
+
+### UtxoMergeParams
+
+The `UtxoMergeParams` object defines how often and at which thresholds to merge UTXOs. This is useful for wallets which have been used for a long time, and have many small UTXOs from mining activity.
+
+| Parameter            | Type    | Description                                                                                                                                                                                                                 |
+| -------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| merge\_at            | integer | Mamimum UTXO count before merge loop is initiated.                                                                                                                                                                          |
+| check\_every         | integer | How frequently (in blocks) the wallet UTXO count is evaluated.                                                                                                                                                              |
+| max\_merge\_at\_once | integer | The maximum nouber of UTXOs to inlude as inputs for a merge transaction. Note that more input UTXOs means a larger transaction and greater fees, and that each blockchain has a limit to the maximum size of a transaction. |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+  "merge_at": 50,
+  "check_every": 10,
+  "max_merge_at_once": 25
+  }
+  ```
+</CollapsibleSection>
