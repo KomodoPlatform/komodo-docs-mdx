@@ -482,27 +482,27 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 
 ### LightningPayment
 
-| Parameter        | Type   | Description                                                                                                                                                                                       |
-| ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type             | string | The payment type. Accepted values are `invoice` or [`keysend`](https://cdecker-lightning.readthedocs.io/lightning-keysend.7.html).                                                                |
-| invoice          | string | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                                                                             |
-| destination      | string | Only used if `type` is `keysend`. A `node_pubkey` (which is also the node address in lightning context). Not to be confused with an onchain address.                                              |
-| amount\_in\_msat | string | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin). |
-| expiry           | string | Only used if `type` is `keysend`. Optional, defaults to `3600`. Seconds until the payment expires.                                                                                                |
+| Parameter        | Type   | Description                                                                                                                                                                                  |
+| ---------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type             | string | The payment type. Accepted values are `invoice` or [`keysend`](https://cdecker-lightning.readthedocs.io/lightning-keysend.7.html).                                                           |
+| invoice          | string | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                                                                        |
+| destination      | string | Only used if `type` is `keysend`. A `node_pubkey` (which is also the node address in lightning context). Not to be confused with an onchain address.                                         |
+| amount\_in\_msat | string | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin). |
+| expiry           | string | Only used if `type` is `keysend`. Optional, defaults to `3600`. Seconds until the payment expires.                                                                                           |
 
 ### LightningPaymentFilter
 
-| Parameter             | Type    | Description                                                                                                         |
-| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| payment\_type         | object  | A standard `LightningPaymentType` object.                                                                           |
-| description           | string  | Optional. A note to indicate the purpose of the invoice.                                                            |
-| status                | string  | Optional. Accepted values: `pending`, `succeeded`, `failed`.                                                        |
-| from\_amount\_msat    | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html)          |
-| to\_amount\_msat      | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html)          |
-| from\_fee\_paid\_msat | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) |
-| to\_fee\_paid\_msat   | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) |
-| from\_timestamp       | string  | Optional. Minimum timestamp in [unix epoch format](https://www.epochconverter.com/) of payment results to return.   |
-| to\_timestamp         | string  | Optional. Maximum timestamp in [unix epoch format](https://www.epochconverter.com/) of payment results to return.   |
+| Parameter             | Type    | Description                                                                                                       |
+| --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
+| payment\_type         | object  | A standard `LightningPaymentType` object.                                                                         |
+| description           | string  | Optional. A note to indicate the purpose of the invoice.                                                          |
+| status                | string  | Optional. Accepted values: `pending`, `succeeded`, `failed`.                                                      |
+| from\_amount\_msat    | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)             |
+| to\_amount\_msat      | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)             |
+| from\_fee\_paid\_msat | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)    |
+| to\_fee\_paid\_msat   | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)    |
+| from\_timestamp       | string  | Optional. Minimum timestamp in [unix epoch format](https://www.epochconverter.com/) of payment results to return. |
+| to\_timestamp         | string  | Optional. Maximum timestamp in [unix epoch format](https://www.epochconverter.com/) of payment results to return. |
 
 ### LightningPaymentType
 
@@ -731,7 +731,6 @@ The `WithdrawNftType` object is used for NFT withdrawals. It includes the follow
 | type           | string | The withdrawal type. Either `withdraw_erc721` or `withdraw_erc1155`.        |
 | withdraw\_data | object | A standard [WithdrawNftData](/atomicdex/api/v20/#withdraw-nft-data) object. |
 
-
 <Note>
   When the `type` value in `WithdrawType` is `withdraw_erc721` it means the NFT
   is absolutely unique - it has only 1 owner and the owner can own only 1 NFT
@@ -747,12 +746,12 @@ The `WithdrawNftType` object is used for NFT withdrawals. It includes the follow
 
 The `WithdrawNftData` object is used for withdrawals of NFTs on ERC721 and ERC1155 contracts. It includes the following items for a given coin or token:
 
-| Parameter      | Type    | Description                                                                                                                |
-| -------------- | ------- | -------------------------------------------------------------------------------------------------------------------------- |
-| chain          | string  | The token chain. Chain must be [activated](/atomicdex/api/legacy/coin_activation/) first.                                  |
-| to             | string  | Destination address to withdraw the token to.                                                                              |
-| token\_address | string  | Token address.                                                                                                             |
-| token\_id      | string  | Token ID.                                                                                                                  |
-| fee            | string  | Optional. A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object.                                               |
-| amount         | string  | Optional, ERC1155 only. Defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is \`true.                           |
+| Parameter      | Type    | Description                                                                                                                              |
+| -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| chain          | string  | The token chain. Chain must be [activated](/atomicdex/api/legacy/coin_activation/) first.                                                |
+| to             | string  | Destination address to withdraw the token to.                                                                                            |
+| token\_address | string  | Token address.                                                                                                                           |
+| token\_id      | string  | Token ID.                                                                                                                                |
+| fee            | string  | Optional. A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object.                                                             |
+| amount         | string  | Optional, ERC1155 only. Defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is \`true.                                         |
 | max            | boolean | Optional, ERC1155 only. Defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent. |
