@@ -390,7 +390,7 @@ function checkUrlStatusCode(url) {
   });
 }
 
-async function processExternalLink(link, currFilePath) {
+async function processExternalLink(link, currFilePath) { //TODO: check the ignore lists ocassionally to determine their status and maybe check for replacements
   let IgnoreURLs = [
     "https://moralis-proxy.komodo.earth",
     "https://nft.antispam.dragonhound.info"
@@ -412,6 +412,12 @@ async function processExternalLink(link, currFilePath) {
   if (
     link.startsWith("http://komodoplatform.com/discord") ||
     link.startsWith("https://komodoplatform.com/discord")
+  ) {
+    return;
+  }
+  if (
+    link.startsWith("http://bitcointalk.org") ||
+    link.startsWith("https://bitcointalk.org")
   ) {
     return;
   }
