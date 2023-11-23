@@ -1,0 +1,224 @@
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes the withdraw_nft method AtomicDEX-API provides to send NFTs to an address";
+
+# Withdraw NFTs {{label : 'withdraw_nft', tag : 'API-v2'}}
+
+<Note>
+  To withdraw NFTs, you must [activate the coin](/atomicdex/api/legacy/coin_activation/) which holds the NFTs first.
+</Note>
+
+### Request Parameters
+
+| Parameter      | Type   | Description                                                                 |
+| -------------- | ------ | --------------------------------------------------------------------------- |
+| withdraw\_type | object | A standard [WithdrawNftType](/atomicdex/api/v20/#withdraw-nft-type) object. |
+
+### Response Parameters
+
+| Parameter         | Type    | Description                                                                                                                                              |
+| ----------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount            | string  | Amount of tokens to withdraw.                                                                                                                            |
+| tx\_hex           | string  | Raw hex of signed transaction. Use this with the [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction/) RPC to broadcast the transaction. |
+| tx\_hash          | string  | Transaction ID of the withdrawl.                                                                                                                         |
+| from              | array   | List of source addresses.                                                                                                                                |
+| to                | array   | List of destination addresses.                                                                                                                           |
+| contract\_type    | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                    |
+| token\_address    | string  | Token address.                                                                                                                                           |
+| token\_id         | string  | Token ID.                                                                                                                                                |
+| fee\_details      | object  | A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object.                                                                                       |
+| coin              | string  | Coin name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                     |
+| block\_height     | integer | Block height of the transaction. If the value is `0`, the transaction is unconfirmed.                                                                    |
+| timestamp         | integer | Timestamp of the block containing the withdrawl transaction in [unix epoch format](https://www.epochconverter.com/).                                     |
+| internal\_id      | integer | Used for internal transaction identification, for some coins it may be equal to transaction hash.                                                        |
+| transaction\_type | string  | This will always be `NftTransfer`.                                                                                                                       |
+
+<Note>
+  When the `type` value in `WithdrawType` is `withdraw_erc721` it means the NFT is absolutely unique - it has only 1 owner and the owner can own only 1 NFT which has this `token_id` in its `token_address` (also referred to as contract address).
+  When the `type` value in `WithdrawType` is `withdraw_erc1155`, it means that it is possible for more than 1 user to own one or more of the same NFT (with an identical `token_id`).
+  Due to this difference, the `amount` and `max` fields are only used the `type` value in `WithdrawType` is `withdraw_erc1155`.
+</Note>
+
+#### 📌 ERC721 Withdraw Example
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "withdraw_type": {
+        "type": "withdraw_erc721",
+        "withdraw_data": {
+          "chain": "BSC",
+          "to": "0x6FAD0eC6bb76914b2a2a800686acc22970645820",
+          "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f81",
+          "token_id": "214300044414"
+        }
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "tx_hex": "f8ca0c84b2d05e008301acab94fd913a305d70a60aac4faac70c739563738e1f8180b86442842e0e000000000000000000000000f622a6c52c94b500542e2ae6bcad24c53bc5b6a20000000000000000000000006fad0ec6bb76914b2a2a800686acc2297064582000000000000000000000000000000000000000000000000000000031e5472c7e8194a07eaa06fe70087b8fef9774472c3bc72ad4c6814ea1fac6515a45987864892f0ca05806e069db608f26f7442595815fbe04f117f10171557e7228d354d0e2f2ac05",
+      "tx_hash": "5d93549408b3bae1c7a03fcc37a7cb7cca37b141de9119c2b87cff1d540507d7",
+      "from": [
+        "0xf622a6C52C94b500542E2AE6bcAD24C53Bc5b6a2"
+      ],
+      "to": [
+        "0x6FAD0eC6bb76914b2a2a800686acc22970645820"
+      ],
+      "contract_type": "ERC721",
+      "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f81",
+      "token_id": "214300044414",
+      "amount": "1",
+      "fee_details": {
+        "type": "Eth",
+        "coin": "BNB",
+        "gas": 109739,
+        "gas_price": "0.000000003",
+        "total_fee": "0.000329217"
+      },
+      "coin": "BNB",
+      "block_height": 0,
+      "timestamp": 1684239228,
+      "internal_id": 0,
+      "transaction_type": "NftTransfer"
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### 📌 ERC1155 Withdraw Example
+
+If you are sending 2 or more NFTs, you must use the `withdraw_erc1155` withdraw type.
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "withdraw_type": {
+        "type": "withdraw_erc1155",
+        "withdraw_data": {
+          "chain": "POLYGON",
+          "to": "0x6FAD0eC6bb76914b2a2a800686acc22970645820",
+          "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+          "token_id": "5",
+          "amount": "2"
+        }
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "tx_hex": "f9014c058523e0723b1b830109b49448c75fbf0452fa8ff2928ddf46b0fe7629cca2ff80b8e4f242432a000000000000000000000000f622a6c52c94b500542e2ae6bcad24c53bc5b6a20000000000000000000000006fad0ec6bb76914b2a2a800686acc229706458200000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000023078000000000000000000000000000000000000000000000000000000000000820136a04fe9a78bcc8f2f859b5ee686369d3d7655cee2646eb78c1d16d8794679b5b907a01804d88b721afcc4721dda00eee2562f433c5bb28ad3bbf4d0e5d70bc0e18ff3",
+      "tx_hash": "337b217448662694ca59ab0840e3f22e422b68fd8e3b52424eb9052f6b150d5c",
+      "from": [
+        "0xf622a6C52C94b500542E2AE6bcAD24C53Bc5b6a2"
+      ],
+      "to": [
+        "0x6FAD0eC6bb76914b2a2a800686acc22970645820"
+      ],
+      "contract_type": "ERC1155",
+      "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+      "token_id": "5",
+      "amount": "2",
+      "fee_details": {
+        "type": "Eth",
+        "coin": "MATIC",
+        "gas": 68020,
+        "gas_price": "0.000000154089437979",
+        "total_fee": "0.01048116357133158"
+      },
+      "coin": "MATIC",
+      "block_height": 0,
+      "timestamp": 1684241604,
+      "internal_id": 0,
+      "transaction_type": "NftTransfer"
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### 📌 ERC1155 Withdraw Max Example
+
+If you would like to withdraw all NFTs from a token\_address, you must use the `withdraw_erc1155` withdraw type and set `max` to `true`.
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "withdraw_type": {
+        "type": "withdraw_erc1155",
+        "withdraw_data": {
+          "chain": "POLYGON",
+          "to": "0x6FAD0eC6bb76914b2a2a800686acc22970645820",
+          "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+          "token_id": "5",
+          "max": true
+        }
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "tx_hex": "f9014c05851ff0bd48fd830109b49448c75fbf0452fa8ff2928ddf46b0fe7629cca2ff80b8e4f242432a000000000000000000000000f622a6c52c94b500542e2ae6bcad24c53bc5b6a20000000000000000000000006fad0ec6bb76914b2a2a800686acc229706458200000000000000000000000000000000000000000000000000000000000000005000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000023078000000000000000000000000000000000000000000000000000000000000820135a02ba2e28c3ff90713ff74b73f76b5db609e2329c3322253cff4646609ea0280d0a03fcf71754cff41f2f785533d7d74b126f7b3d46d09550a17a8dc48381b01c54c",
+      "tx_hash": "8a98473681e66372ef87a1f40ccf145023ca1f5667560763a9a2e62403feeb83",
+      "from": [
+        "0xf622a6C52C94b500542E2AE6bcAD24C53Bc5b6a2"
+      ],
+      "to": [
+        "0x6FAD0eC6bb76914b2a2a800686acc22970645820"
+      ],
+      "contract_type": "ERC1155",
+      "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+      "token_id": "5",
+      "amount": "2",
+      "fee_details": {
+        "type": "Eth",
+        "coin": "MATIC",
+        "gas": 68020,
+        "gas_price": "0.000000137182923005",
+        "total_fee": "0.0093311824228001"
+      },
+      "coin": "MATIC",
+      "block_height": 0,
+      "timestamp": 1684241781,
+      "internal_id": 0,
+      "transaction_type": "NftTransfer"
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+<Note>
+  View the source code at: [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs)
+</Note>
