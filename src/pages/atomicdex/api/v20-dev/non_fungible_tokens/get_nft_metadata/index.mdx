@@ -1,0 +1,97 @@
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes the get_nft_metadata method AtomicDEX-API provides to get metadata for an NFT";
+
+# Get NFT Metadata {{label : 'get_nft_metadata', tag : 'API-v2'}}
+
+### Request Parameters
+
+| Parameter      | Type   | Description        |
+| -------------- | ------ | ------------------ |
+| chain          | string | The token chain.   |
+| token\_address | string | The token address. |
+| token\_id      | string | Token ID.          |
+
+### Response Parameters
+
+| Parameter              | Type    | Description                                                                                                                                                           |
+| ---------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount                 | string  | The amount of this NFT the user owns (used by `ERC1155`).                                                                                                             |
+| block\_number\_minted  | integer | The block height when the NFT was minted. May be `null`.                                                                                                              |
+| block\_number          | integer | The block height when the amount or owner changed.                                                                                                                    |
+| chain                  | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| name                   | string  | May be `null`. An NFT collection name.                                                                                                                                |
+| contract\_type         | string  | The type of NFT contract standard. One of `ERC721` or `ERC1155`.                                                                                                      |
+| last\_token\_uri\_sync | string  | When the token\_uri was last updated.                                                                                                                                 |
+| last\_metadata\_sync   | string  | When the metadata was last updated.                                                                                                                                   |
+| metadata               | string  | The metadata of the token. May be `null`.                                                                                                                             |
+| minter\_address        | string  | Minter address. May be `null`.                                                                                                                                        |
+| owner\_of              | string  | The wallet address of the owner of the NFT.                                                                                                                           |
+| possible\_spam         | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing     | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| symbol                 | string  | May be `null`. The symbol of the NFT contract.                                                                                                                        |
+| token\_address         | string  | The address of the NFT contract.                                                                                                                                      |
+| token\_id              | string  | The token ID of the NFT.                                                                                                                                              |
+| token\_hash            | string  | The token hash. May be `null`.                                                                                                                                        |
+| token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                  |
+| token\_domain          | string  | Token domain. May be `null`.                                                                                                                                          |
+| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                |
+
+#### 📌 Example
+
+<CodeGroup title="Get NFT Metadata" tag="POST" label="get_nft_metadata" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "get_nft_metadata",
+    "mmrpc": "2.0",
+    "params": {
+      "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f81",
+      "token_id": "214300044414",
+      "chain": "BSC"
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "chain": "BSC",
+      "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f81",
+      "token_id": "214300044414",
+      "amount": "1",
+      "owner_of": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+      "token_hash": "125f8f4e952e107c257960000b4b250e",
+      "block_number_minted": 25810308,
+      "block_number": 28056721,
+      "contract_type": "ERC721",
+      "name": "Binance NFT Mystery Box-Back to Blockchain Future",
+      "symbol": "BMBBBF",
+      "token_uri": "https://public.nftstatic.com/static/nft/BSC/BMBBBF/214300044414",
+      "token_domain": "public.nftstatic.com",
+      "metadata": "{\"image\":\"https://public.nftstatic.com/static/nft/res/4df0a5da04174e1e9be04b22a805f605.png\",\"name\":\"Nebula Nodes\",\"description\":\"Interchain nodes continuously exchange blockchain data amongst each other, supporting blockchain interoperability.\"}",
+      "last_token_uri_sync": "2023-02-19T19:12:09.471Z",
+      "last_metadata_sync": "2023-02-19T19:12:18.080Z",
+      "minter_address": "0xdbdeb0895f3681b87fb3654b5cf3e05546ba24a9",
+      "possible_spam": false,
+      "possible_phishing": false,
+      "uri_meta": {
+        "image": "https://public.nftstatic.com/static/nft/res/4df0a5da04174e1e9be04b22a805f605.png",
+        "image_url": "https://public.nftstatic.com/static/nft/res/4df0a5da04174e1e9be04b22a805f605.png",
+        "name": "Nebula Nodes",
+        "description": "Interchain nodes continuously exchange blockchain data amongst each other, supporting blockchain interoperability.",
+        "attributes": null,
+        "animation_url": null,
+        "animation_domain": null,
+        "external_url": null,
+        "external_domain": null,
+        "image_details": null
+      }
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
