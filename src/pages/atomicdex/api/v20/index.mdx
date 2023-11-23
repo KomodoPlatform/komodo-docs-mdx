@@ -722,26 +722,6 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
   ```
 </CollapsibleSection>
 
-### WithdrawNftType
-
-The `WithdrawNftType` object is used for NFT withdrawals. It includes the following items for a given coin or token:
-
-| Parameter      | Type   | Description                                                                 |
-| -------------- | ------ | --------------------------------------------------------------------------- |
-| type           | string | The withdrawal type. Either `withdraw_erc721` or `withdraw_erc1155`.        |
-| withdraw\_data | object | A standard [WithdrawNftData](/atomicdex/api/v20/#withdraw-nft-data) object. |
-
-<Note>
-  When the `type` value in `WithdrawType` is `withdraw_erc721` it means the NFT
-  is absolutely unique - it has only 1 owner and the owner can own only 1 NFT
-  which has this `token_id` in its `token_address` (also referred to as contract
-  address). When the `type` value in `WithdrawType` is `withdraw_erc1155`, it
-  means that it is possible for more than 1 user to own one or more of the same
-  NFT (with an identical `token_id`). Due to this difference, the `amount` and
-  `max` fields are only used the when `type` value in `WithdrawType` is
-  `withdraw_erc1155`.
-</Note>
-
 ### WithdrawNftData
 
 The `WithdrawNftData` object is used for withdrawals of NFTs on ERC721 and ERC1155 contracts. It includes the following items for a given coin or token:
@@ -755,3 +735,13 @@ The `WithdrawNftData` object is used for withdrawals of NFTs on ERC721 and ERC11
 | fee            | string  | Optional. A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object.                                                             |
 | amount         | string  | Optional, ERC1155 only. Defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is \`true.                                         |
 | max            | boolean | Optional, ERC1155 only. Defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent. |
+
+<Note>
+  When the `type` parameter in a [withdraw\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc721`, it means the NFT is absolutely unique,
+  and it has only 1 owner and the owner can own only 1 NFT with this `token_id`
+  in its `token_address` (also referred to as contract address).
+  When the `type` parameter in a [withdraw\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc1155`, it means that it is possible for more
+  than 1 user to own one or more of the same NFT (with an identical `token_id`).
+  Due to this difference, the `amount` and `max` fields are only used the when
+  the `type` value is `withdraw_erc1155`.
+</Note>
