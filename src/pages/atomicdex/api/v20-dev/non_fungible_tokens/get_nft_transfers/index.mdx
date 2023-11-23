@@ -1,0 +1,121 @@
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes the get_nft_transfers method AtomicDEX-API provides to get information about your NFT transactions";
+
+# Get a list of NFT transfers {{label : 'get_nft_transfers', tag : 'API-v2'}}
+
+Returns a list of the NFT transfers involving the user, shown in descending order of the `block_timestamp` value of the NFT's last transfer.
+
+### Request Parameters
+
+| Parameter           | Type    | Description                                                                                                                                                |
+| ------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains              | array   | List of chains to scan for NFTs.                                                                                                                           |
+| max                 | boolean | Optional, defaults to `false`. If `true`, response will return all NFT transfers without pagination, and will ignore the `limit` and `page_number` values. |
+| limit               | integer | Optional, defaults to `10`. The number of NFTs displayed per page in response.                                                                             |
+| page\_number        | integer | Optional, defaults to `1`. The page offset for items in response.                                                                                          |
+| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potentially spam link found in `collection_name`, `token_name` will be censored                              |
+| filters             | object  | Optional. A standard [TokenTransferFilter](/atomicdex/api/v20/#token-transfer-filter) object.                                                              |
+
+### Response Parameters
+
+| Parameter          | Type    | Description                                                                                                                                                           |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount             | string  | Amount of tokens transferred.                                                                                                                                         |
+| block\_hash        | string  | May be `null`. Hash of block in which transfer occurred.                                                                                                              |
+| block\_number      | integer | Height of block in which transfer occurred.                                                                                                                           |
+| block\_timestamp   | integer | Block time in [unix epoch format](https://www.epochconverter.com/).                                                                                                   |
+| chain              | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| token\_uri         | string  | May be `null`. The URI to the metadata of the token.                                                                                                                  |
+| token\_domain      | string  | May be `null`. Extracted domain from the `token_uri`, if valid.                                                                                                       |
+| collection\_name   | string  | May be `null`. Name of collection which token belongs to.                                                                                                             |
+| image\_url         | string  | May be `null`. The URI to the token image.                                                                                                                            |
+| image\_domain      | string  | May be `null`. Extracted domain from the `image_url`, if valid.                                                                                                       |
+| token\_name        | string  | May be `null`. Name of the token.                                                                                                                                     |
+| contract\_type     | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                                 |
+| token\_address     | string  | Address of token transferred.                                                                                                                                         |
+| token\_id          | string  | Token ID.                                                                                                                                                             |
+| possible\_spam     | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| transaction\_hash  | string  | Transaction ID of the transfer.                                                                                                                                       |
+| transaction\_index | string  | May be `null`. Transaction index of the transfer.                                                                                                                     |
+| log\_index         | string  | Log index of the transfer.                                                                                                                                            |
+| value              | string  | May be `null`. Tranfer value.                                                                                                                                         |
+| transaction\_type  | string  | May be `null`. Transaction type. Possible values are `Single`.                                                                                                        |
+| from\_address      | string  | Address of previous owner which sent the token(s).                                                                                                                    |
+| to\_address        | string  | Address of new owner which received the token(s).                                                                                                                     |
+| status             | string  | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`.  |
+| verified           | integer | May be `null`.                                                                                                                                                        |
+| operator           | string  | May be `null`.                                                                                                                                                        |
+
+<DevComment>
+  `verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incormoprates this.
+  What are the other possible values for `transaction_type`?
+  What is `operator`?
+  What does `verified` mean?
+</DevComment>
+
+#### 📌 Example with date and `send` filters
+
+<CodeGroup title="Get a list of NFT transfers" tag="POST" label="get_nft_transfers" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "get_nft_transfers",
+    "mmrpc": "2.0",
+    "params": {
+      "chains": [
+        "POLYGON"
+      ],
+      "max": true,
+      "filters": {
+        "send": true,
+        "from_date": 1676636291
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "transfer_history": [
+        {
+          "chain": "POLYGON",
+          "block_number": 40103927,
+          "block_timestamp": 1678270296,
+          "block_hash": "0xdd5b1ad793332343e206ee0b566a30821ab39d1f79e921f787f1ea23b8a90dbd",
+          "transaction_hash": "0xfe8d5fc480c534625d7e6fc81eadff8b8f6c986cd46f00d5993b6e21d6bd28c9",
+          "transaction_index": 114,
+          "log_index": 307,
+          "value": "0",
+          "contract_type": "ERC1155",
+          "transaction_type": "Single",
+          "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+          "token_id": "5",
+          "from_address": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+          "to_address": "0x6fad0ec6bb76914b2a2a800686acc22970645820",
+          "status": "Send",
+          "amount": "1",
+          "verified": 1,
+          "operator": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+          "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+          "token_domain": "app.thesmurfssociety.com",
+          "collection_name": null,
+          "image_url": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+          "image_domain": "metadata.thesmurfssociety.com",
+          "token_name": "Forest Mushrooms",
+          "possible_spam": false,
+          "possible_phishing": false
+        }
+      ],
+      "skipped": 1,
+      "total": 2
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
