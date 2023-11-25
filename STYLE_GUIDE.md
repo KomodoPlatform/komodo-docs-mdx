@@ -66,7 +66,6 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 - Where a group of parameters are nested within a common structure, this should be given its own table, and linked to from the main parameter table.
 - Common structure objects should be listed alphabetically in the file which contains them. This can be the same file as the parent method, unless the structure is used by multiple methods in different files - in that case, it should be listed in the root folder for the method group (e.g. legacy, v20, v20-dev).
 
-
 For example:
 
 | Parameter | Type    | Description                                                                             |
@@ -76,7 +75,6 @@ For example:
 | amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                        |
 | max       | boolean | Optional, defaults to `false`. Send whole balance.                                      |
 | memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction. |
-
 
 ## Variables
 
@@ -98,11 +96,10 @@ Pages are heavily [**MDX**](https://mdxjs.com/) ("markdown extension") based, wh
 
 Titles and descriptions are mandatory on every documentation page and must be added at the top level. To add a title use this syntax: `export const title = "Documentation page title";`. To add a description use: `export const description = "documentation page description";`
 
-
 ### Subsections and headings
 
-Though it is good to separate each method into its own document, sometimes it is necessary to group methods together. 
-In such a case, we can define the `title`, `label` and/or `tag` properties alongside a section header and within a `CodeGroup` tag so that anchor links are generated in a consistent manner. 
+Though it is good to separate each method into its own document, sometimes it is necessary to group methods together.
+In such a case, we can define the `title`, `label` and/or `tag` properties alongside a section header and within a `CodeGroup` tag so that anchor links are generated in a consistent manner.
 
 - The `label` property should be the exact same as the RPC method.
 - The `title` property should be blank, unless the section heading is not the same as the `label` property. In that case, the `title` property should be the (human readable) section heading.
@@ -177,7 +174,7 @@ The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbe
 
 And rendered as:
 
-![Code group UI](src/images/style-guide-images/code-group-sample.png)
+![Code group UI](style-guide-images/code-group-sample.png)
 
 <!-- If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
 
@@ -189,7 +186,7 @@ And rendered as:
 
 And you'll still have it rendered correctly:
 
-![Single code block UI](src/images/style-guide-images/single-code-block.png) -->
+![Single code block UI](style-guide-images/single-code-block.png) -->
 
 It is important to **note that**, "**AtomicDEX methods**" should be wrapped with `CodeGroup` tags, using the **method name** as the **label value**, and the **tag value** set to **POST**, an additional **mm2MethodDecorate property** with the value **"true"**. This will generate code blocks for:
 
@@ -226,7 +223,7 @@ A working code sample would look like this:
 
 Rendered as:
 
-![mm2MethodDecoratorUI](src/images/style-guide-images/mm2MethodDecoratorUI.png)
+![mm2MethodDecoratorUI](style-guide-images/mm2MethodDecoratorUI.png)
 
 ### Note
 
@@ -262,11 +259,11 @@ Use `Note` tags to **highlight important information**. `Note`s can be one of th
 
 Rendered as:
 
-![Note-info](src/images/style-guide-images/notes-info-UI.png)
+![Note-info](style-guide-images/notes-info-UI.png)
 
-![Note-warning](src/images/style-guide-images/notes-warning-UI.png)
+![Note-warning](style-guide-images/notes-warning-UI.png)
 
-![Note-error](src/images/style-guide-images/notes-error-UI.png)
+![Note-error](style-guide-images/notes-error-UI.png)
 
 ### CollapsibleSection
 
@@ -311,19 +308,19 @@ A working code would look like this:
 
 Rendered as:
 
-![collapsible Section UI](src/images/style-guide-images/collapsible-section-UI.png)
+![collapsible Section UI](style-guide-images/collapsible-section-UI.png)
 
 ### Images
 
 Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component. To render an image in the `src/image` folder, you'd have to import the image using the following syntax:
 
-`import atomicManiq from "@/images/atomic-dex-maniq.webp";`
+`import atomicManiq from "@/public/images/atomic-dex-maniq.webp";`
 
 Now you can render the image using the `OptimizedImage` component, for example:
 
 `<OptimizedImage title="Atomic Dex" src={atomicManiq} alt="atomic dex" classNaming="w-full" />`
 
-![Atomic Maniq](src/images/style-guide-images/atomic-maniq.png)
+![Atomic Maniq](style-guide-images/atomic-maniq.png)
 
 <!-- [You can read more about the magic behind OptimizedImage](https://github.com/Niels-IO/next-image-export-optimizer#readme) -->
 
@@ -351,7 +348,7 @@ Here's how:
 
 Rendered as:
 
-![heading tag UI](src/images/style-guide-images/heading-tag-UI.png)
+![heading tag UI](style-guide-images/heading-tag-UI.png)
 
 ### TaggedSection
 
@@ -369,7 +366,7 @@ Here's how to use it:
 
 Rendered as:
 
-![Tagged section](src/images/style-guide-images/tagged-section-UI.png)
+![Tagged section](style-guide-images/tagged-section-UI.png)
 
 ### Tag
 
@@ -392,17 +389,23 @@ A working code would look like this:
 
 Rendered as:
 
-![Tag component](src/images/style-guide-images/crude-tag-ui.png)
+![Tag component](style-guide-images/crude-tag-ui.png)
+
+## Navbar (Top)
+
+Top navbar's navigation data/dropdown list is manually populated. This file can be found at [src/data/navbar.json](src/data/navbar.json). If you're working on a very important new page, which links to a whole new category or an index, this is where to add them.
+
+![Navbar top](style-guide-images/navbar-top-UI.png)
 
 ## Sidebar (Left)
 
-Sidebar navigation is manually populated. This file can be found at `src/data/sidebar.json`. If you're working on a new page, this is where to link them.
+Left sidebar's navigation data is manually populated. This file can be found at [src/data/sidebar.json](src/data/sidebar.json). If you're working on a new page, this is where to link them.
 
-![Sidebar left](src/images/style-guide-images/sidebar-left-UI.png)
+![Sidebar left](style-guide-images/sidebar-left-UI.png)
 
 ## Sidebar (Right)
 
-![Sidebar right](src/images/style-guide-images/sidebar-right-UI.png)
+![Sidebar right](style-guide-images/sidebar-right-UI.png)
 
 The right sidebar is automatically populated based on the **Heading hierarchy** of the current page.
 
