@@ -1,51 +1,92 @@
 export const title = "AtomicDEX: Sign Raw Transactions";
 export const description = "The methods in this document allow you to create and sign raw transactions.";
 
-# Sign Raw Transactions
+# sign\_raw\_transaction
 
 This method allows users to:
-- Create a signed UTXO raw transaction given a set of prior transaction inputs.
-- Create a signed EVM raw transaction.
-- Sign a previously created raw transaction.
+
+*   Create a signed UTXO raw transaction given unsigned hex, and optionally a set of prior transaction inputs.
+*   Create a signed EVM raw transaction, given the destination address, amount and gas limit.
 
 The transaction can then be broadcasted to the network using the [`send_raw_transaction`](/atomicdex/api/legacy/send_raw_transaction/) to complete the process.
 
-### Arguments
+<Note>
+  This method is used to sign a raw transaction that has already been created.
+  For UTXO coins, the unsigned hex is required to sign the transaction.
+  If `prev_txns` is not provided, it will be sourced via electrums.
+</Note>
 
-| Structure | Type   | Description                                                                          |
-| --------- | ------ | ------------------------------------------------------------------------------------ |
-| coin      | string | The coin to create raw transaction with                                              |
-| type      | string | The operation type. Accepted values: UTXO ( for utxo coins), ETH (for emv coins)     |
-| tx        | object | A standard [RawTxInfo object](/atomicdex/api/common_structures/wallet/#raw-tx-info)  |
+### Request Parameters
 
+| Structure | Type   | Description                                                                         |
+| --------- | ------ | ----------------------------------------------------------------------------------- |
+| coin      | string | The coin to sign the raw transaction with                                           |
+| type      | string | The operation type. Accepted values: UTXO ( for utxo coins), ETH (for emv coins)    |
+| tx        | object | A standard [RawTxInfo object](/atomicdex/api/common_structures/wallet/#raw-tx-info) |
 
-### Response
+### Response Parameters
 
-| Structure | Type   | Description                             |
-| --------- | ------ | --------------------------------------- |
-| signature | string | The signature generated for the message |
+| Structure | Type   | Description                                     |
+| --------- | ------ | ----------------------------------------------- |
+| tx\_hex   | string | The signed transaction hex, ready for broadcast |
 
-#### Create signed UTXO raw transaction
+#### Sign UTXO raw transaction hex
 
 <CodeGroup title="" tag="POST" label="sign_message" mm2MethodDecorate="true">
   ```json
-  { 
+  {
     "userpass": "testpsw",
-    "mmrpc":"2.0",
+    "mmrpc": "2.0",
+    "method": "sign_raw_transaction",
+    "params": {
+      "coin": "KMD",
+      "type": "UTXO",
+      "tx": {
+        "tx_hex": "0400008085202f8901c8d6d8764e51bbadc0592b99f37b3b7d8c9719686d5a9bf63652a0802a1cd0360200000000feffffff0100dd96d8080000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac46366665000000000000000000000000000000"
+      }
+    },
+    "id": 0
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+    {
+      "mmrpc": "2.0",
+      "result": {
+        "tx_hex": "0400008085202f8901c8d6d8764e51bbadc0592b99f37b3b7d8c9719686d5a9bf63652a0802a1cd036020000006a47304402206b40df6d7b1d87622ea1eba0cdce09dfaf21556a408b2bd245920c2f3e9ff5e702201bd7bcc9587a9731cfd7c57057f173cbf635d2818263a96f211c413f6e83d187012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2feffffff0100dd96d8080000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac46366665000000000000000000000000000000"
+      },
+      "id":0
+    }
+  ```
+</CollapsibleSection>
+
+#### Sign UTXO raw transaction hex with inputs
+
+<CodeGroup title="" tag="POST" label="sign_message" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
     "id": 0,
     "method": "sign_raw_transaction",
     "params": {
-      "coin": "tBTC",
+      "coin": "KMD",
       "type": "UTXO",
       "tx": {
-          "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
-          "prev_txns": [{
-                  "tx_hash": "0d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb2",
-                  "index": 1,
-                  "script_pub_key": "001449e3b6b4684c4d4a914b29411af51843c59bfff0",
-                  "amount": 0.00001000
-          }]
-        }
+        "tx_hex": "0400008085202f8901c8d6d8764e51bbadc0592b99f37b3b7d8c9719686d5a9bf63652a0802a1cd0360200000000feffffff0100dd96d8080000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac46366665000000000000000000000000000000",
+        "prev_txns": [
+          {
+            "tx_hash": "36d01c2a80a05236f69b5a6d6819978c7d3b7bf3992b59c0adbb514e76d8d6c8",
+            "index": 2,
+            "script_pub_key": "76a914d346067e3c3c3964c395fee208594790e29ede5d88ac",
+            "amount": 0.00001
+          }
+        ]
+      }
     }
   }
   ```
@@ -53,32 +94,34 @@ The transaction can then be broadcasted to the network using the [`send_raw_tran
 
 #### Response (success)
 
-```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "tx_hex": "020000000001010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e2024730440220156d185b3fb21725c040b7ddcf84bf862b46f079bb66067eef1941023b8451e602204d877ac51b74932dea34c20874fa8112b3636eb506ac429548f7c05fe54e3faf0121039ad38f67dbc22cf5a6bd48b26920d9fac71681836faf80a9a678ddbaa0fe92f800000000"
-    },
-    "id":0
-  }
-```
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+    {
+      "mmrpc": "2.0",
+      "result": {
+        "tx_hex": "020000000001010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e2024730440220156d185b3fb21725c040b7ddcf84bf862b46f079bb66067eef1941023b8451e602204d877ac51b74932dea34c20874fa8112b3636eb506ac429548f7c05fe54e3faf0121039ad38f67dbc22cf5a6bd48b26920d9fac71681836faf80a9a678ddbaa0fe92f800000000"
+      },
+      "id":0
+    }
+  ```
+</CollapsibleSection>
 
-#### Create signed UTXO raw transaction
+#### Signed an ETH/EVM raw transaction
 
 <CodeGroup title="" tag="POST" label="sign_message" mm2MethodDecorate="true">
   ```json
-  { 
+  {
     "userpass": "testpsw",
-    "mmrpc":"2.0",
+    "mmrpc": "2.0",
     "id": 0,
     "method": "sign_raw_transaction",
     "params": {
       "coin": "ETH",
       "type": "ETH",
       "tx": {
-          "to": "0x7Bc1bBDD6A0a722fC9bffC49c921B685ECB84b94",
-          "value": "0x1000",
-          "gas_limit": "21000"
+        "to": "0x7Bc1bBDD6A0a722fC9bffC49c921B685ECB84b94",
+        "value": "0x1000",
+        "gas_limit": "21000"
       }
     }
   }
@@ -96,9 +139,19 @@ The transaction can then be broadcasted to the network using the [`send_raw_tran
     "id": 0
   }
 ```
-<DevComment>
-PR: https://github.com/KomodoPlatform/komodo-defi-framework/pull/1930
-- For utxo coins, is both tx_hex and prev_txns required, or are they basically the same thing represented in a different way?
-- For the ETH/EVM option, as there is no list of previous vouts I'm not sure how there is any fundamental difference between this method and https://developers.komodoplatform.com/basic-docs/atomicdex-api-20/withdraw.html#command-eth-erc20-and-other-eth-based-forks
 
-</DevComment>
+### Errors
+
+#### Signing Error
+
+You might see this if you try to sign a raw transaction that belongs to a different key pair.
+
+```json
+{
+  "mmrpc":"2.0",
+  "error":"Signing error: with_key_pair:114] P2PKH script 'OP_DUP\nOP_HASH160\nOP_PUSHBYTES_20 0xd346067e3c3c3964c395fee208594790e29ede5d\nOP_EQUALVERIFY\nOP_CHECKSIG\n' built from input key pair doesn't match expected prev script 'OP_DUP\nOP_HASH160\nOP_PUSHBYTES_20 0x32311a35188a9439c6c866e842564d6fefd3a028\nOP_EQUALVERIFY\nOP_CHECKSIG\n'","error_path":"utxo_common","error_trace":"utxo_common:3144]",
+  "error_type":"SigningError",
+  "error_data":"with_key_pair:114] P2PKH script 'OP_DUP\nOP_HASH160\nOP_PUSHBYTES_20 0xd346067e3c3c3964c395fee208594790e29ede5d\nOP_EQUALVERIFY\nOP_CHECKSIG\n' built from input key pair doesn't match expected prev script 'OP_DUP\nOP_HASH160\nOP_PUSHBYTES_20 0x32311a35188a9439c6c866e842564d6fefd3a028\nOP_EQUALVERIFY\nOP_CHECKSIG\n'",
+  "id":0
+}
+```
