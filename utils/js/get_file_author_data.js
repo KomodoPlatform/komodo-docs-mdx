@@ -1,9 +1,10 @@
-import https from 'https';
 import fs from 'fs';
+import https from 'https';
 import path from 'path';
 import { spawnSync } from 'child_process';
-
 const authorsData = JSON.parse(fs.readFileSync("./authors.json", 'utf8'));
+const oldFileData = JSON.parse(fs.readFileSync("./utils/_fileData_old_documentation_mod.json", 'utf8'));
+
 const fileData = {};
 
 (async function () {
@@ -147,12 +148,12 @@ const getAllFileData = (filepath) => {
 
     let lastContributor = getLastContributor(filepath)
     let allContributors = getAllContributors(filepath)
+    const fileRoute = filePathToRoute(filepath)
+    fileData[fileRoute] = fileData[fileRoute] ? fileData[fileRoute] : {};
+    fileData[fileRoute]["dateModified"] = date.toISOString();
+    fileData[fileRoute]["contributors"] = allContributors;
 
-    fileData[filePathToRoute(filepath)] = fileData[filePathToRoute(filepath)] ? fileData[filePathToRoute(filepath)] : {};
-    fileData[filePathToRoute(filepath)]["dateModified"] = date.toISOString();
-    fileData[filePathToRoute(filepath)]["contributors"] = allContributors;
-
-    fileData[filePathToRoute(filepath)]["lastContributor"] =
+    fileData[fileRoute]["lastContributor"] =
         lastContributor;
 
 };
@@ -252,6 +253,9 @@ function getAllContributors(filepath) {
         }
         contributorsArray.push(contributor)
     }
+    let oldFileData_pathData = oldFileData[filepath.replace("/index.mdx","").replace("src/pages","")]
+    let oldContributors = oldFileData_pathData ? oldFileData_pathData.contributors : []
+    contributorsArray = [...contributorsArray,...oldContributors]
     return contributorsArray.filter((item, index) => { //filter repeated entries
         return index === contributorsArray.findIndex(obj => {
             return JSON.stringify(obj) === JSON.stringify(item);
