@@ -21,38 +21,38 @@ the following tables are available in `DB/KOMODEFI.db`:
 
 ## NFT List tables
 
-The COIN\_nft\_list tables contain the NFTs that you own, and have the following columns:
-token\_address|token\_id|chain|amount|block\_number|contract\_type|possible\_spam|possible\_phishing|collection\_name|symbol|token\_uri|token\_domain|metadata|last\_token\_uri\_sync|last\_metadata\_sync|raw\_image\_url|image\_url|image\_domain|token\_name|description|attributes|animation\_url|animation\_domain|external\_url|external\_domain|image\_details|details\_json
+The COIN\_nft\_list tables contain the NFTs that you own
+It has the following columns, though not all columns are populated for all NFTs:
 
-| ID | Name                   | Type         | Description |
-| -- | ---------------------- | ------------ | ----------- |
-| 0  | token\_address         | VARCHAR(256) |             |
-| 1  | token\_id              | VARCHAR(256) |             |
-| 2  | chain                  | TEXT         |             |
-| 3  | amount                 | VARCHAR(256) |             |
-| 4  | block\_number          | INTEGER      |             |
-| 5  | contract\_type         | TEXT         |             |
-| 6  | possible\_spam         | INTEGER      |             |
-| 7  | possible\_phishing     | INTEGER      |             |
-| 8  | collection\_name       | TEXT         |             |
-| 9  | symbol                 | TEXT         |             |
-| 10 | token\_uri             | TEXT         |             |
-| 11 | token\_domain          | TEXT         |             |
-| 12 | metadata               | TEXT         |             |
-| 13 | last\_token\_uri\_sync | TEXT         |             |
-| 14 | last\_metadata\_sync   | TEXT         |             |
-| 15 | raw\_image\_url        | TEXT         |             |
-| 16 | image\_url             | TEXT         |             |
-| 17 | image\_domain          | TEXT         |             |
-| 18 | token\_name            | TEXT         |             |
-| 19 | description            | TEXT         |             |
-| 20 | attributes             | TEXT         |             |
-| 21 | animation\_url         | TEXT         |             |
-| 22 | animation\_domain      | TEXT         |             |
-| 23 | external\_url          | TEXT         |             |
-| 24 | external\_domain       | TEXT         |             |
-| 25 | image\_details         | TEXT         |             |
-| 26 | details\_json          | TEXT         |             |
+| ID | Name                   | Type         | Description                                                                    |
+| -- | ---------------------- | ------------ | ------------------------------------------------------------------------------ |
+| 0  | token\_address         | VARCHAR(256) | The address of the token contract.                                             |
+| 1  | token\_id              | VARCHAR(256) | The id of the token.                                                           |
+| 2  | chain                  | TEXT         | The coin network which the NFT is on.                                          |
+| 3  | amount                 | VARCHAR(256) | The amount of NFTs transfered in this transaction.                             |
+| 4  | block\_number          | INTEGER      | The block height of this transaction.                                          |
+| 5  | contract\_type         | TEXT         | The contract type. Either `ERC721` or `ERC1155`.                               |
+| 6  | possible\_spam         | INTEGER      | `1` indicates the NFT has been identified as spam. `0` indicates it has not.   |
+| 7  | possible\_phishing     | INTEGER      | `1` indicates the NFT has been identified as a scam. `0` indicates it has not. |
+| 8  | collection\_name       | TEXT         | The collection name which includes the token.                                  |
+| 9  | symbol                 | TEXT         | An arbitrary symbol for the NFT                                                |
+| 10 | token\_uri             | TEXT         | A link to the token's metadata.                                                |
+| 11 | token\_domain          | TEXT         | The domain the token metadata is hosted on.                                    |
+| 12 | metadata               | TEXT         | The token's metadata in JSON format.                                           |
+| 13 | last\_token\_uri\_sync | TEXT         | Date and time when the token uri was last syncronised.                         |
+| 14 | last\_metadata\_sync   | TEXT         | Date and time when the token metadata was last syncronised.                    |
+| 15 | raw\_image\_url        | TEXT         | The raw URL for the token image.                                               |
+| 16 | image\_url             | TEXT         | A link for the token's image (or other media).                                 |
+| 17 | image\_domain          | TEXT         | The domain the token image (or other media) is hosted on.                      |
+| 18 | token\_name            | TEXT         | The name of the token.                                                         |
+| 19 | description            | TEXT         | An arbitrary description of the NFT.                                           |
+| 20 | attributes             | TEXT         | Additional attribute data for the NFT in JSON format.                          |
+| 21 | animation\_url         | TEXT         | If NFT is animated, the URL of the animation.                                  |
+| 22 | animation\_domain      | TEXT         | If NFT is animated, the domain of the animation.                               |
+| 23 | external\_url          | TEXT         | Additional URL related to the NFT                                              |
+| 24 | external\_domain       | TEXT         | Domain of the additional URL related to the NFT                                |
+| 25 | image\_details         | TEXT         | Additional details about the NFT's image.                                      |
+| 26 | details\_json          | TEXT         | Additional information about the transaction in JSON format.                   |
 
 ### Example COIN\_nft\_list table query
 
@@ -72,46 +72,45 @@ The NFTs listed above are all spam, and will be ignored by the [get\_nft\_list](
 
 The COIN\_nft\_transfer\_history tables contain the history of transfers of your NFTs, and have the following columns:
 
-| ID | Name               | Type         | Description |
-| -- | ------------------ | ------------ | ----------- |
-| 0  | transaction\_hash  | VARCHAR(256) |             |
-| 1  | log\_index         | INTEGER      |             |
-| 2  | chain              | TEXT         |             |
-| 3  | block\_number      | INTEGER      |             |
-| 4  | block\_timestamp   | INTEGER      |             |
-| 5  | contract\_type     | TEXT         |             |
-| 6  | token\_address     | VARCHAR(256) |             |
-| 7  | token\_id          | VARCHAR(256) |             |
-| 8  | status             | TEXT         |             |
-| 9  | amount             | VARCHAR(256) |             |
-| 10 | possible\_spam     | INTEGER      |             |
-| 11 | possible\_phishing | INTEGER      |             |
-| 12 | token\_uri         | TEXT         |             |
-| 13 | token\_domain      | TEXT         |             |
-| 14 | collection\_name   | TEXT         |             |
-| 15 | image\_url         | TEXT         |             |
-| 16 | image\_domain      | TEXT         |             |
-| 17 | token\_name        | TEXT         |             |
-| 18 | details\_json      | TEXT         |             |
+| ID | Name               | Type         | Description                                                                    |
+| -- | ------------------ | ------------ | ------------------------------------------------------------------------------ |
+| 0  | transaction\_hash  | VARCHAR(256) | Hex string, representing the transaction.                                      |
+| 1  | log\_index         | INTEGER      | Simply a table index.                                                          |
+| 2  | chain              | TEXT         | The coin network which the NFT is on.                                          |
+| 3  | block\_number      | INTEGER      | The block height of this transaction.                                          |
+| 4  | block\_timestamp   | INTEGER      | The block time of this transaction.                                            |
+| 5  | contract\_type     | TEXT         | The contract type. Either `ERC721` or `ERC1155`.                               |
+| 6  | token\_address     | VARCHAR(256) | The address of the token contract.                                             |
+| 7  | token\_id          | VARCHAR(256) | The id of the token.                                                           |
+| 8  | status             | TEXT         | The transaction type: `Recieve` or `Send`                                      |
+| 9  | amount             | VARCHAR(256) | The amount of NFTs transfered in this transaction.                             |
+| 10 | possible\_spam     | INTEGER      | `1` indicates the NFT has been identified as spam. `0` indicates it has not.   |
+| 11 | possible\_phishing | INTEGER      | `1` indicates the NFT has been identified as a scam. `0` indicates it has not. |
+| 12 | token\_uri         | TEXT         | A link to the token's metadata.                                                |
+| 13 | token\_domain      | TEXT         | The domain the token metadata is hosted on.                                    |
+| 14 | collection\_name   | TEXT         | The collection name which includes the token.                                  |
+| 15 | image\_url         | TEXT         | A link for the token's image (or other media).                                 |
+| 16 | image\_domain      | TEXT         | The domain the token image (or other media) is hosted on.                      |
+| 17 | token\_name        | TEXT         | The name of the token.                                                         |
+| 18 | details\_json      | TEXT         | Additional information about the transaction in JSON format.                   |
 
 ### Example scanned\_nft\_blocks table query
 
-`SELECT * FROM MATIC_nft_transfer_history WHERE block_timestamp > 1701519320;`
+`SELECT transaction\_hash, token\_name, token\_address, token\_id,  FROM MATIC_nft_transfer_history WHERE block_timestamp > 1701519320;`
 
-| transaction\_hash                                                  | log\_index | chain   | block\_number | block\_timestamp | contract\_type | token\_address                             | token\_id | status  | amount | possible\_spam | possible\_phishing | token\_uri                                                                                                                                                                                 | token\_domain | collection\_name     | image\_url                                                                   | image\_domain                                               | token\_name          | details\_json                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------------------------------------------------ | ---------- | ------- | ------------- | ---------------- | -------------- | ------------------------------------------ | --------- | ------- | ------ | -------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | -------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|                                                                    |            |         |               |                  |                |                                            |           |         |        |                |                    |                                                                                                                                                                                            |               |                      |                                                                              |                                                             |                      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 0x7b57303bcc2c68808b460490e984adcd18567a80660a18b7a151b62015247cda | 512        | POLYGON | 50651981      | 1701519326       | ERC1155        | 0xe7ee9dcf5f4b7f9254b348ba596c9fb9121f77e7 | 1         | Receive | 1      | 1              | 0                  | [https://ipfs.io/ipfs/bafybeidyrvvtmkicjmj235lzo3ilrgd4ghwgvneqeobna6lox663i7k764/token.json](https://ipfs.io/ipfs/bafybeidyrvvtmkicjmj235lzo3ilrgd4ghwgvneqeobna6lox663i7k764/token.json) | ipfs.io       | $2000 USDT Airdrop🎁 | ipfs\://bafybeibfbnyp3yabkowcfbiqkylrwufblx7kkjvsn264s3yep7zamwol5m/USDT.JPG | bafybeibfbnyp3yabkowcfbiqkylrwufblx7kkjvsn264s3yep7zamwol5m | $2000 USDT Airdrop🎁 | \{"block\_hash":"0x41a4f453b1589c43edecadd75c8c501e0d22c87268e3f56d0d03fd6a77ed37f4","transaction\_index":78,"value":"0","transaction\_type":"Single","verified":1,"operator":"0x509517aadfa276de25d0822446386dfce6ac386e","from\_address":"0x0000000000000000000000000000000000000000","to\_address":"0x0000000000000000000000000000000000000000","fee\_details":\{"coin":"MATIC","gas":2154020,"gas\_price":"0.000000031375683387","total\_fee":"0.06758384952926574"}} |
+| transaction\_hash                                                  | token\_name          | token\_address                             | token\_id |
+| ------------------------------------------------------------------ | -------------------- | ------------------------------------------ | --------- |
+| 0x7b57303bcc2c68808b460490e984adcd18567a80660a18b7a151b62015247cda | $2000 USDT Airdrop🎁 | 0xe7ee9dcf5f4b7f9254b348ba596c9fb9121f77e7 | 1         |
 
 ## NFT Last Scanned Block table
 
 The scanned\_nft\_blocks table contains the last block that was scanned for each chain.
 It has the following columns:
 
-| ID | Name                 | Type    | Description |
-| -- | -------------------- | ------- | ----------- |
-| 0  | chain                | TEXT    |             |
-| 1  | last\_scanned\_block | INTEGER |             |
+| ID | Name                 | Type    | Description                                                            |
+| -- | -------------------- | ------- | ---------------------------------------------------------------------- |
+| 2  | chain                | TEXT    | The coin network which the NFT is on.                                  |
+| 1  | last\_scanned\_block | INTEGER | The block height when the last scan for NFTs was performed on a chain. |
 
 ### Example scanned\_nft\_blocks table query
 
