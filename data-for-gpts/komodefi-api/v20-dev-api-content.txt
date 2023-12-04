@@ -2881,6 +2881,1163 @@ The `max_maker_vol` method returns the maximum volume of a coin which can be use
   }
   ```
 </CollapsibleSection>
+export const title = "AtomicDEX: Non Fungible Tokens - Get NFT List";
+export const description =
+  "This document describes all the get_nft_list method AtomicDEX-API provides to get a list of your wallets NFTs";
+
+# Get a list of NFTs {{label : 'get_nft_list', tag : 'API-v2'}}
+
+Returns a list of the NFTs owned by the user, shown in descending order of the `block_number` value (the block height when the amount or owner changed). If the request is for NFTs on more than one chain, this means that the order may not be chronological. In the case of ERC1155 tokens, the `block_number` will update when additional NFTs are received or when all NFTs are withdrawn, but will generally remain the same if only some NFTs are withdrawn.
+
+<Note>
+  Before using this method, you must first call the [update\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/update_nft/)
+  method to populate/refresh the local database.
+</Note>
+
+### Request Parameters
+
+| Parameter           | Type    | Description                                                                                                                                       |
+| ------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains              | array   | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.                                                |
+| max                 | boolean | Optional, defaults to `false`. If `true`, response will return all NFTs without pagination, and will ignore the `limit` and `page_number` values. |
+| limit               | integer | Optional, defaults to `10`. The number of NFTs displayed per page in response.                                                                    |
+| page\_number        | integer | Optional, defaults to `1`. The page offset for items in response.                                                                                 |
+| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potentially spam link found in collection name, token name, symbol will be censored                 |
+| filters             | object  | Optional. A standard [TokenFilter](/atomicdex/api/v20/#token-filter) object.                                                                      |
+
+### Response Parameters
+
+| Parameter              | Type    | Description                                                                                                                                                           |
+| ---------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount                 | string  | The amount of this NFT the user owns (used by `ERC1155`).                                                                                                             |
+| block\_number\_minted  | integer | The block height when the NFT was minted. May be `null`.                                                                                                              |
+| block\_number          | integer | The block height when the amount or owner changed.                                                                                                                    |
+| chain                  | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| name                   | string  | May be `null`. An NFT collection name.                                                                                                                                |
+| contract\_type         | string  | The type of NFT contract standard. One of `ERC721` or `ERC1155`.                                                                                                      |
+| last\_token\_uri\_sync | string  | When the token\_uri was last updated.                                                                                                                                 |
+| last\_metadata\_sync   | string  | When the metadata was last updated.                                                                                                                                   |
+| metadata               | string  | The metadata of the token. May be `null`.                                                                                                                             |
+| minter\_address        | string  | Minter address. May be `null`.                                                                                                                                        |
+| owner\_of              | string  | The wallet address of the owner of the NFT.                                                                                                                           |
+| possible\_spam         | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing     | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| symbol                 | string  | May be `null`. The symbol of the NFT contract.                                                                                                                        |
+| token\_address         | string  | The address of the NFT contract.                                                                                                                                      |
+| token\_id              | string  | The token ID of the NFT.                                                                                                                                              |
+| token\_hash            | string  | The token hash. May be `null`.                                                                                                                                        |
+| token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                  |
+| token\_domain          | string  | Token domain. May be `null`.                                                                                                                                          |
+| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                |
+
+#### 📌 Example with no optional params
+
+<CodeGroup title="Get a list of NFTs" tag="POST" label="get_nft_list" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "get_nft_list",
+    "mmrpc": "2.0",
+    "params": {
+      "chains": [
+        "BSC",
+        "POLYGON"
+      ]
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "nfts": [
+        {
+          "chain": "BSC",
+          "token_address": "0x5c7d6712dfaf0cb079d48981781c8705e8417ca0",
+          "token_id": "0",
+          "amount": "1",
+          "owner_of": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+          "token_hash": "b34ddf294013d20a6d70691027625839",
+          "block_number_minted": 25465916,
+          "block_number": 25919780,
+          "contract_type": "ERC1155",
+          "name": null,
+          "symbol": null,
+          "token_uri": "https://tikimetadata.s3.amazonaws.com/tiki_box.json",
+          "token_domain": "tikimetadata.s3.amazonaws.com",
+          "metadata": "{\"name\":\"Tiki box\",\"description\":\"Born to usher in Bull markets. Tiki JumpStarters are crazed guardians that worship NGU technology. Tiki guardians attach themselves to their owners to guide and protect them from the evils of the crypto industry. Manifested by the power of community and infused with unlimited creativity, the Unlockable Road Map summons powerful gifts and surprises to all Tiki Holders. Booyaaah!!\",\"external_url\":\"\",\"image\":\"https://tikimetadata.s3.amazonaws.com/tiki_box.png\",\"attributes\":[{\"trait_type\":\"Crypto Logo\",\"value\":\"TIKI NFT CRYPTOLOGO SCAR\"}],\"properties\":{\"category\":\"image\",\"creators\":[]}}",
+          "last_token_uri_sync": "2023-02-07T17:10:08.402Z",
+          "last_metadata_sync": "2023-02-07T17:10:16.858Z",
+          "minter_address": "ERC1155 tokens don't have a single minter",
+          "possible_spam": false,
+          "possible_phishing": false,
+          "uri_meta": {
+            "image": "https://tikimetadata.s3.amazonaws.com/tiki_box.png",
+            "image_url": "https://tikimetadata.s3.amazonaws.com/tiki_box.png",
+            "image_domain": "tikimetadata.s3.amazonaws.com",
+            "name": "Tiki box",
+            "description": "Born to usher in Bull markets. Tiki JumpStarters are crazed guardians that worship NGU technology. Tiki guardians attach themselves to their owners to guide and protect them from the evils of the crypto industry. Manifested by the power of community and infused with unlimited creativity, the Unlockable Road Map summons powerful gifts and surprises to all Tiki Holders. Booyaaah!!",
+            "attributes": [
+              {
+                "trait_type": "Crypto Logo",
+                "value": "TIKI NFT CRYPTOLOGO SCAR"
+              }
+            ],
+            "animation_url": null,
+            "animation_domain": null,
+            "external_url": "",
+            "external_domain": null,
+            "image_details": null
+          }
+        },
+        {
+          "chain": "POLYGON",
+          "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+          "token_id": "5",
+          "amount": "1",
+          "owner_of": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+          "token_hash": "28f970585fd743b056859a6e41f50a8e",
+          "block_number_minted": 36781490,
+          "block_number": 42491885,
+          "contract_type": "ERC1155",
+          "name": null,
+          "symbol": null,
+          "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+          "token_domain": "app.thesmurfssociety.com",
+          "metadata": "{\"name\":\"Forest Mushrooms\",\"description\":\"Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.\",\"image\":\"https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg\",\"animation_url\":null,\"external_url\":\"https://app.thesmurfssociety.com/detail/ingredients/5\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Ingredient\"},{\"trait_type\":\"Category\",\"value\":\"COMMON\"}]}",
+          "last_token_uri_sync": "2022-12-13T13:12:50.840Z",
+          "last_metadata_sync": "2023-05-15T07:30:04.882Z",
+          "minter_address": "ERC1155 tokens don't have a single minter",
+          "possible_spam": false,
+          "possible_phishing": false,
+          "uri_meta": {
+            "image": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+            "image_url": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+            "image_domain": "metadata.thesmurfssociety.com",
+            "name": "Forest Mushrooms",
+            "description": "Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.",
+            "attributes": [
+              {
+                "trait_type": "Type",
+                "value": "Ingredient"
+              },
+              {
+                "trait_type": "Category",
+                "value": "COMMON"
+              }
+            ],
+            "animation_url": null,
+            "animation_domain": null,
+            "external_url": "https://app.thesmurfssociety.com/detail/ingredients/5",
+            "external_domain": "app.thesmurfssociety.com",
+            "image_details": null
+          }
+        }
+      ],
+      "skipped": 0,
+      "total": 2
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### 📌 Example with optional limit & page\_number params
+
+<CodeGroup title="Get a list of NFTs" tag="POST" label="get_nft_list" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "get_nft_list",
+    "mmrpc": "2.0",
+    "params": {
+      "chains": [
+        "BSC",
+        "POLYGON"
+      ],
+      "limit": 1,
+      "page_number": 2
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "nfts": [
+        {
+          "chain": "POLYGON",
+          "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+          "token_id": "5",
+          "amount": "1",
+          "owner_of": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+          "token_hash": "28f970585fd743b056859a6e41f50a8e",
+          "block_number_minted": 36781490,
+          "block_number": 42491885,
+          "contract_type": "ERC1155",
+          "name": null,
+          "symbol": null,
+          "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+          "token_domain": "app.thesmurfssociety.com",
+          "metadata": "{\"name\":\"Forest Mushrooms\",\"description\":\"Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.\",\"image\":\"https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg\",\"animation_url\":null,\"external_url\":\"https://app.thesmurfssociety.com/detail/ingredients/5\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Ingredient\"},{\"trait_type\":\"Category\",\"value\":\"COMMON\"}]}",
+          "last_token_uri_sync": "2022-12-13T13:12:50.840Z",
+          "last_metadata_sync": "2023-05-15T07:30:04.882Z",
+          "minter_address": "ERC1155 tokens don't have a single minter",
+          "possible_spam": false,
+          "possible_phishing": false,
+          "uri_meta": {
+            "image": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+            "image_url": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+            "image_domain": "metadata.thesmurfssociety.com",
+            "name": "Forest Mushrooms",
+            "description": "Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.",
+            "attributes": [
+              {
+                "trait_type": "Type",
+                "value": "Ingredient"
+              },
+              {
+                "trait_type": "Category",
+                "value": "COMMON"
+              }
+            ],
+            "animation_url": null,
+            "animation_domain": null,
+            "external_url": "https://app.thesmurfssociety.com/detail/ingredients/5",
+            "external_domain": "app.thesmurfssociety.com",
+            "image_details": null
+          }
+        }
+      ],
+      "skipped": 1,
+      "total": 1
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### 📌 Example with optional spam protection
+
+<CodeGroup title="Get a list of NFTs" tag="POST" label="get_nft_list" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "get_nft_list",
+    "mmrpc": "2.0",
+    "params": {
+      "chains": [
+        "BSC",
+        "POLYGON"
+      ],
+      "protect_from_spam": true,
+      "filters": {
+        "exclude_spam": true,
+        "exclude_phishing": true
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "nfts": [
+        {
+          "chain": "POLYGON",
+          "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+          "token_id": "5",
+          "amount": "1",
+          "owner_of": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+          "token_hash": "28f970585fd743b056859a6e41f50a8e",
+          "block_number_minted": 36781490,
+          "block_number": 42491885,
+          "contract_type": "ERC1155",
+          "name": null,
+          "symbol": null,
+          "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+          "token_domain": "app.thesmurfssociety.com",
+          "metadata": "{\"name\":\"Forest Mushrooms\",\"description\":\"Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.\",\"image\":\"https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg\",\"animation_url\":null,\"external_url\":\"https://app.thesmurfssociety.com/detail/ingredients/5\",\"attributes\":[{\"trait_type\":\"Type\",\"value\":\"Ingredient\"},{\"trait_type\":\"Category\",\"value\":\"COMMON\"}]}",
+          "last_token_uri_sync": "2022-12-13T13:12:50.840Z",
+          "last_metadata_sync": "2023-05-15T07:30:04.882Z",
+          "minter_address": "ERC1155 tokens don't have a single minter",
+          "possible_spam": false,
+          "possible_phishing": false,
+          "uri_meta": {
+            "image": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+            "image_url": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+            "image_domain": "metadata.thesmurfssociety.com",
+            "name": "Forest Mushrooms",
+            "description": "Sweet and nutty with distinct earthy tones, these forest mushrooms will make a fine addition to all your soups, salads, and potions.",
+            "attributes": [
+              {
+                "trait_type": "Type",
+                "value": "Ingredient"
+              },
+              {
+                "trait_type": "Category",
+                "value": "COMMON"
+              }
+            ],
+            "animation_url": null,
+            "animation_domain": null,
+            "external_url": "https://app.thesmurfssociety.com/detail/ingredients/5",
+            "external_domain": "app.thesmurfssociety.com",
+            "image_details": null
+          }
+        }
+      ],
+      "skipped": 1,
+      "total": 1
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+### 📌 Error responses
+
+#### Unsupported Chain Type
+
+The supported chains are
+
+```
+{
+  "mmrpc":"2.0",
+  "error":"Error parsing request: UnsupportedChainType",
+  "error_path":"dispatcher",
+  "error_trace":"dispatcher:109]",
+  "error_type":"InvalidRequest",
+  "error_data":"UnsupportedChainType",
+  "id":null
+}
+```
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes the get_nft_metadata method AtomicDEX-API provides to get metadata for your NFTs";
+
+# Get NFT Metadata {{label : 'get_nft_metadata', tag : 'API-v2'}}
+
+### Request Parameters
+
+| Parameter      | Type   | Description        |
+| -------------- | ------ | ------------------ |
+| chain          | string | The token chain.   |
+| token\_address | string | The token address. |
+| token\_id      | string | Token ID.          |
+
+### Response Parameters
+
+| Parameter              | Type    | Description                                                                                                                                                           |
+| ---------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount                 | string  | The amount of this NFT the user owns (used by `ERC1155`).                                                                                                             |
+| block\_number\_minted  | integer | The block height when the NFT was minted. May be `null`.                                                                                                              |
+| block\_number          | integer | The block height when the amount or owner changed.                                                                                                                    |
+| chain                  | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| name                   | string  | May be `null`. An NFT collection name.                                                                                                                                |
+| contract\_type         | string  | The type of NFT contract standard. One of `ERC721` or `ERC1155`.                                                                                                      |
+| last\_token\_uri\_sync | string  | When the token\_uri was last updated.                                                                                                                                 |
+| last\_metadata\_sync   | string  | When the metadata was last updated.                                                                                                                                   |
+| metadata               | string  | The metadata of the token. May be `null`.                                                                                                                             |
+| minter\_address        | string  | Minter address. May be `null`.                                                                                                                                        |
+| owner\_of              | string  | The wallet address of the owner of the NFT.                                                                                                                           |
+| possible\_spam         | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing     | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| symbol                 | string  | May be `null`. The symbol of the NFT contract.                                                                                                                        |
+| token\_address         | string  | The address of the NFT contract.                                                                                                                                      |
+| token\_id              | string  | The token ID of the NFT.                                                                                                                                              |
+| token\_hash            | string  | The token hash. May be `null`.                                                                                                                                        |
+| token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                  |
+| token\_domain          | string  | Token domain. May be `null`.                                                                                                                                          |
+| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                |
+
+#### 📌 Example
+
+<CodeGroup title="Get NFT Metadata" tag="POST" label="get_nft_metadata" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "get_nft_metadata",
+    "mmrpc": "2.0",
+    "params": {
+      "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f81",
+      "token_id": "214300044414",
+      "chain": "BSC"
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "token_address": "0x2953399124f0cbb46d2cbacd8a89cf0599974963",
+        "amount": "1",
+        "owner_of": "0xab95d01bc8214e4d993043e8ca1b68db2c946498",
+        "token_hash": "af811b641bccbdc10c444ba4f3a2ffb5",
+        "name": "OpenSea Collections",
+        "symbol": "OPENSTORE",
+        "token_uri": "https://api.opensea.io/api/v2/metadata/matic/0x2953399124F0cBB46d2CbACD8A89cF0599974963/0xf43db4f488f644b73a9442de4978fb7572b73d85000000000000110000002710",
+        "token_domain": "api.opensea.io",
+        "metadata": "{\"image\":\"https://i.seadn.io/gae/nY8wjVVQqDZBl-Bk3h9kwSqR1bXt16x_tESRAQmctEb0SCFCPtvtSsBtp98TFiUzP-LpMGt_kiqHDDOfkgbxOuWxkdH4aBNkmzrjZM0?w=500&amp;auto=format\",\"name\":\"Doge Napoleon\",\"description\":null,\"external_link\":null,\"animation_url\":\"https://openseauserdata.com/files/df71203f48e54d027bb2c47b2840cacb.mp4\",\"traits\":[]}",
+        "last_token_uri_sync": "2023-09-01T04:04:30.867Z",
+        "last_metadata_sync": "2023-09-01T04:35:01.128Z",
+        "minter_address": "ERC1155 tokens don't have a single minter",
+        "possible_spam": true,
+        "chain": "POLYGON",
+        "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536720",
+        "block_number_minted": 19645247,
+        "block_number": 45776404,
+        "contract_type": "ERC1155",
+        "possible_phishing": false,
+        "uri_meta": {
+            "image": "https://i.seadn.io/gae/nY8wjVVQqDZBl-Bk3h9kwSqR1bXt16x_tESRAQmctEb0SCFCPtvtSsBtp98TFiUzP-LpMGt_kiqHDDOfkgbxOuWxkdH4aBNkmzrjZM0?w=500&amp;auto=format",
+            "image_url": "https://i.seadn.io/gae/nY8wjVVQqDZBl-Bk3h9kwSqR1bXt16x_tESRAQmctEb0SCFCPtvtSsBtp98TFiUzP-LpMGt_kiqHDDOfkgbxOuWxkdH4aBNkmzrjZM0?w=500&amp;auto=format",
+            "image_domain": "i.seadn.io",
+            "name": "Doge Napoleon",
+            "description": null,
+            "attributes": null,
+            "animation_url": "https://openseauserdata.com/files/df71203f48e54d027bb2c47b2840cacb.mp4",
+            "animation_domain": "openseauserdata.com",
+            "external_url": null,
+            "external_domain": null,
+            "image_details": null
+        }
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## Error responses
+
+```
+{
+    "mmrpc": "2.0",
+    "error": "Token: token_address 0xfd913a305d70a60aac4faac70c739563738e1f81, token_id 214300044414 was not found in wallet",
+    "error_path": "nft",
+    "error_trace": "nft:123]",
+    "error_type": "TokenNotFoundInWallet",
+    "error_data": {
+        "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f81",
+        "token_id": "214300044414"
+    },
+    "id": null
+}
+```
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes the get_nft_transfers method AtomicDEX-API provides to get information about your NFT transactions";
+
+# Get a list of NFT transfers {{label : 'get_nft_transfers', tag : 'API-v2'}}
+
+Returns a list of the NFT transfers involving the user, shown in descending order of the `block_timestamp` value of the NFT's last transfer.
+
+<Note>
+  To view NFT transactions, you must [activate the coin](/atomicdex/api/legacy/coin_activation/) which holds the NFTs first.
+</Note>
+
+### Request Parameters
+
+| Parameter           | Type    | Description                                                                                                                                                |
+| ------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains              | array   | List of chains to scan for NFTs.                                                                                                                           |
+| max                 | boolean | Optional, defaults to `false`. If `true`, response will return all NFT transfers without pagination, and will ignore the `limit` and `page_number` values. |
+| limit               | integer | Optional, defaults to `10`. The number of NFT transfers displayed per page in response.                                                                    |
+| page\_number        | integer | Optional, defaults to `1`. The page offset for items in response.                                                                                          |
+| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potentially spam link found in `collection_name`, `token_name` will be censored                              |
+| filters             | object  | Optional. A standard [TokenTransferFilter](/atomicdex/api/v20/#token-transfer-filter) object.                                                              |
+
+### Response Parameters
+
+| Parameter          | Type    | Description                                                                                                                                                           |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount             | string  | Amount of tokens transferred.                                                                                                                                         |
+| block\_hash        | string  | May be `null`. Hash of block in which transfer occurred.                                                                                                              |
+| block\_number      | integer | Height of block in which transfer occurred.                                                                                                                           |
+| block\_timestamp   | integer | Block time in [unix epoch format](https://www.epochconverter.com/).                                                                                                   |
+| chain              | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| token\_uri         | string  | May be `null`. The URI to the metadata of the token.                                                                                                                  |
+| token\_domain      | string  | May be `null`. Extracted domain from the `token_uri`, if valid.                                                                                                       |
+| collection\_name   | string  | May be `null`. Name of collection which token belongs to.                                                                                                             |
+| image\_url         | string  | May be `null`. The URI to the token image.                                                                                                                            |
+| image\_domain      | string  | May be `null`. Extracted domain from the `image_url`, if valid.                                                                                                       |
+| token\_name        | string  | May be `null`. Name of the token.                                                                                                                                     |
+| contract\_type     | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                                 |
+| token\_address     | string  | Address of token transferred.                                                                                                                                         |
+| token\_id          | string  | Token ID.                                                                                                                                                             |
+| possible\_spam     | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| transaction\_hash  | string  | Transaction ID of the transfer.                                                                                                                                       |
+| transaction\_index | string  | May be `null`. Transaction index of the transfer.                                                                                                                     |
+| log\_index         | string  | Log index of the transfer.                                                                                                                                            |
+| value              | string  | May be `null`. Tranfer value.                                                                                                                                         |
+| transaction\_type  | string  | May be `null`. Transaction type. Possible values are `Single`.                                                                                                        |
+| from\_address      | string  | Address of previous owner which sent the token(s).                                                                                                                    |
+| to\_address        | string  | Address of new owner which received the token(s).                                                                                                                     |
+| status             | string  | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`.  |
+| verified           | integer | May be `null`. A deprecated field which will be removed in future.                                                                                                    |
+| operator           | string  | May be `null`.                                                                                                                                                        |
+
+<DevComment>
+  `verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incormoprates this.
+  What are the other possible values for `transaction_type`?
+  What is `operator`?
+  What does `verified` mean?
+</DevComment>
+
+#### 📌 Example with date and `send` filters
+
+<CodeGroup title="Get a list of NFT transfers" tag="POST" label="get_nft_transfers" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "get_nft_transfers",
+    "mmrpc": "2.0",
+    "params": {
+      "chains": [
+        "POLYGON"
+      ],
+      "max": true,
+      "filters": {
+        "send": true,
+        "from_date": 1676636291
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "transfer_history": [
+        {
+          "chain": "POLYGON",
+          "block_number": 40103927,
+          "block_timestamp": 1678270296,
+          "block_hash": "0xdd5b1ad793332343e206ee0b566a30821ab39d1f79e921f787f1ea23b8a90dbd",
+          "transaction_hash": "0xfe8d5fc480c534625d7e6fc81eadff8b8f6c986cd46f00d5993b6e21d6bd28c9",
+          "transaction_index": 114,
+          "log_index": 307,
+          "value": "0",
+          "contract_type": "ERC1155",
+          "transaction_type": "Single",
+          "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+          "token_id": "5",
+          "from_address": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+          "to_address": "0x6fad0ec6bb76914b2a2a800686acc22970645820",
+          "status": "Send",
+          "amount": "1",
+          "verified": 1,
+          "operator": "0xf622a6c52c94b500542e2ae6bcad24c53bc5b6a2",
+          "token_uri": "https://app.thesmurfssociety.com/metadata/public/metadata/cauldron/5",
+          "token_domain": "app.thesmurfssociety.com",
+          "collection_name": null,
+          "image_url": "https://metadata.thesmurfssociety.com/ingredients/nft/5.Forest_Mushrooms.jpg",
+          "image_domain": "metadata.thesmurfssociety.com",
+          "token_name": "Forest Mushrooms",
+          "possible_spam": false,
+          "possible_phishing": false
+        }
+      ],
+      "skipped": 1,
+      "total": 2
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes all the methods AtomicDEX-API provides to get information and transact with NFTs";
+
+# Non Fungible Tokens (NFTs)
+
+The AtomicDEX API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1155+Multi+token) and [ERC721](https://www.nftstandards.wtf/Standards/ERC721+Non+Fungible+Standard) NFTs via the [Moralis API](https://docs.moralis.io/) on the Avalanche (AVAX), BNB Smart Chain (BNB), Ethereum (ETH), Fantom (FTM), Polygon (MATIC) networks.
+
+<Note>
+  Before using other NFT methods, you should first call the [update\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/update_nft/)
+  method to populate/refresh the local database.
+</Note>
+
+## NFT Information Methods
+
+*   Get a list of your tokens with [get\_nft\_list](/atomicdex/api/v20-dev/non_fungible_tokens/get_nft_list/)
+*   Get a list of token transfers with [get\_nft\_transfers](/atomicdex/api/v20-dev/non_fungible_tokens/get_nft_transfers/)
+*   Get token metadata with [get\_nft\_metadata](/atomicdex/api/v20-dev/non_fungible_tokens/get_nft_metadata/)
+*   Update NFT [update\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/update_nft/)
+*   Refresh NFT metadata with [refresh\_nft\_metadata](/atomicdex/api/v20-dev/non_fungible_tokens/refresh_nft_metadata/)
+
+## NFT Transaction Methods
+
+*   Withdraw ERC721 tokens with [withdraw\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/withdraw_nft/#erc-721-withdraw-example)
+*   Withdraw ERC1155 tokens with [withdraw\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/withdraw_nft/#erc-1155-withdraw-example)
+
+<Note>
+  View the source code at: [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs)
+</Note>
+export const title = "AtomicDEX: Non Fungible Tokens - Query NFT database tables";
+export const description =
+  "This document describes how to query the local NFT database tables.";
+
+# Query NFT database tables
+
+After using the [update\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/update_nft/#update-nft) method to initialise your local NFT database,
+the following tables are available in `DB/KOMODEFI.db`:
+
+*   AVAX\_nft\_list
+*   AVAX\_nft\_transfer\_history
+*   BNB\_nft\_list
+*   BNB\_nft\_transfer\_history
+*   ETH\_nft\_list
+*   ETH\_nft\_transfer\_history
+*   FTM\_nft\_list
+*   FTM\_nft\_transfer\_history
+*   MATIC\_nft\_list
+*   MATIC\_nft\_transfer\_history
+*   scanned\_nft\_blocks
+
+## NFT List tables
+
+The COIN\_nft\_list tables contain the NFTs that you own
+It has the following columns, though not all columns are populated for all NFTs:
+
+| ID | Name                   | Type         | Description                                                                    |
+| -- | ---------------------- | ------------ | ------------------------------------------------------------------------------ |
+| 0  | token\_address         | VARCHAR(256) | The address of the token contract.                                             |
+| 1  | token\_id              | VARCHAR(256) | The id of the token.                                                           |
+| 2  | chain                  | TEXT         | The coin network which the NFT is on.                                          |
+| 3  | amount                 | VARCHAR(256) | The amount of NFTs transfered in this transaction.                             |
+| 4  | block\_number          | INTEGER      | The block height of this transaction.                                          |
+| 5  | contract\_type         | TEXT         | The contract type. Either `ERC721` or `ERC1155`.                               |
+| 6  | possible\_spam         | INTEGER      | `1` indicates the NFT has been identified as spam. `0` indicates it has not.   |
+| 7  | possible\_phishing     | INTEGER      | `1` indicates the NFT has been identified as a scam. `0` indicates it has not. |
+| 8  | collection\_name       | TEXT         | The collection name which includes the token.                                  |
+| 9  | symbol                 | TEXT         | An arbitrary symbol for the NFT                                                |
+| 10 | token\_uri             | TEXT         | A link to the token's metadata.                                                |
+| 11 | token\_domain          | TEXT         | The domain the token metadata is hosted on.                                    |
+| 12 | metadata               | TEXT         | The token's metadata in JSON format.                                           |
+| 13 | last\_token\_uri\_sync | TEXT         | Date and time when the token uri was last syncronised.                         |
+| 14 | last\_metadata\_sync   | TEXT         | Date and time when the token metadata was last syncronised.                    |
+| 15 | raw\_image\_url        | TEXT         | The raw URL for the token image.                                               |
+| 16 | image\_url             | TEXT         | A link for the token's image (or other media).                                 |
+| 17 | image\_domain          | TEXT         | The domain the token image (or other media) is hosted on.                      |
+| 18 | token\_name            | TEXT         | The name of the token.                                                         |
+| 19 | description            | TEXT         | An arbitrary description of the NFT.                                           |
+| 20 | attributes             | TEXT         | Additional attribute data for the NFT in JSON format.                          |
+| 21 | animation\_url         | TEXT         | If NFT is animated, the URL of the animation.                                  |
+| 22 | animation\_domain      | TEXT         | If NFT is animated, the domain of the animation.                               |
+| 23 | external\_url          | TEXT         | Additional URL related to the NFT                                              |
+| 24 | external\_domain       | TEXT         | Domain of the additional URL related to the NFT                                |
+| 25 | image\_details         | TEXT         | Additional details about the NFT's image.                                      |
+| 26 | details\_json          | TEXT         | Additional information about the transaction in JSON format.                   |
+
+### Example COIN\_nft\_list table query
+
+> SELECT chain, token\_name, token\_address, token\_id, possible\_spam, possible\_phishing FROM MATIC\_nft\_list LIMIT 5;
+
+| chain   | token\_name            | token\_address                             | token\_id | possible\_spam | possible\_phishing |
+| ------- | ---------------------- | ------------------------------------------ | --------- | -------------- | ------------------ |
+| POLYGON | $2000 USDT Airdrop🎁   | 0xe7ee9dcf5f4b7f9254b348ba596c9fb9121f77e7 | 1         | 1              | 0                  |
+| POLYGON | $1000 USDC Voucher🎁   | 0xb092b5eb5c653e915880dfc1f606be2ffe6fae8c | 1         | 1              | 0                  |
+| POLYGON | 1000 BLUR Reward       | 0xeaa3c52052b809c8d8072187efc134def2dd5b13 | 0         | 1              | 0                  |
+| POLYGON | SHIB Voucher 66 of 100 | 0xc46e36339ebd8bed48b1bdb6bd815e4b72103949 | 0         | 1              | 0                  |
+| POLYGON | $1000 Rewards          | 0x6e0b84421388ad635f2a1167e39aff2dc742da2a | 0         | 1              | 0                  |
+
+The NFTs listed above are all spam, and will be ignored by the [get\_nft\_list](/atomicdex/api/v20-dev/non_fungible_tokens/get_nft_list/) method.
+
+## NFT Transfer table
+
+The COIN\_nft\_transfer\_history tables contain the history of transfers of your NFTs, and have the following columns:
+
+| ID | Name               | Type         | Description                                                                    |
+| -- | ------------------ | ------------ | ------------------------------------------------------------------------------ |
+| 0  | transaction\_hash  | VARCHAR(256) | Hex string, representing the transaction.                                      |
+| 1  | log\_index         | INTEGER      | Simply a table index.                                                          |
+| 2  | chain              | TEXT         | The coin network which the NFT is on.                                          |
+| 3  | block\_number      | INTEGER      | The block height of this transaction.                                          |
+| 4  | block\_timestamp   | INTEGER      | The block time of this transaction.                                            |
+| 5  | contract\_type     | TEXT         | The contract type. Either `ERC721` or `ERC1155`.                               |
+| 6  | token\_address     | VARCHAR(256) | The address of the token contract.                                             |
+| 7  | token\_id          | VARCHAR(256) | The id of the token.                                                           |
+| 8  | status             | TEXT         | The transaction type: `Recieve` or `Send`                                      |
+| 9  | amount             | VARCHAR(256) | The amount of NFTs transfered in this transaction.                             |
+| 10 | possible\_spam     | INTEGER      | `1` indicates the NFT has been identified as spam. `0` indicates it has not.   |
+| 11 | possible\_phishing | INTEGER      | `1` indicates the NFT has been identified as a scam. `0` indicates it has not. |
+| 12 | token\_uri         | TEXT         | A link to the token's metadata.                                                |
+| 13 | token\_domain      | TEXT         | The domain the token metadata is hosted on.                                    |
+| 14 | collection\_name   | TEXT         | The collection name which includes the token.                                  |
+| 15 | image\_url         | TEXT         | A link for the token's image (or other media).                                 |
+| 16 | image\_domain      | TEXT         | The domain the token image (or other media) is hosted on.                      |
+| 17 | token\_name        | TEXT         | The name of the token.                                                         |
+| 18 | details\_json      | TEXT         | Additional information about the transaction in JSON format.                   |
+
+### Example scanned\_nft\_blocks table query
+
+`SELECT transaction\_hash, token\_name, token\_address, token\_id,  FROM MATIC_nft_transfer_history WHERE block_timestamp > 1701519320;`
+
+| transaction\_hash                                                  | token\_name          | token\_address                             | token\_id |
+| ------------------------------------------------------------------ | -------------------- | ------------------------------------------ | --------- |
+| 0x7b57303bcc2c68808b460490e984adcd18567a80660a18b7a151b62015247cda | $2000 USDT Airdrop🎁 | 0xe7ee9dcf5f4b7f9254b348ba596c9fb9121f77e7 | 1         |
+
+## NFT Last Scanned Block table
+
+The scanned\_nft\_blocks table contains the last block that was scanned for each chain.
+It has the following columns:
+
+| ID | Name                 | Type    | Description                                                            |
+| -- | -------------------- | ------- | ---------------------------------------------------------------------- |
+| 2  | chain                | TEXT    | The coin network which the NFT is on.                                  |
+| 1  | last\_scanned\_block | INTEGER | The block height when the last scan for NFTs was performed on a chain. |
+
+### Example scanned\_nft\_blocks table query
+
+`SELECT * FROM scanned_nft_blocks;`
+
+| chain | last\_scanned\_block |
+| ----- | -------------------- |
+| MATIC | 50651981             |
+| FTM   | 66512090             |
+| ETH   | 0                    |
+| BNB   | 0                    |
+| AVAX  | 0                    |
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes all the refresh_nft_metadata method AtomicDEX-API provides to refresh an NFT's metadata";
+
+# Refresh NFT Metadata {{label : 'refresh_nft_metadata', tag : 'API-v2'}}
+
+This method refreshes metadata of one NFT and metadata of related transactions with the same token\_address and token\_id.
+
+### Request Parameters
+
+| Parameter      | Type   | Description                                                                                                                                             |
+| -------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains         | string | Chains which holds the NFT you would like to updated metadata for.                                                                                      |
+| url            | string | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent.                    |
+| token\_address | string | Token address.                                                                                                                                          |
+| token\_id      | string | Token ID.                                                                                                                                               |
+| url\_antispam  | string | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs). |
+
+<Note>
+  If there are no errors, this request will return an empty response.
+</Note>
+
+#### 📌 Example
+
+<CodeGroup title="Refresh NFT Metadata" tag="POST" label="refresh_nft_metadata" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "refresh_nft_metadata",
+    "mmrpc": "2.0",
+    "params": {
+      "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+      "token_id": "5",
+      "chain": "POLYGON",
+      "url": "https://moralis-proxy.komodo.earth",
+      "url_antispam": "https://nft.antispam.dragonhound.info"
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  <Note>
+    If there are no errors, this request will return an empty response.
+  </Note>
+
+  ```json
+  {
+  	"mmrpc": "2.0",
+  	"result": null,
+  	"id": null
+  }
+  ```
+</CollapsibleSection>
+
+<DevComment>
+  Need to add some error responses here.
+</DevComment>
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes the update_nft method AtomicDEX-API provides to update NFT information in your local database";
+
+# Update NFT {{label : 'update_nft', tag : 'API-v2'}}
+
+This method will scan selected networks to update NFT information stored in the local database.
+To interact with your NFTs, you will first need to activate the coin for the network the NFT is on.
+
+See below for which coin to activate for each network:
+
+| Network   | Coin  |
+| --------- | ----- |
+| AVALANCHE | AVAX  |
+| BSC       | BNB   |
+| ETH       | ETH   |
+| FANTOM    | FTM   |
+| POLYGON   | MATIC |
+
+These coins can be activated using the [enable\_eth\_with\_tokens](/atomicdex/api/v20/enable_eth_with_tokens/) or method.
+
+### Request Parameters
+
+| Parameter     | Type   | Description                                                                                         |
+| ------------- | ------ | --------------------------------------------------------------------------------------------------- |
+| chains        | array  | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.  |
+| url           | string | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent.     |
+| url\_antispam | string | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. |
+
+<Note>
+  If there are no errors, this request will return an empty response.
+  When updating multiple networks, or wallets with numerous NFTs, this request may take a while to complete.
+</Note>
+
+#### 📌 Example
+
+<CodeGroup title="Update NFT" tag="POST" label="update_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "update_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "chains": [
+        "BSC",
+        "POLYGON"
+      ],
+      "url": "https://moralis-proxy.komodo.earth",
+      "url_antispam": "https://nft.antispam.dragonhound.info"
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+  	"mmrpc": "2.0",
+  	"result": null,
+  	"id": null
+  }
+  ```
+</CollapsibleSection>
+
+<DevComment>
+  Need to add some error responses here.
+</DevComment>
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes the withdraw_nft method AtomicDEX-API provides to send NFTs to an address";
+
+# Withdraw NFTs {{label : 'withdraw_nft', tag : 'API-v2'}}
+
+<Note>
+  To withdraw NFTs, you must [activate the coin](/atomicdex/api/legacy/coin_activation/) which holds the NFTs first.
+  The `withdraw_nft` method will return signed raw transaction hex which must be broadcast using the [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction/) method to complete the withdrawal.
+</Note>
+
+### Request Parameters
+
+| Parameter      | Type   | Description                                                                              |
+| -------------- | ------ | ---------------------------------------------------------------------------------------- |
+| type           | string | The contract type of the NFT to withdraw. Either `withdraw_erc721` or `withdraw_erc1155` |
+| withdraw\_data | object | A standard [WithdrawNftData](/atomicdex/api/v20/#withdraw-nft-data) object.              |
+
+### Response Parameters
+
+| Parameter         | Type    | Description                                                                                                                                              |
+| ----------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount            | string  | Amount of tokens to withdraw.                                                                                                                            |
+| tx\_hex           | string  | Raw hex of signed transaction. Use this with the [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction/) RPC to broadcast the transaction. |
+| tx\_hash          | string  | Transaction ID of the withdrawl.                                                                                                                         |
+| from              | array   | List of source addresses.                                                                                                                                |
+| to                | array   | List of destination addresses.                                                                                                                           |
+| contract\_type    | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                    |
+| token\_address    | string  | Token address.                                                                                                                                           |
+| token\_id         | string  | Token ID.                                                                                                                                                |
+| fee\_details      | object  | A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object.                                                                                       |
+| coin              | string  | Coin name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                     |
+| block\_height     | integer | Block height of the transaction. If the value is `0`, the transaction is unconfirmed.                                                                    |
+| timestamp         | integer | Timestamp of the block containing the withdrawl transaction in [unix epoch format](https://www.epochconverter.com/).                                     |
+| internal\_id      | integer | Used for internal transaction identification, for some coins it may be equal to transaction hash.                                                        |
+| transaction\_type | string  | This will always be `NftTransfer`.                                                                                                                       |
+
+#### 📌 ERC721 Withdraw Example
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "type": "withdraw_erc721",
+      "withdraw_data": {
+        "chain": "POLYGON",
+        "to": "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498",
+        "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+        "token_id": "1"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "tx_hex": "f8cb2a8509818733db8289929473a5299824cd955af6377b56f5762dc3ca4cc07880b86442842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c9464980000000000000000000000000000000000000000000000000000000000000001820136a0564b5c9c8309a3f8f6cc007ca957e4c411259026d68c2c34419158aff4d3ebf8a007afaa0590da01a2ce36c7edb5380f41235168f3633ed459b1fc8a750fecd38d",
+          "tx_hash": "bb030f618702715eb39035dccd218355f78ae5379ff6d0691f0f3c0db3c03789",
+          "from": [
+              "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"
+          ],
+          "to": [
+              "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"
+          ],
+          "contract_type": "ERC721",
+          "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+          "token_id": "1",
+          "amount": "1",
+          "fee_details": {
+              "type": "Eth",
+              "coin": "MATIC",
+              "gas": 35218,
+              "gas_price": "0.000000040827827163",
+              "total_fee": "0.001437874417026534"
+          },
+          "coin": "MATIC",
+          "block_height": 0,
+          "timestamp": 1700732198,
+          "internal_id": 0,
+          "transaction_type": "NftTransfer"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### 📌 ERC1155 Withdraw Example
+
+If you are sending 2 or more NFTs, you must use the `withdraw_erc1155` withdraw type.
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "type": "withdraw_erc721",
+      "withdraw_data": {
+        "chain": "POLYGON",
+        "to": "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498",
+        "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+        "token_id": "1"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "tx_hex": "f8cb2a8502dffe7b4682f3a09473a5299824cd955af6377b56f5762dc3ca4cc07880b86442842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c94649800000000000000000000000027ad1f808c1ef82626277ae38998afa5395656600000000000000000000000000000000000000000000000000000000000000001820135a0476a4623c9df31cecbd319e0571c62d14a6dcedd5a760ced945ffa2e39fb12c5a03293f3c10d115edcc3795e414670f070c04ad936e2e87001da12f961df5962a7",
+          "tx_hash": "d6b46e70bf755617366a5c10875eb639d55586bb568010ea82ef42e8d68c6523",
+          "from": [
+              "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"
+          ],
+          "to": [
+              "0x27Ad1F808c1ef82626277Ae38998AfA539565660"
+          ],
+          "contract_type": "ERC721",
+          "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+          "token_id": "1",
+          "amount": "1",
+          "fee_details": {
+              "type": "Eth",
+              "coin": "MATIC",
+              "gas": 62368,
+              "gas_price": "0.000000012347931462",
+              "total_fee": "0.000770115789422016"
+          },
+          "coin": "MATIC",
+          "block_height": 0,
+          "timestamp": 1700732805,
+          "internal_id": 0,
+          "transaction_type": "NftTransfer"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### 📌 ERC1155 Withdraw Max Example
+
+If you would like to withdraw all NFTs from a token\_address, you must use the `withdraw_erc1155` withdraw type and set `max` to `true`.
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "type": "withdraw_erc1155",
+      "withdraw_data": {
+        "chain": "POLYGON",
+        "to": "0x27Ad1F808c1ef82626277Ae38998AfA539565660",
+        "token_address": "0x2953399124f0cbb46d2cbacd8a89cf0599974963",
+        "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536720",
+        "amount": "1"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "tx_hex": "f9014b2a8508d579565282ea3b942953399124f0cbb46d2cbacd8a89cf059997496380b8e4f242432a000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c94649800000000000000000000000027ad1f808c1ef82626277ae38998afa539565660f43db4f488f644b73a9442de4978fb7572b73d85000000000000110000002710000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000023078000000000000000000000000000000000000000000000000000000000000820135a0feb67607bd5e5c58f7533c8d2c88ef0ba3beac7fea29bfe11c3ce9bd10641f2ca02f1045b9f87536e45fe63556805734293e534284efecd9210f614316a3e8dca7",
+          "tx_hash": "9dce8e555d388532bdafd42dd44cd6a2bdcbf74bdda079e15f71b808c8395bcc",
+          "from": [
+              "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"
+          ],
+          "to": [
+              "0x27Ad1F808c1ef82626277Ae38998AfA539565660"
+          ],
+          "contract_type": "ERC1155",
+          "token_address": "0x2953399124f0cbb46d2cbacd8a89cf0599974963",
+          "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536720",
+          "amount": "1",
+          "fee_details": {
+              "type": "Eth",
+              "coin": "MATIC",
+              "gas": 59963,
+              "gas_price": "0.00000003794123733",
+              "total_fee": "0.00227507041401879"
+          },
+          "coin": "MATIC",
+          "block_height": 0,
+          "timestamp": 1700732937,
+          "internal_id": 0,
+          "transaction_type": "NftTransfer"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ### 📌 Withdraw NFTs Error Responses
+
+  #### InvalidRequest (missing field)
+
+  ```
+    {
+        "mmrpc": "2.0",
+        "error": "Error parsing request: missing field `type`",
+        "error_path": "dispatcher",
+        "error_trace": "dispatcher:109]",
+        "error_type": "InvalidRequest",
+        "error_data": "missing field `type`",
+        "id": null
+    }
+  ```
+
+  #### InvalidRequest (wrong withdraw type)
+
+  ```
+  {
+      "mmrpc": "2.0",
+      "error": "Error parsing request: unknown variant `withdraw_erc420`, expected `withdraw_erc1155` or `withdraw_erc721`",
+      "error_path": "dispatcher",
+      "error_trace": "dispatcher:109]",
+      "error_type": "InvalidRequest",
+      "error_data": "unknown variant `withdraw_erc420`, expected `withdraw_erc1155` or `withdraw_erc721`",
+      "id": null
+  }
+  ```
+
+  #### TokenNotFoundInWallet (trying to send NFT you dont own)
+
+  ```
+  {
+      "mmrpc": "2.0",
+      "error": "Token: token_address 0xfd913a305d70a60aac4faac70c739563738e1f82, token_id 110473361632261669912565539602449606788298723469812631769659886404530570536722 was not found in wallet",
+      "error_path": "eth.nft",
+      "error_trace": "eth:883] nft:1177]",
+      "error_type": "GetNftInfoError",
+      "error_data": {
+          "error_type": "TokenNotFoundInWallet",
+          "error_data": {
+              "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f82",
+              "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536722"
+          }
+      },
+      "id": null
+  }
+  ```
+
+  #### TransportError (unable to estimate gas)
+
+  ```
+  {
+      "mmrpc": "2.0",
+      "error": "Transport error: request MethodCall(MethodCall { jsonrpc: Some(V2), method: \"eth_estimateGas\", params: Array([Object({\"from\": String(\"0xab95d01bc8214e4d993043e8ca1b68db2c946498\"), \"to\": String(\"0x2953399124f0cbb46d2cbacd8a89cf0599974963\"), \"gasPrice\": String(\"0x9ddeaaffe\"), \"value\": String(\"0x0\"), \"data\": String(\"0x42842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498f43db4f488f644b73a9442de4978fb7572b73d85000000000000110000002710\")})]), id: Num(64) }) failed: InvalidResponse(\"Server: 'https://polygon-rpc.com/', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); InvalidResponse(\"Server: 'https://polygon.blockpi.network/v1/rpc/public', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); Transport(\"Server: 'https://node.komodo.earth:8080/polygon', response !200: 502 Bad Gateway, &lt;html&gt;..&lt;head&gt;&lt;title&gt;502 Bad Gateway&lt;/title&gt;&lt;/head&gt;..&lt;body&gt;..&lt;center&gt;&lt;h1&gt;502 Bad Gateway&lt;/h1&gt;&lt;/center&gt;..&lt;hr&gt;&lt;center&gt;nginx/1.18.0 (Ubuntu)&lt;/center&gt;..&lt;/body&gt;..&lt;/html&gt;..\"); InvalidResponse(\"Server: 'https://polygon.llamarpc.com/', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); ",
+      "error_path": "eth",
+      "error_trace": "eth:1004] eth:5792]",
+      "error_type": "Transport",
+      "error_data": "request MethodCall(MethodCall { jsonrpc: Some(V2), method: \"eth_estimateGas\", params: Array([Object({\"from\": String(\"0xab95d01bc8214e4d993043e8ca1b68db2c946498\"), \"to\": String(\"0x2953399124f0cbb46d2cbacd8a89cf0599974963\"), \"gasPrice\": String(\"0x9ddeaaffe\"), \"value\": String(\"0x0\"), \"data\": String(\"0x42842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498f43db4f488f644b73a9442de4978fb7572b73d85000000000000110000002710\")})]), id: Num(64) }) failed: InvalidResponse(\"Server: 'https://polygon-rpc.com/', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); InvalidResponse(\"Server: 'https://polygon.blockpi.network/v1/rpc/public', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); Transport(\"Server: 'https://node.komodo.earth:8080/polygon', response !200: 502 Bad Gateway, &lt;html&gt;..&lt;head&gt;&lt;title&gt;502 Bad Gateway&lt;/title&gt;&lt;/head&gt;..&lt;body&gt;..&lt;center&gt;&lt;h1&gt;502 Bad Gateway&lt;/h1&gt;&lt;/center&gt;..&lt;hr&gt;&lt;center&gt;nginx/1.18.0 (Ubuntu)&lt;/center&gt;..&lt;/body&gt;..&lt;/html&gt;..\"); InvalidResponse(\"Server: 'https://polygon.llamarpc.com/', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); ",
+      "id": null
+  }
+  ```
+
+  #### NotEnoughNftsAmount (trying to send more NFTs than you have)
+
+  ```
+  {
+      "mmrpc": "2.0",
+      "error": "Not enough NFTs amount with token_address: 0x2953399124f0cbb46d2cbacd8a89cf0599974963 and token_id 110473361632261669912565539602449606788298723469812631769659886404530570536720. Available 1, required 2",
+      "error_path": "eth",
+      "error_trace": "eth:897]",
+      "error_type": "NotEnoughNftsAmount",
+      "error_data": {
+          "token_address": "0x2953399124f0cbb46d2cbacd8a89cf0599974963",
+          "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536720",
+          "available": "1",
+          "required": "2"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+<Note>
+  View the source code at: [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs)
+</Note>
 export const title = "AtomicDEX: Account Balance Tasks";
 export const description = "The methods in this document allow tracking of balances across multiple addresses under a specified account index.";
 
