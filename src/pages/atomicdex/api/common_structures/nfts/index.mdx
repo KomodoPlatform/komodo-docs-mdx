@@ -5,7 +5,7 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 ### TokensRequest
 
-The `TokensRequest` object includes the following items for a given coin or token:
+The `TokensRequest` object includes the following items for a given token:
 
 | Parameter               | Type    | Description                                                                                                                    |
 | ----------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
@@ -20,3 +20,71 @@ The `TokensRequest` object includes the following items for a given coin or toke
   }
   ```
 </CollapsibleSection>
+
+### NftInfo
+
+The `NftInfo` object includes the following items for a given token:
+
+| Parameter              | Type    | Description                                                                                                                                                           |
+| ---------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount                 | string  | The amount of this NFT the user owns (used by `ERC1155`).                                                                                                             |
+| block\_number\_minted  | integer | The block height when the NFT was minted. May be `null`.                                                                                                              |
+| block\_number          | integer | The block height when the amount or owner changed.                                                                                                                    |
+| chain                  | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| name                   | string  | May be `null`. An NFT collection name.                                                                                                                                |
+| contract\_type         | string  | The type of NFT contract standard. One of `ERC721` or `ERC1155`.                                                                                                      |
+| last\_token\_uri\_sync | string  | When the token\_uri was last updated.                                                                                                                                 |
+| last\_metadata\_sync   | string  | When the metadata was last updated.                                                                                                                                   |
+| metadata               | string  | The metadata of the token. May be `null`.                                                                                                                             |
+| minter\_address        | string  | Minter address. May be `null`.                                                                                                                                        |
+| owner\_of              | string  | The wallet address of the owner of the NFT.                                                                                                                           |
+| possible\_spam         | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing     | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| symbol                 | string  | May be `null`. The symbol of the NFT contract.                                                                                                                        |
+| token\_address         | string  | The address of the NFT contract.                                                                                                                                      |
+| token\_id              | string  | The token ID of the NFT.                                                                                                                                              |
+| token\_hash            | string  | The token hash. May be `null`.                                                                                                                                        |
+| token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                  |
+| token\_domain          | string  | Token domain. May be `null`.                                                                                                                                          |
+| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                |
+
+### NftTransfer
+
+The `NftTransfer` object includes the following items for each token transaction:
+
+| Parameter          | Type    | Description                                                                                                                                                           |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount             | string  | Amount of tokens transferred.                                                                                                                                         |
+| block\_hash        | string  | May be `null`. Hash of block in which transfer occurred.                                                                                                              |
+| block\_number      | integer | Height of block in which transfer occurred.                                                                                                                           |
+| block\_timestamp   | integer | Block time in [unix epoch format](https://www.epochconverter.com/).                                                                                                   |
+| chain              | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| token\_uri         | string  | May be `null`. The URI to the metadata of the token.                                                                                                                  |
+| token\_domain      | string  | May be `null`. Extracted domain from the `token_uri`, if valid.                                                                                                       |
+| collection\_name   | string  | May be `null`. Name of collection which token belongs to.                                                                                                             |
+| image\_url         | string  | May be `null`. The URI to the token image.                                                                                                                            |
+| image\_domain      | string  | May be `null`. Extracted domain from the `image_url`, if valid.                                                                                                       |
+| token\_name        | string  | May be `null`. Name of the token.                                                                                                                                     |
+| contract\_type     | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                                 |
+| token\_address     | string  | Address of token transferred.                                                                                                                                         |
+| token\_id          | string  | Token ID.                                                                                                                                                             |
+| possible\_spam     | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| transaction\_hash  | string  | Transaction ID of the transfer.                                                                                                                                       |
+| transaction\_index | string  | May be `null`. Transaction index of the transfer.                                                                                                                     |
+| log\_index         | string  | Log index of the transfer.                                                                                                                                            |
+| value              | string  | May be `null`. Tranfer value.                                                                                                                                         |
+| transaction\_type  | string  | May be `null`. Transaction type. Possible values are `Single`.                                                                                                        |
+| from\_address      | string  | Address of previous owner which sent the token(s).                                                                                                                    |
+| to\_address        | string  | Address of new owner which received the token(s).                                                                                                                     |
+| status             | string  | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`.  |
+| verified           | integer | May be `null`. A deprecated field which will be removed in future.                                                                                                    |
+| operator           | string  | May be `null`.                                                                                                                                                        |
+| fee\_details       | object  | Optional. A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object.                                                                                          |
+
+<DevComment>
+  `verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incormoprates this.
+  What are the other possible values for `transaction_type`?
+  What is `operator`?
+  What does `verified` mean?
+</DevComment>
