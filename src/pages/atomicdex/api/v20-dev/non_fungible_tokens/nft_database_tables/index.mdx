@@ -1,0 +1,126 @@
+export const title = "AtomicDEX: Non Fungible Tokens - Query NFT database tables";
+export const description =
+  "This document describes how to query the local NFT database tables.";
+
+# Query NFT database tables
+
+After using the [update\_nft](atomicdex/api/v2-dev/non_fungible_tokens/update_nft) method to initialise your local NFT database,
+the following tables are available in `DB/KOMODEFI.db`:
+
+*   AVAX\_nft\_list
+*   AVAX\_nft\_transfer\_history
+*   BNB\_nft\_list
+*   BNB\_nft\_transfer\_history
+*   ETH\_nft\_list
+*   ETH\_nft\_transfer\_history
+*   FTM\_nft\_list
+*   FTM\_nft\_transfer\_history
+*   MATIC\_nft\_list
+*   MATIC\_nft\_transfer\_history
+*   scanned\_nft\_blocks
+
+## NFT List tables
+
+The COIN\_nft\_list tables contain the NFTs that you own, and have the following columns:
+token\_address|token\_id|chain|amount|block\_number|contract\_type|possible\_spam|possible\_phishing|collection\_name|symbol|token\_uri|token\_domain|metadata|last\_token\_uri\_sync|last\_metadata\_sync|raw\_image\_url|image\_url|image\_domain|token\_name|description|attributes|animation\_url|animation\_domain|external\_url|external\_domain|image\_details|details\_json
+
+| ID | Name                   | Type         | Description |
+| -- | ---------------------- | ------------ | ----------- |
+| 0  | token\_address         | VARCHAR(256) |             |
+| 1  | token\_id              | VARCHAR(256) |             |
+| 2  | chain                  | TEXT         |             |
+| 3  | amount                 | VARCHAR(256) |             |
+| 4  | block\_number          | INTEGER      |             |
+| 5  | contract\_type         | TEXT         |             |
+| 6  | possible\_spam         | INTEGER      |             |
+| 7  | possible\_phishing     | INTEGER      |             |
+| 8  | collection\_name       | TEXT         |             |
+| 9  | symbol                 | TEXT         |             |
+| 10 | token\_uri             | TEXT         |             |
+| 11 | token\_domain          | TEXT         |             |
+| 12 | metadata               | TEXT         |             |
+| 13 | last\_token\_uri\_sync | TEXT         |             |
+| 14 | last\_metadata\_sync   | TEXT         |             |
+| 15 | raw\_image\_url        | TEXT         |             |
+| 16 | image\_url             | TEXT         |             |
+| 17 | image\_domain          | TEXT         |             |
+| 18 | token\_name            | TEXT         |             |
+| 19 | description            | TEXT         |             |
+| 20 | attributes             | TEXT         |             |
+| 21 | animation\_url         | TEXT         |             |
+| 22 | animation\_domain      | TEXT         |             |
+| 23 | external\_url          | TEXT         |             |
+| 24 | external\_domain       | TEXT         |             |
+| 25 | image\_details         | TEXT         |             |
+| 26 | details\_json          | TEXT         |             |
+
+### Example COIN\_nft\_list table query
+
+> SELECT chain, token\_name, token\_address, token\_id, possible\_spam, possible\_phishing FROM MATIC\_nft\_list LIMIT 5;
+
+| chain   | token\_name            | token\_address                             | token\_id | possible\_spam | possible\_phishing |
+| ------- | ---------------------- | ------------------------------------------ | --------- | -------------- | ------------------ |
+| POLYGON | $2000 USDT Airdrop🎁   | 0xe7ee9dcf5f4b7f9254b348ba596c9fb9121f77e7 | 1         | 1              | 0                  |
+| POLYGON | $1000 USDC Voucher🎁   | 0xb092b5eb5c653e915880dfc1f606be2ffe6fae8c | 1         | 1              | 0                  |
+| POLYGON | 1000 BLUR Reward       | 0xeaa3c52052b809c8d8072187efc134def2dd5b13 | 0         | 1              | 0                  |
+| POLYGON | SHIB Voucher 66 of 100 | 0xc46e36339ebd8bed48b1bdb6bd815e4b72103949 | 0         | 1              | 0                  |
+| POLYGON | $1000 Rewards          | 0x6e0b84421388ad635f2a1167e39aff2dc742da2a | 0         | 1              | 0                  |
+
+The NFTs listed above are all spam, and will be ignored by the [list\_nfts](atomicdex/api/v2-dev/non_fungible_tokens/list_nfts) method.
+
+## NFT Transfer table
+
+The COIN\_nft\_transfer\_history tables contain the history of transfers of your NFTs, and have the following columns:
+
+| ID | Name               | Type         | Description |
+| -- | ------------------ | ------------ | ----------- |
+| 0  | transaction\_hash  | VARCHAR(256) |             |
+| 1  | log\_index         | INTEGER      |             |
+| 2  | chain              | TEXT         |             |
+| 3  | block\_number      | INTEGER      |             |
+| 4  | block\_timestamp   | INTEGER      |             |
+| 5  | contract\_type     | TEXT         |             |
+| 6  | token\_address     | VARCHAR(256) |             |
+| 7  | token\_id          | VARCHAR(256) |             |
+| 8  | status             | TEXT         |             |
+| 9  | amount             | VARCHAR(256) |             |
+| 10 | possible\_spam     | INTEGER      |             |
+| 11 | possible\_phishing | INTEGER      |             |
+| 12 | token\_uri         | TEXT         |             |
+| 13 | token\_domain      | TEXT         |             |
+| 14 | collection\_name   | TEXT         |             |
+| 15 | image\_url         | TEXT         |             |
+| 16 | image\_domain      | TEXT         |             |
+| 17 | token\_name        | TEXT         |             |
+| 18 | details\_json      | TEXT         |             |
+
+### Example scanned\_nft\_blocks table query
+
+`SELECT * FROM MATIC_nft_transfer_history WHERE block_timestamp > 1701519320;`
+
+| transaction\_hash                                                  | log\_index | chain   | block\_number | block\_timestamp | contract\_type | token\_address                             | token\_id | status  | amount | possible\_spam | possible\_phishing | token\_uri                                                                                                                                                                                 | token\_domain | collection\_name     | image\_url                                                                   | image\_domain                                               | token\_name          | details\_json                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------ | ---------- | ------- | ------------- | ---------------- | -------------- | ------------------------------------------ | --------- | ------- | ------ | -------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | -------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                    |            |         |               |                  |                |                                            |           |         |        |                |                    |                                                                                                                                                                                            |               |                      |                                                                              |                                                             |                      |                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 0x7b57303bcc2c68808b460490e984adcd18567a80660a18b7a151b62015247cda | 512        | POLYGON | 50651981      | 1701519326       | ERC1155        | 0xe7ee9dcf5f4b7f9254b348ba596c9fb9121f77e7 | 1         | Receive | 1      | 1              | 0                  | [https://ipfs.io/ipfs/bafybeidyrvvtmkicjmj235lzo3ilrgd4ghwgvneqeobna6lox663i7k764/token.json](https://ipfs.io/ipfs/bafybeidyrvvtmkicjmj235lzo3ilrgd4ghwgvneqeobna6lox663i7k764/token.json) | ipfs.io       | $2000 USDT Airdrop🎁 | ipfs\://bafybeibfbnyp3yabkowcfbiqkylrwufblx7kkjvsn264s3yep7zamwol5m/USDT.JPG | bafybeibfbnyp3yabkowcfbiqkylrwufblx7kkjvsn264s3yep7zamwol5m | $2000 USDT Airdrop🎁 | \{"block\_hash":"0x41a4f453b1589c43edecadd75c8c501e0d22c87268e3f56d0d03fd6a77ed37f4","transaction\_index":78,"value":"0","transaction\_type":"Single","verified":1,"operator":"0x509517aadfa276de25d0822446386dfce6ac386e","from\_address":"0x0000000000000000000000000000000000000000","to\_address":"0x0000000000000000000000000000000000000000","fee\_details":\{"coin":"MATIC","gas":2154020,"gas\_price":"0.000000031375683387","total\_fee":"0.06758384952926574"}} |
+
+## NFT Last Scanned Block table
+
+The scanned\_nft\_blocks table contains the last block that was scanned for each chain.
+It has the following columns:
+
+| ID | Name                 | Type    | Description |
+| -- | -------------------- | ------- | ----------- |
+| 0  | chain                | TEXT    |             |
+| 1  | last\_scanned\_block | INTEGER |             |
+
+### Example scanned\_nft\_blocks table query
+
+`SELECT * FROM scanned_nft_blocks;`
+
+| chain | last\_scanned\_block |
+| ----- | -------------------- |
+| MATIC | 50651981             |
+| FTM   | 66512090             |
+| ETH   | 0                    |
+| BNB   | 0                    |
+| AVAX  | 0                    |
