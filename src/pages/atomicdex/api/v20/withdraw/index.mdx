@@ -224,19 +224,6 @@ The request was failed due to an AtomicDEX API internal error.
   }
   ```
 
-  #### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "error_path": "utxo_common",
-    "error_trace": "utxo_common:1371]",
-    "error_type": "InvalidFeePolicy",
-    "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "id": 0
-  }
-  ```
 </CollapsibleSection>
 
 #### Withdraw BTC, KMD, and other BTC-based forks, 1 coin per Kbyte fee
@@ -558,7 +545,7 @@ The request was failed due to an AtomicDEX API internal error.
   ```
 </CollapsibleSection>
 
-##### Withdraw Tendermint coins with a memo
+##### Withdraw Tendermint coins with a memo and custom gas fee
 
 <CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
   ```json
@@ -570,7 +557,12 @@ The request was failed due to an AtomicDEX API internal error.
       "coin": "IRIS",
       "to": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
       "amount": 13,
-      "memo": "It was a bright cold day in April, and the clocks were striking thirteen."
+      "memo": "It was a bright cold day in April, and the clocks were striking thirteen.",
+      "fee": {
+          "type": "CosmosGas",
+          "gas_price": 0.05,
+          "gas_limit": 150000
+      }
     },
     "id": 0
   }
@@ -609,3 +601,46 @@ The request was failed due to an AtomicDEX API internal error.
 
   You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
 </CollapsibleSection>
+
+
+### Error Responses
+
+#### InvalidRequest: Unknown fee type
+```
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
+    "id": 0
+}
+```
+
+#### InvalidRequest: wrong parameter type
+```
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: invalid type: string \"0.1\", expected f64",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "invalid type: string \"0.1\", expected f64",
+    "id": 0
+}
+```
+
+#### InvalidFeePolicy: attempt to use EthGas for UTXO coin
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+    "error_path": "utxo_common",
+    "error_trace": "utxo_common:1371]",
+    "error_type": "InvalidFeePolicy",
+    "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+    "id": 0
+  }
+  ```
