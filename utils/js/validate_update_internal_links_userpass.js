@@ -25,7 +25,7 @@ if (fs.existsSync(manualLinkFile)) {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    await createFileSlugs(filepaths);
+    //await createFileSlugs(filepaths); // can comment on repeat runs
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -217,7 +217,7 @@ async function processLink(link, currFilePath, filepathSlugs) {
     slug = slugify(correctUrlSplit[1]);
     correctUrl = correctUrlSplit[0] + "#" + slug;
   }
-  
+
   if (
     !Object.hasOwn(filepathSlugs, internalLinkFile)
   ) {
