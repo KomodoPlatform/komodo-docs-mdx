@@ -71,6 +71,9 @@ function readTitleLinksAndHrefs(data) {
     Object.keys(navigation).forEach(function (navigationKey) {
       var sections = navigation[navigationKey];
       sections.forEach(function (page) {
+        if (page.titleLink && page.links.length > 0) {
+          throw new Error("To be able to have collapsible sections in left sidebar, title with titlelink can't have sub-items")
+        }
         if (page.titleLink) {
           pagesArray.push(page.titleLink);
         }
