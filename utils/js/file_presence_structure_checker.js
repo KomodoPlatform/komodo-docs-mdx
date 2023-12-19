@@ -61,7 +61,24 @@ const getFileNames = (filepath) => {
   }
 };
 
+function isValidUrl(urlString) {
+  try {
+    new URL(urlString);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 walkDir("./src/pages", getFileNames);
+
+const invalidFilenames = fileNames.filter(fileName => {
+  return isValidUrl("https://www.example.com" + fileName) && /[A-Z]/.test(fileName)
+})
+
+if (invalidFilenames.length > 0) {
+  throw new Error("following file names are invalid. Either can't form valid url or has uppercase letters in them: " + JSON.stringify(invalidFilenames))
+}
 
 const pagesArray = [];
 
@@ -71,6 +88,9 @@ function readTitleLinksAndHrefs(data) {
     Object.keys(navigation).forEach(function (navigationKey) {
       var sections = navigation[navigationKey];
       sections.forEach(function (page) {
+        if (page.titleLink && page.links.length > 0) {
+          throw new Error("To be able to have collapsible sections in left sidebar, title with titlelink can't have sub-items. 'page.titleLink': " + page.titleLink)
+        }
         if (page.titleLink) {
           pagesArray.push(page.titleLink);
         }
