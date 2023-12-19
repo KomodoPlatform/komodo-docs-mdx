@@ -392,6 +392,7 @@ async function processExternalLink(link, currFilePath) {
   let IgnoreURLs = [
     "https://moralis-proxy.komodo.earth",
     "https://nft.antispam.dragonhound.info",
+    "https://www.digitalocean.com/community/tutorials/how-to-add-delete-and-grant-sudo-privileges-to-users-on-a-debian-vps",
   ];
   if (
     link.startsWith("http://127.0.0.1") ||
@@ -424,7 +425,14 @@ async function processExternalLink(link, currFilePath) {
     link.startsWith("https://telegram.org/")
   ) {
     return;
+  } 
+  if (
+    link.startsWith("http://notarystats.info") ||
+    link.startsWith("https://notarystats.info")
+  ) {
+    return;
   }
+ 
   try {
     const { newLocation, statusCode } = await checkUrlStatusCode(link);
     if (statusCode === 200) {
