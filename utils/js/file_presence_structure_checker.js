@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 const sidebarNavData = JSON.parse(fs.readFileSync("./src/data/sidebar.json", 'utf8'))
-const navbarNavData = JSON.parse(fs.readFileSync("./src/data/sidebar.json", 'utf8'))
+const navbarNavData = JSON.parse(fs.readFileSync("./src/data/navbar.json", 'utf8'))
 
 function walkDir(dirPath, callback) {
   fs.readdirSync(dirPath).forEach((file) => {
@@ -61,22 +61,64 @@ const getFileNames = (filepath) => {
   }
 };
 
+function isValidUrl(urlString) {
+  try {
+    new URL(urlString);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
 walkDir("./src/pages", getFileNames);
 
-const pagesArray = [];
+const invalidFilenames = fileNames.filter(fileName => {
+  return isValidUrl("https://www.example.com" + fileName) && /[A-Z]/.test(fileName)
+})
 
-function readTitleLinksAndHrefs(data) {
+if (invalidFilenames.length > 0) {
+  throw new Error("following file names are invalid. Either can't form valid url or has uppercase letters in them: " + JSON.stringify(invalidFilenames))
+}
+
+const sidebarPagesArray = [];
+const navbarPagesArray  = [];
+
+function readTitleLinksAndHrefsNavbar(data){
+  Object.keys(data).forEach(function (key) {
+    var dropdown = data[key];
+    dropdown.items.forEach(function (item) {
+      if(!item.link.endsWith("/")) {
+        throw new Error(`In navbar.json, link: ${item.link} should end with /`)
+      }
+      navbarPagesArray.push(item.link)
+    });
+  });
+}
+
+function readTitleLinksAndHrefsSidebar(data) {
   Object.keys(data).forEach(function (key) {
     var navigation = data[key];
     Object.keys(navigation).forEach(function (navigationKey) {
+      if(!navigationKey.endsWith("/")) {
+        throw new Error(`In sidebar.json, navigationKey: ${navigationKey} should end with /`)
+      }
       var sections = navigation[navigationKey];
       sections.forEach(function (page) {
-        if (page.titleLink) {
-          pagesArray.push(page.titleLink);
+        if (page.titleLink && page.links.length > 0) {
+          throw new Error("To be able to have collapsible sections in left sidebar, title with titlelink can't have sub-items. 'page.titleLink': " + page.titleLink)
         }
-        if (page.links) {
+        if (page.titleLink) {
+          if(!page.titleLink.endsWith("/")) {
+            throw new Error(`In sidebar.json, titleLink: ${page.titleLink} should end with /`)
+          }
+          sidebarPagesArray.push(page.titleLink);
+        }
+        if (page.links) {  
           for (const link of page.links) {
-            pagesArray.push(link.href);
+            if(!link.href.endsWith("/")) {
+              throw new Error(`In sidebar.json, link: ${link.href} should end with /`)
+            }
+            sidebarPagesArray.push(link.href);
           }
         }
       });
@@ -86,14 +128,14 @@ function readTitleLinksAndHrefs(data) {
 
 // Read titleLinks and links.href values from antaraFrameworkPageNavigation
 
-readTitleLinksAndHrefs(sidebarNavData);
-readTitleLinksAndHrefs(navbarNavData);
+readTitleLinksAndHrefsSidebar(sidebarNavData);
+readTitleLinksAndHrefsNavbar(navbarNavData);
 
 function compareArrays(fileNames, pagesArray) {
   var differences = [];
-  fileNames.forEach(function (element) {
-    if (!pagesArray.includes(element)) {
-      differences.push(element);
+  fileNames.forEach(function (fileName) {
+    if (!pagesArray.includes(fileName)) {
+      differences.push(fileName);
     }
   });
 
@@ -101,9 +143,11 @@ function compareArrays(fileNames, pagesArray) {
 }
 
 //pages present in the file system but not in sidebar
-var pagesNotInSidebar = compareArrays(fileNames, pagesArray);
+var pagesNotInSidebar = compareArrays(fileNames, sidebarPagesArray);
 //pages present in the sidebar but not in file system
-var pagesNotInFileSystem = compareArrays(pagesArray, fileNames);
+var pagesInSidebarNotInFileSystem = compareArrays(sidebarPagesArray, fileNames);
+
+var pagesInNavbarNotInFileSystem = compareArrays(navbarPagesArray, fileNames)
 
 function removeUndefinedStrings(array) {
   return array.filter(function (element) {
@@ -121,11 +165,19 @@ ${pagesNotInSidebar.join("\n")}
 `;
 }
 
-if (pagesNotInFileSystem.length > 0) {
+if (pagesInSidebarNotInFileSystem.length > 0) {
   errorString =
     errorString +
     `\npages present in the sidebar but not in file system:
-${pagesNotInFileSystem.join("\n")}
+${pagesInSidebarNotInFileSystem.join("\n")}
+`;
+}
+
+if (pagesInNavbarNotInFileSystem.length > 0) {
+  errorString =
+    errorString +
+    `\npages present in the navbar but not in file system:
+${pagesInNavbarNotInFileSystem.join("\n")}
 `;
 }
 

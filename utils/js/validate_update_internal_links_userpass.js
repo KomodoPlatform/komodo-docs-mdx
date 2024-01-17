@@ -25,7 +25,7 @@ if (fs.existsSync(manualLinkFile)) {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    await createFileSlugs(filepaths);
+    //await createFileSlugs(filepaths); // can comment on repeat runs
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -217,10 +217,8 @@ async function processLink(link, currFilePath, filepathSlugs) {
     slug = slugify(correctUrlSplit[1]);
     correctUrl = correctUrlSplit[0] + "#" + slug;
   }
-  
-  if (
-    !Object.hasOwn(filepathSlugs, internalLinkFile)
-  ) {
+
+  if (!Object.hasOwn(filepathSlugs, internalLinkFile)) {
     console.log("#----------------------------------------------#");
     console.log("currNormalisedDir: " + currNormalisedDir);
     console.log("currFilePath: " + currFilePath);
@@ -234,8 +232,7 @@ async function processLink(link, currFilePath, filepathSlugs) {
     throw new Error(
       `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile} with url ${correctUrl} (original url: ${link})`
     );
-  }
-  else if (
+  } else if (
     slug &&
     !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
   ) {
@@ -338,7 +335,7 @@ function isValidTitleDescExports(str) {
 
     return titleExported && descriptionExported;
   } catch (e) {
-    throw new Error(e)
+    throw new Error(e);
     //console.log(e)
     //return false; // Parsing error means the string is not valid JS
   }
@@ -358,8 +355,9 @@ function checkUrlStatusCode(url) {
     }
     let requestOptions = new URL(url);
     requestOptions.headers = {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
       Referer: "https://www.google.com/",
     };
 
@@ -383,18 +381,25 @@ function checkUrlStatusCode(url) {
     req.on("error", (err) => {
       reject(err);
     });
-    req.setTimeout(5000, () => {
+    req.setTimeout(50, () => {
       req.destroy();
       reject(new Error("Request timed out " + url));
     });
   });
 }
 
-async function processExternalLink(link, currFilePath) { //TODO: check the ignore lists ocassionally to determine their status and maybe check for replacements
+async function processExternalLink(link, currFilePath) {
+  //TODO: check the ignore lists ocassionally to determine their status and maybe check for replacements
   let IgnoreURLs = [
     "https://moralis-proxy.komodo.earth",
-    "https://nft.antispam.dragonhound.info"
-  ]
+    "https://nft.antispam.dragonhound.info",
+    "https://www.digitalocean.com/community/tutorials/how-to-add-delete-and-grant-sudo-privileges-to-users-on-a-debian-vps",
+    "https://www.virustotal.com/gui/"
+  ];
+  if (IgnoreURLs.some((ignoreLink) => link.includes(ignoreLink))) {
+    fs.appendFileSync(manualLinkFile, link + "\n");
+    return
+  }
   if (
     link.startsWith("http://127.0.0.1") ||
     link.startsWith("https://127.0.0.1") ||
@@ -421,6 +426,19 @@ async function processExternalLink(link, currFilePath) { //TODO: check the ignor
   ) {
     return;
   }
+  if (
+    link.startsWith("http://telegram.org/") ||
+    link.startsWith("https://telegram.org/")
+  ) {
+    return;
+  }
+  if (
+    link.startsWith("http://notarystats.info") ||
+    link.startsWith("https://notarystats.info")
+  ) {
+    return;
+  }
+
   try {
     const { newLocation, statusCode } = await checkUrlStatusCode(link);
     if (statusCode === 200) {
@@ -440,8 +458,6 @@ async function processExternalLink(link, currFilePath) { //TODO: check the ignor
       //   `Check this link manually: [${link}] It responds with statuscode: ${statusCode} `
       // );
       fs.appendFileSync(manualLinkFile, link + "\n");
-    } else if (IgnoreURLs.some(ignoreLink => link.includes(ignoreLink))) {
-      fs.appendFileSync(manualLinkFile, link + "\n");
     } else {
       throw new Error(
         `The URL ${link} in the file ${currFilePath} returned a statuscode: ${statusCode}`
@@ -449,14 +465,21 @@ async function processExternalLink(link, currFilePath) { //TODO: check the ignor
     }
   } catch (err) {
     if (err.message.startsWith("Request timed out")) {
-      console.log(`Request timed out when checking the URL ${link} in the file ${currFilePath}`);
+      console.log(
+        `Request timed out when checking the URL ${link} in the file ${currFilePath}`
+      );
       return;
     }
     else if (err.message.includes("ETIMEDOUT")) {
       console.log(`Request timed out when checking the URL ${link} in the file ${currFilePath}`);
       return;
     } else {
-      throw new Error(err);
+      console.error(`Error when checking the URL ${link} in the file ${currFilePath}`)
+      fs.appendFileSync(manualLinkFile, link + "\n");
+      fs.appendFileSync(manualLinkFile, err);
+      fs.appendFileSync(manualLinkFile, "\n");
+
+      //throw new Error(err);
     }
   }
 }
