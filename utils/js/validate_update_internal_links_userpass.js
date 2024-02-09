@@ -472,7 +472,7 @@ async function processExternalLink(link, currFilePath) {
     } else {
       console.error(`Error when checking the URL ${link} in the file ${currFilePath}`)
       fs.appendFileSync(manualLinkFile, link + "\n");
-      fs.appendFileSync(manualLinkFile, err);
+      fs.appendFileSync(manualLinkFile, JSON.stringify(err, null, 2) + "\n");
       fs.appendFileSync(manualLinkFile, "\n");
 
       //throw new Error(err);
