@@ -12,12 +12,7 @@ let array2 = Object.keys(json2);
 // Function to check if a string starts with "mmvl" or "komodo"
 function startsWithMMVLorKomodo(str) {
   return (
-    str.startsWith("/mmV1") ||
-    str.startsWith("/mmV2") ||
-    str.startsWith("/notary") ||
-    str.startsWith("/qa") ||
-    str.startsWith("/komodo") ||
-    str.startsWith("/resources")
+    str.startsWith("/mmV1") 
   );
 }
 
