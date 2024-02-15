@@ -108,6 +108,7 @@ const nameChangedMap = {
   "/komodo/access-remote-daemon-ssh.html":
     "/atomicdex/tutorials/setup-atomicdex-aws/",
   "/komodo/info.html": "/smart-chains/setup/ecosystem-launch-parameters/",
+  "/komodo/multisig-transactions-on-komodo-or-assetchains.html":"/komodo/multisig-transactions-on-komodo-or-smartchains/",
   "/notary/setup-Komodo-Notary-Node.html": "/notary/",
   "/notary/generate-privkeys-third-party-coins-from-passphrase.html":
     "/notary/generate-privkeys-for-third-party-coins-from-passphrase/",
