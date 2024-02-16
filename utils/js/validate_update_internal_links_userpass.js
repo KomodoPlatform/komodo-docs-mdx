@@ -25,7 +25,7 @@ if (fs.existsSync(manualLinkFile)) {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    await createFileSlugs(filepaths); // can comment on repeat runs
+   await createFileSlugs(filepaths); // can comment on repeat runs
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -102,10 +102,7 @@ async function processFile(filePath, filepathSlugs) {
         if (!filePath.includes("src/pages/atomicdex")) {
           return SKIP;
         }
-        // if (
-        //     is(node, { name: "CodeGroup" })) {
-        //     console.log(node)
-        // }
+
         try {
           if (
             is(node, { name: "CodeGroup" }) &&
@@ -131,11 +128,18 @@ async function processFile(filePath, filepathSlugs) {
             //console.log(clonedChild)
             node.children = [clonedChild];
             return SKIP;
-          }
+          } else if (node.type === "code" && node.lang === null) {
+            throw new Error(`Code lang value missing
+Filepath: ${filePath} 
+code node: 
+${JSON.stringify(node,null,2)}`);
+        }
         } catch (error) {
-          console.log(filePath);
-          console.log(node);
-          throw new Error(error);
+          throw new Error(`Error:s
+${JSON.stringify(error,null,2)}         
+Filepath: ${filePath} 
+Node: 
+${JSON.stringify(node,null,2)}`);
         }
       });
     })
