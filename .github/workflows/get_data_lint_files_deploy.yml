@@ -63,7 +63,12 @@ jobs:
         run: node utils/js/h1_presence_checker.js
 
       - name: Prepare data files for GPTs
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: node utils/js/create_data_for_gpts.js
+
+      - name: Ensure change logs are updated
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        run: node utils/js/ensure_changelog_update.js
 
       - name: Set lint-fix branch name
         id: vars
