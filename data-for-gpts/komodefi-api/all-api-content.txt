@@ -342,10 +342,54 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 
 | Parameter  | Type             | Description                                                                                                                               |
 | ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`                                  |
 | amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
-| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+| gas\_price | string (numeric) | Used only when fee type is `Qrc20Gas` or `EthGas`; sets the gas price in `gwei` units.                                                    |
+| gas\_price | number (double)  | Used only when fee type is `CosmosGas`; sets the gas price.                                                                               |
+| gas        | number (integer) | Used only when fee type is `EthGas`; sets the gas limit for transaction                                                                   |
+| gas\_limit | number (integer) | Used only when fee type is `Qrc20Gas` or `CosmosGas`; sets the gas limit for transaction                                                  |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Examples
+
+  ```json
+  {
+    "type": "UtxoFixed",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "UtxoPerKbyte",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "EthGas",
+    "gas_price": "10",
+    "gas": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "Qrc20Gas",
+    "gas_price": "10",
+    "gas_limit": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "CosmosGas",
+    "gas_price": 0.05,
+    "gas_limit": 21000
+  }
+  ```
+</CollapsibleSection>
 
 ### ExtendedFeeInfo
 
@@ -11275,11 +11319,12 @@ For coins with segwit, they may appear twice in the output (once for each addres
 
 #### Arguments
 
-| Structure   | Type   | Description                                                                         |
-| ----------- | ------ | ----------------------------------------------------------------------------------- |
-| coin        | string | The ticker of the coin to get best orders                                           |
-| action      | string | Whether to `buy` or `sell` the selected coin                                        |
-| request\_by | object | A standard [RequestBy](/atomicdex/api/common_structures/orders/#request-by) object. |
+| Structure     | Type   | Description                                                                          |
+| ------------- | ------ | ------------------------------------------------------------------------------------ |
+| coin          | string | The ticker of the coin to get best orders                                            |
+| action        | string | Whether to `buy` or `sell` the selected coin                                         |
+| exclude\_mine | bool   | Defaults to `false`. If `true`, the users orders will be excluded from the response. |
+| request\_by   | object | A standard [RequestBy](/atomicdex/api/common_structures/orders/#request-by) object.  |
 
 #### Response
 
@@ -11318,225 +11363,6 @@ For coins with segwit, they may appear twice in the output (once for each addres
     "mmrpc": "2.0",
     "result": {
       "orders": {
-        "TKL": [
-          {
-            "coin": "TKL",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "RAwv8JhfvmFx2V3QpY7ehiYpBJ1eqxxdxR"
-            },
-            "price": {
-              "decimal": "8.7753611926",
-              "rational": [
-                [1, [927133003, 10]],
-                [1, [705032704, 1]]
-              ],
-              "fraction": {
-                "numer": "43876805963",
-                "denom": "5000000000"
-              }
-            },
-            "pubkey": "02dbd8c73e2e80e4f3cf88d2f04a9d2d0df4269496608b14a3e17556fdcb01e0c1",
-            "uuid": "416bb993-acac-42cf-ae54-bf57a21f7a3d",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "2478.31474597274",
-              "rational": [
-                [1, [1635841741, 28851]],
-                [1, [2755359744, 11]]
-              ],
-              "fraction": {
-                "numer": "123915737298637",
-                "denom": "50000000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "0.0001",
-              "rational": [
-                [1, [1]],
-                [1, [10000]]
-              ],
-              "fraction": {
-                "numer": "1",
-                "denom": "10000"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "21748.107044857509733489724",
-              "rational": [
-                [1, [2703103759, 3484586521, 294741]],
-                [1, [2007498752, 2373086065, 13]]
-              ],
-              "fraction": {
-                "numer": "5437026761214377433372431",
-                "denom": "250000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.00087753611926",
-              "rational": [
-                [1, [927133003, 10]],
-                [1, [2285707264, 11641]]
-              ],
-              "fraction": {
-                "numer": "43876805963",
-                "denom": "50000000000000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 2,
-              "rel_nota": true
-            }
-          }
-        ],
-        "XMY-segwit": [
-          {
-            "coin": "XMY-segwit",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "MJx4vyc657NwQUMjzRgDcypvRw5NduzSz4"
-            },
-            "price": {
-              "decimal": "88.3356107012",
-              "rational": [
-                [1, [1795694657, 51]],
-                [1, [2500000000]]
-              ],
-              "fraction": {
-                "numer": "220839026753",
-                "denom": "2500000000"
-              }
-            },
-            "pubkey": "025d81c96aa4269c5946c0bd8dad7785ae0f4f595e7aea2ec4f8fe71f77ebf74a9",
-            "uuid": "999b34ca-c7b2-4caa-92e2-76349ed2d4b5",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "2478.31474597274",
-              "rational": [
-                [1, [1635841741, 28851]],
-                [1, [2755359744, 11]]
-              ],
-              "fraction": {
-                "numer": "123915737298637",
-                "denom": "50000000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "0.0001",
-              "rational": [
-                [1, [1]],
-                [1, [10000]]
-              ],
-              "fraction": {
-                "numer": "1",
-                "denom": "10000"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "218923.446595291331147485288",
-              "rational": [
-                [1, [1174424077, 4198508482, 1483482]],
-                [1, [3151233024, 3334026680, 6]]
-              ],
-              "fraction": {
-                "numer": "27365430824411416393435661",
-                "denom": "125000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.00883356107012",
-              "rational": [
-                [1, [1795694657, 51]],
-                [1, [3290337280, 5820]]
-              ],
-              "fraction": {
-                "numer": "220839026753",
-                "denom": "25000000000000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 3,
-              "rel_nota": false
-            }
-          }
-        ],
-        "LTC": [
-          {
-            "coin": "LTC",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "Lgrta1iKRcy8zzygVkZeEXuxBqzssPWtae"
-            },
-            "price": {
-              "decimal": "0.0001087673",
-              "rational": [
-                [1, [1087673]],
-                [1, [1410065408, 2]]
-              ],
-              "fraction": {
-                "numer": "1087673",
-                "denom": "10000000000"
-              }
-            },
-            "pubkey": "026da2fc632afabbb1b86d04a9a012db25eca74db38ba2eccd88552f27f4c0b245",
-            "uuid": "8530300a-b11c-4eca-80ab-c4124aaf3b64",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "24706.624279842",
-              "rational": [
-                [1, [986196625, 2876]],
-                [1, [500000000]]
-              ],
-              "fraction": {
-                "numer": "12353312139921",
-                "denom": "500000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "5.019891088590044985947063133864681756373468864263432116086360514603194158538457790163036133102504153",
-              "rational": [
-                [1, [5460000]],
-                [1, [1087673]]
-              ],
-              "fraction": {
-                "numer": "5460000",
-                "denom": "1087673"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "2.6872728150328587666",
-              "rational": [
-                [1, [4244429513, 3128397295]],
-                [1, [1156841472, 1164153218]]
-              ],
-              "fraction": {
-                "numer": "13436364075164293833",
-                "denom": "5000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.000546",
-              "rational": [
-                [1, [273]],
-                [1, [500000]]
-              ],
-              "fraction": {
-                "numer": "273",
-                "denom": "500000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 2,
-              "rel_nota": false
-            }
-          }
-        ],
         "LTC-segwit": [
           {
             "coin": "LTC-segwit",
@@ -11630,7 +11456,7 @@ For coins with segwit, they may appear twice in the output (once for each addres
             },
             "pubkey": "02dbd8c73e2e80e4f3cf88d2f04a9d2d0df4269496608b14a3e17556fdcb01e0c1",
             "uuid": "95bb48ce-7411-4be7-a1b9-70e8f8d7887f",
-            "is_mine": false,
+            "is_mine": true,
             "base_max_volume": {
               "decimal": "8964.021726027",
               "rational": [
@@ -11679,6 +11505,120 @@ For coins with segwit, they may appear twice in the output (once for each addres
               "base_confs": 7,
               "base_nota": false,
               "rel_confs": 3,
+              "rel_nota": false
+            }
+          }
+        ]
+      },
+      "original_tickers": {
+        "LTC": ["LTC-segwit"],
+        "BTC": ["BTC-segwit"],
+        "XMY": ["XMY-segwit"]
+      }
+    },
+    "id": 0
+  }
+  ```
+</CollapsibleSection>
+
+#### Command (by number, exclude own orders)
+
+<CodeGroup title="" tag="POST" label="best_orders" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "best_orders",
+    "mmrpc": "2.0",
+    "params": {
+      "coin": "DGB",
+      "action": "buy",
+      "exclude_mine": true,
+      "request_by": {
+        "type": "number",
+        "value": 100
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (by number - success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "orders": {
+        "LTC-segwit": [
+          {
+            "coin": "LTC-segwit",
+            "address": {
+              "address_type": "Transparent",
+              "address_data": "Lgrta1iKRcy8zzygVkZeEXuxBqzssPWtae"
+            },
+            "price": {
+              "decimal": "0.0001087673",
+              "rational": [
+                [1, [1087673]],
+                [1, [1410065408, 2]]
+              ],
+              "fraction": {
+                "numer": "1087673",
+                "denom": "10000000000"
+              }
+            },
+            "pubkey": "026da2fc632afabbb1b86d04a9a012db25eca74db38ba2eccd88552f27f4c0b245",
+            "uuid": "8530300a-b11c-4eca-80ab-c4124aaf3b64",
+            "is_mine": false,
+            "base_max_volume": {
+              "decimal": "24706.624279842",
+              "rational": [
+                [1, [986196625, 2876]],
+                [1, [500000000]]
+              ],
+              "fraction": {
+                "numer": "12353312139921",
+                "denom": "500000000"
+              }
+            },
+            "base_min_volume": {
+              "decimal": "5.019891088590044985947063133864681756373468864263432116086360514603194158538457790163036133102504153",
+              "rational": [
+                [1, [5460000]],
+                [1, [1087673]]
+              ],
+              "fraction": {
+                "numer": "5460000",
+                "denom": "1087673"
+              }
+            },
+            "rel_max_volume": {
+              "decimal": "2.6872728150328587666",
+              "rational": [
+                [1, [4244429513, 3128397295]],
+                [1, [1156841472, 1164153218]]
+              ],
+              "fraction": {
+                "numer": "13436364075164293833",
+                "denom": "5000000000000000000"
+              }
+            },
+            "rel_min_volume": {
+              "decimal": "0.000546",
+              "rational": [
+                [1, [273]],
+                [1, [500000]]
+              ],
+              "fraction": {
+                "numer": "273",
+                "denom": "500000"
+              }
+            },
+            "conf_settings": {
+              "base_confs": 7,
+              "base_nota": false,
+              "rel_confs": 2,
               "rel_nota": false
             }
           }
@@ -16465,20 +16405,6 @@ The request was failed due to an AtomicDEX API internal error.
     "id": 0
   }
   ```
-
-  #### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "error_path": "utxo_common",
-    "error_trace": "utxo_common:1371]",
-    "error_type": "InvalidFeePolicy",
-    "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "id": 0
-  }
-  ```
 </CollapsibleSection>
 
 #### Withdraw BTC, KMD, and other BTC-based forks, 1 coin per Kbyte fee
@@ -16800,7 +16726,7 @@ The request was failed due to an AtomicDEX API internal error.
   ```
 </CollapsibleSection>
 
-##### Withdraw Tendermint coins with a memo
+##### Withdraw Tendermint coins with a memo and custom gas fee
 
 <CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
   ```json
@@ -16812,7 +16738,12 @@ The request was failed due to an AtomicDEX API internal error.
       "coin": "IRIS",
       "to": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
       "amount": 13,
-      "memo": "It was a bright cold day in April, and the clocks were striking thirteen."
+      "memo": "It was a bright cold day in April, and the clocks were striking thirteen.",
+      "fee": {
+        "type": "CosmosGas",
+        "gas_price": 0.05,
+        "gas_limit": 150000
+      }
     },
     "id": 0
   }
@@ -16851,6 +16782,50 @@ The request was failed due to an AtomicDEX API internal error.
 
   You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
 </CollapsibleSection>
+
+### Error Responses
+
+#### InvalidRequest: Unknown fee type
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
+    "id": 0
+}
+```
+
+#### InvalidRequest: wrong parameter type
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: invalid type: string \"0.1\", expected f64",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "invalid type: string \"0.1\", expected f64",
+    "id": 0
+}
+```
+
+#### InvalidFeePolicy: attempt to use EthGas for UTXO coin
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1371]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "id": 0
+}
+```
 export const title = "AtomicDEX Method: Get Current MTP";
 export const description = "The get_current_mtp method returns the Median Time Past (MTP) from electrum servers for UTXO coins.";
 
