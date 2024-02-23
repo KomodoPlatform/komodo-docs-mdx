@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "9621b583-2009-472c-96ea-9a907d86ac77",
-		"name": "mm2_dev",
+		"_postman_id": "01b1b7d4-48d2-414d-b721-e1e7ea1c2c3a",
+		"name": "komodo_defi",
+		"description": "Komodo DeFi Framework RPC methods",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "16279216"
+		"_exporter_id": "12719479"
 	},
 	"item": [
 		{
@@ -16,7 +17,46 @@
 							"name": "Electrum",
 							"item": [
 								{
-									"name": "electrum UTXO",
+									"name": "electrum (UTXO TCP/SSL)",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10017\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10017\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10017\"\r\n        }\r\n    ]\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "electrum (UTXO WSS)",
 									"event": [
 										{
 											"listen": "prerequest",
@@ -330,7 +370,8 @@
 									"host": [
 										"{{address}}"
 									]
-								}
+								},
+								"description": "Disables the selected coin."
 							},
 							"response": []
 						},
@@ -774,7 +815,8 @@
 									"host": [
 										"{{address}}"
 									]
-								}
+								},
+								"description": "Returns the confirmed and unconfirmed balance of the requested coin."
 							},
 							"response": []
 						},
@@ -2317,7 +2359,7 @@
 					]
 				},
 				{
-					"name": "mm2 Info",
+					"name": "Utility",
 					"item": [
 						{
 							"name": "help",
@@ -7290,6 +7332,250 @@
 										"216"
 									],
 									"port": "30783"
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "HD Wallet",
+			"item": [
+				{
+					"name": "task_enable_utxo",
+					"item": [
+						{
+							"name": "init DOC (wss)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n    {\r\n      \"userpass\": \"testpsw\",\r\n      \"mmrpc\": \"2.0\",\r\n      \"method\": \"task::enable_utxo::init\",\r\n      \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n          \"mode\": {\r\n            \"rpc\": \"Electrum\",\r\n            \"rpc_data\": {\r\n              \"servers\": [\r\n                {\r\n                  \"url\": \"electrum3.cipig.net:30020\",\r\n                  \"protocol\": \"WSS\"\r\n                }\r\n              ]\r\n            }\r\n          },\r\n          \"scan_policy\": \"scan_if_new_wallet\",\r\n          \"min_addresses_number\": 3,\r\n          \"gap_limit\": 20\r\n        }\r\n      }\r\n    }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (wss, hd)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::init\",\r\n    \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\": \"Electrum\",\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:30020\",\r\n                            \"protocol\": \"WSS\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:30020\",\r\n                            \"protocol\": \"WSS\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:30020\",\r\n                            \"protocol\": \"WSS\"\r\n                        }\r\n                    ]\r\n                }\r\n            },\r\n            \"path_to_address\": { // defaults to 0'/0/0\r\n                \"account_id\": 0,\r\n                \"chain\": \"External\", // Accepted values: \"External\", \"Internal\"\r\n                \"address_id\": 1\r\n            },\r\n            \"tx_history\": true, // defaults to false\r\n            \"gap_limit\": 20, // Optional, defaults to 20 \r\n            \"scan_policy\": \"scan_if_new_wallet\", // Optional, defaults to \"scan_if_new_wallet\", Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\"\r\n            \"min_addresses_number\": 3 // Optional, Number of addresses to generate, if not specified addresses will be generated up to path_to_address::address_index\r\n        }\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (wss, trezor)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n    {\r\n      \"userpass\": \"testpsw\",\r\n      \"mmrpc\": \"2.0\",\r\n      \"method\": \"task::enable_utxo::init\",\r\n      \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n          \"mode\": {\r\n            \"rpc\": \"Electrum\",\r\n            \"rpc_data\": {\r\n              \"servers\": [\r\n                {\r\n                  \"url\": \"electrum3.cipig.net:30020\",\r\n                  \"protocol\": \"WSS\"\r\n                }\r\n              ]\r\n            }\r\n          },\r\n          \"scan_policy\": \"scan_if_new_wallet\",\r\n          \"min_addresses_number\": 3,\r\n          \"priv_key_policy\": \"Trezor\",\r\n          \"gap_limit\": 20\r\n        }\r\n      }\r\n    }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (tcp)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n    {\r\n      \"userpass\": \"testpsw\",\r\n      \"mmrpc\": \"2.0\",\r\n      \"method\": \"task::enable_utxo::init\",\r\n      \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n          \"mode\": {\r\n            \"rpc\": \"Electrum\",\r\n            \"rpc_data\": {\r\n              \"servers\": [\r\n                {\r\n                  \"url\": \"electrum3.cipig.net:20020\",\r\n                  \"protocol\": \"SSL\"\r\n                }\r\n              ]\r\n            }\r\n          },\r\n          \"scan_policy\": \"scan_if_new_wallet\",\r\n          \"min_addresses_number\": 3,\r\n          \"gap_limit\": 20\r\n        }\r\n      }\r\n    }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (tcp, hd)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::init\",\r\n    \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\": \"Electrum\",\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:20020\",\r\n                            \"protocol\": \"SSL\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:20020\",\r\n                            \"protocol\": \"SSL\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:20020\",\r\n                            \"protocol\": \"SSL\"\r\n                        }\r\n                    ]\r\n                }\r\n            },\r\n            \"path_to_address\": { // defaults to 0'/0/0\r\n                \"account_id\": 0,\r\n                \"chain\": \"External\", // Accepted values: \"External\", \"Internal\"\r\n                \"address_id\": 1\r\n            },\r\n            \"tx_history\": true, // defaults to false\r\n            \"gap_limit\": 20, // Optional, defaults to 20 \r\n            \"scan_policy\": \"scan_if_new_wallet\", // Optional, defaults to \"scan_if_new_wallet\", Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\"\r\n            \"min_addresses_number\": 3 // Optional, Number of addresses to generate, if not specified addresses will be generated up to path_to_address::address_index\r\n        }\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (tcp, trezor)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n    {\r\n      \"userpass\": \"testpsw\",\r\n      \"mmrpc\": \"2.0\",\r\n      \"method\": \"task::enable_utxo::init\",\r\n      \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n          \"mode\": {\r\n            \"rpc\": \"Electrum\",\r\n            \"rpc_data\": {\r\n              \"servers\": [\r\n                {\r\n                  \"url\": \"electrum3.cipig.net:20020\",\r\n                  \"protocol\": \"SSL\"\r\n                }\r\n              ]\r\n            }\r\n          },\r\n          \"scan_policy\": \"scan_if_new_wallet\",\r\n          \"min_addresses_number\": 3,\r\n          \"priv_key_policy\": \"Trezor\",\r\n          \"gap_limit\": 20\r\n        }\r\n      }\r\n    }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
 								}
 							},
 							"response": []
