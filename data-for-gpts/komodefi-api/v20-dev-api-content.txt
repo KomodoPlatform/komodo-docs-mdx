@@ -134,7 +134,7 @@ The `get_locked_amount` method returns the amount of a coin which is currently l
 export const title = "AtomicDEX: HD Address Management";
 export const description = "The methods in this document allow generation of HD addresses on AtomicDEX.";
 
-# Heirarchical Deterministic Address Management
+# Hierarchical Deterministic Address Management
 
 A hierarchical-deterministic (HD) wallet generates a new key pair from a master key pair, allowing for multiple addresses to be generated from the same seed so that change from transactions go to a previously unused address, enhancing privacy and security. The hierarchical structure resembles that of a tree, with the master key “determining” the key pairs that follow it in the hierarchy. If you have activated a coin with the [task::enable\_utxo::init](/atomicdex/api/v20-dev/task_enable_utxo/#init) or [task::enable\_qtum::init](/atomicdex/api/v20-dev/task_enable_qtum/#init) and used the `"priv_key_policy": "Trezor"` parameter, you can use the methods below to generate new addresses.
 
@@ -149,7 +149,7 @@ To avoid generating too many addresses at once, we can use a `gap_limit` constra
 | coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                      |
 | account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                        |
 | chain       | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| gap\_limit  | integer | The maximum number of empty addresses in a row.                                                                                                                                                                                                                               |
+| gap\_limit  | string  | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation, or 20 if no value was provided.                                                                                                                                       |
 
 #### Response
 
@@ -222,29 +222,20 @@ If we don't already have too many unused addresses, we can use the `get_new_addr
 
 #### Arguments
 
-| Parameter   | Type    | Description                                                                                                                                                                                                                                                                   |
-| ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                      |
-| account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                        |
-| chain       | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| gap\_limit  | integer | The maximum number of empty addresses in a row.                                                                                                                                                                                                                               |
+| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                                 |
+| ----------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                                                                    |
+| account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                                                                      |
+| chain       | string  | `Internal`, or `External`. Defaults to `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
+| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided                                                                                                                                                                                       |
 
 #### Response
 
-| Parameter                          | Type            | Description                                                                                                                                                                                                                                                                 |
-| ---------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| result                             | string          | Returns with value `success` when successful, otherwise returns the error values below                                                                                                                                                                                      |
-| result.new\_address                | object          | Contains details about your new address.                                                                                                                                                                                                                                    |
-| result.address                     | string          | The new address that was generated.                                                                                                                                                                                                                                         |
-| result.details                     | object          | Contains extra contextual information about the reason why allowed is `false`                                                                                                                                                                                               |
-| result.details.address             | boolean         | If reason is `LastAddressNotUsed`, this is the address that should be used before you can get a new address.                                                                                                                                                                |
-| result.details.derivation\_path    | string          | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.                                                                                                                                                                 |
-| result.details.chain               | string          | `External` or `Internal` External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| result.details.balance             | object          | Contains the spendable and unspendable balance for this address                                                                                                                                                                                                             |
-| result.details.balance.spendable   | string(numeric) | Spendable balance for this address                                                                                                                                                                                                                                          |
-| result.details.balance.unspendable | string(numeric) | Unspendable balance for this address (e.g. from unconfirmed incoming transactions)                                                                                                                                                                                          |
+| Parameter    | Type   | Description                                                               |
+| ------------ | ------ | ------------------------------------------------------------------------- |
+| new\_address | object | A standard [NewAddressInfo](/atomicdex/api/v20/#new-address-info) object. |
 
-Other reasons you might not be able to get a new address are:
+Some reasons you might not be able to get a new address are:
 
 *   `EmptyAddressesLimitReached` - Last gap\_limit addresses are still unused.
 *   `AddressLimitReached` - Addresses limit reached. Currently, the limit is [2^31](https://www.wolframalpha.com/input?i=2%5E%2832%29)
@@ -274,29 +265,156 @@ Other reasons you might not be able to get a new address are:
 
   ```json
   {
-    "mmrpc": "2.0",
-    "result": {
-      "allowed": true
-    },
-    "id": null
+      "mmrpc": "2.0",
+      "result": {
+          "new_address": {
+              "address": "RDKyU11wFTa8kYETaDbr4YuJZG8C4e6JUm",
+              "derivation_path": "m/44'/141'/0'/0/3",
+              "chain": "External",
+              "balance": {
+                  "spendable": "0",
+                  "unspendable": "0"
+              }
+          }
+      },
+      "id": null
   }
   ```
+</CollapsibleSection>
 
-  #### Response (success, not allowed)
+## task\_scan\_for\_new\_addresses\_init
+
+#### Arguments
+
+| Parameter   | Type    | Description                                                                                                                           |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string  | The ticker of the coin you want to scan addresses for                                                                                 |
+| account\_id | integer | Optional, HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                  |
+| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided |
+
+#### Response
+
+| Parameter | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| task\_id  | integer | An identifying number which is used to query task status. |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="get_new_address" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "task::scan_for_new_addresses::init",
+    "params": {
+      "coin": "DGB",
+      "account_index": 0,
+      "gap_limit": 20
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
 
   ```json
   {
     "mmrpc": "2.0",
     "result": {
-      "new_address": {
-        "address": "RRqF4cYniMwYs66S4QDUUZ4GJQFQF69rBE",
-        "derivation_path": "m/44'/141'/0'/0/3",
-        "chain": "External",
-        "balance": {
-          "spendable": "0",
-          "unspendable": "0"
+        "task_id": 3
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## task\_scan\_for\_new\_addresses\_status
+
+Use the `task::scan_for_new_addresses::status` method to query the status of a HD address scanning task.
+
+#### Arguments
+
+| Parameter            | Type    | Description                                                                               |
+| -------------------- | ------- | ----------------------------------------------------------------------------------------- |
+| task\_id             | integer | The identifying number returned when initiating the withdrawal process.                   |
+| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
+
+#### Response
+
+| Parameter | Type             | Description                                                                                    |
+| --------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| status    | string           | Status of the task. `Ok`, `InProgress` or `Error`.                                             |
+| details   | string or object | Once complete, a standard [ScanAddressesInfo](/atomicdex/api/v20/#scan-addresses-info) object. |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="get_new_address" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "task::scan_for_new_addresses::status",
+    "params": {
+      "task_id": 3
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success, no new address found)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "status": "Ok",
+        "details": {
+            "account_index": 0,
+            "derivation_path": "m/44'/141'/0'",
+            "new_addresses": []
         }
-      }
+    },
+    "id": null
+  }
+  ```
+
+  #### Response (success, new address found)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "status": "Ok",
+        "details": {
+            "account_index": 0,
+            "derivation_path": "m/44'/141'/0'",
+            "new_addresses": [
+                {
+                    "address": "RXaMK6RtvwPiy67oramBfFXCgMobBofMWv",
+                    "derivation_path": "m/44'/141'/0'/0/3",
+                    "chain": "External",
+                    "balance": {
+                        "spendable": "0",
+                        "unspendable": "0"
+                    }
+                },
+                {
+                    "address": "RJkjq4DeQ5vTNJxa1gHoS4y31ZU9F3aisu",
+                    "derivation_path": "m/44'/141'/0'/0/4",
+                    "chain": "External",
+                    "balance": {
+                        "spendable": "0.444",
+                        "unspendable": "0"
+                    }
+                }
+            ]
+        }
     },
     "id": null
   }
@@ -304,40 +422,62 @@ Other reasons you might not be able to get a new address are:
 </CollapsibleSection>
 export const title = "AtomicDEX: HD Wallets Overview";
 export const description =
-  "This document describes all the methods available to activate coins, generate addresses etc., in Hardware Wallet mode.";
+  "This document provides and overview of functionality availble using the KomoDeFi API in Hierarchical Deterministic (HD) mode.";
 
 # HD Wallets Overview
 
-The AtomicDEX API now is able to activate coins in Iguana and HW modes simultaneously!
+[Hierarchical Deterministic (HD) Wallets](https://atomicdex.io/en/blog/hd-wallet/) are different to other wallets, as they use a key pair management system that allows generating multiple new addresses from a single seed phrase or private key.
 
-For example, you can activate DOC with seed phrase or private key in Iguana mode and also activate MARTY with a Hardware wallet or using a HD account at the same time.
+`Hierarchical` refers to the structure of HD wallets, which resembles a tree, where parent keys can produce children keys, which can produce grandchildren keys, and so on, all from the same root seed.
+`Deterministic` means that the addresses generated in this tree will always be the same for the same root seed phrase.
 
-To get started, [configure and launch the AtomicDEX API](/atomicdex/setup/), then plug in your Trezor hardware wallet device.
+HD wallets offer several advantages over traditional wallets:
 
-## Initialisation and authentication:
+*   Convenience: HD wallets allow users to generate multiple public and private keys from a single seed phrase, making it easier to manage multiple addresses in one place.
+*   Privacy: HD wallets can generate new addresses for each transaction, making it more difficult for malicious parties to track a user’s transaction history.
+*   Access Control: A user who controls the root seed can create new addresses & keypairs which can be shared with a 3rd party, providing limited or regulated access to funds held under specific pairs.
+
+<Note type="info">
+  To use HD wallet functionality with the KomoDeFi API, you must include `"enable_hd":true` in your `MM2.json` file.
+  Hardware wallets like [Trezor](https://trezor.io/) as always in HD mode, and this parameter **must** to be set to `true`.
+</Note>
+
+In some cases, the methods used to interact with HD wallets are the same as those used with legacy wallets. However, there are some differences, which are detailed in the links below.
+
+## Initialisation and authentication (Hardware wallets only):
 
 *   Initialise connection with your Trezor with [task::init\_trezor::init](/atomicdex/api/v20-dev/task_init_trezor/#init)
 *   Check the status of the connecton with [task::init\_trezor::status](/atomicdex/api/v20-dev/task_init_trezor/#status)
 *   Cancel authentication process with [task::init\_trezor::cancel](/atomicdex/api/v20-dev/task_init_trezor/#cancel)
 *   Authenticate using PIN or phrase with [task::init\_trezor::user\_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action)
 
-## UTXO Coin Activation in Hardware Mode:
+## UTXO & QTUM Coin Activation in HD Mode:
+
+As HD mode activation performs address scanning to return addresses and balances for enabled accounts, we use `task` methods because fetching this data can take some time.
+
+<Note>
+  These methods (and others with a `task::` prefix) will be linked to a numeric
+  `task_id` value which is used to query the status or outcome of the task.
+</Note>
 
 *   Use [task::enable\_utxo::init](/atomicdex/api/v20-dev/task_enable_utxo/#init) for UTXO coins like KMD, BTC and DOGE.
 *   Check the activation status with [task::enable\_utxo::status](/atomicdex/api/v20-dev/task_enable_utxo/#status)
-*   Authenticate the activation with [task::enable\_utxo::user\_action](/atomicdex/api/v20-dev/task_enable_utxo/#user-action)
-
-## QTUM Coin Activation in Hardware Mode:
-
+*   Authenticate the activation with [task::enable\_utxo::user\_action](/atomicdex/api/v20-dev/task_enable_utxo/#user-action) (hardware wallet only)
 *   Use [task::enable\_qtum::init](/atomicdex/api/v20-dev/task_enable_qtum/#init) for QTUM Ecosystem coins.
 *   Check the activation status with [task::enable\_qtum::status](/atomicdex/api/v20-dev/task_enable_qtum/#status)
-*   Authenticate the activation with [task::enable\_qtum::user\_action](/atomicdex/api/v20-dev/task_enable_qtum/#user-action)
+*   Authenticate the activation with [task::enable\_qtum::user\_action](/atomicdex/api/v20-dev/task_enable_qtum/#user-action) (hardware wallet only)
 
 ## Withdrawing your Funds:
 
+*   Prepare a transaction with [withdraw (v2)](/atomicdex/api/v20/withdraw/#withdraw)
+*   Broadcast the transaction with [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction/#send-raw-transaction)
 *   Prepare a transaction with [task::withdraw::init](/atomicdex/api/v20-dev/task_withdraw/#init)
 *   Check the status of the transaction preparation with [task::withdraw::status](/atomicdex/api/v20-dev/task_withdraw/#status)
 *   Cancel the transaction preparation with [task::withdraw::cancel](/atomicdex/api/v20-dev/task_withdraw/#cancel)
+
+<DevComment>
+  Not sure if these are still active?
+</DevComment>
 
 ## Viewing Hardware Wallet Coin Balances:
 
@@ -349,77 +489,14 @@ To get started, [configure and launch the AtomicDEX API](/atomicdex/setup/), the
 *   Use [can\_get\_new\_address](/atomicdex/api/v20-dev/hd_address_management/#can-get-new-address) to determine if your current address has been used, or should be updated.
 *   Use [get\_new\_address](/atomicdex/api/v20-dev/hd_address_management/#get-new-address) to generate a new address
 
-<Note>
-  These methods (and others with a `task::` prefix) will be linked to a numeric
-  `task_id` value which is used to query the status or outcome of the task.
-</Note>
+## Viewing Transaction History:
 
-## Details for HwError error type
+*   Transaction history using an `account_id` [my\_tx\_history](/atomicdex/api/v20/my_tx_history/)
+*   Transaction history using an `address_id` [my\_tx\_history](/atomicdex/api/v20/my_tx_history/)
 
-When requesting the status of a task, if an `error_type` of `HwError` is returned, the GUI / User should check the details in `error_data` field to know which action is required (as detailed below).
-
-### FoundUnexpectedDevice
-
-The connected Trezor device has a different pubkey value than what was specified in the `device_pubkey` parameter
-
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "Error",
-    "details": {
-      "error": "Found unexpected device. Please re-initialize Hardware wallet",
-      "error_path": "lib.common_impl.coin_balance.utxo_common.hd_pubkey.hw_ctx",
-      "error_trace": "lib:93] common_impl:46] coin_balance:304] utxo_common:163] hd_pubkey:176] hw_ctx:149]",
-      "error_type": "HwError",
-      "error_data": "FoundUnexpectedDevice"
-    }
-  },
-  "id": null
-}
-```
-
-### FoundMultipleDevices
-
-Multiple Trezor devices are plugged in. Remove the additional devices, and keep the one you want to use plugged in.
-
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "Error",
-    "details": {
-      "error": "Found multiple devices. Please unplug unused devices",
-      "error_path": "init_hw.crypto_ctx.hw_client",
-      "error_trace": "init_hw:151] crypto_ctx:248] crypto_ctx:354] hw_client:152] hw_client:126]",
-      "error_type": "HwError",
-      "error_data": "FoundMultipleDevices"
-    }
-  },
-  "id": null
-}
-```
-
-### NoTrezorDeviceAvailable
-
-No Trezor device detected by the AtomicDEX API. Make sure it is plugged in, or try a different USB cable / port.
-
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "Error",
-    "details": {
-      "error": "No Trezor device available",
-      "error_path": "init_hw.crypto_ctx.hw_ctx.response.usb.libusb",
-      "error_trace": "init_hw:151] crypto_ctx:248] crypto_ctx:354] hw_ctx:120] response:136] usb:46] libusb:195]",
-      "error_type": "HwError",
-      "error_data": "NoTrezorDeviceAvailable"
-    }
-  },
-  "id": null
-}
-```
+<DevComment>
+  # TODO: Add hashlinks to the above methods
+</DevComment>
 export const title = "AtomicDEX API RPC Protocol v2.0 (Dev)";
 export const description = "AtomicDEX API now supports mmrpc 2.0 protocol format, providing a standardized format for requests, successful responses, and error responses.";
 
@@ -734,11 +811,11 @@ The `task::enable_lightning::status` request checks the status of lightning node
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ### Response Parameters
 
-  | Parameter      | Type   | Description                                                                        |
-  | -------------- | ------ | ---------------------------------------------------------------------------------- |
-  | platform\_coin | string | The coin ticker for which the lightning node is being intitialized.                |
-  | address        | string | This node's address for the activated coin.                                        |
-  | balance        | object | A standard [balanceInfos](/atomicdex/api/common_structures/#balance-infos) object. |
+  | Parameter      | Type   | Description                                                         |
+  | -------------- | ------ | ------------------------------------------------------------------- |
+  | platform\_coin | string | The coin ticker for which the lightning node is being intitialized. |
+  | address        | string | This node's address for the activated coin.                         |
+  | balance        | object | A standard [BalanceInfo](/atomicdex/api/v20/#balance-info) object.  |
 
   <Note>
     The unspendable balance for lightning is different to a layer-1 unspendable balance. The channel reserve is part of the unspendable balance in lightning - the user will get this part of the balance on chain when closing the channel, but it can't be spent on layer 2 (lightning) because it's part of the security mechanism to prevent channel breaches and ensure that both parties fulfill their obligations within the channel.
@@ -3100,6 +3177,164 @@ Use the `task::account_balance::cancel` method to cancel an account balance requ
   }
   ```
 </CollapsibleSection>
+export const title = "AtomicDEX: HD Account Management Tasks";
+export const description = "The methods in this document allow tracking of balances across multiple addresses under a specified account index.";
+
+# task\_create\_new\_account
+
+If you have activated a coin with the [task::enable\_utxo::init](/atomicdex/api/v20-dev/task_enable_utxo/#init) or [task::enable\_qtum::init](/atomicdex/api/v20-dev/task_enable_qtum/#init) and are using `HD Mode`, your funds may be spread across a range of addresses under a specified account index. The methods below will return the combined balance of your account, detailing the balance for each active account address.
+
+## init {{label : 'init', tag : 'API-v2'}}
+
+Use the `task::create_new_account::init` method to initialise a HD account.
+
+#### Arguments
+
+| Parameter   | Type   | Description                                                                                                                             |
+| ----------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string | Ticker of coin you would like to initialise a HD account for.                                                                           |
+| account\_id | string | Optional. If not defined, will increment to the next unused account id in the wallet.                                                   |
+| scan        | string | Optional. If `true`, will scan the account for funded addresses. Defaults to `true`.                                                    |
+| gap\_limit  | string | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation, or 20 if no value was provided. |
+
+#### Response
+
+| Parameter | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| task\_id  | integer | An identifying number which is used to query task status. |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="init" tag="POST" label="task::create_new_account::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "task::create_new_account::init",
+    "params": {
+      "coin": "KMD",
+      "account_id": 77,
+      "scan": true,
+      "gap_limit": 20
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (ready, successful)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "task_id": 6
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## status {{label : 'status', tag : 'API-v2'}}
+
+Use the `task::create_new_account::status` method to query the status of a HD account creation task.
+
+#### Arguments
+
+| Parameter            | Type    | Description                                                                               |
+| -------------------- | ------- | ----------------------------------------------------------------------------------------- |
+| task\_id             | integer | The identifying number returned when initiating the withdrawal process.                   |
+| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
+
+#### Response
+
+| Parameter | Type             | Description                                                                                                                                                      |
+| --------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| status    | string           | Status of the task. `Ok`, `InProgress` or `Error`.                                                                                                               |
+| details   | string or object | If in progress, either `Preparing` or `RequestingAccountBalance`. Once complete, a standard [WalletAccountInfo](/atomicdex/api/v20/#wallet-account-info) object. |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="status" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "task::create_new_account::status",
+    "params": {
+      "task_id": 1
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (ready, successful)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "status": "Ok",
+          "details": {
+              "account_index": 77,
+              "derivation_path": "m/44'/141'/77'",
+              "total_balance": {
+                  "spendable": "7.777",
+                  "unspendable": "0"
+              },
+              "addresses": [
+                  {
+                      "address": "RMsnNdVfZbxWwDxJafc6scbaN1xYVoR7Gx",
+                      "derivation_path": "m/44'/141'/77'/0/4",
+                      "chain": "External",
+                      "balance": {
+                          "spendable": "0",
+                          "unspendable": "0"
+                      }
+                  },
+                  {
+                      "address": "R9roM4acnrrp1BL73MXd9EWdF5biRcSJ5X",
+                      "derivation_path": "m/44'/141'/77'/0/5",
+                      "chain": "External",
+                      "balance": {
+                          "spendable": "0",
+                          "unspendable": "0"
+                      }
+                  },
+                  {
+                      "address": "RLNu8gszQ8ENUrY3VSyBS2714CNVwn1f7P",
+                      "derivation_path": "m/44'/141'/77'/0/7",
+                      "chain": "External",
+                      "balance": {
+                          "spendable": "7.777",
+                          "unspendable": "0"
+                      }
+                  }
+              ]
+          }
+      },
+      "id": null
+  }
+  ```
+
+  #### Response (in progress)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "status": "InProgress",
+        "details": "Preparing"
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
 export const title = "KomoDeFi: QTUM Activation Tasks";
 export const description =
   "The methods in this document allow activation of QTUM.";
@@ -3339,7 +3574,7 @@ UTXO coins are activated using this method. For QTUM coins, refer to [task::enab
 
 #### 📌 Examples
 
-#### Command
+#### Activation in Trezor mode
 
 <CodeGroup title="" tag="POST" label="task::enable_utxo::init" mm2MethodDecorate="true">
   ```json
@@ -3589,7 +3824,7 @@ Possible Error Cases:
 
 *   `TaskTimedOut` - Timed out waiting for coin activation, connecting to the device trezor or for user to confirm pubkey)
 *   `CoinCreationError` - Error during activation. E.g. incorrect or inactive electrum servers.
-*   `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/atomicdex/api/v20-dev/hd_wallets_overview/#details-for-hw-error-error-type) for more info.
+*   `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/atomicdex/api/v20-dev/task_init_trezor/#details-for-hw-error-error-type) for more info.
 
 ## user\_action {{label : 'task::enable_utxo::user_action', tag : 'API-v2'}}
 
@@ -3644,621 +3879,23 @@ If the `task::enable_utxo::status` returns `UserActionRequired`, we need to use 
   }
   ```
 </CollapsibleSection>
-export const title = "AtomicDEX: ZHTLC Coin Methods";
-export const description =
-  "The methods in this document allow activation and management of ZHTLC coins like ARRR, ZOMBIE.";
-
-# ZHTLC Coin Methods
-
-ZHTLC coins, like Pirate (ARRR) and the test coin ZOMBIE take a little longer to enable, and use a new two step method to enable. Activation can take a little while the first time, as we need to download some block cache data, and build a wallet database. Subsequent enabling will be faster, but still take a bit longer than other coins. The second step for activation is optional, but allows us to check the status of the activation process.
-
-To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods:
-
-*   Generate a transaction with `task::withdraw::init`
-*   Query its status with `task::withdraw::status`
-*   Cancel generating the transaction with `task::withdraw::cancel`
-
-## Initialize Z Coin Activation {{label : 'task::enable_z_coin::init', tag : 'API-v2'}}
-
-<Note>
-  To enable Z coins you also need to [install some Zcash
-  Params](https://forum.komodoplatform.com/t/installing-zcash-params/603)
-</Note>
-
-#### Arguments
-
-| Structure          | Type   | Description                                                                                              |
-| ------------------ | ------ | -------------------------------------------------------------------------------------------------------- |
-| ticker             | string | Ticker of coin to activate                                                                               |
-| activation\_params | object | A standard [ActivationRpcData](/atomicdex/api/common_structures/activation/#activation-rpc-data) object. |
-
-#### Response
-
-| Structure | Type    | Description                                               |
-| --------- | ------- | --------------------------------------------------------- |
-| task\_id  | integer | An identifying number which is used to query task status. |
-
-#### 📌 Examples
-
-#### Enable Z coin without any optional parameters
-
-<CodeGroup title="Initialize Z Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "method": "task::enable_z_coin::init",
-    "mmrpc": "2.0",
-    "params": {
-      "ticker": "ZOMBIE",
-      "activation_params": {
-        "mode": {
-          "rpc": "Light",
-          "rpc_data": {
-            "electrum_servers": [
-              {
-                "url": "zombie.dragonhound.info:10033"
-              }
-            ],
-            "light_wallet_d_servers": [
-              "http://zombie.dragonhound.info:443"
-            ]
-          }
-        },
-        "zcash_params_path": "/home/username/path_to/.zcash-params",
-        "scan_blocks_per_iteration": 100,
-        "scan_interval_ms": 200
-      }
-    }
-  }
-  ```
-</CodeGroup>
-
-#### Sync from block 2528700, with custom `.zcash-params` path and scan params
-
-<CodeGroup title="Initialize Z Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "method": "task::enable_z_coin::init",
-    "mmrpc": "2.0",
-    "params": {
-      "ticker": "ZOMBIE",
-      "activation_params": {
-        "mode": {
-          "rpc": "Light",
-          "rpc_data": {
-            "electrum_servers": [
-              {
-                "url": "zombie.dragonhound.info:10033"
-              }
-            ],
-            "light_wallet_d_servers": [
-              "http://zombie.dragonhound.info:443"
-            ],
-            "sync_params": {
-              "height": 2528700
-            }
-          }
-        },
-        "zcash_params_path": "/home/username/path_to/.zcash-params",
-        "scan_blocks_per_iteration": 100,
-        "scan_interval_ms": 200
-      }
-    }
-  }
-  ```
-</CodeGroup>
-
-#### Sync from sapling activation height (earliest)
-
-The Z coin lightwallet client only supports blocks that are post-sapling. The sapling activation height for Z coins can be found in the [coins file](https://github.com/KomodoPlatform/coins/blob/master/coins)
-
-<CodeGroup title="Initialize Z Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "method": "task::enable_z_coin::init",
-    "mmrpc": "2.0",
-    "params": {
-      "ticker": "ZOMBIE",
-      "activation_params": {
-        "mode": {
-          "rpc": "Light",
-          "rpc_data": {
-            "electrum_servers": [
-              {
-                "url": "zombie.dragonhound.info:10033"
-              }
-            ],
-            "light_wallet_d_servers": [
-              "http://zombie.dragonhound.info:443"
-            ],
-            "sync_params": "earliest"
-          }
-        },
-        "zcash_params_path": "/home/username/path_to/.zcash-params",
-        "scan_blocks_per_iteration": 100,
-        "scan_interval_ms": 200
-      }
-    }
-  }
-  ```
-</CodeGroup>
-
-#### Using websockets to sync from [Proof of Keys Day](https://hackernoon.com/not-your-keys-not-your-bitcoin-jan3bitcoin-z6k3ktb), 2023.
-
-<CodeGroup title="Initialize Z Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "method": "task::enable_z_coin::init",
-    "mmrpc": "2.0",
-    "params": {
-      "ticker": "ZOMBIE",
-      "activation_params": {
-        "mode": {
-          "rpc": "Light",
-          "rpc_data": {
-            "electrum_servers": [
-              {
-                "protocol": "SSL",
-                "url": "zombie.dragonhound.info:20133",
-                "ws_url": "zombie.dragonhound.info:30059"
-              }
-            ],
-            "light_wallet_d_servers": [
-              "http://zombie.dragonhound.info:443"
-            ],
-            "sync_params": {
-              "date": 1672704000
-            }
-          }
-        }
-      }
-    }
-  }
-  ```
-</CodeGroup>
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "task_id": 0
-    },
-    "id": null
-  }
-  ```
-</CollapsibleSection>
-
-## Activation Status {{label : 'task::enable_z_coin::status', tag : 'API-v2'}}
-
-Z coins need to build sync a local block cache and wallet database before they can be used. Using `task_id` as an input, this method will return the current status of the activation process.
-
-#### Arguments
-
-| Parameter            | Type    | Description                                                                              |
-| -------------------- | ------- | ---------------------------------------------------------------------------------------- |
-| task\_id             | integer | The identifying number returned when initiating the initialisation process.              |
-| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true` |
-
-#### Response
-
-| Structure | Type   | Description                                                                                                           |
-| --------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
-| status    | string | A short indication of how the enabling is progressing.                                                                |
-| details   | object | Depending on the state of enabling progress, this will contain different information as shown in the responses below. |
-
-#### 📌 Examples
-
-#### Status of Z coin activation
-
-<CodeGroup title="Activation Status" tag="POST" label="task::enable_z_coin::status" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "method": "task::enable_z_coin::status",
-    "mmrpc": "2.0",
-    "params": {
-      "task_id": 0,
-      "forget_if_finished": false
-    }
-  }
-  ```
-</CodeGroup>
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (ActivatingCoin - enabling has started)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "status": "InProgress",
-      "details": "ActivatingCoin"
-    },
-    "id": null
-  }
-  ```
-
-  #### Response (UpdatingBlocksCache)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "status": "InProgress",
-      "details": {
-        "UpdatingBlocksCache": {
-          "current_scanned_block": 265930,
-          "latest_block": 269656
-        }
-      }
-    },
-    "id": null
-  }
-  ```
-
-  #### Response (BuildingWalletDb)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "status": "InProgress",
-      "details": {
-        "BuildingWalletDb": {
-          "current_scanned_block": 265311,
-          "latest_block": 269656
-        }
-      }
-    },
-  "id": null
-  }
-  ```
-
-  #### Response (CoinCreationError - no Zcash Params)
-
-  ```json
-  {
-  	"error": "Error on platform coin ZOMBIE creation: ZCashParamsNotFound",
-  	"error_path": "lib.z_coin_activation.z_coin",
-  	"error_trace": "lib:104] z_coin_activation:218] z_coin:1007]",
-  	"error_type": "CoinCreationError",
-  	"error_data": {
-  		"ticker": "ZOMBIE",
-  		"error": "ZCashParamsNotFound"
-  	}
-  }
-  ```
-
-  #### Response (error - NoSuchTask)
-
-  You'll see this if the task number does not exist, or the task has already completed.
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "No such task '1'",
-    "error_path": "init_standalone_coin",
-    "error_trace": "init_standalone_coin:119]",
-    "error_type": "NoSuchTask",
-    "error_data": 1,
-    "id": null
-  }
-  ```
-
-  #### Response (error - InvalidRequest)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Error parsing request: invalid value: integer `-205`, expected u64",
-    "error_path": "dispatcher",
-    "error_trace": "dispatcher:109]",
-    "error_type": "InvalidRequest",
-    "error_data": "invalid value: integer `-205`, expected u64",
-    "id": 42
-  }
-  ```
-
-  #### Response (Enabling complete)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "status": "Ok",
-      "details": {
-        "ticker": "ZOMBIE",
-        "current_block": 269657,
-        "wallet_balance": {
-          "wallet_type": "Iguana",
-          "address": "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj",
-          "balance": {
-            "spendable": "29.99989008",
-            "unspendable": "0"
-          }
-        }
-      }
-    },
-    "id": null
-  }
-  ```
-
-  #### Response (no Zcash Params)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "status": "Error",
-      "details": {
-        "error": "Error on platform coin ZOMBIE creation: ZCashParamsNotFound",
-        "error_path": "lib.z_coin_activation.z_coin",
-        "error_trace": "lib:103] z_coin_activation:192] z_coin:761]",
-        "error_type": "CoinCreationError",
-        "error_data": {
-          "ticker": "ZOMBIE",
-          "error": "ZCashParamsNotFound"
-        }
-      }
-    },
-    "id": null
-  }
-  ```
-
-  #### Response (error - no such task)
-
-  You'll see this if the task number does not exist, or the task has already completed.
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "No such task '1'",
-    "error_path": "init_standalone_coin",
-    "error_trace": "init_standalone_coin:119]",
-    "error_type": "NoSuchTask",
-    "error_data": 1,
-    "id": null
-  }
-  ```
-</CollapsibleSection>
-
-## Cancel Initialization {{label : 'task::enable_z_coin::cancel', tag : 'API-v2'}}
-
-If you want to cancel the enabling process before it has completed, you can use this method.
-
-#### Arguments
-
-| Structure | Type    | Description                                                           |
-| --------- | ------- | --------------------------------------------------------------------- |
-| task\_id  | integer | The identifying number returned when initiating the enabling process. |
-
-#### Response
-
-| Structure    | Type   | Description                                                    |
-| ------------ | ------ | -------------------------------------------------------------- |
-| result       | string | Indicates task cancellation was succesful.                     |
-| error        | string | An error message to explain what went wrong.                   |
-| error\_path  | string | An indicator of the class or function which reurned the error. |
-| error\_trace | string | An indicator of where in the source code the error was thrown. |
-| error\_type  | string | An enumerated value for the returned error.                    |
-| error\_data  | string | The input task ID which resulted in the error.                 |
-
-#### 📌 Examples
-
-#### Command
-
-<CodeGroup title="Cancel Initialization" tag="POST" label="task::enable_z_coin::cancel" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "method": "task::enable_z_coin::cancel",
-    "mmrpc": "2.0",
-    "params": {
-      "task_id": "<TASK_ID>"
-    }
-  }
-  ```
-</CodeGroup>
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (success)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": "success",
-    "id": null
-  }
-  ```
-
-  #### Response (success - already finished)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Task is finished already",
-    "error_path": "init_standalone_coin.manager",
-    "error_trace": "init_standalone_coin:144] manager:101]",
-    "error_type": "TaskFinished",
-    "error_data": 0,
-    "id": null
-  }
-  ```
-
-  #### Response (error - no such task)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "No such task '1'",
-    "error_path": "init_standalone_coin",
-    "error_trace": "init_standalone_coin:119]",
-    "error_type": "NoSuchTask",
-    "error_data": 1,
-    "id": null
-  }
-  ```
-</CollapsibleSection>
-
-## Z Coin Transaction History {{label : 'z_coin_tx_history', tag : 'API-v2'}}
-
-To get the transaction history for ZHTLC coins, you need to use this special method - the [v2 my\_tx\_history](/atomicdex/api/v20/my_tx_history/) and [legacy my\_tx\_history](/atomicdex/api/legacy/my_tx_history/) methods are not compatible with ZHTLC coins. Currently trasaction memos will not be displayed in output, though they can be added to outgoing transactions with the [task::withdraw](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods.
-
-#### Arguments
-
-| Structure                  | Type    | Description                                                                                                                                                                                                   |
-| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                       | string  | Ticker of the coin to get history for.                                                                                                                                                                        |
-| limit                      | integer | Optional. Limits the number of returned transactions. Defaults to `10`. Ignored if `max = true`.                                                                                                              |
-| paging\_options.FromId     | string  | Optional. AtomicDEX API will skip records until it reaches this ID, skipping the from\_id as well; track the internal\_id of the last displayed transaction to find the value of this field for the next page |
-| paging\_options.PageNumber | integer | Optional. AtomicDEX API will return limit swaps from the selected page. Ignored if `FromId` .                                                                                                                 |
-
-#### Response
-
-| Structure      | Type             | Description                                                                                                                                                                               |
-| -------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| transactions   | array of objects | transactions data                                                                                                                                                                         |
-| from\_id       | string           | the from\_id specified in the request; this value is null if from\_id was not set                                                                                                         |
-| skipped        | number           | the number of skipped records (i.e. the position of `from_id` in the list + 1); this value is 0 if `from_id` was not set                                                                  |
-| limit          | number           | the limit that was set in the request; note that the actual number of transactions can differ from the specified limit (e.g. on the last page)                                            |
-| total          | number           | the total number of transactions available                                                                                                                                                |
-| page\_number   | number           | the page\_number that was set in the request                                                                                                                                              |
-| total\_pages   | number           | total pages available with the selected limit                                                                                                                                             |
-| current\_block | number           | the number of the latest block of coin blockchain                                                                                                                                         |
-| sync\_status   | object           | A standard [SyncStatus](/atomicdex/api/common_structures/#sync-status/) object. Provides the information that helps to track the progress of transaction history preloading at background |
-
-#### 📌 Examples
-
-<CodeGroup title="Z Coin Transaction History" tag="POST" label="z_coin_tx_history" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "method": "z_coin_tx_history",
-    "mmrpc": "2.0",
-    "params": {
-      "coin": "ARRR",
-      "limit": 2,
-      "paging_options": {
-        "PageNumber": 2
-      }
-    }
-  }
-  ```
-</CodeGroup>
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (success)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "coin": "ARRR",
-      "target": {
-        "type": "iguana"
-      },
-      "current_block": 2228711,
-      "transactions": [
-        {
-          "tx_hash": "b7e8307778d7d61ebb2ebc7a130661ef6fbeb66ee5d15d0f84a3bfce3ebad5a1",
-          "from": [
-            "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj"
-          ],
-          "to": [
-            "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj"
-          ],
-          "spent_by_me": "17.65495855",
-          "received_by_me": "17.65494855",
-          "my_balance_change": "-0.00001000",
-          "block_height": 2224011,
-          "confirmations": 4701,
-          "timestamp": 1673018341,
-          "transaction_fee": "0.00001",
-          "coin": "ARRR",
-          "internal_id": 26
-        },
-        {
-          "tx_hash": "967deb0a8cbce0c1f0ba20deee7a955e1a82bd1173bb3dd15cc95f03738ca65c",
-          "from": [
-            "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj"
-          ],
-          "to": [
-            "zs10ah73fpudlecg678jmqjdyeym5fgccvjytqry533rq2w04dekenxe8ekt349s3lelmlss3j4u9q",
-            "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj"
-          ],
-          "spent_by_me": "20.65496855",
-          "received_by_me": "17.65495855",
-          "my_balance_change": "-3.00001000",
-          "block_height": 2196913,
-          "confirmations": 31799,
-          "timestamp": 1671100306,
-          "transaction_fee": "0.00001",
-          "coin": "ARRR",
-          "internal_id": 25
-        }
-      ],
-      "sync_status": {
-        "state": "Finished"
-      },
-      "limit": 2,
-      "skipped": 2,
-      "total": 28,
-      "total_pages": 14,
-      "paging_options": {
-        "PageNumber": 2
-      }
-    },
-    "id": null
-  }
-  ```
-
-  #### Response (error - coin not supported)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "TKL",
-    "error_path": "my_tx_history_v2",
-    "error_trace": "my_tx_history_v2:523]",
-    "error_type": "NotSupportedFor",
-    "error_data": "TKL",
-    "id": null
-  }
-  ```
-
-  #### Response (error - coin not active)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "ZOMBIE",
-    "error_path": "my_tx_history_v2.lp_coins",
-    "error_trace": "my_tx_history_v2:521] lp_coins:2849]",
-    "error_type": "CoinIsNotActive",
-    "error_data": "ZOMBIE",
-    "id": null
-  }
-  ```
-</CollapsibleSection>
-export const title = "AtomicDEX: Trezor Initialisation";
-export const description =
-  "Prepare your Trezor device for use in the AtomicDEX API, and authenticate using your PIN or phrase.";
+export const title = "Komodo DeFi Framework: Trezor Initialisation";
+export const description = "Prepare your Trezor device for use in the KomoDeFi API, and authenticate using your PIN or phrase.";
 
 import trezorpin from "@/public/images/api-images/trezor_pin.png";
 
 # Trezor Initialisation
 
-The methods below prepare your Trezor device for use within the AtomicDEX API. Once completed, you can authenticate using your PIN or phrase with [task::init\_trezor::user\_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action).
+The methods below prepare your Trezor device for use within the KomoDeFi API. Once completed, you can authenticate using your PIN or phrase with [task::init\_trezor::user\_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action).
+
+<Note>
+  Methods with a `task::` prefix will be linked to a numeric
+  `task_id` value which can be used to query the status or outcome of a task.
+</Note>
 
 ## init {{label : 'task::init_trezor::init', tag : 'API-v2'}}
 
-Before using this method, launch the AtomicDEX API, and plug in your Trezor.
+Before using this method, launch the KomoDeFi API, and plug in your Trezor.
 
 #### Arguments
 
@@ -4364,7 +4001,7 @@ After running the `task::init_trezor::init` method, we can query the status of d
 
   *   `Initializing` - This is the normal task state. It does not require any action from the user.
 
-  *   `WaitingForTrezorToConnect` - The AtomicDEX API is waiting for the user to plugin a Trezor device.
+  *   `WaitingForTrezorToConnect` - The KomoDeFi API is waiting for the user to plugin a Trezor device.
 
   ```json
   {
@@ -4377,7 +4014,7 @@ After running the `task::init_trezor::init` method, we can query the status of d
   }
   ```
 
-  *   `FollowHwDeviceInstructions` - The AtomicDEX API is waiting for the user to follow instructions displayed on the device (e.g. clicking a button to confirm).
+  *   `FollowHwDeviceInstructions` - The KomoDeFi API is waiting for the user to follow instructions displayed on the device (e.g. clicking a button to confirm).
 
   ```json
   {
@@ -4482,7 +4119,7 @@ After running the `task::init_trezor::init` method, we can query the status of d
   }
   ```
 
-  *   `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/atomicdex/api/v20-dev/hd_wallets_overview/#details-for-hw-error-error-type) for more info.
+  *   `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/atomicdex/api/v20-dev/task_init_trezor/#details-for-hw-error-error-type) for more info.
 </CollapsibleSection>
 
 ## cancel {{label : 'task::init_trezor::cancel', tag : 'API-v2'}}
@@ -4646,6 +4283,73 @@ When you see the pin grid on your device, or it asks for a passphrase word, use 
   }
   ```
 </CollapsibleSection>
+
+## Details for `HwError` error type
+
+When requesting the status of a task, if an `error_type` of `HwError` is returned, the GUI / User should check the details in `error_data` field to know which action is required (as detailed below).
+
+### FoundUnexpectedDevice
+
+The connected Trezor device has a different pubkey value than what was specified in the `device_pubkey` parameter
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "status": "Error",
+    "details": {
+      "error": "Found unexpected device. Please re-initialize Hardware wallet",
+      "error_path": "lib.common_impl.coin_balance.utxo_common.hd_pubkey.hw_ctx",
+      "error_trace": "lib:93] common_impl:46] coin_balance:304] utxo_common:163] hd_pubkey:176] hw_ctx:149]",
+      "error_type": "HwError",
+      "error_data": "FoundUnexpectedDevice"
+    }
+  },
+  "id": null
+}
+```
+
+### FoundMultipleDevices
+
+Multiple Trezor devices are plugged in. Remove the additional devices, and keep the one you want to use plugged in.
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "status": "Error",
+    "details": {
+      "error": "Found multiple devices. Please unplug unused devices",
+      "error_path": "init_hw.crypto_ctx.hw_client",
+      "error_trace": "init_hw:151] crypto_ctx:248] crypto_ctx:354] hw_client:152] hw_client:126]",
+      "error_type": "HwError",
+      "error_data": "FoundMultipleDevices"
+    }
+  },
+  "id": null
+}
+```
+
+### NoTrezorDeviceAvailable
+
+No Trezor device detected by the KomoDeFi API. Make sure it is plugged in, or try a different USB cable / port.
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "status": "Error",
+    "details": {
+      "error": "No Trezor device available",
+      "error_path": "init_hw.crypto_ctx.hw_ctx.response.usb.libusb",
+      "error_trace": "init_hw:151] crypto_ctx:248] crypto_ctx:354] hw_ctx:120] response:136] usb:46] libusb:195]",
+      "error_type": "HwError",
+      "error_data": "NoTrezorDeviceAvailable"
+    }
+  },
+  "id": null
+}
+```
 export const title = "AtomicDEX: Withdraw Tasks";
 export const description = "The methods in this document allow withdrawal of coins from AtomicDEX.";
 
@@ -4655,7 +4359,7 @@ export const description = "The methods in this document allow withdrawal of coi
 
 The `task::withdraw::init` method generates, signs, and returns a transaction that transfers the `amount` of `coin` to the address indicated in the `to` argument. The status of this method can be queried via the [withdraw\_status](/atomicdex/api/v20-dev/task_withdraw/#status) method.
 
-It will return the transaction hex (via `task::withdraw::status`), which then needs to be broadcast with the [sendrawtransaction](/atomicdex/api/legacy/send_raw_transaction/) to complete the withdrawal. This method is uses the same input fields as the [standard v2 withdraw method](/atomicdex/api/v20/withdraw/), with additional optional fields to specify the `from` address when using a hardware or HD wallet. There are two way to indicate which HW/HD address to send funds from:
+It will return the transaction hex (via `task::withdraw::status`), which then needs to be broadcast with the [sendrawtransaction](/atomicdex/api/legacy/send_raw_transaction/) to complete the withdrawal. This method is uses the same input fields as the [standard v2 withdraw method](/atomicdex/api/v20/withdraw/), with additional optional fields to specify the `from` address when using a hardware or HD wallet. There are two way to indicate which HD address to send funds from:
 
 *   Using `derivation_path` as a single input. E.g `m/44'/20'/0'/0/2`
 *   Using `account_id` (0), `chain` (External) & `address_id` (2) inputs. The bracketed values are the equavalent of the derivation path above.
@@ -4669,21 +4373,21 @@ To cancel the transaction generation, use the [withdraw\_cancel](/atomicdex/api/
 
 ### Arguments
 
-| Structure             | Type             | Description                                                                                                                                                                                                                                                                                                 |
-| --------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                  | string           | The name of the coin the user desires to withdraw                                                                                                                                                                                                                                                           |
-| to                    | string           | Coins are withdrawn to this address                                                                                                                                                                                                                                                                         |
-| amount                | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                                                                                                                                                                                                                            |
-| memo                  | string           | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.                                                                                                                                                                                                                     |
-| from                  | string           | Optional, used only for transactions using a hardware wallet. For more information, see the [Trezor Integration guide](/atomicdex/api/v20-dev/task_init_trezor/)                                                                                                                                            |
-| from.derivation\_path | string           | Optional, HW/HD wallets only. Follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID`                                                                                                                                                                                                              |
-| from.account\_id      | integer          | Optional, HW/HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HW/HD wallet                                                                                                                                                                                  |
-| from.chain            | string           | Optional, HW/HD wallets only. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| from.address\_id      | integer          | Optional, HW/HD wallets only. Check the output from coin activation to find the ID of an address with balance.                                                                                                                                                                                              |
-| max                   | bool             | Optional. Withdraw the maximum available amount. Defaults to `false`                                                                                                                                                                                                                                        |
-| fee                   | object           | Optional. Used only to set a custom fee, otherwise fee value will be derived from a deamon's `estimatefee` (or similar) RPC method                                                                                                                                                                          |
-| fee.type              | string           | Type of transaction fee; possible values: `UtxoFixed` or `UtxoPerKbyte`                                                                                                                                                                                                                                     |
-| fee.amount            | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte)                                                                                                                                                                   |
+| Structure             | Type             | Description                                                                                                                                                                                                                                                                                                                      |
+| --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                  | string           | The name of the coin the user desires to withdraw                                                                                                                                                                                                                                                                                |
+| to                    | string           | Coins are withdrawn to this address                                                                                                                                                                                                                                                                                              |
+| amount                | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                                                                                                                                                                                                                                                 |
+| memo                  | string           | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.                                                                                                                                                                                                                                          |
+| from                  | string           | Optional, used only for transactions using a hardware wallet. For more information, see the [Trezor Integration guide](/atomicdex/api/v20-dev/task_init_trezor/)                                                                                                                                                                 |
+| from.derivation\_path | string           | Optional, HD wallets only. Follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID`                                                                                                                                                                                                                                      |
+| from.account\_id      | integer          | Optional, HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                                                                                                                                                                                                             |
+| from.chain            | string           | Optional, HD wallets only. `Internal`, or `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
+| from.address\_id      | integer          | Optional, HD wallets only. Check the output from coin activation to find the ID of an address with balance.                                                                                                                                                                                                                      |
+| max                   | bool             | Optional. Withdraw the maximum available amount. Defaults to `false`                                                                                                                                                                                                                                                             |
+| fee                   | object           | Optional. Used only to set a custom fee, otherwise fee value will be derived from a deamon's `estimatefee` (or similar) RPC method                                                                                                                                                                                               |
+| fee.type              | string           | Type of transaction fee; possible values: `UtxoFixed` or `UtxoPerKbyte`                                                                                                                                                                                                                                                          |
+| fee.amount            | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte)                                                                                                                                                                                        |
 
 #### Response
 
@@ -4773,7 +4477,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/atomicdex/api/
   ```
 </CodeGroup>
 
-#### Command (HW/HD wallet: derivation path option)
+#### Command (HD wallet: derivation path option)
 
 <CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
@@ -4793,7 +4497,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/atomicdex/api/
   ```
 </CodeGroup>
 
-#### Command (HW/HD wallet: account\_id, chain & address\_id option)
+#### Command (HD wallet: account\_id, chain & address\_id option)
 
 <CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
@@ -5074,6 +4778,626 @@ Use the `task::withdraw::cancel` method to cancel the withdrawal preparation tas
     "error_trace": "init_withdraw:94] manager:104]",
     "error_type": "TaskFinished",
     "error_data": 4,
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+export const title = "AtomicDEX: ZHTLC Coin Activation";
+export const description =
+  "The methods in this document allow activation of ZHTLC coins like ARRR & ZOMBIE.";
+
+# Initialize ZHTLC Coin Activation {{label : 'task::enable_z_coin::init', tag : 'API-v2'}}
+
+<Note>
+  To enable Z coins you also need to [install some Zcash
+  Params](https://forum.komodoplatform.com/t/installing-zcash-params/603)
+</Note>
+
+#### Arguments
+
+| Structure          | Type   | Description                                                                                              |
+| ------------------ | ------ | -------------------------------------------------------------------------------------------------------- |
+| ticker             | string | Ticker of coin to activate                                                                               |
+| activation\_params | object | A standard [ActivationRpcData](/atomicdex/api/common_structures/activation/#activation-rpc-data) object. |
+
+#### Response
+
+| Structure | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| task\_id  | integer | An identifying number which is used to query task status. |
+
+#### 📌 Examples
+
+#### Enable Z coin without any optional parameters
+
+<CodeGroup title="Initialize ZHTLC Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::init",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ZOMBIE",
+      "activation_params": {
+        "mode": {
+          "rpc": "Light",
+          "rpc_data": {
+            "electrum_servers": [
+              {
+                "url": "zombie.dragonhound.info:10033"
+              }
+            ],
+            "light_wallet_d_servers": [
+              "http://zombie.dragonhound.info:443"
+            ]
+          }
+        },
+        "zcash_params_path": "/home/username/path_to/.zcash-params",
+        "scan_blocks_per_iteration": 100,
+        "scan_interval_ms": 200
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Sync from block 2528700, with custom `.zcash-params` path and scan params
+
+<CodeGroup title="Initialize ZHTLC Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::init",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ZOMBIE",
+      "activation_params": {
+        "mode": {
+          "rpc": "Light",
+          "rpc_data": {
+            "electrum_servers": [
+              {
+                "url": "zombie.dragonhound.info:10033"
+              }
+            ],
+            "light_wallet_d_servers": [
+              "http://zombie.dragonhound.info:443"
+            ],
+            "sync_params": {
+              "height": 2528700
+            }
+          }
+        },
+        "zcash_params_path": "/home/username/path_to/.zcash-params",
+        "scan_blocks_per_iteration": 100,
+        "scan_interval_ms": 200
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Sync from sapling activation height (earliest)
+
+The Z coin lightwallet client only supports blocks that are post-sapling. The sapling activation height for Z coins can be found in the [coins file](https://github.com/KomodoPlatform/coins/blob/master/coins)
+
+<CodeGroup title="Initialize ZHTLC Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::init",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ZOMBIE",
+      "activation_params": {
+        "mode": {
+          "rpc": "Light",
+          "rpc_data": {
+            "electrum_servers": [
+              {
+                "url": "zombie.dragonhound.info:10033"
+              }
+            ],
+            "light_wallet_d_servers": [
+              "http://zombie.dragonhound.info:443"
+            ],
+            "sync_params": "earliest"
+          }
+        },
+        "zcash_params_path": "/home/username/path_to/.zcash-params",
+        "scan_blocks_per_iteration": 100,
+        "scan_interval_ms": 200
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Using websockets to sync from [Proof of Keys Day](https://hackernoon.com/not-your-keys-not-your-bitcoin-jan3bitcoin-z6k3ktb), 2023.
+
+<CodeGroup title="Initialize ZHTLC Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::init",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ZOMBIE",
+      "activation_params": {
+        "mode": {
+          "rpc": "Light",
+          "rpc_data": {
+            "electrum_servers": [
+              {
+                "protocol": "SSL",
+                "url": "zombie.dragonhound.info:20133",
+                "ws_url": "zombie.dragonhound.info:30059"
+              }
+            ],
+            "light_wallet_d_servers": [
+              "http://zombie.dragonhound.info:443"
+            ],
+            "sync_params": {
+              "date": 1672704000
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "task_id": 0
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## Activation Status {{label : 'task::enable_z_coin::status', tag : 'API-v2'}}
+
+Z coins need to build sync a local block cache and wallet database before they can be used. Using `task_id` as an input, this method will return the current status of the activation process.
+
+#### Arguments
+
+| Parameter            | Type    | Description                                                                              |
+| -------------------- | ------- | ---------------------------------------------------------------------------------------- |
+| task\_id             | integer | The identifying number returned when initiating the initialisation process.              |
+| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true` |
+
+#### Response
+
+| Structure | Type   | Description                                                                                                           |
+| --------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| status    | string | A short indication of how the enabling is progressing.                                                                |
+| details   | object | Depending on the state of enabling progress, this will contain different information as shown in the responses below. |
+
+#### 📌 Examples
+
+#### Status of Z coin activation
+
+<CodeGroup title="Activation Status" tag="POST" label="task::enable_z_coin::status" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::status",
+    "mmrpc": "2.0",
+    "params": {
+      "task_id": 0,
+      "forget_if_finished": false
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (ActivatingCoin - enabling has started)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "InProgress",
+      "details": "ActivatingCoin"
+    },
+    "id": null
+  }
+  ```
+
+  #### Response (UpdatingBlocksCache)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "InProgress",
+      "details": {
+        "UpdatingBlocksCache": {
+          "current_scanned_block": 265930,
+          "latest_block": 269656
+        }
+      }
+    },
+    "id": null
+  }
+  ```
+
+  #### Response (BuildingWalletDb)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "InProgress",
+      "details": {
+        "BuildingWalletDb": {
+          "current_scanned_block": 265311,
+          "latest_block": 269656
+        }
+      }
+    },
+  "id": null
+  }
+  ```
+
+  #### Response (CoinCreationError - no Zcash Params)
+
+  ```json
+  {
+  	"error": "Error on platform coin ZOMBIE creation: ZCashParamsNotFound",
+  	"error_path": "lib.z_coin_activation.z_coin",
+  	"error_trace": "lib:104] z_coin_activation:218] z_coin:1007]",
+  	"error_type": "CoinCreationError",
+  	"error_data": {
+  		"ticker": "ZOMBIE",
+  		"error": "ZCashParamsNotFound"
+  	}
+  }
+  ```
+
+  #### Response (error - NoSuchTask)
+
+  You'll see this if the task number does not exist, or the task has already completed.
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "No such task '1'",
+    "error_path": "init_standalone_coin",
+    "error_trace": "init_standalone_coin:119]",
+    "error_type": "NoSuchTask",
+    "error_data": 1,
+    "id": null
+  }
+  ```
+
+  #### Response (error - InvalidRequest)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Error parsing request: invalid value: integer `-205`, expected u64",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "invalid value: integer `-205`, expected u64",
+    "id": 42
+  }
+  ```
+
+  #### Response (Enabling complete)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "Ok",
+      "details": {
+        "ticker": "ZOMBIE",
+        "current_block": 269657,
+        "wallet_balance": {
+          "wallet_type": "Iguana",
+          "address": "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj",
+          "balance": {
+            "spendable": "29.99989008",
+            "unspendable": "0"
+          }
+        }
+      }
+    },
+    "id": null
+  }
+  ```
+
+  #### Response (no Zcash Params)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "Error",
+      "details": {
+        "error": "Error on platform coin ZOMBIE creation: ZCashParamsNotFound",
+        "error_path": "lib.z_coin_activation.z_coin",
+        "error_trace": "lib:103] z_coin_activation:192] z_coin:761]",
+        "error_type": "CoinCreationError",
+        "error_data": {
+          "ticker": "ZOMBIE",
+          "error": "ZCashParamsNotFound"
+        }
+      }
+    },
+    "id": null
+  }
+  ```
+
+  #### Response (error - no such task)
+
+  You'll see this if the task number does not exist, or the task has already completed.
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "No such task '1'",
+    "error_path": "init_standalone_coin",
+    "error_trace": "init_standalone_coin:119]",
+    "error_type": "NoSuchTask",
+    "error_data": 1,
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## Cancel Activation {{label : 'task::enable_z_coin::cancel', tag : 'API-v2'}}
+
+If you want to cancel the enabling process before it has completed, you can use this method.
+
+#### Arguments
+
+| Structure | Type    | Description                                                           |
+| --------- | ------- | --------------------------------------------------------------------- |
+| task\_id  | integer | The identifying number returned when initiating the enabling process. |
+
+#### Response
+
+| Structure    | Type   | Description                                                    |
+| ------------ | ------ | -------------------------------------------------------------- |
+| result       | string | Indicates task cancellation was succesful.                     |
+| error        | string | An error message to explain what went wrong.                   |
+| error\_path  | string | An indicator of the class or function which reurned the error. |
+| error\_trace | string | An indicator of where in the source code the error was thrown. |
+| error\_type  | string | An enumerated value for the returned error.                    |
+| error\_data  | string | The input task ID which resulted in the error.                 |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="Cancel Activation" tag="POST" label="task::enable_z_coin::cancel" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "task::enable_z_coin::cancel",
+    "mmrpc": "2.0",
+    "params": {
+      "task_id": "<TASK_ID>"
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": "success",
+    "id": null
+  }
+  ```
+
+  #### Response (success - already finished)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Task is finished already",
+    "error_path": "init_standalone_coin.manager",
+    "error_trace": "init_standalone_coin:144] manager:101]",
+    "error_type": "TaskFinished",
+    "error_data": 0,
+    "id": null
+  }
+  ```
+
+  #### Response (error - no such task)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "No such task '1'",
+    "error_path": "init_standalone_coin",
+    "error_trace": "init_standalone_coin:119]",
+    "error_type": "NoSuchTask",
+    "error_data": 1,
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+export const title = "AtomicDEX: ZHTLC Coin Methods";
+export const description =
+  "The methods in this document allow activation and management of ZHTLC coins like ARRR & ZOMBIE.";
+
+# ZHTLC Coin Methods
+
+ZHTLC coins, like Pirate (ARRR) and the test coin ZOMBIE take a little longer to enable, and use a new two step method to enable.
+Activation can take a little while the first time, as we need to download some block cache data, and build a wallet database.
+Subsequent enabling will be faster, but still take a bit longer than other coins. The second step for activation is optional, but allows us to check the status of the activation process.
+
+To activate ZHTLC coins, you need to use the [task::enable\_z\_coin](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods:
+
+*   Initialize activation with with [task::enable\_z\_coin::init](/atomicdex/api/v20-dev/zhtlc_coins/activation/#initialize-zhtlc-coin-activation)
+*   Query activation status with [task::enable\_z\_coin::status](/atomicdex/api/v20-dev/zhtlc_coins/activation/#activation-status)
+*   Cancel activation with [task::enable\_z\_coin::cancel](/atomicdex/api/v20-dev/zhtlc_coins/activation/#cancel-activation)
+
+To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods:
+
+*   Generate a transaction with [task::withdraw::init](/atomicdex/api/v20-dev/task_withdraw/#init)
+*   Query its status with [task::withdraw::status](/atomicdex/api/v20-dev/task_withdraw/#status)
+*   Cancel generating the transaction with [task::withdraw::cancel](/atomicdex/api/v20-dev/task_withdraw/#cancel)
+*   Broadcast the transaction with [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction/#send-raw-transaction)
+
+ZHTLC coins are not compatible with the [v2 my\_tx\_history](/atomicdex/api/v20/my_tx_history/) and [legacy my\_tx\_history](/atomicdex/api/legacy/my_tx_history/) methods.
+To get the transaction history for ZHTLC coins, you need to use the [z\_coin\_tx\_history](/atomicdex/api/v20-dev/zhtlc_coins/transaction_history/) method.
+export const title = "AtomicDEX: ZHTLC Coin Transaction History";
+export const description =
+  "The methods in this document allow querying the transaction history ZHTLC coins like ARRR & ZOMBIE.";
+
+# ZHTLC Coin Transaction History {{label : 'z_coin_tx_history', tag : 'API-v2'}}
+
+To get the transaction history for ZHTLC coins, you need to use this special method - the [v2 my\_tx\_history](/atomicdex/api/v20/my_tx_history/) and [legacy my\_tx\_history](/atomicdex/api/legacy/my_tx_history/) methods are not compatible with ZHTLC coins. Currently trasaction memos will not be displayed in output, though they can be added to outgoing transactions with the [task::withdraw](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods.
+
+#### Arguments
+
+| Structure                  | Type    | Description                                                                                                                                                                                                   |
+| -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                       | string  | Ticker of the coin to get history for.                                                                                                                                                                        |
+| limit                      | integer | Optional. Limits the number of returned transactions. Defaults to `10`. Ignored if `max = true`.                                                                                                              |
+| paging\_options.FromId     | string  | Optional. AtomicDEX API will skip records until it reaches this ID, skipping the from\_id as well; track the internal\_id of the last displayed transaction to find the value of this field for the next page |
+| paging\_options.PageNumber | integer | Optional. AtomicDEX API will return limit swaps from the selected page. Ignored if `FromId` .                                                                                                                 |
+
+#### Response
+
+| Structure      | Type             | Description                                                                                                                                                                               |
+| -------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| transactions   | array of objects | transactions data                                                                                                                                                                         |
+| from\_id       | string           | the from\_id specified in the request; this value is null if from\_id was not set                                                                                                         |
+| skipped        | number           | the number of skipped records (i.e. the position of `from_id` in the list + 1); this value is 0 if `from_id` was not set                                                                  |
+| limit          | number           | the limit that was set in the request; note that the actual number of transactions can differ from the specified limit (e.g. on the last page)                                            |
+| total          | number           | the total number of transactions available                                                                                                                                                |
+| page\_number   | number           | the page\_number that was set in the request                                                                                                                                              |
+| total\_pages   | number           | total pages available with the selected limit                                                                                                                                             |
+| current\_block | number           | the number of the latest block of coin blockchain                                                                                                                                         |
+| sync\_status   | object           | A standard [SyncStatus](/atomicdex/api/common_structures/#sync-status/) object. Provides the information that helps to track the progress of transaction history preloading at background |
+
+#### 📌 Examples
+
+<CodeGroup title="ZHTLC Coin Transaction History" tag="POST" label="z_coin_tx_history" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "z_coin_tx_history",
+    "mmrpc": "2.0",
+    "params": {
+      "coin": "ARRR",
+      "limit": 2,
+      "paging_options": {
+        "PageNumber": 2
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "coin": "ARRR",
+      "target": {
+        "type": "iguana"
+      },
+      "current_block": 2228711,
+      "transactions": [
+        {
+          "tx_hash": "b7e8307778d7d61ebb2ebc7a130661ef6fbeb66ee5d15d0f84a3bfce3ebad5a1",
+          "from": [
+            "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj"
+          ],
+          "to": [
+            "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj"
+          ],
+          "spent_by_me": "17.65495855",
+          "received_by_me": "17.65494855",
+          "my_balance_change": "-0.00001000",
+          "block_height": 2224011,
+          "confirmations": 4701,
+          "timestamp": 1673018341,
+          "transaction_fee": "0.00001",
+          "coin": "ARRR",
+          "internal_id": 26
+        },
+        {
+          "tx_hash": "967deb0a8cbce0c1f0ba20deee7a955e1a82bd1173bb3dd15cc95f03738ca65c",
+          "from": [
+            "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj"
+          ],
+          "to": [
+            "zs10ah73fpudlecg678jmqjdyeym5fgccvjytqry533rq2w04dekenxe8ekt349s3lelmlss3j4u9q",
+            "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj"
+          ],
+          "spent_by_me": "20.65496855",
+          "received_by_me": "17.65495855",
+          "my_balance_change": "-3.00001000",
+          "block_height": 2196913,
+          "confirmations": 31799,
+          "timestamp": 1671100306,
+          "transaction_fee": "0.00001",
+          "coin": "ARRR",
+          "internal_id": 25
+        }
+      ],
+      "sync_status": {
+        "state": "Finished"
+      },
+      "limit": 2,
+      "skipped": 2,
+      "total": 28,
+      "total_pages": 14,
+      "paging_options": {
+        "PageNumber": 2
+      }
+    },
+    "id": null
+  }
+  ```
+
+  #### Response (error - coin not supported)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "TKL",
+    "error_path": "my_tx_history_v2",
+    "error_trace": "my_tx_history_v2:523]",
+    "error_type": "NotSupportedFor",
+    "error_data": "TKL",
+    "id": null
+  }
+  ```
+
+  #### Response (error - coin not active)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "ZOMBIE",
+    "error_path": "my_tx_history_v2.lp_coins",
+    "error_trace": "my_tx_history_v2:521] lp_coins:2849]",
+    "error_type": "CoinIsNotActive",
+    "error_data": "ZOMBIE",
     "id": null
   }
   ```
