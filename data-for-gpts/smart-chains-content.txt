@@ -3366,7 +3366,7 @@ The MoMoM notarized migration API allows the migration of coin or token value us
 
 Notary nodes store "fingerprints" of the blocks belonging to the blockchains of the various assets in the main Komodo chain (KMD). The "fingerprints" can also be referred to as <b>MoM</b>, or `merkle root of merkle roots`.
 
-The fingerprints of fingerprints are delivered back into the blockchain of the assets as back notarizations. To learn more about the notarization process, [please visit this linked article](https://komodoplatform.com/komodo-platforms-new-scalability-tech/).
+The fingerprints of fingerprints are delivered back into the blockchain of the assets as back notarizations. To learn more about the notarization process, [please visit this linked article](https://komodoplatform.com/en/blog/komodo-platform-new-scalability-solution/).
 
 ### Workflow of the MoMoM value migration
 
@@ -9188,7 +9188,7 @@ curl --user $rpcuser:$rpcpassword --data-binary '{"jsonrpc": "1.0", "id":"curlte
 
 The `encryptwallet` method encrypts the wallet with the indicated `passphrase`.
 
-For more information, please see these instructions: [Encrypt Komodo's wallet.dat File](https://docs.komodoplatform.com/komodo/encrypt-wallet.html)
+For more information, please see these instructions: [Encrypt Komodo's wallet.dat File](/komodo/encrypt-wallet/)
 
 This method is for first-time encryption only. After the first encryption, any calls that interact with private keys will require the passphrase via [walletpassphrase](/smart-chains/api/wallet/#walletpassphrase) prior to calling the corresponding method. This includes methods that create a transaction, dump a private key for an address, sign a transaction, etc.
 
@@ -13480,9 +13480,116 @@ export const description = "Find the Changelogs of various versions of Komodo da
 
 # Change Log
 
-Version 0.5.0 of the Komodo daemon includes the following changes.
+## v0.8.1 \[Falkor]
 
-## List of Changes
+*   This update is mandatory and includes several security fixes, code refactoring, optimizations, and other improvements.
+*   Update Rust compiler to 1.69.
+*   Add notarisations specific unit tests.
+*   Refactoring the legacy code that is associated with PAX, KV, and ratification transactions has resulted in a slight decrease in block verification and overall synchronization time.
+*   Bump libcurl to 8.4.0 ([CVE-2023-38545](https://github.com/advisories/GHSA-7xw9-w465-6x42), [CVE-2023-38546](https://github.com/advisories/GHSA-x3qx-m3c2-qfhx) fix).
+*   Fix the value pools (sprout, sapling) calculation issue.
+*   Minor fixes and updates.
+
+## v0.8.0-beta1 \[Viserion]
+
+*   This is a mandatory update, Komodo Season 7 HF planned on height `3484958` for KMD, and timestamp `1688132253` (`Fri Jun 30 2023 13:37:33 GMT+0000`) for assetchains. All wallets/nodes should be updated to the latest (`0.8.0`) software to continue following mainnet.
+*   Reduce AUR 5% -> 0.01% (start from S7), as it announced in [KIP-0001](https://github.com/KomodoPlatform/kips/blob/main/kip-0001.mediawiki).
+*   Memory Usage Improvement: The memory usage of `komodod` has been reduced by not keeping Equihash solutions for all block headers in memory.
+*   Node Startup Performance Improvements.
+*   Security fixes.
+*   Upgrade project dependencies (libevent).
+*   Add `z_gettreestate` rpc.
+*   Minor fixes and updates.
+
+## v0.7.2 \[Longpan]
+
+*   This is a mandatory update, Komodo Season 6 HF planned on height 2963330 for KMD, and timestamp 1656077853 (Fri Jun 24 2022 13:37:33 GMT+0000) for assetchains. All wallets/nodes should be updated to the latest (0.7.2) software to continue following mainnet.
+*   Fix build with new glibc 2.34 on Linux platforms.
+*   Fix unoptimized depends build (bdb, boost, protobuf, zeromq).
+*   Remove Verus (VRSC) legacy code: VerusHash, VerusHash 1.1, Verus POS/stake, etc. Chains which used VerusHash as primary algo, like LUMBER will be incompatible with new version of daemon.
+*   Code refactoring. Perfomance boost on some operations.
+*   Restore -exchange command line arg for an exchanges (this will disable interest/reward calculations and will set nLockTime in newly created transactions to zero).
+*   Fix / refactor komodo\_block\_prg and komodo\_block\_unlocktime internals logic, get rid of VerusHash usage in it. Starting from this release all chains using -ac\_timeunlockfrom, -ac\_timeunlockto, -ac\_timelockgte will be incompatible with new daemon (there was no well-known public blockchains using these features). Newly created blockchains (ACs) using these parameters will work without any limitations on 0.7.2 and higher versions of software.
+*   hf22 / hfnet consensus changes and fixes, related to well-known issues of long-gaps between blocks, disappearing txes from mempool in-case of big gaps between blocks, etc. These changes aimed to improve the network stability, help to get rid of such gaps, and make txes propagation more reliable and stable.
+*   Minor fixes and updates.
+*   version bump
+
+## v0.7.1 \[Hydra]
+
+*   general refactoring
+*   general enhancements
+*   update dns seed
+*   rm dead chains
+*   bump version
+
+## v0.7.0 \[Medusa]
+
+*   disable vSolutions size > 1 after HF
+*   fix -disablewallet arg on getblocktemplate caused daemon crash
+*   add zHTLC functionality
+*   update assetchains file
+*   add S5 pubkeys and HF bits
+*   update CI
+*   bump version
+*   general enhancements
+
+Pools and miners please note:
+
+*   we recommend running your KMD mining node with `-minrelaytxfee=0.000035 -opretmintxfee=0.004`
+
+## v0.6.1 \[Draconic Serpent]
+
+*   CC improvements
+*   Bump deprecation height
+*   added asmap utility
+*   remove inactive ACs
+*   tar: unpack as current user
+*   bump version
+
+## v0.6.0 \[Draconic Serpent]
+
+*   fix initial sync
+*   rm template matching and pseudo opcodes
+*   fix notarization test segfault
+*   update CI/CD
+*   disable THROW\_IF\_SYNCING
+*   added CBufferedFile fix (thx LarryRuane)
+*   added unit test (streams\_tests.cpp rewritten for Google C++ Testing Framework)
+*   additional komodo\_block\_load test
+*   remove invalid TXs (reward related) from mempool
+*   update openssl
+*   avoid duplicate getheaders requests
+*   fix linearize tool
+*   fix fingerprint encoding
+*   remove time adjustment
+*   add dPoW S4 array and activation height/timestamp
+*   bump KMD version
+
+Pools and miners please note:
+
+*   we recommend running your KMD mining node with `-minrelaytxfee=0.000035 -opretmintxfee=0.004`
+
+## v0.5.2 \[Obsidian Dragon]
+
+*   Update boost
+*   Update libcurl
+*   Update ccache
+*   Update proton
+*   Update seeds
+*   Bump min protocol version
+*   Bump protocol version
+*   Remove old seeds
+*   Add tests and CI
+*   Update univalue
+*   Bump KMD version
+*   Remove CEAL, CHAIN, COMMOD, DSEC, KMDICE, BNTN, EQL, DION, PRLPY
+*   Add `opretmintxfee` parameter
+
+Pools and miners please note:
+
+*   we recommend restarting your KMD mining node with `-minrelaytxfee=0.000035 -opretmintxfee=0.004`
+
+## v0.5.0 \[Obsidian Dragon]
 
 *   zMempool fix
 *   KMDnuke fix
@@ -13491,11 +13598,6 @@ Version 0.5.0 of the Komodo daemon includes the following changes.
 *   CC fixes and additions
 *   add season 3.5 pubkey array
 *   protocol version bump
-*   update libsodium 1.0.18
-*   update libgmp URL
-*   update libsnark URL
-*   update channelsCC test
-*   use kmd metrics art
 export const title = "Introduction to Smart Chain Documentation";
 export const description =
   "Discover the comprehensive Smart Chain technical documentation, covering installation, setup, tutorials, and API commands for developers.";
@@ -17969,7 +18071,7 @@ export const description =
 *   The purpose of this document is to give a better understanding of Smart Chain parameters via examples. These chains are grouped simply by the number of parameters used in customizing each. As new parameters are added, the new combinations will be tested and added here.
 *   Please see [Creating a new Blockchain using Komodo Platform](./create-a-default-smart-chain.html) and [Parameters to customize Blockchains created using Komodo Platform](/antara/setup/antara-customizations) if you haven't already.
 *   All chains must have at least `ac_name` and `ac_supply` set. The `ac_pubkey` parameter can be used with any of these chains. If `ac_perc` is not set, the only effect `ac_pubkey` has is to have the genesis block be mined to the pubkey that has been specified. The parameters `ac_name` , `ac_supply` , `ac_pubkey` are not counted when grouping based on the `Number of parameters`.
-*   The values of parameters other than `ac_name` in these examples are completely arbitrary. The names of these example-asset-chains are assigned based on how a chain is customized and its grouping.
+*   The values of parameters other than `ac_name` in these examples are completely arbitrary. The names of these example-smart-chains are assigned based on how a chain is customized and its grouping.
 
 ## Number of parameters: 1
 

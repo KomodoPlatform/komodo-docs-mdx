@@ -342,10 +342,54 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 
 | Parameter  | Type             | Description                                                                                                                               |
 | ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`                                  |
 | amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
-| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+| gas\_price | string (numeric) | Used only when fee type is `Qrc20Gas` or `EthGas`; sets the gas price in `gwei` units.                                                    |
+| gas\_price | number (double)  | Used only when fee type is `CosmosGas`; sets the gas price.                                                                               |
+| gas        | number (integer) | Used only when fee type is `EthGas`; sets the gas limit for transaction                                                                   |
+| gas\_limit | number (integer) | Used only when fee type is `Qrc20Gas` or `CosmosGas`; sets the gas limit for transaction                                                  |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Examples
+
+  ```json
+  {
+    "type": "UtxoFixed",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "UtxoPerKbyte",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "EthGas",
+    "gas_price": "10",
+    "gas": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "Qrc20Gas",
+    "gas_price": "10",
+    "gas_limit": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "CosmosGas",
+    "gas_price": 0.05,
+    "gas_limit": 21000
+  }
+  ```
+</CollapsibleSection>
 
 ### ExtendedFeeInfo
 
@@ -3594,7 +3638,7 @@ Activating coins in 'lite mode' means you don't need to have a native coin daemo
 KomoDeFi is a true cross chain, cross protocol Decentralized Exchange (DEX), allowing for trades between coins and tokens across many platforms and ecosystems, such as:
 
 *   UTXO based coins (e.g. DOGE, BTC, ZEC, LTC, DASH, DGB)
-*   [Ethereum (ETH)](https://ethereum.org/en/) & [ERC20 tokens](https://etherscan.io/tokens)
+*   [Ethereum (ETH)](https://ethereum.org/) & [ERC20 tokens](https://etherscan.io/tokens)
 *   [Binance Coin (BNB)](https://coinmarketcap.com/currencies/bnb/) & [BEP20](https://www.coingecko.com/en?asset_platform_id=binance-coin) tokens
 *   [QTUM](https://qtum.org) & [QRC20 tokens](https://qtum.info/qrc20)
 *   [Polygon (MATIC)](https://polygon.technology/) & [PLG20 tokens](https://polygonscan.com/tokens)
@@ -8427,7 +8471,7 @@ The `orderbook` method requests from the network the currently available orders 
         ]
       }
     ],
-    "netid": 7777,
+    "netid": 8762,
     "numasks": 2,
     "numbids": 6,
     "rel": "MARTY",
@@ -11275,11 +11319,12 @@ For coins with segwit, they may appear twice in the output (once for each addres
 
 #### Arguments
 
-| Structure   | Type   | Description                                                                         |
-| ----------- | ------ | ----------------------------------------------------------------------------------- |
-| coin        | string | The ticker of the coin to get best orders                                           |
-| action      | string | Whether to `buy` or `sell` the selected coin                                        |
-| request\_by | object | A standard [RequestBy](/atomicdex/api/common_structures/orders/#request-by) object. |
+| Structure     | Type   | Description                                                                          |
+| ------------- | ------ | ------------------------------------------------------------------------------------ |
+| coin          | string | The ticker of the coin to get best orders                                            |
+| action        | string | Whether to `buy` or `sell` the selected coin                                         |
+| exclude\_mine | bool   | Defaults to `false`. If `true`, the users orders will be excluded from the response. |
+| request\_by   | object | A standard [RequestBy](/atomicdex/api/common_structures/orders/#request-by) object.  |
 
 #### Response
 
@@ -11318,225 +11363,6 @@ For coins with segwit, they may appear twice in the output (once for each addres
     "mmrpc": "2.0",
     "result": {
       "orders": {
-        "TKL": [
-          {
-            "coin": "TKL",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "RAwv8JhfvmFx2V3QpY7ehiYpBJ1eqxxdxR"
-            },
-            "price": {
-              "decimal": "8.7753611926",
-              "rational": [
-                [1, [927133003, 10]],
-                [1, [705032704, 1]]
-              ],
-              "fraction": {
-                "numer": "43876805963",
-                "denom": "5000000000"
-              }
-            },
-            "pubkey": "02dbd8c73e2e80e4f3cf88d2f04a9d2d0df4269496608b14a3e17556fdcb01e0c1",
-            "uuid": "416bb993-acac-42cf-ae54-bf57a21f7a3d",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "2478.31474597274",
-              "rational": [
-                [1, [1635841741, 28851]],
-                [1, [2755359744, 11]]
-              ],
-              "fraction": {
-                "numer": "123915737298637",
-                "denom": "50000000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "0.0001",
-              "rational": [
-                [1, [1]],
-                [1, [10000]]
-              ],
-              "fraction": {
-                "numer": "1",
-                "denom": "10000"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "21748.107044857509733489724",
-              "rational": [
-                [1, [2703103759, 3484586521, 294741]],
-                [1, [2007498752, 2373086065, 13]]
-              ],
-              "fraction": {
-                "numer": "5437026761214377433372431",
-                "denom": "250000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.00087753611926",
-              "rational": [
-                [1, [927133003, 10]],
-                [1, [2285707264, 11641]]
-              ],
-              "fraction": {
-                "numer": "43876805963",
-                "denom": "50000000000000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 2,
-              "rel_nota": true
-            }
-          }
-        ],
-        "XMY-segwit": [
-          {
-            "coin": "XMY-segwit",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "MJx4vyc657NwQUMjzRgDcypvRw5NduzSz4"
-            },
-            "price": {
-              "decimal": "88.3356107012",
-              "rational": [
-                [1, [1795694657, 51]],
-                [1, [2500000000]]
-              ],
-              "fraction": {
-                "numer": "220839026753",
-                "denom": "2500000000"
-              }
-            },
-            "pubkey": "025d81c96aa4269c5946c0bd8dad7785ae0f4f595e7aea2ec4f8fe71f77ebf74a9",
-            "uuid": "999b34ca-c7b2-4caa-92e2-76349ed2d4b5",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "2478.31474597274",
-              "rational": [
-                [1, [1635841741, 28851]],
-                [1, [2755359744, 11]]
-              ],
-              "fraction": {
-                "numer": "123915737298637",
-                "denom": "50000000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "0.0001",
-              "rational": [
-                [1, [1]],
-                [1, [10000]]
-              ],
-              "fraction": {
-                "numer": "1",
-                "denom": "10000"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "218923.446595291331147485288",
-              "rational": [
-                [1, [1174424077, 4198508482, 1483482]],
-                [1, [3151233024, 3334026680, 6]]
-              ],
-              "fraction": {
-                "numer": "27365430824411416393435661",
-                "denom": "125000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.00883356107012",
-              "rational": [
-                [1, [1795694657, 51]],
-                [1, [3290337280, 5820]]
-              ],
-              "fraction": {
-                "numer": "220839026753",
-                "denom": "25000000000000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 3,
-              "rel_nota": false
-            }
-          }
-        ],
-        "LTC": [
-          {
-            "coin": "LTC",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "Lgrta1iKRcy8zzygVkZeEXuxBqzssPWtae"
-            },
-            "price": {
-              "decimal": "0.0001087673",
-              "rational": [
-                [1, [1087673]],
-                [1, [1410065408, 2]]
-              ],
-              "fraction": {
-                "numer": "1087673",
-                "denom": "10000000000"
-              }
-            },
-            "pubkey": "026da2fc632afabbb1b86d04a9a012db25eca74db38ba2eccd88552f27f4c0b245",
-            "uuid": "8530300a-b11c-4eca-80ab-c4124aaf3b64",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "24706.624279842",
-              "rational": [
-                [1, [986196625, 2876]],
-                [1, [500000000]]
-              ],
-              "fraction": {
-                "numer": "12353312139921",
-                "denom": "500000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "5.019891088590044985947063133864681756373468864263432116086360514603194158538457790163036133102504153",
-              "rational": [
-                [1, [5460000]],
-                [1, [1087673]]
-              ],
-              "fraction": {
-                "numer": "5460000",
-                "denom": "1087673"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "2.6872728150328587666",
-              "rational": [
-                [1, [4244429513, 3128397295]],
-                [1, [1156841472, 1164153218]]
-              ],
-              "fraction": {
-                "numer": "13436364075164293833",
-                "denom": "5000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.000546",
-              "rational": [
-                [1, [273]],
-                [1, [500000]]
-              ],
-              "fraction": {
-                "numer": "273",
-                "denom": "500000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 2,
-              "rel_nota": false
-            }
-          }
-        ],
         "LTC-segwit": [
           {
             "coin": "LTC-segwit",
@@ -11630,7 +11456,7 @@ For coins with segwit, they may appear twice in the output (once for each addres
             },
             "pubkey": "02dbd8c73e2e80e4f3cf88d2f04a9d2d0df4269496608b14a3e17556fdcb01e0c1",
             "uuid": "95bb48ce-7411-4be7-a1b9-70e8f8d7887f",
-            "is_mine": false,
+            "is_mine": true,
             "base_max_volume": {
               "decimal": "8964.021726027",
               "rational": [
@@ -11679,6 +11505,120 @@ For coins with segwit, they may appear twice in the output (once for each addres
               "base_confs": 7,
               "base_nota": false,
               "rel_confs": 3,
+              "rel_nota": false
+            }
+          }
+        ]
+      },
+      "original_tickers": {
+        "LTC": ["LTC-segwit"],
+        "BTC": ["BTC-segwit"],
+        "XMY": ["XMY-segwit"]
+      }
+    },
+    "id": 0
+  }
+  ```
+</CollapsibleSection>
+
+#### Command (by number, exclude own orders)
+
+<CodeGroup title="" tag="POST" label="best_orders" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "best_orders",
+    "mmrpc": "2.0",
+    "params": {
+      "coin": "DGB",
+      "action": "buy",
+      "exclude_mine": true,
+      "request_by": {
+        "type": "number",
+        "value": 100
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (by number - success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "orders": {
+        "LTC-segwit": [
+          {
+            "coin": "LTC-segwit",
+            "address": {
+              "address_type": "Transparent",
+              "address_data": "Lgrta1iKRcy8zzygVkZeEXuxBqzssPWtae"
+            },
+            "price": {
+              "decimal": "0.0001087673",
+              "rational": [
+                [1, [1087673]],
+                [1, [1410065408, 2]]
+              ],
+              "fraction": {
+                "numer": "1087673",
+                "denom": "10000000000"
+              }
+            },
+            "pubkey": "026da2fc632afabbb1b86d04a9a012db25eca74db38ba2eccd88552f27f4c0b245",
+            "uuid": "8530300a-b11c-4eca-80ab-c4124aaf3b64",
+            "is_mine": false,
+            "base_max_volume": {
+              "decimal": "24706.624279842",
+              "rational": [
+                [1, [986196625, 2876]],
+                [1, [500000000]]
+              ],
+              "fraction": {
+                "numer": "12353312139921",
+                "denom": "500000000"
+              }
+            },
+            "base_min_volume": {
+              "decimal": "5.019891088590044985947063133864681756373468864263432116086360514603194158538457790163036133102504153",
+              "rational": [
+                [1, [5460000]],
+                [1, [1087673]]
+              ],
+              "fraction": {
+                "numer": "5460000",
+                "denom": "1087673"
+              }
+            },
+            "rel_max_volume": {
+              "decimal": "2.6872728150328587666",
+              "rational": [
+                [1, [4244429513, 3128397295]],
+                [1, [1156841472, 1164153218]]
+              ],
+              "fraction": {
+                "numer": "13436364075164293833",
+                "denom": "5000000000000000000"
+              }
+            },
+            "rel_min_volume": {
+              "decimal": "0.000546",
+              "rational": [
+                [1, [273]],
+                [1, [500000]]
+              ],
+              "fraction": {
+                "numer": "273",
+                "denom": "500000"
+              }
+            },
+            "conf_settings": {
+              "base_confs": 7,
+              "base_nota": false,
+              "rel_confs": 2,
               "rel_nota": false
             }
           }
@@ -14654,7 +14594,7 @@ The v2 `orderbook` method requests from the network the currently available orde
         }
         }
       ],
-      "net_id": 7777,
+      "net_id": 8762,
       "num_asks": 3,
       "num_bids": 3,
       "rel": "DASH",
@@ -15475,7 +15415,7 @@ To set this up, you can add some additional parameters to your MM2.json as shown
 ```json
 {
 	"gui": "MarketMakerBot",
-	"netid": 7777,
+	"netid": 8762,
 	"rpc_password": "YOUR_PASSWORD",
 	"passphrase": "YOUR SEED PHRASE",
 	"dbdir": "/path/to/your/atomicdex/DB",
@@ -16465,20 +16405,6 @@ The request was failed due to an AtomicDEX API internal error.
     "id": 0
   }
   ```
-
-  #### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "error_path": "utxo_common",
-    "error_trace": "utxo_common:1371]",
-    "error_type": "InvalidFeePolicy",
-    "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "id": 0
-  }
-  ```
 </CollapsibleSection>
 
 #### Withdraw BTC, KMD, and other BTC-based forks, 1 coin per Kbyte fee
@@ -16800,7 +16726,7 @@ The request was failed due to an AtomicDEX API internal error.
   ```
 </CollapsibleSection>
 
-##### Withdraw Tendermint coins with a memo
+##### Withdraw Tendermint coins with a memo and custom gas fee
 
 <CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
   ```json
@@ -16812,7 +16738,12 @@ The request was failed due to an AtomicDEX API internal error.
       "coin": "IRIS",
       "to": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
       "amount": 13,
-      "memo": "It was a bright cold day in April, and the clocks were striking thirteen."
+      "memo": "It was a bright cold day in April, and the clocks were striking thirteen.",
+      "fee": {
+        "type": "CosmosGas",
+        "gas_price": 0.05,
+        "gas_limit": 150000
+      }
     },
     "id": 0
   }
@@ -16851,6 +16782,50 @@ The request was failed due to an AtomicDEX API internal error.
 
   You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
 </CollapsibleSection>
+
+### Error Responses
+
+#### InvalidRequest: Unknown fee type
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
+    "id": 0
+}
+```
+
+#### InvalidRequest: wrong parameter type
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: invalid type: string \"0.1\", expected f64",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "invalid type: string \"0.1\", expected f64",
+    "id": 0
+}
+```
+
+#### InvalidFeePolicy: attempt to use EthGas for UTXO coin
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1371]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "id": 0
+}
+```
 export const title = "AtomicDEX Method: Get Current MTP";
 export const description = "The get_current_mtp method returns the Median Time Past (MTP) from electrum servers for UTXO coins.";
 
@@ -21936,16 +21911,271 @@ export const description = "Find the Changelogs of various versions of AtomicDEX
 
 # Change Log
 
-Version 0.2.8 of the AtomicDEX API includes the following changes.
+## Komodo DeFi Framework v2.0.0-beta
 
-#### List of Changes
+### Network Evolution & KMD Burn: Enhancing KMD's Role in Komodo's DeFi Framework
 
-*   add sound based notification
-*   use background service for mm2
-*   new atomicDEX core
-*   add NAV
-*   optimise FTC integration
-*   update log tags
+Introducing pivotal network enhancements to pave the way for an evolved DEX P2P network, Komodo DeFi Framework 2.0.0-beta marks a strategic step forward. This release not only streamlines network performance but also introduces a deflationary aspect to KMD, underscoring its utility and value in Komodo Platform's expanding ecosystem.
+
+### Release Notes
+
+**Features:**
+
+*   KMD Burn:
+    *   Burning 25% of the taker fee when paid in KMD was implemented by [@onur-ozkan](https://github.com/onur-ozkan) [#2006](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2006)
+*   Swap watcher nodes (only for UTXO/UTXO swaps):
+    *   For UTXO/UTXO swaps, watcher nodes will either complete the swap for taker or refund the taker payment if the taker goes offline after sending their payment. This was implemented by [@caglaryucekaya](https://github.com/caglaryucekaya) in [#1457](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1457) [#1496](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1496) [#1523](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1523) [#1552](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1552)
+    *   Using watcher nodes for swaps were enabled by default for UTXO/UTXO swaps by [@caglaryucekaya](https://github.com/caglaryucekaya). All nodes doing a swap will broadcast a watcher message after the taker payment is sent if both coins swapped are supported by watchers (currently only UTXO) [#1859](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1859)
+
+**Enhancements:**
+
+*   Network Enhancements:
+    *   P2P layer was upgraded to use the latest stable libp2p version by [@onur-ozkan](https://github.com/onur-ozkan) [#1878](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1878)
+    *   `7777` network was deprecated by [@onur-ozkan](https://github.com/onur-ozkan) [#2020](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2020).
+    *   Seednodes for `netid` `8762` were updated by [@smk762](https://github.com/smk762) [#2024](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2024)
+    *   `libp2p-yamux` was updated by [@onur-ozkan](https://github.com/onur-ozkan) to use yamux `v0.13` (new version) by default and to fall back to yamux `v0.12` (old version) when setting any configuration options [#2030](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2030)
+    *   The backpressure buffer cap was increased from `25` to `256` by [@onur-ozkan](https://github.com/onur-ozkan) [#2030](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2030)
+    *   New protocol version (Version2) was added by [@onur-ozkan](https://github.com/onur-ozkan) to be used for peer exchange and request-response behaviours in [#2030](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2030)
+    *   Network information is now written to stdout so users can find mm2 ports easily [@onur-ozkan](https://github.com/onur-ozkan) [#2034](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2034)
+*   NFT feature was released in [v1.0.6-beta](https://github.com/KomodoPlatform/komodo-defi-framework/releases/tag/v1.0.6-beta), this release adds significant enhancements to this feature:
+    *   `exclude_spam` and `exclude_phishing` params were added for `get_nft_list` and `get_nft_transfers` RPCs by [@laruh](https://github.com/laruh) [#1959](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1959)
+    *   Spam transfers with empty meta was fixed by [@laruh](https://github.com/laruh) to no longer update [#1989](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1989)
+*   `version` method was added to `PUBLIC_METHODS` that require no login by [@smk762](https://github.com/smk762) [#2001](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2001)
+*   An additional `PRICE_ENDPOINTS` url which is a cached copy of `https://prices.komodian.info/api/v2/tickers` and is updated every minute was added by [@smk762](https://github.com/smk762) [#2032](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2032)
+
+**Bug Fixes:**
+
+*   ARRR/Pirate:
+    *   ARRR infrastructure for lightwallet servers uses a fork of `lightwalletd`, the grpc service was renamed by [@smk762](https://github.com/smk762) `from cash.z.wallet.sdk.rpc` to `pirate.wallet.sdk.rpc` to use the `lightwalletd` fork [#1963](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1963)
+    *   Previous blocks/wallet sync was fixed by [@borngraced](https://github.com/borngraced) to be resumed if `sync_params` are not provided after restart [#1967](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1967)
+*   EVM web3 requests timeout was reduced to 20s by [@shamardy](https://github.com/shamardy) [#1973](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1973)
+*   Fixed `0.0001` min threshold for TakerFee was removed by [@shamardy](https://github.com/shamardy) [#1971](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1971)
+*   The minimum trading volume for evm and tendermint was changed to be the smallest possible amount of the coin by [@shamardy](https://github.com/shamardy) [#1971](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1971)
+*   Minimum trading price was reduced by [@shamardy](https://github.com/shamardy) to be any value above 0 [#1971](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1971)
+*   `Cryptocondition` script type was added to utxo transactions by [@shamardy](https://github.com/shamardy) [#1991](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1991)
+*   On response error the next web3 node is now tried [@shamardy](https://github.com/shamardy) [#1998](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1998)
+*   Watchtower taker-side restart bug was fixed by [@caglaryucekaya](https://github.com/caglaryucekaya) [#1908](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1908)
+*   `rpcport` value can now accept a string [@shamardy](https://github.com/shamardy) [#2026](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2026)
+
+### NB - Backwards compatibility breaking changes
+
+*   `7777` Network deprecation and the upgrade to a new p2p layer breaks compatibility with previous versions of Komodo DeFi Framework. Connections between nodes/clients running an older version of Komodo DeFi Framework and nodes/clients running this version will not be possible. To avoid this, all nodes/clients must be upgraded to the latest version of Komodo DeFi Framework.
+*   Because of KMD burn of a part of the taker fee, the taker fee outputs for any `coin/KMD` swap are changed and makers running older versions will not be able to validate the taker fee, this will cause the swap to fail. This case will never happen anyway because older versions will not be able to connect to this latest version due to the network upgrade.
+*   Because of the removal of the fixed 0.0001 min threshold for TakerFee, taker fee validation will also fail for these cases. Again, this case will never happen as the previous case.
+
+## Komodo DeFi Framework v1.0.7-beta
+
+**Enhancements:**
+
+*   Using a specific start date for Pirate/ARRR synchronization was added by [@borngraced](https://github.com/borngraced). This allows users to specify a specific date as the starting point for synchronization as a substitute for the checkpoint block from config or syncing from the first block [#1922](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1922)
+
+**Bug Fixes:**
+
+*   PoSV coins withdrawal was fixed by [@reddink](https://github.com/reddink). The issue was a missing n\_time field in the generated transaction. The fix now correctly considers when n\_time is required, and the rawtransaction can be broadcasted [#1925](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1925)
+*   Tendermint tests were fixed by [@onur-ozkan](https://github.com/onur-ozkan) by using latest relayer channel [#1929](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1929)
+*   Price service urls were updated by [@smk762](https://github.com/smk762) [#1928](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1928)
+*   NFT transactions that transfer multiple NFT tokens were fixed in db by [@shamardy](https://github.com/shamardy). log\_index is now used as part of the transfers history table primary key [#1926](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1926)
+*   A fix was introduced by [@shamardy](https://github.com/shamardy) to use kmd rewards for fees if change + interest is below dust threshold [#1944](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1944)
+*   Debug info was removed from release binary by [@onur-ozkan](https://github.com/onur-ozkan) to reduce the file size [#1954](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1954)
+*   Failing tests due to BCHD were ignored by [@shamardy](https://github.com/shamardy) [#1955](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1955)
+
+## Komodo DeFi Framework v1.0.6-beta
+
+**New Features:**
+
+*   NFT Wallet APIs for ERC721/ERC1155 tokens using Moralis Web3 was added by [@laruh](https://github.com/laruh) for multiple EVM chains to enable developers to access real-time NFT data and metadata from various blockchains without building their own backend services in [#1652](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1652) [#1704](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1704) [#1775](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1775) [#1817](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1817) [#1823](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1823) [#1833](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1833) [#1877](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1877)
+
+**Enhancements:**
+
+*   HTTPS support was added for the RPC server by [@shamardy](https://github.com/shamardy) in [#1861](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1861)
+*   Infrastructure DNS rotation for default seed nodes was done by [@ca333](https://github.com/ca333) in [#1868](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1868)
+*   Price endpoints were updated by [@laruh](https://github.com/laruh) in [#1869](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1869)
+*   IBC and standard withdrawals for Cosmos now allow users to specify the gas price and gas limit for each transaction @ozkanonur [#1894](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1894)
+*   CI enhancements by @ozkanonur
+    *   The time needed for CI completion was reduced by caching the downloaded dependencies in [#1880](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1880)
+    *   Label validation on PRs was added. This validation will only succeed if one of the following labels is used but not both: `under review` or `in progress` [#1881](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1881)
+    *   A CI job was added to check if mm2 version was bumped before merging any pull request to main in [#1899](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1899)
+    *   All CI tests now run with the `--no-fail-fast` flag, allowing other tests to proceed despite any failures [#1907](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1907)
+
+**Bug Fixes:**
+
+*   Some RUSTSEC advisories were fixed by @ozkanonur in [#1853](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1853)
+*   Orderbook response now returns the right age for the age field, this was fixed by [@rozhkovdmitrii](https://github.com/rozhkovdmitrii) in [#1851](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1851)
+*   A bug that caused `best_orders` rpc to return `is_mine: false` for the user's orders was fixed by [@rozhkovdmitrii](https://github.com/rozhkovdmitrii) in [#1849](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1849)
+    *   An optional parameter `exclude_mine` was also added to the `best_orders` request that allows users to exclude their own orders from the response.
+    *   `exclude_mine` defaults to false to maintain the same behaviour before the PR.
+*   A fix removed the passed config string from the error logs during mm2 initialization if there was a deserialization error was done by [@shamardy](https://github.com/shamardy) in [#1872](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1872)
+*   Index out of bounds errors in the `tx_details_by_hash` functions was fixed by [@shamardy](https://github.com/shamardy) in [#1915](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1915)
+
+## AtomicDEX v1.0.5-beta
+
+*   Deprecated `wasm-timer` dependency was removed from atomicDEX-API tree by @ozkanonur in [#1836](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1836)
+*   `log`, `getrandom` and `wasm-bindgen` dependencies were updated to more recent versions that are inline with the latest libp2p upstream by @ozkanonur in [#1837](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1837)
+*   A CI lint pipeline was added that validates pull request titles to ensure that they comply with the conventional commit specifications by @ozkanonur in [#1839](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1839)
+*   KMD AUR were reduced from 5% to 0.01% starting at nS7HardforkHeight to comply with [KIP-0001](https://github.com/KomodoPlatform/kips/blob/main/kip-0001.mediawiki) by [@shamardy](https://github.com/shamardy) in [#1841](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1841)
+
+## AtomicDEX v1.0.4-beta
+
+*   Some enhancements were done for `enable_bch_with_tokens`, `enable_eth_with_tokens`, `enable_tendermint_with_assets` RPCs by [@shamardy](https://github.com/shamardy) in [#1762](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1762)
+    *   A new parameter `get_balances` was added to the above methods requests, when this parameter is set to `false`, balances will not be returned in the response. The default value for this parameter is `true` to ensure backward compatibility.
+    *   Token balances requests are now performed concurrently for the above methods.
+*   Passive parent coin state for keeping tokens active when platform is disabled was added by @ozkanonur in [#1763](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1763)
+*   Detection of a chain reorganization for SPV was added by [@borngraced](https://github.com/borngraced) [@shamardy](https://github.com/shamardy). If a chain reorg occurs, the new best chain headers are re-downloaded and re-validated [#1728](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1728)
+*   Optimization of release compilation profile for mm2 was done by @ozkanonur in [#1821](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1821)
+*   PoSV support for UTXO coins was added by [@reddink](https://github.com/reddink) in [#1815](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1815)
+
+## AtomicDEX v1.0.3-beta
+
+*   adex tool was introduced [#1729](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1729)
+*   bump mm2 to `v1.0.2-beta` [#1743](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1743)
+*   bump mm2 to `v1.0.3-beta` [#1769](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1769)
+*   \[release] v1.0.3 [#1771](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1771)
+
+## AtomicDEX v1.0.2-beta
+
+*   adex-cli command line utility was introduced that supplies commands: init, start, stop, status [#1729](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1729)
+*   CI/CD workflow logics are improved [#1736](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1736)
+*   Project root is simplified/refactored [#1738](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1738)
+*   Created base image to provide more glibc compatible pre-built binaries for linux [#1741](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1741)
+*   Set default log level as "info" [#1747](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1747)
+
+## AtomicDEX v1.0.1-beta
+
+*   2 Update pirate & zombie domains for tests [#1705](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1705)
+*   2 lock free avoid on account sequence problems [#1694](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1694)
+*   sec fixes, build-time optimizations, dependency optimizations, CI migration, etc [#1699](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1699)
+*   \[release] 1.0.1-beta [#1721](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1721)
+
+## AtomicDEX-v1.0.0-beta
+
+*   2 spv storage optimization [#1](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1) [#1585](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1585)
+*   \[doc] update mobile build instructions [#1661](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1661)
+*   2 `disable_coin` should fail if there are tokens dependent on the platform [#1651](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1651)
+*   2 fix vulnerable dependencies [#1666](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1666)
+*   Bugfix pubkey keepalive overflow and "forever orders" [#1668](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1668)
+*   2 Hardware Wallet enhancements [#1672](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1672)
+*   2 Complete MetaMask [#1674](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1674)
+*   Add workflow for VirusTotal results [#1676](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1676)
+*   2 refactor version handling [#1686](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1686)
+*   \[release] 1.0.0-beta [#1576](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1576)
+
+## beta-2.1.8741
+
+*   Don't respond to GetKnownPeers p2p msg if the number of peers requested exceeds the default number by [@shamardy](https://github.com/shamardy) in [#1445](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1445)
+*   \[r2r] Avoid deadlock on `DuplexMutex` by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1453](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1453)
+*   \[r2r] Mobile libs code fixes, build instructions and CI. by [@artemii235](https://github.com/artemii235) in [#1463](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1463)
+*   \[r2r] hotfix: disallow withdraw to taproot addresses by [@shamardy](https://github.com/shamardy) in [#1503](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1503)
+*   update cc and cmake dependencies to be compatible with Visual Studio … by [@DeckerSU](https://github.com/DeckerSU) in [#1532](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1532)
+*   \[r2r] Don't return an error if a UTXO coin is enabled with `trezor_coin` field by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1541](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1541)
+
+## beta-2.1.7404
+
+*   Target-branch added for dependabot in mm2.1 by [@laruh](https://github.com/laruh) in [#1426](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1426)
+*   Skip orders not existing in orders\_set instead of using expect. by [@artemii235](https://github.com/artemii235) in [#1430](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1430)
+*   Fix ARRR activation. More info to activation statuses. Check point block by [@artemii235](https://github.com/artemii235) in [#1439](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1439)
+
+## beta-2.1.7132
+
+*   \[r2r] Implement tx history RPC for Zcoin (ARRR). by [@artemii235](https://github.com/artemii235) in [#1336](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1336)
+*   \[r2r] No login mode by [@caglaryucekaya](https://github.com/caglaryucekaya) in [#1341](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1341)
+*   \[r2r] Fix for LBC block header deserializing bug by [@borngraced](https://github.com/borngraced) in [#1343](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1343)
+*   Release SLP, WASM, Maker bot, QTUM delegation. by [@artemii235](https://github.com/artemii235) in [#1184](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1184)
+*   \[r2r] Fix P2P OrdermatchRequest backward compatibility. by [@artemii235](https://github.com/artemii235) in [#1406](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1406)
+
+## beta-2.1.6805
+
+*   \[WASM] Fixing, refactoring, and implementing P2P, IndexedDB, SwapLock, SavedSwap, MySwaps, MyOrdersStorage by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1007](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1007)
+*   update\_maker\_order memory leak fix by [@shamardy](https://github.com/shamardy) in [#1068](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1068)
+*   MVP swaps support for SLP tokens and PIRATE. by [@artemii235](https://github.com/artemii235) in [#1067](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1067)
+*   Upload release library to nightly server during CI build. by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1093](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1093)
+*   Add SLP UTXOs validation using BCHD API. by [@artemii235](https://github.com/artemii235) in [#1094](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1094)
+*   simple market maker bot by [@Milerius](https://github.com/Milerius) in [#1066](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1066)
+*   Enable 2.0 skeleton by [@artemii235](https://github.com/artemii235) in [#1099](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1099)
+*   Partial lightning network node implementation by [@shamardy](https://github.com/shamardy) in [#1103](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1103)
+*   Use 'wss' P2P protocol instead of 'ws' by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1117](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1117)
+*   Qtum delegation by [@Milerius](https://github.com/Milerius) in [#1096](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1096)
+*   Slurp refactoring [#914](https://github.com/KomodoPlatform/komodo-defi-framework/issues/914) by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1119](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1119)
+*   Add gRPC-web support in WASM (BCHD API for SLP). by [@artemii235](https://github.com/artemii235) in [#1127](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1127)
+*   Next iteration of enable v2. Refactoring. Added enable\_slp. by [@artemii235](https://github.com/artemii235) in [#1130](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1130)
+*   simple telegram client by [@Milerius](https://github.com/Milerius) in [#1114](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1114)
+*   feat(lp\_bot): use `other` for unknown variant in provider by [@Milerius](https://github.com/Milerius) in [#1140](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1140)
+*   Implement enable\_bch\_with\_tokens RPC. Refactoring by [@artemii235](https://github.com/artemii235) in [#1145](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1145)
+*   feat(lp\_bot): cancel order on stopping mm2 context by [@Milerius](https://github.com/Milerius) in [#1143](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1143)
+*   Fix hanging pointers [#1158](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1158) by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1162](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1162)
+*   Use parking lot mutex for maker orders by [@shamardy](https://github.com/shamardy) in [#1163](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1163)
+*   Lightning Network Channels by [@shamardy](https://github.com/shamardy) in [#1133](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1133)
+*   Add and implement a swap recoverer [#1160](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1160) by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1164](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1164)
+*   Trezor integration PoC by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1150](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1150)
+*   Fix orders "leak" due to race condition. by [@artemii235](https://github.com/artemii235) in [#1178](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1178)
+*   Implement BCH and SLP tx history. Refactoring. by [@artemii235](https://github.com/artemii235) in [#1175](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1175)
+*   Fix recreating Taker swap data by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1191](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1191)
+*   Optimize CI pipeline to run faster checks as a separate stage. by [@artemii235](https://github.com/artemii235) in [#1192](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1192)
+*   Update CI pipeline for MacOS. by [@artemii235](https://github.com/artemii235) in [#1202](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1202)
+*   Add `mm2_version` WASM foreign function by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1213](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1213)
+*   Changes for Linux CI by [@artemii235](https://github.com/artemii235) in [#1209](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1209)
+*   Fix unstable test\_update\_maker\_order\_fail test by [@shamardy](https://github.com/shamardy) in [#1216](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1216)
+*   Use komodod multiarch Docker image in tests. Do not build and upload libmm2 for desktop. by [@artemii235](https://github.com/artemii235) in [#1214](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1214)
+*   Implement requesting balances of HD wallet addresses by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1190](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1190)
+*   Arrr integration WIP. by [@artemii235](https://github.com/artemii235) in [#1204](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1204)
+*   Expect larger integers on blockchain.scripthash.get\_balance by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1218](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1218)
+*   Add confirmation settings to orderbook by [@shamardy](https://github.com/shamardy) in [#1217](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1217)
+*   Lightning payments by [@shamardy](https://github.com/shamardy) in [#1210](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1210)
+*   Integrate HD account storage by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1223](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1223)
+*   Spv proof by [@Milerius](https://github.com/Milerius) in [#1207](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1207)
+*   Sync dev with mm2.1 by [@Milerius](https://github.com/Milerius) in [#1236](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1236)
+*   Solana by [@Milerius](https://github.com/Milerius) in [#1109](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1109)
+*   Provide podman compatibility by @ozkanonur in [#1242](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1242)
+*   update podman requirement by @ozkanonur in [#1243](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1243)
+*   Fix `coin` in `recover_funds_of_swap` RPC by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1249](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1249)
+*   Simultaneous activation of coins in two modes (Iguana and Trezor) by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1227](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1227)
+*   Add RPC call to get raw transaction encoded in hex by [@hrmhatef](https://github.com/hrmhatef) in [#1248](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1248)
+*   provide custom swap locktime functionality by @ozkanonur in [#1252](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1252)
+*   \[r2r] Add PR naming convention to the docs by @ozkanonur in [#1257](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1257)
+*   \[r2r] add dependencies update note when basing branch on mm2.1 to the docs by [@shamardy](https://github.com/shamardy) in [#1261](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1261)
+*   \[r2r] impl get publickey hash rpc method by [@borngraced](https://github.com/borngraced) in [#1258](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1258)
+*   \[r2r] Update WASM docs, fix `my_recent_swaps` in WASM by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1264](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1264)
+*   \[r2r] ARRR integration WIP. by [@artemii235](https://github.com/artemii235) in [#1237](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1237)
+*   \[r2r] Lightning channels and payments history by [@shamardy](https://github.com/shamardy) in [#1240](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1240)
+*   \[r2r] fix spv proof validation by @ozkanonur in [#1268](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1268)
+*   Update block headers in DB in case of a chain reorganization by [@shamardy](https://github.com/shamardy) in [#1276](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1276)
+*   Store maker\_coin\_htlc\_privkey and taker\_coin\_htlc\_privkey as None by [@artemii235](https://github.com/artemii235) in [#1277](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1277)
+*   \[r2r] broadcast tx to txhlp / refactor tx errors by @ozkanonur in [#1245](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1245)
+*   \[r2r] Sign and verify messages by [@caglaryucekaya](https://github.com/caglaryucekaya) in [#1256](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1256)
+*   \[r2r] continuously push for playground nodes by @ozkanonur in [#1280](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1280)
+*   \[r2r] UTXO RPC batch requests by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1255](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1255)
+*   \[r2r] overall refactoring by @ozkanonur in [#1284](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1284)
+*   \[r2r] fix `MM_VERSION` path by @ozkanonur in [#1296](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1296)
+*   \[r2r] Deps update by [@artemii235](https://github.com/artemii235) in [#1294](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1294)
+*   \[r2r] update rust-lightning & remove bitcoin-spv crate from our deps tree by [@shamardy](https://github.com/shamardy) in [#1300](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1300)
+*   Temporary ignore RUSTSEC-2020-0071 (time crate potential segfault). by [@artemii235](https://github.com/artemii235) in [#1303](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1303)
+*   update License GPLv3 by [@ca333](https://github.com/ca333) in [#1286](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1286)
+*   \[r2r] fixes incorrect coin type for rpc error by [@borngraced](https://github.com/borngraced) in [#1289](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1289)
+*   Remove unused dependencies, add unused dependencies check step to CI by [@shamardy](https://github.com/shamardy) in [#1305](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1305)
+*   \[r2r] Impl storing Infos about fiat price to MM2.db on swap completion by [@borngraced](https://github.com/borngraced) in [#1282](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1282)
+*   \[r2r] fix nonce\_lock problem by [@laruh](https://github.com/laruh) in [#1306](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1306)
+*   \[r2r] HD wallet tx history by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1285](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1285)
+*   \[r2r] Implement ARRR swap in light mode. by [@artemii235](https://github.com/artemii235) in [#1302](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1302)
+*   \[r2r] split qtum utxo by [@laruh](https://github.com/laruh) in [#1313](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1313)
+*   \[r2r] Don't return Null on `my_recent_swaps` by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1317](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1317)
+*   \[r2r] Try to find `check_utxo_maturity` from the coins config by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1315](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1315)
+*   update playground pipeline by @ozkanonur in [#1323](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1323)
+*   add commit prefix for playground node by @ozkanonur in [#1325](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1325)
+*   \[r2r] Fix unstable test\_get\_channels\_by\_filter test by [@shamardy](https://github.com/shamardy) in [#1320](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1320)
+*   \[r2r] Get rid of fomat, wite macros by [@sergeyboyko0791](https://github.com/sergeyboyko0791) in [#1316](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1316)
+*   \[r2r] API call optimization by [@caglaryucekaya](https://github.com/caglaryucekaya) in [#1279](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1279)
+*   \[r2r] Fix rpc\_password length constraints by [@laruh](https://github.com/laruh) in [#1329](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1329)
+*   \[r2r] Allow bestorders RPC execution with number by [@laruh](https://github.com/laruh) in [#1327](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1327)
+*   \[r2r] Remove outdated transactions from transaction history by [@caglaryucekaya](https://github.com/caglaryucekaya) in [#1328](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1328)
+*   \[r2r] Dependabot integration by [@laruh](https://github.com/laruh) in [https://github.com](https://github.com)...
+
+## beta-2.1.5724
+
+*   Hotfix for FIRO block header format (prog pow).
+*   hotfix for unknown destination address errors showing up by [@shamardy](https://github.com/shamardy) in [#1186](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1186)
+*   Avoid log spam and malfunctioning electrums excessive reconnects [#1193](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1193) [#1161](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1161). by [@artemii235](https://github.com/artemii235) in [#1194](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1194)
+*   \[wip] update readme by [@ca333](https://github.com/ca333) in [#1180](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1180)
+*   Remove nxt arg from help by [@tonymorony](https://github.com/tonymorony) in [#1199](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1199)
+*   feat(firo\_hot\_fix): add support for prog pow by [@Milerius](https://github.com/Milerius) in [#1235](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1235)
 export const title = "Introduction to AtomicDEX";
 export const description =
   "Explore the technical documentation for AtomicDEX, the decentralized exchange powered by atomic swaps, and learn about the AtomicDEX API.";
@@ -21962,11 +22192,11 @@ This documentation is intended for developers utilizing the AtomicDEX API.
 
 A brief conceptual overview of AtomicDEX can be found in the <b>Start Here</b> > <b>Product Introductions</b> > <b>AtomicDEX </b> section.
 
-[<b>Link to "AtomicDEX" Introduction</b>](https://developers.komodoplatform.com/start-here/about-komodo-platform/product-introductions#AtomicDEX)
+[<b>Link to "AtomicDEX" Introduction</b>](/start-here/about-komodo-platform/product-introductions#AtomicDEX)
 
 The [<b>AtomicDEX Tutorials</b>](/atomicdex/tutorials/) section contains a more thorough conceptual explanation of AtomicDEX.
 
-Please consult our [Learning Path Outlines](https://developers.komodoplatform.com/start-here/learning-launchpad/#introduction) section for more details on approaches to learning AtomicDEX from both a conceptual and technical perspective.
+Please consult our [Learning Path Outlines](/start-here/learning-launchpad/#introduction) section for more details on approaches to learning AtomicDEX from both a conceptual and technical perspective.
 
 #### About AtomicDEX Setup
 
@@ -21976,7 +22206,7 @@ The AtomicDEX Setup section contains basic information about setting up and usin
 
 The AtomicDEX Tutorials section contains various tutorials that provide instruction for AtomicDEX usage and creation.
 
-For a walkthrough covering multiple tutorials in a targeted fashion, please see the [Learning Launchpad](https://developers.komodoplatform.com/start-here/learning-launchpad/#introduction) section.
+For a walkthrough covering multiple tutorials in a targeted fashion, please see the [Learning Launchpad](/start-here/learning-launchpad/#introduction) section.
 
 #### About AtomicDEX API
 
@@ -22364,7 +22594,7 @@ When running the AtomicDEX API via commandline with the `mm2` binary, some basic
 | Parameter               | Type            | Description                                                                                                                                                                                                                                                                                                                                                                                         |
 | ----------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | gui                     | string          | Information to identify which app, tool or product is using the API, e.g. `AtomicDEX iOS 1.0.1`. Helps developers identify if an issue is related to specific builds or operating systems etc.                                                                                                                                                                                                      |
-| netid                   | integer         | Nework ID number, telling the AtomicDEX-API which network to join. 7777 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it.                                                                                                                                                                               |
+| netid                   | integer         | Nework ID number, telling the AtomicDEX-API which network to join. 8762 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it.                                                                                                                                                                               |
 | passphrase              | string          | Your passphrase; this is the source of each of your coins private keys. [**KEEP IT SAFE!**](https://www.youtube.com/watch?v=WFpxVbTqhB8)                                                                                                                                                                                                                                                            |
 | rpc\_password           | string          | For RPC requests that need authentication, this will need to match the `userpass` value in the request body.                                                                                                                                                                                                                                                                                        |
 | allow\_weak\_password   | boolean         | Optional, defaults to `false`. If `true`, will allow low entropy rpc\_password. If `false` rpc\_password must not have 3 of the same characters in a row, must be between 8-32 characters in length, must contain at least one of each of the following: numeric, uppercase, lowercase, special character (e.g. !#$\*). It also can not contain the word "password", or the chars `<`, `>`, or `&`. |
@@ -22372,7 +22602,7 @@ When running the AtomicDEX API via commandline with the `mm2` binary, some basic
 | rpcip                   | string          | Optional, defaults to `127.0.0.1`. IP address to bind to for RPC server.                                                                                                                                                                                                                                                                                                                            |
 | rpcport                 | integer         | Optional, defaults to `7783`. Port to use for RPC communication.                                                                                                                                                                                                                                                                                                                                    |
 | rpc\_local\_only        | boolean         | Optional, defaults to `true`. If `false` the AtomicDEX API will allow rpc methods sent from external IP addresses. **Warning:** Only use this if you know what you are doing, and have put the appropriate security measures in place.                                                                                                                                                              |
-| i\_am\_seed             | boolean         | Optional, defaults to `false`. Runs AtomicDEX API as a seed node mode (acting as a relay for AtomicDEX API clients). Use of this mode is not reccomended on the main network (7777) as it could result in a pubkey ban if non-compliant. On alternative testing or private networks, at least one seed node is required to relay information to other AtomicDEX API clients using the same netID.   |
+| i\_am\_seed             | boolean         | Optional, defaults to `false`. Runs AtomicDEX API as a seed node mode (acting as a relay for AtomicDEX API clients). Use of this mode is not reccomended on the main network (8762) as it could result in a pubkey ban if non-compliant. On alternative testing or private networks, at least one seed node is required to relay information to other AtomicDEX API clients using the same netID.   |
 | seednodes               | list of strings | Optional. If operating on a test or private netID, the IP address of at least one seed node is required (on the main network, these are already hardcoded)                                                                                                                                                                                                                                          |
 | hd\_account\_id         | integer         | Optional. If this value is set, the AtomicDEX-API will work in only the [HD derivation mode](/atomicdex/api/v20-dev/hd_wallets_overview/), and coins will need to have a coin derivation path entry in the `coins` file for activation. The `hd_account_id` value effectively takes its place in the full derivation as follows: `m/44'/COIN_ID'/<hd_account_id>'/CHAIN/ADDRESS_ID`                 |
 | message\_service\_cfg   | object          | Optional. This data is used to configure [Telegram](https://telegram.org/) messenger alerts for swap events when running using the [makerbot functionality](/atomicdex/api/v20/start_simple_market_maker_bot/). For more information check out the [telegram alerts guide](/atomicdex/api/v20/telegram_alerts/)                                                                                     |
@@ -22385,7 +22615,7 @@ When running the AtomicDEX API via commandline with the `mm2` binary, some basic
 ```json
 {
   "gui": "DEVDOCS_CLI",
-  "netid": 7777,
+  "netid": 8762,
   "rpc_password": "ENTER_UNIQUE_PASSWORD",
   "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
   "allow_weak_password": true,
@@ -22398,7 +22628,7 @@ When running the AtomicDEX API via commandline with the `mm2` binary, some basic
 ```json
 {
   "gui": "DEVDOCS_CLI",
-  "netid": 7777,
+  "netid": 8762,
   "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
   "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
   "allow_weak_password": false,
@@ -22423,7 +22653,7 @@ If you are using HD wallets, you will need to add the `hd_account_id` value to y
 ```json
 {
   "gui": "DEVDOCS_CLI",
-  "netid": 7777,
+  "netid": 8762,
   "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
   "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
   "allow_weak_password": false,
@@ -22535,9 +22765,13 @@ Unpack and follow the instructions here: [instructions link](https://cmake.org/r
 sudo apt-get install build-essential
 ```
 
-##### Windows: [Follow these instructions for MSVC](https://learn.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-170\&viewFallbackFrom=vs-2017)
+##### Windows:
 
-##### MacOS: [Install XCode via the App Store](https://apps.apple.com/us/app/xcode/id497799835?mt=12)
+[Follow these instructions for MSVC](https://learn.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=msvc-170\&viewFallbackFrom=vs-2017)
+
+##### MacOS:
+
+[Install XCode via the App Store](https://apps.apple.com/us/app/xcode/id497799835?mt=12)
 
 #### Install Additional Dependencies
 
@@ -23369,7 +23603,7 @@ We also need to create an MM2.json file in the same directory as the `coins` fil
 | Parameter     | Type    | Description                                                                                                                                                                                                           |
 | ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | gui           | string  | Information to identify which app, tool or product is using the API, e.g. `AtomicDEX iOS 1.0.1`. Helps developers identify if an issue is related to specific builds or operating systems etc.                        |
-| netid         | integer | Nework ID number, telling the AtomicDEX API which network to join. 7777 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it. |
+| netid         | integer | Nework ID number, telling the AtomicDEX API which network to join. 8762 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it. |
 | passphrase    | string  | Your passphrase; this is the source of each of your coins private keys. KEEP IT SAFE!                                                                                                                                 |
 | rpc\_password | string  | For RPC requests that need authentication, this will need to match the `userpass` value in the request body.                                                                                                          |
 
@@ -23385,7 +23619,7 @@ We also need to create an MM2.json file in the same directory as the `coins` fil
 The MM2.json configuration commands can also be supplied at runtime, as below:
 
 ```bash
-stdbuf -oL ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":7777, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
+stdbuf -oL ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":8762, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
 ```
 
 Replace `YOUR_PASSPHRASE_HERE` and `YOUR_PASSWORD_HERE` with your actual passphrase and password, and then execute the command in the terminal.
@@ -23430,7 +23664,7 @@ If you see something similar, the AtomicDEX API is up and running!
   When using the AtomicDEX API on a VPS without accompanying tools such as `tmux` or `screen`, it is recommended to use [`nohup`](https://www.digitalocean.com/community/tutorials/nohup-command-in-linux) when launching the AtomicDEX-API. This will ensure that the AtomicDEX-API instance is not shutdown when the user logs out.
 
   ```bash
-  stdbuf -oL nohup ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":7777, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
+  stdbuf -oL nohup ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":8762, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
   ```
 </Note>
 
@@ -23594,7 +23828,7 @@ The response below shows a list of users willing to send DOC in exchange for MAR
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json
-  {"bids": [],"numbids": 0,"biddepth": 0,"asks": [{"coin": "DOC","address": "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh","price": "0.89999998","price_rat": [[1, [813957463, 471859]],[1, [0, 524288]]],"price_fraction": {"numer": "2026619787280727","denom": "2251799813685248"},"maxvolume": "10855.85028615","max_volume_rat": [[1, [3593286463, 1389548]],[1, [0, 128]]],"max_volume_fraction": {"numer": "5968066809508671","denom": "549755813888"},"pubkey": "5a2f1c468b7083c4f7649bf68a50612ffe7c38b1d62e1ece3829ca88e7e7fd12","age": 5,"uuid": "5bff6021-b086-477e-b874-f45d898933fe","is_mine": false}],"numasks": 1,"askdepth": 0,"base": "DOC","rel": "MARTY","timestamp": 1549319941,"netid": 7777}
+  {"bids": [],"numbids": 0,"biddepth": 0,"asks": [{"coin": "DOC","address": "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh","price": "0.89999998","price_rat": [[1, [813957463, 471859]],[1, [0, 524288]]],"price_fraction": {"numer": "2026619787280727","denom": "2251799813685248"},"maxvolume": "10855.85028615","max_volume_rat": [[1, [3593286463, 1389548]],[1, [0, 128]]],"max_volume_fraction": {"numer": "5968066809508671","denom": "549755813888"},"pubkey": "5a2f1c468b7083c4f7649bf68a50612ffe7c38b1d62e1ece3829ca88e7e7fd12","age": 5,"uuid": "5bff6021-b086-477e-b874-f45d898933fe","is_mine": false}],"numasks": 1,"askdepth": 0,"base": "DOC","rel": "MARTY","timestamp": 1549319941,"netid": 8762}
   ```
 </CollapsibleSection>
 
@@ -23657,7 +23891,7 @@ Try again this time adding ` | jq` to the end of the `bash` example below:
   	"base": "DOC",
   	"rel": "MARTY",
   	"timestamp": 1549320152,
-  	"netid": 7777
+  	"netid": 8762
   }
   ```
 </CollapsibleSection>
@@ -23903,7 +24137,7 @@ The following tutorial introduces the reader to a simple method to become a liqu
 
 #### Virtual Private Server (Recommended)
 
-We recommend that the user [have a Virtual Private Server (VPS)](https://developers.komodoplatform.com/smart-chains/tutorials/basic-environment-setup-for-linux-vps) with *at least* the following specifications.
+We recommend that the user [have a Virtual Private Server (VPS)](/smart-chains/tutorials/basic-environment-setup-for-linux-vps) with *at least* the following specifications.
 
 *   2 vCPU
 *   4GB RAM
@@ -23996,7 +24230,7 @@ cp mm2scripts/* .
 
 The user must create a seed phrase that will serve as a type of password for accessing all coins in the user's digital wallet.
 
-Various tools are available in the cryptocurrency community to create a secure seed phrase. One available method is to use the automated procedure that is included in the [AtomicDEX Desktop Wallet](https://atomicdex.io).
+Various tools are available in the cryptocurrency community to create a secure seed phrase. One available method is to use the automated procedure that is included in the [AtomicDEX Desktop Wallet](https://komodoplatform.com/en/wallets.html).
 
 Backup these 24 words carefully. They provide access to the coins that are stored in the addresses created by the AtomicDEX API.
 
@@ -24261,7 +24495,7 @@ Display the KMD/LTC Orderbook.
        "is_mine": false
      }
    ],
-   "netid": 7777,
+   "netid": 8762,
    "numasks": 1,
    "numbids": 1,
    "rel": "LTC",
@@ -24342,7 +24576,7 @@ Display the LTC/KMD Orderbook.
        "is_mine": false
      }
    ],
-   "netid": 7777,
+   "netid": 8762,
    "numasks": 1,
    "numbids": 1,
    "rel": "KMD",
@@ -24815,7 +25049,7 @@ To understand AtomicDEX, one must first understand what a decentralized exchange
 
 This discussion requires a small amount of foundational knowledge. The reader should be generally familiar with blockchain technology and should understand the basic ideas of the Komodo project.
 
-For a broad overview of Komodo, head to the [About Komodo Platform section](https://developers.komodoplatform.com/start-here/about-komodo-platform/) For a more thorough understanding of general blockchain technology, check out [the Delayed Proof of Work section of the Core Technology Discussions.](https://developers.komodoplatform.com/start-here/core-technology-discussions/delayed-proof-of-work) This section gives an overview of how a blockchain works and why it matters.
+For a broad overview of Komodo, head to the [About Komodo Platform section](/start-here/about-komodo-platform/) For a more thorough understanding of general blockchain technology, check out [the Delayed Proof of Work section of the Core Technology Discussions.](/start-here/core-technology-discussions/delayed-proof-of-work) This section gives an overview of how a blockchain works and why it matters.
 
 After reading the above articles, the following discussion should be attainable.
 
@@ -24918,7 +25152,7 @@ However, the nature of an atomic swap is unique in comparison with the opposing 
 | Users maintain control over the funds throughout the process       | <b>Yes:</b> Users maintain control over their funds until the trade is completed, at which point ownership is swapped atomically         | <b>No:</b> Users relinquish ownership to the gateway nodes, although users do hold private keys to IOUs                    | <b>No:</b> Once the user sends funds to the CEX, they only own their funds in theory until the funds are returned |
 | User funds remain distributed and decentralized throughout process | <b>Yes:</b> As users maintain ownership over their funds at all times, all funds in the exchange process are never in a central location | <b>No:</b> User funds are held in a collection of multi-signature addresses that are maintained by a small group of people | <b>No:</b> User funds are held in a centralized database, managed by company employees                            |
 
-This is probably enough to get the basic idea. If the reader desires a more thorough understanding of the atomic swap process, read the [AtomicDEX and Atomic Swaps section of the Core Technology Disucssions.](https://developers.komodoplatform.com/start-here/core-technology-discussions/atomicdex)
+This is probably enough to get the basic idea. If the reader desires a more thorough understanding of the atomic swap process, read the [AtomicDEX and Atomic Swaps section of the Core Technology Disucssions.](/start-here/core-technology-discussions/atomicdex)
 
 The underlying ideas of atomic swaps were invented by Tier Nolan in 2013. He posted his ideas on an online community forum where Komodo's lead developer and primary visionary, JL777, or "James" for short, was also exploring blockchain technology. Here’s where Komodo enters the picture.
 
@@ -24954,7 +25188,7 @@ AtomicDEX is open source, meaning that we do not keep the software's source code
 
 Many opportunities are available for cryptocurrency-exchange entrepreneurs to build their own audiences and businesses using Komodo software. Entrepreneurs can create their own market places on the main Komodo network for trading, or they can create their own private and public networks. Developers can use Komodo's back-end software API to feature atomic-swap DEX functionality in their existing or upcoming software innovations, including mobile software. Enterprise and other large-scale companies can reach out to Komodo for integration with Komodo technology, or even for consulting services.
 
-[Please reach out to the Komodo team for further information.](https://komodoplatform.com/contact-us/)
+[Please reach out to the Komodo team for further information.](https://komodoplatform.com/en/contact.html)
 export const title = "Adding a new coin to the AtomicDEX-API";
 export const description =
   "This guide describes how to add a new coin to the AtomicDEX-API";
@@ -24983,7 +25217,7 @@ Different platforms & protocols vary slightly in what data is required. Review t
 | fname                   | string  | The full name of the coin/token.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | mm2                     | integer | Indicates trading compatibility with AtomicDEX API. `1` is compatible, `0` is not compatible. Non-compatible coins may still be listed as `wallet only` in AtomicDEX apps.                                                                                                                                                                                                                                                                                                                                                                                          |
 | required\_confirmations | integer | Defaults to `1`. The number of confirmations AtomicDEX will wait for during the swap. WARNING, this setting affects the security of the atomic swap. 51% attacks (double spending) are a threat and have been succesfully conducted in the past. You can find a collection of coins and the theoretical cost of a 51% attack [here](https://www.crypto51.app/). Please be aware that some of the coins supported by AtomicDEX may be vulnerable to such attacks, so consider using higher confirmation values for them, especially when dealing with large amounts. |
-| requires\_notarization  | boolean | Defaults to `false`. For coins protected by [dPoW](https://komodoplatform.com/51-attack-how-komodo-can-help-prevent-one/) can be set to `true` wait for a notarization when sending transactions during a swap. If `true`, `"required_confirmations"` must be set to `2` or higher.                                                                                                                                                                                                                                                                                 |
+| requires\_notarization  | boolean | Defaults to `false`. For coins protected by [dPoW](https://komodoplatform.com/en/blog/51-attack-how-komodo-can-help-prevent-one/) can be set to `true` wait for a notarization when sending transactions during a swap. If `true`, `"required_confirmations"` must be set to `2` or higher.                                                                                                                                                                                                                                                                         |
 | decimals                | integer | Defines the number of digits after the decimal point that should be used to display the orderbook amounts, balance, and the value of inputs to be used in the case of order creation or a `withdraw` transaction. The default value used for a UTXO type coin (Bitcoin Protocol) is `8` and the default value used for a ERC20 Token is `18`. It is **very important** for this value to be set correctly. For example, if this value was set as `9` for BTC, a command to withdraw `1 BTC` tries to withdraw `10^9` satoshis of Bitcoin, i.e., `10 BTC`            |
 | protocol                | string  | Contains the coin protocol `"type"` (UTXO, ETH, etc.) and specific protocol configuration - `"protocol_data"` object that can have arbitrary format.                                                                                                                                                                                                                                                                                                                                                                                                                |
 | orderbook\_ticker       | string  | If set, coins with the same value will share the same orderbook. For example, if `BTC-Segwit` and `BTC-BEP20` are set with `"orderbook_ticker":"BTC"` the same orderbook is returned for KMD/BTC, KMD/BTC-BEP20 and KMD/BTC-Segwit pairs.                                                                                                                                                                                                                                                                                                                           |
@@ -25467,7 +25701,7 @@ apt-get install -y unzip jq curl
 wget $(curl --silent https://api.github.com/repos/KomodoPlatform/atomicDEX-API/releases | jq -r '.[0].assets[] | select(.name | endswith("Linux-Release.zip")).browser_download_url')
 wget https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins
 unzip *Linux-Release.zip
-./mm2 "{\"netid\":7777,\"gui\":\"aws_cli\",\"passphrase\":\"SEED_WORDS_PLEASE_REPLACE\",\"rpc_password\":\"RPC_PASS_PLEASE_REPLACE\",\"myipaddr\":\"0.0.0.0\"}"
+./mm2 "{\"netid\":8762,\"gui\":\"aws_cli\",\"passphrase\":\"SEED_WORDS_PLEASE_REPLACE\",\"rpc_password\":\"RPC_PASS_PLEASE_REPLACE\",\"myipaddr\":\"0.0.0.0\"}"
 ```
 
 ## Install AWS CLI , get AWS access credentials
@@ -25520,4 +25754,4 @@ nodeIp=REPLACE_PUBLIC_IP
 ssh -o IdentitiesOnly=yes -i ~/.ssh/mm2.pem admin@$nodeIp 'curl -s --url "http://127.0.0.1:7783" --data "{\"userpass\":\"testpsw\",\"method\":\"version\"}"'
 ```
 
-Edit the command above as necessary to exchange one curl command for another from [the AtomicDEX API.](https://developers.atomicdex.io/atomicdex/atomicdex-api)
+Edit the command above as necessary to exchange one curl command for another from [the AtomicDEX API.](/atomicdex/api/)
