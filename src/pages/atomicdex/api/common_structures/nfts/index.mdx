@@ -46,7 +46,7 @@ The `NftInfo` object includes the following items for a given token:
 | token\_hash            | string  | The token hash. May be `null`.                                                                                                                                        |
 | token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                  |
 | token\_domain          | string  | Token domain. May be `null`.                                                                                                                                          |
-| uri\_meta              | object  | A standard [TokenMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                |
+| uri\_meta              | object  | A standard [NftMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                  |
 
 ### NftTransfer
 
@@ -80,7 +80,8 @@ The `NftTransfer` object includes the following items for each token transaction
 | status             | string  | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`.  |
 | verified           | integer | May be `null`. A deprecated field which will be removed in future.                                                                                                    |
 | operator           | string  | May be `null`.                                                                                                                                                        |
-| fee\_details       | object  | Optional. A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object.                                                                                          |
+| fee\_details       | object  | Optional. A standard [WithdrawNftData](/atomicdex/api/common_structures/nfts/#withdraw-nft-data) object.                                                              |
+| confirmations      | integer | The count of blocks produced since this transaction was confirmed.                                                                                                    |
 
 <DevComment>
   `verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incormoprates this.
@@ -88,3 +89,96 @@ The `NftTransfer` object includes the following items for each token transaction
   What is `operator`?
   What does `verified` mean?
 </DevComment>
+
+### NftMetadata
+
+The `NftMetadata` object includes the following items for a given coin or token:
+
+| Parameter         | Type                       | Description                                                                                                                                                      |
+| ----------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| image             | string                     | Optional. Direct URL to the NFT's image.                                                                                                                         |
+| image\_url        | string                     | Optional. Optional. Url to the NFT's image. Derived from the `image` or `image_url` fields to prioritize the non-null value. Can be null if neither is provided. |
+| image\_domain     | string                     | Optional. Extracted domain from the 'image\_url', if valid.                                                                                                      |
+| name              | string                     | Optional. Name of the token.                                                                                                                                     |
+| description       | string                     | Optional. Description of the token.                                                                                                                              |
+| attributes        | object or array of objects | Optional. The values within this parameter will vary, and are set by the creator. Often used to store traits.                                                    |
+| animation\_url    | string                     | Optional. Url to an animation to be displayed instead of a static image.                                                                                         |
+| animation\_domain | string                     | Optional. Extracted domain from the `animation_url`, if valid.                                                                                                   |
+| external\_url     | string                     | Optional. URL to the external source related to the token.                                                                                                       |
+| external\_domain  | string                     | Optional. Extracted domain from the `external_url`, if valid.                                                                                                    |
+| image\_details    | object                     | Optional. JSON containing additional details or attributes of the image.                                                                                         |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  [
+      {
+          "trait_type": "Specialization",
+          "value": "Thief"
+      },
+      {
+          "trait_type": "Skin Tone",
+          "value": "#0013b0"
+      },
+      {
+          "trait_type": "Weapon",
+          "value": "Crossbow"
+      },
+      {
+          "trait_type": "Species",
+          "value": "Dark Elf"
+      },
+      {
+          "trait_type": "Gender",
+          "value": "Female"
+      },
+      {
+          "trait_type": "Strength",
+          "value": "8"
+      },
+      {
+          "trait_type": "Dexterity",
+          "value": "12"
+      },
+      {
+          "trait_type": "Intelligence",
+          "value": "10"
+      },
+      {
+          "trait_type": "Perks",
+          "value": ["Steath", "Eagle Eye", "Lockpicking", "Pickpocketing", "Fire resistance"]
+      },
+      {
+          "trait_type": "Weakness",
+          "value": ["Slow healing", "Elfbark Addict", "Lockpicking", "Fear of cats", "Unconvincing liar"]
+      },
+      {
+          "trait_type": "Personality",
+          "value": "Aggressive"
+      }
+  ]
+  ```
+</CollapsibleSection>
+
+### WithdrawNftData
+
+The `WithdrawNftData` object is used for withdrawals of NFTs on ERC721 and ERC1155 contracts. It includes the following items for a given coin or token:
+
+| Parameter      | Type    | Description                                                                                                                              |
+| -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| chain          | string  | The token chain. Chain must be [activated](/atomicdex/api/legacy/coin_activation/) first.                                                |
+| to             | string  | Destination address to withdraw the token to.                                                                                            |
+| token\_address | string  | Token address.                                                                                                                           |
+| token\_id      | string  | Token ID.                                                                                                                                |
+| fee            | object  | A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object. May be missing for older transfers.                                   |
+| amount         | string  | Optional, ERC1155 only. Defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is true.                                           |
+| max            | boolean | Optional, ERC1155 only. Defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent. |
+
+<Note>
+  When the `type` parameter in a [withdraw\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc721`, it means the NFT is absolutely unique,
+  and it has only 1 owner and the owner can own only 1 NFT with this `token_id`
+  in its `token_address` (also referred to as contract address).
+  When the `type` parameter in a [withdraw\_nft](/atomicdex/api/v20-dev/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc1155`, it means that it is possible for more
+  than 1 user to own one or more of the same NFT (with an identical `token_id`).
+  Due to this difference, the `amount` and `max` fields are only used the when
+  the `type` value is `withdraw_erc1155`.
+</Note>
