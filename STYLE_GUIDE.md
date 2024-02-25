@@ -71,7 +71,7 @@ For example:
 | Parameter | Type    | Description                                                                             |
 | --------- | ------- | --------------------------------------------------------------------------------------- |
 | coin      | string  | The name of the coin the user desires to activate.                                      |
-| fee       | object  | Optional. A standard [FeeInfo](/atomicdex/api/v20/#FeeInfo) object.                     |
+| fee       | object  | Optional. A standard [FeeInfo](/atomicdex/api/common_structures/#FeeInfo) object.                     |
 | amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                        |
 | max       | boolean | Optional, defaults to `false`. Send whole balance.                                      |
 | memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction. |
