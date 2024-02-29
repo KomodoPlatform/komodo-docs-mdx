@@ -2881,6 +2881,96 @@ The `max_maker_vol` method returns the maximum volume of a coin which can be use
   }
   ```
 </CollapsibleSection>
+export const title = "AtomicDEX: Non Fungible Tokens";
+export const description =
+  "This document describes the clear_nft_db method AtomicDEX-API provides to clear NFT data from your local database";
+
+# Clear NFT Database {{label : 'clear_nft_db', tag : 'API-v2'}}
+
+This method will clear the NFT database data stored in the local database for selected (or all) networks.
+
+### Request Parameters
+
+| Parameter  | Type    | Description                                                                                                        |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| clear\_all | boolean | Defaults to `false`. If `true` all NFT data for all networks will be purged.                                       |
+| chains     | array   | Optional. List of networks to remove NFT data for. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`. |
+
+<Note>
+  You can confirm the NFT database has been cleared by querying the `KOMODEFI.db` database file.
+  For more information, refer to the [Query NFT Database Tables](/atomicdex/api/v20-dev/non_fungible_tokens/query_nft_database_tables) documentation.
+</Note>
+
+#### 📌 Example to clear Binance Smart chain and Polygon NFT data
+
+<CodeGroup title="Clear NFT Database" tag="POST" label="clear_nft_db" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "clear_nft_db",
+    "mmrpc": "2.0",
+    "params": {
+      "chains": [
+        "POLYGON",
+        "BSC"
+      ]
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+      {
+          "mmrpc": "2.0",
+          "result": null,
+          "id": null
+      }
+  ```
+</CollapsibleSection>
+
+#### 📌 Example to clear all NFT data
+
+<CodeGroup title="Clear NFT Database" tag="POST" label="clear_nft_db" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "clear_nft_db",
+    "mmrpc": "2.0",
+    "params": {
+      "clear_all": true
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+      {
+          "mmrpc": "2.0",
+          "result": null,
+          "id": null
+      }
+  ```
+</CollapsibleSection>
+
+### Error responses
+
+#### UnsupportedChainType
+
+Returned when the `chains` parameter contains an unsupported network.
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: UnsupportedChainType",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:110]",
+    "error_type": "InvalidRequest",
+    "error_data": "UnsupportedChainType",
+    "id": null
+}
+```
 export const title = "AtomicDEX: Non Fungible Tokens - Get NFT List";
 export const description =
   "This document describes all the get_nft_list method AtomicDEX-API provides to get a list of your wallets NFTs";
@@ -2903,15 +2993,15 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
 | limit               | integer | Optional, defaults to `10`. The number of NFTs displayed per page in response.                                                                                          |
 | page\_number        | integer | Optional, defaults to `1`. The page offset for items in response.                                                                                                       |
 | protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potential spam link found in collection name, token name, symbol will be replaced with `URL redacted for user protection` |
-| filters             | object  | Optional. A standard [TokenFilter](/atomicdex/api/v20/#token-filter) object.                                                                                            |
+| filters             | object  | Optional. A standard [NftFilter](/atomicdex/api/common_structures/nfts/#nft-filter) object.                                                                             |
 
 ### Response Parameters
 
 | Parameter | Type            | Description                                                                            |
 | --------- | --------------- | -------------------------------------------------------------------------------------- |
 | nfts      | list of objects | A list of standard [NftInfo](/atomicdex/api/common_structures/nfts/#nft-info) objects. |
-| total     | string          | The total number of NFTs in your wallet matching the request filters.                  |
-| skipped   | string          | The number of NFTs in your wallet excluded by the request filters.                     |
+| total     | integer         | The total number of NFTs in your wallet matching the request filters.                  |
+| skipped   | integer         | The number of NFTs in your wallet excluded by the request filters.                     |
 
 #### 📌 Example with no optional params
 
@@ -3212,12 +3302,12 @@ export const description =
 
 ### Request Parameters
 
-| Parameter           | Type    | Description                                                                                                                       |
-| ------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| chain               | string  | The token chain.                                                                                                                  |
-| token\_address      | string  | The token address.                                                                                                                |
-| token\_id           | string  | Token ID.                                                                                                                         |
-| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potentially spam link found in collection name, token name, symbol will be censored |
+| Parameter           | Type    | Description                                                                                                                                                             |
+| ------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chain               | string  | The token chain.                                                                                                                                                        |
+| token\_address      | string  | The token address.                                                                                                                                                      |
+| token\_id           | string  | Token ID.                                                                                                                                                               |
+| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potential spam link found in collection name, token name, symbol will be replaced with `URL redacted for user protection` |
 
 ### Response Parameters
 
@@ -3242,7 +3332,7 @@ export const description =
 | token\_hash            | string  | The token hash. May be `null`.                                                                                                                                        |
 | token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                  |
 | token\_domain          | string  | Token domain. May be `null`.                                                                                                                                          |
-| uri\_meta              | object  | A standard [NftMetadata](/atomicdex/api/v20/#token-metadata) object.                                                                                                |
+| uri\_meta              | object  | A standard [NftMetadata](/atomicdex/api/common_structures/nfts/#nft-metadata) object.                                                                                 |
 
 #### 📌 Example
 
@@ -3334,22 +3424,22 @@ Returns a list of the NFT transfers involving the user, shown in descending orde
 
 ### Request Parameters
 
-| Parameter           | Type    | Description                                                                                                                                                |
-| ------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chains              | array   | List of chains to scan for NFTs.                                                                                                                           |
-| max                 | boolean | Optional, defaults to `false`. If `true`, response will return all NFT transfers without pagination, and will ignore the `limit` and `page_number` values. |
-| limit               | integer | Optional, defaults to `10`. The number of NFT transfers displayed per page in response.                                                                    |
-| page\_number        | integer | Optional, defaults to `1`. The page offset for items in response.                                                                                          |
-| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potentially spam link found in `collection_name`, `token_name` will be censored                              |
-| filters             | object  | Optional. A standard [TokenTransferFilter](/atomicdex/api/v20/#token-transfer-filter) object.                                                              |
+| Parameter           | Type    | Description                                                                                                                                                             |
+| ------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains              | array   | List of chains to scan for NFTs.                                                                                                                                        |
+| max                 | boolean | Optional, defaults to `false`. If `true`, response will return all NFT transfers without pagination, and will ignore the `limit` and `page_number` values.              |
+| limit               | integer | Optional, defaults to `10`. The number of NFT transfers displayed per page in response.                                                                                 |
+| page\_number        | integer | Optional, defaults to `1`. The page offset for items in response.                                                                                                       |
+| protect\_from\_spam | boolean | Optional, defaults to `false`. If `true`, any potential spam link found in collection name, token name, symbol will be replaced with `URL redacted for user protection` |
+| filters             | object  | Optional. A standard [NftTransferFilter](/atomicdex/api/common_structures/nfts/#nft-transfer-filter) object.                                                            |
 
 ### Response Parameters
 
 | Parameter         | Type            | Description                                                                                    |
 | ----------------- | --------------- | ---------------------------------------------------------------------------------------------- |
 | transfer\_history | list of objects | A list of standard [NftTransfer](/atomicdex/api/common_structures/nfts/#nft-transfer) objects. |
-| total             | string          | The total number of NFT transfers in your wallet matching the request filters.                 |
-| skipped           | string          | The number of NFT transfers in your wallet excluded by the request filters.                    |
+| total             | integer         | The total number of NFT transfers in your wallet matching the request filters.                 |
+| skipped           | integer         | The number of NFT transfers in your wallet excluded by the request filters.                    |
 
 #### 📌 Example with date and `send` filters
 
@@ -3548,9 +3638,9 @@ The COIN\_nft\_transfer\_history tables contain the history of transfers of your
 | 17 | token\_name        | TEXT         | The name of the token.                                                         |
 | 18 | details\_json      | TEXT         | Additional information about the transaction in JSON format.                   |
 
-### Example scanned\_nft\_blocks table query
+### Example COIN\_nft\_transfer\_history table query
 
-`SELECT transaction\_hash, token\_name, token\_address, token\_id,  FROM MATIC_nft_transfer_history WHERE block_timestamp > 1701519320;`
+> SELECT transaction\_hash, token\_name, token\_address, token\_id,  FROM MATIC\_nft\_transfer\_history WHERE block\_timestamp > 1701519320;
 
 | transaction\_hash                                                  | token\_name          | token\_address                             | token\_id |
 | ------------------------------------------------------------------ | -------------------- | ------------------------------------------ | --------- |
@@ -3568,7 +3658,7 @@ It has the following columns:
 
 ### Example scanned\_nft\_blocks table query
 
-`SELECT * FROM scanned_nft_blocks;`
+> SELECT \* FROM scanned\_nft\_blocks;
 
 | chain | last\_scanned\_block |
 | ----- | -------------------- |
@@ -3715,10 +3805,10 @@ export const description =
 
 ### Request Parameters
 
-| Parameter      | Type   | Description                                                                              |
-| -------------- | ------ | ---------------------------------------------------------------------------------------- |
-| type           | string | The contract type of the NFT to withdraw. Either `withdraw_erc721` or `withdraw_erc1155` |
-| withdraw\_data | object | A standard [WithdrawNftData](/atomicdex/api/v20/#withdraw-nft-data) object.              |
+| Parameter      | Type   | Description                                                                                    |
+| -------------- | ------ | ---------------------------------------------------------------------------------------------- |
+| type           | string | The contract type of the NFT to withdraw. Either `withdraw_erc721` or `withdraw_erc1155`       |
+| withdraw\_data | object | A standard [WithdrawNftData](/atomicdex/api/common_structures/nfts/#withdraw-nft-data) object. |
 
 ### Response Parameters
 
@@ -3732,7 +3822,7 @@ export const description =
 | contract\_type    | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                    |
 | token\_address    | string  | Token address.                                                                                                                                           |
 | token\_id         | string  | Token ID.                                                                                                                                                |
-| fee\_details      | object  | A standard [WithdrawFee](/atomicdex/api/v20/#withdraw-fee) object.                                                                                       |
+| fee\_details      | object  | A standard [WithdrawFee](/atomicdex/api/common_structures/#withdraw-fee) object.                                                                         |
 | coin              | string  | Coin name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                     |
 | block\_height     | integer | Block height of the transaction. If the value is `0`, the transaction is unconfirmed.                                                                    |
 | timestamp         | integer | Timestamp of the block containing the withdrawl transaction in [unix epoch format](https://www.epochconverter.com/).                                     |
