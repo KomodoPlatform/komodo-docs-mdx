@@ -22,18 +22,6 @@ import { remark } from 'remark'
                         throw new Error("Document must contain a <h1>: " + filePath);
                     }
                 })
-//                 .use(() => (tree) => {
-//                     visit(tree, 'code', (node, _nodeIndex, parentNode) => {
-//                         if (node.lang === null) {
-//                             throw new Error(`Code lang value missing
-// Filepath: ${filePath} 
-// code node: 
-// ${JSON.stringify(node,null,2)}`);
-
-//                         }
-//                     });
-              
-//                 })
                 .process(markdown);
         });
     } catch (error) {

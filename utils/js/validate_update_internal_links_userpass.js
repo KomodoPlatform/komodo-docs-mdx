@@ -25,7 +25,7 @@ if (fs.existsSync(manualLinkFile)) {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-   await createFileSlugs(filepaths); // can comment on repeat runs
+    await createFileSlugs(filepaths); // can comment on repeat runs
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -135,7 +135,7 @@ code node:
 ${JSON.stringify(node,null,2)}`);
         }
         } catch (error) {
-          throw new Error(`Error:s
+          throw new Error(`Error:
 ${JSON.stringify(error,null,2)}         
 Filepath: ${filePath} 
 Node: 
@@ -481,5 +481,14 @@ async function processExternalLink(link, currFilePath) {
 
       //throw new Error(err);
     }
+  }
+}
+
+function isValidJSON(str) {
+  try {
+    JSON.parse(str);
+    return true; // Parsing succeeded, string is valid JSON
+  } catch (e) {
+    return false; // Parsing failed, string is not valid JSON
   }
 }
