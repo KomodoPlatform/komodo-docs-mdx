@@ -125,7 +125,7 @@ system_manager(entt::registry &registry, bool subscribe_to_internal_events = tru
 
 #### Destructor
 
-```
+```cpp
 ~system_manager()
 ```
 
@@ -167,7 +167,7 @@ Public member functions.
 
 #### Usage Pattern
 
-```
+```cpp
 void receive_add_base_system(const ecs::event::add_base_system &evt)
 ```
 
@@ -348,7 +348,7 @@ The `get_system` function uses a template parameter to return a reference to a s
 
 #### Usage Pattern
 
-```
+```cpp
 template<typename TSystem>
 const TSystem &get_system() const
 ```
@@ -1114,7 +1114,7 @@ The `nb_systems` function returns the number of systems registered in the system
 
 #### Usage Pattern
 
-```
+```c
 std::size_t nb_systems() const
 ```
 
@@ -1159,7 +1159,7 @@ The `nb_systems` function is an overloaded version of the `nb_systems` function.
 
 #### Usage Pattern
 
-```
+```c
 std::size_t nb_systems(system_type sys_type) const
 ```
 
@@ -1309,16 +1309,15 @@ int main()
 
 #### Usage Pattern
 
-```
+```c
 using clock = std::chrono::steady_clock
 ```
 
-```
-Private typedefs.
+<Note>
+  Private typedefs.
 
-syntactic sugar name for a chrono steady clock
-
-```
+  syntactic sugar name for a chrono steady clock
+</Note>
 
 ### system\_ptr
 
@@ -1330,9 +1329,9 @@ syntactic sugar name for a chrono steady clock
 using system_ptr = std::unique_ptr<base_system>
 ```
 
-```
-syntactic sugar name for a pointer to base_system
-```
+<Note>
+  syntactic sugar name for a pointer to base\_system
+</Note>
 
 ### system\_array
 
@@ -1344,9 +1343,9 @@ syntactic sugar name for a pointer to base_system
 using system_array = std::vector<system_ptr>
 ```
 
-```
-syntactic sugar name for an array of system_ptr
-```
+<Note>
+  syntactic sugar name for an array of system\_ptr
+</Note>
 
 ### system\_registry
 
@@ -1358,9 +1357,9 @@ syntactic sugar name for an array of system_ptr
 using system_registry = std::array<system_array, system_type::size>
 ```
 
-```
-syntactic sugar name for a multidimensional array of system_array (pre_update, logic_update, post_update)
-```
+<Note>
+  syntactic sugar name for a multidimensional array of system\_array (pre\_update, logic\_update, post\_update)
+</Note>
 
 ### systems\_queue
 
@@ -1370,9 +1369,9 @@ syntactic sugar name for a multidimensional array of system_array (pre_update, l
 using systems_queue = std::queue<system_ptr>
 ```
 
-```
-syntactic sugar name for a queue of system pointer to add.
-```
+<Note>
+  syntactic sugar name for a queue of system pointer to add.
+</Note>
 
 ### add\_system\_
 
@@ -1380,7 +1379,7 @@ syntactic sugar name for a queue of system pointer to add.
 
 #### Usage Pattern
 
-```
+```cpp
 base*system &add_system*(system_ptr &&system, system_type sys_type)
 ```
 
@@ -1414,7 +1413,7 @@ This is the principal constructor for key-press functions.
 
 ###### Usage Pattern
 
-```
+```cpp
 
 key_pressed(input::key key_, bool alt_, bool control_, bool shift_, bool system_)
 
@@ -1461,7 +1460,7 @@ Please see the [key\_pressed | 1](/antara/api/gaming/#key-pressed-1) function fo
 
 ###### Usage Pattern
 
-```
+```c
 key_pressed()
 ```
 
@@ -1469,39 +1468,33 @@ key_pressed()
 
 ##### antara::gaming::input::key key
 
-```
-Fields.
-```
+###### Fields.
 
-{/* I don't have enough information/knowledge to edit this portion. What is this section? What do you mean by "Fields" and "key pressed" specifically? */}
-
-```
 key pressed
+
+```cpp
+ bool alt = {"{false}"}
 ```
 
-##### bool alt = {"{false}"}
-
-```
 is alt pressed at the same time.
+
+```cpp
+ bool control = {"{false}"}
 ```
 
-##### bool control = {"{false}"}
-
-```
 is ctrl pressed at the same time.
+
+```cpp
+bool shift = {"{false}"}
 ```
 
-##### bool shift = {"{false}"}
-
-```
 is shift pressed at the same time.
+
+```cpp
+bool system = {"{false}"}
 ```
 
-##### bool system = {"{false}"}
-
-```
 is system pressed at the same time.
-```
 
 ### event::key\_released
 
@@ -1521,7 +1514,7 @@ This is the principal constructor for key-release functions.
 
 ###### Usage Pattern
 
-```
+```cpp
 key_released(input::key key_, bool alt_, bool control_, bool shift_, bool system_)
 ```
 
@@ -1564,7 +1557,7 @@ Please see the [key\_released | 1](/antara/api/gaming/#key-released) function fo
 
 ###### Usage Pattern
 
-```
+```c
 key_released()
 ```
 
@@ -1572,37 +1565,33 @@ key_released()
 
 ##### input::key key
 
-{/* Again, I don't understand this content well enough to edit */}
-
-```
-Fields.
+###### Fields.
 
 key released
-```
 
+```cpp
 bool alt = {"{false}"}
-
 ```
+
 is alt released at the same time.
-```
 
+```cpp
 bool control = {"{false}"}
-
 ```
+
 is ctrl released at the same time.
-```
 
+```cpp
 bool shift = {"{false}"}
-
 ```
+
 is shift released at the same time.
-```
 
+```cpp
 bool system = {"{false}"}
+```
 
-```
 is system released at the same time.
-```
 
 ## event::quit\_game
 
@@ -1626,7 +1615,7 @@ This is the principal constructor for `quit_game` functions.
 
 ###### Usage Pattern
 
-```
+```cpp
 quit_game(int return_value)
 ```
 
@@ -1665,7 +1654,7 @@ Please see the [quit\_game | 1](/antara/api/gaming/#quit-game-1) function for mo
 
 ###### Usage Pattern
 
-```
+```cpp
 quit_game()
 ```
 
@@ -1677,15 +1666,13 @@ quit_game()
 
 ###### Usage Pattern
 
-```
+```cpp
 int return_value_
 ```
 
-```
-Fields.
+###### Fields.
 
 the return value of the program when leaving the game
-```
 
 #### Public Static Attributes
 
@@ -1697,9 +1684,7 @@ the return value of the program when leaving the game
 constexpr const event::invoker_dispatcher<quit_game, int> invoker = {}
 ```
 
-```
 Static fields.
-```
 
 ## sfml
 
@@ -1745,7 +1730,7 @@ The `update` function destroys and clears the sounds when they are finished.
 
 ###### Usage Pattern
 
-```
+```cpp
 void update()
 ```
 

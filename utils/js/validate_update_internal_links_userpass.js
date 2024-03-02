@@ -102,10 +102,7 @@ async function processFile(filePath, filepathSlugs) {
         if (!filePath.includes("src/pages/atomicdex")) {
           return SKIP;
         }
-        // if (
-        //     is(node, { name: "CodeGroup" })) {
-        //     console.log(node)
-        // }
+
         try {
           if (
             is(node, { name: "CodeGroup" }) &&
@@ -131,11 +128,18 @@ async function processFile(filePath, filepathSlugs) {
             //console.log(clonedChild)
             node.children = [clonedChild];
             return SKIP;
-          }
+          } else if (node.type === "code" && node.lang === null) {
+            throw new Error(`Code lang value missing
+Filepath: ${filePath} 
+code node: 
+${JSON.stringify(node,null,2)}`);
+        }
         } catch (error) {
-          console.log(filePath);
-          console.log(node);
-          throw new Error(error);
+          throw new Error(`Error:
+${JSON.stringify(error,null,2)}         
+Filepath: ${filePath} 
+Node: 
+${JSON.stringify(node,null,2)}`);
         }
       });
     })
@@ -477,5 +481,14 @@ async function processExternalLink(link, currFilePath) {
 
       //throw new Error(err);
     }
+  }
+}
+
+function isValidJSON(str) {
+  try {
+    JSON.parse(str);
+    return true; // Parsing succeeded, string is valid JSON
+  } catch (e) {
+    return false; // Parsing failed, string is not valid JSON
   }
 }

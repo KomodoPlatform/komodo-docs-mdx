@@ -1,8 +1,8 @@
-import { visit, EXIT } from 'unist-util-visit'
+import { EXIT, visit } from 'unist-util-visit'
 
 import { promises as fs } from 'fs';
-import { remark } from 'remark'
 import path from 'path'
+import { remark } from 'remark'
 
 (async function () {
     try {
