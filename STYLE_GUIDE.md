@@ -71,7 +71,7 @@ For example:
 | Parameter | Type    | Description                                                                             |
 | --------- | ------- | --------------------------------------------------------------------------------------- |
 | coin      | string  | The name of the coin the user desires to activate.                                      |
-| fee       | object  | Optional. A standard [FeeInfo](/atomicdex/api/v20/#FeeInfo) object.                     |
+| fee       | object  | Optional. A standard [FeeInfo](/atomicdex/api/common_structures/#FeeInfo) object.                     |
 | amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                        |
 | max       | boolean | Optional, defaults to `false`. Send whole balance.                                      |
 | memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction. |
@@ -142,6 +142,22 @@ For example, when method and title are the same:
 
 We've got a few **MDX** components we use across the Docs. Below is a walkthrough of how to start writing and using the components that make up the Docs.
 
+IMPORTANT: Alwats use double quotes inside mdx tags.
+
+Example:
+
+Correct:
+
+```
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+```
+
+Wrong:
+
+```
+<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
+```
+
 MDX supports standard markdown by default [CommonMark](https://commonmark.org/). However, this project also has [GFM](https://github.github.com/gfm/) installed.
 
 > Many of the components mentioned here are simplified and possibly do more than **explicitly pointed out**.
@@ -150,7 +166,7 @@ MDX supports standard markdown by default [CommonMark](https://commonmark.org/).
 
 The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbed content (or not, if it's a single block) with properties such as **title, tags, labels and more**. An example would look something like this:
 
-````mdx
+```mdx
 <CodeGroup title="Code Sample" tag="post" label="/kmd/jwt/post" >
 
 ```ts
@@ -170,7 +186,7 @@ The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbe
 ```
 
 </CodeGroup>
-````
+```
 
 And rendered as:
 
@@ -178,11 +194,11 @@ And rendered as:
 
 <!-- If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
 
-````mdx
+```mdx
 ```ts {{title: "Single Block", tag: "post", label: "/kmd/jwt/post"}}
 // ...
 ```
-````
+```
 
 And you'll still have it rendered correctly:
 
@@ -202,7 +218,7 @@ You only need to include the `json` data, and the additional **mm2MethodDecorate
 
 A working code sample would look like this:
 
-````mdx
+```mdx
 <CodeGroup title="Generate Invoice" tag="POST" label="generate_invoice" mm2MethodDecorate="true">
 
 ```json
@@ -219,7 +235,7 @@ A working code sample would look like this:
 ```
 
 </CodeGroup>
-````
+```
 
 Rendered as:
 
@@ -271,7 +287,7 @@ This renders a button with a specified text based on its state (expanded or coll
 
 You'll mostly use this for API, Commands, etc. Responses, which should be wrapped with the `CollapsibleSection` tags, for example:
 
-````mdx
+```mdx
    <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
       #### Response (ready, successful)
 
@@ -284,13 +300,13 @@ You'll mostly use this for API, Commands, etc. Responses, which should be wrappe
       ```
 
    </CollapsibleSection>
-````
+```
 
 The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to '**Show Error Responses**' and '**Hide Error Responses' respectively**.
 
 A working code would look like this:
 
-````mdx
+```mdx
 <CollapsibleSection expandedText='Hide code' collapsedText='Show code'>
 
 ```json
@@ -304,7 +320,7 @@ A working code would look like this:
 ```
 
 </CollapsibleSection>
-````
+```
 
 Rendered as:
 

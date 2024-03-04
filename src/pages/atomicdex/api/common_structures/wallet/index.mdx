@@ -1,0 +1,64 @@
+export const title = "Komodo DeFi SDK Common Structures: Wallet Operations";
+export const description = "Starting with version beta-2.1.3434, the Komodo DeFi SDK supports the standardized protocol format called mmrpc 2.0.";
+
+# Wallet Operations Structures
+
+### RawTxInfo
+
+The `RawTxInfo` object includes the following items:
+
+| Parameter  | Type   | Description                                                                                                                                                                                                                  |
+| ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_hex    | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
+| prev\_txns | list   | UTXO only. A list of standard [InputTxns objects](/atomicdex/api/common_structures/wallet/#input-txns).                                                                                                                      |
+| to         | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
+| value      | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
+| gas\_limit | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
+
+<DevComment>
+  TODO: Confirm units used in ETH/EVM transactions.
+</DevComment>
+
+<CollapsibleSection expandedText="Hide UTXO Example" collapsedText="Show UTXO Example">
+  ```json
+    {
+        "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
+        "prev_txns": [
+            ...
+        ]
+    }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide ETH/EVM Example" collapsedText="Show ETH/EVM Example">
+  ```json
+    {
+        "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
+        "value": "0.85",
+        "gas_limit": "21000"
+    }
+  ```
+</CollapsibleSection>
+
+### InputTxns
+
+The `InputTxns` object includes the following items:
+
+| Parameter        | Type    | Description                                                                                                                                                                                                                                         |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_hash         | string  | The transaction id of an unspent transaction from the same wallet output.                                                                                                                                                                           |
+| index            | integer | The \[output index([https://bitcoin.stackexchange.com/questions/100765/what-does-the-index-of-an-utxo-stand-for](https://bitcoin.stackexchange.com/questions/100765/what-does-the-index-of-an-utxo-stand-for))] of this unspent transaction output. |
+| script\_pub\_key | string  | The [scriptpubkey](https://learnmeabitcoin.com/technical/scriptPubKey) of this unspent transaction output.                                                                                                                                          |
+| amount           | float   | The value of this unspent transaction output.                                                                                                                                                                                                       |
+| amount           |         |                                                                                                                                                                                                                                                     |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+    {
+        "tx_hash": "0d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb2",
+        "index": 1,
+        "script_pub_key": "001449e3b6b4684c4d4a914b29411af51843c59bfff0",
+        "amount": 0.00001000
+    }
+  ```
+</CollapsibleSection>
