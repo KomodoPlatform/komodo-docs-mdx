@@ -7,7 +7,7 @@ export const description = "The methods in this document allow withdrawal of coi
 
 The `task::withdraw::init` method generates, signs, and returns a transaction that transfers the `amount` of `coin` to the address indicated in the `to` argument. The status of this method can be queried via the [withdraw\_status](/atomicdex/api/v20-dev/task_withdraw/#status) method.
 
-It will return the transaction hex (via `task::withdraw::status`), which then needs to be broadcast with the [sendrawtransaction](/atomicdex/api/legacy/send_raw_transaction/) to complete the withdrawal. This method is uses the same input fields as the [standard v2 withdraw method](/atomicdex/api/v20/withdraw/), with additional optional fields to specify the `from` address when using a hardware or HD wallet. There are two way to indicate which HW/HD address to send funds from:
+It will return the transaction hex (via `task::withdraw::status`), which then needs to be broadcast with the [sendrawtransaction](/atomicdex/api/legacy/send_raw_transaction/) to complete the withdrawal. This method is uses the same input fields as the [standard v2 withdraw method](/atomicdex/api/v20/withdraw/), with additional optional fields to specify the `from` address when using a hardware or HD wallet. There are two way to indicate which HD address to send funds from:
 
 *   Using `derivation_path` as a single input. E.g `m/44'/20'/0'/0/2`
 *   Using `account_id` (0), `chain` (External) & `address_id` (2) inputs. The bracketed values are the equavalent of the derivation path above.
@@ -21,21 +21,21 @@ To cancel the transaction generation, use the [withdraw\_cancel](/atomicdex/api/
 
 ### Arguments
 
-| Structure             | Type             | Description                                                                                                                                                                                                                                                                                                 |
-| --------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                  | string           | The name of the coin the user desires to withdraw                                                                                                                                                                                                                                                           |
-| to                    | string           | Coins are withdrawn to this address                                                                                                                                                                                                                                                                         |
-| amount                | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                                                                                                                                                                                                                            |
-| memo                  | string           | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.                                                                                                                                                                                                                     |
-| from                  | string           | Optional, used only for transactions using a hardware wallet. For more information, see the [Trezor Integration guide](/atomicdex/api/v20-dev/task_init_trezor/)                                                                                                                                            |
-| from.derivation\_path | string           | Optional, HW/HD wallets only. Follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID`                                                                                                                                                                                                              |
-| from.account\_id      | integer          | Optional, HW/HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HW/HD wallet                                                                                                                                                                                  |
-| from.chain            | string           | Optional, HW/HD wallets only. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| from.address\_id      | integer          | Optional, HW/HD wallets only. Check the output from coin activation to find the ID of an address with balance.                                                                                                                                                                                              |
-| max                   | bool             | Optional. Withdraw the maximum available amount. Defaults to `false`                                                                                                                                                                                                                                        |
-| fee                   | object           | Optional. Used only to set a custom fee, otherwise fee value will be derived from a deamon's `estimatefee` (or similar) RPC method                                                                                                                                                                          |
-| fee.type              | string           | Type of transaction fee; possible values: `UtxoFixed` or `UtxoPerKbyte`                                                                                                                                                                                                                                     |
-| fee.amount            | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte)                                                                                                                                                                   |
+| Structure             | Type             | Description                                                                                                                                                                                                                                                                                                                      |
+| --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                  | string           | The name of the coin the user desires to withdraw                                                                                                                                                                                                                                                                                |
+| to                    | string           | Coins are withdrawn to this address                                                                                                                                                                                                                                                                                              |
+| amount                | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                                                                                                                                                                                                                                                 |
+| memo                  | string           | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.                                                                                                                                                                                                                                          |
+| from                  | string           | Optional, used only for transactions using a hardware wallet. For more information, see the [Trezor Integration guide](/atomicdex/api/v20-dev/task_init_trezor/)                                                                                                                                                                 |
+| from.derivation\_path | string           | Optional, HD wallets only. Follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID`                                                                                                                                                                                                                                      |
+| from.account\_id      | integer          | Optional, HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                                                                                                                                                                                                             |
+| from.chain            | string           | Optional, HD wallets only. `Internal`, or `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
+| from.address\_id      | integer          | Optional, HD wallets only. Check the output from coin activation to find the ID of an address with balance.                                                                                                                                                                                                                      |
+| max                   | bool             | Optional. Withdraw the maximum available amount. Defaults to `false`                                                                                                                                                                                                                                                             |
+| fee                   | object           | Optional. Used only to set a custom fee, otherwise fee value will be derived from a deamon's `estimatefee` (or similar) RPC method                                                                                                                                                                                               |
+| fee.type              | string           | Type of transaction fee; possible values: `UtxoFixed` or `UtxoPerKbyte`                                                                                                                                                                                                                                                          |
+| fee.amount            | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte)                                                                                                                                                                                        |
 
 #### Response
 
@@ -125,7 +125,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/atomicdex/api/
   ```
 </CodeGroup>
 
-#### Command (HW/HD wallet: derivation path option)
+#### Command (HD wallet: derivation path option)
 
 <CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
@@ -145,7 +145,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/atomicdex/api/
   ```
 </CodeGroup>
 
-#### Command (HW/HD wallet: account\_id, chain & address\_id option)
+#### Command (HD wallet: account\_id, chain & address\_id option)
 
 <CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
@@ -224,7 +224,7 @@ To get the status of your withdrawal transaction generation, use the `task::with
     "userpass": "testpsw",
     "method": "task::withdraw::status",
     "params": {
-      "task_id": "<TASK_ID>",
+      "task_id": 3,
       "forget_if_finished": false
     },
     "id": 0

@@ -1,16 +1,20 @@
-export const title = "AtomicDEX: Trezor Initialisation";
-export const description =
-  "Prepare your Trezor device for use in the AtomicDEX API, and authenticate using your PIN or phrase.";
+export const title = "Komodo DeFi Framework: Trezor Initialisation";
+export const description = "Prepare your Trezor device for use in the KomoDeFi API, and authenticate using your PIN or phrase.";
 
 import trezorpin from "@/public/images/api-images/trezor_pin.png";
 
 # Trezor Initialisation
 
-The methods below prepare your Trezor device for use within the AtomicDEX API. Once completed, you can authenticate using your PIN or phrase with [task::init\_trezor::user\_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action).
+The methods below prepare your Trezor device for use within the KomoDeFi API. Once completed, you can authenticate using your PIN or phrase with [task::init\_trezor::user\_action](/atomicdex/api/v20-dev/task_init_trezor/#user-action).
+
+<Note>
+  Methods with a `task::` prefix will be linked to a numeric
+  `task_id` value which can be used to query the status or outcome of a task.
+</Note>
 
 ## init {{label : 'task::init_trezor::init', tag : 'API-v2'}}
 
-Before using this method, launch the AtomicDEX API, and plug in your Trezor.
+Before using this method, launch the KomoDeFi API, and plug in your Trezor.
 
 #### Arguments
 
@@ -116,7 +120,7 @@ After running the `task::init_trezor::init` method, we can query the status of d
 
   *   `Initializing` - This is the normal task state. It does not require any action from the user.
 
-  *   `WaitingForTrezorToConnect` - The AtomicDEX API is waiting for the user to plugin a Trezor device.
+  *   `WaitingForTrezorToConnect` - The KomoDeFi API is waiting for the user to plugin a Trezor device.
 
   ```json
   {
@@ -129,7 +133,7 @@ After running the `task::init_trezor::init` method, we can query the status of d
   }
   ```
 
-  *   `FollowHwDeviceInstructions` - The AtomicDEX API is waiting for the user to follow instructions displayed on the device (e.g. clicking a button to confirm).
+  *   `FollowHwDeviceInstructions` - The KomoDeFi API is waiting for the user to follow instructions displayed on the device (e.g. clicking a button to confirm).
 
   ```json
   {
@@ -234,7 +238,7 @@ After running the `task::init_trezor::init` method, we can query the status of d
   }
   ```
 
-  *   `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/atomicdex/api/v20-dev/hd_wallets_overview/#details-for-hw-error-error-type) for more info.
+  *   `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/atomicdex/api/v20-dev/task_init_trezor/#details-for-hw-error-error-type) for more info.
 </CollapsibleSection>
 
 ## cancel {{label : 'task::init_trezor::cancel', tag : 'API-v2'}}
@@ -398,3 +402,70 @@ When you see the pin grid on your device, or it asks for a passphrase word, use 
   }
   ```
 </CollapsibleSection>
+
+## Details for `HwError` error type
+
+When requesting the status of a task, if an `error_type` of `HwError` is returned, the GUI / User should check the details in `error_data` field to know which action is required (as detailed below).
+
+### FoundUnexpectedDevice
+
+The connected Trezor device has a different pubkey value than what was specified in the `device_pubkey` parameter
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "status": "Error",
+    "details": {
+      "error": "Found unexpected device. Please re-initialize Hardware wallet",
+      "error_path": "lib.common_impl.coin_balance.utxo_common.hd_pubkey.hw_ctx",
+      "error_trace": "lib:93] common_impl:46] coin_balance:304] utxo_common:163] hd_pubkey:176] hw_ctx:149]",
+      "error_type": "HwError",
+      "error_data": "FoundUnexpectedDevice"
+    }
+  },
+  "id": null
+}
+```
+
+### FoundMultipleDevices
+
+Multiple Trezor devices are plugged in. Remove the additional devices, and keep the one you want to use plugged in.
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "status": "Error",
+    "details": {
+      "error": "Found multiple devices. Please unplug unused devices",
+      "error_path": "init_hw.crypto_ctx.hw_client",
+      "error_trace": "init_hw:151] crypto_ctx:248] crypto_ctx:354] hw_client:152] hw_client:126]",
+      "error_type": "HwError",
+      "error_data": "FoundMultipleDevices"
+    }
+  },
+  "id": null
+}
+```
+
+### NoTrezorDeviceAvailable
+
+No Trezor device detected by the KomoDeFi API. Make sure it is plugged in, or try a different USB cable / port.
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "status": "Error",
+    "details": {
+      "error": "No Trezor device available",
+      "error_path": "init_hw.crypto_ctx.hw_ctx.response.usb.libusb",
+      "error_trace": "init_hw:151] crypto_ctx:248] crypto_ctx:354] hw_ctx:120] response:136] usb:46] libusb:195]",
+      "error_type": "HwError",
+      "error_data": "NoTrezorDeviceAvailable"
+    }
+  },
+  "id": null
+}
+```

@@ -9,14 +9,15 @@ This method generates a raw transaction which should then be broadcast using [se
 
 ## Arguments
 
-| Structure | Type             | Description                                                                         |
-| --------- | ---------------- | ----------------------------------------------------------------------------------- |
-| coin      | string           | the name of the coin the user desires to withdraw                                   |
-| to        | string           | coins are withdrawn to this address                                                 |
-| amount    | string (numeric) | the amount the user desires to withdraw, ignored when `max=true`                    |
-| memo      | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem). |
-| max       | bool             | withdraw the maximum available amount                                               |
-| fee       | object           | Optional. A standard [FeeInfo](/atomicdex/api/common_structures/#fee-info) object.  |
+| Structure | Type             | Description                                                                                    |
+| --------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| coin      | string           | The name of the coin the user desires to withdraw                                              |
+| to        | string           | Coins are withdrawn to this address                                                            |
+| amount    | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                               |
+| memo      | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem).            |
+| max       | bool             | Withdraw the maximum available amount                                                          |
+| fee       | object           | A standard [FeeInfo](/atomicdex/api/v20/#fee-info) object.                                     |
+| from      | object           | HD wallets only. A standard [WithdrawFromInfo](/atomicdex/api/v20/#withdraw-from-info) object. |
 
 ### Response
 
@@ -35,75 +36,6 @@ This method generates a raw transaction which should then be broadcast using [se
 | kmd\_rewards                 | object (optional)          | an object containing information about accrued rewards; always exists if the coin is `KMD`                                                                                                  |
 | kmd\_rewards.amount          | string (numeric, optional) | the amount of accrued rewards                                                                                                                                                               |
 | kmd\_rewards.claimed\_by\_me | bool (optional)            | whether the rewards been claimed by me                                                                                                                                                      |
-
-### ⚠ Error types
-
-#### NotSufficientBalance
-
-The `available` balance is not sufficient to transfer the specified amount.
-
-| Structure | Type             | Description                                                                                                                                            |
-| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| coin      | string           | the name of the coin which balance is not sufficient. This coin name may differ from the requested coin. For example, ERC20 fees are paid by ETH (gas) |
-| available | string (numeric) | the balance available for transfer                                                                                                                     |
-| required  | string (numeric) | the amount required to transfer the specified amount. This amount is necessary but may not be sufficient                                               |
-
-#### ZeroBalanceToWithdrawMax
-
-The available balance is zero.
-
-| Structure | Type | Description |
-| --------- | ---- | ----------- |
-| (none)    |      |             |
-
-#### AmountTooLow
-
-The specified amount is too low. Required at least `threshold`.
-
-| Structure | Type             | Description                                          |
-| --------- | ---------------- | ---------------------------------------------------- |
-| amount    | string (numeric) | the amount the user was willing to transfer          |
-| threshold | string (numeric) | the `amount` has not to be less than the `threshold` |
-
-#### InvalidAddress
-
-The specified `to` address is not valid.
-
-| Structure | Type   | Description           |
-| --------- | ------ | --------------------- |
-| (none)    | string | the error description |
-
-#### InvalidFeePolicy
-
-The specified `fee` is not valid.
-
-| Structure | Type   | Description           |
-| --------- | ------ | --------------------- |
-| (none)    | string | the error description |
-
-#### NoSuchCoin
-
-The specified coin was not found or is not activated yet.
-
-| Structure | Type   | Description                                   |
-| --------- | ------ | --------------------------------------------- |
-| coin      | string | the not found `coin` specified in the Request |
-
-#### Transport
-
-The request was failed due to a network error.
-
-| Structure | Type   | Description                     |
-| --------- | ------ | ------------------------------- |
-| (none)    | string | the transport error description |
-
-#### InternalError
-
-The request was failed due to an AtomicDEX API internal error.
-
-| Structure | Type   | Description                    |
-| --------- | ------ | ------------------------------ |
-| (none)    | string | the internal error description |
 
 ### 📌 Examples
 
@@ -154,23 +86,65 @@ The request was failed due to an AtomicDEX API internal error.
     "id": 0
   }
   ```
+</CollapsibleSection>
 
-  #### Response (NotSufficientBalance error)
+#### HD Withdraw with derivation\_path
 
+<CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
   ```json
   {
+    "userpass": "testpsw",
     "mmrpc": "2.0",
-    "error": "Not enough DOC to withdraw: available 69.75066225, required at least 1000.00001",
-    "error_path": "utxo_common",
-    "error_trace": "utxo_common:1379] utxo_common:449]",
-    "error_type": "NotSufficientBalance",
-    "error_data": {
-      "coin": "DOC",
-      "available": "69.75066225",
-      "required": "1000.00001"
+    "method": "withdraw",
+    "params": {
+      "coin": "MCL",
+      "to": "RNBA756iaFCx2Uhya3pvCufbeyovAaknJL",
+      "amount": 1.025,
+      "from": {
+        "derivation_path": "m/44'/141'/0'/0/0"
+      }
     },
     "id": 0
   }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (KMD success)
+
+  ```json
+  # TODO: Add response
+  ```
+</CollapsibleSection>
+
+#### HD Withdraw with `account_id`, `chain` and `address_id`
+
+<CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "withdraw",
+    "params": {
+      "coin": "VRSC",
+      "to": "RNBA756iaFCx2Uhya3pvCufbeyovAaknJL",
+      "amount": 1.025,
+      "from": {
+        "account_id": 0,
+        "chain": "External",
+        "address_id": 2
+      }
+    },
+    "id": 0
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (KMD success)
+
+  ```json
+  # TODO: Add response
   ```
 </CollapsibleSection>
 
@@ -374,20 +348,6 @@ The request was failed due to an AtomicDEX API internal error.
       "coin": "ETH",
       "internal_id": ""
     },
-    "id": 0
-  }
-  ```
-
-  #### Response (InvalidFeePolicy error - attempt to use UtxoFixed or UtxoPerKbyte for ETH coin)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Invalid fee policy: Expected 'EthGas' fee type, found UtxoFixed",
-    "error_path": "eth",
-    "error_trace": "eth:535]",
-    "error_type": "InvalidFeePolicy",
-    "error_data": "Expected 'EthGas' fee type, found UtxoFixed",
     "id": 0
   }
   ```
