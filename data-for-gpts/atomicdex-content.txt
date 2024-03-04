@@ -22212,7 +22212,8 @@ For a walkthrough covering multiple tutorials in a targeted fashion, please see 
 
 The AtomicDEX API section contains all available API commands.
 
-These API commands can also be called Remote Procedure Calls, or RPCs.
+These API commands can also be called Remote Procedure Calls (or RPCs) and are used to interact with the AtomicDEX daemon using a variety of languages.
+Recently, a `komodefi-cli` binary has been introduced to simplify the process of [interacting with the AtomicDEX daemon from the command line](/atomicdex/tutorials/using-komodefi-cli-in-console/).
 export const title = "Add and Activate Coins on AtomicDEX Mobile";
 export const description =
   "Activate coins on AtomicDEX Mobile by following simple steps and enjoy seamless trading.";
@@ -25755,3 +25756,162 @@ ssh -o IdentitiesOnly=yes -i ~/.ssh/mm2.pem admin@$nodeIp 'curl -s --url "http:/
 ```
 
 Edit the command above as necessary to exchange one curl command for another from [the AtomicDEX API.](/atomicdex/api/)
+export const title = "Using KomoDeFi CLI in Console";
+export const description = "This guide details the configuration and usage of the komodefi-cli binary.";
+
+# Using KomoDeFi CLI in Console
+
+For convenience, the  standalone `komodefi-cli` binary is provided to be used for interacting with the KomoDeFi network from the command line.
+
+## Building KomoDeFi CLI
+
+Refer to [https://github.com/KomodoPlatform/komodo-defi-framework?tab=readme-ov-file#building-from-source](https://github.com/KomodoPlatform/komodo-defi-framework?tab=readme-ov-file#building-from-source) for instructions on installing dependencies and preparing your build environment.
+
+Once it is ready, you can build the komodefi-cli binary by running the following command from the root folder of the project repository:
+
+```bash
+cargo build --manifest-path ./mm2src/komodefi_cli/Cargo.toml --out-dir $(pwd)/bin -Z unstable-options
+```
+
+We also add the `bin` directory to the `PATH` environment variable so that the `komodefi-cli` binary can be executed from any location.
+
+```bash
+export PATH=${PATH}:$(pwd)/bin
+```
+
+## Configuration
+
+#### Setting Default CLI Root Path
+
+You can customize the default root directory for `komodefi-cli` by setting the `KOMODEFI_CLI_ROOT` environment variable. This allows you to specify a location for saving configuration files, binaries, and other related data.
+
+```bash
+export KOMODEFI_CLI_ROOT=$HOME/komodefi-cli
+```
+
+#### Downloading the Core API binary
+
+Before using the `komodefi-cli` binary, you need to download the Core API binary. Running the following command to download the latest release:
+
+```bash
+komodefi-cli mm2 download
+```
+
+#### Configuring the Core API
+
+For the `komodefi-cli` to work, you need to configure the Core API by setting the `coins` data and the information required for an [MM2.json](/atomicdex/tutorials/atomicdex-walkthrough/#launching-the-atomic-dex-api) file. For more information, run the following command:
+
+```bash
+komodefi-cli init --help
+```
+
+Which will return
+
+```bash
+Config is not set
+Initialize a predefined coin set and configuration to start mm2 instance with
+
+Usage: komodefi-cli init [OPTIONS]
+
+Options:
+      --mm-coins-path <MM_COINS_PATH>  Coin set file path [default: coins] [aliases: coins]
+      --mm-conf-path <MM_CONF_PATH>    mm2 configuration file path [default: MM2.json] [aliases: conf]
+  -h, --help                           Print help
+```
+
+If you have an existing coins file and/or MM2.json file, you can use the `--mm-coins-path` and `--mm-conf-path` options to specify the file paths, as below.
+
+```bash
+komodefi-cli init --mm-coins-path /path/to/coins --mm-conf-path /path/to/MM2.json
+```
+
+Alternatively, run `komodefi-cli init` without any options to create the `coins` and `MM2.json` files interactively. Pressing enter for each option will use the default values. In the case of the mnemonic phrase, you can enter your own mnemonic phrase or press enter to use a newly generated one.
+
+```bash
+$ komodefi-cli init 
+    Config is not set
+    Start collecting mm2_cfg into: /home/smk762/komodefi-cli/MM2.json
+    > gui is set by default: komodefi-cli
+    > What is the network `mm2` is going to be a part, netid: 8762
+    > What is the seed phrase: before device quantum scan agent gift sauce flame devote tiny ripple west
+    > Allow weak password: No
+    > What is the rpc_password: <tb+UD32
+    > What is dbdir None
+    > Use secure connection for rpc: No
+    > What is rpcip: None
+    > What is the rpcport: 7783
+    > What is rpc_local_only: 
+    > What is i_am_a_seed: 
+    Reading seed nodes until tap enter is met
+    > What is the next seednode: None
+    > What is enable_hd: 
+    mm2_cfg has been writen into: /home/smk762/komodefi-cli/MM2.json
+    Getting coin set from: https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins
+    Got coins data, written into: /home/smk762/komodefi-cli/coins
+    Start getting activation_scheme from: "/home/smk762/komodefi-cli/activation_scheme.json"
+    Download activation_scheme from: https://stats.kmd.io/api/table/coin_activation/
+    Initialization done
+```
+
+#### Starting the Core API
+
+After the configuration is set, you can start the Core API by running `komodefi-cli mm2 start`. You can also use the `--help` option to see the available options for this command:
+
+```bash
+komodefi-cli mm2 start -help  
+Start mm2 instance  
+  
+Usage: komodefi-cli mm2 start [OPTIONS]  
+  
+Options:  
+     --mm-conf-path <MM_CONF_PATH>    mm2 configuration file path [aliases: conf]  
+     --mm-coins-path <MM_COINS_PATH>  Coin set file path [aliases: coins]  
+     --mm-log <MM_LOG>                Log file path [aliases: log]  
+ -h, --help                           Print help
+```
+
+For example, to start the Core API and save its runtime logs to \~/logs/mm2.log, you can run the following command:
+
+```bash
+$ komodefi-cli mm2 start --mm-log ~/logs/mm2.log  
+> Set env MM_LOG as: ~/logs/mm2.log  
+> Started child process: "mm2", pid: 459264
+```
+
+## Usage
+
+From here, you are ready to use the `komodefi-cli` binary to interact with the KomoDeFi network. You can use the `--help` option to see the available commands and options.
+
+```bash
+komodefi-cli --help 
+Config is not set
+Provides a CLI interface and facilitates interoperating to komodo defi platform through the mm2 service
+
+Usage: komodefi-cli <COMMAND>
+
+Commands:
+  init                Initialize a predefined coin set and configuration to start mm2 instance with
+  config              Manage rpc_password and mm2 RPC URL
+  mm2                 Manage mm2 instance commands
+  coin                Coin commands: enable, disable etc.
+  wallet              Wallet commands: balance, withdraw etc.
+  sell                Put a selling request
+  buy                 Put a buying request
+  set-price           Place an order on the orderbook. The setprice order is always considered a sell
+  update-maker-order  Update order on the orderbook [aliases: update]
+  order               Order listing commands: book, history, depth etc. [aliases: orders]
+  swaps               Swap related commands [aliases: swap]
+  cancel              Cancel one or many orders
+  utility             Utility commands [aliases: util, pubkeys, pubkey]
+  message             Message signing commands: sign, verify)
+  network             Network commands
+  version-stat        Version statistic commands [aliases: stat, vstat]
+  task                Tracking the status of long-running commands
+  help                Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+For more details and examples of commands available in `komodefi-cli`, refer to the [komodefi-cli documentation](https://github.com/KomodoPlatform/komodo-defi-framework/blob/1799-swap-commands/mm2src/komodefi_cli/src/doc/CLI_REFERENCE.md) within the [Komodo DeFi Framework](https://github.com/KomodoPlatform/komodo-defi-framework) repository.
