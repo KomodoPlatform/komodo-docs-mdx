@@ -1,11 +1,11 @@
-export const title = "AtomicDEX Method: My TX History";
+export const title = "KomoDeFi Method: My TX History";
 export const description = "The my_tx_history method allows you to view the transaction history of coins.";
 
 # my\_tx\_history
 
 To use this method, you must activate your coin with `"tx_history": true`. The response will vary depending on the coin.
 Currently only BCH & SLP tokens are supported in the master/release API. In the latest dev API, UTXO coins, QTUM, and Tendermint/Tendermint tokens are also supported.
-For ZHTLC coins, you must use the [z\_coin\_tx\_history](/atomicdex/api/v20-dev/task_enable_z_coin/#z-coin-transaction-history) method.
+For ZHTLC coins, you must use the [z\_coin\_tx\_history](/atomicdex/api/v20-dev/zhtlc_coins/transaction_history/) method.
 For all other coins, use the legacy [my\_tx\_history](/atomicdex/api/legacy/my_tx_history/#my-tx-history) method.
 
 ## Arguments
@@ -14,7 +14,8 @@ For all other coins, use the legacy [my\_tx\_history](/atomicdex/api/legacy/my_t
 | --------------- | ------- | ------------------------------------------------------------------------------------------------ |
 | coin            | string  | Ticker of the coin to get history for.                                                           |
 | limit           | integer | Optional. Limits the number of returned transactions. Defaults to `10`. Ignored if `max = true`. |
-| paging\_options | object  | Optional. A standard [Pagination](/atomicdex/api/common_structures/#pagination) object.          |
+| paging\_options | object  | Optional. A standard [Pagination](/atomicdex/api/v20/#pagination) object.                        |
+| target          | object  | Optional. A standard [HistoryTarget](/atomicdex/api/v20/#history-target) object.                 |
 
 #### Response
 
@@ -30,7 +31,171 @@ For all other coins, use the legacy [my\_tx\_history](/atomicdex/api/legacy/my_t
 | current\_block | number           | the number of the latest block of coin blockchain                                                                                                                                         |
 | sync\_status   | object           | A standard [SyncStatus](/atomicdex/api/common_structures/#sync-status/) object. Provides the information that helps to track the progress of transaction history preloading at background |
 
-## Request (BCH from page 2)
+## HD Wallet Account Request
+
+<CodeGroup title="" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "my_tx_history",
+    "params": {
+      "coin": "DOC",
+      "limit": 10,
+      "paging_options": {
+        "PageNumber": 1
+      },
+      "target": {
+        "type": "account_id",
+        "account_id": 77
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ### Response
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "coin": "DOC",
+        "target": {
+            "type": "account_id",
+            "account_id": 77
+        },
+        "current_block": 2066531,
+        "transactions": [
+            {
+                "tx_hex": "0400008085202f890165d40f00c0b4395ccdbe6d4f3124fa8b06d4910e5327b67c8186dd4b55afa124030000006b483045022100a3fe466d53ce9e5429608427e0d0224e8923d86dabf5b6c4b4d54dae7c060acd022039d165e1e245efd93a9172ab0a7837985310b4beccd6e05be1894cd66e0912cc012102d09f2cb1693be9c0ea73bb48d45ce61805edd1c43590681b02f877206078a5b3ffffffff0400e1f505000000001976a91479bdbbf2302fa86c7c5861ddc782e6e5776a546d88ac00c2eb0b000000001976a91479bdbbf2302fa86c7c5861ddc782e6e5776a546d88aca01f791c000000001976a91479bdbbf2302fa86c7c5861ddc782e6e5776a546d88ace04728b93f0200001976a91490a0d8ba62c339ade97a14e81b6f531de03fdbb288ac00000000000000000000000000000000000000",
+                "tx_hash": "e5cd671c71f9a2564cd05057ee94be86bd215df257bfb7408b9ee6deb1e461c5",
+                "from": [
+                    "RNTv4xTLLm26p3SvsQCBy9qNK7s1RgGYSB"
+                ],
+                "to": [
+                    "RLNu8gszQ8ENUrY3VSyBS2714CNVwn1f7P",
+                    "RNTv4xTLLm26p3SvsQCBy9qNK7s1RgGYSB"
+                ],
+                "total_amount": "24734.9033",
+                "spent_by_me": "0",
+                "received_by_me": "7.777",
+                "my_balance_change": "7.777",
+                "block_height": 2051968,
+                "timestamp": 1693906841,
+                "fee_details": {
+                    "type": "Utxo",
+                    "coin": "DOC",
+                    "amount": "0.0001"
+                },
+                "coin": "DOC",
+                "internal_id": "e5cd671c71f9a2564cd05057ee94be86bd215df257bfb7408b9ee6deb1e461c5",
+                "transaction_type": "StandardTransfer",
+                "memo": null,
+                "confirmations": 14564
+            }
+        ],
+        "sync_status": {
+            "state": "Finished"
+        },
+        "limit": 10,
+        "skipped": 0,
+        "total": 1,
+        "total_pages": 1,
+        "paging_options": {
+            "PageNumber": 1
+        }
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## HD Wallet Address Request
+
+<CodeGroup title="" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "my_tx_history",
+    "params": {
+      "coin": "DOC",
+      "limit": 1,
+      "paging_options": {
+        "PageNumber": 1
+      },
+      "target": {
+        "type": "address_id",
+        "account_id": 0,
+        "chain": "External",
+        "address_id": 1
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ### Response
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "coin": "DOC",
+          "target": {
+              "type": "address_id",
+              "account_id": 0,
+              "chain": "External",
+              "address_id": 1
+          },
+          "current_block": 2066531,
+          "transactions": [
+              {
+                  "tx_hex": "0400008085202f8901c97b980d21538685a1fa82e1bb0c3a25b2dfaeaecb10647403b48afaefdcef3d010000006b483045022100d4ec136c54cda3861916e2390f0c8afc5348ce7844eaecb98da1bd2c964703280220107bb95194bdb51b9fd584d1834357376288b1ed5185a2bae34b290947683f5a01210325f62245ee44b9e586e71ef462833d8aa32ae2a05d06a9b78a9fb95b7a7d2a3fffffffff0280969800000000001976a914f26650dc9aa4e4505978ad635cdb15491cee70e188ace07c5205000000001976a914e30fff4883a28b09889f3e94c24392c899d2833e88ac930cf264000000000000000000000000000000",
+                  "tx_hash": "8c6456383d7d112ec400597739e07a3c50557a4ec399b8993312d8c4780ce973",
+                  "from": [
+                      "RVyndZp3ZrhGKSwHryyM3Kcz9aq2EJrW1z"
+                  ],
+                  "to": [
+                      "RVyndZp3ZrhGKSwHryyM3Kcz9aq2EJrW1z",
+                      "RXNtAyDSsY3DS3VxTpJegzoHU9bUX54j56"
+                  ],
+                  "total_amount": "0.99293",
+                  "spent_by_me": "0.99293",
+                  "received_by_me": "0.99292",
+                  "my_balance_change": "-0.00001",
+                  "block_height": 2046628,
+                  "timestamp": 1693584717,
+                  "fee_details": {
+                      "type": "Utxo",
+                      "coin": "DOC",
+                      "amount": "0.00001"
+                  },
+                  "coin": "DOC",
+                  "internal_id": "8c6456383d7d112ec400597739e07a3c50557a4ec399b8993312d8c4780ce973",
+                  "transaction_type": "StandardTransfer",
+                  "memo": null,
+                  "confirmations": 19904
+              }
+          ],
+          "sync_status": {
+              "state": "Finished"
+          },
+          "limit": 1,
+          "skipped": 0,
+          "total": 10,
+          "total_pages": 10,
+          "paging_options": {
+              "PageNumber": 1
+          }
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
 
 <CodeGroup title="" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
   ```json
@@ -323,61 +488,3 @@ For all other coins, use the legacy [my\_tx\_history](/atomicdex/api/legacy/my_t
   }
   ```
 </CollapsibleSection>
-
-## Error cases
-
-### Error - Coin not active
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "TTT-SLP",
-  "error_path": "my_tx_history_v2.lp_coins",
-  "error_trace": "my_tx_history_v2:389] lp_coins:2847]",
-  "error_type": "CoinIsNotActive",
-  "error_data": "TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Coin not compatible
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "TTT-SLP",
-  "error_path": "my_tx_history_v2",
-  "error_trace": "my_tx_history_v2:336]",
-  "error_type": "NotSupportedFor",
-  "error_data": "TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Coin enabled without tx\_history = true
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Storage is not initialized for TTT-SLP",
-  "error_path": "my_tx_history_v2",
-  "error_trace": "my_tx_history_v2:343]",
-  "error_type": "StorageIsNotInitialized",
-  "error_data": "Storage is not initialized for TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Local database failed
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
-  "error_path": "my_tx_history_v2.sql_tx_history_storage",
-  "error_trace": "my_tx_history_v2:351] sql_tx_history_storage:472]",
-  "error_type": "StorageError",
-  "error_data": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
-  "id": null
-}
-```

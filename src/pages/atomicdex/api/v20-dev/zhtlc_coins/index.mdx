@@ -1,0 +1,25 @@
+export const title = "AtomicDEX: ZHTLC Coin Methods";
+export const description =
+  "The methods in this document allow activation and management of ZHTLC coins like ARRR & ZOMBIE.";
+
+# ZHTLC Coin Methods
+
+ZHTLC coins, like Pirate (ARRR) and the test coin ZOMBIE take a little longer to enable, and use a new two step method to enable.
+Activation can take a little while the first time, as we need to download some block cache data, and build a wallet database.
+Subsequent enabling will be faster, but still take a bit longer than other coins. The second step for activation is optional, but allows us to check the status of the activation process.
+
+To activate ZHTLC coins, you need to use the [task::enable\_z\_coin](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods:
+
+*   Initialize activation with with [task::enable\_z\_coin::init](/atomicdex/api/v20-dev/zhtlc_coins/activation/#initialize-zhtlc-coin-activation)
+*   Query activation status with [task::enable\_z\_coin::status](/atomicdex/api/v20-dev/zhtlc_coins/activation/#activation-status)
+*   Cancel activation with [task::enable\_z\_coin::cancel](/atomicdex/api/v20-dev/zhtlc_coins/activation/#cancel-activation)
+
+To withdraw ZHTLC coins, you need to use the [task::withdraw](/atomicdex/api/v20-dev/task_withdraw/#withdraw-tasks) methods:
+
+*   Generate a transaction with [task::withdraw::init](/atomicdex/api/v20-dev/task_withdraw/#init)
+*   Query its status with [task::withdraw::status](/atomicdex/api/v20-dev/task_withdraw/#status)
+*   Cancel generating the transaction with [task::withdraw::cancel](/atomicdex/api/v20-dev/task_withdraw/#cancel)
+*   Broadcast the transaction with [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction/#send-raw-transaction)
+
+ZHTLC coins are not compatible with the [v2 my\_tx\_history](/atomicdex/api/v20/my_tx_history/) and [legacy my\_tx\_history](/atomicdex/api/legacy/my_tx_history/) methods.
+To get the transaction history for ZHTLC coins, you need to use the [z\_coin\_tx\_history](/atomicdex/api/v20-dev/zhtlc_coins/transaction_history/) method.

@@ -51,6 +51,7 @@ jobs:
         run: cd utils/js && npm ci
 
       - name: Get file and Author data
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: node utils/js/get_file_author_data.js
 
       - name: Validate and Update links
@@ -63,6 +64,7 @@ jobs:
         run: node utils/js/h1_presence_checker.js
 
       - name: Prepare data files for GPTs
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: node utils/js/create_data_for_gpts.js
 
       - name: Ensure change logs are updated

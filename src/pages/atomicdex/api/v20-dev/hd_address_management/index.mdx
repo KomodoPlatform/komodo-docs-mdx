@@ -1,87 +1,9 @@
 export const title = "AtomicDEX: HD Address Management";
 export const description = "The methods in this document allow generation of HD addresses on AtomicDEX.";
 
-# Heirarchical Deterministic Address Management
+# Hierarchical Deterministic Address Management
 
 A hierarchical-deterministic (HD) wallet generates a new key pair from a master key pair, allowing for multiple addresses to be generated from the same seed so that change from transactions go to a previously unused address, enhancing privacy and security. The hierarchical structure resembles that of a tree, with the master key “determining” the key pairs that follow it in the hierarchy. If you have activated a coin with the [task::enable\_utxo::init](/atomicdex/api/v20-dev/task_enable_utxo/#init) or [task::enable\_qtum::init](/atomicdex/api/v20-dev/task_enable_qtum/#init) and used the `"priv_key_policy": "Trezor"` parameter, you can use the methods below to generate new addresses.
-
-## can\_get\_new\_address
-
-To avoid generating too many addresses at once, we can use a `gap_limit` constraint so that no more than a specific amount of unused addresses can be generated before more addresses can be generated.
-
-#### Arguments
-
-| Parameter   | Type    | Description                                                                                                                                                                                                                                                                   |
-| ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                      |
-| account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                        |
-| chain       | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| gap\_limit  | integer | The maximum number of empty addresses in a row.                                                                                                                                                                                                                               |
-
-#### Response
-
-| Parameter              | Type    | Description                                                                                                  |
-| ---------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
-| result                 | string  | Returns with value `success` when successful, otherwise returns the error values below                       |
-| result.allowed         | boolean | Whether or not you can get a new address.                                                                    |
-| result.reason          | string  | The reason you cant get a new address (if allowed is `false`).                                               |
-| result.details         | object  | Contains extra contextual information about the reason why allowed is `false`                                |
-| result.details.address | boolean | If reason is `LastAddressNotUsed`, this is the address that should be used before you can get a new address. |
-
-Other reasons you might not be able to get a new address are:
-
-*   `EmptyAddressesLimitReached` - Last gap\_limit addresses are still unused.
-*   `AddressLimitReached` - Addresses limit reached. Currently, the limit is [2^31](https://www.wolframalpha.com/input?i=2%5E%2832%29)
-
-#### 📌 Examples
-
-#### Command
-
-<CodeGroup title="" tag="POST" label="can_get_new_address" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "testpsw",
-    "mmrpc": "2.0",
-    "method": "can_get_new_address",
-    "params": {
-      "coin": "DOC",
-      "account_id": 0,
-      "chain": "External",
-      "gap_limit": 20
-    }
-  }
-  ```
-</CodeGroup>
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (success, allowed)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "allowed": true
-    },
-    "id": null
-  }
-  ```
-
-  #### Response (success, not allowed)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "allowed": false,
-      "reason": "LastAddressNotUsed",
-      "details": {
-        "address": "RMHFCEWacWP7dYw1DWxH3TF5YW8q8hM5z7"
-      }
-    },
-    "id": null
-  }
-  ```
-</CollapsibleSection>
 
 ## get\_new\_address
 
@@ -89,29 +11,20 @@ If we don't already have too many unused addresses, we can use the `get_new_addr
 
 #### Arguments
 
-| Parameter   | Type    | Description                                                                                                                                                                                                                                                                   |
-| ----------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                      |
-| account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                        |
-| chain       | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| gap\_limit  | integer | The maximum number of empty addresses in a row.                                                                                                                                                                                                                               |
+| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                                 |
+| ----------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                                                                    |
+| account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                                                                      |
+| chain       | string  | `Internal`, or `External`. Defaults to `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
+| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided                                                                                                                                                                                       |
 
 #### Response
 
-| Parameter                          | Type            | Description                                                                                                                                                                                                                                                                 |
-| ---------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| result                             | string          | Returns with value `success` when successful, otherwise returns the error values below                                                                                                                                                                                      |
-| result.new\_address                | object          | Contains details about your new address.                                                                                                                                                                                                                                    |
-| result.address                     | string          | The new address that was generated.                                                                                                                                                                                                                                         |
-| result.details                     | object          | Contains extra contextual information about the reason why allowed is `false`                                                                                                                                                                                               |
-| result.details.address             | boolean         | If reason is `LastAddressNotUsed`, this is the address that should be used before you can get a new address.                                                                                                                                                                |
-| result.details.derivation\_path    | string          | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.                                                                                                                                                                 |
-| result.details.chain               | string          | `External` or `Internal` External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-| result.details.balance             | object          | Contains the spendable and unspendable balance for this address                                                                                                                                                                                                             |
-| result.details.balance.spendable   | string(numeric) | Spendable balance for this address                                                                                                                                                                                                                                          |
-| result.details.balance.unspendable | string(numeric) | Unspendable balance for this address (e.g. from unconfirmed incoming transactions)                                                                                                                                                                                          |
+| Parameter    | Type   | Description                                                               |
+| ------------ | ------ | ------------------------------------------------------------------------- |
+| new\_address | object | A standard [NewAddressInfo](/atomicdex/api/v20/#new-address-info) object. |
 
-Other reasons you might not be able to get a new address are:
+Some reasons you might not be able to get a new address are:
 
 *   `EmptyAddressesLimitReached` - Last gap\_limit addresses are still unused.
 *   `AddressLimitReached` - Addresses limit reached. Currently, the limit is [2^31](https://www.wolframalpha.com/input?i=2%5E%2832%29)
@@ -141,29 +54,156 @@ Other reasons you might not be able to get a new address are:
 
   ```json
   {
-    "mmrpc": "2.0",
-    "result": {
-      "allowed": true
-    },
-    "id": null
+      "mmrpc": "2.0",
+      "result": {
+          "new_address": {
+              "address": "RDKyU11wFTa8kYETaDbr4YuJZG8C4e6JUm",
+              "derivation_path": "m/44'/141'/0'/0/3",
+              "chain": "External",
+              "balance": {
+                  "spendable": "0",
+                  "unspendable": "0"
+              }
+          }
+      },
+      "id": null
   }
   ```
+</CollapsibleSection>
 
-  #### Response (success, not allowed)
+## task\_scan\_for\_new\_addresses\_init
+
+#### Arguments
+
+| Parameter   | Type    | Description                                                                                                                           |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string  | The ticker of the coin you want to scan addresses for                                                                                 |
+| account\_id | integer | Optional, HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                  |
+| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided |
+
+#### Response
+
+| Parameter | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| task\_id  | integer | An identifying number which is used to query task status. |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="get_new_address" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "task::scan_for_new_addresses::init",
+    "params": {
+      "coin": "DGB",
+      "account_index": 0,
+      "gap_limit": 20
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
 
   ```json
   {
     "mmrpc": "2.0",
     "result": {
-      "new_address": {
-        "address": "RRqF4cYniMwYs66S4QDUUZ4GJQFQF69rBE",
-        "derivation_path": "m/44'/141'/0'/0/3",
-        "chain": "External",
-        "balance": {
-          "spendable": "0",
-          "unspendable": "0"
+        "task_id": 3
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## task\_scan\_for\_new\_addresses\_status
+
+Use the `task::scan_for_new_addresses::status` method to query the status of a HD address scanning task.
+
+#### Arguments
+
+| Parameter            | Type    | Description                                                                               |
+| -------------------- | ------- | ----------------------------------------------------------------------------------------- |
+| task\_id             | integer | The identifying number returned when initiating the withdrawal process.                   |
+| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
+
+#### Response
+
+| Parameter | Type             | Description                                                                                    |
+| --------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| status    | string           | Status of the task. `Ok`, `InProgress` or `Error`.                                             |
+| details   | string or object | Once complete, a standard [ScanAddressesInfo](/atomicdex/api/v20/#scan-addresses-info) object. |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="get_new_address" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "task::scan_for_new_addresses::status",
+    "params": {
+      "task_id": 3
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success, no new address found)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "status": "Ok",
+        "details": {
+            "account_index": 0,
+            "derivation_path": "m/44'/141'/0'",
+            "new_addresses": []
         }
-      }
+    },
+    "id": null
+  }
+  ```
+
+  #### Response (success, new address found)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "status": "Ok",
+        "details": {
+            "account_index": 0,
+            "derivation_path": "m/44'/141'/0'",
+            "new_addresses": [
+                {
+                    "address": "RXaMK6RtvwPiy67oramBfFXCgMobBofMWv",
+                    "derivation_path": "m/44'/141'/0'/0/3",
+                    "chain": "External",
+                    "balance": {
+                        "spendable": "0",
+                        "unspendable": "0"
+                    }
+                },
+                {
+                    "address": "RJkjq4DeQ5vTNJxa1gHoS4y31ZU9F3aisu",
+                    "derivation_path": "m/44'/141'/0'/0/4",
+                    "chain": "External",
+                    "balance": {
+                        "spendable": "0.444",
+                        "unspendable": "0"
+                    }
+                }
+            ]
+        }
     },
     "id": null
   }

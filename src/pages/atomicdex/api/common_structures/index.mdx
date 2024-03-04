@@ -9,6 +9,7 @@ The objects are in the request or response of multiple Komodo DeFi SDK methods h
 *   [Swaps](/atomicdex/api/common_structures/swaps/)
 *   [Lightning Network](/atomicdex/api/common_structures/lightning/)
 *   [Non-fungible Tokens](/atomicdex/api/common_structures/nfts/)
+*   [Wallet Operations](/atomicdex/api/common_structures/wallet/)
 
 Structures which are used in more than one section are listed below:
 
@@ -151,10 +152,54 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 
 | Parameter  | Type             | Description                                                                                                                               |
 | ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`                                  |
 | amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
-| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+| gas\_price | string (numeric) | Used only when fee type is `Qrc20Gas` or `EthGas`; sets the gas price in `gwei` units.                                                    |
+| gas\_price | number (double)  | Used only when fee type is `CosmosGas`; sets the gas price.                                                                               |
+| gas        | number (integer) | Used only when fee type is `EthGas`; sets the gas limit for transaction                                                                   |
+| gas\_limit | number (integer) | Used only when fee type is `Qrc20Gas` or `CosmosGas`; sets the gas limit for transaction                                                  |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Examples
+
+  ```json
+  {
+    "type": "UtxoFixed",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "UtxoPerKbyte",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "EthGas",
+    "gas_price": "10",
+    "gas": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "Qrc20Gas",
+    "gas_price": "10",
+    "gas_limit": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "CosmosGas",
+    "gas_price": 0.05,
+    "gas_limit": 21000
+  }
+  ```
+</CollapsibleSection>
 
 ### ExtendedFeeInfo
 
@@ -284,6 +329,69 @@ The `numerator` and `denominator` are BigInteger numbers represented as a sign a
       "sync_status": {
         "state": "Finished"
       }
+  }
+  ```
+</CollapsibleSection>
+
+### WithdrawFee
+
+The `WithdrawFee` object varies depending on the coin or token type. Refer to the examples to view the object structure for each type.
+
+| Parameter       | Type           | Description                                                                       |
+| --------------- | -------------- | --------------------------------------------------------------------------------- |
+| type            | string         | The fee type. Either `Utxo`, `Tendermint`, `Qrc20` or `Eth`.                      |
+| amount          | numeric string | `Utxo` or `Tendermint` type only. The fee amount.                                 |
+| coin            | string         | The coin which will be used to pay the transaction fee.                           |
+| gas             | integer        | `Eth` type only. The amount of gas to be used for the transaction.                |
+| gas\_price      | numeric string | `Eth` or `Qrc20` type only. Price per unit of gas to be used for the transaction. |
+| gas\_limit      | numeric string | `Tendermint` or `Qrc20` type only. Maximum gas to be used for the transaction.    |
+| miner\_fee      | numeric string | `Tendermint` type only. Fee to mine the transaction.                              |
+| total\_fee      | numeric string | `Eth` type only. Gas price multiplied by gas amount.                              |
+| total\_gas\_fee | numeric string | `Qrc20` type only. Gas price multiplied by gas amount.                            |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example of Eth type
+
+  ```json
+  {
+    "type": "Eth",
+    "coin": "BNB",
+    "gas": 109739,
+    "gas_price": "0.000000003",
+    "total_fee": "0.000329217"
+  }
+  ```
+
+  #### Example of Qrc20 type
+
+  ```json
+  {
+    "type": "Qrc20",
+    "coin": "tQTUM",
+    "miner_fee": "0.00000447",
+    "gas_limit": 100000,
+    "gas_price": 40,
+    "total_gas_fee": "0.04"
+  }
+  ```
+
+  #### Example of Tendermint type
+
+  ```json
+  {
+    "type": "Tendermint",
+    "coin": "IRIS",
+    "amount": "0.038553",
+    "gas_limit": 100000
+  }
+  ```
+
+  #### Example of Utxo type
+
+  ```json
+  {
+    "type": "Utxo",
+    "amount": "0.00001"
   }
   ```
 </CollapsibleSection>

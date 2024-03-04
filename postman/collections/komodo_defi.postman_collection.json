@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "9621b583-2009-472c-96ea-9a907d86ac77",
-		"name": "mm2_dev",
+		"_postman_id": "01b1b7d4-48d2-414d-b721-e1e7ea1c2c3a",
+		"name": "komodo_defi",
+		"description": "Komodo DeFi Framework RPC methods",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "16279216"
+		"_exporter_id": "12719479"
 	},
 	"item": [
 		{
@@ -16,7 +17,7 @@
 							"name": "Electrum",
 							"item": [
 								{
-									"name": "electrum UTXO",
+									"name": "electrum (UTXO TCP/SSL)",
 									"event": [
 										{
 											"listen": "prerequest",
@@ -44,6 +45,45 @@
 										"body": {
 											"mode": "raw",
 											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10017\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10017\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10017\"\r\n        }\r\n    ]\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "electrum (UTXO WSS)",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10020\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10020\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10020\"\r\n        }\r\n    ]\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -330,7 +370,8 @@
 									"host": [
 										"{{address}}"
 									]
-								}
+								},
+								"description": "Disables the selected coin."
 							},
 							"response": []
 						},
@@ -774,7 +815,8 @@
 									"host": [
 										"{{address}}"
 									]
-								}
+								},
+								"description": "Returns the confirmed and unconfirmed balance of the requested coin."
 							},
 							"response": []
 						},
@@ -2317,7 +2359,7 @@
 					]
 				},
 				{
-					"name": "mm2 Info",
+					"name": "Utility",
 					"item": [
 						{
 							"name": "help",
@@ -2560,7 +2602,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::init\",\r\n    \"params\": {\r\n        \"ticker\":\"DOC\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\":\"Electrum\", // Accepted values: \"Electrum\", \"Native\"\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:10017\"\r\n                            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n                            // \"disable_cert_verification\": false\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:10017\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:10017\"\r\n                        }\r\n                    ]\r\n                } // Required only if: \"rpc\": \"Electrum\"\r\n            }\r\n            // \"tx_history\": false,\r\n            // \"required_confirmations\": 1, // Default: Coin Config\r\n            // \"requires_notarization\": false, // Default: Coin Config\r\n            // \"address_format\": {\r\n            //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n            // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n            // }, // Default: Coin Config\r\n            // \"utxo_merge_params\": null,\r\n            // // \"utxo_merge_params\": {\r\n            // //     \"merge_at\":50\r\n            // //     // \"check_every\":10,\r\n            // //     // \"max_merge_at_once\":100\r\n            // //     },\r\n            // \"check_utxo_maturity\": false,\r\n            // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n            // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"min_addresses_number\": 3 // used only if \"priv_key_policy\": \"Trezor\"\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::init\",\r\n    \"params\": {\r\n        \"ticker\":\"DOC\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\":\"Electrum\", // Accepted values: \"Electrum\", \"Native\"\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:10020\"\r\n                            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n                            // \"disable_cert_verification\": false\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:10020\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:10020\"\r\n                        }\r\n                    ]\r\n                } // Required only if: \"rpc\": \"Electrum\"\r\n            }\r\n            // \"tx_history\": false,\r\n            // \"required_confirmations\": 1, // Default: Coin Config\r\n            // \"requires_notarization\": false, // Default: Coin Config\r\n            // \"address_format\": {\r\n            //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n            // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n            // }, // Default: Coin Config\r\n            // \"utxo_merge_params\": null,\r\n            // // \"utxo_merge_params\": {\r\n            // //     \"merge_at\":50\r\n            // //     // \"check_every\":10,\r\n            // //     // \"max_merge_at_once\":100\r\n            // //     },\r\n            // \"check_utxo_maturity\": false,\r\n            // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n            // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"min_addresses_number\": 3 // used only if \"priv_key_policy\": \"Trezor\"\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -3218,7 +3260,346 @@
 							"response": []
 						}
 					]
-				},
+				},				
+                {
+                    "name": "Non Fungible Tokens",
+                    "item": [
+                        {
+                            "name": "get_nft_list",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+                                            ""
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"chains\": [\n            \"POLYGON\"\n        ]\n    }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{address}}",
+                                    "host": [
+                                        "{{address}}"
+                                    ]
+                                },
+                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+                            },
+                            "response": [
+                                {
+                                    "name": "Example with optional limit & page_number params",
+                                    "originalRequest": {
+                                        "method": "POST",
+                                        "header": [],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"chains\": [\n        \"BSC\",\n        \"POLYGON\"\n      ],\n      \"limit\": 1,\n      \"page_number\": 2\n    }\n  }",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{address}}",
+                                            "host": [
+                                                "{{address}}"
+                                            ]
+                                        },
+                                        "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+                                    },
+                                    "_postman_previewlanguage": "JSON",
+                                    "header": null,
+                                    "cookie": [],
+                                    "body": null
+                                },
+                                {
+                                    "name": "Example with spam protection",
+                                    "originalRequest": {
+                                        "method": "POST",
+                                        "header": [],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"chains\": [\n            \"BSC\",\n            \"POLYGON\"\n        ],\n        \"protect_from_spam\": true,\n        \"filters\": {\n            \"exclude_spam\": true,\n            \"exclude_phishing\": true\n        }\n    }\n}",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "json"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{address}}",
+                                            "host": [
+                                                "{{address}}"
+                                            ]
+                                        },
+                                        "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+                                    },
+                                    "_postman_previewlanguage": "JSON",
+                                    "header": null,
+                                    "cookie": [],
+                                    "body": null
+                                }
+                            ]
+                        },
+                        {
+                            "name": "get_nft_transfers",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+                                            ""
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"get_nft_transfers\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"chains\": [\n      \"POLYGON\"\n    ],\n    \"max\": true,\n    \"filters\": {\n      \"send\": true,\n      \"from_date\": 1690890685\n    }\n  }\n}\n",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{address}}",
+                                    "host": [
+                                        "{{address}}"
+                                    ]
+                                },
+                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "get_nft_metadata",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+                                            ""
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"get_nft_metadata\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"token_address\": \"0x2953399124f0cbb46d2cbacd8a89cf0599974963\",\n    \"token_id\": \"110473361632261669912565539602449606788298723469812631769659886404530570536720\",\n    \"chain\": \"POLYGON\"\n  }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{address}}",
+                                    "host": [
+                                        "{{address}}"
+                                    ]
+                                },
+                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#get-nft-metadata)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "refresh_nft_metadata",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+                                            ""
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"refresh_nft_metadata\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"token_address\": \"0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff\",\n    \"token_id\": \"5\",\n    \"chain\": \"POLYGON\",\n    \"url\": \"https://moralis-proxy.komodo.earth\",\n    \"url_antispam\": \"https://nft.antispam.dragonhound.info\"\n  }\n}\n\n",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{address}}",
+                                    "host": [
+                                        "{{address}}"
+                                    ]
+                                },
+                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "update_nft",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+                                            ""
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"update_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"chains\": [\n      \"BSC\",\n      \"POLYGON\"\n    ],\n    \"url\": \"https://moralis-proxy.komodo.earth\",\n    \"url_antispam\": \"https://nft.antispam.dragonhound.info\"\n  }\n}\n",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{address}}",
+                                    "host": [
+                                        "{{address}}"
+                                    ]
+                                },
+                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#update-nft](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#update-nft)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "withdraw_nft",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+                                            ""
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"type\": \"withdraw_erc721\",\n    \"withdraw_data\": {\n        \"chain\": \"POLYGON\",\n        \"to\": \"0x27Ad1F808c1ef82626277Ae38998AfA539565660\",\n        \"token_address\": \"0x73a5299824cd955af6377b56f5762dc3ca4cc078\",\n        \"token_id\": \"1\"\n    }\n  }\n}\n",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{address}}",
+                                    "host": [
+                                        "{{address}}"
+                                    ]
+                                },
+                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#withdraw-nfts)"
+                            },
+                            "response": []
+                        },
+                        {
+                            "name": "withdraw_nft (erc1155)",
+                            "event": [
+                                {
+                                    "listen": "prerequest",
+                                    "script": {
+                                        "exec": [
+                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+                                            ""
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"type\": \"withdraw_erc1155\",\n    \"withdraw_data\": {\n      \"chain\": \"POLYGON\",\n      \"to\": \"0x27Ad1F808c1ef82626277Ae38998AfA539565660\",\n      \"token_address\": \"0x2953399124f0cbb46d2cbacd8a89cf0599974963\",\n      \"token_id\": \"110473361632261669912565539602449606788298723469812631769659886404530570536720\",\n      \"amount\": \"1\"\n    }\n  }\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "text"
+                                        }
+                                    }
+                                },
+                                "url": {
+                                    "raw": "{{address}}",
+                                    "host": [
+                                        "{{address}}"
+                                    ]
+                                },
+                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/atomicdex/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example)"
+                            },
+                            "response": [
+                                {
+                                    "name": "erc1155",
+                                    "originalRequest": {
+                                        "method": "POST",
+                                        "header": [],
+                                        "body": {
+                                            "mode": "raw",
+                                            "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"withdraw_type\": {\n      \"type\": \"withdraw_erc721\",\n      \"withdraw_data\": {\n        \"chain\": \"BSC\",\n        \"to\": \"0x6FAD0eC6bb76914b2a2a800686acc22970645820\",\n        \"token_address\": \"0xfd913a305d70a60aac4faac70c739563738e1f81\",\n        \"token_id\": \"214300044414\"\n      }\n    }\n  }\n}\n",
+                                            "options": {
+                                                "raw": {
+                                                    "language": "text"
+                                                }
+                                            }
+                                        },
+                                        "url": {
+                                            "raw": "{{address}}",
+                                            "host": [
+                                                "{{address}}"
+                                            ]
+                                        }
+                                    },
+                                    "_postman_previewlanguage": null,
+                                    "header": null,
+                                    "cookie": [],
+                                    "body": null
+                                }
+                            ]
+                        }
+                    ]
+                },
 				{
 					"name": "Wallet",
 					"item": [
@@ -4357,7 +4738,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"best_orders\",\r\n    \"params\": {\r\n        \"coin\": \"DOC\",\r\n        \"action\": \"buy\", // Accepted values: \"buy\", \"sell\"\r\n        \"request_by\": {\r\n            \"type\": \"volume\", // Accepted values: \"volume\", \"number\"\r\n            \"value\": 1.1 // Accepted values: Decimals if \"type\": \"volume\", Unsigned Integers if \"type\": \"number\"\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}"
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"best_orders\",\r\n    \"params\": {\r\n        \"coin\": \"DOC\",\r\n        \"exclude_mine\": true, // Accepted values: \"true\", \"false\". Defaults to false.,\r\n        \"action\": \"buy\", // Accepted values: \"buy\", \"sell\"\r\n        \"request_by\": {\r\n            \"type\": \"volume\", // Accepted values: \"volume\", \"number\"\r\n            \"value\": 1.1 // Accepted values: Decimals if \"type\": \"volume\", Unsigned Integers if \"type\": \"number\"\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}"
 								},
 								"url": {
 									"raw": "{{address}}",
@@ -7290,6 +7671,250 @@
 										"216"
 									],
 									"port": "30783"
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "HD Wallet",
+			"item": [
+				{
+					"name": "task_enable_utxo",
+					"item": [
+						{
+							"name": "init DOC (wss)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n    {\r\n      \"userpass\": \"testpsw\",\r\n      \"mmrpc\": \"2.0\",\r\n      \"method\": \"task::enable_utxo::init\",\r\n      \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n          \"mode\": {\r\n            \"rpc\": \"Electrum\",\r\n            \"rpc_data\": {\r\n              \"servers\": [\r\n                {\r\n                  \"url\": \"electrum3.cipig.net:30020\",\r\n                  \"protocol\": \"WSS\"\r\n                }\r\n              ]\r\n            }\r\n          },\r\n          \"scan_policy\": \"scan_if_new_wallet\",\r\n          \"min_addresses_number\": 3,\r\n          \"gap_limit\": 20\r\n        }\r\n      }\r\n    }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (wss, hd)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::init\",\r\n    \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\": \"Electrum\",\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:30020\",\r\n                            \"protocol\": \"WSS\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:30020\",\r\n                            \"protocol\": \"WSS\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:30020\",\r\n                            \"protocol\": \"WSS\"\r\n                        }\r\n                    ]\r\n                }\r\n            },\r\n            \"path_to_address\": { // defaults to 0'/0/0\r\n                \"account_id\": 0,\r\n                \"chain\": \"External\", // Accepted values: \"External\", \"Internal\"\r\n                \"address_id\": 1\r\n            },\r\n            \"tx_history\": true, // defaults to false\r\n            \"gap_limit\": 20, // Optional, defaults to 20 \r\n            \"scan_policy\": \"scan_if_new_wallet\", // Optional, defaults to \"scan_if_new_wallet\", Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\"\r\n            \"min_addresses_number\": 3 // Optional, Number of addresses to generate, if not specified addresses will be generated up to path_to_address::address_index\r\n        }\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (wss, trezor)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n    {\r\n      \"userpass\": \"testpsw\",\r\n      \"mmrpc\": \"2.0\",\r\n      \"method\": \"task::enable_utxo::init\",\r\n      \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n          \"mode\": {\r\n            \"rpc\": \"Electrum\",\r\n            \"rpc_data\": {\r\n              \"servers\": [\r\n                {\r\n                  \"url\": \"electrum3.cipig.net:30020\",\r\n                  \"protocol\": \"WSS\"\r\n                }\r\n              ]\r\n            }\r\n          },\r\n          \"scan_policy\": \"scan_if_new_wallet\",\r\n          \"min_addresses_number\": 3,\r\n          \"priv_key_policy\": \"Trezor\",\r\n          \"gap_limit\": 20\r\n        }\r\n      }\r\n    }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (tcp)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n    {\r\n      \"userpass\": \"testpsw\",\r\n      \"mmrpc\": \"2.0\",\r\n      \"method\": \"task::enable_utxo::init\",\r\n      \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n          \"mode\": {\r\n            \"rpc\": \"Electrum\",\r\n            \"rpc_data\": {\r\n              \"servers\": [\r\n                {\r\n                  \"url\": \"electrum3.cipig.net:20020\",\r\n                  \"protocol\": \"SSL\"\r\n                }\r\n              ]\r\n            }\r\n          },\r\n          \"scan_policy\": \"scan_if_new_wallet\",\r\n          \"min_addresses_number\": 3,\r\n          \"gap_limit\": 20\r\n        }\r\n      }\r\n    }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (tcp, hd)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::init\",\r\n    \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\": \"Electrum\",\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:20020\",\r\n                            \"protocol\": \"SSL\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:20020\",\r\n                            \"protocol\": \"SSL\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:20020\",\r\n                            \"protocol\": \"SSL\"\r\n                        }\r\n                    ]\r\n                }\r\n            },\r\n            \"path_to_address\": { // defaults to 0'/0/0\r\n                \"account_id\": 0,\r\n                \"chain\": \"External\", // Accepted values: \"External\", \"Internal\"\r\n                \"address_id\": 1\r\n            },\r\n            \"tx_history\": true, // defaults to false\r\n            \"gap_limit\": 20, // Optional, defaults to 20 \r\n            \"scan_policy\": \"scan_if_new_wallet\", // Optional, defaults to \"scan_if_new_wallet\", Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\"\r\n            \"min_addresses_number\": 3 // Optional, Number of addresses to generate, if not specified addresses will be generated up to path_to_address::address_index\r\n        }\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "init DOC (tcp, trezor)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n    {\r\n      \"userpass\": \"testpsw\",\r\n      \"mmrpc\": \"2.0\",\r\n      \"method\": \"task::enable_utxo::init\",\r\n      \"params\": {\r\n        \"ticker\": \"DOC\",\r\n        \"activation_params\": {\r\n          \"mode\": {\r\n            \"rpc\": \"Electrum\",\r\n            \"rpc_data\": {\r\n              \"servers\": [\r\n                {\r\n                  \"url\": \"electrum3.cipig.net:20020\",\r\n                  \"protocol\": \"SSL\"\r\n                }\r\n              ]\r\n            }\r\n          },\r\n          \"scan_policy\": \"scan_if_new_wallet\",\r\n          \"min_addresses_number\": 3,\r\n          \"priv_key_policy\": \"Trezor\",\r\n          \"gap_limit\": 20\r\n        }\r\n      }\r\n    }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
 								}
 							},
 							"response": []
