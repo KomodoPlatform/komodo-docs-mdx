@@ -71,7 +71,7 @@ For example:
 | Parameter | Type    | Description                                                                             |
 | --------- | ------- | --------------------------------------------------------------------------------------- |
 | coin      | string  | The name of the coin the user desires to activate.                                      |
-| fee       | object  | Optional. A standard [FeeInfo](/atomicdex/api/v20/#FeeInfo) object.                     |
+| fee       | object  | Optional. A standard [FeeInfo](/atomicdex/api/common_structures/#FeeInfo) object.                     |
 | amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                        |
 | max       | boolean | Optional, defaults to `false`. Send whole balance.                                      |
 | memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction. |
@@ -141,6 +141,22 @@ For example, when method and title are the same:
 ### Components
 
 We've got a few **MDX** components we use across the Docs. Below is a walkthrough of how to start writing and using the components that make up the Docs.
+
+IMPORTANT: Alwats use double quotes inside mdx tags.
+
+Example:
+
+Correct:
+
+```
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+```
+
+Wrong:
+
+```
+<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
+```
 
 MDX supports standard markdown by default [CommonMark](https://commonmark.org/). However, this project also has [GFM](https://github.github.com/gfm/) installed.
 
