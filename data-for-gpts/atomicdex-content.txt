@@ -343,10 +343,54 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 
 | Parameter  | Type             | Description                                                                                                                               |
 | ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`                                  |
 | amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
-| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+| gas\_price | string (numeric) | Used only when fee type is `Qrc20Gas` or `EthGas`; sets the gas price in `gwei` units.                                                    |
+| gas\_price | number (double)  | Used only when fee type is `CosmosGas`; sets the gas price.                                                                               |
+| gas        | number (integer) | Used only when fee type is `EthGas`; sets the gas limit for transaction                                                                   |
+| gas\_limit | number (integer) | Used only when fee type is `Qrc20Gas` or `CosmosGas`; sets the gas limit for transaction                                                  |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Examples
+
+  ```json
+  {
+    "type": "UtxoFixed",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "UtxoPerKbyte",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "EthGas",
+    "gas_price": "10",
+    "gas": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "Qrc20Gas",
+    "gas_price": "10",
+    "gas_limit": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "CosmosGas",
+    "gas_price": 0.05,
+    "gas_limit": 21000
+  }
+  ```
+</CollapsibleSection>
 
 ### ExtendedFeeInfo
 
@@ -8493,7 +8537,7 @@ The `orderbook` method requests from the network the currently available orders 
         ]
       }
     ],
-    "netid": 7777,
+    "netid": 8762,
     "numasks": 2,
     "numbids": 6,
     "rel": "MARTY",
@@ -11341,11 +11385,12 @@ For coins with segwit, they may appear twice in the output (once for each addres
 
 #### Arguments
 
-| Structure   | Type   | Description                                                                         |
-| ----------- | ------ | ----------------------------------------------------------------------------------- |
-| coin        | string | The ticker of the coin to get best orders                                           |
-| action      | string | Whether to `buy` or `sell` the selected coin                                        |
-| request\_by | object | A standard [RequestBy](/atomicdex/api/common_structures/orders/#request-by) object. |
+| Structure     | Type   | Description                                                                          |
+| ------------- | ------ | ------------------------------------------------------------------------------------ |
+| coin          | string | The ticker of the coin to get best orders                                            |
+| action        | string | Whether to `buy` or `sell` the selected coin                                         |
+| exclude\_mine | bool   | Defaults to `false`. If `true`, the users orders will be excluded from the response. |
+| request\_by   | object | A standard [RequestBy](/atomicdex/api/common_structures/orders/#request-by) object.  |
 
 #### Response
 
@@ -11384,225 +11429,6 @@ For coins with segwit, they may appear twice in the output (once for each addres
     "mmrpc": "2.0",
     "result": {
       "orders": {
-        "TKL": [
-          {
-            "coin": "TKL",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "RAwv8JhfvmFx2V3QpY7ehiYpBJ1eqxxdxR"
-            },
-            "price": {
-              "decimal": "8.7753611926",
-              "rational": [
-                [1, [927133003, 10]],
-                [1, [705032704, 1]]
-              ],
-              "fraction": {
-                "numer": "43876805963",
-                "denom": "5000000000"
-              }
-            },
-            "pubkey": "02dbd8c73e2e80e4f3cf88d2f04a9d2d0df4269496608b14a3e17556fdcb01e0c1",
-            "uuid": "416bb993-acac-42cf-ae54-bf57a21f7a3d",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "2478.31474597274",
-              "rational": [
-                [1, [1635841741, 28851]],
-                [1, [2755359744, 11]]
-              ],
-              "fraction": {
-                "numer": "123915737298637",
-                "denom": "50000000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "0.0001",
-              "rational": [
-                [1, [1]],
-                [1, [10000]]
-              ],
-              "fraction": {
-                "numer": "1",
-                "denom": "10000"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "21748.107044857509733489724",
-              "rational": [
-                [1, [2703103759, 3484586521, 294741]],
-                [1, [2007498752, 2373086065, 13]]
-              ],
-              "fraction": {
-                "numer": "5437026761214377433372431",
-                "denom": "250000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.00087753611926",
-              "rational": [
-                [1, [927133003, 10]],
-                [1, [2285707264, 11641]]
-              ],
-              "fraction": {
-                "numer": "43876805963",
-                "denom": "50000000000000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 2,
-              "rel_nota": true
-            }
-          }
-        ],
-        "XMY-segwit": [
-          {
-            "coin": "XMY-segwit",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "MJx4vyc657NwQUMjzRgDcypvRw5NduzSz4"
-            },
-            "price": {
-              "decimal": "88.3356107012",
-              "rational": [
-                [1, [1795694657, 51]],
-                [1, [2500000000]]
-              ],
-              "fraction": {
-                "numer": "220839026753",
-                "denom": "2500000000"
-              }
-            },
-            "pubkey": "025d81c96aa4269c5946c0bd8dad7785ae0f4f595e7aea2ec4f8fe71f77ebf74a9",
-            "uuid": "999b34ca-c7b2-4caa-92e2-76349ed2d4b5",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "2478.31474597274",
-              "rational": [
-                [1, [1635841741, 28851]],
-                [1, [2755359744, 11]]
-              ],
-              "fraction": {
-                "numer": "123915737298637",
-                "denom": "50000000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "0.0001",
-              "rational": [
-                [1, [1]],
-                [1, [10000]]
-              ],
-              "fraction": {
-                "numer": "1",
-                "denom": "10000"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "218923.446595291331147485288",
-              "rational": [
-                [1, [1174424077, 4198508482, 1483482]],
-                [1, [3151233024, 3334026680, 6]]
-              ],
-              "fraction": {
-                "numer": "27365430824411416393435661",
-                "denom": "125000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.00883356107012",
-              "rational": [
-                [1, [1795694657, 51]],
-                [1, [3290337280, 5820]]
-              ],
-              "fraction": {
-                "numer": "220839026753",
-                "denom": "25000000000000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 3,
-              "rel_nota": false
-            }
-          }
-        ],
-        "LTC": [
-          {
-            "coin": "LTC",
-            "address": {
-              "address_type": "Transparent",
-              "address_data": "Lgrta1iKRcy8zzygVkZeEXuxBqzssPWtae"
-            },
-            "price": {
-              "decimal": "0.0001087673",
-              "rational": [
-                [1, [1087673]],
-                [1, [1410065408, 2]]
-              ],
-              "fraction": {
-                "numer": "1087673",
-                "denom": "10000000000"
-              }
-            },
-            "pubkey": "026da2fc632afabbb1b86d04a9a012db25eca74db38ba2eccd88552f27f4c0b245",
-            "uuid": "8530300a-b11c-4eca-80ab-c4124aaf3b64",
-            "is_mine": false,
-            "base_max_volume": {
-              "decimal": "24706.624279842",
-              "rational": [
-                [1, [986196625, 2876]],
-                [1, [500000000]]
-              ],
-              "fraction": {
-                "numer": "12353312139921",
-                "denom": "500000000"
-              }
-            },
-            "base_min_volume": {
-              "decimal": "5.019891088590044985947063133864681756373468864263432116086360514603194158538457790163036133102504153",
-              "rational": [
-                [1, [5460000]],
-                [1, [1087673]]
-              ],
-              "fraction": {
-                "numer": "5460000",
-                "denom": "1087673"
-              }
-            },
-            "rel_max_volume": {
-              "decimal": "2.6872728150328587666",
-              "rational": [
-                [1, [4244429513, 3128397295]],
-                [1, [1156841472, 1164153218]]
-              ],
-              "fraction": {
-                "numer": "13436364075164293833",
-                "denom": "5000000000000000000"
-              }
-            },
-            "rel_min_volume": {
-              "decimal": "0.000546",
-              "rational": [
-                [1, [273]],
-                [1, [500000]]
-              ],
-              "fraction": {
-                "numer": "273",
-                "denom": "500000"
-              }
-            },
-            "conf_settings": {
-              "base_confs": 7,
-              "base_nota": false,
-              "rel_confs": 2,
-              "rel_nota": false
-            }
-          }
-        ],
         "LTC-segwit": [
           {
             "coin": "LTC-segwit",
@@ -11696,7 +11522,7 @@ For coins with segwit, they may appear twice in the output (once for each addres
             },
             "pubkey": "02dbd8c73e2e80e4f3cf88d2f04a9d2d0df4269496608b14a3e17556fdcb01e0c1",
             "uuid": "95bb48ce-7411-4be7-a1b9-70e8f8d7887f",
-            "is_mine": false,
+            "is_mine": true,
             "base_max_volume": {
               "decimal": "8964.021726027",
               "rational": [
@@ -11745,6 +11571,120 @@ For coins with segwit, they may appear twice in the output (once for each addres
               "base_confs": 7,
               "base_nota": false,
               "rel_confs": 3,
+              "rel_nota": false
+            }
+          }
+        ]
+      },
+      "original_tickers": {
+        "LTC": ["LTC-segwit"],
+        "BTC": ["BTC-segwit"],
+        "XMY": ["XMY-segwit"]
+      }
+    },
+    "id": 0
+  }
+  ```
+</CollapsibleSection>
+
+#### Command (by number, exclude own orders)
+
+<CodeGroup title="" tag="POST" label="best_orders" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "best_orders",
+    "mmrpc": "2.0",
+    "params": {
+      "coin": "DGB",
+      "action": "buy",
+      "exclude_mine": true,
+      "request_by": {
+        "type": "number",
+        "value": 100
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (by number - success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "orders": {
+        "LTC-segwit": [
+          {
+            "coin": "LTC-segwit",
+            "address": {
+              "address_type": "Transparent",
+              "address_data": "Lgrta1iKRcy8zzygVkZeEXuxBqzssPWtae"
+            },
+            "price": {
+              "decimal": "0.0001087673",
+              "rational": [
+                [1, [1087673]],
+                [1, [1410065408, 2]]
+              ],
+              "fraction": {
+                "numer": "1087673",
+                "denom": "10000000000"
+              }
+            },
+            "pubkey": "026da2fc632afabbb1b86d04a9a012db25eca74db38ba2eccd88552f27f4c0b245",
+            "uuid": "8530300a-b11c-4eca-80ab-c4124aaf3b64",
+            "is_mine": false,
+            "base_max_volume": {
+              "decimal": "24706.624279842",
+              "rational": [
+                [1, [986196625, 2876]],
+                [1, [500000000]]
+              ],
+              "fraction": {
+                "numer": "12353312139921",
+                "denom": "500000000"
+              }
+            },
+            "base_min_volume": {
+              "decimal": "5.019891088590044985947063133864681756373468864263432116086360514603194158538457790163036133102504153",
+              "rational": [
+                [1, [5460000]],
+                [1, [1087673]]
+              ],
+              "fraction": {
+                "numer": "5460000",
+                "denom": "1087673"
+              }
+            },
+            "rel_max_volume": {
+              "decimal": "2.6872728150328587666",
+              "rational": [
+                [1, [4244429513, 3128397295]],
+                [1, [1156841472, 1164153218]]
+              ],
+              "fraction": {
+                "numer": "13436364075164293833",
+                "denom": "5000000000000000000"
+              }
+            },
+            "rel_min_volume": {
+              "decimal": "0.000546",
+              "rational": [
+                [1, [273]],
+                [1, [500000]]
+              ],
+              "fraction": {
+                "numer": "273",
+                "denom": "500000"
+              }
+            },
+            "conf_settings": {
+              "base_confs": 7,
+              "base_nota": false,
+              "rel_confs": 2,
               "rel_nota": false
             }
           }
@@ -14720,7 +14660,7 @@ The v2 `orderbook` method requests from the network the currently available orde
         }
         }
       ],
-      "net_id": 7777,
+      "net_id": 8762,
       "num_asks": 3,
       "num_bids": 3,
       "rel": "DASH",
@@ -15751,7 +15691,7 @@ To set this up, you can add some additional parameters to your MM2.json as shown
 ```json
 {
 	"gui": "MarketMakerBot",
-	"netid": 7777,
+	"netid": 8762,
 	"rpc_password": "YOUR_PASSWORD",
 	"passphrase": "YOUR SEED PHRASE",
 	"dbdir": "/path/to/your/atomicdex/DB",
@@ -16741,20 +16681,6 @@ The request was failed due to an AtomicDEX API internal error.
     "id": 0
   }
   ```
-
-  #### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "error_path": "utxo_common",
-    "error_trace": "utxo_common:1371]",
-    "error_type": "InvalidFeePolicy",
-    "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-    "id": 0
-  }
-  ```
 </CollapsibleSection>
 
 #### Withdraw BTC, KMD, and other BTC-based forks, 1 coin per Kbyte fee
@@ -17076,7 +17002,7 @@ The request was failed due to an AtomicDEX API internal error.
   ```
 </CollapsibleSection>
 
-##### Withdraw Tendermint coins with a memo
+##### Withdraw Tendermint coins with a memo and custom gas fee
 
 <CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
   ```json
@@ -17088,7 +17014,12 @@ The request was failed due to an AtomicDEX API internal error.
       "coin": "IRIS",
       "to": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
       "amount": 13,
-      "memo": "It was a bright cold day in April, and the clocks were striking thirteen."
+      "memo": "It was a bright cold day in April, and the clocks were striking thirteen.",
+      "fee": {
+        "type": "CosmosGas",
+        "gas_price": 0.05,
+        "gas_limit": 150000
+      }
     },
     "id": 0
   }
@@ -17127,6 +17058,50 @@ The request was failed due to an AtomicDEX API internal error.
 
   You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
 </CollapsibleSection>
+
+### Error Responses
+
+#### InvalidRequest: Unknown fee type
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
+    "id": 0
+}
+```
+
+#### InvalidRequest: wrong parameter type
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: invalid type: string \"0.1\", expected f64",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:109]",
+    "error_type": "InvalidRequest",
+    "error_data": "invalid type: string \"0.1\", expected f64",
+    "id": 0
+}
+```
+
+#### InvalidFeePolicy: attempt to use EthGas for UTXO coin
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1371]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "id": 0
+}
+```
 export const title = "AtomicDEX Method: Get Current MTP";
 export const description = "The get_current_mtp method returns the Median Time Past (MTP) from electrum servers for UTXO coins.";
 
@@ -22493,11 +22468,11 @@ This documentation is intended for developers utilizing the AtomicDEX API.
 
 A brief conceptual overview of AtomicDEX can be found in the <b>Start Here</b> > <b>Product Introductions</b> > <b>AtomicDEX </b> section.
 
-[<b>Link to "AtomicDEX" Introduction</b>](https://developers.komodoplatform.com/start-here/about-komodo-platform/product-introductions#AtomicDEX)
+[<b>Link to "AtomicDEX" Introduction</b>](/start-here/about-komodo-platform/product-introductions#AtomicDEX)
 
 The [<b>AtomicDEX Tutorials</b>](/atomicdex/tutorials/) section contains a more thorough conceptual explanation of AtomicDEX.
 
-Please consult our [Learning Path Outlines](https://developers.komodoplatform.com/start-here/learning-launchpad/#introduction) section for more details on approaches to learning AtomicDEX from both a conceptual and technical perspective.
+Please consult our [Learning Path Outlines](/start-here/learning-launchpad/#introduction) section for more details on approaches to learning AtomicDEX from both a conceptual and technical perspective.
 
 #### About AtomicDEX Setup
 
@@ -22507,7 +22482,7 @@ The AtomicDEX Setup section contains basic information about setting up and usin
 
 The AtomicDEX Tutorials section contains various tutorials that provide instruction for AtomicDEX usage and creation.
 
-For a walkthrough covering multiple tutorials in a targeted fashion, please see the [Learning Launchpad](https://developers.komodoplatform.com/start-here/learning-launchpad/#introduction) section.
+For a walkthrough covering multiple tutorials in a targeted fashion, please see the [Learning Launchpad](/start-here/learning-launchpad/#introduction) section.
 
 #### About AtomicDEX API
 
@@ -22895,7 +22870,7 @@ When running the AtomicDEX API via commandline with the `mm2` binary, some basic
 | Parameter               | Type            | Description                                                                                                                                                                                                                                                                                                                                                                                         |
 | ----------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | gui                     | string          | Information to identify which app, tool or product is using the API, e.g. `AtomicDEX iOS 1.0.1`. Helps developers identify if an issue is related to specific builds or operating systems etc.                                                                                                                                                                                                      |
-| netid                   | integer         | Nework ID number, telling the AtomicDEX-API which network to join. 7777 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it.                                                                                                                                                                               |
+| netid                   | integer         | Nework ID number, telling the AtomicDEX-API which network to join. 8762 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it.                                                                                                                                                                               |
 | passphrase              | string          | Your passphrase; this is the source of each of your coins private keys. [**KEEP IT SAFE!**](https://www.youtube.com/watch?v=WFpxVbTqhB8)                                                                                                                                                                                                                                                            |
 | rpc\_password           | string          | For RPC requests that need authentication, this will need to match the `userpass` value in the request body.                                                                                                                                                                                                                                                                                        |
 | allow\_weak\_password   | boolean         | Optional, defaults to `false`. If `true`, will allow low entropy rpc\_password. If `false` rpc\_password must not have 3 of the same characters in a row, must be between 8-32 characters in length, must contain at least one of each of the following: numeric, uppercase, lowercase, special character (e.g. !#$\*). It also can not contain the word "password", or the chars `<`, `>`, or `&`. |
@@ -22903,7 +22878,7 @@ When running the AtomicDEX API via commandline with the `mm2` binary, some basic
 | rpcip                   | string          | Optional, defaults to `127.0.0.1`. IP address to bind to for RPC server.                                                                                                                                                                                                                                                                                                                            |
 | rpcport                 | integer         | Optional, defaults to `7783`. Port to use for RPC communication.                                                                                                                                                                                                                                                                                                                                    |
 | rpc\_local\_only        | boolean         | Optional, defaults to `true`. If `false` the AtomicDEX API will allow rpc methods sent from external IP addresses. **Warning:** Only use this if you know what you are doing, and have put the appropriate security measures in place.                                                                                                                                                              |
-| i\_am\_seed             | boolean         | Optional, defaults to `false`. Runs AtomicDEX API as a seed node mode (acting as a relay for AtomicDEX API clients). Use of this mode is not reccomended on the main network (7777) as it could result in a pubkey ban if non-compliant. On alternative testing or private networks, at least one seed node is required to relay information to other AtomicDEX API clients using the same netID.   |
+| i\_am\_seed             | boolean         | Optional, defaults to `false`. Runs AtomicDEX API as a seed node mode (acting as a relay for AtomicDEX API clients). Use of this mode is not reccomended on the main network (8762) as it could result in a pubkey ban if non-compliant. On alternative testing or private networks, at least one seed node is required to relay information to other AtomicDEX API clients using the same netID.   |
 | seednodes               | list of strings | Optional. If operating on a test or private netID, the IP address of at least one seed node is required (on the main network, these are already hardcoded)                                                                                                                                                                                                                                          |
 | hd\_account\_id         | integer         | Optional. If this value is set, the AtomicDEX-API will work in only the [HD derivation mode](/atomicdex/api/v20-dev/hd_wallets_overview/), and coins will need to have a coin derivation path entry in the `coins` file for activation. The `hd_account_id` value effectively takes its place in the full derivation as follows: `m/44'/COIN_ID'/<hd_account_id>'/CHAIN/ADDRESS_ID`                 |
 | message\_service\_cfg   | object          | Optional. This data is used to configure [Telegram](https://telegram.org/) messenger alerts for swap events when running using the [makerbot functionality](/atomicdex/api/v20/start_simple_market_maker_bot/). For more information check out the [telegram alerts guide](/atomicdex/api/v20/telegram_alerts/)                                                                                     |
@@ -22916,7 +22891,7 @@ When running the AtomicDEX API via commandline with the `mm2` binary, some basic
 ```json
 {
   "gui": "DEVDOCS_CLI",
-  "netid": 7777,
+  "netid": 8762,
   "rpc_password": "ENTER_UNIQUE_PASSWORD",
   "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
   "allow_weak_password": true,
@@ -22929,7 +22904,7 @@ When running the AtomicDEX API via commandline with the `mm2` binary, some basic
 ```json
 {
   "gui": "DEVDOCS_CLI",
-  "netid": 7777,
+  "netid": 8762,
   "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
   "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
   "allow_weak_password": false,
@@ -22954,7 +22929,7 @@ If you are using HD wallets, you will need to add the `hd_account_id` value to y
 ```json
 {
   "gui": "DEVDOCS_CLI",
-  "netid": 7777,
+  "netid": 8762,
   "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
   "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
   "allow_weak_password": false,
@@ -23904,7 +23879,7 @@ We also need to create an MM2.json file in the same directory as the `coins` fil
 | Parameter     | Type    | Description                                                                                                                                                                                                           |
 | ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | gui           | string  | Information to identify which app, tool or product is using the API, e.g. `AtomicDEX iOS 1.0.1`. Helps developers identify if an issue is related to specific builds or operating systems etc.                        |
-| netid         | integer | Nework ID number, telling the AtomicDEX API which network to join. 7777 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it. |
+| netid         | integer | Nework ID number, telling the AtomicDEX API which network to join. 8762 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it. |
 | passphrase    | string  | Your passphrase; this is the source of each of your coins private keys. KEEP IT SAFE!                                                                                                                                 |
 | rpc\_password | string  | For RPC requests that need authentication, this will need to match the `userpass` value in the request body.                                                                                                          |
 
@@ -23920,7 +23895,7 @@ We also need to create an MM2.json file in the same directory as the `coins` fil
 The MM2.json configuration commands can also be supplied at runtime, as below:
 
 ```bash
-stdbuf -oL ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":7777, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
+stdbuf -oL ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":8762, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
 ```
 
 Replace `YOUR_PASSPHRASE_HERE` and `YOUR_PASSWORD_HERE` with your actual passphrase and password, and then execute the command in the terminal.
@@ -23965,7 +23940,7 @@ If you see something similar, the AtomicDEX API is up and running!
   When using the AtomicDEX API on a VPS without accompanying tools such as `tmux` or `screen`, it is recommended to use [`nohup`](https://www.digitalocean.com/community/tutorials/nohup-command-in-linux) when launching the AtomicDEX-API. This will ensure that the AtomicDEX-API instance is not shutdown when the user logs out.
 
   ```bash
-  stdbuf -oL nohup ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":7777, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
+  stdbuf -oL nohup ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":8762, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
   ```
 </Note>
 
@@ -24129,7 +24104,7 @@ The response below shows a list of users willing to send DOC in exchange for MAR
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json
-  {"bids": [],"numbids": 0,"biddepth": 0,"asks": [{"coin": "DOC","address": "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh","price": "0.89999998","price_rat": [[1, [813957463, 471859]],[1, [0, 524288]]],"price_fraction": {"numer": "2026619787280727","denom": "2251799813685248"},"maxvolume": "10855.85028615","max_volume_rat": [[1, [3593286463, 1389548]],[1, [0, 128]]],"max_volume_fraction": {"numer": "5968066809508671","denom": "549755813888"},"pubkey": "5a2f1c468b7083c4f7649bf68a50612ffe7c38b1d62e1ece3829ca88e7e7fd12","age": 5,"uuid": "5bff6021-b086-477e-b874-f45d898933fe","is_mine": false}],"numasks": 1,"askdepth": 0,"base": "DOC","rel": "MARTY","timestamp": 1549319941,"netid": 7777}
+  {"bids": [],"numbids": 0,"biddepth": 0,"asks": [{"coin": "DOC","address": "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh","price": "0.89999998","price_rat": [[1, [813957463, 471859]],[1, [0, 524288]]],"price_fraction": {"numer": "2026619787280727","denom": "2251799813685248"},"maxvolume": "10855.85028615","max_volume_rat": [[1, [3593286463, 1389548]],[1, [0, 128]]],"max_volume_fraction": {"numer": "5968066809508671","denom": "549755813888"},"pubkey": "5a2f1c468b7083c4f7649bf68a50612ffe7c38b1d62e1ece3829ca88e7e7fd12","age": 5,"uuid": "5bff6021-b086-477e-b874-f45d898933fe","is_mine": false}],"numasks": 1,"askdepth": 0,"base": "DOC","rel": "MARTY","timestamp": 1549319941,"netid": 8762}
   ```
 </CollapsibleSection>
 
@@ -24192,7 +24167,7 @@ Try again this time adding ` | jq` to the end of the `bash` example below:
   	"base": "DOC",
   	"rel": "MARTY",
   	"timestamp": 1549320152,
-  	"netid": 7777
+  	"netid": 8762
   }
   ```
 </CollapsibleSection>
@@ -24438,7 +24413,7 @@ The following tutorial introduces the reader to a simple method to become a liqu
 
 #### Virtual Private Server (Recommended)
 
-We recommend that the user [have a Virtual Private Server (VPS)](https://developers.komodoplatform.com/smart-chains/tutorials/basic-environment-setup-for-linux-vps) with *at least* the following specifications.
+We recommend that the user [have a Virtual Private Server (VPS)](/smart-chains/tutorials/basic-environment-setup-for-linux-vps) with *at least* the following specifications.
 
 *   2 vCPU
 *   4GB RAM
@@ -24531,7 +24506,7 @@ cp mm2scripts/* .
 
 The user must create a seed phrase that will serve as a type of password for accessing all coins in the user's digital wallet.
 
-Various tools are available in the cryptocurrency community to create a secure seed phrase. One available method is to use the automated procedure that is included in the [AtomicDEX Desktop Wallet](https://atomicdex.io).
+Various tools are available in the cryptocurrency community to create a secure seed phrase. One available method is to use the automated procedure that is included in the [AtomicDEX Desktop Wallet](https://komodoplatform.com/en/wallets.html).
 
 Backup these 24 words carefully. They provide access to the coins that are stored in the addresses created by the AtomicDEX API.
 
@@ -24796,7 +24771,7 @@ Display the KMD/LTC Orderbook.
        "is_mine": false
      }
    ],
-   "netid": 7777,
+   "netid": 8762,
    "numasks": 1,
    "numbids": 1,
    "rel": "LTC",
@@ -24877,7 +24852,7 @@ Display the LTC/KMD Orderbook.
        "is_mine": false
      }
    ],
-   "netid": 7777,
+   "netid": 8762,
    "numasks": 1,
    "numbids": 1,
    "rel": "KMD",
@@ -25350,7 +25325,7 @@ To understand AtomicDEX, one must first understand what a decentralized exchange
 
 This discussion requires a small amount of foundational knowledge. The reader should be generally familiar with blockchain technology and should understand the basic ideas of the Komodo project.
 
-For a broad overview of Komodo, head to the [About Komodo Platform section](https://developers.komodoplatform.com/start-here/about-komodo-platform/) For a more thorough understanding of general blockchain technology, check out [the Delayed Proof of Work section of the Core Technology Discussions.](https://developers.komodoplatform.com/start-here/core-technology-discussions/delayed-proof-of-work) This section gives an overview of how a blockchain works and why it matters.
+For a broad overview of Komodo, head to the [About Komodo Platform section](/start-here/about-komodo-platform/) For a more thorough understanding of general blockchain technology, check out [the Delayed Proof of Work section of the Core Technology Discussions.](/start-here/core-technology-discussions/delayed-proof-of-work) This section gives an overview of how a blockchain works and why it matters.
 
 After reading the above articles, the following discussion should be attainable.
 
@@ -25453,7 +25428,7 @@ However, the nature of an atomic swap is unique in comparison with the opposing 
 | Users maintain control over the funds throughout the process       | <b>Yes:</b> Users maintain control over their funds until the trade is completed, at which point ownership is swapped atomically         | <b>No:</b> Users relinquish ownership to the gateway nodes, although users do hold private keys to IOUs                    | <b>No:</b> Once the user sends funds to the CEX, they only own their funds in theory until the funds are returned |
 | User funds remain distributed and decentralized throughout process | <b>Yes:</b> As users maintain ownership over their funds at all times, all funds in the exchange process are never in a central location | <b>No:</b> User funds are held in a collection of multi-signature addresses that are maintained by a small group of people | <b>No:</b> User funds are held in a centralized database, managed by company employees                            |
 
-This is probably enough to get the basic idea. If the reader desires a more thorough understanding of the atomic swap process, read the [AtomicDEX and Atomic Swaps section of the Core Technology Disucssions.](https://developers.komodoplatform.com/start-here/core-technology-discussions/atomicdex)
+This is probably enough to get the basic idea. If the reader desires a more thorough understanding of the atomic swap process, read the [AtomicDEX and Atomic Swaps section of the Core Technology Disucssions.](/start-here/core-technology-discussions/atomicdex)
 
 The underlying ideas of atomic swaps were invented by Tier Nolan in 2013. He posted his ideas on an online community forum where Komodo's lead developer and primary visionary, JL777, or "James" for short, was also exploring blockchain technology. Here’s where Komodo enters the picture.
 
@@ -25489,7 +25464,7 @@ AtomicDEX is open source, meaning that we do not keep the software's source code
 
 Many opportunities are available for cryptocurrency-exchange entrepreneurs to build their own audiences and businesses using Komodo software. Entrepreneurs can create their own market places on the main Komodo network for trading, or they can create their own private and public networks. Developers can use Komodo's back-end software API to feature atomic-swap DEX functionality in their existing or upcoming software innovations, including mobile software. Enterprise and other large-scale companies can reach out to Komodo for integration with Komodo technology, or even for consulting services.
 
-[Please reach out to the Komodo team for further information.](https://komodoplatform.com/contact-us/)
+[Please reach out to the Komodo team for further information.](https://komodoplatform.com/en/contact.html)
 export const title = "Adding a new coin to the AtomicDEX-API";
 export const description =
   "This guide describes how to add a new coin to the AtomicDEX-API";
@@ -25518,7 +25493,7 @@ Different platforms & protocols vary slightly in what data is required. Review t
 | fname                   | string  | The full name of the coin/token.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | mm2                     | integer | Indicates trading compatibility with AtomicDEX API. `1` is compatible, `0` is not compatible. Non-compatible coins may still be listed as `wallet only` in AtomicDEX apps.                                                                                                                                                                                                                                                                                                                                                                                          |
 | required\_confirmations | integer | Defaults to `1`. The number of confirmations AtomicDEX will wait for during the swap. WARNING, this setting affects the security of the atomic swap. 51% attacks (double spending) are a threat and have been succesfully conducted in the past. You can find a collection of coins and the theoretical cost of a 51% attack [here](https://www.crypto51.app/). Please be aware that some of the coins supported by AtomicDEX may be vulnerable to such attacks, so consider using higher confirmation values for them, especially when dealing with large amounts. |
-| requires\_notarization  | boolean | Defaults to `false`. For coins protected by [dPoW](https://komodoplatform.com/51-attack-how-komodo-can-help-prevent-one/) can be set to `true` wait for a notarization when sending transactions during a swap. If `true`, `"required_confirmations"` must be set to `2` or higher.                                                                                                                                                                                                                                                                                 |
+| requires\_notarization  | boolean | Defaults to `false`. For coins protected by [dPoW](https://komodoplatform.com/en/blog/51-attack-how-komodo-can-help-prevent-one/) can be set to `true` wait for a notarization when sending transactions during a swap. If `true`, `"required_confirmations"` must be set to `2` or higher.                                                                                                                                                                                                                                                                         |
 | decimals                | integer | Defines the number of digits after the decimal point that should be used to display the orderbook amounts, balance, and the value of inputs to be used in the case of order creation or a `withdraw` transaction. The default value used for a UTXO type coin (Bitcoin Protocol) is `8` and the default value used for a ERC20 Token is `18`. It is **very important** for this value to be set correctly. For example, if this value was set as `9` for BTC, a command to withdraw `1 BTC` tries to withdraw `10^9` satoshis of Bitcoin, i.e., `10 BTC`            |
 | protocol                | string  | Contains the coin protocol `"type"` (UTXO, ETH, etc.) and specific protocol configuration - `"protocol_data"` object that can have arbitrary format.                                                                                                                                                                                                                                                                                                                                                                                                                |
 | orderbook\_ticker       | string  | If set, coins with the same value will share the same orderbook. For example, if `BTC-Segwit` and `BTC-BEP20` are set with `"orderbook_ticker":"BTC"` the same orderbook is returned for KMD/BTC, KMD/BTC-BEP20 and KMD/BTC-Segwit pairs.                                                                                                                                                                                                                                                                                                                           |
@@ -26002,7 +25977,7 @@ apt-get install -y unzip jq curl
 wget $(curl --silent https://api.github.com/repos/KomodoPlatform/atomicDEX-API/releases | jq -r '.[0].assets[] | select(.name | endswith("Linux-Release.zip")).browser_download_url')
 wget https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins
 unzip *Linux-Release.zip
-./mm2 "{\"netid\":7777,\"gui\":\"aws_cli\",\"passphrase\":\"SEED_WORDS_PLEASE_REPLACE\",\"rpc_password\":\"RPC_PASS_PLEASE_REPLACE\",\"myipaddr\":\"0.0.0.0\"}"
+./mm2 "{\"netid\":8762,\"gui\":\"aws_cli\",\"passphrase\":\"SEED_WORDS_PLEASE_REPLACE\",\"rpc_password\":\"RPC_PASS_PLEASE_REPLACE\",\"myipaddr\":\"0.0.0.0\"}"
 ```
 
 ## Install AWS CLI , get AWS access credentials
@@ -26055,4 +26030,4 @@ nodeIp=REPLACE_PUBLIC_IP
 ssh -o IdentitiesOnly=yes -i ~/.ssh/mm2.pem admin@$nodeIp 'curl -s --url "http://127.0.0.1:7783" --data "{\"userpass\":\"testpsw\",\"method\":\"version\"}"'
 ```
 
-Edit the command above as necessary to exchange one curl command for another from [the AtomicDEX API.](https://developers.atomicdex.io/atomicdex/atomicdex-api)
+Edit the command above as necessary to exchange one curl command for another from [the AtomicDEX API.](/atomicdex/api/)

@@ -1,6 +1,7 @@
 import * as acorn from "acorn";
 
 import { SKIP, visit } from "unist-util-visit";
+import {visitParents} from 'unist-util-visit-parents'
 
 import { constants } from "fs";
 import fs from "fs";
@@ -50,10 +51,12 @@ async function createFileSlugs(filepaths) {
           const slugs = [];
 
           let slugify = slugifyWithCounter();
-          // Visit all heading nodes and collect their values
-          visit(tree, "heading", (node) => {
-            const slug = slugify(toString(node));
-            slugs.push(slug);
+          // Visit all heading nodes and collect their values while rejecting the ones in DevComment
+          visitParents(tree, "heading", (node, ancestors) => {
+            if (!ancestors.some((ancestor) => ancestor.name === "DevComment")) {
+              const slug = slugify(toString(node));
+              slugs.push(slug);
+            }
           });
           filepathSlugs[filePath] = slugs;
         })
@@ -468,6 +471,10 @@ async function processExternalLink(link, currFilePath) {
       console.log(
         `Request timed out when checking the URL ${link} in the file ${currFilePath}`
       );
+      return;
+    }
+    else if (err.message.includes("ETIMEDOUT")) {
+      console.log(`Request timed out when checking the URL ${link} in the file ${currFilePath}`);
       return;
     } else {
       console.error(`Error when checking the URL ${link} in the file ${currFilePath}`)

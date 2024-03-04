@@ -152,10 +152,54 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 
 | Parameter  | Type             | Description                                                                                                                               |
 | ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`                                  |
 | amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
-| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+| gas\_price | string (numeric) | Used only when fee type is `Qrc20Gas` or `EthGas`; sets the gas price in `gwei` units.                                                    |
+| gas\_price | number (double)  | Used only when fee type is `CosmosGas`; sets the gas price.                                                                               |
+| gas        | number (integer) | Used only when fee type is `EthGas`; sets the gas limit for transaction                                                                   |
+| gas\_limit | number (integer) | Used only when fee type is `Qrc20Gas` or `CosmosGas`; sets the gas limit for transaction                                                  |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Examples
+
+  ```json
+  {
+    "type": "UtxoFixed",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "UtxoPerKbyte",
+    "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "EthGas",
+    "gas_price": "10",
+    "gas": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "Qrc20Gas",
+    "gas_price": "10",
+    "gas_limit": 21000
+  }
+  ```
+
+  ```json
+  {
+    "type": "CosmosGas",
+    "gas_price": 0.05,
+    "gas_limit": 21000
+  }
+  ```
+</CollapsibleSection>
 
 ### ExtendedFeeInfo
 
