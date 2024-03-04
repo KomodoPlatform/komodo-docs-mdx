@@ -1,5 +1,5 @@
 //import { visit, EXIT } from 'unist-util-visit'
-import {visitParents, EXIT} from 'unist-util-visit-parents'
+import {EXIT, visitParents} from 'unist-util-visit-parents'
 
 import { promises as fs } from 'fs';
 import path from 'path'
