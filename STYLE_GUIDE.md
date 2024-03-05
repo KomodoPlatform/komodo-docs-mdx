@@ -142,7 +142,7 @@ For example, when method and title are the same:
 
 We've got a few **MDX** components we use across the Docs. Below is a walkthrough of how to start writing and using the components that make up the Docs.
 
-IMPORTANT: Alwats use double quotes inside mdx tags.
+IMPORTANT: Always use double quotes inside mdx tags.
 
 Example:
 
@@ -288,18 +288,18 @@ This renders a button with a specified text based on its state (expanded or coll
 You'll mostly use this for API, Commands, etc. Responses, which should be wrapped with the `CollapsibleSection` tags, for example:
 
 ```mdx
-   <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-      #### Response (ready, successful)
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
+  #### Response (ready, successful)
 
-      ```json
-      {
-         "mmrpc": "2.0",
-         "result": "success",
-         "id": null
-      }
-      ```
+    ```json
+    {
+       "mmrpc": "2.0",
+       "result": "success",
+       "id": null
+    }
+    ```
 
-   </CollapsibleSection>
+</CollapsibleSection>
 ```
 
 The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to '**Show Error Responses**' and '**Hide Error Responses' respectively**.
@@ -406,6 +406,14 @@ A working code would look like this:
 Rendered as:
 
 ![Tag component](style-guide-images/crude-tag-ui.png)
+
+## ToCForIndex
+
+This component can be included in the root index.mdx files in any of the directories that hold a specific category of docs. This component will populate a list with the table of contents for the section.
+
+Rendered as:
+
+![TocForIndex component](style-guide-images/toc-for-index.png)
 
 ## Navbar (Top)
 
