@@ -407,6 +407,14 @@ Rendered as:
 
 ![Tag component](style-guide-images/crude-tag-ui.png)
 
+## ToCForIndex
+
+This component can be included in the root index.mdx files in any of the directories that hold a specific category of docs. This component will populate a list with the table of contents for the section.
+
+Rendered as:
+
+![TocForIndex component](style-guide-images/toc-for-index.png)
+
 ## Navbar (Top)
 
 Top navbar's navigation data/dropdown list is manually populated. This file can be found at [src/data/navbar.json](src/data/navbar.json). If you're working on a very important new page, which links to a whole new category or an index, this is where to add them.
