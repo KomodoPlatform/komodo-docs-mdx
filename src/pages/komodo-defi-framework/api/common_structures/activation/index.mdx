@@ -18,7 +18,7 @@ The `ActivationParams` object defines additional parameters used for activation.
 | zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing Zcash parameters. Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                                     |
 | scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                  |
 | scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                    |
-| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode) object.                                                                                                     |
+| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode) object.                                                                                         |
 
 <Note>
   For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
@@ -36,9 +36,9 @@ The `ActivationParams` object defines additional parameters used for activation.
 
 Defines the activation mode for QTUM, BCH, UTXO & ZHTLC coins.
 
-| Parameter | Type   | Description                                                                                                                               |
-| --------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.                            |
+| Parameter | Type   | Description                                                                                                                                           |
+| --------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.                                        |
 | rpc\_data | object | `Electrum` or `Light` mode only. A standard [ActivationRpcData](/komodo-defi-framework/api/common_structures/activation/#activation-rpc-data) object. |
 
 ### ActivationRpcData
@@ -48,8 +48,8 @@ Contains information about electrum & lightwallet\_d servers for coins being use
 | Parameter                 | Type              | Description                                                                                                                                                                                                                                                     |
 | ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | light\_wallet\_d\_servers | list              | ZHTLC only. A list of urls which are hosting lightwallet\_d servers for a coin.                                                                                                                                                                                 |
-| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                                                    |
-| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                                   |
+| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                                        |
+| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                       |
 | sync\_params              | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling\_activation\_height), `height` (a specific block height) or `date` (a unix timestamp). |
 
 <DevComment>
@@ -127,17 +127,17 @@ Contains information electrum servers for coins being used in `Electrum` or `Lig
 
 ### CoinProtocol
 
-| Parameter      | Type    | Description                                                                                            |
-| -------------- | ------- | ------------------------------------------------------------------------------------------------------ |
-| type           | integer | One of the Coin Types supported by the Komodo DeFi Framework                                           |
+| Parameter      | Type    | Description                                                                                                        |
+| -------------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| type           | integer | One of the Coin Types supported by the Komodo DeFi Framework                                                       |
 | protocol\_data | object  | A standard [CoinProtocolData](/komodo-defi-framework/api/common_structures/activation/#coin-protocol-data) object. |
 
 ### CoinProtocolData
 
-| Parameter             | Type   | Description                                                                                                |
-| --------------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
-| platform              | string | Indicates the platform parent coin for EMV-like protocols, or the coin used for lightning nodes.           |
-| network               | string | Either `mainnet` or \`testnet                                                                              |
+| Parameter             | Type   | Description                                                                                                            |
+| --------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------- |
+| platform              | string | Indicates the platform parent coin for EMV-like protocols, or the coin used for lightning nodes.                       |
+| network               | string | Either `mainnet` or \`testnet                                                                                          |
 | confirmation\_targets | object | A standard [ConfirmationTargets](/komodo-defi-framework/api/common_structures/lightning/#confirmation-targets) object. |
 
 ### EvmNode

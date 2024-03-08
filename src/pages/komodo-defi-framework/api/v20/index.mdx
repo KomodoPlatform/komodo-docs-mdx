@@ -114,15 +114,15 @@ The `ActivationParams` object defines additional parameters used for activation.
 | ---------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | required\_confirmations      | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                                                            |
 | requires\_notarization       | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file.                                          |
-| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/v20/#activation-mode) object.                                                                                                                                                                       |
+| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/v20/#activation-mode) object.                                                                                                                                                           |
 | zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing [Zcash parameters](https://z.cash/learn/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                                                     |
 | scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                                                           |
 | scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                                                             |
-| tx\_history                  | boolean | Optional. Enable transaction history scanning. When active, the Komodo DeFi Framework API will collect transaction history data for local storage, and allow use of the [my\_tx\_history (v2)](/komodo-defi-framework/api/v20/my_tx_history/) method.                                                  |
+| tx\_history                  | boolean | Optional. Enable transaction history scanning. When active, the Komodo DeFi Framework API will collect transaction history data for local storage, and allow use of the [my\_tx\_history (v2)](/komodo-defi-framework/api/v20/my_tx_history/) method.                         |
 | min\_addresses\_number       | integer | Optional, HD wallets only. Number of addresses to generate. If not specified, addresses will be generated up to `path_to_address::address_index`.                                                                                                                             |
 | scan\_policy                 | string  | Optional, HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Defaults to `scan_if_new_wallet`. Note that `scan` will result in multple requests to the Komodo DeFi API and may take some time to complete. |
 | gap\_limit                   | integer | Optional, HD wallets only. The max number of empty addresses in a row. Transactions sent to an address outside the `gap_limit`, will not be identified when scanning. Defaults to `20`.                                                                                       |
-| path\_to\_address            | object  | Optional, HD wallets only. A standard [AddressDerivationPath](/komodo-defi-framework/api/v20/#address-derivation-path) object.                                                                                                                                                            |
+| path\_to\_address            | object  | Optional, HD wallets only. A standard [AddressDerivationPath](/komodo-defi-framework/api/v20/#address-derivation-path) object.                                                                                                                                                |
 | get\_balances                | boolean | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                       |
 
 <DevComment>
@@ -146,9 +146,9 @@ The `ActivationParams` object defines additional parameters used for activation.
 
 Defines the activation mode for QTUM, BCH, UTXO & ZHTLC coins.
 
-| Parameter | Type   | Description                                                                                                      |
-| --------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
-| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.   |
+| Parameter | Type   | Description                                                                                                                  |
+| --------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.               |
 | rpc\_data | object | `Electrum` or `Light` mode only. A standard [ActivationRpcData](/komodo-defi-framework/api/v20/#activation-rpc-data) object. |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
@@ -178,8 +178,8 @@ Contains information about electrum & lightwallet\_d servers for coins being use
 | Parameter                 | Type              | Description                                                                                                                                                                                                                                                     |
 | ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | light\_wallet\_d\_servers | list              | ZHTLC only. A list of urls which are hosting lightwallet\_d servers for a coin.                                                                                                                                                                                 |
-| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/v20/#activation-servers) objects.                                                                                                                                                             |
-| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/v20/#activation-servers) objects.                                                                                                                                            |
+| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/v20/#activation-servers) objects.                                                                                                                                                 |
+| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/v20/#activation-servers) objects.                                                                                                                                |
 | sync\_params              | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling\_activation\_height), `height` (a specific block height) or `date` (a unix timestamp). |
 
 ### ActivationServers
@@ -304,12 +304,12 @@ The `AddressDerivationPath` object defines the account / change / address\_index
 
 The `addressInfos` object includes the following items for a given address:
 
-| Parameter          | Type   | Description                                                                                                                  |
-| ------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| Parameter          | Type   | Description                                                                                                                              |
+| ------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | balances           | object | A standard [BalanceInfo](/komodo-defi-framework/api/v20/#balance-info) object. Not included in responses where `get_balances` is `false` |
 | derivation\_method | object | A standard [DerivationMethod](/komodo-defi-framework/api/v20/#derivation-method) object                                                  |
-| pubkey             | string | The public key associated with the seed used to launch Komodo DeFi                                                           |
-| tickers            | array  | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`               |
+| pubkey             | string | The public key associated with the seed used to launch Komodo DeFi                                                                       |
+| tickers            | array  | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                           |
 
 <CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
   #### Example with balances
@@ -403,9 +403,9 @@ The `EvmNode` object includes the following items for a given coin or token:
 
 ### CoinProtocol
 
-| Parameter      | Type    | Description                                                                   |
-| -------------- | ------- | ----------------------------------------------------------------------------- |
-| type           | integer | One of the supported \[coin types]\(link TBA)                                 |
+| Parameter      | Type    | Description                                                                               |
+| -------------- | ------- | ----------------------------------------------------------------------------------------- |
+| type           | integer | One of the supported \[coin types]\(link TBA)                                             |
 | protocol\_data | object  | A standard [CoinProtocolData](/komodo-defi-framework/api/v20/#coin-protocol-data) object. |
 
 ### CoinProtocolData
@@ -414,7 +414,7 @@ The `EvmNode` object includes the following items for a given coin or token:
 | --------------------- | ------ | ------------------------------------------------------------------------------------------------ |
 | platform              | string | Indicates the platform parent coin for EMV-like protocols, or the coin used for lightning nodes. |
 | network               | string | Either `mainnet` or \`testnet                                                                    |
-| confirmation\_targets | object | A standard [ConfirmationTargets](/komodo-defi-framework/api/v20/#confirmation-targets) object.               |
+| confirmation\_targets | object | A standard [ConfirmationTargets](/komodo-defi-framework/api/v20/#confirmation-targets) object.   |
 
 ### ConfirmationTargets
 
@@ -669,7 +669,7 @@ The `WalletBalanceInfo` object includes the following items in the activation re
 | Parameter    | Type   | Description                                                                                     |
 | ------------ | ------ | ----------------------------------------------------------------------------------------------- |
 | wallet\_type | string | In HD wallet mode, this will return `HD`. <DevComment> What are the other values? </DevComment> |
-| accounts     | object | A standard [WalletAccountInfo](/komodo-defi-framework/api/v20/#wallet-account-info) object.                 |
+| accounts     | object | A standard [WalletAccountInfo](/komodo-defi-framework/api/v20/#wallet-account-info) object.     |
 
 ```json
 {
@@ -713,7 +713,7 @@ The `ScanAddressesInfo` response object includes the following items for request
 | ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
 | derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the account.                                   |
-| new\_addresses   | list    | A list of standard [NewAddressInfo](/komodo-defi-framework/api/v20/#new-address-info) objects.                                                            |
+| new\_addresses   | list    | A list of standard [NewAddressInfo](/komodo-defi-framework/api/v20/#new-address-info) objects.                                                |
 
 <DevComment>
   Confirm `new_addresses` array has the structure of `NewAddressInfo`.
@@ -727,7 +727,7 @@ The `NewAddressInfo` response object includes the following items for request in
 | ---------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | address          | string | The account address for a specific derivation path under the `account_index`.                                                                                                                                                                                                 |
 | derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. If there are no more addresses with balances within the gap limit, the address index will increment.                                                              |
-| balance          | object | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                                                                                                                                                                                                            |
+| balance          | object | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                                                                                                                                                                                                |
 | chain            | string | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
 ### WalletAccountInfo
@@ -738,8 +738,8 @@ The `WalletAccountInfo` object includes the following items in the activation re
 | ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
 | derivation\_path | string  | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                                                |
-| total\_balance   | object  | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                                                                            |
-| addresses        | list    | A list of standard [AccountAddressInfo](/komodo-defi-framework/api/v20/#account-address-info) objects.                                                    |
+| total\_balance   | object  | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                                                                |
+| addresses        | list    | A list of standard [AccountAddressInfo](/komodo-defi-framework/api/v20/#account-address-info) objects.                                        |
 
 ```json
 {
@@ -764,7 +764,7 @@ The `AccountAddressInfo` object includes the following items for active addresse
 | address          | string | The account address for a specific derivation path under the `account_index`.                               |
 | derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. |
 | chain            | string | `External` or `Internal`, as defined in the activation request.                                             |
-| balance          | object | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                                          |
+| balance          | object | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                              |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
