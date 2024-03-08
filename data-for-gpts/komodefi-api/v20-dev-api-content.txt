@@ -543,7 +543,7 @@ The `task::enable_lightning::init` request a task to run a lightning node. Use t
 | Parameter          | Type   | Description                                                                                                             |
 | ------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------- |
 | ticker             | string | Ticker of coin to activate                                                                                              |
-| activation\_params | object | A standard [LightningActivationParams](/atomicdex/api/common_structures/lightning/#lightning-activation-params) object. |
+| activation\_params | object | A standard [LightningActivationParams](/komodo-defi-framework/api/common_structures/lightning/#lightning-activation-params) object. |
 
 #### 📌 Example
 
@@ -738,7 +738,7 @@ The `task::enable_lightning::status` request checks the status of lightning node
   | -------------- | ------ | ---------------------------------------------------------------------------------- |
   | platform\_coin | string | The coin ticker for which the lightning node is being intitialized.                |
   | address        | string | This node's address for the activated coin.                                        |
-  | balance        | object | A standard [balanceInfos](/atomicdex/api/common_structures/#balance-infos) object. |
+  | balance        | object | A standard [balanceInfos](/komodo-defi-framework/api/common_structures/#balance-infos) object. |
 
   <Note>
     The unspendable balance for lightning is different to a layer-1 unspendable balance. The channel reserve is part of the unspendable balance in lightning - the user will get this part of the balance on chain when closing the channel, but it can't be spent on layer 2 (lightning) because it's part of the security mechanism to prevent channel breaches and ensure that both parties fulfill their obligations within the channel.
@@ -869,10 +869,10 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
 | ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | coin             | string  | The ticker of the coin you would like to open a channel for.                                                                                                                                                                                                                                                                                                                          |
 | node\_address    | string  | Lightning node addresses always have a format of `node_pubkey`@`ip_address`:`port`.                                                                                                                                                                                                                                                                                                   |
-| amount           | object  | A standard [LightningChannelAmount](/atomicdex/api/common_structures/lightning/#lightning-channel-amount) object.                                                                                                                                                                                                                                                                     |
+| amount           | object  | A standard [LightningChannelAmount](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-amount) object.                                                                                                                                                                                                                                                                     |
 | push\_msat       | integer | Optional. The amount in millisatoshi to push to the counterparty while openning, to create inbound liquidity for the channel. Using the `push_msat` parameter avoids having to send funds in a separate request later. Please note that the funds given using push\_msat is given unconditionally, meaning that there is no proof of payment in a preimage as with paying an invoice. |
-| channel\_options | object  | Optional. A standard [LightningChannelOptions](/atomicdex/api/common_structures/lightning/#lightning-channel-options) object.                                                                                                                                                                                                                                                         |
-| channel\_configs | object  | Optional. A standard [LightningChannelConfig](/atomicdex/api/common_structures/lightning/#lightning-channel-config) object.                                                                                                                                                                                                                                                           |
+| channel\_options | object  | Optional. A standard [LightningChannelOptions](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options) object.                                                                                                                                                                                                                                                         |
+| channel\_configs | object  | Optional. A standard [LightningChannelConfig](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-config) object.                                                                                                                                                                                                                                                           |
 
 #### 📌 Example using an exact amount
 
@@ -1058,7 +1058,7 @@ The `lightning::channels::update_channel` method updates channel options.
 | ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
 | coin             | string | The ticker of the coin you would like to update channel configuration options for.                                  |
 | uuid             | string | Unique channel identifier.                                                                                          |
-| channel\_options | object | A standard [LightningChannelOptions](/atomicdex/api/common_structures/lightning/#lightning-channel-options) object. |
+| channel\_options | object | A standard [LightningChannelOptions](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options) object. |
 
 #### 📌 Example to update all available channel options
 
@@ -1307,8 +1307,8 @@ The `lightning::channels::list_open_channels_by_filter` method returns a list of
 | Parameter       | Type    | Description                                                                                                                  |
 | --------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | coin            | string  | The ticker of the coin you would like to view open channels for.                                                             |
-| filter          | object  | A standard [LightningOpenChannelsFilter](/atomicdex/api/common_structures/lightning/#lightning-open-channels-filter) object. |
-| paging\_options | object  | Optional. A standard [Pagination](/atomicdex/api/common_structures/#pagination) object.                                      |
+| filter          | object  | A standard [LightningOpenChannelsFilter](/komodo-defi-framework/api/common_structures/lightning/#lightning-open-channels-filter) object. |
+| paging\_options | object  | Optional. A standard [Pagination](/komodo-defi-framework/api/common_structures/#pagination) object.                                      |
 | limit           | integer | Optional, defaults to `10`. Maximum number of results to return.                                                             |
 
 #### 📌 Example without using `filter` parameter
@@ -1566,8 +1566,8 @@ The `lightning::channels::list_closed_channels_by_filter` method returns a list 
 | Parameter       | Type    | Description                                                                                                                      |
 | --------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | coin            | string  | The ticker of the coin you would like to view closed channels for.                                                               |
-| filter          | object  | A standard [LightningClosedChannelsFilter](/atomicdex/api/common_structures/lightning/#lightning-closed-channels-filter) object. |
-| paging\_options | object  | Optional. A standard [Pagination](/atomicdex/api/common_structures/#pagination) object.                                          |
+| filter          | object  | A standard [LightningClosedChannelsFilter](/komodo-defi-framework/api/common_structures/lightning/#lightning-closed-channels-filter) object. |
+| paging\_options | object  | Optional. A standard [Pagination](/komodo-defi-framework/api/common_structures/#pagination) object.                                          |
 | limit           | integer | Optional, defaults to `10`. Maximum number of results to return.                                                                 |
 
 #### 📌 Example without using `filter` parameter
@@ -1858,11 +1858,11 @@ Follow the flowchart below to visualize the process:
 
 <Note>
   Some configurations are set per coin, and some are set per channel. The
-  [counterparty\_channel\_config\_limits](/atomicdex/api/common_structures/lightning/#counterparty-channel-config)
+  [counterparty\_channel\_config\_limits](/komodo-defi-framework/api/common_structures/lightning/#counterparty-channel-config)
   param must be set in the `coins` configuration file, and aplies to all
   channels opened by counterparty nodes. The
-  [our\_channels\_config](/atomicdex/api/common_structures/lightning/#lightning-channel-config) and
-  [channel\_options](/atomicdex/api/common_structures/lightning/#lightning-channel-options) parameters
+  [our\_channels\_config](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-config) and
+  [channel\_options](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options) parameters
   are set per channel. These can be defined in the `coins` configuration file to
   act as the default for all opened channels, and optionally overwritten or
   updated using the
@@ -1878,18 +1878,18 @@ Follow the flowchart below to visualize the process:
 | coin                                  | object  | The ticker of the coin you will use lightning network with, suffixed with `-lightning`                                                                                                                                                                                                                                                         |
 | mm2                                   | integer | Defaults to `0`. A value of `1`, indicates the coin is atomic swap compatible.                                                                                                                                                                                                                                                                 |
 | decimals                              | integer | The decimal precision of the coin you will use the lightning network with.                                                                                                                                                                                                                                                                     |
-| protocol                              | object  | A standard [CoinProtocol](/atomicdex/api/common_structures/activation/#coin-protocol) object.                                                                                                                                                                                                                                                  |
+| protocol                              | object  | A standard [CoinProtocol](/komodo-defi-framework/api/common_structures/activation/#coin-protocol) object.                                                                                                                                                                                                                                                  |
 | accept\_inbound\_channels             | boolean | Optional, defaults to `true`. If this is set to false, we do not accept inbound requests to open a new channel.                                                                                                                                                                                                                                |
 | accept\_forwards\_to\_priv\_channels  | boolean | Optional, defaults to `false`. When set to `false`, any HTLCs which were to be forwarded over private channels will be rejected. This prevents us from taking on HTLC-forwarding risk when we intend to run as a node which is not online reliably (e.g. GUI wallet apps). Generally, private channels are used for non-routing purposes only. |
-| counterparty\_channel\_config\_limits | object  | Optional. A standard [CounterpartyChannelConfig](/atomicdex/api/common_structures/lightning/#counterparty-channel-config) object.                                                                                                                                                                                                              |
-| channel\_options                      | object  | Optional. A standard [LightningChannelOptions](/atomicdex/api/common_structures/lightning/#lightning-channel-options) object.                                                                                                                                                                                                                  |
-| our\_channels\_config                 | object  | Optional. A standard [LightningChannelConfig](/atomicdex/api/common_structures/lightning/#lightning-channel-config) object.                                                                                                                                                                                                                    |
+| counterparty\_channel\_config\_limits | object  | Optional. A standard [CounterpartyChannelConfig](/komodo-defi-framework/api/common_structures/lightning/#counterparty-channel-config) object.                                                                                                                                                                                                              |
+| channel\_options                      | object  | Optional. A standard [LightningChannelOptions](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options) object.                                                                                                                                                                                                                  |
+| our\_channels\_config                 | object  | Optional. A standard [LightningChannelConfig](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-config) object.                                                                                                                                                                                                                    |
 
 <Note>
   For GUIs and wallet apps, it is recommended to set
   `accept_forwards_to_priv_channels` to `false`. This prevents users from taking
   on HTLC-forwarding risk when a node is expected to not be reliably online.
-  [our\_channels\_config::announced\_channel](/atomicdex/api/common_structures/lightning/#lightning-channel-options)
+  [our\_channels\_config::announced\_channel](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options)
   should also be set to `false` for GUIs and wallet apps.
 </Note>
 
@@ -2250,7 +2250,7 @@ Used to pay an invoice or send a payment via pubkey/address.
 | Parameter | Type   | Description                                                                                          |
 | --------- | ------ | ---------------------------------------------------------------------------------------------------- |
 | type      | string | Ticker of the coin to query.                                                                         |
-| payment   | object | A standard [LightningPayment](/atomicdex/api/common_structures/lightning/#lightning-payment) object. |
+| payment   | object | A standard [LightningPayment](/komodo-defi-framework/api/common_structures/lightning/#lightning-payment) object. |
 
 #### 📌 Example using `invoice`
 
@@ -2499,8 +2499,8 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
 | Parameter       | Type    | Description                                                                                                                 |
 | --------------- | ------- | --------------------------------------------------------------------------------------------------------------------------- |
 | coin            | string  | Ticker of the coin to query.                                                                                                |
-| filter          | object  | Optional. A standard [LightningPaymentFilter](/atomicdex/api/common_structures/lightning/#lightning-payment-filter) object. |
-| paging\_options | object  | Optional. A standard [Pagination](/atomicdex/api/common_structures/#pagination) object.                                     |
+| filter          | object  | Optional. A standard [LightningPaymentFilter](/komodo-defi-framework/api/common_structures/lightning/#lightning-payment-filter) object. |
+| paging\_options | object  | Optional. A standard [Pagination](/komodo-defi-framework/api/common_structures/#pagination) object.                                     |
 | limit           | integer | Optional, defaults to `10`. Maximum number of results to return.                                                            |
 
 #### 📌 Example without filter
@@ -2766,9 +2766,9 @@ The `max_maker_vol` method returns the maximum volume of a coin which can be use
 | Parameter         | Type   | Description                                                                                                                                                                        |
 | ----------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | coin              | string | The ticker of the coin you queried.                                                                                                                                                |
-| volume            | object | A standard [NumericFormatsValue](/atomicdex/api/common_structures/#numeric-formats-value) object representing the tradable maker volume.                                           |
-| balance           | object | A standard [NumericFormatsValue](/atomicdex/api/common_structures/#numeric-formats-value) object representing the tradable taker balance.                                          |
-| locked\_by\_swaps | object | A standard [NumericFormatsValue](/atomicdex/api/common_structures/#numeric-formats-value) object representing the volume of a coin's balance which is locked by swaps in progress. |
+| volume            | object | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the tradable maker volume.                                           |
+| balance           | object | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the tradable taker balance.                                          |
+| locked\_by\_swaps | object | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the volume of a coin's balance which is locked by swaps in progress. |
 
 #### 📌 Examples
 
@@ -2909,7 +2909,7 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
 
 | Parameter | Type            | Description                                                                            |
 | --------- | --------------- | -------------------------------------------------------------------------------------- |
-| nfts      | list of objects | A list of standard [NftInfo](/atomicdex/api/common_structures/nfts/#nft-info) objects. |
+| nfts      | list of objects | A list of standard [NftInfo](/komodo-defi-framework/api/common_structures/nfts/#nft-info) objects. |
 | total     | string          | The total number of NFTs in your wallet matching the request filters.                  |
 | skipped   | string          | The number of NFTs in your wallet excluded by the request filters.                     |
 
@@ -3347,7 +3347,7 @@ Returns a list of the NFT transfers involving the user, shown in descending orde
 
 | Parameter         | Type            | Description                                                                                    |
 | ----------------- | --------------- | ---------------------------------------------------------------------------------------------- |
-| transfer\_history | list of objects | A list of standard [NftTransfer](/atomicdex/api/common_structures/nfts/#nft-transfer) objects. |
+| transfer\_history | list of objects | A list of standard [NftTransfer](/komodo-defi-framework/api/common_structures/nfts/#nft-transfer) objects. |
 | total             | string          | The total number of NFT transfers in your wallet matching the request filters.                 |
 | skipped           | string          | The number of NFT transfers in your wallet excluded by the request filters.                    |
 
@@ -4789,7 +4789,7 @@ To withdraw ZHTLC coins, you need to use the [task::withdraw](/komodo-defi-frame
 | Structure          | Type   | Description                                                                                              |
 | ------------------ | ------ | -------------------------------------------------------------------------------------------------------- |
 | ticker             | string | Ticker of coin to activate                                                                               |
-| activation\_params | object | A standard [ActivationRpcData](/atomicdex/api/common_structures/activation/#activation-rpc-data) object. |
+| activation\_params | object | A standard [ActivationRpcData](/komodo-defi-framework/api/common_structures/activation/#activation-rpc-data) object. |
 
 #### Response
 
@@ -5250,7 +5250,7 @@ To get the transaction history for ZHTLC coins, you need to use this special met
 | page\_number   | number           | the page\_number that was set in the request                                                                                                                                              |
 | total\_pages   | number           | total pages available with the selected limit                                                                                                                                             |
 | current\_block | number           | the number of the latest block of coin blockchain                                                                                                                                         |
-| sync\_status   | object           | A standard [SyncStatus](/atomicdex/api/common_structures/#sync-status/) object. Provides the information that helps to track the progress of transaction history preloading at background |
+| sync\_status   | object           | A standard [SyncStatus](/komodo-defi-framework/api/common_structures/#sync-status/) object. Provides the information that helps to track the progress of transaction history preloading at background |
 
 #### 📌 Examples
 
