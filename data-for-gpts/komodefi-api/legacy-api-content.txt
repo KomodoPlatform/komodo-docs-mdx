@@ -706,7 +706,7 @@ export const description = "The buy method issues a buy request and attempts to 
 The `buy` method issues a buy request and attempts to match an order from the orderbook based on the provided arguments.
 
 <Note>
-  *   Buy and sell methods always create the `taker` order first. A `taker` order must pay a `dexfee` during the swap as it is taking liquidity from the market. The `dexfee` is calculated as "the greater of either `Minimum transaction amount (dust) TAKER COIN` or `0.0001 TAKER COIN` or `1/777th` the size of the desired order". If your `GoodTillCancelled` order is not matched in 30 seconds, the order is automatically converted to a `maker` request and stays on the orderbook until the request is matched or cancelled. To always act as a maker, please use the [setprice](/atomicdex/api/legacy/setprice/) method.
+  *   Buy and sell methods always create the `taker` order first. A `taker` order must pay a `dexfee` during the swap as it is taking liquidity from the market. The `dexfee` is calculated as "the greater of either `Minimum transaction amount (dust) TAKER COIN` or `0.0001 TAKER COIN` or `1/777th` the size of the desired order". If your `GoodTillCancelled` order is not matched in 30 seconds, the order is automatically converted to a `maker` request and stays on the orderbook until the request is matched or cancelled. To always act as a maker, please use the [setprice](/komodo-defi-framework/api/legacy/setprice/) method.
   *   To prevent a user from making trades in which the transaction fees may end up costing a significant portion of the value of the trade, we have set a lower limit to the value of a trade. See the description of the `volume` and `min_volume` arguments for more info.
 </Note>
 
@@ -1314,7 +1314,7 @@ There are two methods of coin activation:
 A coin can only be activated once per session, and must be activated before it can be used in trading or wallet functions.
 
 <Note type="warning">
-  The KomoDeFi API requires an `mm2` parameter to be set for each `coin`. This can be added to the enable/electrum command, or defined in your [coins file](/atomicdex/tutorials/atomicdex-walkthrough/#setting-up-the-coin-list).
+  The KomoDeFi API requires an `mm2` parameter to be set for each `coin`. This can be added to the enable/electrum command, or defined in your [coins file](/komodo-defi-framework/tutorials/atomicdex-walkthrough/#setting-up-the-coin-list).
 
   The value of the `mm2` parameter informs the software as to whether the `coin` is expected to be compatible for atomic swaps.
 
@@ -1373,7 +1373,7 @@ KomoDeFi is a true cross chain, cross protocol Decentralized Exchange (DEX), all
 | servers.protocol                         | string (optional, defaults to `TCP`)    | Transport protocol used by KomoDeFi API to connect to the electrum server (`TCP` or `SSL`)                                                                                                                                                 |
 | servers.disable\_cert\_verification      | bool (optional, defaults to `false`.)   | If `true`, this disables server SSL/TLS certificate verification (e.g. to use self-signed certificate). <b>Use at your own risk</b>                                                                                                        |
 | mm2                                      | integer                                 | Required if not set in `coins` file. Informs the KomoDeFi API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                              |
-| tx\_history                              | bool                                    | If `true` the KomoDeFi API will preload trasaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/atomicdex/api/legacy/my_tx_history/#my-tx-history) method                                          |
+| tx\_history                              | bool                                    | If `true` the KomoDeFi API will preload trasaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                          |
 | required\_confirmations                  | integer (optional, defaults to `3`)     | Number of confirmations for the KomoDeFi API to wait during the transaction steps of an atomic swap.                                                                                                                                       |
 | requires\_notarization                   | boolean (optional, defaults to `false`) | If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
 | swap\_contract\_address                  | string (required for QRC20 only)        | address of etomic swap smart contract                                                                                                                                                                                                      |
@@ -1545,7 +1545,7 @@ KomoDeFi is a true cross chain, cross protocol Decentralized Exchange (DEX), all
 | gas\_station\_decimals      | integer (optional for ETH/ERC20 and other gas model chains)          | Defines the decimals used to denominate the gas station response to gwei units. For example, the ETH gas station uses 8 decimals, which means that "average": 860 is equal to 86 gwei. While the Matic gas station uses 9 decimals, so 860 would mean 860 gwei exactly. Defaults to `8` |
 | gas\_station\_policy.policy | string (optional for ETH/ERC20 and other gas model chains)           | Defines the method of gas price calculation from the station response. `"MeanAverageFast"` will use the mean between average and fast fields. `"Average"` will return a simple average value. Defaults to `"MeanAverageFast"`.                                                          |
 | mm2                         | integer                                                              | Required if not set in `coins` file. Informs the KomoDeFi API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                                           |
-| tx\_history                 | bool                                                                 | If `true` the KomoDeFi API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/atomicdex/api/legacy/my_tx_history/#my-tx-history) method                                                                                      |
+| tx\_history                 | bool                                                                 | If `true` the KomoDeFi API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                                                                      |
 | required\_confirmations     | integer (optional, defaults to `3`)                                  | Number of confirmations for the KomoDeFi API to wait during the transaction steps of an atomic swap.                                                                                                                                                                                    |
 | requires\_notarization      | boolean (optional, defaults to `false`)                              | If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.                                              |
 
@@ -1768,7 +1768,7 @@ KomoDeFi is a true cross chain, cross protocol Decentralized Exchange (DEX), all
   ```
 </CollapsibleSection>
 
-For enabling Z coins, refer to the [Z coin tasks](/atomicdex/api/v20-dev/task_enable_z_coin/#initialize-zhtlc-coin-activation) in the v2.0 Dev API.
+For enabling Z coins, refer to the [Z coin tasks](/komodo-defi-framework/api/v20-dev/task_enable_z_coin/#initialize-zhtlc-coin-activation) in the v2.0 Dev API.
 
 To see more examples for other platforms like Fantom, Avalanche & Harmony, you can search the [KomoDeFi API Coin Activation Commands List
 ](https://stats.kmd.io/atomicdex/activation_commands/) or build a single `batch` command to enable a set of selected coins via the
@@ -2511,7 +2511,7 @@ The `get_trade_fee` method returns the approximate amount of the miner fee that 
 This amount should be multiplied by 2 and deducted from the volume on `buy/sell` calls when the user is about to trade the entire balance of the selected coin. This aspect is currently under development.
 
 <Note>
-  This function is deprecated. Please consider using [trade\_preimage v2.0](/atomicdex/api/v20/trade_preimage/) instead.
+  This function is deprecated. Please consider using [trade\_preimage v2.0](/komodo-defi-framework/api/v20/trade_preimage/) instead.
 </Note>
 
 <Note>
@@ -3076,7 +3076,7 @@ export const description =
 # metrics
 
 The `metrics` method returns a snapshot of the current AtomicDEX API metrics used in [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/).
-For more information check out the [AtomicDEX metrics guide](/atomicdex/tutorials/atomicdex-metrics/)
+For more information check out the [AtomicDEX metrics guide](/komodo-defi-framework/tutorials/atomicdex-metrics/)
 
 ### Request Parameters
 
@@ -4724,7 +4724,7 @@ export const description =
 
 The `my_tx_history` method returns the blockchain transactions involving the AtomicDEX API node's coin address.
 
-The coin that is used must have `tx_history` set to true in its [enable](/atomicdex/api/legacy/coin_activation/#enable-method) or [electrum](/atomicdex/api/legacy/coin_activation/#electrum-method) call.
+The coin that is used must have `tx_history` set to true in its [enable](/komodo-defi-framework/api/legacy/coin_activation/#enable-method) or [electrum](/komodo-defi-framework/api/legacy/coin_activation/#electrum-method) call.
 
 ## Arguments
 
@@ -6679,7 +6679,7 @@ export const description = "The sell method issues a sell request and attempts t
 The `sell` method issues a sell request and attempts to match an order from the orderbook based on the provided arguments.
 
 <Note>
-  *   Buy and sell methods always create the `taker` order first. A `taker` order must pay a `dexfee` during the swap as it is taking liquidity from the market. The `dexfee` is calculated as "the greater of either `Minimum transaction amount (dust) TAKER COIN` or `0.0001 TAKER COIN` or `1/777th` the size of the desired order". If your `GoodTillCancelled` order is not matched in 30 seconds, the order is automatically converted to a `maker` request and stays on the orderbook until the request is matched or cancelled. To always act as a maker, please use the [setprice](/atomicdex/api/legacy/setprice/) method.
+  *   Buy and sell methods always create the `taker` order first. A `taker` order must pay a `dexfee` during the swap as it is taking liquidity from the market. The `dexfee` is calculated as "the greater of either `Minimum transaction amount (dust) TAKER COIN` or `0.0001 TAKER COIN` or `1/777th` the size of the desired order". If your `GoodTillCancelled` order is not matched in 30 seconds, the order is automatically converted to a `maker` request and stays on the orderbook until the request is matched or cancelled. To always act as a maker, please use the [setprice](/komodo-defi-framework/api/legacy/setprice/) method.
   *   To prevent a user from making trades in which the transaction fees may end up costing a significant portion of the value of the trade, we have set a lower limit to the value of a trade. See the description of the `volume` argument for more info.
 </Note>
 
@@ -7637,7 +7637,7 @@ Depending on the parameters, the function returns different results:
 </Note>
 
 <Note>
-  This function is deprecated. Please consider using [trade\_preimage v2.0](/atomicdex/api/v20/trade_preimage/) instead.
+  This function is deprecated. Please consider using [trade\_preimage v2.0](/komodo-defi-framework/api/v20/trade_preimage/) instead.
 </Note>
 
 #### Arguments
@@ -8439,7 +8439,7 @@ export const description = "The withdraw method generates, signs, and returns a 
 
 The `withdraw` method generates, signs, and returns a transaction that transfers the `amount` of `coin` to the address indicated in the `to` argument.
 
-This method generates a raw transaction which should then be broadcast using [send\_raw\_transaction](/atomicdex/api/legacy/send_raw_transaction/).
+This method generates a raw transaction which should then be broadcast using [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/).
 
 ## Arguments
 
