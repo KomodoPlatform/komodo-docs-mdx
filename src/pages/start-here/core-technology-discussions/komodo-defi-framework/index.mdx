@@ -89,9 +89,9 @@ Therefore, one person must release control over their money first. The atomic-sw
 
 A key aspect of a proper atomic swap is that at each stage of the trade-clearing process, each user has incentives to proceed to the next step in the proper manner and disincentives to avoid abandoning the procedure. With this structure in place, regardless of a failure by either user to complete the protocol, each user receives a proper reward.
 
-### AtomicDEX Manages a Public Trading Profile for Maker and Taker
+### Komodo DeFi Framework Manages a Public Trading Profile for Maker and Taker
 
-In addition to the atomic-swap protocol, AtomicDEX also allows users to track the behavior of trading partners on the network via a Trust API.
+In addition to the atomic-swap protocol, Komodo DeFi Framework also allows users to track the behavior of trading partners on the network via a Trust API.
 
 The Trust API is not based on personal identity, but rather on behavior as associated with public addresses.
 
@@ -113,7 +113,7 @@ Taker will need two transactions to perform her swap. One transaction will cover
   The `dexfee` is actually calculated as "the greater of either `0.0001 TAKER COIN` or `1/777th` the size of the desired order"
 </Note>
 
-The second transaction required of Taker sends the actual amount she intends to swap. AtomicDEX first verifies that she has these funds, but for the moment she retains these funds in the safety of her own digital wallet.
+The second transaction required of Taker sends the actual amount she intends to swap. Komodo DeFi Framework first verifies that she has these funds, but for the moment she retains these funds in the safety of her own digital wallet.
 
 #### Maker Answers Taker
 
@@ -140,7 +140,7 @@ A summary of the procedure, starting from the beginning.
 
     *   `<makerpayment>` enters a state of limbo on the Maker's coin network, held safely by encryption, awaiting either for Taker to spend the payment, or for the swap to time out
 
-    *   If the latter occurs, `<makerpayment>` is automatically refunded to Maker via the AtomicDEX protocol
+    *   If the latter occurs, `<makerpayment>` is automatically refunded to Maker via the Komodo DeFi Framework protocol
 
 3.  Taker now sends `<takerpayment>`
 
@@ -151,7 +151,7 @@ A summary of the procedure, starting from the beginning.
 
     *   `<takerpayment>` enters a state of limbo on the Taker's coin network, held safely by encryption, awaiting either for Maker to spend the payment, or for the swap to time out
 
-    *   If the latter occurs, `<takerpayment>` is automatically refunded to Taker via the AtomicDEX protocol
+    *   If the latter occurs, `<takerpayment>` is automatically refunded to Taker via the Komodo DeFi Framework protocol
 
 4.  Maker now spends the `<takerpayment>`
 
@@ -167,7 +167,7 @@ While it may seem inefficient to have five transactions for a swap that could be
 
 As we will now explain, at every step along the way there are incentives for each side to proceed, and there are various financial protections in place should one side fail.
 
-Also, because payments are sent to these "temporary holding addresses" that exist within the AtomicDEX protocol, the protocol itself can assist in the process of moving money at the appropriate steps.
+Also, because payments are sent to these "temporary holding addresses" that exist within the Komodo DeFi Framework protocol, the protocol itself can assist in the process of moving money at the appropriate steps.
 
 Let us now examine what is happening after each step.
 
@@ -175,17 +175,17 @@ Let us now examine what is happening after each step.
 
 If Maker accepts the offer to trade, but does not send `<makerpayment>`, Taker only stands to lose the `<dexfee>`. This is only 1/777th of the entire transaction amount, so she loses very little.
 
-Maker, on the other hand, stands to lose more. Since Maker did not follow through with his end of the bargain, the AtomicDEX network indicates on his public AtomicDEX trading profile that he failed in a commitment, thus decreasing his profile’s reputation. If Maker continues this behavior as a habit, he may find it difficult to discover trading partners.
+Maker, on the other hand, stands to lose more. Since Maker did not follow through with his end of the bargain, the Komodo DeFi Framework network indicates on his public Komodo DeFi Framework trading profile that he failed in a commitment, thus decreasing his profile’s reputation. If Maker continues this behavior as a habit, he may find it difficult to discover trading partners.
 
-So long as the frequency of Makers failing is low, the occasional extra `<dexfee>` paid by a Taker is a minor issue. However, if there is a sudden spike in misbehavior, the AtomicDEX code has built-in contingency plans which can provide refunds to Takers.
+So long as the frequency of Makers failing is low, the occasional extra `<dexfee>` paid by a Taker is a minor issue. However, if there is a sudden spike in misbehavior, the Komodo DeFi Framework code has built-in contingency plans which can provide refunds to Takers.
 
 #### 2 - Maker Successfully Sends `<makerpayment>`
 
-If Taker does not follow with her next step, the `<takerpayment>`, then Taker loses not only the `<dexfee>`, but she also receives a mark on her public AtomicDEX profile. She gains nothing, and Maker has no reason to fear as `<makerpayment>` will automatically return to him via the AtomicDEX protocol.
+If Taker does not follow with her next step, the `<takerpayment>`, then Taker loses not only the `<dexfee>`, but she also receives a mark on her public Komodo DeFi Framework profile. She gains nothing, and Maker has no reason to fear as `<makerpayment>` will automatically return to him via the Komodo DeFi Framework protocol.
 
 #### 3 - Taker Successfully Sends `<takerpayment>`
 
-If Maker does not proceed with his next step (spending the payment), then after lock time expires Taker can simply activate an AtomicDEX protocol that will refund the payment.
+If Maker does not proceed with his next step (spending the payment), then after lock time expires Taker can simply activate an Komodo DeFi Framework protocol that will refund the payment.
 
 #### 4 - Maker Spends `<takerpayment>`
 
@@ -207,23 +207,23 @@ Naturally, users must understand that outside forces can disable the process and
 
 ### The Connection is the True Challenge of an Atomic Swap
 
-Performing a successful connection between Maker and Taker, and verifying their funds, is the most complex and difficult aspect of creating the AtomicDEX network.
+Performing a successful connection between Maker and Taker, and verifying their funds, is the most complex and difficult aspect of creating the Komodo DeFi Framework network.
 
 Myriad factors are involved in a successful attempt for Maker and Taker to connect: human motivation; the experience level of the users; economics; connection technology; user hardware setups; normal variations within Internet connections; etc.
 
 We emphasize to users here that the process of performing these actions over a peer-to-peer network has almost an artistic element to it. An attempt to successfully connect Maker and Taker can be thought of more like fishing, where we must simply cast and recast our line until we successfully connect with our target.
 
-If a user attempts a trade and no response returns from the network, the user should slightly adjust the parameters of their offer and try again. As AtomicDEX continues to iterate and improve, and as the number of users increases, we expect any required effort to lessen for users, the network, and the AtomicDEX GUI apps.
+If a user attempts a trade and no response returns from the network, the user should slightly adjust the parameters of their offer and try again. As Komodo DeFi Framework continues to iterate and improve, and as the number of users increases, we expect any required effort to lessen for users, the network, and the Komodo DeFi Framework GUI apps.
 
 ### The DEX Fee
 
-People will notice that there is a small `<dexfee>` required as part of the AtomicDEX protocol. This is 1/777 of the transaction amount and it is calibrated to make spam attacks impractical. The 1/777 fee is about equal to 0.1287% of the `<takerpayment>`.
+People will notice that there is a small `<dexfee>` required as part of the Komodo DeFi Framework protocol. This is 1/777 of the transaction amount and it is calibrated to make spam attacks impractical. The 1/777 fee is about equal to 0.1287% of the `<takerpayment>`.
 
-By forcing a would-be attacker to spend real money, attacking the network becomes costly. Without this spam prevention, AtomicDEX could otherwise be attacked at the protocol level by any person performing a plethora of trade requests.
+By forcing a would-be attacker to spend real money, attacking the network becomes costly. Without this spam prevention, Komodo DeFi Framework could otherwise be attacked at the protocol level by any person performing a plethora of trade requests.
 
 Naturally, some atomic swaps can initiate and then fail to complete, which raises questions about what happens to the `<dexfee>` in this scenario. The `<dexfee>` is the first charge in the protocol; in this sense, there is a `<dexfee>` charged for these failed atomic swaps.
 
-However, this failure should not be looked upon in isolation. The AtomicDEX protocol is based on statistics. Statistically speaking, there will be some percentage of atomic swaps that start and will not complete.
+However, this failure should not be looked upon in isolation. The Komodo DeFi Framework protocol is based on statistics. Statistically speaking, there will be some percentage of atomic swaps that start and will not complete.
 
 Let us suppose a 15% failure rate at this stage of the atomic swap (15% is three times higher than the rate of failure we currently observe in our testing). Even in this scenario, the effective `<dexfee>` cost is still only 0.15% to all Taker-side requests across the entire network.
 
@@ -233,16 +233,16 @@ As an organization, when speaking generally to our audience online, we state tha
 
 ### Dealing with Confirmations
 
-Since AtomicDEX is trading permanently on blockchains — as opposed to updating an internal database of vouchers — both sides of the trading pair need to wait and watch as miners on the respective blockchains calculate transaction confirmations.
+Since Komodo DeFi Framework is trading permanently on blockchains — as opposed to updating an internal database of vouchers — both sides of the trading pair need to wait and watch as miners on the respective blockchains calculate transaction confirmations.
 
-Because the payments that occur on one blockchain will proceed regardless of the actions on the other blockchain — a confirmation failure on one chain will not stop with the other blockchain performing its duties as normal — the AtomicDEX protocol must automatically observe and adjust as necessary.
+Because the payments that occur on one blockchain will proceed regardless of the actions on the other blockchain — a confirmation failure on one chain will not stop with the other blockchain performing its duties as normal — the Komodo DeFi Framework protocol must automatically observe and adjust as necessary.
 
-### AtomicDEX is Entirely Experimental, and Should Be Treated As Such
+### Komodo DeFi Framework is Entirely Experimental, and Should Be Treated As Such
 
 We warn our readers, nevertheless. Every element of the Komodo ecosystem is still considered to be highly experimental. We provide no investment advice, nor any guarantees of any funds utilized on our network. Use our products only at your own risk.
 
-### The AtomicDEX API
+### The Komodo DeFi Framework API
 
 We created an API model that is generally the same for all coins.
 
-For more information, [please turn to the AtomicDEX documentation.](/komodo-defi-framework/)
+For more information, [please turn to the Komodo DeFi Framework documentation.](/komodo-defi-framework/)

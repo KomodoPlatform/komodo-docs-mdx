@@ -77,6 +77,9 @@ async function processFile(filePath, filepathSlugs) {
   if (!filePath.endsWith("/index.mdx")) {
     throw new Error("File path doesn't end with '/index.mdx': " + filePath);
   }
+  // if (filePath.includes("setup/dexp2p")) {
+  //   throw new Error("dexp2p': " + filePath);
+  // }
   // if (!filePath.includes("/non_fungible_token")) {
   //     return
   // }

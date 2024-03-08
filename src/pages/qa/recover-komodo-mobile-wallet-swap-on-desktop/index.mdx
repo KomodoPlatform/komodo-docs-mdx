@@ -1,15 +1,15 @@
-export const title = "How to recover a swap that failed in AtomicDEX mobile using Desktop";
-export const description = "This guide describes a step-by-step process to recover a swap that failed in AtomicDEX mobile using AtomicDEX desktop.";
+export const title = "How to recover a swap that failed in Komodo mobile wallet using Desktop";
+export const description = "This guide describes a step-by-step process to recover a swap that failed in Komodo mobile wallet using Desktop.";
 
-# How to recover a swap that failed in AtomicDEX mobile using Desktop
+# How to recover a swap that failed in Komodo mobile wallet using Desktop
 
-If for any reason, you don't want to/can't recover a stuck/timed out/failed swap in AtomicDEX mobile and wants to use the CLI on a desktop, follow this guide.
+If for any reason, you don't want to/can't recover a stuck/timed out/failed swap in Komodo mobile wallet and wants to use the CLI on a desktop, follow this guide.
 
-*   First, export the log file from your AtomicDEX mobile (Settings -> "Share log File") and transfer it to your Desktop.
+*   First, export the log file from your Komodo mobile wallet (Settings -> "Share log File") and transfer it to your Desktop.
 *   Follow the instructions in [this linked guide](/qa/extract-swap-data-komodo-wallet-log/) to extract the swap data from the log file into a format usable by `mm2`
-*   It should create two directories named "MAKER" and "TAKER" and files named `<uuid>.json` in the appropriate directory. `uuid` is the swap id from the AtomicDEX mobile app
+*   It should create two directories named "MAKER" and "TAKER" and files named `<uuid>.json` in the appropriate directory. `uuid` is the swap id from the Komodo mobile wallet app
 *   Find the file named after your stuck swap's id and save it in a accessible location. Also note if it was in the directory named "MAKER" or "TAKER"
-*   Follow the instructions in [this linked guide](/qa/komodefi-api-quickstart/) to download, configure and setup AtomicDEX on your desktop. When creating the file `MM2.json` as described in the guide, use the seed words from AtomicDEX mobile as the value for the key `"passphrase"`
+*   Follow the instructions in [this linked guide](/qa/komodefi-api-quickstart/) to download, configure and setup Komodo DeFi Framework on your desktop. When creating the file `MM2.json` as described in the guide, use the seed words from Komodo mobile wallet as the value for the key `"passphrase"`
 *   Once `mm2` is up and running, open a new terminal window and export the `rpc_password` as value to the environment variable named `userpass`.
 
 ```bash
@@ -56,7 +56,7 @@ curl --url "http://127.0.0.1:7783" --data "{\"userpass\":\"$userpass\",\"method\
 }
 ```
 
-*   Make sure the address and balance in the above response match the values shown in AtomicDEX mobile. If the address does not match, the `"passphrase"` (seed words) in `MM2.json` is incorrect. Stop `mm2`, delete the directory named `DB`, correct the passphrase and repeat all the steps from before. If the balance is `0`, either the electrum server's addresses you are using are incorrect or your connection might have an issue. Likely a firewall is blocking it.
+*   Make sure the address and balance in the above response match the values shown in Komodo mobile wallet. If the address does not match, the `"passphrase"` (seed words) in `MM2.json` is incorrect. Stop `mm2`, delete the directory named `DB`, correct the passphrase and repeat all the steps from before. If the balance is `0`, either the electrum server's addresses you are using are incorrect or your connection might have an issue. Likely a firewall is blocking it.
 
 <Note type="warning">
   Don't delete the DB if you have been using the `mm2` on your desktop before
@@ -67,7 +67,7 @@ curl --url "http://127.0.0.1:7783" --data "{\"userpass\":\"$userpass\",\"method\
   was created/modified most recently
 </Note>
 
-*   Once you are sure that both the coins have been enabled using the `electrum` method and the addresses and balances match the values in the AtomicDEX mobile, you are ready to recover the swap. Issue the `recover_funds_of_swap` command with the swap id as an argument
+*   Once you are sure that both the coins have been enabled using the `electrum` method and the addresses and balances match the values in the Komodo mobile wallet, you are ready to recover the swap. Issue the `recover_funds_of_swap` command with the swap id as an argument
 
 ```bash
 curl --url "http://127.0.0.1:7783" --data "{\"userpass\":\"$userpass\",\"method\":\"recover_funds_of_swap\",\"params\":{\"uuid\":\"<swap id of the stuck swap here>\"}}"
