@@ -6,7 +6,7 @@ script_path = os.path.dirname(os.path.realpath(__file__))
 root_path = os.path.dirname(script_path)
 
 def gen_api_methods_table():
-    atomicdex_files = glob.glob(f'{root_path}/src/pages/atomicdex/**/index.mdx', recursive = True)
+    atomicdex_files = glob.glob(f'{root_path}/src/pages/komodo-defi-framework/**/index.mdx', recursive = True)
     methods_dict = {
         "legacy": [],
         "v20": [],
@@ -37,7 +37,7 @@ def gen_api_methods_table():
 
     with open(f'{script_path}/methods_table.template', 'r') as f:
         template = f.read()
-        with open(f'{root_path}/src/pages/atomicdex/api/index.mdx', 'w') as f2:
+        with open(f'{root_path}/src/pages/komodo-defi-framework/api/index.mdx', 'w') as f2:
             f2.write(template)
             for method in methods_list:
                 legacy = ""
