@@ -95,7 +95,7 @@ The `add_node_to_version_stat` method adds a Node's name, IP address and PeerID 
 `07 09:33:58, atomicdex_behaviour:610] INFO Local peer id: PeerId("12D3KooWReXsTVCKGAna1tzrD1jaUttTSs17ULFuvvzoGD9bqmmA")
 `
 
-Note: To allow collection of version stats, added nodes must open port 38890.
+Note: To allow collection of version stats, added nodes must open ports 42845 (tcp) and 42855 (ws).
 
 ## Arguments
 
@@ -197,19 +197,19 @@ For coins with segwit, they may appear twice in the output (once for each addres
 
 #### Arguments
 
-| Structure     | Type   | Description                                                                          |
-| ------------- | ------ | ------------------------------------------------------------------------------------ |
-| coin          | string | The ticker of the coin to get best orders                                            |
-| action        | string | Whether to `buy` or `sell` the selected coin                                         |
-| exclude\_mine | bool   | Defaults to `false`. If `true`, the users orders will be excluded from the response. |
-| request\_by   | object | A standard [RequestBy](/komodo-defi-framework/api/common_structures/orders/#request-by) object.  |
+| Structure     | Type   | Description                                                                                     |
+| ------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| coin          | string | The ticker of the coin to get best orders                                                       |
+| action        | string | Whether to `buy` or `sell` the selected coin                                                    |
+| exclude\_mine | bool   | Defaults to `false`. If `true`, the users orders will be excluded from the response.            |
+| request\_by   | object | A standard [RequestBy](/komodo-defi-framework/api/common_structures/orders/#request-by) object. |
 
 #### Response
 
-| Structure         | Type          | Description                                                                                                    |
-| ----------------- | ------------- | -------------------------------------------------------------------------------------------------------------- |
+| Structure         | Type          | Description                                                                                                                |
+| ----------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------- |
 | orders            | object (map)  | the `ticker -> array of standard [OrderData](/komodo-defi-framework/api/common_structures/orders/#order-data) objects` map |
-| original\_tickers | list (string) | Tickers included in response when `orderbook_ticker` is configured for the queried coin in `coins` file        |
+| original\_tickers | list (string) | Tickers included in response when `orderbook_ticker` is configured for the queried coin in `coins` file                    |
 
 #### 📌 Examples
 
@@ -1077,26 +1077,26 @@ The AtomicDEX-API supports Bitcoin Cash SLP tokens. Using this method, you can e
 
 ### Request Parameters
 
-| Parameter                | Type             | Description                                                                                                                                                                                                                                 |
-| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ticker                   | string           | Ticker of the platform protocol coin. Options: `BCH` or `tBCH`                                                                                                                                                                              |
-| bchd\_urls               | array of strings | A list of BCHD gRPC API server URLs, used for  validation of SLP token transactions. It's recommended to add as many servers as possible. The URLs list can be found at [https://bchd.fountainhead.cash/](https://bchd.fountainhead.cash/). |
-| mode                     | object           | A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode) object.                                                                                                                                           |
-| tx\_history              | boolean          | If `true`, spawns a background loop to store the local cache of address(es) transactions. Defaults to `false`.                                                                                                                              |
-| slp\_tokens\_requests    | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/nfts/#tokens-request) objects.                                                                                                                                          |
-| address\_format          | object           | Optional. Overwrites the address format from coins file, if set. A standard [AddressFormat](/komodo-defi-framework/api/common_structures/#address-format) object.                                                                                       |
-| allow\_slp\_unsafe\_conf | boolean          | Optional, defaults to `false`. If `true`, allows bchd\_urls to be empty. **Warning:** it is highly unsafe to do so as it may lead to invalid SLP transactions generation and tokens burning.                                                |
-| get\_balances            | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                     |
-| required\_confirmations  | integer          | Optional, defaults to value in the coins file, or `3` if not set. Confirmations to wait for steps in swap.                                                                                                                                  |
-| requires\_notarization   | boolean          | Optional, defaults to `true`. Has no effect on BCH.                                                                                                                                                                                         |
-| tx\_history              | boolean          | Optional, defaults to `true`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method           |
-| utxo\_merge\_params      | object           | A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params) object. Used to reduce a wallet's UTXO count in cases where it is causing significantly slower RPC responses.                                  |
+| Parameter                | Type             | Description                                                                                                                                                                                                                                   |
+| ------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker                   | string           | Ticker of the platform protocol coin. Options: `BCH` or `tBCH`                                                                                                                                                                                |
+| bchd\_urls               | array of strings | A list of BCHD gRPC API server URLs, used for  validation of SLP token transactions. It's recommended to add as many servers as possible. The URLs list can be found at [https://bchd.fountainhead.cash/](https://bchd.fountainhead.cash/).   |
+| mode                     | object           | A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode) object.                                                                                                                                 |
+| tx\_history              | boolean          | If `true`, spawns a background loop to store the local cache of address(es) transactions. Defaults to `false`.                                                                                                                                |
+| slp\_tokens\_requests    | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                          |
+| address\_format          | object           | Optional. Overwrites the address format from coins file, if set. A standard [AddressFormat](/komodo-defi-framework/api/common_structures/#address-format) object.                                                                             |
+| allow\_slp\_unsafe\_conf | boolean          | Optional, defaults to `false`. If `true`, allows bchd\_urls to be empty. **Warning:** it is highly unsafe to do so as it may lead to invalid SLP transactions generation and tokens burning.                                                  |
+| get\_balances            | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                       |
+| required\_confirmations  | integer          | Optional, defaults to value in the coins file, or `3` if not set. Confirmations to wait for steps in swap.                                                                                                                                    |
+| requires\_notarization   | boolean          | Optional, defaults to `true`. Has no effect on BCH.                                                                                                                                                                                           |
+| tx\_history              | boolean          | Optional, defaults to `true`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method |
+| utxo\_merge\_params      | object           | A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params) object. Used to reduce a wallet's UTXO count in cases where it is causing significantly slower RPC responses.                        |
 
 ### Response Parameters
 
-| Parameter             | Type    | Description                                                                                                                                                       |
-| --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| current\_block        | integer | Block height of the coin being activated                                                                                                                          |
+| Parameter             | Type    | Description                                                                                                                                                                   |
+| --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| current\_block        | integer | Block height of the coin being activated                                                                                                                                      |
 | bch\_addresses\_infos | object  | A standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) object. Note: the structure may vary based on the value of the `get_balances` parameter. |
 | slp\_addresses\_infos | object  | A standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) object. Note: the structure may vary based on the value of the `get_balances` parameter. |
 
@@ -1516,8 +1516,8 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | mm2                         | integer          | Required if not set in `coins` file. Informs the AtomicDEX API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                                                                                               |
 | swap\_contract\_address     | string           | Address of etomic swap smart contract                                                                                                                                                                                                                                                                                                        |
 | fallback\_swap\_contract    | string           | Address of backup etomic swap smart contract                                                                                                                                                                                                                                                                                                 |
-| nodes                       | array of objects | A list of standard [EvmNode](/komodo-defi-framework/api/common_structures/activation/#evm-node) objects.                                                                                                                                                                                                                                                 |
-| erc20\_tokens\_requests     | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/nfts/#tokens-request) objects.                                                                                                                                                                                                                                           |
+| nodes                       | array of objects | A list of standard [EvmNode](/komodo-defi-framework/api/common_structures/activation/#evm-node) objects.                                                                                                                                                                                                                                     |
+| erc20\_tokens\_requests     | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                                                                                                                         |
 | gas\_station\_decimals      | integer          | Optional, for ETH/ERC20 and other gas model chains. Defaults to `8`. Defines the decimals used to denominate the gas station response to gwei units. For example, the ETH gas station uses 8 decimals, which means that "average": 860 is equal to 86 gwei. While the Matic gas station uses 9 decimals, so 860 would mean 860 gwei exactly. |
 | gas\_station\_policy.policy | string           | Optional, for ETH/ERC20 and other gas model chains. Defaults to `"MeanAverageFast"`. Defines the method of gas price calculation from the station response. `"MeanAverageFast"` will use the mean between average and fast fields. `"Average"` will return a simple average value.                                                           |
 | get\_balances               | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                                                                                      |
@@ -1525,13 +1525,13 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | required\_confirmations     | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the AtomicDEX API to wait during the transaction steps of an atomic swap                                                                                                                                                                      |
 | requires\_notarization      | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.                                                                    |
 | rpc\_mode                   | string           | Optional, defaults to `Http`, value can be `Metamask` when the AtomicDEX-API is built targeting `wasm`                                                                                                                                                                                                                                       |
-| tx\_history                 | boolean          | Optional, defaults to `false`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                                                                                           |
+| tx\_history                 | boolean          | Optional, defaults to `false`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                                                                               |
 
 ### Response Parameters
 
-| Parameter               | Type    | Description                                                                                                                                                       |
-| ----------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| current\_block          | integer | Block height of the coin being activated                                                                                                                          |
+| Parameter               | Type    | Description                                                                                                                                                                   |
+| ----------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| current\_block          | integer | Block height of the coin being activated                                                                                                                                      |
 | eth\_addresses\_infos   | object  | A standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) object. Note: the structure may vary based on the value of the `get_balances` parameter. |
 | erc20\_addresses\_infos | object  | A standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) object. Note: the structure may vary based on the value of the `get_balances` parameter. |
 
@@ -2040,23 +2040,23 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 | ----------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ticker                  | string           | Ticker of the platform protocol coin.  Options: `ATOM`, `IRIS`, `OSMOSIS`                                                                                                                                                                                                 |
 | mm2                     | integer          | Required if not set in `coins` file. Informs the AtomicDEX API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                            |
-| tokens\_params          | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/nfts/#tokens-request) objects.                                                                                                                                                                        |
+| tokens\_params          | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                                                      |
 | priv\_key\_policy       | string           | Optional, defaults to `ContextPrivKey`. value can be `ContextPrivKey`,`Trezor` when AtomicDEX-API is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the AtomicDEX-API is built targeting `wasm`                                     |
-| tx\_history             | boolean          | Optional, defaults to `false`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                        |
+| tx\_history             | boolean          | Optional, defaults to `false`. If `true` the AtomicDEX API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                            |
 | required\_confirmations | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the AtomicDEX API to wait during the transaction steps of an atomic swap                                                                                                   |
 | requires\_notarization  | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
 | get\_balances           | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                   |
 
 ### Response Parameters
 
-| Parameter        | Type             | Description                                                                                                                                                |
-| ---------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| current\_block   | integer          | Block height of the coin being activated                                                                                                                   |
-| ticker           | string           | Ticker of the platform protocol coin, as input in the request.                                                                                             |
-| address          | string           | An address for the activated coin                                                                                                                          |
+| Parameter        | Type             | Description                                                                                                                                                            |
+| ---------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| current\_block   | integer          | Block height of the coin being activated                                                                                                                               |
+| ticker           | string           | Ticker of the platform protocol coin, as input in the request.                                                                                                         |
+| address          | string           | An address for the activated coin                                                                                                                                      |
 | balance          | object           | Only returned when `get_balances` is `true`. A standard [BalanceInfos](/komodo-defi-framework/api/common_structures/#balance-infos) object.                            |
 | tokens\_balances | array of objects | Only returned when `get_balances` is `true`. A list of standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) objects, one for each token. |
-| tokens\_tickers  | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                                    |
+| tokens\_tickers  | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                                                |
 
 ### 📌 Examples
 
@@ -2623,7 +2623,7 @@ It includes a uniform request, successful and error response formats. At the mom
 
 | Structure    | Type              | Description                                                                                 |
 | ------------ | ----------------- | ------------------------------------------------------------------------------------------- |
-| mmrpc        | string            | the string specifying the version of the AtomicDEX API RPC protocol                         |
+| mmrpc        | string            | the string specifying the version of the Komodo DeFi API RPC protocol                       |
 | error        | string            | the common error description                                                                |
 | error\_path  | string            | the error path consisting of file names separated by a dot similar to JSON path notation    |
 | error\_trace | string            | the error path consisting of file and line number pairs separated by ']'                    |
@@ -2704,18 +2704,25 @@ The folowing objects are used in the request or response of multiple Komodo DeFi
 
 The `ActivationParams` object defines additional parameters used for activation. These params may vary depending on the coin type.
 
-| Parameter                    | Type    | Description                                                                                                                                                                                                                          |
-| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| required\_confirmations      | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                   |
-| requires\_notarization       | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file. |
-| priv\_key\_policy            | string  | Defaults to `ContextPrivkey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                                            |
-| min\_addresses\_number       | integer | HD wallets only. How many additional addreesses to generate at a minimum.                                                                                                                                                            |
-| scan\_policy                 | string  | HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the Komodo DeFi SDK.                                       |
-| gap\_limit                   | integer | HD wallets only. The max number of empty addresses in a row. If transactions were sent to an address outside the `gap_limit`, they will not be identified when scanning.                                                             |
-| zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing Zcash parameters. Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                                     |
-| scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                  |
-| scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                    |
-| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/v20/#activation-mode) object.                                                                                                                              |
+| Parameter                    | Type    | Description                                                                                                                                                                                                                                                                   |
+| ---------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| required\_confirmations      | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                                                            |
+| requires\_notarization       | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file.                                          |
+| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/v20/#activation-mode) object.                                                                                                                                                           |
+| zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing [Zcash parameters](https://z.cash/learn/). Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                                                     |
+| scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                                                           |
+| scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                                                             |
+| tx\_history                  | boolean | Optional. Enable transaction history scanning. When active, the Komodo DeFi Framework API will collect transaction history data for local storage, and allow use of the [my\_tx\_history (v2)](/komodo-defi-framework/api/v20/my_tx_history/) method.                         |
+| min\_addresses\_number       | integer | Optional, HD wallets only. Number of addresses to generate. If not specified, addresses will be generated up to `path_to_address::address_index`.                                                                                                                             |
+| scan\_policy                 | string  | Optional, HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Defaults to `scan_if_new_wallet`. Note that `scan` will result in multple requests to the Komodo DeFi API and may take some time to complete. |
+| gap\_limit                   | integer | Optional, HD wallets only. The max number of empty addresses in a row. Transactions sent to an address outside the `gap_limit`, will not be identified when scanning. Defaults to `20`.                                                                                       |
+| path\_to\_address            | object  | Optional, HD wallets only. A standard [AddressDerivationPath](/komodo-defi-framework/api/v20/#address-derivation-path) object.                                                                                                                                                |
+| get\_balances                | boolean | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                       |
+
+<DevComment>
+  Is priv\_key\_policy still a thing?
+  Defaults to `ContextPrivKey`. Set as `Trezor` to activate in Trezor mode.
+</DevComment>
 
 <Note>
   For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
@@ -2733,21 +2740,41 @@ The `ActivationParams` object defines additional parameters used for activation.
 
 Defines the activation mode for QTUM, BCH, UTXO & ZHTLC coins.
 
-| Parameter | Type   | Description                                                                                                      |
-| --------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
-| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.   |
+| Parameter | Type   | Description                                                                                                                  |
+| --------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.               |
 | rpc\_data | object | `Electrum` or `Light` mode only. A standard [ActivationRpcData](/komodo-defi-framework/api/v20/#activation-rpc-data) object. |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "mode": {
+          "rpc": "Electrum",
+          "rpc_data": {
+              "servers": [
+                  {
+                      "url": "electrum1.cipig.net:10020"
+                  },
+                  {
+                      "url": "electrum2.cipig.net:10020"
+                  }
+              ]
+          }
+      },
+  }
+  ```
+</CollapsibleSection>
 
 ### ActivationRpcData
 
 Contains information about electrum & lightwallet\_d servers for coins being used in `Electrum` or `Light` mode.
 
-| Parameter                 | Type              | Description                                                                                                                                                                                                                                                                                                        |
-| ------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| light\_wallet\_d\_servers | list              | ZHTLC only. A list of urls which are hosting lightwallet\_d servers for a coin.                                                                                                                                                                                                                                    |
-| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/v20/#activation-servers) objects.                                                                                                                                                                                                                |
-| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/v20/#activation-servers) objects.                                                                                                                                                                                               |
-| sync\_params              | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling\_activation\_height), `height` (a specific block height) or `date` (a timestamp in [unix epoch format](https://www.epochconverter.com/)). |
+| Parameter                 | Type              | Description                                                                                                                                                                                                                                                     |
+| ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| light\_wallet\_d\_servers | list              | ZHTLC only. A list of urls which are hosting lightwallet\_d servers for a coin.                                                                                                                                                                                 |
+| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/v20/#activation-servers) objects.                                                                                                                                                 |
+| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/v20/#activation-servers) objects.                                                                                                                                |
+| sync\_params              | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling\_activation\_height), `height` (a specific block height) or `date` (a unix timestamp). |
 
 ### ActivationServers
 
@@ -2816,18 +2843,67 @@ Contains information electrum servers for coins being used in `Electrum` or `Lig
   }
   }
   ```
+
+  #### HD UTXO Activation (v2)
+
+  ```json
+  {
+      "activation_params": {
+          "mode": {
+              "rpc": "Electrum",
+              "rpc_data": {
+                  "servers": [
+                      {
+                          "url": "electrum2.cipig.net:10001"
+                      },
+                      {
+                          "url": "electrum3.cipig.net:20001",
+                          "ws_url": "electrum3.cipig.net:30001",
+                          "protocol": "SSL"
+                      }
+                  ]
+              }
+          },
+          "scan_policy": "scan_if_new_wallet",
+          "min_addresses_number": 3,
+          "gap_limit": 20
+      }
+  }
+  ```
+</CollapsibleSection>
+
+### AddressDerivationPath
+
+The `AddressDerivationPath` object defines the account / change / address\_index of the [derivation path](https://medium.com/mycrypto/wtf-is-a-derivation-path-c3493ca2eb52) used for your wallet. Using different values for `account_id` or `address_id` parameters will result in a different address and private key for each combination. The `chain` parameter is used to specify if the change from a transaction. Set to `External` for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction.
+
+| Parameter   | Type    | Description                                                                              |
+| ----------- | ------- | ---------------------------------------------------------------------------------------- |
+| account\_id | integer | Optional, defaults to `0`. Used as a layer of separation or hierarchy.                   |
+| chain       | string  | Optional. Accepted values are `External` (0) and `Internal` (1). Defaults to `External`. |
+| address\_id | integer | Optional, defaults to `0`. Used as a layer of separation or hierarchy.                   |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "path_to_address": {
+          "account_id": 0,
+          "chain": "External",
+          "address_id": 1
+      }
+  }
+  ```
 </CollapsibleSection>
 
 ### AddressInfos
 
 The `addressInfos` object includes the following items for a given address:
 
-| Parameter          | Type   | Description                                                                                                                    |
-| ------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| balances           | object | A standard [balanceInfos](/komodo-defi-framework/api/v20/#balance-infos) object. Not included in responses where `get_balances` is `false` |
-| derivation\_method | object | A standard [DerivationMethod](/komodo-defi-framework/api/v20/#derivation-method) object                                                    |
-| pubkey             | string | The public key associated with the seed used to launch AtomicDEX                                                               |
-| tickers            | array  | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                 |
+| Parameter          | Type   | Description                                                                                                                              |
+| ------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| balances           | object | A standard [BalanceInfo](/komodo-defi-framework/api/v20/#balance-info) object. Not included in responses where `get_balances` is `false` |
+| derivation\_method | object | A standard [DerivationMethod](/komodo-defi-framework/api/v20/#derivation-method) object                                                  |
+| pubkey             | string | The public key associated with the seed used to launch Komodo DeFi                                                                       |
+| tickers            | array  | A list of tokens which were successfully activated. Only included in responses where `get_balances` is `false`                           |
 
 <CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
   #### Example with balances
@@ -2858,9 +2934,9 @@ The `addressInfos` object includes the following items for a given address:
   ```
 </CollapsibleSection>
 
-### BalanceInfos
+### BalanceInfo
 
-The `balanceInfos` object includes the following items for a given coin or token:
+The `balanceInfo` object includes the following items for a given coin or token:
 
 | Parameter   | Type             | Description                                                                                                              |
 | ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -2885,15 +2961,13 @@ The `DerivationMethod` object includes the following items for a given coin or t
 | type      | string | Defines how keypairs will be generated. Possible values: `Iguana` or `HDWallet` |
 
 <Note>
-  Using the same seed or private key to generate keypairs using different
-  derivation methods will result in a different address and private key for each
-  method.
+  Using the same seed or private key to generate keypairs using different derivation methods will result in a different address and private key for each method.
 </Note>
 
 Where the value indicates:
 
 *   `Iguana`: The coin or token is was activated using Iguana derivation (default).
-*   `HDWallet`: The coin or token is was activated using a Heirarchical Deterministic (HD) Wallet derivation path.
+*   `HDWallet`: The coin or token is was activated using a Hierarchical Deterministic (HD) Wallet derivation path.
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
@@ -2923,9 +2997,9 @@ The `EvmNode` object includes the following items for a given coin or token:
 
 ### CoinProtocol
 
-| Parameter      | Type    | Description                                                                   |
-| -------------- | ------- | ----------------------------------------------------------------------------- |
-| type           | integer | One of the supported \[coin types]\(link TBA)                                 |
+| Parameter      | Type    | Description                                                                               |
+| -------------- | ------- | ----------------------------------------------------------------------------------------- |
+| type           | integer | One of the supported \[coin types]\(link TBA)                                             |
 | protocol\_data | object  | A standard [CoinProtocolData](/komodo-defi-framework/api/v20/#coin-protocol-data) object. |
 
 ### CoinProtocolData
@@ -2934,7 +3008,7 @@ The `EvmNode` object includes the following items for a given coin or token:
 | --------------------- | ------ | ------------------------------------------------------------------------------------------------ |
 | platform              | string | Indicates the platform parent coin for EMV-like protocols, or the coin used for lightning nodes. |
 | network               | string | Either `mainnet` or \`testnet                                                                    |
-| confirmation\_targets | object | A standard [ConfirmationTargets](/komodo-defi-framework/api/v20/#confirmation-targets) object.               |
+| confirmation\_targets | object | A standard [ConfirmationTargets](/komodo-defi-framework/api/v20/#confirmation-targets) object.   |
 
 ### ConfirmationTargets
 
@@ -3017,9 +3091,7 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 | their\_channel\_reserve\_sats           | boolean | Optional, defaults to `10000` or 1% of channel value. The minimum balance that the other node has to maintain on their side, at all times. This ensures that if our counterparty broadcasts a revoked state, we can punish them by claiming at least this value on chain.                                                                                                                                                                                                                              |
 
 <Note>
-  For GUIs and wallet apps, it is recommended to set `announced_channel` to
-  `false` (the default value), as the node is not expected to be reliably
-  online.
+  For GUIs and wallet apps, it is recommended to set `announced_channel` to `false` (the default value), as the node is not expected to be reliably online.
 </Note>
 
 ### LightningChannelOptions
@@ -3076,27 +3148,27 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 
 ### LightningPayment
 
-| Parameter        | Type   | Description                                                                                                                                                                                  |
-| ---------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type             | string | The payment type. Accepted values are `invoice` or [`keysend`](https://cdecker-lightning.readthedocs.io/lightning-keysend.7.html).                                                           |
-| invoice          | string | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                                                                        |
-| destination      | string | Only used if `type` is `keysend`. A `node_pubkey` (which is also the node address in lightning context). Not to be confused with an onchain address.                                         |
-| amount\_in\_msat | string | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin). |
-| expiry           | string | Only used if `type` is `keysend`. Optional, defaults to `3600`. Seconds until the payment expires.                                                                                           |
+| Parameter        | Type   | Description                                                                                                                                                                                       |
+| ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type             | string | The payment type. Accepted values are `invoice` or [`keysend`](https://cdecker-lightning.readthedocs.io/lightning-keysend.7.html).                                                                |
+| invoice          | string | Only used if `type` is `invoice`. An identifying string which represents the invoice.                                                                                                             |
+| destination      | string | Only used if `type` is `keysend`. A `node_pubkey` (which is also the node address in lightning context). Not to be confused with an onchain address.                                              |
+| amount\_in\_msat | string | Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) (A thousandth of a satoshi; the same as 0.00000000001 bitcoin). |
+| expiry           | string | Only used if `type` is `keysend`. Optional, defaults to `3600`. Seconds until the payment expires.                                                                                                |
 
 ### LightningPaymentFilter
 
-| Parameter             | Type    | Description                                                                                                       |
-| --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------- |
-| payment\_type         | object  | A standard `LightningPaymentType` object.                                                                         |
-| description           | string  | Optional. A note to indicate the purpose of the invoice.                                                          |
-| status                | string  | Optional. Accepted values: `pending`, `succeeded`, `failed`.                                                      |
-| from\_amount\_msat    | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)             |
-| to\_amount\_msat      | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)             |
-| from\_fee\_paid\_msat | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)    |
-| to\_fee\_paid\_msat   | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)    |
-| from\_timestamp       | string  | Optional. Minimum timestamp in [unix epoch format](https://www.epochconverter.com/) of payment results to return. |
-| to\_timestamp         | string  | Optional. Maximum timestamp in [unix epoch format](https://www.epochconverter.com/) of payment results to return. |
+| Parameter             | Type    | Description                                                                                                         |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| payment\_type         | object  | A standard `LightningPaymentType` object.                                                                           |
+| description           | string  | Optional. A note to indicate the purpose of the invoice.                                                            |
+| status                | string  | Optional. Accepted values: `pending`, `succeeded`, `failed`.                                                        |
+| from\_amount\_msat    | integer | Optional. Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html)          |
+| to\_amount\_msat      | integer | Optional. Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html)          |
+| from\_fee\_paid\_msat | integer | Optional. Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) |
+| to\_fee\_paid\_msat   | integer | Optional. Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter.html) |
+| from\_timestamp       | string  | Optional. Minimum timestamp (in milliseconds) of payment results to return.                                         |
+| to\_timestamp         | string  | Optional. Maximum timestamp (in milliseconds) of payment results to return.                                         |
 
 ### LightningPaymentType
 
@@ -3106,8 +3178,8 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
 | destination | string | Only used if `type` is `Outbound Payment`. A pubkey which will receive the payment. |
 
 <DevComment>
-  Response may change in future. See
-  [https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\\_r1206176530](https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\_r1206176530)
+  Response may change in future.
+  See [https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\\_r1206176530](https://github.com/KomodoPlatform/komodo-docs-mdx/pull/31#discussion\\_r1206176530)
 </DevComment>
 
 ### Pagination
@@ -3124,114 +3196,45 @@ For requests which return many results, pagination offsets may be applied. \*\* 
 
   ```json
   {
-    "PageNumber": 1
+      "PageNumber": 1
   }
   ```
 
   ```json
   {
-    "FromId": 4
+      "FromId": 4
   }
   ```
 </CollapsibleSection>
 
-### TokenFilter
+### HistoryTarget
 
-The `TokenFilter` object includes the following items for a given coin or token:
+Used to specify a HD wallet `account_id` or `address_id` for \[my\_tx\_history (v2)] requests.
 
-| Parameter         | Type    | Description                                                                                                                    |
-| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| exclude\_spam     | boolean | Optional, defaults to `false`. If `true`, only tokens which have param `possible_spam:false` are included in the response.     |
-| exclude\_phishing | boolean | Optional, defaults to `false`. If `true`, only tokens which have param `possible_phishing:false` are included in the response. |
-
-### TokenTransferFilter
-
-The `TokenTransferFilter` object includes the following items for a transfer of given coin or token:
-
-| Parameter         | Type    | Description                                                                                                                                             |
-| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| receive           | boolean | Optional, defaults to `false`. If `true`, only transfers where user received NFTs are included in the response.                                         |
-| send              | boolean | Optional, defaults to `false`. If `true`, only transfers where user sent NFTs are included in the response.                                             |
-| from\_date        | integer | Optional. A timestamp in [unix epoch format](https://www.epochconverter.com/). If `true`, filter includes transfers from this date onwards (inclusive). |
-| to\_date          | integer | Optional. A timestamp in [unix epoch format](https://www.epochconverter.com/). If `true`, filter includes transfers up to this date (inclusive).        |
-| exclude\_spam     | boolean | Optional, defaults to `false`. If `true`, only transfers which have param `possible_spam:false` are included in the response.                           |
-| exclude\_phishing | boolean | Optional, defaults to `false`. If `true`, only transfers which have param `possible_phishing:false` are included in the response.                       |
+| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                              |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type        | string  | Filters results by `account_id` or `address_id` part of the derivation path.                                                                                                                                                                                                                                             |
+| account\_id | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                                                              |
+| address\_id | integer | Only required when `type` is `address_id`. `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
+| chain       | string  | Only required when `type` is `address_id`. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Example
+
   ```json
   {
-      "ticker": "MINDS-ERC20",
-      "required_confirmations": 4
+    "type": "account_id",
+    "account_id": 77
   }
   ```
-</CollapsibleSection>
 
-### NftMetadata
-
-The `NftMetadata` object includes the following items for a given coin or token:
-
-| Parameter         | Type                       | Description                                                                                                                                                      |
-| ----------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| image             | string                     | Optional. Direct URL to the NFT's image.                                                                                                                         |
-| image\_url        | string                     | Optional. Optional. Url to the NFT's image. Derived from the `image` or `image_url` fields to prioritize the non-null value. Can be null if neither is provided. |
-| image\_domain     | string                     | Optional. Extracted domain from the 'image\_url', if valid.                                                                                                      |
-| name              | string                     | Optional. Name of the token.                                                                                                                                     |
-| description       | string                     | Optional. Description of the token.                                                                                                                              |
-| attributes        | object or array of objects | Optional. The values within this parameter will vary, and are set by the creator. Often used to store traits.                                                    |
-| animation\_url    | string                     | Optional. Url to an animation to be displayed instead of a static image.                                                                                         |
-| animation\_domain | string                     | Optional. Extracted domain from the `animation_url`, if valid.                                                                                                   |
-| external\_url     | string                     | Optional. URL to the external source related to the token.                                                                                                       |
-| external\_domain  | string                     | Optional. Extracted domain from the `external_url`, if valid.                                                                                                    |
-| image\_details    | object                     | Optional. JSON containing additional details or attributes of the image.                                                                                         |
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
-  [
-      {
-          "trait_type": "Specialization",
-          "value": "Thief"
-      },
-      {
-          "trait_type": "Skin Tone",
-          "value": "#0013b0"
-      },
-      {
-          "trait_type": "Weapon",
-          "value": "Crossbow"
-      },
-      {
-          "trait_type": "Species",
-          "value": "Dark Elf"
-      },
-      {
-          "trait_type": "Gender",
-          "value": "Female"
-      },
-      {
-          "trait_type": "Strength",
-          "value": "8"
-      },
-      {
-          "trait_type": "Dexterity",
-          "value": "12"
-      },
-      {
-          "trait_type": "Intelligence",
-          "value": "10"
-      },
-      {
-          "trait_type": "Perks",
-          "value": ["Steath", "Eagle Eye", "Lockpicking", "Pickpocketing", "Fire resistance"]
-      },
-      {
-          "trait_type": "Weakness",
-          "value": ["Slow healing", "Elfbark Addict", "Lockpicking", "Fear of cats", "Unconvincing liar"]
-      },
-      {
-          "trait_type": "Personality",
-          "value": "Aggressive"
-      }
-  ]
+  {
+    "type": "address_id",
+    "account_id": 0,
+    "chain": "External", // Accepted values: "External" and "Internal"
+    "address_id": 1
+  }
   ```
 </CollapsibleSection>
 
@@ -3253,92 +3256,305 @@ The `TokensRequest` object includes the following items for a given coin or toke
   ```
 </CollapsibleSection>
 
-### WithdrawFee
+### WalletBalanceInfo
 
-The `WithdrawFee` object varies depending on the coin or token type. Refer to the examples to view the object structure for each type.
+The `WalletBalanceInfo` object includes the following items in the activation response for a coin in HD mode:
 
-| Parameter       | Type           | Description                                                                       |
-| --------------- | -------------- | --------------------------------------------------------------------------------- |
-| type            | string         | The fee type. Either `Utxo`, `Tendermint`, `Qrc20` or `Eth`.                      |
-| amount          | numeric string | `Utxo` or `Tendermint` type only. The fee amount.                                 |
-| coin            | string         | The coin which will be used to pay the transaction fee.                           |
-| gas             | integer        | `Eth` type only. The amount of gas to be used for the transaction.                |
-| gas\_price      | numeric string | `Eth` or `Qrc20` type only. Price per unit of gas to be used for the transaction. |
-| gas\_limit      | numeric string | `Tendermint` or `Qrc20` type only. Maximum gas to be used for the transaction.    |
-| miner\_fee      | numeric string | `Tendermint` type only. Fee to mine the transaction.                              |
-| total\_fee      | numeric string | `Eth` type only. Gas price multiplied by gas amount.                              |
-| total\_gas\_fee | numeric string | `Qrc20` type only. Gas price multiplied by gas amount.                            |
+| Parameter    | Type   | Description                                                                                     |
+| ------------ | ------ | ----------------------------------------------------------------------------------------------- |
+| wallet\_type | string | In HD wallet mode, this will return `HD`. <DevComment> What are the other values? </DevComment> |
+| accounts     | object | A standard [WalletAccountInfo](/komodo-defi-framework/api/v20/#wallet-account-info) object.     |
 
-<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
-  #### Example of Eth type
+```json
+{
+    "wallet_balance": {
+        "wallet_type": "HD",
+        "accounts": [
+            ...
+        ]
+    }
+}
+```
 
+### WithdrawFromInfo
+
+The `WithdrawFromInfo` response object includes the following items for HD Wallet [withdraw (v2)](/komodo-defi-framework/api/v20/withdraw/) requests.
+You can use either the `derivation_path` on its own, or the `account_id`, `chain` and `address_id` together.
+
+| Parameter        | Type    | Description                                                                                                                                                                                                                                                                   |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.                                                                                                                                                                   |
+| account\_id      | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.**                                                                                                                                 |
+| address\_id      | integer | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
+| chain            | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
+
+### FeeInfo
+
+The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/withdraw/) requests:
+
+| Parameter  | Type             | Description                                                                                                                               |
+| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
+| amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
+| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
+| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
+
+### ScanAddressesInfo
+
+The `ScanAddressesInfo` response object includes the following items for request in HD mode:
+
+| Parameter        | Type    | Description                                                                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the account.                                   |
+| new\_addresses   | list    | A list of standard [NewAddressInfo](/komodo-defi-framework/api/v20/#new-address-info) objects.                                                |
+
+<DevComment>
+  Confirm `new_addresses` array has the structure of `NewAddressInfo`.
+</DevComment>
+
+### NewAddressInfo
+
+The `NewAddressInfo` response object includes the following items for request in HD mode:
+
+| Parameter        | Type   | Description                                                                                                                                                                                                                                                                   |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| address          | string | The account address for a specific derivation path under the `account_index`.                                                                                                                                                                                                 |
+| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. If there are no more addresses with balances within the gap limit, the address index will increment.                                                              |
+| balance          | object | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                                                                                                                                                                                                |
+| chain            | string | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
+
+### WalletAccountInfo
+
+The `WalletAccountInfo` object includes the following items in the activation response for a coin in HD mode:
+
+| Parameter        | Type    | Description                                                                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| derivation\_path | string  | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                                                |
+| total\_balance   | object  | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                                                                |
+| addresses        | list    | A list of standard [AccountAddressInfo](/komodo-defi-framework/api/v20/#account-address-info) objects.                                        |
+
+```json
+{
+    "account_index": 0,
+    "derivation_path": "m/44'/141'/0'",
+    "total_balance": {
+        "spendable": "23.08710255",
+        "unspendable": "0"
+    },
+    "addresses": [
+        ...
+    ]
+}
+```
+
+### AccountAddressInfo
+
+The `AccountAddressInfo` object includes the following items for active addresses in the activation response for a coin in HD mode:
+
+| Parameter        | Type   | Description                                                                                                 |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
+| address          | string | The account address for a specific derivation path under the `account_index`.                               |
+| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. |
+| chain            | string | `External` or `Internal`, as defined in the activation request.                                             |
+| balance          | object | A standard [balanceInfo](/komodo-defi-framework/api/v20/#balance-info) object.                              |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
   {
-    "type": "Eth",
-    "coin": "BNB",
-    "gas": 109739,
-    "gas_price": "0.000000003",
-    "total_fee": "0.000329217"
-  }
-  ```
-
-  #### Example of Qrc20 type
-
-  ```json
-  {
-    "type": "Qrc20",
-    "coin": "tQTUM",
-    "miner_fee": "0.00000447",
-    "gas_limit": 100000,
-    "gas_price": 40,
-    "total_gas_fee": "0.04"
-  }
-  ```
-
-  #### Example of Tendermint type
-
-  ```json
-  {
-    "type": "Tendermint",
-    "coin": "IRIS",
-    "amount": "0.038553",
-    "gas_limit": 100000
-  }
-  ```
-
-  #### Example of Utxo type
-
-  ```json
-  {
-    "type": "Utxo",
-    "amount": "0.00001"
+      "address": "RXNtAyDSsY3DS3VxTpJegzoHU9bUX54j56",
+      "derivation_path": "m/44'/141'/0'/0/0",
+      "chain": "External",
+      "balance": {
+          "spendable": "7.64018255",
+          "unspendable": "0"
+      }
   }
   ```
 </CollapsibleSection>
 
-### WithdrawNftData
+## Error types
 
-The `WithdrawNftData` object is used for withdrawals of NFTs on ERC721 and ERC1155 contracts. It includes the following items for a given coin or token:
+#### NotSufficientBalance
 
-| Parameter      | Type    | Description                                                                                                                              |
-| -------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| chain          | string  | The token chain. Chain must be [activated](/komodo-defi-framework/api/legacy/coin_activation/) first.                                                |
-| to             | string  | Destination address to withdraw the token to.                                                                                            |
-| token\_address | string  | Token address.                                                                                                                           |
-| token\_id      | string  | Token ID.                                                                                                                                |
-| fee            | object  | A standard [WithdrawFee](/komodo-defi-framework/api/v20/#withdraw-fee) object. May be missing for older transfers.                                   |
-| amount         | string  | Optional, ERC1155 only. Defaults to `1`. Amount of NFTs to withdraw. Ignored if `max` is true.                                           |
-| max            | boolean | Optional, ERC1155 only. Defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent. |
+The `available` balance is not sufficient to transfer the specified amount.
 
-<Note>
-  When the `type` parameter in a [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc721`, it means the NFT is absolutely unique,
-  and it has only 1 owner and the owner can own only 1 NFT with this `token_id`
-  in its `token_address` (also referred to as contract address).
-  When the `type` parameter in a [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc1155`, it means that it is possible for more
-  than 1 user to own one or more of the same NFT (with an identical `token_id`).
-  Due to this difference, the `amount` and `max` fields are only used the when
-  the `type` value is `withdraw_erc1155`.
-</Note>
+| Structure | Type             | Description                                                                                                                                            |
+| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| coin      | string           | the name of the coin which balance is not sufficient. This coin name may differ from the requested coin. For example, ERC20 fees are paid by ETH (gas) |
+| available | string (numeric) | the balance available for transfer                                                                                                                     |
+| required  | string (numeric) | the amount required to transfer the specified amount. This amount is necessary but may not be sufficient                                               |
+
+#### Response (NotSufficientBalance error)
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Not enough DOC to withdraw: available 69.75066225, required at least 1000.00001",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1379] utxo_common:449]",
+  "error_type": "NotSufficientBalance",
+  "error_data": {
+    "coin": "DOC",
+    "available": "69.75066225",
+    "required": "1000.00001"
+  },
+  "id": 0
+}
+```
+
+#### ZeroBalanceToWithdrawMax
+
+The available balance is zero.
+
+| Structure | Type | Description |
+| --------- | ---- | ----------- |
+| (none)    |      |             |
+
+#### AmountTooLow
+
+The specified amount is too low. Required at least `threshold`.
+
+| Structure | Type             | Description                                          |
+| --------- | ---------------- | ---------------------------------------------------- |
+| amount    | string (numeric) | the amount the user was willing to transfer          |
+| threshold | string (numeric) | the `amount` has not to be less than the `threshold` |
+
+#### InvalidAddress
+
+The specified `to` address is not valid.
+
+| Structure | Type   | Description           |
+| --------- | ------ | --------------------- |
+| (none)    | string | the error description |
+
+#### InvalidFeePolicy
+
+The specified `fee` is not valid.
+
+| Structure | Type   | Description           |
+| --------- | ------ | --------------------- |
+| (none)    | string | the error description |
+
+#### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1371]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "id": 0
+}
+```
+
+#### Response (InvalidFeePolicy error - attempt to use UtxoFixed or UtxoPerKbyte for ETH coin)
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'EthGas' fee type, found UtxoFixed",
+  "error_path": "eth",
+  "error_trace": "eth:535]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'EthGas' fee type, found UtxoFixed",
+  "id": 0
+}
+```
+
+#### NoSuchCoin
+
+The specified coin was not found or is not activated yet.
+
+| Structure | Type   | Description                                   |
+| --------- | ------ | --------------------------------------------- |
+| coin      | string | the not found `coin` specified in the Request |
+
+#### Transport
+
+The request was failed due to a network error.
+
+| Structure | Type   | Description                     |
+| --------- | ------ | ------------------------------- |
+| (none)    | string | the transport error description |
+
+#### InternalError
+
+The request was failed due to an Komodo DeFi API internal error.
+
+| Structure | Type   | Description                    |
+| --------- | ------ | ------------------------------ |
+| (none)    | string | the internal error description |
+
+## Error cases
+
+### Error - Coin not active
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "TTT-SLP",
+  "error_path": "my_tx_history_v2.lp_coins",
+  "error_trace": "my_tx_history_v2:389] lp_coins:2847]",
+  "error_type": "CoinIsNotActive",
+  "error_data": "TTT-SLP",
+  "id": null
+}
+```
+
+### Error - Coin not compatible
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "TTT-SLP",
+  "error_path": "my_tx_history_v2",
+  "error_trace": "my_tx_history_v2:336]",
+  "error_type": "NotSupportedFor",
+  "error_data": "TTT-SLP",
+  "id": null
+}
+```
+
+### Error - Coin enabled without tx\_history = true
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Storage is not initialized for TTT-SLP",
+  "error_path": "my_tx_history_v2",
+  "error_trace": "my_tx_history_v2:343]",
+  "error_type": "StorageIsNotInitialized",
+  "error_data": "Storage is not initialized for TTT-SLP",
+  "id": null
+}
+```
+
+### Error - Local database failed
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
+  "error_path": "my_tx_history_v2.sql_tx_history_storage",
+  "error_trace": "my_tx_history_v2:351] sql_tx_history_storage:472]",
+  "error_type": "StorageError",
+  "error_data": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
+  "id": null
+}
+```
+
+<DevComment>
+  There are some common objects that are used in the Komodo DeFi SDK RPC protocol. These standard objects have been collected and grouped into the following sections:
+
+  *   [Activation](/komodo-defi-framework/api/common_structures/activation)
+  *   [Swaps](/komodo-defi-framework/api/common_structures/swaps/)
+  *   [Lightning Network](/komodo-defi-framework/api/common_structures/lightning/)
+  *   [Non-fungible Tokens](/komodo-defi-framework/api/common_structures/nfts/)
+</DevComment>
 export const title = "AtomicDEX: Signing and Verifying Messages";
 export const description = "The methods in this document allow you to sign and verify messages for all coins supported by AtomicDEX.";
 
@@ -3483,14 +3699,14 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
 **InternalError:** An internal error occured during the verification process
 **SignatureDecodingError:** Given signature could not be decoded
 **AddressDecodingError:** Given address could not be decoded
-export const title = "AtomicDEX Method: My TX History";
+export const title = "Komodo DeFi Framework Method: My TX History";
 export const description = "The my_tx_history method allows you to view the transaction history of coins.";
 
 # my\_tx\_history
 
 To use this method, you must activate your coin with `"tx_history": true`. The response will vary depending on the coin.
 Currently only BCH & SLP tokens are supported in the master/release API. In the latest dev API, UTXO coins, QTUM, and Tendermint/Tendermint tokens are also supported.
-For ZHTLC coins, you must use the [z\_coin\_tx\_history](/komodo-defi-framework/api/v20-dev/task_enable_z_coin/#z-coin-transaction-history) method.
+For ZHTLC coins, you must use the [z\_coin\_tx\_history](/komodo-defi-framework/api/v20-dev/zhtlc_coins/transaction_history/) method.
 For all other coins, use the legacy [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method.
 
 ## Arguments
@@ -3499,23 +3715,188 @@ For all other coins, use the legacy [my\_tx\_history](/komodo-defi-framework/api
 | --------------- | ------- | ------------------------------------------------------------------------------------------------ |
 | coin            | string  | Ticker of the coin to get history for.                                                           |
 | limit           | integer | Optional. Limits the number of returned transactions. Defaults to `10`. Ignored if `max = true`. |
-| paging\_options | object  | Optional. A standard [Pagination](/komodo-defi-framework/api/common_structures/#pagination) object.          |
+| paging\_options | object  | Optional. A standard [Pagination](/komodo-defi-framework/api/v20/#pagination) object.            |
+| target          | object  | Optional. A standard [HistoryTarget](/komodo-defi-framework/api/v20/#history-target) object.     |
 
 #### Response
 
-| Structure      | Type             | Description                                                                                                                                                                               |
-| -------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| transactions   | array of objects | transactions data                                                                                                                                                                         |
-| from\_id       | string           | the from\_id specified in the request; this value is null if from\_id was not set                                                                                                         |
-| skipped        | number           | the number of skipped records (i.e. the position of `from_id` in the list + 1); this value is 0 if `from_id` was not set                                                                  |
-| limit          | number           | the limit that was set in the request; note that the actual number of transactions can differ from the specified limit (e.g. on the last page)                                            |
-| total          | number           | the total number of transactions available                                                                                                                                                |
-| page\_number   | number           | the page\_number that was set in the request                                                                                                                                              |
-| total\_pages   | number           | total pages available with the selected limit                                                                                                                                             |
-| current\_block | number           | the number of the latest block of coin blockchain                                                                                                                                         |
+| Structure      | Type             | Description                                                                                                                                                                                           |
+| -------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| transactions   | array of objects | transactions data                                                                                                                                                                                     |
+| from\_id       | string           | the from\_id specified in the request; this value is null if from\_id was not set                                                                                                                     |
+| skipped        | number           | the number of skipped records (i.e. the position of `from_id` in the list + 1); this value is 0 if `from_id` was not set                                                                              |
+| limit          | number           | the limit that was set in the request; note that the actual number of transactions can differ from the specified limit (e.g. on the last page)                                                        |
+| total          | number           | the total number of transactions available                                                                                                                                                            |
+| page\_number   | number           | the page\_number that was set in the request                                                                                                                                                          |
+| total\_pages   | number           | total pages available with the selected limit                                                                                                                                                         |
+| current\_block | number           | the number of the latest block of coin blockchain                                                                                                                                                     |
 | sync\_status   | object           | A standard [SyncStatus](/komodo-defi-framework/api/common_structures/#sync-status/) object. Provides the information that helps to track the progress of transaction history preloading at background |
 
-## Request (BCH from page 2)
+## HD Wallet Account Request
+
+<CodeGroup title="" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "my_tx_history",
+    "params": {
+      "coin": "DOC",
+      "limit": 10,
+      "paging_options": {
+        "PageNumber": 1
+      },
+      "target": {
+        "type": "account_id",
+        "account_id": 77
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ### Response
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "coin": "DOC",
+        "target": {
+            "type": "account_id",
+            "account_id": 77
+        },
+        "current_block": 2066531,
+        "transactions": [
+            {
+                "tx_hex": "0400008085202f890165d40f00c0b4395ccdbe6d4f3124fa8b06d4910e5327b67c8186dd4b55afa124030000006b483045022100a3fe466d53ce9e5429608427e0d0224e8923d86dabf5b6c4b4d54dae7c060acd022039d165e1e245efd93a9172ab0a7837985310b4beccd6e05be1894cd66e0912cc012102d09f2cb1693be9c0ea73bb48d45ce61805edd1c43590681b02f877206078a5b3ffffffff0400e1f505000000001976a91479bdbbf2302fa86c7c5861ddc782e6e5776a546d88ac00c2eb0b000000001976a91479bdbbf2302fa86c7c5861ddc782e6e5776a546d88aca01f791c000000001976a91479bdbbf2302fa86c7c5861ddc782e6e5776a546d88ace04728b93f0200001976a91490a0d8ba62c339ade97a14e81b6f531de03fdbb288ac00000000000000000000000000000000000000",
+                "tx_hash": "e5cd671c71f9a2564cd05057ee94be86bd215df257bfb7408b9ee6deb1e461c5",
+                "from": [
+                    "RNTv4xTLLm26p3SvsQCBy9qNK7s1RgGYSB"
+                ],
+                "to": [
+                    "RLNu8gszQ8ENUrY3VSyBS2714CNVwn1f7P",
+                    "RNTv4xTLLm26p3SvsQCBy9qNK7s1RgGYSB"
+                ],
+                "total_amount": "24734.9033",
+                "spent_by_me": "0",
+                "received_by_me": "7.777",
+                "my_balance_change": "7.777",
+                "block_height": 2051968,
+                "timestamp": 1693906841,
+                "fee_details": {
+                    "type": "Utxo",
+                    "coin": "DOC",
+                    "amount": "0.0001"
+                },
+                "coin": "DOC",
+                "internal_id": "e5cd671c71f9a2564cd05057ee94be86bd215df257bfb7408b9ee6deb1e461c5",
+                "transaction_type": "StandardTransfer",
+                "memo": null,
+                "confirmations": 14564
+            }
+        ],
+        "sync_status": {
+            "state": "Finished"
+        },
+        "limit": 10,
+        "skipped": 0,
+        "total": 1,
+        "total_pages": 1,
+        "paging_options": {
+            "PageNumber": 1
+        }
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## HD Wallet Address Request
+
+<CodeGroup title="" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "my_tx_history",
+    "params": {
+      "coin": "DOC",
+      "limit": 1,
+      "paging_options": {
+        "PageNumber": 1
+      },
+      "target": {
+        "type": "address_id",
+        "account_id": 0,
+        "chain": "External",
+        "address_id": 1
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ### Response
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "coin": "DOC",
+          "target": {
+              "type": "address_id",
+              "account_id": 0,
+              "chain": "External",
+              "address_id": 1
+          },
+          "current_block": 2066531,
+          "transactions": [
+              {
+                  "tx_hex": "0400008085202f8901c97b980d21538685a1fa82e1bb0c3a25b2dfaeaecb10647403b48afaefdcef3d010000006b483045022100d4ec136c54cda3861916e2390f0c8afc5348ce7844eaecb98da1bd2c964703280220107bb95194bdb51b9fd584d1834357376288b1ed5185a2bae34b290947683f5a01210325f62245ee44b9e586e71ef462833d8aa32ae2a05d06a9b78a9fb95b7a7d2a3fffffffff0280969800000000001976a914f26650dc9aa4e4505978ad635cdb15491cee70e188ace07c5205000000001976a914e30fff4883a28b09889f3e94c24392c899d2833e88ac930cf264000000000000000000000000000000",
+                  "tx_hash": "8c6456383d7d112ec400597739e07a3c50557a4ec399b8993312d8c4780ce973",
+                  "from": [
+                      "RVyndZp3ZrhGKSwHryyM3Kcz9aq2EJrW1z"
+                  ],
+                  "to": [
+                      "RVyndZp3ZrhGKSwHryyM3Kcz9aq2EJrW1z",
+                      "RXNtAyDSsY3DS3VxTpJegzoHU9bUX54j56"
+                  ],
+                  "total_amount": "0.99293",
+                  "spent_by_me": "0.99293",
+                  "received_by_me": "0.99292",
+                  "my_balance_change": "-0.00001",
+                  "block_height": 2046628,
+                  "timestamp": 1693584717,
+                  "fee_details": {
+                      "type": "Utxo",
+                      "coin": "DOC",
+                      "amount": "0.00001"
+                  },
+                  "coin": "DOC",
+                  "internal_id": "8c6456383d7d112ec400597739e07a3c50557a4ec399b8993312d8c4780ce973",
+                  "transaction_type": "StandardTransfer",
+                  "memo": null,
+                  "confirmations": 19904
+              }
+          ],
+          "sync_status": {
+              "state": "Finished"
+          },
+          "limit": 1,
+          "skipped": 0,
+          "total": 10,
+          "total_pages": 10,
+          "paging_options": {
+              "PageNumber": 1
+          }
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
 
 <CodeGroup title="" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
   ```json
@@ -3808,64 +4189,6 @@ For all other coins, use the legacy [my\_tx\_history](/komodo-defi-framework/api
   }
   ```
 </CollapsibleSection>
-
-## Error cases
-
-### Error - Coin not active
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "TTT-SLP",
-  "error_path": "my_tx_history_v2.lp_coins",
-  "error_trace": "my_tx_history_v2:389] lp_coins:2847]",
-  "error_type": "CoinIsNotActive",
-  "error_data": "TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Coin not compatible
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "TTT-SLP",
-  "error_path": "my_tx_history_v2",
-  "error_trace": "my_tx_history_v2:336]",
-  "error_type": "NotSupportedFor",
-  "error_data": "TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Coin enabled without tx\_history = true
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Storage is not initialized for TTT-SLP",
-  "error_path": "my_tx_history_v2",
-  "error_trace": "my_tx_history_v2:343]",
-  "error_type": "StorageIsNotInitialized",
-  "error_data": "Storage is not initialized for TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Local database failed
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
-  "error_path": "my_tx_history_v2.sql_tx_history_storage",
-  "error_trace": "my_tx_history_v2:351] sql_tx_history_storage:472]",
-  "error_type": "StorageError",
-  "error_data": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
-  "id": null
-}
-```
 export const title = "AtomicDEX Method: Orderbook v2";
 export const description = "The orderbook method requests from the network the currently available orders for the specified trading pair.";
 
@@ -3884,16 +4207,16 @@ The v2 `orderbook` method requests from the network the currently available orde
 
 ## Response
 
-| Structure              | Type             | Description                                                                                                                    |
-| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| base                   | string           | The name of the coin the user desires to receive                                                                               |
-| rel                    | string           | The name of the coin the user will trade                                                                                       |
-| numasks                | integer          | The number of outstanding asks                                                                                                 |
-| numbids                | integer          | The number of outstanding bids                                                                                                 |
-| netid                  | integer          | The id of the network on which the request is made (default is `8762`)                                                         |
+| Structure              | Type             | Description                                                                                                                                |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| base                   | string           | The name of the coin the user desires to receive                                                                                           |
+| rel                    | string           | The name of the coin the user will trade                                                                                                   |
+| numasks                | integer          | The number of outstanding asks                                                                                                             |
+| numbids                | integer          | The number of outstanding bids                                                                                                             |
+| netid                  | integer          | The id of the network on which the request is made (default is `8762`)                                                                     |
 | asks                   | array of objects | An array of standard [OrderDataV2](/komodo-defi-framework/api/common_structures/orders/#order-data-v2) objects containing outstanding asks |
 | bids                   | array of objects | An array of standard [OrderDataV2](/komodo-defi-framework/api/common_structures/orders/#order-data-v2) objects containing outstanding bids |
-| timestamp              | integer          | A UNIX timestamp representing when the orderbook was requested                                                                 |
+| timestamp              | integer          | A UNIX timestamp representing when the orderbook was requested                                                                             |
 | total\_asks\_base\_vol | object           | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object.                              |
 | total\_asks\_rel\_vol  | object           | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object.                              |
 | total\_bids\_base\_vol | object           | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object.                              |
@@ -4601,10 +4924,10 @@ The transaction can then be broadcasted to the network using the [`send_raw_tran
 
 ### Request Parameters
 
-| Structure | Type   | Description                                                                         |
-| --------- | ------ | ----------------------------------------------------------------------------------- |
-| coin      | string | The coin to sign the raw transaction with                                           |
-| type      | string | The operation type. Accepted values: UTXO ( for utxo coins), ETH (for emv coins)    |
+| Structure | Type   | Description                                                                                     |
+| --------- | ------ | ----------------------------------------------------------------------------------------------- |
+| coin      | string | The coin to sign the raw transaction with                                                       |
+| type      | string | The operation type. Accepted values: UTXO ( for utxo coins), ETH (for emv coins)                |
 | tx        | object | A standard [RawTxInfo object](/komodo-defi-framework/api/common_structures/wallet/#raw-tx-info) |
 
 ### Response Parameters
@@ -4747,7 +5070,7 @@ The transaction can then be broadcasted to the network using the [`send_raw_tran
 
   #### Invalid Request
 
-  ```
+  ```json
   {
     "mmrpc":"2.0",
     "error":"Error parsing request: invalid digit found in string",
@@ -4761,7 +5084,7 @@ The transaction can then be broadcasted to the network using the [`send_raw_tran
 
   #### Invalid Parameter
 
-  ```
+  ```json
   {
     "mmrpc":"2.0",
     "error":"Invalid param: Invalid input length",
@@ -4777,7 +5100,7 @@ The transaction can then be broadcasted to the network using the [`send_raw_tran
 
   Coin does not exist or has not been activated.
 
-  ```
+  ```json
   {
     "mmrpc":"2.0",
     "error":"No such coin NOTSURE",
@@ -5150,7 +5473,7 @@ To set this up, you can add some additional parameters to your MM2.json as shown
 	"netid": 8762,
 	"rpc_password": "YOUR_PASSWORD",
 	"passphrase": "YOUR SEED PHRASE",
-	"dbdir": "/path/to/your/atomicdex/DB",
+	"dbdir": "/path/to/your/komodefi/DB",
 	"message_service_cfg": {
 		"telegram": {
 			"api_key": "YOUR:TELEGRAM_API_TOKEN",
@@ -5212,11 +5535,11 @@ Depending on the parameters, the function returns different results:
 
 ### Result
 
-| Structure                 | Type             | Description                                                                                                                                                                                                                        |
-| ------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Structure                 | Type             | Description                                                                                                                                                                                                                                    |
+| ------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | base\_coin\_fee           | object           | A standard [ExtendedFeeInfo](/komodo-defi-framework/api/common_structures/#extended-fee-info) object. The approximate miner fee is paid per the whole swap concerning the `base` coin                                                          |
 | rel\_coin\_fee            | object           | A standard [ExtendedFeeInfo](/komodo-defi-framework/api/common_structures/#extended-fee-info) object. The approximate miner fee is paid per the whole swap concerning the `rel` coin                                                           |
-| volume                    | string (numeric) | Optional. The max available volume that can be traded (in decimal representation); empty if the `max` argument is missing or false                                                                                                 |
+| volume                    | string (numeric) | Optional. The max available volume that can be traded (in decimal representation); empty if the `max` argument is missing or false                                                                                                             |
 | volume\_rat               | rational         | Optional. The max available volume that can be traded represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) object.; empty if the `max` argument is missing or false                         |
 | volume\_fraction          | fraction         | Optional. The max available volume that can be traded represented as a standard [fractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) object.; empty if the `max` argument is missing or false                     |
 | taker\_fee                | object           | A standard [ExtendedFeeInfo](/komodo-defi-framework/api/common_structures/#extended-fee-info) object. The dex fee to be paid by Taker; empty if `swap_method` is `setprice`                                                                    |
@@ -5923,14 +6246,15 @@ This method generates a raw transaction which should then be broadcast using [se
 
 ## Arguments
 
-| Structure | Type             | Description                                                                         |
-| --------- | ---------------- | ----------------------------------------------------------------------------------- |
-| coin      | string           | the name of the coin the user desires to withdraw                                   |
-| to        | string           | coins are withdrawn to this address                                                 |
-| amount    | string (numeric) | the amount the user desires to withdraw, ignored when `max=true`                    |
-| memo      | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem). |
-| max       | bool             | withdraw the maximum available amount                                               |
-| fee       | object           | Optional. A standard [FeeInfo](/komodo-defi-framework/api/common_structures/#fee-info) object.  |
+| Structure | Type             | Description                                                                                                |
+| --------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| coin      | string           | The name of the coin the user desires to withdraw                                                          |
+| to        | string           | Coins are withdrawn to this address                                                                        |
+| amount    | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                           |
+| memo      | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem).                        |
+| max       | bool             | Withdraw the maximum available amount                                                                      |
+| fee       | object           | A standard [FeeInfo](/komodo-defi-framework/api/v20/#fee-info) object.                                     |
+| from      | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/v20/#withdraw-from-info) object. |
 
 ### Response
 
@@ -5949,75 +6273,6 @@ This method generates a raw transaction which should then be broadcast using [se
 | kmd\_rewards                 | object (optional)          | an object containing information about accrued rewards; always exists if the coin is `KMD`                                                                                                  |
 | kmd\_rewards.amount          | string (numeric, optional) | the amount of accrued rewards                                                                                                                                                               |
 | kmd\_rewards.claimed\_by\_me | bool (optional)            | whether the rewards been claimed by me                                                                                                                                                      |
-
-### ⚠ Error types
-
-#### NotSufficientBalance
-
-The `available` balance is not sufficient to transfer the specified amount.
-
-| Structure | Type             | Description                                                                                                                                            |
-| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| coin      | string           | the name of the coin which balance is not sufficient. This coin name may differ from the requested coin. For example, ERC20 fees are paid by ETH (gas) |
-| available | string (numeric) | the balance available for transfer                                                                                                                     |
-| required  | string (numeric) | the amount required to transfer the specified amount. This amount is necessary but may not be sufficient                                               |
-
-#### ZeroBalanceToWithdrawMax
-
-The available balance is zero.
-
-| Structure | Type | Description |
-| --------- | ---- | ----------- |
-| (none)    |      |             |
-
-#### AmountTooLow
-
-The specified amount is too low. Required at least `threshold`.
-
-| Structure | Type             | Description                                          |
-| --------- | ---------------- | ---------------------------------------------------- |
-| amount    | string (numeric) | the amount the user was willing to transfer          |
-| threshold | string (numeric) | the `amount` has not to be less than the `threshold` |
-
-#### InvalidAddress
-
-The specified `to` address is not valid.
-
-| Structure | Type   | Description           |
-| --------- | ------ | --------------------- |
-| (none)    | string | the error description |
-
-#### InvalidFeePolicy
-
-The specified `fee` is not valid.
-
-| Structure | Type   | Description           |
-| --------- | ------ | --------------------- |
-| (none)    | string | the error description |
-
-#### NoSuchCoin
-
-The specified coin was not found or is not activated yet.
-
-| Structure | Type   | Description                                   |
-| --------- | ------ | --------------------------------------------- |
-| coin      | string | the not found `coin` specified in the Request |
-
-#### Transport
-
-The request was failed due to a network error.
-
-| Structure | Type   | Description                     |
-| --------- | ------ | ------------------------------- |
-| (none)    | string | the transport error description |
-
-#### InternalError
-
-The request was failed due to an AtomicDEX API internal error.
-
-| Structure | Type   | Description                    |
-| --------- | ------ | ------------------------------ |
-| (none)    | string | the internal error description |
 
 ### 📌 Examples
 
@@ -6068,23 +6323,65 @@ The request was failed due to an AtomicDEX API internal error.
     "id": 0
   }
   ```
+</CollapsibleSection>
 
-  #### Response (NotSufficientBalance error)
+#### HD Withdraw with derivation\_path
 
+<CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
   ```json
   {
+    "userpass": "testpsw",
     "mmrpc": "2.0",
-    "error": "Not enough DOC to withdraw: available 69.75066225, required at least 1000.00001",
-    "error_path": "utxo_common",
-    "error_trace": "utxo_common:1379] utxo_common:449]",
-    "error_type": "NotSufficientBalance",
-    "error_data": {
-      "coin": "DOC",
-      "available": "69.75066225",
-      "required": "1000.00001"
+    "method": "withdraw",
+    "params": {
+      "coin": "MCL",
+      "to": "RNBA756iaFCx2Uhya3pvCufbeyovAaknJL",
+      "amount": 1.025,
+      "from": {
+        "derivation_path": "m/44'/141'/0'/0/0"
+      }
     },
     "id": 0
   }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (KMD success)
+
+  ```json
+  # TODO: Add response
+  ```
+</CollapsibleSection>
+
+#### HD Withdraw with `account_id`, `chain` and `address_id`
+
+<CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "mmrpc": "2.0",
+    "method": "withdraw",
+    "params": {
+      "coin": "VRSC",
+      "to": "RNBA756iaFCx2Uhya3pvCufbeyovAaknJL",
+      "amount": 1.025,
+      "from": {
+        "account_id": 0,
+        "chain": "External",
+        "address_id": 2
+      }
+    },
+    "id": 0
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (KMD success)
+
+  ```json
+  # TODO: Add response
   ```
 </CollapsibleSection>
 
@@ -6288,20 +6585,6 @@ The request was failed due to an AtomicDEX API internal error.
       "coin": "ETH",
       "internal_id": ""
     },
-    "id": 0
-  }
-  ```
-
-  #### Response (InvalidFeePolicy error - attempt to use UtxoFixed or UtxoPerKbyte for ETH coin)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Invalid fee policy: Expected 'EthGas' fee type, found UtxoFixed",
-    "error_path": "eth",
-    "error_trace": "eth:535]",
-    "error_type": "InvalidFeePolicy",
-    "error_data": "Expected 'EthGas' fee type, found UtxoFixed",
     "id": 0
   }
   ```
