@@ -12,7 +12,7 @@ const listOfAllowedElementsToCheck = [
 
 import { compile } from "@mdx-js/mdx";
 import * as fs from "fs";
-//import { mdxAnnotations } from "mdx-annotations";
+import { mdxAnnotations } from "mdx-annotations";
 import path from "path";
 import { visit } from "unist-util-visit";
 import { removedWords } from "./_removed_search_words.js";
@@ -155,12 +155,12 @@ function hasOnlyHyphens(str) {
 async function compileMdxFile(mdxFilePathToCompile) {
     const mdxFileResultString = fs.readFileSync(mdxFilePathToCompile, "utf8");
     return await compile(mdxFileResultString, {
-        //remarkPlugins: [mdxAnnotations.remark],
+        remarkPlugins: [mdxAnnotations.remark],
         rehypePlugins: [
-            //     mdxAnnotations.rehype,
+            mdxAnnotations.rehype,
             () => elementTreeChecker(mdxFilePathToCompile),
         ],
-        //recmaPlugins: [mdxAnnotations.recma],
+        recmaPlugins: [mdxAnnotations.recma],
     });
 }
 

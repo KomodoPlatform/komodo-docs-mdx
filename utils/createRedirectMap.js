@@ -24,13 +24,13 @@ const mapDirObj = {
   "/antara/api/": "/basic-docs/antara/antara-api/",
   "/antara/setup/": "/basic-docs/antara/antara-setup/",
   "/antara/tutorials/": "/basic-docs/antara/antara-tutorials/",
-  "/atomicdex/changelog/": "/basic-docs/atomicdex/changelog/",
-  "/atomicdex/api/legacy/": "/basic-docs/atomicdex-api-legacy/",
-  "/atomicdex/api/v20/": "/basic-docs/atomicdex-api-20/",
-  "/atomicdex/api/v20-dev/": "/basic-docs/atomicdex-api-20-dev/",
-  "/atomicdex/mobile/": "/basic-docs/atomicdex/atomicdex-beta/",
-  "/atomicdex/setup/": "/basic-docs/atomicdex/atomicdex-setup/",
-  "/atomicdex/tutorials/": "/basic-docs/atomicdex/atomicdex-tutorials/",
+  "/komodo-defi-framework/changelog/": "/basic-docs/atomicdex/changelog/",
+  "/komodo-defi-framework/api/legacy/": "/basic-docs/atomicdex-api-legacy/",
+  "/komodo-defi-framework/api/v20/": "/basic-docs/atomicdex-api-20/",
+  "/komodo-defi-framework/api/v20-dev/": "/basic-docs/atomicdex-api-20-dev/",
+  "/komodo-defi-framework/mobile/": "/basic-docs/atomicdex/atomicdex-beta/",
+  "/komodo-defi-framework/setup/": "/basic-docs/atomicdex/atomicdex-setup/",
+  "/komodo-defi-framework/tutorials/": "/basic-docs/atomicdex/atomicdex-tutorials/",
   "/historical/cc-jl/": "/cc-jl/",
   "/historical/whitepaper/": "/whitepaper/",
   "/smart-chains/api/": "/basic-docs/smart-chains/smart-chain-api/",
@@ -62,34 +62,34 @@ fileNames.forEach((filePath) => {
 const nameChangedMap = {
   "/basic-docs/antara/introduction-to-antara.html": "/antara/",
   "/basic-docs/smart-chains/smart-chain-tutorials/subatomic.html":
-    "/atomicdex/",
+    "/komodo-defi-framework/",
   "/basic-docs/smart-chains/introduction-to-smart-chain-documentation.html":
     "/smart-chains/",
-  "/basic-docs/atomicdex/atomicdex-methods.html": "/atomicdex/api/",
+  "/basic-docs/atomicdex/atomicdex-methods.html": "/komodo-defi-framework/api/",
   "/": "/",
   "/basic-docs/atomicdex/atomicdex-beta/create-a-new-wallet-using-atomicdex-mobile.html":
-    "/atomicdex/mobile/",
+    "/komodo-defi-framework/mobile/create-new-wallet-on-komodo-mobile-wallet/",
   "/basic-docs/atomicdex/atomicdex-setup/get-started-atomicdex.html":
-    "/atomicdex/setup/",
+    "/komodo-defi-framework/setup/",
   "/basic-docs/atomicdex/atomicdex-tutorials/introduction-to-atomicdex.html":
-    "/atomicdex/tutorials/",
-  "/basic-docs/atomicdex/introduction-to-atomicdex.html": "/atomicdex/",
+    "/komodo-defi-framework/tutorials/",
+  "/basic-docs/atomicdex/introduction-to-atomicdex.html": "/komodo-defi-framework/tutorials/",
   "/mmV2/LP/atomicdex-api-docker-telegram.html":
-    "/atomicdex/tutorials/atomicdex-api-docker-telegram/",
+    "/komodo-defi-framework/tutorials/api-docker-telegram/",
   "/basic-docs/atomicdex/atomicdex-tutorials/add-coin-to-atomicdex-desktop.html":
-    "/atomicdex/tutorials/listing-a-coin-on-atomicdex/",
+    "/komodo-defi-framework/tutorials/listing-a-new-coin/",
   "/basic-docs/atomicdex/atomicdex-tutorials/listing-a-coin-on-atomicdex.html":
-    "/atomicdex/tutorials/listing-a-coin-on-atomicdex/",
+    "/komodo-defi-framework/tutorials/listing-a-new-coin/",
   "/basic-docs/atomicdex-api-20-dev/account_balance_tasks.html":
-    "/atomicdex/api/v20-dev/task_account_balance/",
+    "/komodo-defi-framework/api/v20-dev/task_account_balance/",
   "/basic-docs/atomicdex-api-20-dev/coin_activation_tasks.html":
-    "/atomicdex/api/v20-dev/task_enable_qtum/",
+    "/komodo-defi-framework/api/v20-dev/task_enable_qtum/",
   "/basic-docs/atomicdex-api-20-dev/trezor_initialisation.html":
-    "/atomicdex/api/v20-dev/task_init_trezor/",
+    "/komodo-defi-framework/api/v20-dev/task_init_trezor/",
   "/basic-docs/atomicdex-api-20-dev/withdraw_tasks.html":
-    "/atomicdex/api/v20-dev/task_withdraw/",
+    "/komodo-defi-framework/api/v20-dev/task_withdraw/",
   "/basic-docs/atomicdex-api-20-dev/zhtlc_coins.html":
-    "/atomicdex/api/v20-dev/task_enable_z_coin/",
+    "/komodo-defi-framework/api/v20-dev/task_enable_z_coin/",
   "/basic-docs/smart-chains/smart-chain-tutorials/betdapp.html":
     "/smart-chains/setup/dexp2p/",
   "/basic-docs/smart-chains/smart-chain-tutorials/checklist-new-coin.html":
@@ -106,9 +106,9 @@ const nameChangedMap = {
   "/whitepaper/introduction.html": "/historical/whitepaper/",
   "/komodo/installation.html": "/komodo/",
   "/komodo/access-remote-daemon-ssh.html":
-    "/atomicdex/tutorials/setup-atomicdex-aws/",
+    "/komodo-defi-framework/tutorials/setup-komodefi-api-aws/",
   "/komodo/info.html": "/smart-chains/setup/ecosystem-launch-parameters/",
-  "/komodo/multisig-transactions-on-komodo-or-assetchains.html":"/komodo/multisig-transactions-on-komodo-or-smartchains/",
+  "/komodo/multisig-transactions-on-komodo-or-assetchains.html": "/komodo/multisig-transactions-on-komodo-or-smartchains/",
   "/notary/setup-Komodo-Notary-Node.html": "/notary/",
   "/notary/generate-privkeys-third-party-coins-from-passphrase.html":
     "/notary/generate-privkeys-for-third-party-coins-from-passphrase/",
@@ -119,19 +119,31 @@ const nameChangedMap = {
   "/komodo/dPoW-conf.html": "/komodo/dpow-conf/",
   "/komodo/setup-electrumX-server.html": "/komodo/setup-electrumx-server/",
   "/komodo/using-Key-Value.html": "/komodo/using-key-value/",
-  "/qa/atomicDEX-PRO/build.html": "/qa/atomicdex-destop-build/",
-  "/qa/atomicDEX-quickstart.html": "/qa/atomicdex-quickstart/",
-  "/qa/debug-Komodo.html": "/qa/",
+  "/qa/atomicDEX-PRO/build.html": "/qa/komodo-desktop-wallet-build/",
+  "/qa/atomicDEX-quickstart.html": "/qa/komodefi-api-quickstart/",
+  "/qa/debug-Komodo.html": "/qa/debug-komodo/",
   "/qa/extract-swap-data-atomicDEX-log.html":
-    "/qa/extract-swap-data-atomicdex-log/",
+    "/qa/extract-swap-data-komodo-wallet-log/",
   "/qa/recover-atomicDEX-mobile-swap-desktop.html":
-    "/qa/recover-atomicdex-mobile-swap-desktop/",
+    "/qa/recover-komodo-mobile-wallet-swap-on-desktop/",
   "/resources/third-party-repos-resources.html": "/resources/third-party/",
   "/resources/list-all-KomodoPlatform-repos-links.html": "/resources/",
   "/basic-docs/antara/activate-antara-smartchain.html":
     "/antara/tutorials/activate-antara-smartchain/",
   "/basic-docs/antara/test-use-write-integrate-antara.html":
     "/antara/tutorials/test-use-write-integrate-antara/",
+  "/basic-docs/atomicdex/atomicdex-tutorials/atomicdex-walkthrough.html":
+    "/komodo-defi-framework/tutorials/api-walkthrough/",
+  "/basic-docs/atomicdex/atomicdex-tutorials/atomicdex-metrics.html": "/komodo-defi-framework/tutorials/api-metrics/",
+  "/basic-docs/atomicdex/atomicdex-tutorials/setup-atomicdex-aws.html": "/komodo-defi-framework/tutorials/setup-komodefi-api-aws/",
+  "/basic-docs/atomicdex/atomicdex-tutorials/additional-information-about-atomicdex.html": "/komodo-defi-framework/tutorials/additional-information/",
+  "/basic-docs/atomicdex/atomicdex-beta/restore-wallet-using-atomicdex-mobile.html": "/komodo-defi-framework/mobile/restore-wallet-on-komodo-mobile-wallet/",
+  "/basic-docs/atomicdex/atomicdex-beta/add-and-activate-coins-on-atomicdex-mobile.html": "/komodo-defi-framework/mobile/add-and-activate-coins-on-komodo-mobile-wallet/",
+  "/basic-docs/atomicdex/atomicdex-beta/withdraw-or-send-funds-using-atomicdex-mobile.html": "/komodo-defi-framework/mobile/withdraw-or-send-funds-on-komodo-mobile-wallet/",
+  "/basic-docs/atomicdex/atomicdex-beta/perform-cross-chain-atomic-swaps-using-atomicdex-mobile.html": "/komodo-defi-framework/mobile/perform-cross-chain-atomic-swaps-on-komodo-mobile-wallet/",
+  "/basic-docs/atomicdex/atomicdex-beta/view-ongoing-orders-and-swap-history-on-atomicdex-mobile.html": "/komodo-defi-framework/setup/view-ongoing-orders-and-swap-history-on-komodo-mobile-wallet/",
+  "/basic-docs/atomicdex/atomicdex-beta/recover-seed-on-atomicdex-mobile.html": "/komodo-defi-framework/mobile/recover-seed-on-komodo-mobile-wallet/",
+  "/basic-docs/atomicdex/atomicdex-beta/delete-seed-from-atomicdex-mobile.html": "/komodo-defi-framework/mobile/delete-seed-on-komodo-mobile-wallet/",
 };
 
 for (const path in nameChangedMap) {

@@ -102,9 +102,9 @@ async function processFile(filePath, filepathSlugs) {
     })
     .use(() => (tree) => {
       visit(tree, (node, nodeIndex, parentNode) => {
-        if (!filePath.includes("src/pages/atomicdex")) {
-          return SKIP;
-        }
+        // if (!filePath.includes("src/pages/komodo-defi-framework")) {
+        //   return SKIP;
+        // }
 
         try {
           if (
@@ -132,6 +132,7 @@ async function processFile(filePath, filepathSlugs) {
             node.children = [clonedChild];
             return SKIP;
           } else if (node.type === "code" && node.lang === null) {
+            console.log(`Code lang value missing in file: ${filePath}, line: ${node.position.start.line}`);
             throw new Error(`Code lang value missing
 Filepath: ${filePath} 
 code node: 
