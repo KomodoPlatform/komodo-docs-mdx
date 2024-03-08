@@ -34,7 +34,12 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 
 - Use [American English spelling](https://www.thefreedictionary.com/American-English-vs-British-English-Spelling.htm)
 - Use the [Oxford comma](https://www.youtube.com/watch?v=xUt7-B8IfxU)
-- Use [Bluebook title case](https://titlecaseconverter.com/rules/#BB) for headings and products.
+- Use [Bluebook titleLink , an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```case](https://titlecaseconverter.com/rules/#BB) for headings and products.
 - Use [sentence case](https://titlecaseconverter.com/sentence-case/) for menu items, tabs, buttons, links, and all other text.
 - Use a 4-space indent in code blocks for the request body and response. This will make the parameters and values easier to read.
 - Use images or diagrams to help explain complex concepts or processes. This will make the content more engaging and easier to understand.
@@ -94,16 +99,56 @@ Pages are heavily [**MDX**](https://mdxjs.com/) ("markdown extension") based, wh
 
 ### Adding a Title and Description
 
-Titles and descriptions are mandatory on every documentation page and must be added at the top level. To add a title use this syntax: `export const title = "Documentation page title";`. To add a description use: `export const description = "documentation page description";`
+Titles and descriptions are mandatory on every documentation page and must be added at the top level. To add a titleLink , an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```use this syntax: `export const titleLink , an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```= "Documentation page titleLink", an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```;`. To add a description use: `export const description = "documentation page description";`
 
 ### Subsections and headings
 
 Though it is good to separate each method into its own document, sometimes it is necessary to group methods together.
-In such a case, we can define the `title`, `label` and/or `tag` properties alongside a section header and within a `CodeGroup` tag so that anchor links are generated in a consistent manner.
+In such a case, we can define the `titleLink`, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```, `label` and/or `tag` properties alongside a section header and within a `CodeGroup` tag so that anchor links are generated in a consistent manner.
 
 - The `label` property should be the exact same as the RPC method.
-- The `title` property should be blank, unless the section heading is not the same as the `label` property. In that case, the `title` property should be the (human readable) section heading.
-- for methods with a `task::xxxx::` or `lightning::xxxx::` prefix, the `label` property should be the full RPC method name, and the title should be the truncated RPC method without the prefix (only the last bit, after the last set of `::`), or a human readable title as above (recommended).
+- The `titleLink`, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ``` property should be blank, unless the section heading is not the same as the `label` property. In that case, the `titleLink`, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ``` property should be the (human readable) section heading.
+- for methods with a `task::xxxx::` or `lightning::xxxx::` prefix, the `label` property should be the full RPC method name, and the titleLink , an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```should be the truncated RPC method without the prefix (only the last bit, after the last set of `::`), or a human readable titleLink , an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```as above (recommended).
 
 For example, with a human readable section heading:
 
@@ -111,7 +156,12 @@ For example, with a human readable section heading:
 ## Transaction History
 ...
 ### my_tx_history with pagination {{label : 'my_tx_history', tag : 'POST'}}
-<CodeGroup title="Transaction History" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
+<CodeGroup titleLink=, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```"Transaction History" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
 ...
 </CodeGroup>
 ```
@@ -123,17 +173,32 @@ For example, with a `task::xxxx::` prefix:
 ...
 ## init {{label : 'task::init_trezor::init', tag : 'POST'}}
 ...
-<CodeGroup title="init" tag="POST" label="task::init_trezor::init" mm2MethodDecorate="true">
+<CodeGroup titleLink=, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```"init" tag="POST" label="task::init_trezor::init" mm2MethodDecorate="true">
 ...
 </CodeGroup>
 ```
 
-For example, when method and title are the same:
+For example, when method and titleLink , an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```are the same:
 
 ```
 ## get_balance {{label : 'get_balance', tag : 'POST'}}
 ...
-<CodeGroup title="" tag="POST" label="get_balance" mm2MethodDecorate="true">
+<CodeGroup titleLink=, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```"" tag="POST" label="get_balance" mm2MethodDecorate="true">
 ...
 </CodeGroup>
 ```
@@ -164,10 +229,20 @@ MDX supports standard markdown by default [CommonMark](https://commonmark.org/).
 
 ### CodeGroup
 
-The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbed content (or not, if it's a single block) with properties such as **title, tags, labels and more**. An example would look something like this:
+The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbed content (or not, if it's a single block) with properties such as **titleLink,, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ``` tags, labels and more**. An example would look something like this:
 
 ````mdx
-<CodeGroup title="Code Sample" tag="post" label="/kmd/jwt/post" >
+<CodeGroup titleLink=, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```"Code Sample" tag="post" label="/kmd/jwt/post" >
 
 ```ts
 // ...
@@ -196,7 +271,12 @@ And rendered as:
 <!-- If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
 
 ```mdx
-```ts {{title: "Single Block", tag: "post", label: "/kmd/jwt/post"}}
+```ts {{titleLink:, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ``` "Single Block", tag: "post", label: "/kmd/jwt/post"}}
 // ...
 ```
 ```
@@ -220,7 +300,12 @@ You only need to include the `json` data, and the additional **mm2MethodDecorate
 A working code sample would look like this:
 
 ````mdx
-<CodeGroup title="Generate Invoice" tag="POST" label="generate_invoice" mm2MethodDecorate="true">
+<CodeGroup titleLink=, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```"Generate Invoice" tag="POST" label="generate_invoice" mm2MethodDecorate="true">
 
 ```json
 {
@@ -337,7 +422,12 @@ Images should be added to the related subfolder within the `src/images` folder, 
 
 Now you can render the image using the `OptimizedImage` component, for example:
 
-`<OptimizedImage title="Atomic Dex" src={atomicManiq} alt="atomic dex" classNaming="w-full" />`
+`<OptimizedImage titleLink=, an empty links array is expected:
+
+```
+ "titleLink": "/qa/komodefi-api-quickstart/",
+        "links": []
+        ```"Atomic Dex" src={atomicManiq} alt="atomic dex" classNaming="w-full" />`
 
 ![Atomic Maniq](style-guide-images/komodefi-maniq.png)
 
@@ -427,6 +517,13 @@ Top navbar's navigation data/dropdown list is manually populated. This file can 
 ## Sidebar (Left)
 
 Left sidebar's navigation data is manually populated. This file can be found at [src/data/sidebar.json](src/data/sidebar.json). If you're working on a new page, this is where to link them.
+
+Along with `titleLink`, an empty links array is expected:
+
+```json
+"titleLink": "/qa/komodefi-api-quickstart/",
+"links": []
+```
 
 ![Sidebar left](style-guide-images/sidebar-left-UI.png)
 
