@@ -333,13 +333,17 @@ Rendered as:
 
 Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component. To render an image in the `src/image` folder, you'd have to import the image using the following syntax:
 
-`import atomicManiq from "@/public/images/komodefi-maniq.webp";`
+```jsx
+import komodefiManiq from "@/public/images/komodefi-maniq.webp";
+```
 
 Now you can render the image using the `OptimizedImage` component, for example:
 
-`<OptimizedImage title="Atomic Dex" src={atomicManiq} alt="atomic dex" classNaming="w-full" />`
+```jsx
+<OptimizedImage title="Komodo DeFi Framework" src={komodefiManiq} alt="Komodo DeFi Framework" classNaming="w-full" />
+```
 
-![Atomic Maniq](style-guide-images/komodefi-maniq.png)
+![Komodo DeFi Framework](style-guide-images/komodefi-maniq.png)
 
 <!-- [You can read more about the magic behind OptimizedImage](https://github.com/Niels-IO/next-image-export-optimizer#readme) -->
 
