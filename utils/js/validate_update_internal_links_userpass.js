@@ -1,7 +1,7 @@
 import * as acorn from "acorn";
 
 import { SKIP, visit } from "unist-util-visit";
-import {visitParents} from 'unist-util-visit-parents'
+import { visitParents } from 'unist-util-visit-parents'
 
 import { constants } from "fs";
 import fs from "fs";
@@ -13,9 +13,8 @@ import path from "path";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
-import { slugifyWithCounter } from "@sindresorhus/slugify";
+import slugify, { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
-import { type } from "os";
 
 const manualLinkFile = "links-to-manually-check";
 if (fs.existsSync(manualLinkFile)) {
@@ -80,8 +79,8 @@ async function processFile(filePath, filepathSlugs) {
   // if (filePath.includes("setup/dexp2p")) {
   //   throw new Error("dexp2p': " + filePath);
   // }
-  // if (!filePath.includes("/non_fungible_token")) {
-  //     return
+  // if (!filePath.includes("/smart-chains/setup/dexp2p")) {
+  //   return
   // }
   console.log("Processing: " + filePath);
   const file = await remark()
@@ -98,9 +97,22 @@ async function processFile(filePath, filepathSlugs) {
       }
     })
     .use(() => (tree) => {
+      visit(tree, "link", (node) => {
+        //Process internal links
+        const isExternalURL = /^https?:\/\//;
+        if (!isExternalURL.test(node.url)) {
+          node.url = processInternalLink(node.url, filePath, filepathSlugs);
+        }
+      });
+    })
+    .use(() => (tree) => {
       visit(tree, "link", async (node) => {
-        //Process the link
-        node.url = await processLink(node.url, filePath, filepathSlugs);
+        //Process external links
+        const isExternalURL = /^https?:\/\//;
+        if (isExternalURL.test(node.url)) {
+          await processExternalLink(node.url, filePath);
+          return node.url;
+        }
       });
     })
     .use(() => (tree) => {
@@ -139,14 +151,14 @@ async function processFile(filePath, filepathSlugs) {
             throw new Error(`Code lang value missing
 Filepath: ${filePath} 
 code node: 
-${JSON.stringify(node,null,2)}`);
-        }
+${JSON.stringify(node, null, 2)}`);
+          }
         } catch (error) {
           throw new Error(`Error:
-${JSON.stringify(error,null,2)}         
+${JSON.stringify(error, null, 2)}         
 Filepath: ${filePath} 
 Node: 
-${JSON.stringify(node,null,2)}`);
+${JSON.stringify(node, null, 2)}`);
         }
       });
     })
@@ -156,13 +168,8 @@ ${JSON.stringify(node,null,2)}`);
   }
 }
 // Function to process a link
-async function processLink(link, currFilePath, filepathSlugs) {
+function processInternalLink(link, currFilePath, filepathSlugs) {
   if (link.startsWith("mailto:")) {
-    return link;
-  }
-  const isExternalURL = /^https?:\/\//;
-  if (isExternalURL.test(link)) {
-    await processExternalLink(link, currFilePath);
     return link;
   }
 
@@ -222,9 +229,12 @@ async function processLink(link, currFilePath, filepathSlugs) {
     filePath,
     correctUrlSplit[0] + "index.mdx"
   );
-  let slug;
+  let slug = "";
   if (correctUrlSplit[1]) {
-    let slugify = slugifyWithCounter();
+    //trying to fix slugs with _
+
+    //slugifyWithCounter stuff was used as a mistake here earlier
+    //let slugify = slugifyWithCounter();
     slug = slugify(correctUrlSplit[1]);
     correctUrl = correctUrlSplit[0] + "#" + slug;
   }
@@ -241,10 +251,10 @@ async function processLink(link, currFilePath, filepathSlugs) {
     console.log("slug: " + slug);
     console.log("#----------------------------------------------#");
     throw new Error(
-      `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile} with url ${correctUrl} (original url: ${link})`
+      `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) has updated url: ${correctUrl} (original url: ${link}), but the file: ${internalLinkFile} is missing`
     );
   } else if (
-    slug &&
+    slug !== "" &&
     !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
   ) {
     console.log("##------------------------------------------------##");
@@ -275,7 +285,6 @@ async function processLink(link, currFilePath, filepathSlugs) {
     );
     throw new Error(err);
   }
-
   return correctUrl;
 }
 
@@ -392,7 +401,7 @@ function checkUrlStatusCode(url) {
     req.on("error", (err) => {
       reject(err);
     });
-    req.setTimeout(50, () => {
+    req.setTimeout(100, () => {
       req.destroy();
       reject(new Error("Request timed out " + url));
     });
