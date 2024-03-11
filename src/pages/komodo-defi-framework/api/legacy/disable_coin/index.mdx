@@ -1,0 +1,84 @@
+export const title = "Komodo DeFi Framework Method: Convert Address";
+export const description = "The disable_coin method deactivates the previously enabled coin, and also cancels all active orders that use the selected coin.";
+
+# disable\_coin
+
+**disable\_coin coin**
+
+The `disable_coin` method deactivates the previously enabled coin, and also cancels all active orders that use the selected coin. The method will return an error in the following cases:
+
+*   The coin is not enabled
+*   The coin is used by active swaps
+*   The coin is used by a currently matching order. In this case, other orders might still be cancelled
+
+## Arguments
+
+| Structure | Type   | Description                   |
+| --------- | ------ | ----------------------------- |
+| coin      | string | the ticker of coin to disable |
+
+#### Response
+
+| Structure         | Type             | Description                                                                      |
+| ----------------- | ---------------- | -------------------------------------------------------------------------------- |
+| coin              | string           | the ticker of deactivated coin                                                   |
+| cancelled\_orders | array of strings | uuids of cancelled orders                                                        |
+| swaps             | array of strings | uuids of active swaps that use the selected coin; present only in error cases    |
+| orders.matching   | array of strings | uuids of matching orders that use the selected coin; present only in error cases |
+| orders.cancelled  | array of strings | uuids of orders that were successfully cancelled despite the error               |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="disable_coin" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "disable_coin",
+    "coin": "DOC"
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+    "result": {
+      "cancelled_orders": ["e5fc7c81-7574-4d3f-b64a-47227455d62a"],
+      "coin": "DOC"
+    }
+  }
+  ```
+
+  #### Response (error - coin is not enabled)
+
+  ```json
+  {
+    "error": "No such coin: DOC"
+  }
+  ```
+
+  #### Response (error - active swap is using the coin)
+
+  ```json
+  {
+    "error": "There're active swaps using DOC",
+    "swaps": ["d88d0a0e-f8bd-40ab-8edd-fe20801ef349"]
+  }
+  ```
+
+  #### Response (error - the order is matched at the moment, but another order is cancelled)
+
+  ```json
+  {
+    "error": "There're currently matching orders using DOC",
+    "orders": {
+      "matching": ["d88d0a0e-f8bd-40ab-8edd-fe20801ef349"],
+      "cancelled": ["c88d0a0e-f8bd-40ab-8edd-fe20801ef349"]
+    }
+  }
+  ```
+</CollapsibleSection>

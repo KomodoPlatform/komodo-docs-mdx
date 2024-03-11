@@ -1,0 +1,96 @@
+export const title = "Komodo DeFi Framework Method: Cancel all Orders";
+export const description = "The cancel_all_orders cancels the active orders created by the Komodo DeFi Framework API node by specified condition.";
+
+# cancel\_all\_orders
+
+**cancel\_all\_orders cancel\_by**
+
+The `cancel_all_orders` cancels the active orders created by the Komodo DeFi Framework API node by specified condition.
+
+## Arguments
+
+| Structure  | Type   | Description                                                                                                                              |
+| ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| cancel\_by | object | A standard [CancelBy](/komodo-defi-framework/api/common_structures/orders/#cancel-by) object. Orders matching this filter are cancelled. |
+
+## Response
+
+| Structure           | Type                     | Description                                                                                                    |
+| ------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| cancelled           | array of strings (uuids) | uuids of cancelled orders                                                                                      |
+| currently\_matching | array of strings (uuids) | uuids of the orders being matched with other orders; these are not cancelled even if they fit cancel condition |
+
+#### 📌 Examples
+
+#### Command (All orders)
+
+<CodeGroup title="" tag="POST" label="cancel_all_orders" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "cancel_all_orders",
+    "cancel_by": {
+      "type": "All"
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Command (Cancel by pair)
+
+<CodeGroup title="" tag="POST" label="cancel_all_orders" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "cancel_all_orders",
+    "cancel_by": {
+      "type": "Pair",
+      "data": {
+        "base": "DOC",
+        "rel": "MARTY"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Command (Cancel by coin)
+
+<CodeGroup title="" tag="POST" label="cancel_all_orders" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "cancel_all_orders",
+    "cancel_by": {
+      "type": "Coin",
+      "data": {
+        "ticker": "DOC"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (1 order cancelled)
+
+  ```json
+  {
+    "result": {
+      "cancelled": ["2aae69d1-0167-493e-ad15-c6a8b43546d6"],
+      "currently_matching": []
+    }
+  }
+  ```
+
+  #### Response (1 order cancelled and 1 is currently matching)
+
+  ```json
+  {
+    "result": {
+      "cancelled": ["2aae69d1-0167-493e-ad15-c6a8b43546d6"],
+      "currently_matching": ["e9a6f422-e378-437f-bb74-ba4307a90e68"]
+    }
+  }
+  ```
+</CollapsibleSection>

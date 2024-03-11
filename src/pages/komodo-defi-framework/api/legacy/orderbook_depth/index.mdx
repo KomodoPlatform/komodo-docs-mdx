@@ -1,0 +1,91 @@
+export const title = "Komodo DeFi Framework Method: Orderbook Depth";
+export const description = "The orderbook_depth method returns the number of asks and bids for the specified trading pairs.";
+
+# orderbook\_depth
+
+**orderbook\_depth pairs**
+
+The `orderbook_depth` method returns the number of asks and bids for the specified trading pairs.
+
+## Arguments
+
+| Structure | Type  | Description               |
+| --------- | ----- | ------------------------- |
+| pairs     | array | an array of trading pairs |
+
+## Response
+
+<Note type="warning">
+  The pairs in the response are not guaranteed to be in the order of pairs in the request.
+</Note>
+
+| Structure | Type                 | Description                    |
+| --------- | -------------------- | ------------------------------ |
+| result    | array of `PairDepth` | an array of pair depth objects |
+
+Where `PairDepth` object structure is as follows
+
+| Structure  | Type               | Description        |
+| ---------- | ------------------ | ------------------ |
+| pair       | array of 2 strings | the orderbook pair |
+| depth.asks | number             | the number of asks |
+| depth.bids | number             | the number of bids |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="orderbook_depth" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "testpsw",
+    "method": "orderbook_depth",
+    "pairs": [
+      [
+        "DOC",
+        "MARTY"
+      ],
+      [
+        "BTC",
+        "KMD"
+      ],
+      [
+        "DOGE",
+        "KMD"
+      ]
+    ]
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+    "result": [
+      {
+        "pair": ["DOC", "MARTY"],
+        "depth": {
+          "asks": 2,
+          "bids": 6
+        }
+      },
+      {
+        "pair": ["DOGE", "KMD"],
+        "depth": {
+          "asks": 3,
+          "bids": 3
+        }
+      },
+      {
+        "pair": ["BTC", "KMD"],
+        "depth": {
+          "asks": 5,
+          "bids": 9
+        }
+      }
+    ]
+  }
+  ```
+</CollapsibleSection>

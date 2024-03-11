@@ -1,9 +1,9 @@
 //import { visit, EXIT } from 'unist-util-visit'
-import {visitParents, EXIT} from 'unist-util-visit-parents'
+import {EXIT, visitParents} from 'unist-util-visit-parents'
 
 import { promises as fs } from 'fs';
-import { remark } from 'remark'
 import path from 'path'
+import { remark } from 'remark'
 
 (async function () {
     try {
