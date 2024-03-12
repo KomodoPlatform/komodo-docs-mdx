@@ -78,7 +78,7 @@ For example:
 
 ## Variables
 
-- For Komodo DeFi Framework API methods, the userpass variable should always be `testpsw`
+- For Komodo DeFi Framework API methods, the userpass variable should always be `RPC_UserP@SSW0RD`
 
 ## Templates
 
@@ -224,7 +224,7 @@ A working code sample would look like this:
 
 ```json
 {
-  "userpass": "testpsw",
+  "userpass": "RPC_UserP@SSW0RD",
   "mmrpc": "2.0",
   "method": "lightning::payments::generate_invoice",
   "params": {

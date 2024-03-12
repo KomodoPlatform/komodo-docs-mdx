@@ -141,7 +141,7 @@ async function processFile(filePath, filepathSlugs) {
             }
             const clonedChild = JSON.parse(JSON.stringify(originalChild));
             let methodObj = JSON.parse(clonedChild.value);
-            methodObj.userpass = "testpsw";
+            methodObj.userpass = "RPC_UserP@SSW0RD";
             clonedChild.value = JSON.stringify(methodObj, null, 2);
             //console.log(clonedChild)
             node.children = [clonedChild];
