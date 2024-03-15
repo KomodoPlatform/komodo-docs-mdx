@@ -28,9 +28,10 @@ const mapDirObj = {
   "/komodo-defi-framework/api/legacy/": "/basic-docs/atomicdex-api-legacy/",
   "/komodo-defi-framework/api/v20/": "/basic-docs/atomicdex-api-20/",
   "/komodo-defi-framework/api/v20-dev/": "/basic-docs/atomicdex-api-20-dev/",
-  "/komodo-defi-framework/mobile/": "/basic-docs/atomicdex/atomicdex-beta/",
+  "/komodo-wallet/mobile/": "/basic-docs/atomicdex/atomicdex-beta/",
   "/komodo-defi-framework/setup/": "/basic-docs/atomicdex/atomicdex-setup/",
-  "/komodo-defi-framework/tutorials/": "/basic-docs/atomicdex/atomicdex-tutorials/",
+  "/komodo-defi-framework/tutorials/":
+    "/basic-docs/atomicdex/atomicdex-tutorials/",
   "/historical/cc-jl/": "/cc-jl/",
   "/historical/whitepaper/": "/whitepaper/",
   "/smart-chains/api/": "/basic-docs/smart-chains/smart-chain-api/",
@@ -68,12 +69,13 @@ const nameChangedMap = {
   "/basic-docs/atomicdex/atomicdex-methods.html": "/komodo-defi-framework/api/",
   "/": "/",
   "/basic-docs/atomicdex/atomicdex-beta/create-a-new-wallet-using-atomicdex-mobile.html":
-    "/komodo-defi-framework/mobile/create-new-wallet-on-komodo-mobile-wallet/",
+    "/komodo-wallet/mobile/create-a-new-wallet/",
   "/basic-docs/atomicdex/atomicdex-setup/get-started-atomicdex.html":
     "/komodo-defi-framework/setup/",
   "/basic-docs/atomicdex/atomicdex-tutorials/introduction-to-atomicdex.html":
     "/komodo-defi-framework/tutorials/",
-  "/basic-docs/atomicdex/introduction-to-atomicdex.html": "/komodo-defi-framework/tutorials/",
+  "/basic-docs/atomicdex/introduction-to-atomicdex.html":
+    "/komodo-defi-framework/tutorials/",
   "/mmV2/LP/atomicdex-api-docker-telegram.html":
     "/komodo-defi-framework/tutorials/api-docker-telegram/",
   "/basic-docs/atomicdex/atomicdex-tutorials/add-coin-to-atomicdex-desktop.html":
@@ -108,7 +110,8 @@ const nameChangedMap = {
   "/komodo/access-remote-daemon-ssh.html":
     "/komodo-defi-framework/tutorials/setup-komodefi-api-aws/",
   "/komodo/info.html": "/smart-chains/setup/ecosystem-launch-parameters/",
-  "/komodo/multisig-transactions-on-komodo-or-assetchains.html": "/komodo/multisig-transactions-on-komodo-or-smartchains/",
+  "/komodo/multisig-transactions-on-komodo-or-assetchains.html":
+    "/komodo/multisig-transactions-on-komodo-or-smartchains/",
   "/notary/setup-Komodo-Notary-Node.html": "/notary/",
   "/notary/generate-privkeys-third-party-coins-from-passphrase.html":
     "/notary/generate-privkeys-for-third-party-coins-from-passphrase/",
@@ -134,16 +137,28 @@ const nameChangedMap = {
     "/antara/tutorials/test-use-write-integrate-antara/",
   "/basic-docs/atomicdex/atomicdex-tutorials/atomicdex-walkthrough.html":
     "/komodo-defi-framework/tutorials/api-walkthrough/",
-  "/basic-docs/atomicdex/atomicdex-tutorials/atomicdex-metrics.html": "/komodo-defi-framework/tutorials/api-metrics/",
-  "/basic-docs/atomicdex/atomicdex-tutorials/setup-atomicdex-aws.html": "/komodo-defi-framework/tutorials/setup-komodefi-api-aws/",
-  "/basic-docs/atomicdex/atomicdex-tutorials/additional-information-about-atomicdex.html": "/komodo-defi-framework/tutorials/additional-information/",
-  "/basic-docs/atomicdex/atomicdex-beta/restore-wallet-using-atomicdex-mobile.html": "/komodo-defi-framework/mobile/restore-wallet-on-komodo-mobile-wallet/",
-  "/basic-docs/atomicdex/atomicdex-beta/add-and-activate-coins-on-atomicdex-mobile.html": "/komodo-defi-framework/mobile/add-and-activate-coins-on-komodo-mobile-wallet/",
-  "/basic-docs/atomicdex/atomicdex-beta/withdraw-or-send-funds-using-atomicdex-mobile.html": "/komodo-defi-framework/mobile/withdraw-or-send-funds-on-komodo-mobile-wallet/",
-  "/basic-docs/atomicdex/atomicdex-beta/perform-cross-chain-atomic-swaps-using-atomicdex-mobile.html": "/komodo-defi-framework/mobile/perform-cross-chain-atomic-swaps-on-komodo-mobile-wallet/",
-  "/basic-docs/atomicdex/atomicdex-beta/view-ongoing-orders-and-swap-history-on-atomicdex-mobile.html": "/komodo-defi-framework/setup/view-ongoing-orders-and-swap-history-on-komodo-mobile-wallet/",
-  "/basic-docs/atomicdex/atomicdex-beta/recover-seed-on-atomicdex-mobile.html": "/komodo-defi-framework/mobile/recover-seed-on-komodo-mobile-wallet/",
-  "/basic-docs/atomicdex/atomicdex-beta/delete-seed-from-atomicdex-mobile.html": "/komodo-defi-framework/mobile/delete-seed-on-komodo-mobile-wallet/",
+  "/basic-docs/atomicdex/atomicdex-tutorials/atomicdex-metrics.html":
+    "/komodo-defi-framework/tutorials/api-metrics/",
+  "/basic-docs/atomicdex/atomicdex-tutorials/setup-atomicdex-aws.html":
+    "/komodo-defi-framework/tutorials/setup-komodefi-api-aws/",
+  "/basic-docs/atomicdex/atomicdex-tutorials/additional-information-about-atomicdex.html":
+    "/komodo-defi-framework/tutorials/additional-information/",
+  "/basic-docs/atomicdex/atomicdex-beta/restore-wallet-using-atomicdex-mobile.html":
+    "/komodo-wallet/mobile/restore-a-wallet/",
+  "/basic-docs/atomicdex/atomicdex-beta/add-and-activate-coins-on-atomicdex-mobile.html":
+    "/komodo-wallet/mobile/add-and-activate-coins/",
+  "/basic-docs/atomicdex/atomicdex-beta/withdraw-or-send-funds-using-atomicdex-mobile.html":
+    "/komodo-wallet/mobile/withdraw-or-send-funds/",
+  "/basic-docs/atomicdex/atomicdex-beta/perform-cross-chain-atomic-swaps-using-atomicdex-mobile.html":
+    "/komodo-wallet/mobile/perform-cross-chain-atomic-swaps/",
+  "/basic-docs/atomicdex/atomicdex-beta/view-ongoing-orders-and-swap-history-on-atomicdex-mobile.html":
+    "/komodo-wallet/mobile/view-ongoing-orders-and-swap-history/",
+  "/basic-docs/atomicdex/atomicdex-beta/view-your-receiving-address-to-send-funds-for-trading.html":
+    "/komodo-wallet/mobile/view-your-receiving-address-to-send-funds-for-trading/",
+  "/basic-docs/atomicdex/atomicdex-beta/recover-seed-on-atomicdex-mobile.html":
+    "/komodo-wallet/mobile/recover-seed-phrase/",
+  "/basic-docs/atomicdex/atomicdex-beta/delete-seed-from-atomicdex-mobile.html":
+    "/komodo-wallet/mobile/delete-seed-phrase/",
 };
 
 for (const path in nameChangedMap) {
