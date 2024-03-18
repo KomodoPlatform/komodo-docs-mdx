@@ -2,6 +2,7 @@ import fs from 'fs';
 import https from 'https';
 import path from 'path';
 import { spawnSync } from 'child_process';
+import { get } from 'http';
 const authorsData = JSON.parse(fs.readFileSync("./authors.json", 'utf8'));
 const oldFileData = JSON.parse(fs.readFileSync("./utils/_fileData_old_documentation_mod.json", 'utf8'));
 
@@ -121,6 +122,23 @@ const getAllFileData = (filepath) => {
         filepath,
     ]); //, { cwd: gitDir }
 
+    const getCommitTimesInReverse = spawnSync("git", [
+        "log",
+        "--reverse",
+        "--format=%ct",
+        filepath,
+    ]);
+
+    if (getCommitTimesInReverse.error) {
+        console.error(
+            "An error occurred while executing the git command:",
+            getCommitTimesInReverse.error.message
+        );
+        throw new Error(
+            `An error occurred while executing the git command: ${getCommitTimesInReverse.error.message}`
+        );
+    }
+
     if (getLastEditedTime.error) {
         console.error(
             "An error occurred while executing the git command:",
@@ -131,18 +149,34 @@ const getAllFileData = (filepath) => {
         );
     }
 
-    const date = new Date(parseInt(getLastEditedTime.stdout.toString()) * 1000);
+    const firstCommitTime = getCommitTimesInReverse.stdout.toString().split("\n")[0]
+    const firstCommitDate = new Date(parseInt(firstCommitTime) * 1000);
 
     if (
-        date.toString() == "Invalid Date"
+        firstCommitDate.toString() == "Invalid Date"
     ) {
         console.error(
-            filepath + " Date is invalid:",
-            date
+            filepath + "firstCommitDate is invalid:",
+            firstCommitDate
         );
         throw new Error(
-            "Date is invalid:",
-            date
+            "firstCommitDate is invalid:",
+            firstCommitDate
+        );
+    }
+
+    const lastEditedDate = new Date(parseInt(getLastEditedTime.stdout.toString()) * 1000);
+
+    if (
+        lastEditedDate.toString() == "Invalid Date"
+    ) {
+        console.error(
+            filepath + "lastEditedDate is invalid:",
+            lastEditedDate
+        );
+        throw new Error(
+            "lastEditedDate is invalid:",
+            lastEditedDate
         );
     }
 
@@ -152,7 +186,7 @@ const getAllFileData = (filepath) => {
     fileData[fileRoute] = fileData[fileRoute] ? fileData[fileRoute] : {};
     fileData[fileRoute]["dateModified"] = date.toISOString();
     fileData[fileRoute]["contributors"] = allContributors;
-
+    fileData[fileRoute]["dateCreated"] = firstCommitDate.toISOString();
     fileData[fileRoute]["lastContributor"] =
         lastContributor;
 
@@ -253,9 +287,9 @@ function getAllContributors(filepath) {
         }
         contributorsArray.push(contributor)
     }
-    let oldFileData_pathData = oldFileData[filepath.replace("/index.mdx","").replace("src/pages","")]
+    let oldFileData_pathData = oldFileData[filepath.replace("/index.mdx", "").replace("src/pages", "")]
     let oldContributors = oldFileData_pathData ? oldFileData_pathData.contributors : []
-    contributorsArray = [...contributorsArray,...oldContributors]
+    contributorsArray = [...contributorsArray, ...oldContributors]
     return contributorsArray.filter((item, index) => { //filter repeated entries
         return index === contributorsArray.findIndex(obj => {
             return JSON.stringify(obj) === JSON.stringify(item);
