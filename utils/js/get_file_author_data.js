@@ -184,7 +184,7 @@ const getAllFileData = (filepath) => {
     let allContributors = getAllContributors(filepath)
     const fileRoute = filePathToRoute(filepath)
     fileData[fileRoute] = fileData[fileRoute] ? fileData[fileRoute] : {};
-    fileData[fileRoute]["dateModified"] = date.toISOString();
+    fileData[fileRoute]["dateModified"] = lastEditedDate.toISOString();
     fileData[fileRoute]["contributors"] = allContributors;
     fileData[fileRoute]["dateCreated"] = firstCommitDate.toISOString();
     fileData[fileRoute]["lastContributor"] =
