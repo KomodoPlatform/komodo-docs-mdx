@@ -121,7 +121,7 @@ jobs:
 
   web_build_preview_and_gen_preview_images:
     needs: update_lint_get_data
-    name: Build and deploy
+    name: Build, deploy and generate preview image PR
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -144,7 +144,6 @@ jobs:
         with:
           ssh-key: ${{ secrets.DOCS_UI_SSH_PRIVATE_KEY }}
           repository: KomodoPlatform/website-komodo-docs
-          path: website-komodo-docs-repo
           ref: dev
           submodules: recursive
           fetch-depth: 0
@@ -152,7 +151,7 @@ jobs:
       - name: Get updated content (without diff)
         if: needs.update_lint_get_data.outputs.NO_DIFF == 'true'
         run: |
-          cd website-komodo-docs-repo/utils
+          cd utils
           ./update_mdx_branch.sh ${{ needs.update_lint_get_data.outputs.BRANCH }}
           cd ..
           ./update-content.sh
@@ -160,7 +159,7 @@ jobs:
       - name: Get updated content (with diff)
         if: needs.update_lint_get_data.outputs.NO_DIFF == 'false'
         run: |
-          cd website-komodo-docs-repo/utils
+          cd utils
           ./update_mdx_branch.sh ${{ needs.update_lint_get_data.outputs.LINT_BRANCH }}
           cd ..
           ./update-content.sh
@@ -174,7 +173,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            website-komodo-docs-repo/.next/cache
+            .next/cache
           # Generate a new cache whenever packages or source files change.
           key:
             nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
@@ -182,14 +181,14 @@ jobs:
           restore-keys: nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
 
       - name: Install build deps
-        run: cd website-komodo-docs-repo && yarn install
+        run: cd yarn install
 
       - name: Build
-        run: cd  website-komodo-docs-repo && yarn export:cfp
+        run: cd yarn export:cfp
 
       - name: Add no-index headers before pubishing to cloudflare
         run: |
-          echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./website-komodo-docs-repo/out/_headers
+          echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
@@ -198,7 +197,7 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: komodo-docs
-          directory: ./website-komodo-docs-repo/out
+          directory: ./out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: "3"
           branch: ${{ steps.get_branch.outputs.BRANCH_NAME }}
@@ -228,7 +227,7 @@ jobs:
 
       - name: Generate Preview Images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: cd website-komodo-docs-repo && yarn gen:previewImgs
+        run: yarn gen:previewImgs
 
       - name: Checkout mdx repo
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
@@ -242,7 +241,7 @@ jobs:
 
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: mkdir -p ./komodo-docs-mdx-repo/preview-images/optimized/ && mkdir -p ./komodo-docs-mdx-repo/preview-images/original/ && rsync -avh --delete ./website-komodo-docs-repo/preview-images-original/ ./komodo-docs-mdx-repo/preview-images/original/ && rsync -avh --delete ./website-komodo-docs-repo/public/preview-images/ ./komodo-docs-mdx-repo/preview-images/optimized/
+        run: mkdir -p ./komodo-docs-mdx-repo/preview-images/optimized/ && mkdir -p ./komodo-docs-mdx-repo/preview-images/original/ && rsync -avh --delete ./preview-images-original/ ./komodo-docs-mdx-repo/preview-images/original/ && rsync -avh --delete ./public/preview-images/ ./komodo-docs-mdx-repo/preview-images/optimized/
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
