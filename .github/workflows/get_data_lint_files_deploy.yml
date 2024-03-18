@@ -165,8 +165,10 @@ jobs:
           ./update-content.sh
 
       - uses: actions/setup-node@v3
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
         with:
-          node-version: "16.14"
+          node-version: "18.9.0"
           cache: yarn
 
       - name: Restore cache
@@ -227,7 +229,12 @@ jobs:
 
       - name: Generate Preview Images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: yarn gen:previewImgs
+        uses: mujo-code/puppeteer-headful@18.9.0
+        env:
+          CI: "true"
+          CF_PUBLISH_URL: ${{ steps.cf_publish.outputs.url }}
+        with:
+          args: yarn gen:previewImgs
 
       - name: Checkout mdx repo
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
