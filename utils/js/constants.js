@@ -13,5 +13,7 @@ export const constants = {
         "github": "https://www.github.com/KomodoPlatform",
         "twitter": "https://twitter.com/KomodoPlatform/",
         "youtube": "https://www.youtube.com/channel/UCtp7YrrEnZbW97sgPldyvKg"
-    }
+    },
+    "orgName": "Komodo Platform",
+    "orgDesc": "Komodo is an open, composable blockchain platform. With a unique multi-chain design, Komodo is focused on providing fully composable blockchain solutions for independent developers, startups, and enterprise businesses alike.",
 }
