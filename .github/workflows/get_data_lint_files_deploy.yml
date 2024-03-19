@@ -79,7 +79,7 @@ jobs:
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: node utils/js/create_sitemap.js
 
-      - name: Set lint-fix branch name
+      - name: Set branch name, commit_sha, lint-fix branch name
         id: vars
         shell: bash
         run: |
@@ -88,6 +88,83 @@ jobs:
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
           lint_branch_name="lint-fix-patches/${BRANCH_NAME}"
           echo "lint_branch_name=$lint_branch_name" >> $GITHUB_OUTPUT
+          echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          path: website-komodo-docs
+          ssh-key: ${{ secrets.DOCS_UI_SSH_PRIVATE_KEY }}
+          repository: KomodoPlatform/website-komodo-docs
+          ref: dev
+          submodules: recursive
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v3
+        env:
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+        with:
+          node-version: "18.9.0"
+          cache: yarn
+          cache-dependency-path: "**/yarn.lock"
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .next/cache
+          # Generate a new cache whenever packages or source files change.
+          key:
+            nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+            # If source files changed but packages didn't, rebuild from a prior cache.
+          restore-keys: nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+
+      - name: Get updated content, Install deps, build, Add no-index headers before pubishing to cloudflare
+        run: |
+          cd $GITHUB_WORKSPACE/website-komodo-docs/utils
+          ./update_mdx_branch.sh ${{ steps.vars.outputs.lint_branch_name }}
+          cd ..
+          ./update-content.sh
+          yarn install
+          yarn export:cfp
+          echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        id: cf_publish
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          projectName: komodo-docs
+          directory: $GITHUB_WORKSPACE/website-komodo-docs/out
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          wranglerVersion: "3"
+          branch: ${{ steps.vars.outputs.BRANCH_NAME }}
+
+      - name: Post CF preview url
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "Preview for merge commit: ${{ steps.vars.outputs.sha_short }}, available on cloudflare at: ${{ steps.cf_publish.outputs.url }}/en/docs/"
+            })
+
+      - name: Generate Preview Images
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        uses: mujo-code/puppeteer-headful@18.9.0
+        env:
+          CI: "true"
+          CF_PUBLISH_URL: ${{ steps.cf_publish.outputs.url }}
+        with:
+          args: cd $GITHUB_WORKSPACE/website-komodo-docs/ && yarn gen:previewImgs
+
+      - name: Update mdx repo with preview images
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        run: mkdir -p ./preview-images/optimized/ && mkdir -p ./preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/preview-images-original/ ./preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/public/preview-images/ ./preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json ./preview-images/previewImgTimeStamps.json
 
       - name: Check if diff exists
         id: diff_check
@@ -102,166 +179,14 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "[Bot] File and author data updated, validated and updated internal links, formatted md content, checked presence of file and dirs based on sidebar, checked presence of h1 in every file, update Komodo DeFi Framework methods table"
+          commit-message: "[Bot] File and author data updated, validated and updated internal links, formatted md content, checked presence of file and dirs based on sidebar, checked presence of h1 in every file, update Komodo DeFi Framework methods table, adds/updates preview images"
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           branch: ${{ steps.vars.outputs.lint_branch_name}}
           delete-branch: true
-          title: "[BOT] PR to ${{ steps.vars.outputs.branch_name}}. Lints file structure, file contents, gets author data, Updates Komodo DeFi Framework Methods Table"
+          title: "[BOT] PR to ${{ steps.vars.outputs.branch_name}}. Lints file structure, file contents, gets author data, Updates Komodo DeFi Framework Methods Table, adds/updates preview images"
           body: |
             -  File and author data updated, validated and updated internal links, formatted md content, checked presence of file and dirs based on sidebar, checked presence of h1 in every file, Komodo DeFi Framework Methods Table auto-generated
-          labels: |
-            autogenerated
-          reviewers: smk762, gcharang
-          draft: false
-    outputs:
-      NO_DIFF: ${{ steps.diff_check.outputs.NO_DIFF}}
-      LINT_BRANCH: ${{ steps.vars.outputs.lint_branch_name}}
-      BRANCH: ${{ steps.vars.outputs.BRANCH_NAME}}
-
-  web_build_preview_and_gen_preview_images:
-    needs: update_lint_get_data
-    name: Build, deploy and generate preview image PR
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
-    steps:
-      - name: Extract branch name of mdx repo
-        shell: bash
-        run: |
-          BRANCH_NAME="${{ github.head_ref || github.ref }}"
-          BRANCH_NAME=${BRANCH_NAME#refs/heads/}  # remove the refs/heads/ prefix
-          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_OUTPUT
-        id: get_branch
-
-      - name: Shortify commit sha
-        shell: bash
-        run: |
-          echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
-        id: shortify_commit
-
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          ssh-key: ${{ secrets.DOCS_UI_SSH_PRIVATE_KEY }}
-          repository: KomodoPlatform/website-komodo-docs
-          ref: dev
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: Get updated content (without diff)
-        if: needs.update_lint_get_data.outputs.NO_DIFF == 'true'
-        run: |
-          cd utils
-          ./update_mdx_branch.sh ${{ needs.update_lint_get_data.outputs.BRANCH }}
-          cd ..
-          ./update-content.sh
-
-      - name: Get updated content (with diff)
-        if: needs.update_lint_get_data.outputs.NO_DIFF == 'false'
-        run: |
-          cd utils
-          ./update_mdx_branch.sh ${{ needs.update_lint_get_data.outputs.LINT_BRANCH }}
-          cd ..
-          ./update-content.sh
-
-      - uses: actions/setup-node@v3
-        env:
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
-        with:
-          node-version: "18.9.0"
-          cache: yarn
-
-      - name: Restore cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            .next/cache
-          # Generate a new cache whenever packages or source files change.
-          key:
-            nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-            # If source files changed but packages didn't, rebuild from a prior cache.
-          restore-keys: nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
-
-      - name: Install build deps
-        run: yarn install
-
-      - name: Build
-        run: yarn export:cfp
-
-      - name: Add no-index headers before pubishing to cloudflare
-        run: |
-          echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
-
-      - name: Publish to Cloudflare Pages
-        uses: cloudflare/pages-action@v1
-        id: cf_publish
-        with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          projectName: komodo-docs
-          directory: ./out
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-          wranglerVersion: "3"
-          branch: ${{ steps.get_branch.outputs.BRANCH_NAME }}
-
-      - name: Post CF preview url
-        uses: actions/github-script@v6
-        if: github.event_name == 'pull_request'
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "Preview for merge commit: ${{ steps.shortify_commit.outputs.sha_short }}, available on cloudflare at: ${{ steps.cf_publish.outputs.url }}/en/docs/"
-            })
-
-      - name: Set preview-images-update branch name
-        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        id: vars
-        shell: bash
-        run: |
-          BRANCH_NAME="${{ github.head_ref || github.ref }}"
-          BRANCH_NAME=${BRANCH_NAME#refs/heads/}
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
-          preview_image_branch_name="preview-images-update/${BRANCH_NAME}"
-          echo "preview_image_branch_name=$preview_image_branch_name" >> $GITHUB_OUTPUT
-
-      - name: Generate Preview Images
-        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        uses: mujo-code/puppeteer-headful@18.9.0
-        env:
-          CI: "true"
-          CF_PUBLISH_URL: ${{ steps.cf_publish.outputs.url }}
-        with:
-          args: yarn gen:previewImgs
-
-      - name: Checkout mdx repo
-        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        uses: actions/checkout@v3
-        with:
-          ssh-key: ${{ secrets.GITHUB_TOKEN }}
-          repository: KomodoPlatform/komodo-docs-mdx
-          path: komodo-docs-mdx-repo
-          ref: ${{ steps.get_branch.outputs.BRANCH_NAME }}
-          fetch-depth: 0
-
-      - name: Update mdx repo with preview images
-        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: mkdir -p ./komodo-docs-mdx-repo/preview-images/optimized/ && mkdir -p ./komodo-docs-mdx-repo/preview-images/original/ && rsync -avh --delete ./preview-images-original/ ./komodo-docs-mdx-repo/preview-images/original/ && rsync -avh --delete ./public/preview-images/ ./komodo-docs-mdx-repo/preview-images/optimized/ && rsync -avh --delete ./previewImgTimeStamps.json ./komodo-docs-mdx-repo/preview-images/previewImgTimeStamps.json
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v5
-        with:
-          path: komodo-docs-mdx-repo
-          committer: GitHub <noreply@github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          commit-message: Add new files
-          title: "[BOT] PR to ${{ steps.get_branch.outputs.BRANCH_NAME }}. Generates preview images"
-          body: "This is an automated PR to add/update preview images"
-          branch: ${{ steps.vars.outputs.preview_image_branch_name}}
-          delete-branch: true
-          token: ${{ secrets.GITHUB_TOKEN }}
           labels: |
             autogenerated
           reviewers: smk762, gcharang
