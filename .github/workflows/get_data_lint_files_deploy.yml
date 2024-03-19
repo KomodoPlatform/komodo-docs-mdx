@@ -122,7 +122,7 @@ jobs:
       - name: Get updated content, Install deps, build, Add no-index headers before pubishing to cloudflare
         run: |
           cd $GITHUB_WORKSPACE/website-komodo-docs/utils
-          ./update_mdx_branch.sh ${{ steps.vars.outputs.lint_branch_name }}
+          ./update_mdx_branch.sh ${{ steps.vars.outputs.BRANCH_NAME }}
           cd ..
           ./update-content.sh
           yarn install
@@ -165,6 +165,9 @@ jobs:
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: mkdir -p ./preview-images/optimized/ && mkdir -p ./preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/preview-images-original/ ./preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/public/preview-images/ ./preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json ./preview-images/previewImgTimeStamps.json
+
+      - name: delete repo checked out
+        run: rm -rf $GITHUB_WORKSPACE/website-komodo-docs
 
       - name: Check if diff exists
         id: diff_check
