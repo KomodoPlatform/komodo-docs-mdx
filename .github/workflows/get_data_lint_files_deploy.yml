@@ -121,6 +121,7 @@ jobs:
 
       - name: Get updated content, Install deps, build, Add no-index headers before pubishing to cloudflare
         run: |
+          mkdir -p ./preview-images/optimized/ && mkdir -p ./preview-images/original/
           cd $GITHUB_WORKSPACE/website-komodo-docs/utils
           ./update_mdx_branch.sh ${{ steps.vars.outputs.BRANCH_NAME }}
           cd ..
@@ -164,7 +165,7 @@ jobs:
           CI: "true"
           CF_PUBLISH_URL: ${{ steps.cf_publish.outputs.url }}
         with:
-          args: cd ./website-komodo-docs/ && yarn gen:previewImgs
+          args: cd ./website-komodo-docs/ && pwd && ls && git status && yarn gen:previewImgs
 
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
