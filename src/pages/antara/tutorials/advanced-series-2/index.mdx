@@ -56,7 +56,7 @@ When working with software based on the Bitcoin protocol, a common problem a dev
 
 With this in mind, the essential structure of a CC script is as follows. (The automatically generated content is handled by the daemon's internal functions and can be ignored.)
 
-```
+```bash
 evalcode + pubkey + automatically generated content
 ```
 
@@ -78,7 +78,7 @@ For example, typically the design of an Antara Module requires that each time a 
 
 A transaction in the Bitcoin protocol consists of input and output vectors, called "vins" and "vouts" for brevity. The vins take funds from utxos, combine them into one "spend" transaction, and create new vouts. Some of the vouts may be new utxos.
 
-```
+```bash
 vin0 + vin1 + ... + vin[n-1] -> vout0 + vout1 + ... vout[n-1]
 ```
 
@@ -100,13 +100,13 @@ Consider the implications of the combination of possibilities contained in this 
 
 Observe the essential structure of a transaction with 3 vins and 2 vouts.
 
-```
+```bash
 vin0 + vin1 + vin2 -> vout0 + vout1
 ```
 
 With the possibilities of OP\_CCC, the combination allows for 1.12e+12 possibile combinations.
 
-```
+```bash
 257 * 257 * 257 * 257 * 257 = 1.12e+12
 ```
 
@@ -200,7 +200,7 @@ Replace `<CC_name>` with your module name. For example, `faucetaddress`.
 
 Execute the `<CC_name>address` RPC call and use the returned value to complete the `<CC_Name>CCaddr` line of code.
 
-```
+```c
 const char *FaucetCCaddr = "R9zHrofhRbub7ER77B7NrVch3A63R39GuC";
 ```
 
@@ -208,7 +208,7 @@ const char *FaucetCCaddr = "R9zHrofhRbub7ER77B7NrVch3A63R39GuC";
 
 From the response returned by the `<CC_name>address` RPC, use the hex value of the private key to complete the appropriate line of code.
 
-```
+```c
 uint8_t FaucetCCpriv[32] = { 0xd4, 0x4f, 0xf2, 0x31, 0x71, 0x7d, 0x28, 0x02, 0x4b, 0xc7, 0xdd, 0x71, 0xa0, 0x39, 0xc4, 0xbe, 0x1a, 0xfe, 0xeb, 0xc2, 0x46, 0xda, 0x76, 0xf8, 0x07, 0x53, 0x3d, 0x96, 0xb4, 0xca, 0xa0, 0xe9 };
 ```
 

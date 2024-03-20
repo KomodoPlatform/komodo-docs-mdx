@@ -27,7 +27,7 @@ async function fetchLatestRelease() {
     if(defiResponse.data.tag_name === versionsFromJson['komodo-defi-framework']){
       console.log("komodo-defi-framework changelog is upto date"); 
     } else {
-      throw new Error("update komodo changelog in the file: ./src/pages/atomicdex/changelog/index.mdx and the release version in ./utils/_changeLogVersions.json")
+      throw new Error("update komodo changelog in the file: ./src/pages/komodo-defi-framework/changelog/index.mdx and the release version in ./utils/_changeLogVersions.json")
     }
   } catch (error) {
     console.error('Error when comparing the komodo defi framework latest release:', error);

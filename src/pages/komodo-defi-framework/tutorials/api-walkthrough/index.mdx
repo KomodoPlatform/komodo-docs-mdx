@@ -1,0 +1,492 @@
+export const title = "Komodo DeFi Framework API Walkthrough";
+export const description =
+  "This guide describes a step-by-step process to get started with Komodo DeFi Framework.";
+
+# Komodo DeFi Framework API Walkthrough
+
+Now that you have the Komodo DeFi Framework API [installed](/komodo-defi-framework/setup/) you are ready for your first atomic swap!
+Since we're testing Komodo DeFi Framework API as a back end, we're going to be doing a few things that a normal user using a GUI will not be expected to do.
+Let's open up the terminal and get started.
+
+## Setting Up the Coin List
+
+In the Komodo ecosystem we use two blockchain coins, DOC and MARTY, for testing purposes. These coins are freely distributed and have no blockchain scarcity, so don't treat these coins as having any real value.
+If you lose them or destroy them, there's no need to stress. You can always grab more from our faucet in the [KomodoPlatform Discord server](https://komodoplatform.com/discord).
+Let's set up a file in the `~/komodo-defi-framework/target/debug` directory to import the settings for these test coins. Make a file called `coins` and place the following text into it:
+
+```json
+[
+  {
+    "coin": "DOC",
+    "asset": "DOC",
+    "fname": "DOC",
+    "rpcport": 62415,
+    "txversion": 4,
+    "overwintered": 1,
+    "mm2": 1,
+    "sign_message_prefix": "Komodo Signed Message:\n",
+    "is_testnet": true,
+    "required_confirmations": 1,
+    "requires_notarization": false,
+    "avg_blocktime": 60,
+    "protocol": {
+      "type": "UTXO"
+    },
+    "derivation_path": "m/44'/141'",
+    "trezor_coin": "Komodo"
+  },
+  {
+    "coin": "MARTY",
+    "asset": "MARTY",
+    "fname": "MARTY",
+    "rpcport": 52592,
+    "txversion": 4,
+    "overwintered": 1,
+    "mm2": 1,
+    "sign_message_prefix": "Komodo Signed Message:\n",
+    "is_testnet": true,
+    "required_confirmations": 1,
+    "requires_notarization": false,
+    "avg_blocktime": 60,
+    "protocol": {
+      "type": "UTXO"
+    },
+    "derivation_path": "m/44'/141'",
+    "trezor_coin": "Komodo"
+  }
+]
+```
+
+Save this file. Komodo DeFi Framework API will search for it automatically on launch.
+
+<Note>
+  The `coins` file in [this linked repository](https://github.com/KomodoPlatform/coins) contains the standard coin configuration file used in GUI software.
+  You can download and use [this file](https://github.com/KomodoPlatform/coins/blob/master/coins) if you want to activate other coins.
+
+  Servers used for light mode activation are listed within [this file](https://github.com/KomodoPlatform/coins/blob/master/utils/coins_config.json),
+  and you can find many coin activation request body json examples at [https://stats.kmd.io/atomicdex/activation\_commands/](https://stats.kmd.io/atomicdex/activation_commands/).
+</Note>
+
+## Launching the Komodo DeFi Framework API
+
+We also need to create an MM2.json file in the same directory as the `coins` file. We'll use a minimal configuration for this example (check out the [configure mm2 guide](/komodo-defi-framework/setup/configure-mm2-json/) for more information about additional configuration parameters).
+
+### MM2.json Minimal Configuration
+
+| Parameter     | Type    | Description                                                                                                                                                                                                                       |
+| ------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| gui           | string  | Information to identify which app, tool or product is using the API, e.g. `KomodoWallet iOS 1.0.1`. Helps developers identify if an issue is related to specific builds or operating systems etc.                                 |
+| netid         | integer | Nework ID number, telling the Komodo DeFi Framework API which network to join. 8762 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it. |
+| passphrase    | string  | Your passphrase; this is the source of each of your coins private keys. KEEP IT SAFE!                                                                                                                                             |
+| rpc\_password | string  | For RPC requests that need authentication, this will need to match the `userpass` value in the request body.                                                                                                                      |
+
+<Note>
+  Unless you include the `allow_weak_password` paramater and set it to `true`, your `rpc_password`:
+
+  *   Can't have 3 of the same characters in a row,
+  *   Must be between 8-32 characters in length
+  *   Must contain at least one each of the following: numeric, uppercase, lowercase, special character (e.g. !#$\*).
+  *   Must not contain the word "password", or the chars `<`, `>`, or `&`.
+</Note>
+
+The MM2.json configuration commands can also be supplied at runtime, as below:
+
+```bash
+stdbuf -oL ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":8762, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
+```
+
+Replace `YOUR_PASSPHRASE_HERE` and `YOUR_PASSWORD_HERE` with your actual passphrase and password, and then execute the command in the terminal.
+
+You should see output similar to the following:
+
+```bash
+06 10:26:37, mm2:279] Komodo DeFi Framework API 1.0.3-beta_6444336 DT 2023-05-01T22:25:14+03:00
+06 10:26:37, mm2_main::mm2::lp_native_dex:424] INFO Version: 1.0.3-beta_6444336 DT 2023-05-01T22:25:14+03:00
+06 10:26:37, crypto::crypto_ctx:333] INFO Public key hash: d346c085a470963c399fe67e3c3b3e93e29ede5d
+06 10:26:37, crypto::crypto_ctx:334] INFO Shared Database ID: 7d4df7c448a7b66c62f6ec3bb8798ca6f0d17862
+06 10:26:38, mm2_libp2p::atomicdex_behaviour:653] INFO Local peer id: PeerId("12D3KooWBGkWw6LMvXLwQsb4w5vffmnM2cunFhTjqQd9oeNuc18a")
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWEsuiKcQaBaKEzuMtT6uFjs89P1E8MK3wGRZbeuCbCw6P to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWKxavLCJVrQ5Gk1kd9m6cohctGQBmiKPS9XQFoXEoyGmS to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWAToxtunEBWCoAHjefSv74fmnM2cunFhTjjw6PNsmxran to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWSmEi8ypaVzFA1AGde2RjxNW5Pvxw3qa2fVe48PjNs63R to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWHKkHiNhZtKceQehHhPqwU5W1jXpoVBgS1qst899GjvTm to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWMrjLmrv8hNgAoVf1RfumfjyPStzd4nv5XL47zN4ZKisb to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWL6yrrNACb7t7RPyTEPxKmq8jtrcbkcNd6H5G2hK7bXaL to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWHBeCnJdzNk51G4mLnao9cDsjuqiMTEo5wMFXrd25bd1F to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooW9soGyPfX6kcyh3uVXNHq1y2dPmQNt2veKgdLXkBiCVKq to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWPR2RoPi19vQtLugjCdvVmCcGLP2iXAzbDfP3tp81ZL4d to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWKu8pMTgteWacwFjN7zRWWHb3bctyTvHU3xx5x4x6qDYY to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWJWBnkVsVNjiqUEPjLyHpiSmQVAJ5t6qt1Txv5ctJi9Xd to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWGrUpCAbkxhPRioNs64sbUmPmpEcou6hYfrqQvxfWDEuf to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWEaZpH61H4yuQkaNG5AsyGdpBhKRppaLdAY52a774ab5u to explicit relay list
+06 10:26:38, atomicdex_gossipsub::behaviour:147] INFO Adding peer 12D3KooWAd5gPXwX7eDvKWwkr2FZGfoJceKDCA53SHmTFFVkrN7Q to explicit relay list
+06 10:26:38, mm2_libp2p::atomicdex_behaviour:762] INFO Dialed /ip4/79.228.173.231/tcp/42845
+06 10:26:38, mm2_libp2p::atomicdex_behaviour:762] INFO Dialed /ip4/84.82.76.214/tcp/42845
+06 10:26:38, mm2_libp2p::atomicdex_behaviour:762] INFO Dialed /ip4/69.178.128.39/tcp/42845
+06 10:26:38, mm2_main::mm2::database:26] INFO Checking the current SQLite migration
+06 10:26:38, mm2_main::mm2::database:30] INFO Current migration is 9, skipping the init, trying to migrate
+06 10:26:38, mm2_main::mm2::database:119] INFO migrate_sqlite_database, current migration 9
+06 10:26:38, mm2_main::mm2::database:135] INFO migrate_sqlite_database complete, migrated to 9
+😉 2023-05-06 18:26:38 +0800 [] rpc:362] >>>>>>>>>> DEX stats 127.0.0.1:7783 DEX stats API enabled at unixtime.1683368798  <<<<<<<<<
+
+```
+
+If you see something similar, the Komodo DeFi Framework API is up and running!
+
+<Note classNaming="flex-col">
+  When using the Komodo DeFi Framework API on a VPS without accompanying tools such as `tmux` or `screen`, it is recommended to use [`nohup`](https://www.digitalocean.com/community/tutorials/nohup-command-in-linux). This will ensure that the Komodo DeFi Framework API instance is not shutdown when the user logs out.
+
+  ```bash
+  stdbuf -oL nohup ./mm2 "{\"gui\":\"Docs_Walkthru\",\"netid\":8762, \"passphrase\":\"YOUR_PASSPHRASE_HERE\", \"rpc_password\":\"YOUR_PASSWORD_HERE\"}" &
+  ```
+</Note>
+
+### Setting `userpass` Environment Variable
+
+Create a new file in the `~/komodo-defi-framework/target/debug` folder called `userpass`, then enter the following text using the same `rpc_password` as is in your MM2.json file or runtime configuration string:
+
+```bash
+export userpass="RPC_UserP@SSW0RD"
+```
+
+Save it, and then in the terminal execute:
+
+```bash
+source userpass
+```
+
+Test it by executing:
+
+```bash
+echo $userpass
+```
+
+You should now see your userpass printed to the console.
+
+<Note>
+  The `userpass` environment variable will remain in memory until the session is
+  closed. When you open up a new session later, you'll need to create the
+  `userpass` environment variable again. Additional environment variables for
+  the Komodo DeFi Framework API can be found in the [configure mm2
+  guide](/komodo-defi-framework/setup/configure-mm2-json/).
+</Note>
+
+### Connect to the Selected Coin Networks
+
+While we did set up the `coins` file for wach coin's configuration properties earlier, the Komodo DeFi Framework API doesn't to connect to their blockchain networks until we send a [coin activation request](/komodo-defi-framework/api/legacy/coin_activation/).
+
+To activate DOC and MARTY, send the following requests to the Komodo DeFi Framework API:
+
+<CodeGroup title="" tag="POST" label="electrum" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "electrum",
+    "coin": "MARTY",
+    "servers": [
+      {
+        "url": "electrum1.cipig.net:10021"
+      },
+      {
+        "url": "electrum2.cipig.net:10021"
+      },
+      {
+        "url": "electrum3.cipig.net:10021"
+      }
+    ]
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "address": "RLgAgBFHFbG2ma9MDTHyKL5vovftMepBkE",
+    "coin": "MARTY",
+    "balance": 16.95595733,
+    "result": "success"
+  }
+  ```
+</CollapsibleSection>
+
+You are now connected to the MARTY test-blockchain network!
+
+Let's connect to DOC (note it uses a different Electrum port).
+
+<CodeGroup title="" tag="POST" label="electrum" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "electrum",
+    "coin": "DOC",
+    "servers": [
+      {
+        "url": "electrum1.cipig.net:10020"
+      },
+      {
+        "url": "electrum2.cipig.net:10020"
+      },
+      {
+        "url": "electrum3.cipig.net:10020"
+      }
+    ]
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {"address": "RLgAgBFHFbG2ma9MDTHyKL5vovftMepBkE","coin": "DOC","balance": 11.27710708,"result": "success"}
+  ```
+</CollapsibleSection>
+
+You are now connected to the DOC test-blockchain network!
+
+### Get MARTY from the Faucet
+
+Note that in the examples the address, `RLgAgBFHFbG2ma9MDTHyKL5vovftMepBkE`, is present in both returned responses. You will see a different address in your returned responses - your address is unique to to your `passphrase`.
+
+To get free DOC and MARTY coins, use the Flux-Bot faucet in the [KomodoPlatform Discord](https://komodoplatform.com/discord) with the slash command below:
+
+```bash
+/faucet-drip MARTY RLgAgBFHFbG2ma9MDTHyKL5vovftMepBkE
+```
+
+In a minute or so a few MARTY coins will arrive in your address. You can [check your balance](/komodo-defi-framework/api/legacy/my_balance/) with the request below:
+
+<CodeGroup title="" tag="POST" label="my_balance" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "my_balance",
+    "coin": "MARTY"
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {"address": "RQNUR7qLgPUgZxYbvU9x5Kw93f6LU898CQ","balance": 77.7,"coin": "MARTY"}
+  ```
+</CollapsibleSection>
+
+Now you are ready to trade!
+
+### The Komodo DeFi Framework Orderbook
+
+Komodo DeFi Framework uses a decentralized, peer-to-peer orderbook empowering users to trade without having to rely on a centralized service.
+
+This avoids some serious problems which can affect centralized exchanges, such as:
+
+*   Security risks: There's always a chance [hackers](https://www.wired.com/2014/03/bitcoin-exchange/), [founders](https://www.youtube.com/watch?v=20BEJouWBgY) or other [bad actors](https://www.youtube.com/watch?v=P14nZqx2ZdY) could steal a users assets or [personal information](https://www.bitdegree.org/crypto/news/crypto-exchange-coinsquare-suffers-from-user-data-breach) because everything is stored on the exchange's servers.
+*   Lack of transparency: It's difficult to know if the exchange is playing fair, which can lead to [market manipulation](https://www.youtube.com/watch?v=TRXdxiot5JM) or insider trading.
+*   Limited user control: Users don't have complete control over their funds, as they are held by the exchange. Remember: [**Not your keys, not your coins!**](https://www.youtube.com/watch?v=dnC5mFaIW3Q)
+*   Limited asset offerings: Centralized exchanges may not have as diverse a range of cryptocurrencies available for trading.
+*   High exit fees: Users might have to pay a lot of money just to withdraw their funds. If some cases, [withdrawals are suspended](https://www.youtube.com/shorts/LFOCppNHnds) altogether!
+
+To see the orders listed on the Komodo DeFi Framework orderbook, use the [`orderbook`](/komodo-defi-framework/api/legacy/orderbook/) method:
+
+<CodeGroup title="" tag="POST" label="orderbook" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "orderbook",
+    "base": "DOC",
+    "rel": "MARTY"
+  }
+  ```
+</CodeGroup>
+
+The response below shows a list of users willing to send DOC in exchange for MARTY.
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {"bids": [],"numbids": 0,"biddepth": 0,"asks": [{"coin": "DOC","address": "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh","price": "0.89999998","price_rat": [[1, [813957463, 471859]],[1, [0, 524288]]],"price_fraction": {"numer": "2026619787280727","denom": "2251799813685248"},"maxvolume": "10855.85028615","max_volume_rat": [[1, [3593286463, 1389548]],[1, [0, 128]]],"max_volume_fraction": {"numer": "5968066809508671","denom": "549755813888"},"pubkey": "5a2f1c468b7083c4f7649bf68a50612ffe7c38b1d62e1ece3829ca88e7e7fd12","age": 5,"uuid": "5bff6021-b086-477e-b874-f45d898933fe","is_mine": false}],"numasks": 1,"askdepth": 0,"base": "DOC","rel": "MARTY","timestamp": 1549319941,"netid": 8762}
+  ```
+</CollapsibleSection>
+
+<Note>
+  Notice that the output is not easily readable in the terminal. This is where
+  we start using `jq`. You may remember that we installed software called `jq`
+  during the setup process. `jq` is optional, but it is recommended as it makes
+  reading the output in the terminal easier. To use `jq`, simply add the
+  following to the end of any command: `| jq`.
+</Note>
+
+Try again this time adding ` | jq` to the end of the `bash` example below:
+
+<CodeGroup title="" tag="POST" label="orderbook" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "orderbook",
+    "base": "DOC",
+    "rel": "MARTY"
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+  	"bids": [],
+  	"numbids": 0,
+  	"biddepth": 0,
+  	"asks": [{
+  		"coin": "DOC",
+  		"address": "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh",
+  		"price": "2",
+  		"maxvolume": "10855.85028615",
+  		"price_rat": [
+  			[1, [2]],
+  			[1, [1]]
+  		],
+  		"price_fraction": {
+  			"numer": "2",
+  			"denom": "1"
+  		},
+  		"max_volume_rat": [
+  			[1, [3593286463, 1389548]],
+  			[1, [0, 128]]
+  		],
+  		"max_volume_fraction": {
+  			"numer": "5968066809508671",
+  			"denom": "549755813888"
+  		},
+  		"pubkey": "5a2f1c468b7083c4f7649bf68a50612ffe7c38b1d62e1ece3829ca88e7e7fd12",
+  		"age": 9,
+  		"zcredits": 0,
+  		"uuid": "5bff6021-b086-477e-b874-f45d898933fe",
+  		"is_mine": false
+  	}],
+  	"numasks": 1,
+  	"askdepth": 0,
+  	"base": "DOC",
+  	"rel": "MARTY",
+  	"timestamp": 1549320152,
+  	"netid": 8762
+  }
+  ```
+</CollapsibleSection>
+
+That's much easier to read. We can easily see someone with the address `RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh` is willing to swap DOC for MARTY.
+
+```bash
+"base": "DOC",
+"rel": "MARTY",
+```
+
+They are asking `2` MARTY for every `1` DOC and have a total of `10855.85028615` available to trade.
+
+```bash
+"price": 2,
+"maxvolume": 10855.85028615,
+```
+
+### Initiate a Swap
+
+Let's create a DOC/MARTY [`buy`](/komodo-defi-framework/api/legacy/buy/) order
+
+<CodeGroup title="" tag="POST" label="buy" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "buy",
+    "base": "DOC",
+    "rel": "MARTY",
+    "volume": "1",
+    "price": "2"
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "result": {
+      "action": "Buy",
+      "base": "DOC",
+      "base_amount": "1",
+      "dest_pub_key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "method": "request",
+      "rel": "MARTY",
+      "rel_amount": "2",
+      "sender_pubkey": "c213230771ebff769c58ade63e8debac1b75062ead66796c8d793594005f3920",
+      "uuid": "288743e2-92a5-471e-92d5-bb828a2303c3"
+    }
+  }
+  ```
+</CollapsibleSection>
+
+If you see order data in the response, the order was successfully submitted to the network.
+
+Your swap is not yet started, however.
+
+From here, everything is automated.
+
+If your order is matched you will see something similar in terminal output as the steps of the swap are completed:
+
+```bash
+· 2023-05-06 22:05:31 +0800 [] lp_ordermatch:3094] Entering the taker_swap_loop DOC/MARTY with uuid: a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a
+06 14:05:31, atomicdex_gossipsub::behaviour:189] INFO Subscribed to topic: swap/a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a
+· 2023-05-06 22:05:33 +0800 [] taker_swap:756] Taker swap a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a has successfully started
++--- 06 14:05:33 -------
+| (0:00) [swap uuid=a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a] Started...
++--- 06 14:05:49 -------
+| (0:16) [swap uuid=a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a] Negotiated...
+06 14:05:50, mm2_main::mm2::lp_swap::taker_swap:1245] INFO Taker fee tx hash 11da01de79647552cc541ce2e1c32680e664530c70e940247d2d275405438cab
+06 14:05:51, mm2_main::mm2::lp_swap::taker_swap:1325] INFO Got maker payment c55fcdd5be98761cb181296a3dd76ac9b1b80b269a5236887c9f8d0fa46a8ffc
+06 14:05:51, mm2_main::mm2::lp_swap::taker_swap:1338] INFO Before wait confirm
+06 14:05:51, coins::utxo::rpc_clients:175] INFO Waiting for tx c55fcdd5be98761cb181296a3dd76ac9b1b80b269a5236887c9f8d0fa46a8ffc confirmations, now 0, required 1, requires_notarization false
++--- 06 14:07:10 -------
+| (1:37) [swap uuid=a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a] Maker payment wait confirm started...
+06 14:07:23, coins::utxo::rpc_clients:175] INFO Waiting for tx c55fcdd5be98761cb181296a3dd76ac9b1b80b269a5236887c9f8d0fa46a8ffc confirmations, now 0, required 1, requires_notarization false
++--- 06 14:07:34 -------
+| (2:01) [swap uuid=a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a] Maker payment wait confirm started...
+06 14:07:38, mm2_main::mm2::lp_swap::taker_swap:1356] INFO After wait confirm
+06 14:07:40, mm2_main::mm2::lp_swap::taker_swap:1508] INFO Taker payment tx hash 431c28bcf749b90f035b6ec613fe07e3faac3191e2a7650c78dd6309e7724e7b
++--- 06 14:07:43 -------
+| (2:09) [swap uuid=a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a] Taker payment sent...
+06 14:07:52, mm2_main::mm2::lp_swap::taker_swap:1662] INFO Taker payment spend tx 1a8023d27231a00929b39f78ec919fe6ddd8195e76f846e26cdbc1bc18dd4b50
++--- 06 14:07:52 -------
+| (2:19) [swap uuid=a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a] Taker payment spent...
+06 14:07:53, mm2_main::mm2::lp_swap::taker_swap:1734] INFO Maker payment spend tx a8f735e53996631049d7e0d9b79c6a5c776a94b684205c8539d8690dffe7fa86
+· 2023-05-06 22:07:58 +0800 [swap uuid=a8122ae2-2f20-4c19-b2f7-c4fa53d9e52a] Finished
+```
+
+When you see that last line, you know that your swap went through! Let's check by checking our DOC [balance](/komodo-defi-framework/api/legacy/my_balance/) again.
+
+<CodeGroup title="" tag="POST" label="my_balance" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "my_balance",
+    "coin": "DOC"
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+      "address": "RQNUR7qLgPUgZxYbvU9x5Kw93f6LU898CQ",
+      "balance": 0.99999,
+      "coin": "DOC"
+  }
+  ```
+</CollapsibleSection>
+
+Congratulations! You have successfully completed your first atomic swap!
+
+Once you are finished using the Komodo DeFi Framework API, you can exit using the [`stop`](/komodo-defi-framework/api/legacy/stop/) method:
+
+<CodeGroup title="" tag="POST" label="stop" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "stop"
+  }
+  ```
+</CodeGroup>
+
+Don't forget to reach out to us [on Discord](https://komodoplatform.com/discord) or [Twitter](https://twitter.com/komodoplatform) tell us about your experience and ask any questions you may have!

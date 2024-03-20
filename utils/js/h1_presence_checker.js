@@ -1,8 +1,9 @@
-import { visit, EXIT } from 'unist-util-visit'
+//import { visit, EXIT } from 'unist-util-visit'
+import {EXIT, visitParents} from 'unist-util-visit-parents'
 
 import { promises as fs } from 'fs';
-import { remark } from 'remark'
 import path from 'path'
+import { remark } from 'remark'
 
 (async function () {
     try {
@@ -12,8 +13,8 @@ import path from 'path'
             const file = await remark()
                 .use(() => (tree) => {
                     let documentContainsTitleHeading = false;
-                    visit(tree, 'heading', (node, _nodeIndex, parentNode) => {
-                        if (node.depth === 1) {
+                    visitParents(tree, 'heading', (node, ancestors) => {
+                        if (node.depth === 1 && !ancestors.some((ancestor) => ancestor.name === "DevComment")) {
                             documentContainsTitleHeading = true;
                             EXIT;
                         }
