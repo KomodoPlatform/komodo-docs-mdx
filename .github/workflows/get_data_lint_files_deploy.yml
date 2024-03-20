@@ -121,13 +121,13 @@ jobs:
 
       - name: Get updated content, Install deps, build, Add no-index headers before pubishing to cloudflare
         run: |
+          pwd
           echo $GITHUB_WORKSPACE
-          mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/preview-images/original/
+          ls $GITHUB_WORKSPACE
           cd $GITHUB_WORKSPACE/website-komodo-docs/utils
           ./update_mdx_branch.sh ${{ steps.vars.outputs.BRANCH_NAME }}
           cd ..
           export CFP=yes
-          mkdir -p $GITHUB_WORKSPACE/komodo-docs-mdx/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/komodo-docs-mdx/preview-images/original/
           ./update-content.sh
           rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json $GITHUB_WORKSPACE/website-komodo-docs/_fileData.json
           rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json $GITHUB_WORKSPACE/website-komodo-docs/lib/data/searchIndex.json
