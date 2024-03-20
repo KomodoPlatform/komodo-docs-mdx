@@ -160,14 +160,31 @@ jobs:
               body: "Preview for merge commit: ${{ steps.vars.outputs.sha_short }}, available on cloudflare at: ${{ steps.cf_publish.outputs.url }}/en/docs/"
             })
 
+      - name: Update package repos, Install libgconf-2-4, wget, Add Google Chrome repository, Install Google Chrome Stable, Clean up
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -yq libgconf-2-4
+          sudo apt-get install -y wget --no-install-recommends
+          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable --no-install-recommends
+          sudo rm -rf /var/lib/apt/lists/*
+
+      # Setting environment variable for Puppeteer and generating preview images
+      - name: Set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD and CF_PUBLISH_URL
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        run: |
+          echo "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true" >> $GITHUB_ENV
+          echo "CF_PUBLISH_URL=${{ steps.cf_publish.outputs.url }}" >> $GITHUB_ENV
+
       - name: Generate Preview Images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        uses: mujo-code/puppeteer-headful@18.9.0
-        env:
-          CI: "true"
-          CF_PUBLISH_URL: ${{ steps.cf_publish.outputs.url }}
-        with:
-          args: cd ./website-komodo-docs/ && pwd && ls && git status && yarn gen:previewImgs
+        run: |
+          cd $GITHUB_WORKSPACE/website-komodo-docs/
+          git status
+          yarn gen:previewImgs
 
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
