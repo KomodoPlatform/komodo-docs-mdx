@@ -13,7 +13,12 @@ import { remark } from 'remark'
             const file = await remark()
                 .use(() => (tree) => {
                     let documentContainsTitleHeading = false;
-                    visitParents(tree, 'heading', (node, ancestors) => {
+                    visitParents(tree, 'heading', (node, ancestors) => {                       
+                        let nodeHasLinks = node.children.some(child => child.type === "link") 
+                        if(nodeHasLinks){
+                            throw new Error(`${JSON.stringify(node,null,2)} 
+in file:${filePath} has a link. Please remove it.`)
+                        }                                            
                         if (node.depth === 1 && !ancestors.some((ancestor) => ancestor.name === "DevComment")) {
                             documentContainsTitleHeading = true;
                             EXIT;
