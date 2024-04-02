@@ -75,10 +75,6 @@ jobs:
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: node utils/js/create_search_index.js
 
-      - name: Generate Site map
-        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: node utils/js/create_sitemap.js
-
       - name: Set branch name, commit_sha, lint-fix branch name
         id: vars
         shell: bash
@@ -131,7 +127,6 @@ jobs:
           ./update-content.sh
           rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json $GITHUB_WORKSPACE/website-komodo-docs/_fileData.json
           rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json $GITHUB_WORKSPACE/website-komodo-docs/lib/data/searchIndex.json
-          rsync -avh --delete $GITHUB_WORKSPACE//utils/_sitemap.xml $GITHUB_WORKSPACE/website-komodo-docs/public/sitemap.xml
           yarn install
           yarn export          
           echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
