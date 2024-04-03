@@ -336,7 +336,7 @@ Rendered as:
 Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component. To render an image in the `src/image` folder, you'd have to import the image using the following syntax:
 
 ```jsx
-import komodefiManiq from "@/public/images/komodefi-maniq.webp";
+import komodefiManiq from "@/public/images/docs/komodefi-maniq.webp";
 ```
 
 Now you can render the image using the `OptimizedImage` component, for example:
