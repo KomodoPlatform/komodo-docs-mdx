@@ -91,7 +91,7 @@ const nameChangedMap = {
   "/basic-docs/atomicdex-api-20-dev/withdraw_tasks.html":
     "/komodo-defi-framework/api/v20-dev/task_withdraw/",
   "/basic-docs/atomicdex-api-20-dev/zhtlc_coins.html":
-    "/komodo-defi-framework/api/v20-dev/task_enable_z_coin/",
+    "/komodo-defi-framework/api/v20-dev/zhtlc_coins/",
   "/basic-docs/smart-chains/smart-chain-tutorials/betdapp.html":
     "/smart-chains/setup/dexp2p/",
   "/basic-docs/smart-chains/smart-chain-tutorials/checklist-new-coin.html":
@@ -100,6 +100,8 @@ const nameChangedMap = {
     "/smart-chains/tutorials/",
   "/basic-docs/start-here/core-technology-discussions/introduction.html":
     "/start-here/core-technology-discussions/",
+  "/basic-docs/start-here/core-technology-discussions/atomicdex.html":
+    "/start-here/core-technology-discussions/komodo-defi-framework/",
   "/basic-docs/start-here/learning-launchpad/learning-path-outline.html":
     "/start-here/learning-launchpad/",
   "/basic-docs/start-here/about-komodo-platform/about-komodo-platform.html":
