@@ -170,6 +170,22 @@ fs.writeFileSync("./utils/Redirect-map.json", JSON.stringify(pathObj, null, 2));
 const baseUrl = "https://komodoplatform.com/en/docs";
 let arrRedirects = [];
 const transformPaths = (obj) => {
+  const lowerCaseKeys = new Set();
+  const deletionTargets = new Set();
+
+  for (const key of Object.keys(obj)) {
+    const lowerKey = key.toLowerCase();
+    if (lowerCaseKeys.has(lowerKey)) {
+      deletionTargets.add(lowerKey); // Store the lowercase key for deletion
+    } else {
+      lowerCaseKeys.add(lowerKey);
+    }
+  }
+
+  for (const key of deletionTargets) {
+    delete obj[key];
+  }  
+
   Object.entries(obj).forEach(([key, value]) => {
     const outputString = `${key} ${baseUrl}${value};`;
     arrRedirects.push(outputString);
