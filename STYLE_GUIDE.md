@@ -26,7 +26,7 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
   - Where a request includes optional parameters which will result in different response structures, the file should contain a code block for each possible request variation, followed by a code block for the response of each example.
   - Below the request/response examples, include code blocks for each potential error response, along with details on what causes the error and how it might be resolved.
 - In some cases, it may be appropriate to group related methods together in a single `index.mdx` file. For example, the `index.mdx` file within the `task_init_trezor` folder contains documentation for all methods for initialisation and authentication with a Trezor hardware wallet.
-- Where common structures exist in the request or response of mulitple methods, these should be documented in the `index.mdx` file in the base folder for a section (e.g. [src/pages/atomicdex/api/v20/index.mdx](src/pages/atomicdex/api/v20/index.mdx)), and linked to from request/response parameter tables where required.
+- Where common structures exist in the request or response of mulitple methods, these should be documented in the `index.mdx` file in the base folder for a section (e.g. [src/pages/komodo-defi-framework/api/v20/index.mdx](src/pages/komodo-defi-framework/api/v20/index.mdx)), and linked to from request/response parameter tables where required.
 - Where a method or parameter is deprecated, this should be communicated in the method heading or request parameters table.
 - Separate sections of content with subheadings to make scanning and finding the information they need easier. Two line breaks should be used before and one line break after each subheading.
 
@@ -44,7 +44,7 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 - Use simple language: Where possible, avoid jargon or technical terms that may be unfamiliar to the reader. When unavoidable, provide a link to a definition or explanation of the term.
 - Proofread and test your content: Make sure to proofread your MDX file for errors and test any code snippets or examples to ensure they work as expected.
 - Be generous with hyperlinks: Link to relevant documentation or resources, whether to somewhere else within our internal docs or to a respected external source. This will provide additional context and help users better understand the content.
-- Use absolute links for internal docs: The `pages` folder is the root directory for internal docs. Use absolute links to reference other pages within the `pages` folder, for example: `[AtomicDEX API methods](/atomicdex/api/#sub-section-header)`. The url must end with a slash.
+- Use absolute links for internal docs: The `pages` folder is the root directory for internal docs. Use absolute links to reference other pages within the `pages` folder, for example: `[Komodo DeFi Framework API methods](/komodo-defi-framework/api/#sub-section-header)`. The url must end with a slash.
 - Use bullet points and numbered lists to break up long paragraphs to make the content more readable.
 
 ## Syntax
@@ -68,23 +68,23 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 
 For example:
 
-| Parameter | Type    | Description                                                                             |
-| --------- | ------- | --------------------------------------------------------------------------------------- |
-| coin      | string  | The name of the coin the user desires to activate.                                      |
-| fee       | object  | Optional. A standard [FeeInfo](/atomicdex/api/v20/#FeeInfo) object.                     |
-| amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                        |
-| max       | boolean | Optional, defaults to `false`. Send whole balance.                                      |
-| memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction. |
+| Parameter | Type    | Description                                                                                   |
+| --------- | ------- | --------------------------------------------------------------------------------------------- |
+| coin      | string  | The name of the coin the user desires to activate.                                            |
+| fee       | object  | Optional. A standard [FeeInfo](/komodo-defi-framework/api/common_structures/#FeeInfo) object. |
+| amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                              |
+| max       | boolean | Optional, defaults to `false`. Send whole balance.                                            |
+| memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.       |
 
 ## Variables
 
-- For AtomicDEX-API methods, the userpass variable should always be `testpsw`
+- For Komodo DeFi Framework API methods, the userpass variable should always be `RPC_UserP@SSW0RD`
 
 ## Templates
 
 Use the linked templates below as a starting point for new documentation pages.
 
-- [AtomicDEX API methods](templates/atomicdex_method.mdx)
+- [Komodo DeFi Framework API methods](templates/komodefi_method.mdx)
 
 ## How to contribute
 
@@ -142,6 +142,22 @@ For example, when method and title are the same:
 
 We've got a few **MDX** components we use across the Docs. Below is a walkthrough of how to start writing and using the components that make up the Docs.
 
+IMPORTANT: Always use double quotes inside mdx tags.
+
+Example:
+
+Correct:
+
+```
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+```
+
+Wrong:
+
+```
+<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
+```
+
 MDX supports standard markdown by default [CommonMark](https://commonmark.org/). However, this project also has [GFM](https://github.github.com/gfm/) installed.
 
 > Many of the components mentioned here are simplified and possibly do more than **explicitly pointed out**.
@@ -156,6 +172,7 @@ The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbe
 ```ts
 // ...
 ```
+````
 
 ```python
 
@@ -170,7 +187,7 @@ The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbe
 ```
 
 </CodeGroup>
-````
+```
 
 And rendered as:
 
@@ -178,17 +195,17 @@ And rendered as:
 
 <!-- If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
 
-````mdx
+```mdx
 ```ts {{title: "Single Block", tag: "post", label: "/kmd/jwt/post"}}
 // ...
 ```
-````
+```
 
 And you'll still have it rendered correctly:
 
 ![Single code block UI](style-guide-images/single-code-block.png) -->
 
-It is important to **note that**, "**AtomicDEX methods**" should be wrapped with `CodeGroup` tags, using the **method name** as the **label value**, and the **tag value** set to **POST**, an additional **mm2MethodDecorate property** with the value **"true"**. This will generate code blocks for:
+It is important to **note that**, "**Komodo DeFi Framework methods**" should be wrapped with `CodeGroup` tags, using the **method name** as the **label value**, and the **tag value** set to **POST**, an additional **mm2MethodDecorate property** with the value **"true"**. This will generate code blocks for:
 
 - **JSON**: The pure request body.
 - **Python3**: Using the requests library.
@@ -207,7 +224,7 @@ A working code sample would look like this:
 
 ```json
 {
-  "userpass": "testpsw",
+  "userpass": "RPC_UserP@SSW0RD",
   "mmrpc": "2.0",
   "method": "lightning::payments::generate_invoice",
   "params": {
@@ -217,9 +234,10 @@ A working code sample would look like this:
   "id": 56
 }
 ```
+````
 
 </CodeGroup>
-````
+```
 
 Rendered as:
 
@@ -272,21 +290,24 @@ This renders a button with a specified text based on its state (expanded or coll
 You'll mostly use this for API, Commands, etc. Responses, which should be wrapped with the `CollapsibleSection` tags, for example:
 
 ````mdx
-   <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-      #### Response (ready, successful)
+#### Response (ready, successful)
 
-      ```json
-      {
-         "mmrpc": "2.0",
-         "result": "success",
-         "id": null
-      }
-      ```
+<CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
-   </CollapsibleSection>
+    ```json
+    {
+       "mmrpc": "2.0",
+       "result": "success",
+       "id": null
+    }
+    ```
+
+</CollapsibleSection>
 ````
 
 The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to '**Show Error Responses**' and '**Hide Error Responses' respectively**.
+
+Headers like `#### Response (ready, successful)` should be outside the `CollapsibleSection` tags
 
 A working code would look like this:
 
@@ -314,13 +335,17 @@ Rendered as:
 
 Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component. To render an image in the `src/image` folder, you'd have to import the image using the following syntax:
 
-`import atomicManiq from "@/public/images/atomic-dex-maniq.webp";`
+```jsx
+import komodefiManiq from "@/public/images/docs/komodefi-maniq.webp";
+```
 
 Now you can render the image using the `OptimizedImage` component, for example:
 
-`<OptimizedImage title="Atomic Dex" src={atomicManiq} alt="atomic dex" classNaming="w-full" />`
+```jsx
+<OptimizedImage title="Komodo DeFi Framework" src={komodefiManiq} alt="Komodo DeFi Framework" classNaming="w-full" />
+```
 
-![Atomic Maniq](style-guide-images/atomic-maniq.png)
+![Komodo DeFi Framework](style-guide-images/komodefi-maniq.png)
 
 <!-- [You can read more about the magic behind OptimizedImage](https://github.com/Niels-IO/next-image-export-optimizer#readme) -->
 
@@ -391,6 +416,14 @@ Rendered as:
 
 ![Tag component](style-guide-images/crude-tag-ui.png)
 
+## ToCForIndex
+
+This component can be included in the root index.mdx files in any of the directories that hold a specific category of docs. This component will populate a list with the table of contents for the section.
+
+Rendered as:
+
+![TocForIndex component](style-guide-images/toc-for-index.png)
+
 ## Navbar (Top)
 
 Top navbar's navigation data/dropdown list is manually populated. This file can be found at [src/data/navbar.json](src/data/navbar.json). If you're working on a very important new page, which links to a whole new category or an index, this is where to add them.
@@ -400,6 +433,13 @@ Top navbar's navigation data/dropdown list is manually populated. This file can 
 ## Sidebar (Left)
 
 Left sidebar's navigation data is manually populated. This file can be found at [src/data/sidebar.json](src/data/sidebar.json). If you're working on a new page, this is where to link them.
+
+Along with `titleLink`, an empty links array is expected:
+
+```json
+"titleLink": "/qa/komodefi-api-quickstart/",
+"links": []
+```
 
 ![Sidebar left](style-guide-images/sidebar-left-UI.png)
 

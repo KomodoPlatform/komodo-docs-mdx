@@ -28,7 +28,7 @@ The `load_configuration` function loads customizable configuration settings from
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TConfig>
 
 TConfig antara::gaming::config::load_configuration(std::filesystem::path &&config_path, std::string filename)
@@ -76,7 +76,7 @@ The `version` function returns the current version of the Antara Gaming SDK.
 
 #### Usage Pattern
 
-```cpp
+```c
 #include <antara/gaming/core/version.hpp>
 
 constexpr const char *antara::gaming::version()
@@ -125,7 +125,7 @@ system_manager(entt::registry &registry, bool subscribe_to_internal_events = tru
 
 #### Destructor
 
-```
+```cpp
 ~system_manager()
 ```
 
@@ -163,11 +163,9 @@ int main()
 
 Public member functions.
 
-{/* The description in the documentation was unclear to me. Can you please provide more information about what "Public member functions" means here? Thx */}
-
 #### Usage Pattern
 
-```
+```c
 void receive_add_base_system(const ecs::event::add_base_system &evt)
 ```
 
@@ -183,7 +181,9 @@ void receive_add_base_system(const ecs::event::add_base_system &evt)
 | ------ | ---- | ----------- |
 | (none) | void |             |
 
-{/* needs an example */}
+<DevComment>
+  {/* needs an example */}
+</DevComment>
 
 ### start
 
@@ -215,7 +215,9 @@ system_manager_instance.start();
 | ------ | ---- | ----------- |
 | (none) | void |             |
 
-{/* Does this return something such as a bool value, for successful execution, by chance? */}
+<DevComment>
+  {/* Does this return something such as a bool value, for successful execution, by chance? */}
+</DevComment>
 
 #### 📌 Example
 
@@ -279,7 +281,7 @@ int main()
     entt::dispatcher& dispatcher{registry.set<entt::dispatcher>()};
     antara::gaming::ecs::system_manager system_manager{entity_registry};
     system_manager.start();
-    // ... add 5 differents systems here
+    // ... add 5 different systems here
     std::size_t nb_systems_updated = system_manager.update();
     if (nb_systems_updated != 5) {
         std::cerr << "Expect 5 system updates from system_manager.update(), but received only " << nb_systems_updated << std::endl;
@@ -331,7 +333,7 @@ int main()
     entt::dispatcher& dispatcher{registry.set<entt::dispatcher>()};
     antara::gaming::ecs::system_manager system_manager{entity_registry};
     system_manager.start();
-    // ... add 5 differents systems here
+    // ... add 5 different systems here
     std::size_t nb_systems_updated = system_manager.update();
     if (nb_systems_updated != 5) {
         std::cerr << "Expect 5 system updates from system_manager.update(), but received only " << nb_systems_updated << std::endl;
@@ -348,7 +350,7 @@ The `get_system` function uses a template parameter to return a reference to a s
 
 #### Usage Pattern
 
-```
+```c
 template<typename TSystem>
 const TSystem &get_system() const
 ```
@@ -365,7 +367,9 @@ const TSystem &get_system() const
 | ------- | --------- | --------------------------------------------------- |
 | TSystem | \&TSystem | a reference to the template chosen by the developer |
 
-{/* Need an example here */}
+<DevComment>
+  {/* Need an example here */}
+</DevComment>
 
 ### get\_system | 2
 
@@ -377,7 +381,7 @@ This overloaded function accepts different parameters.
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TSystem>
 
 TSystem &get_system()
@@ -426,7 +430,7 @@ This function recursively calls the [get\_system](/antara/api/gaming/#get-system
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename ...TSystems>
 std::tuple<std::add_lvalue_reference_t<TSystems>...> get_systems()
 ```
@@ -456,7 +460,7 @@ int main()
     entt::dispatcher& dispatcher{registry.set<entt::dispatcher>()};
     antara::gaming::ecs::system_manager system_manager{entity_registry};
     system_manager.start();
-    // ... added 2 differents systems here (render_system, and a log_system)
+    // ... added 2 different systems here (render_system, and a log_system)
     auto& render_system = system_manager.get_system<game::render_system>();
 
     const auto& log_system = system_manager.get_system<game::log_system>();
@@ -476,7 +480,7 @@ An overloaded version of the [get\_systems](/antara/api/gaming/#get-systems-1) f
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename ...TSystems>
 std::tuple<std::add_lvalue_reference_t<std::add_const_t<TSystems>>...> get_systems() const
 ```
@@ -505,7 +509,7 @@ int main()
     entt::registry entity_registry;
     entt::dispatcher& dispatcher{registry.set<entt::dispatcher>()};
     antara::gaming::ecs::system_manager system_manager{entity_registry};
-    // ... added differents systems here
+    // ... added different systems here
     // Called from a const context
     auto &&[system_foo, system_bar] = system_manager.get_systems<system_foo, system_bar>();
 
@@ -526,7 +530,7 @@ The `has_system` function verifies whether or not a system is already registered
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TSystem>
 bool has_system() const
 ```
@@ -625,7 +629,7 @@ The `has_systems` function verifies whether or not a list of systems is already 
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename ...TSystems>
 bool has_systems() const
 ```
@@ -730,7 +734,7 @@ This function recursively calls the [has\_system](/antara/api/gaming/#has-system
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename ...TSystems>
 bool has\_systems() const
 ```
@@ -776,7 +780,7 @@ The`mark_system` function marks a system for destruction at the next tick of the
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TSystem>
 bool mark_system()
 ```
@@ -823,7 +827,7 @@ The`mark_systems` function marks a system for destruction at the next tick of th
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TSystem>
 bool mark_system()
 ```
@@ -876,7 +880,7 @@ This function recursively calls the [mark\_system](/antara/api/gaming/#mark-syst
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename ...TSystems>
 bool mark_systems()
 ```
@@ -923,7 +927,7 @@ The `enable_system` function enables a system.
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TSystem>
 bool enable_system()
 ```
@@ -972,7 +976,7 @@ This function recursively calls the [enable\_system](/antara/api/gaming/#enable-
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename ...TSystems>
 bool enable_systems()
 ```
@@ -1020,7 +1024,7 @@ A disabled system is ignored during the game loop, but the system is not destroy
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TSystem>
 bool disable_system()
 ```
@@ -1068,7 +1072,7 @@ This function recursively calls the [disable\_system](/antara/api/gaming/#disabl
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename ...TSystems>
 bool disable_systems()
 ```
@@ -1114,7 +1118,7 @@ The `nb_systems` function returns the number of systems registered in the system
 
 #### Usage Pattern
 
-```
+```c
 std::size_t nb_systems() const
 ```
 
@@ -1159,7 +1163,7 @@ The `nb_systems` function is an overloaded version of the `nb_systems` function.
 
 #### Usage Pattern
 
-```
+```c
 std::size_t nb_systems(system_type sys_type) const
 ```
 
@@ -1206,7 +1210,7 @@ This function is a factory.
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TSystem, typename ...TSystemArgs>
 TSystem &create_system(TSystemArgs&&... args)
 ```
@@ -1246,11 +1250,13 @@ int main()
 
 #### Public Function
 
-{/* Requires documentation */}
+<DevComment>
+  {/* Requires documentation */}
+</DevComment>
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename TSystem, typename ...TSystemArgs>
 void create_system_rt(TSystemArgs&&... args)
 ```
@@ -1261,13 +1267,11 @@ void create_system_rt(TSystemArgs&&... args)
 
 The `load_systems` function loads many os systems.
 
-{/* What does "os" mean above? Operating systems? That would make it operating systems systems */}
-
 This function recursively calls the [create\_system](/antara/api/gaming/#create-system) function.
 
 #### Usage Pattern
 
-```cpp
+```c
 template<typename ...TSystems, typename ...TArgs>
 auto load_systems(TArgs&&... args)
 ```
@@ -1309,16 +1313,15 @@ int main()
 
 #### Usage Pattern
 
-```
+```c
 using clock = std::chrono::steady_clock
 ```
 
-```
-Private typedefs.
+<Note>
+  Private typedefs.
 
-syntactic sugar name for a chrono steady clock
-
-```
+  syntactic sugar name for a chrono steady clock
+</Note>
 
 ### system\_ptr
 
@@ -1330,9 +1333,9 @@ syntactic sugar name for a chrono steady clock
 using system_ptr = std::unique_ptr<base_system>
 ```
 
-```
-syntactic sugar name for a pointer to base_system
-```
+<Note>
+  syntactic sugar name for a pointer to base\_system
+</Note>
 
 ### system\_array
 
@@ -1344,9 +1347,9 @@ syntactic sugar name for a pointer to base_system
 using system_array = std::vector<system_ptr>
 ```
 
-```
-syntactic sugar name for an array of system_ptr
-```
+<Note>
+  syntactic sugar name for an array of system\_ptr
+</Note>
 
 ### system\_registry
 
@@ -1358,9 +1361,9 @@ syntactic sugar name for an array of system_ptr
 using system_registry = std::array<system_array, system_type::size>
 ```
 
-```
-syntactic sugar name for a multidimensional array of system_array (pre_update, logic_update, post_update)
-```
+<Note>
+  syntactic sugar name for a multidimensional array of system\_array (pre\_update, logic\_update, post\_update)
+</Note>
 
 ### systems\_queue
 
@@ -1370,9 +1373,9 @@ syntactic sugar name for a multidimensional array of system_array (pre_update, l
 using systems_queue = std::queue<system_ptr>
 ```
 
-```
-syntactic sugar name for a queue of system pointer to add.
-```
+<Note>
+  syntactic sugar name for a queue of system pointer to add.
+</Note>
 
 ### add\_system\_
 
@@ -1380,11 +1383,9 @@ syntactic sugar name for a queue of system pointer to add.
 
 #### Usage Pattern
 
-```
+```cpp
 base*system &add_system*(system_ptr &&system, system_type sys_type)
 ```
-
-{/* Not clear about any of this, just placing here for now in the format */}
 
 ### entity\_registry\_
 
@@ -1414,10 +1415,8 @@ This is the principal constructor for key-press functions.
 
 ###### Usage Pattern
 
-```
-
+```cpp
 key_pressed(input::key key_, bool alt_, bool control_, bool shift_, bool system_)
-
 ```
 
 ###### Template Type
@@ -1455,13 +1454,15 @@ int main()
 
 The `key_pressed` function that takes no arguments is the default constructor, provided for scripting-system convenience.
 
-{/* Is there more information we can provide here? */}
+<DevComment>
+  {/* Is there more information we can provide here? */}
+</DevComment>
 
 Please see the [key\_pressed | 1](/antara/api/gaming/#key-pressed-1) function for more information.
 
 ###### Usage Pattern
 
-```
+```c
 key_pressed()
 ```
 
@@ -1469,39 +1470,33 @@ key_pressed()
 
 ##### antara::gaming::input::key key
 
-```
-Fields.
-```
+###### Fields.
 
-{/* I don't have enough information/knowledge to edit this portion. What is this section? What do you mean by "Fields" and "key pressed" specifically? */}
-
-```
 key pressed
+
+```cpp
+ bool alt = {"{false}"}
 ```
 
-##### bool alt = {"{false}"}
-
-```
 is alt pressed at the same time.
+
+```cpp
+ bool control = {"{false}"}
 ```
 
-##### bool control = {"{false}"}
-
-```
 is ctrl pressed at the same time.
+
+```cpp
+bool shift = {"{false}"}
 ```
 
-##### bool shift = {"{false}"}
-
-```
 is shift pressed at the same time.
+
+```cpp
+bool system = {"{false}"}
 ```
 
-##### bool system = {"{false}"}
-
-```
 is system pressed at the same time.
-```
 
 ### event::key\_released
 
@@ -1521,7 +1516,7 @@ This is the principal constructor for key-release functions.
 
 ###### Usage Pattern
 
-```
+```cpp
 key_released(input::key key_, bool alt_, bool control_, bool shift_, bool system_)
 ```
 
@@ -1564,7 +1559,7 @@ Please see the [key\_released | 1](/antara/api/gaming/#key-released) function fo
 
 ###### Usage Pattern
 
-```
+```c
 key_released()
 ```
 
@@ -1572,37 +1567,33 @@ key_released()
 
 ##### input::key key
 
-{/* Again, I don't understand this content well enough to edit */}
-
-```
-Fields.
+###### Fields.
 
 key released
-```
 
+```cpp
 bool alt = {"{false}"}
-
 ```
+
 is alt released at the same time.
-```
 
+```cpp
 bool control = {"{false}"}
-
 ```
+
 is ctrl released at the same time.
-```
 
+```cpp
 bool shift = {"{false}"}
-
 ```
+
 is shift released at the same time.
-```
 
+```cpp
 bool system = {"{false}"}
+```
 
-```
 is system released at the same time.
-```
 
 ## event::quit\_game
 
@@ -1626,7 +1617,7 @@ This is the principal constructor for `quit_game` functions.
 
 ###### Usage Pattern
 
-```
+```cpp
 quit_game(int return_value)
 ```
 
@@ -1665,7 +1656,7 @@ Please see the [quit\_game | 1](/antara/api/gaming/#quit-game-1) function for mo
 
 ###### Usage Pattern
 
-```
+```cpp
 quit_game()
 ```
 
@@ -1673,19 +1664,19 @@ quit_game()
 
 ##### return\_value\_
 
-{/* need more information to edit this part */}
+<DevComment>
+  {/* need more information to edit this part */}
+</DevComment>
 
 ###### Usage Pattern
 
-```
+```cpp
 int return_value_
 ```
 
-```
-Fields.
+###### Fields.
 
 the return value of the program when leaving the game
-```
 
 #### Public Static Attributes
 
@@ -1697,9 +1688,7 @@ the return value of the program when leaving the game
 constexpr const event::invoker_dispatcher<quit_game, int> invoker = {}
 ```
 
-```
 Static fields.
-```
 
 ## sfml
 
@@ -1711,7 +1700,7 @@ The `antara::gaming::sfml::audio_system` class provides audio-related functions 
 
 ###### Usage Pattern
 
-```cpp
+```c
 class audio_system : public antara::gaming::ecs::system<audio_system>
 ```
 
@@ -1723,7 +1712,7 @@ class audio_system : public antara::gaming::ecs::system<audio_system>
 
 ###### Usage Pattern
 
-```cpp
+```c
 audio_system(entt::registry &registry)
 ```
 
@@ -1745,7 +1734,7 @@ The `update` function destroys and clears the sounds when they are finished.
 
 ###### Usage Pattern
 
-```
+```c
 void update()
 ```
 
@@ -1771,4 +1760,6 @@ The `antara::gaming::sfml::component_sound` struct contains sound and the sound'
 
 The `sf::Sound sound` object is the SFML Sound instance and contains the sound data.
 
-{/* Any other information here */}
+<DevComment>
+  {/* Any other information here */}
+</DevComment>

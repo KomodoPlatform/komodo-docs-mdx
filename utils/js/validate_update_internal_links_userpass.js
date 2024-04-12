@@ -1,6 +1,7 @@
 import * as acorn from "acorn";
 
 import { SKIP, visit } from "unist-util-visit";
+import { visitParents } from 'unist-util-visit-parents'
 
 import { constants } from "fs";
 import fs from "fs";
@@ -12,9 +13,8 @@ import path from "path";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
-import { slugifyWithCounter } from "@sindresorhus/slugify";
+import slugify, { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
-import { type } from "os";
 
 const manualLinkFile = "links-to-manually-check";
 if (fs.existsSync(manualLinkFile)) {
@@ -25,7 +25,7 @@ if (fs.existsSync(manualLinkFile)) {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => filepaths.push(filepath));
-    await createFileSlugs(filepaths); // can comment on repeat runs
+    await createFileSlugs(filepaths); // can comment on repeat runs, while fixing internal links and not changing headings in content
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
     for (let index = 0; index < filepaths.length; index++) {
@@ -50,10 +50,12 @@ async function createFileSlugs(filepaths) {
           const slugs = [];
 
           let slugify = slugifyWithCounter();
-          // Visit all heading nodes and collect their values
-          visit(tree, "heading", (node) => {
-            const slug = slugify(toString(node));
-            slugs.push(slug);
+          // Visit all heading nodes and collect their values while rejecting the ones in DevComment
+          visitParents(tree, "heading", (node, ancestors) => {
+            if (!ancestors.some((ancestor) => ancestor.name === "DevComment")) {
+              const slug = slugify(toString(node));
+              slugs.push(slug);
+            }
           });
           filepathSlugs[filePath] = slugs;
         })
@@ -74,38 +76,44 @@ async function processFile(filePath, filepathSlugs) {
   if (!filePath.endsWith("/index.mdx")) {
     throw new Error("File path doesn't end with '/index.mdx': " + filePath);
   }
-  // if (!filePath.includes("/non_fungible_token")) {
-  //     return
+  // if (filePath.includes("setup/dexp2p")) {
+  //   throw new Error("dexp2p': " + filePath);
+  // }
+  // if (!filePath.includes("/smart-chains/setup/dexp2p")) {
+  //   return
   // }
   console.log("Processing: " + filePath);
   const file = await remark()
     .use(remarkGfm)
     .use(remarkMdx)
     .use(() => (tree) => {
-      //console.log("Processing: " + filePath)
-      const hasTitleAndDesc = tree.children.some(
-        (node) =>
-          node.type === "mdxjsEsm" && isValidTitleDescExports(node.value)
-      );
-      if (!hasTitleAndDesc) {
-        throw new Error("File doesn't have title/description: " + filePath);
-      }
+      hasValidTitleDescExportsImgImports(tree.children, filePath);
+    })
+    .use(() => (tree) => {
+      visit(tree, "link", (node) => {
+        //Process internal links
+        const isExternalURL = /^https?:\/\//;
+        if (!isExternalURL.test(node.url)) {
+          node.url = processInternalLink(node.url, filePath, filepathSlugs);
+        }
+      });
     })
     .use(() => (tree) => {
       visit(tree, "link", async (node) => {
-        //Process the link
-        node.url = await processLink(node.url, filePath, filepathSlugs);
+        //Process external links
+        const isExternalURL = /^https?:\/\//;
+        if (isExternalURL.test(node.url)) {
+          await processExternalLink(node.url, filePath);
+          return node.url;
+        }
       });
     })
     .use(() => (tree) => {
       visit(tree, (node, nodeIndex, parentNode) => {
-        if (!filePath.includes("src/pages/atomicdex")) {
-          return SKIP;
-        }
-        // if (
-        //     is(node, { name: "CodeGroup" })) {
-        //     console.log(node)
+        // if (!filePath.includes("src/pages/komodo-defi-framework")) {
+        //   return SKIP;
         // }
+
         try {
           if (
             is(node, { name: "CodeGroup" }) &&
@@ -126,16 +134,24 @@ async function processFile(filePath, filepathSlugs) {
             }
             const clonedChild = JSON.parse(JSON.stringify(originalChild));
             let methodObj = JSON.parse(clonedChild.value);
-            methodObj.userpass = "testpsw";
+            methodObj.userpass = "RPC_UserP@SSW0RD";
             clonedChild.value = JSON.stringify(methodObj, null, 2);
             //console.log(clonedChild)
             node.children = [clonedChild];
             return SKIP;
+          } else if (node.type === "code" && node.lang === null) {
+            console.log(`Code lang value missing in file: ${filePath}, line: ${node.position.start.line}`);
+            throw new Error(`Code lang value missing
+Filepath: ${filePath} 
+code node: 
+${JSON.stringify(node, null, 2)}`);
           }
         } catch (error) {
-          console.log(filePath);
-          console.log(node);
-          throw new Error(error);
+          throw new Error(`Error:
+${JSON.stringify(error, null, 2)}         
+Filepath: ${filePath} 
+Node: 
+${JSON.stringify(node, null, 2)}`);
         }
       });
     })
@@ -145,13 +161,8 @@ async function processFile(filePath, filepathSlugs) {
   }
 }
 // Function to process a link
-async function processLink(link, currFilePath, filepathSlugs) {
+function processInternalLink(link, currFilePath, filepathSlugs) {
   if (link.startsWith("mailto:")) {
-    return link;
-  }
-  const isExternalURL = /^https?:\/\//;
-  if (isExternalURL.test(link)) {
-    await processExternalLink(link, currFilePath);
     return link;
   }
 
@@ -211,9 +222,12 @@ async function processLink(link, currFilePath, filepathSlugs) {
     filePath,
     correctUrlSplit[0] + "index.mdx"
   );
-  let slug;
+  let slug = "";
   if (correctUrlSplit[1]) {
-    let slugify = slugifyWithCounter();
+    //trying to fix slugs with _
+
+    //slugifyWithCounter stuff was used as a mistake here earlier
+    //let slugify = slugifyWithCounter();
     slug = slugify(correctUrlSplit[1]);
     correctUrl = correctUrlSplit[0] + "#" + slug;
   }
@@ -230,10 +244,10 @@ async function processLink(link, currFilePath, filepathSlugs) {
     console.log("slug: " + slug);
     console.log("#----------------------------------------------#");
     throw new Error(
-      `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) not present in file: ${internalLinkFile} with url ${correctUrl} (original url: ${link})`
+      `Processing file: ${currFilePath}, slug: ${slug} (original slug: ${correctUrlSplit[1]} ) has updated url: ${correctUrl} (original url: ${link}), but the file: ${internalLinkFile} is missing`
     );
   } else if (
-    slug &&
+    slug !== "" &&
     !filepathSlugs[internalLinkFile].some((slugO) => slug === slugO)
   ) {
     console.log("##------------------------------------------------##");
@@ -264,7 +278,6 @@ async function processLink(link, currFilePath, filepathSlugs) {
     );
     throw new Error(err);
   }
-
   return correctUrl;
 }
 
@@ -294,50 +307,74 @@ export function walkDir(dirPath, callback) {
   });
 }
 
-function isValidTitleDescExports(str) {
-  // console.log(str);
-  try {
-    const parsed = acorn.parse(str, {
-      sourceType: "module",
-      ecmaVersion: 2020,
-    });
+function hasValidTitleDescExportsImgImports(children, filePath) {
+  const expImpChildren = children.filter((node) => node.type === "mdxjsEsm");
+  let titleExportedCount = 0;
+  let descriptionExportedCount = 0;
+  let invalidImagePaths = [];
+  let imagesNotFound = []
 
-    let titleExported = false;
-    let descriptionExported = false;
-    for (const node of parsed.body) {
-      if (node.type === "ExportNamedDeclaration") {
-        if (node.declaration && node.declaration.declarations) {
-          for (const declaration of node.declaration.declarations) {
-            if (
-              declaration.id.name === "title" &&
-              declaration.init.type === "Literal"
-            ) {
-              titleExported = true;
-              // let numChars = declaration.init.value.length;
-              // if (numChars > 60) {
-              //   throw new Error(`Title: "${declaration.init.value}" has ${numChars} characters, which is greater than 60`)
-              // }
+  for (const node of expImpChildren) {
+    try {
+      const parsed = acorn.parse(node.value, {
+        sourceType: "module",
+        ecmaVersion: 2020,
+      });
+
+      for (const node of parsed.body) {
+        if (node.type === "ExportNamedDeclaration") {
+          if (node.declaration && node.declaration.declarations) {
+            for (const declaration of node.declaration.declarations) {
+              if (
+                declaration.id.name === "title" &&
+                declaration.init.type === "Literal"
+              ) {
+                titleExportedCount = titleExportedCount + 1;
+                // let numChars = declaration.init.value.length;
+                // if (numChars > 60) {
+                //   throw new Error(`Title: "${declaration.init.value}" has ${numChars} characters, which is greater than 60`)
+                // }
+              }
+              if (
+                declaration.id.name === "description" &&
+                declaration.init.type === "Literal"
+              ) {
+                descriptionExportedCount = descriptionExportedCount + 1;
+                // let numChars = declaration.init.value.length;
+                // if (numChars > 160 || numChars < 140) {
+                //   throw new Error(`Description: "${declaration.init.value}" has ${numChars} characters, which is not between 140 and 160`)
+                // }
+              }
             }
-            if (
-              declaration.id.name === "description" &&
-              declaration.init.type === "Literal"
-            ) {
-              descriptionExported = true;
-              // let numChars = declaration.init.value.length;
-              // if (numChars > 160 || numChars < 140) {
-              //   throw new Error(`Description: "${declaration.init.value}" has ${numChars} characters, which is not between 140 and 160`)
-              // }
+          }
+        } else if (node.type === "ImportDeclaration" && node.source.type === "Literal") {
+          const importImgPath = node.source.value
+          if (!importImgPath.startsWith("@/public/images/docs")) {
+            invalidImagePaths.push(importImgPath)
+          } else {
+            let imagePath = importImgPath.replace("@/public/images/docs", "src/images");
+            if (!fs.existsSync(imagePath)) {
+              imagesNotFound.push(imagePath)
             }
           }
         }
       }
+    } catch (e) {
+      console.log(`Error in file: ${filePath}`);
+      console.log(`Error in node: ${JSON.stringify(node, null, 2)}`);
+      throw new Error(e);
     }
+  }
 
-    return titleExported && descriptionExported;
-  } catch (e) {
-    throw new Error(e);
-    //console.log(e)
-    //return false; // Parsing error means the string is not valid JS
+  let errorString = `Processing file: ${filePath}
+  ${titleExportedCount !== 1 ? `Title exported ${titleExportedCount} times` : ""}
+  ${descriptionExportedCount !== 1 ? `Description exported ${descriptionExportedCount} times` : ""}
+  ${invalidImagePaths.length > 0 ? `Invalid image paths (must start with '@/public/images/docs'): \n${invalidImagePaths.join(",\n")}` : ""}
+  ${imagesNotFound.length > 0 ? `Images not found in filesystem: \n${imagesNotFound.join(",\n")}` : ""}
+  
+  `
+  if (titleExportedCount !== 1 || descriptionExportedCount !== 1 || invalidImagePaths.length > 0 || imagesNotFound.length > 0) {
+    throw new Error(errorString);
   }
 }
 
@@ -381,7 +418,7 @@ function checkUrlStatusCode(url) {
     req.on("error", (err) => {
       reject(err);
     });
-    req.setTimeout(50, () => {
+    req.setTimeout(100, () => {
       req.destroy();
       reject(new Error("Request timed out " + url));
     });
@@ -469,6 +506,10 @@ async function processExternalLink(link, currFilePath) {
         `Request timed out when checking the URL ${link} in the file ${currFilePath}`
       );
       return;
+    }
+    else if (err.message.includes("ETIMEDOUT")) {
+      console.log(`Request timed out when checking the URL ${link} in the file ${currFilePath}`);
+      return;
     } else {
       console.error(`Error when checking the URL ${link} in the file ${currFilePath}`)
       fs.appendFileSync(manualLinkFile, link + "\n");
@@ -477,5 +518,14 @@ async function processExternalLink(link, currFilePath) {
 
       //throw new Error(err);
     }
+  }
+}
+
+function isValidJSON(str) {
+  try {
+    JSON.parse(str);
+    return true; // Parsing succeeded, string is valid JSON
+  } catch (e) {
+    return false; // Parsing failed, string is not valid JSON
   }
 }

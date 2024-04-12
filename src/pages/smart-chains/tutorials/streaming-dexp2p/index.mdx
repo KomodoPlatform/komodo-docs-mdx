@@ -2,11 +2,11 @@ export const title = "Streaming using DEXP2P";
 export const description =
   "This document provides a step-by-step guide on streaming a video file using the DEXP2P feature available in the komodo daemon.";
 
-import obsrecording from "@/public/images/streaming-dexp2p/OBS-Studio-Recording-Settings-for-dexp2p-livestream.png";
-import obsstudio from "@/public/images/streaming-dexp2p/OBS-Studio-Advanced-Settings-Filename-for-dexp2p-livestream.png";
-import obs from "@/public/images/streaming-dexp2p/OBS-Studio-start-Recording.png";
+import obsrecording from "@/public/images/docs/streaming-dexp2p/OBS-Studio-Recording-Settings-for-dexp2p-livestream.png";
+import obsstudio from "@/public/images/docs/streaming-dexp2p/OBS-Studio-Advanced-Settings-Filename-for-dexp2p-livestream.png";
+import obs from "@/public/images/docs/streaming-dexp2p/OBS-Studio-start-Recording.png";
 
-# How to stream and playback a video file using the [DEXP2P](/smart-chains/setup/dexp2p/) layer of a Smart Chain
+# How to stream and playback a video file using the DEXP2P layer of a Smart Chain
 
 <Note>
   This tech is in development. The
@@ -34,7 +34,7 @@ Command to filter the datablobs to get information on all the slices published a
 ./komodo-cli -ac_name=DORN DEX_list 0 0 "slices"
 ```
 
-<collapse-text hidden title="Response">
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json
   {
     "result": "success",
@@ -64,7 +64,7 @@ Command to filter the datablobs to get information on all the slices published a
     "n": 1
   }
   ```
-</collapse-text>
+</CollapsibleSection>
 
 The value of the key named `"matches"` is a JSON array. In it, we can see JSON of datablobs representing all the slices of different files available on the network . In each JSON, we can see that `tagA` is `slices`, which we filtered for. The rest of the relevant keys from the example are as follows
 
@@ -86,7 +86,7 @@ Command to filter the datablobs to get all the datablobs that contain the data o
 ./komodo-cli -ac_name=DORN DEX_list 0 0 "17-53-21.mkv" "data"
 ```
 
-<collapse-text hidden title="Response">
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json
   {
     "result": "success",
@@ -120,7 +120,7 @@ Command to filter the datablobs to get all the datablobs that contain the data o
   }
 
   ```
-</collapse-text>
+</CollapsibleSection>
 
 The value of the key named `"matches"` is a JSON array. The length of the array must be a multiple of `100`, as each slice is broken into `100` fragments as indicated by the previous datablob (slice info datablob). The datablob shown in the above example contains data from the published file. In the JSON that represents the datablob, we can see that `tagA` is the file name and `tagB` is the word `data`, which we filtered for. The rest of the relevant keys are as follows
 
@@ -140,7 +140,7 @@ Command to filter the datablobs to get the datablob that contains the informatio
 ./komodo-cli -ac_name=DORN DEX_list 0 0 "17-53-21.mkv" "0"
 ```
 
-<collapse-text hidden title="Response">
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json
   {
     "result": "success",
@@ -170,7 +170,7 @@ Command to filter the datablobs to get the datablob that contains the informatio
     "n": 1
   }
   ```
-</collapse-text>
+</CollapsibleSection>
 
 The value of the key named `"matches"` is a JSON array. In it, we can see the datablob that contains the locators information about the published file. In the JSON that represents the datablob, we can see that `tagA` is the file name and `tagB` is the slice number, which we filtered for. The rest of the relevant keys are as follows
 
@@ -207,7 +207,7 @@ After that, navigate to `Settings > Advanced > Recording > Filename Formatting` 
 
 The settings should look similar to the ones in the above image.
 
-### 2) Create a script to loop the [DEX\_stream](/smart-chains/setup/dexp2p/#dex-stream) command
+### 2) Create a script to loop the DEX\_stream command
 
 In the directory where the Komodo daemon is located, create a script named `stream.sh` with the following contents and save the file.
 
@@ -252,7 +252,7 @@ You should see slices of the file being published as they become available. You 
 
 To watch a stream, you must launch the same Smart Chain whose DEXP2P network is being used to broadcast it. So, find the details from the streamer.
 
-### 1) Create a script to loop the [DEX\_streamsub](/smart-chains/setup/dexp2p/#dex-streamsub) command
+### 1) Create a script to loop the DEX\_streamsub command
 
 In the directory where the Komodo daemon is located, create a script named `streamsub.sh` with the following contents and save the file.
 
