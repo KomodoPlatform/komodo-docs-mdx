@@ -180,7 +180,7 @@ jobs:
           cd $GITHUB_WORKSPACE/website-komodo-docs/
           git status
           yarn gen:previewImgs
-
+      # TODO: update previewImgTimeStamps.json from $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json to $GITHUB_WORKSPACE/website-komodo-docs/src/data/docs/previewImgTimeStamps.json
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/preview-images-original/ $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/public/preview-images/ $GITHUB_WORKSPACE/preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json $GITHUB_WORKSPACE/preview-images/previewImgTimeStamps.json
