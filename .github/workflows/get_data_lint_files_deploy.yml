@@ -61,7 +61,7 @@ jobs:
         run: node utils/js/file_presence_structure_checker.js
 
       - name: Verify h1 is present in every file
-        run: node utils/js/h1_presence_checker.js
+        run: node utils/js/h1_presence_format_checker.js
 
       - name: Prepare data files for GPTs
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
@@ -74,10 +74,6 @@ jobs:
       - name: Generate Search Index
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: node utils/js/create_search_index.js
-
-      - name: Generate Site map
-        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: node utils/js/create_sitemap.js
 
       - name: Set branch name, commit_sha, lint-fix branch name
         id: vars
@@ -131,7 +127,6 @@ jobs:
           ./update-content.sh
           rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json $GITHUB_WORKSPACE/website-komodo-docs/_fileData.json
           rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json $GITHUB_WORKSPACE/website-komodo-docs/lib/data/searchIndex.json
-          rsync -avh --delete $GITHUB_WORKSPACE//utils/_sitemap.xml $GITHUB_WORKSPACE/website-komodo-docs/public/sitemap.xml
           yarn install
           yarn export          
           echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
@@ -185,7 +180,7 @@ jobs:
           cd $GITHUB_WORKSPACE/website-komodo-docs/
           git status
           yarn gen:previewImgs
-
+      # TODO: update previewImgTimeStamps.json from $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json to $GITHUB_WORKSPACE/website-komodo-docs/src/data/docs/previewImgTimeStamps.json
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/preview-images-original/ $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/public/preview-images/ $GITHUB_WORKSPACE/preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json $GITHUB_WORKSPACE/preview-images/previewImgTimeStamps.json

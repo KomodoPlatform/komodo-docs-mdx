@@ -290,8 +290,9 @@ This renders a button with a specified text based on its state (expanded or coll
 You'll mostly use this for API, Commands, etc. Responses, which should be wrapped with the `CollapsibleSection` tags, for example:
 
 ````mdx
+#### Response (ready, successful)
+
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-  #### Response (ready, successful)
 
     ```json
     {
@@ -305,6 +306,8 @@ You'll mostly use this for API, Commands, etc. Responses, which should be wrappe
 ````
 
 The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to '**Show Error Responses**' and '**Hide Error Responses' respectively**.
+
+Headers like `#### Response (ready, successful)` should be outside the `CollapsibleSection` tags
 
 A working code would look like this:
 
@@ -320,10 +323,9 @@ A working code would look like this:
   "date": "2078-05-16"
 }
 ```
-````
 
 </CollapsibleSection>
-```
+````
 
 Rendered as:
 
@@ -334,7 +336,7 @@ Rendered as:
 Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component. To render an image in the `src/image` folder, you'd have to import the image using the following syntax:
 
 ```jsx
-import komodefiManiq from "@/public/images/komodefi-maniq.webp";
+import komodefiManiq from "@/public/images/docs/komodefi-maniq.webp";
 ```
 
 Now you can render the image using the `OptimizedImage` component, for example:
