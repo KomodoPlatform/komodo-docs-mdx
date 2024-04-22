@@ -19,11 +19,11 @@ const fileData = {};
     try {
         const { response } = await httpsGet(allContributorsDataUrl, options)
         const contributorData = JSON.parse(response)
-
         for (const contributor of contributorData) {
             if (!authorsData[contributor.login]) {
-                const { contributorCommitsResponse } = await httpsGet(`https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?author=${contributor.login}`, options)
-                const contributorCommits = JSON.parse(contributorCommitsResponse)
+                const { response } = await httpsGet(`https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?author=${contributor.login}`, options)
+                const contributorCommits = JSON.parse(response)
+                console.log(contributorCommits)
                 const commit_emails = new Set();
                 contributorCommits.forEach(commit => {
                     if (commit.commit && commit.commit.author && commit.commit.author.email) {
