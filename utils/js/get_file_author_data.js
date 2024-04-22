@@ -2,14 +2,13 @@ import fs from 'fs';
 import https from 'https';
 import path from 'path';
 import { spawnSync } from 'child_process';
-import { get } from 'http';
 const authorsData = JSON.parse(fs.readFileSync("./authors.json", 'utf8'));
 const oldFileData = JSON.parse(fs.readFileSync("./utils/_fileData_old_documentation_mod.json", 'utf8'));
 
 const fileData = {};
 
 (async function () {
-    const contributorsInfoUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/contributors"
+    const allContributorsDataUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/contributors"
 
     const options = {
         headers: {
@@ -18,13 +17,23 @@ const fileData = {};
     };
 
     try {
-        const { response } = await httpsGet(contributorsInfoUrl, options)
+        const { response } = await httpsGet(allContributorsDataUrl, options)
         const contributorData = JSON.parse(response)
-        contributorData.forEach(contributor => {
+        for (const contributor of contributorData) {
             if (!authorsData[contributor.login]) {
+                const { response } = await httpsGet(`https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?author=${contributor.login}`, options)
+                const contributorCommits = JSON.parse(response)
+                console.log(contributorCommits)
+                const commit_emails = new Set();
+                contributorCommits.forEach(commit => {
+                    if (commit.commit && commit.commit.author && commit.commit.author.email) {
+                        commit_emails.add(commit.commit.author.email);
+                    }
+                });
+                console.log(commit_emails)
                 authorsData[contributor.login] = {
                     username: contributor.login,
-                    commit_emails: [],
+                    commit_emails: Array.from(commit_emails),
                     socials: {
                         twitter: "",
                         linkedin: ""
@@ -33,7 +42,7 @@ const fileData = {};
             }
             authorsData[contributor.login].id = contributor.id
             authorsData[contributor.login].avatar_url = contributor.avatar_url
-        });
+        }
     } catch (error) {
         console.error(error);
     }
@@ -43,6 +52,8 @@ const fileData = {};
         const imgName = await downloadImage(imageUrl, username)
         authorsData[username].image = imgName
     }
+
+
 
     fs.writeFileSync("authors.json", JSON.stringify(authorsData, null, 4))
 
