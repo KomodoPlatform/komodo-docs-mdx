@@ -10,6 +10,8 @@ const fileData = {};
 (async function () {
     const allContributorsDataUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/contributors"
 
+    const latest100CommitsUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?sha=dev&per_page=100"
+
     const options = {
         headers: {
             'User-Agent': 'komodo-docs-mdx-ci'
@@ -17,43 +19,56 @@ const fileData = {};
     };
 
     try {
-        const { response } = await httpsGet(allContributorsDataUrl, options)
-        const contributorData = JSON.parse(response)
-        for (const contributor of contributorData) {
-            if (!authorsData[contributor.login]) {
-                const { response } = await httpsGet(`https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?author=${contributor.login}`, options)
-                const contributorCommits = JSON.parse(response)
-                console.log(contributorCommits)
-                const commit_emails = new Set();
-                contributorCommits.forEach(commit => {
-                    if (commit.commit && commit.commit.author && commit.commit.author.email) {
-                        commit_emails.add(commit.commit.author.email);
-                    }
-                });
-                console.log(commit_emails)
-                authorsData[contributor.login] = {
-                    username: contributor.login,
-                    commit_emails: Array.from(commit_emails),
-                    socials: {
-                        twitter: "",
-                        linkedin: ""
-                    }
+        const { response: contributorsRes } = await httpsGet(allContributorsDataUrl, options)
+        const contributorData = JSON.parse(contributorsRes)
+        const { response: commitsRes } = await httpsGet(latest100CommitsUrl, options)
+        const commitData = JSON.parse(commitsRes)
+
+        const contributorLogins = new Set();
+        contributorData.forEach(contributor => contributorLogins.add(contributor.login))
+        commitData.forEach(commit => commit.author && contributorLogins.add(commit.author.login))
+        Object.values(authorsData).forEach(author => contributorLogins.add(author.username))
+        for (const contributorLogin of Array.from(contributorLogins)) {
+            const isNewContributor = !Object.values(authorsData).find(author => author.username === contributorLogin)
+            console.log(contributorLogin)
+
+            const { response } = await httpsGet(`https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?sha=dev&author=${contributorLogin}`, options)
+            const contributorCommits = JSON.parse(response)
+            //console.log(contributorCommits)
+            const commit_emails = new Set();
+            contributorCommits.forEach(commit => {
+                if (commit.commit && commit.commit.author && commit.commit.author.email) {
+                    commit_emails.add(commit.commit.author.email);
                 }
+            });
+            if (!isNewContributor) {
+                authorsData[contributorLogin].commit_emails.forEach(email => commit_emails.add(email))
             }
-            authorsData[contributor.login].id = contributor.id
-            authorsData[contributor.login].avatar_url = contributor.avatar_url
+
+            authorsData[contributorLogin] = authorsData[contributorLogin] ?? {}
+
+            //console.log(commit_emails)
+            console.log(contributorLogin)
+
+            authorsData[contributorLogin].username = contributorLogin
+            authorsData[contributorLogin].commit_emails = Array.from(commit_emails).sort()
+            const authorSocials = authorsData[contributorLogin].socials
+            authorsData[contributorLogin].socials = {
+                ...authorSocials,
+                twitter: authorSocials ?? authorSocials.twitter ?? "",
+                linkedin: authorSocials ?? authorSocials.linkedin ?? ""
+            }
+
+            const contributor = contributorData.find(contributor => contributor.login === contributorLogin)
+            authorsData[contributorLogin].id = contributor.id
+            const imageUrl = contributor.avatar_url
+            authorsData[contributorLogin].avatar_url = imageUrl
+            const imgName = await downloadImage(imageUrl, contributorLogin)
+            authorsData[contributorLogin].image = imgName
         }
     } catch (error) {
         console.error(error);
     }
-
-    for (const username in authorsData) {
-        const imageUrl = authorsData[username].avatar_url
-        const imgName = await downloadImage(imageUrl, username)
-        authorsData[username].image = imgName
-    }
-
-
 
     fs.writeFileSync("authors.json", JSON.stringify(authorsData, null, 4))
 
