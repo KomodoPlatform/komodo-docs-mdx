@@ -4,56 +4,82 @@ import path from 'path';
 import { spawnSync } from 'child_process';
 const authorsData = JSON.parse(fs.readFileSync("./authors.json", 'utf8'));
 const oldFileData = JSON.parse(fs.readFileSync("./utils/_fileData_old_documentation_mod.json", 'utf8'));
+import dotenv from 'dotenv';
+dotenv.config();
 
 const fileData = {};
 
 (async function () {
     const allContributorsDataUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/contributors"
 
+    const latest100CommitsUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?sha=dev&per_page=100"
+
+    const userDataUrl = (login) => `https://api.github.com/users/${login}`
+
     const options = {
         headers: {
-            'User-Agent': 'komodo-docs-mdx-ci'
+            'User-Agent': 'komodo-docs-mdx-ci',
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+            'Authorization': `Bearer ${process.env.LOCAL_GH_TOKEN ?? process.env.GH_TOKEN}`
         }
     };
 
     try {
-        const { response } = await httpsGet(allContributorsDataUrl, options)
-        const contributorData = JSON.parse(response)
-        for (const contributor of contributorData) {
-            if (!authorsData[contributor.login]) {
-                const { response } = await httpsGet(`https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?author=${contributor.login}`, options)
-                const contributorCommits = JSON.parse(response)
-                console.log(contributorCommits)
-                const commit_emails = new Set();
-                contributorCommits.forEach(commit => {
-                    if (commit.commit && commit.commit.author && commit.commit.author.email) {
-                        commit_emails.add(commit.commit.author.email);
-                    }
-                });
-                console.log(commit_emails)
-                authorsData[contributor.login] = {
-                    username: contributor.login,
-                    commit_emails: Array.from(commit_emails),
-                    socials: {
-                        twitter: "",
-                        linkedin: ""
-                    }
+        const { response: contributorsRes } = await httpsGet(allContributorsDataUrl, options)
+        const contributorData = JSON.parse(contributorsRes)
+        const { response: commitsRes } = await httpsGet(latest100CommitsUrl, options)
+        const commitData = JSON.parse(commitsRes)
+
+        const contributorLogins = new Set();
+        contributorData.forEach(contributor => contributorLogins.add(contributor.login))
+        commitData.forEach(commit => commit.author && contributorLogins.add(commit.author.login))
+        Object.values(authorsData).forEach(author => contributorLogins.add(author.username))
+        for (const contributorLogin of Array.from(contributorLogins)) {
+            const isMissingInContributorData = !Object.values(authorsData).find(author => author.username === contributorLogin) || !contributorData.find(contributor => contributor.login === contributorLogin)
+            console.log(contributorLogin)
+
+            const { response } = await httpsGet(`https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?sha=dev&author=${contributorLogin}`, options)
+            const contributorCommits = JSON.parse(response)
+            const commit_emails = new Set();
+            contributorCommits.forEach(commit => {
+                if (commit.commit && commit.commit.author && commit.commit.author.email) {
+                    commit_emails.add(commit.commit.author.email);
                 }
+            });
+
+            authorsData[contributorLogin]?.commit_emails.forEach(email => commit_emails.add(email))
+
+
+            authorsData[contributorLogin] = authorsData[contributorLogin] ?? {}
+
+            //console.log(commit_emails)
+            console.log(contributorLogin)
+
+            authorsData[contributorLogin].username = contributorLogin
+            authorsData[contributorLogin].commit_emails = Array.from(commit_emails).sort()
+            const authorSocials = authorsData[contributorLogin].socials
+
+            const { response: userDataRes } = await httpsGet(userDataUrl(contributorLogin), options)
+            const userData = JSON.parse(userDataRes)
+            console.log(userData)
+
+            authorsData[contributorLogin].socials = {
+                ...authorSocials,
+                twitter: userData.twitter_username ?? authorSocials?.twitter ?? "",
+                linkedin: authorSocials?.linkedin ?? ""
             }
-            authorsData[contributor.login].id = contributor.id
-            authorsData[contributor.login].avatar_url = contributor.avatar_url
+
+            authorsData[contributorLogin].id = userData.id
+            const imageUrl = userData.avatar_url
+            authorsData[contributorLogin].avatar_url = imageUrl
+            const imgName = await downloadImage(imageUrl, contributorLogin)
+            authorsData[contributorLogin].image = imgName
         }
     } catch (error) {
-        console.error(error);
+        console.error(error)
+        throw new Error(error)
     }
-
-    for (const username in authorsData) {
-        const imageUrl = authorsData[username].avatar_url
-        const imgName = await downloadImage(imageUrl, username)
-        authorsData[username].image = imgName
-    }
-
-
 
     fs.writeFileSync("authors.json", JSON.stringify(authorsData, null, 4))
 
