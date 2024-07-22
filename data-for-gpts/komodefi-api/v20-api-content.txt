@@ -1091,6 +1091,11 @@ The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, y
 | requires\_notarization   | boolean          | Optional, defaults to `true`. Has no effect on BCH.                                                                                                                                                                                                       |
 | tx\_history              | boolean          | Optional, defaults to `true`. If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method |
 | utxo\_merge\_params      | object           | A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params) object. Used to reduce a wallet's UTXO count in cases where it is causing significantly slower RPC responses.                                    |
+|                          |                  |                                                                                                                                                                                                                                                           |
+
+<Note>
+  *   Go to: [https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums) for a full list of nodes/servers.
+</Note>
 
 ### Response Parameters
 
@@ -1118,14 +1123,19 @@ The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, y
       "ticker": "BCH",
       "allow_slp_unsafe_conf": false,
       "bchd_urls": [
-        "https://bchd.imaginary.cash:8335/"
+        "https://bchd.dragonhound.info"
       ],
       "mode": {
         "rpc": "Electrum",
         "rpc_data": {
           "servers": [
             {
-              "url": "electrum1.cipig.net:10055"
+              "url": "bch.imaginary.cash:50002",
+              "protocol": "SSL"
+            },
+            {
+              "url": "cashnode.bch.ninja:50002",
+              "protocol": "SSL"
             },
             {
               "url": "electrum3.cipig.net:20055",
@@ -1209,14 +1219,19 @@ The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, y
       "ticker": "BCH",
       "allow_slp_unsafe_conf": false,
       "bchd_urls": [
-        "https://bchd.imaginary.cash:8335/"
+        "https://bchd.dragonhound.info"
       ],
       "mode": {
         "rpc": "Electrum",
         "rpc_data": {
           "servers": [
             {
-              "url": "electrum1.cipig.net:10055"
+              "url": "bch.imaginary.cash:50002",
+              "protocol": "SSL"
+            },
+            {
+              "url": "cashnode.bch.ninja:50002",
+              "protocol": "SSL"
             },
             {
               "url": "electrum3.cipig.net:20055",
@@ -1238,9 +1253,9 @@ The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, y
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response
+#### Response
 
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json
   {
   	"mmrpc": "2.0",
@@ -1516,7 +1531,10 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | mm2                         | integer          | Required if not set in `coins` file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                                                                                   |
 | swap\_contract\_address     | string           | Address of etomic swap smart contract                                                                                                                                                                                                                                                                                                        |
 | fallback\_swap\_contract    | string           | Address of backup etomic swap smart contract                                                                                                                                                                                                                                                                                                 |
-| nodes                       | array of objects | A list of standard [EvmNode](/komodo-defi-framework/api/common_structures/activation/#evm-node) objects.                                                                                                                                                                                                                                     |
+| maker\_swap\_v2\_contract   | string           | Backup address for the maker's swap smart contract                                                                                                                                                                                                                                                                                           |
+| taker\_swap\_v2\_contract   | string           | Backup address for the taker's swap smart contract                                                                                                                                                                                                                                                                                           |
+| nodes                       | array of objects | A list of standard [EvmNode](/komodo-defi-framework/api/common_structures/activation/#evm-node) objects. ([https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums)).                                                                                                   |
+|                             |                  |                                                                                                                                                                                                                                                                                                                                              |
 | erc20\_tokens\_requests     | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                                                                                                                         |
 | gas\_station\_decimals      | integer          | Optional, for ETH/ERC20 and other gas model chains. Defaults to `8`. Defines the decimals used to denominate the gas station response to gwei units. For example, the ETH gas station uses 8 decimals, which means that "average": 860 is equal to 86 gwei. While the Matic gas station uses 9 decimals, so 860 would mean 860 gwei exactly. |
 | gas\_station\_policy.policy | string           | Optional, for ETH/ERC20 and other gas model chains. Defaults to `"MeanAverageFast"`. Defines the method of gas price calculation from the station response. `"MeanAverageFast"` will use the mean between average and fast fields. `"Average"` will return a simple average value.                                                           |
@@ -1558,7 +1576,7 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
       "fallback_swap_contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
       "nodes": [
         {
-          "url": "http://eth1.cipig.net:8555",
+          "url": "http://eth1.cipig.net:18555",
           "gui_auth": false
         },
         {
@@ -1665,7 +1683,10 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
           "url": "https://polygon-rpc.com"
         },
         {
-          "url": "https://poly-rpc.gateway.pokt.network"
+          "url": "https://node.komodo.earth:8080/polygon"
+        },
+        {
+          "url": "https://block-proxy.komodo.earth/rpc/matic"
         }
       ],
       "erc20_tokens_requests": [

@@ -3979,7 +3979,7 @@ Komodo DeFi Framework is a true cross chain, cross protocol Decentralized Exchan
 | Structure                                | Type                                    | Description                                                                                                                                                                                                                                |
 | ---------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | coin                                     | string                                  | Ticker of coin to activate                                                                                                                                                                                                                 |
-| servers                                  | array of objects                        | List of [Electrum servers](https://github.com/KomodoPlatform/coins/tree/master/electrums)                                                                                                                                                  |
+| servers                                  | array of objects                        | List of \[Electrum servers] ([https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums))                                                                               |
 | servers.url                              | string                                  | Electrum server URL                                                                                                                                                                                                                        |
 | servers.protocol                         | string (optional, defaults to `TCP`)    | Transport protocol used by Komodo DeFi Framework API to connect to the electrum server (`TCP` or `SSL`)                                                                                                                                    |
 | servers.disable\_cert\_verification      | bool (optional, defaults to `false`.)   | If `true`, this disables server SSL/TLS certificate verification (e.g. to use self-signed certificate). <b>Use at your own risk</b>                                                                                                        |
@@ -4244,9 +4244,9 @@ Komodo DeFi Framework is a true cross chain, cross protocol Decentralized Exchan
     "coin": "ETH",
     "method": "enable",
     "urls": [
-      "http://eth1.cipig.net:8555",
-      "http://eth2.cipig.net:8555",
-      "http://eth3.cipig.net:8555"
+      "http://eth1.cipig.net:18555",
+      "http://eth2.cipig.net:18555",
+      "http://eth3.cipig.net:18555"
     ],
     "swap_contract_address": "0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80",
     "fallback_swap_contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
@@ -4280,9 +4280,9 @@ Komodo DeFi Framework is a true cross chain, cross protocol Decentralized Exchan
     "userpass": "RPC_UserP@SSW0RD",
     "method": "enable",
     "urls": [
-      "http://eth1.cipig.net:8555",
-      "http://eth2.cipig.net:8555",
-      "http://eth3.cipig.net:8555"
+      "http://eth1.cipig.net:18555",
+      "http://eth2.cipig.net:18555",
+      "http://eth3.cipig.net:18555"
     ],
     "swap_contract_address": "0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80",
     "fallback_swap_contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
@@ -12535,6 +12535,11 @@ The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, y
 | requires\_notarization   | boolean          | Optional, defaults to `true`. Has no effect on BCH.                                                                                                                                                                                                       |
 | tx\_history              | boolean          | Optional, defaults to `true`. If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method |
 | utxo\_merge\_params      | object           | A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params) object. Used to reduce a wallet's UTXO count in cases where it is causing significantly slower RPC responses.                                    |
+|                          |                  |                                                                                                                                                                                                                                                           |
+
+<Note>
+  *   Go to: [https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums) for a full list of nodes/servers.
+</Note>
 
 ### Response Parameters
 
@@ -12562,14 +12567,19 @@ The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, y
       "ticker": "BCH",
       "allow_slp_unsafe_conf": false,
       "bchd_urls": [
-        "https://bchd.imaginary.cash:8335/"
+        "https://bchd.dragonhound.info"
       ],
       "mode": {
         "rpc": "Electrum",
         "rpc_data": {
           "servers": [
             {
-              "url": "electrum1.cipig.net:10055"
+              "url": "bch.imaginary.cash:50002",
+              "protocol": "SSL"
+            },
+            {
+              "url": "cashnode.bch.ninja:50002",
+              "protocol": "SSL"
             },
             {
               "url": "electrum3.cipig.net:20055",
@@ -12653,14 +12663,19 @@ The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, y
       "ticker": "BCH",
       "allow_slp_unsafe_conf": false,
       "bchd_urls": [
-        "https://bchd.imaginary.cash:8335/"
+        "https://bchd.dragonhound.info"
       ],
       "mode": {
         "rpc": "Electrum",
         "rpc_data": {
           "servers": [
             {
-              "url": "electrum1.cipig.net:10055"
+              "url": "bch.imaginary.cash:50002",
+              "protocol": "SSL"
+            },
+            {
+              "url": "cashnode.bch.ninja:50002",
+              "protocol": "SSL"
             },
             {
               "url": "electrum3.cipig.net:20055",
@@ -12682,9 +12697,9 @@ The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, y
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response
+#### Response
 
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json
   {
   	"mmrpc": "2.0",
@@ -12960,7 +12975,10 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | mm2                         | integer          | Required if not set in `coins` file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                                                                                   |
 | swap\_contract\_address     | string           | Address of etomic swap smart contract                                                                                                                                                                                                                                                                                                        |
 | fallback\_swap\_contract    | string           | Address of backup etomic swap smart contract                                                                                                                                                                                                                                                                                                 |
-| nodes                       | array of objects | A list of standard [EvmNode](/komodo-defi-framework/api/common_structures/activation/#evm-node) objects.                                                                                                                                                                                                                                     |
+| maker\_swap\_v2\_contract   | string           | Backup address for the maker's swap smart contract                                                                                                                                                                                                                                                                                           |
+| taker\_swap\_v2\_contract   | string           | Backup address for the taker's swap smart contract                                                                                                                                                                                                                                                                                           |
+| nodes                       | array of objects | A list of standard [EvmNode](/komodo-defi-framework/api/common_structures/activation/#evm-node) objects. ([https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums)).                                                                                                   |
+|                             |                  |                                                                                                                                                                                                                                                                                                                                              |
 | erc20\_tokens\_requests     | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                                                                                                                         |
 | gas\_station\_decimals      | integer          | Optional, for ETH/ERC20 and other gas model chains. Defaults to `8`. Defines the decimals used to denominate the gas station response to gwei units. For example, the ETH gas station uses 8 decimals, which means that "average": 860 is equal to 86 gwei. While the Matic gas station uses 9 decimals, so 860 would mean 860 gwei exactly. |
 | gas\_station\_policy.policy | string           | Optional, for ETH/ERC20 and other gas model chains. Defaults to `"MeanAverageFast"`. Defines the method of gas price calculation from the station response. `"MeanAverageFast"` will use the mean between average and fast fields. `"Average"` will return a simple average value.                                                           |
@@ -13002,7 +13020,7 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
       "fallback_swap_contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
       "nodes": [
         {
-          "url": "http://eth1.cipig.net:8555",
+          "url": "http://eth1.cipig.net:18555",
           "gui_auth": false
         },
         {
@@ -13109,7 +13127,10 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
           "url": "https://polygon-rpc.com"
         },
         {
-          "url": "https://poly-rpc.gateway.pokt.network"
+          "url": "https://node.komodo.earth:8080/polygon"
+        },
+        {
+          "url": "https://block-proxy.komodo.earth/rpc/matic"
         }
       ],
       "erc20_tokens_requests": [
@@ -21295,8 +21316,8 @@ Returns a list of the NFTs owned by the user, shown in descending order of the `
 | Parameter | Type            | Description                                                                                        |
 | --------- | --------------- | -------------------------------------------------------------------------------------------------- |
 | nfts      | list of objects | A list of standard [NftInfo](/komodo-defi-framework/api/common_structures/nfts/#nft-info) objects. |
-| total     | integer         | The total number of NFTs in your wallet matching the request filters.                              |
 | skipped   | integer         | The number of NFTs in your wallet excluded by the request filters.                                 |
+| total     | integer         | The total number of NFTs in your wallet matching the request filters.                              |
 
 #### 📌 Example with no optional params
 
@@ -21972,13 +21993,14 @@ This method refreshes metadata of one NFT and metadata of related transactions w
 
 ### Request Parameters
 
-| Parameter      | Type   | Description                                                                                                                                             |
-| -------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chain          | string | Chains which holds the NFT you would like to updated metadata for.                                                                                      |
-| url            | string | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent.                    |
-| token\_address | string | Token address.                                                                                                                                          |
-| token\_id      | string | Token ID.                                                                                                                                               |
-| url\_antispam  | string | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs). |
+| Parameter      | Type    | Description                                                                                                                                                                                                       |
+| -------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chain          | string  | Chains which holds the NFT you would like to updated metadata for.                                                                                                                                                |
+| token\_address | string  | Token address.                                                                                                                                                                                                    |
+| token\_id      | string  | Token ID.                                                                                                                                                                                                         |
+| proxy\_auth    | boolean | Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false).                                                                                 |
+| url            | string  | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent (if proxy\_auth is set to true, will need to provide a new Komodo Proxy URL). |
+| url\_antispam  | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs).                                                           |
 
 <Note>
   If there are no errors, this request will return an empty response.
@@ -22043,11 +22065,12 @@ These coins can be activated using the [enable\_eth\_with\_tokens](/komodo-defi-
 
 ### Request Parameters
 
-| Parameter     | Type   | Description                                                                                         |
-| ------------- | ------ | --------------------------------------------------------------------------------------------------- |
-| chains        | array  | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.  |
-| url           | string | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent.     |
-| url\_antispam | string | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. |
+| Parameter     | Type    | Description                                                                                                                                                                  |
+| ------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains        | array   | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.                                                                           |
+| proxy\_auth   | boolean | Indicates whether authentication is required for accessing the proxy URLs (true if necessary, false otherwise).                                                              |
+| url           | string  | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent (if proxy\_auth is set to true, will need to provide a new Komodo Proxy URL). |
+| url\_antispam | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent.                                                                          |
 
 <Note>
   If there are no errors, this request will return an empty response.
@@ -22064,11 +22087,11 @@ These coins can be activated using the [enable\_eth\_with\_tokens](/komodo-defi-
     "mmrpc": "2.0",
     "params": {
       "chains": [
-        "BSC",
         "POLYGON"
       ],
       "url": "https://moralis-proxy.komodo.earth",
-      "url_antispam": "https://nft.antispam.dragonhound.info"
+      "url_antispam": "https://nft.antispam.dragonhound.info",
+      "proxy_auth": false
     }
   }
   ```
@@ -22787,7 +22810,7 @@ QTUM coins are activated using this method. For UTXO coins, refer to [task::enab
 | .mode                           | object  | An object containing RPC type and data parameters as below.                                                                                                                                                      |
 | ..rpc                           | string  | UTXO RPC mode. Options: `{ "rpc":"Native" }` if running a native blockchain node, or `"rpc":"Electrum"` to use electrum RPCs. If using electrum, a list of electrum servers is required under `rpc_data.servers` |
 | ..rpc\_data                     | object  | An object containing electrum server information.                                                                                                                                                                |
-| ...servers                      | list    | A list of electrum server URLs                                                                                                                                                                                   |
+| ...servers                      | list    | A list of electrum server URLs ([https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums))                                                  |
 | ....url                         | object  | The url and port of a coins electrum server                                                                                                                                                                      |
 | ....ws\_url                     | object  | Optional. Used to define electrum server url/port for websocket connections.                                                                                                                                     |
 | ....protocol                    | object  | Defines electrum server protocol as `TCP` or `SSL`. Defaults to `TCP`                                                                                                                                            |
@@ -22987,7 +23010,7 @@ UTXO coins are activated using this method. For QTUM coins, refer to [task::enab
 | .mode                           | object  | An object containing RPC type and data parameters as below.                                                                                                                                                      |
 | ..rpc                           | string  | UTXO RPC mode. Options: `{ "rpc":"Native" }` if running a native blockchain node, or `"rpc":"Electrum"` to use electrum RPCs. If using electrum, a list of electrum servers is required under `rpc_data.servers` |
 | ..rpc\_data                     | object  | An object containing electrum server information.                                                                                                                                                                |
-| ...servers                      | list    | A list of electrum server URLs                                                                                                                                                                                   |
+| ...servers                      | list    | A list of electrum server URLs ([https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums))                                                  |
 | ....url                         | object  | The url and port of a coins electrum server                                                                                                                                                                      |
 | ....ws\_url                     | object  | Optional. Used to define electrum server url/port for websocket connections.                                                                                                                                     |
 | ....protocol                    | object  | Defines electrum server protocol as `TCP` or `SSL`. Defaults to `TCP`                                                                                                                                            |
@@ -24252,6 +24275,11 @@ export const description =
             "electrum_servers": [
               {
                 "url": "zombie.dragonhound.info:10033"
+              },
+              {
+                "url": "zombie.dragonhound.info:20033",
+                "protocol": "SSL",
+                "ws_url": "zombie.dragonhound.info:30058"
               }
             ],
             "light_wallet_d_servers": [
@@ -24323,6 +24351,11 @@ The Z coin lightwallet client only supports blocks that are post-sapling. The sa
             "electrum_servers": [
               {
                 "url": "zombie.dragonhound.info:10033"
+              },
+              {
+                "url": "zombie.dragonhound.info:20033",
+                "protocol": "SSL",
+                "ws_url": "zombie.dragonhound.info:30058"
               }
             ],
             "light_wallet_d_servers": [
