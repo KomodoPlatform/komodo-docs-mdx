@@ -51,7 +51,7 @@ async function walkDir(dir, callback) {
         const stats = await fs.stat(filePath);
         if (stats.isDirectory()) {
             await walkDir(filePath, callback);
-        } else if (stats.isFile() && !filePath.startsWith(".")) {
+        } else if (stats.isFile() && !filePath.toLowerCase().includes(".ds_store")) {
             await callback(filePath);
         }
     }));

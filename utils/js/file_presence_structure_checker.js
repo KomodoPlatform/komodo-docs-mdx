@@ -52,7 +52,7 @@ findMissingIndexInDirs("./src/pages");
 const fileNames = [];
 const getFileNames = (filepath) => {
   if (
-    !(filepath.endsWith("/_app.tsx") || filepath.endsWith("/_document.tsx") || filepath.startsWith("."))
+    !(filepath.endsWith("/_app.tsx") || filepath.endsWith("/_document.tsx") || filepath.toLowerCase().includes(".ds_store"))
   ) {
     let filePathURL = filepath
       .replace("src/pages", "")
