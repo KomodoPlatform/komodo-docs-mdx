@@ -25,7 +25,7 @@ if (fs.existsSync(manualLinkFile)) {
   try {
     let filepaths = [];
     walkDir("./src/pages", (filepath) => {
-      if (!filepath.startsWith(".")) {
+      if (!filepath.toLowercase().includes(".ds_store")) {
         filepaths.push(filepath)
       }
     });
