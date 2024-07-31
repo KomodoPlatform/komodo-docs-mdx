@@ -6,17 +6,19 @@ export const description = "This guide describes how to query the MM2 SQLite dat
 The Komodo DeFi Framework API stores historical information such as swaps and orders within an SQLite database, located under the DB user data folder with each wallet having its own subfolder represented by a hexideciaml string.
 This string is shown in the runtime logs of the `kdf` binary as `Public key hash` when it starts up.
 
-```
+```bash
 30 08:39:23, mm2:269] AtomicDEX API 2.1.0-beta_a81f2a101 DT 2024-07-26T23:24:52+03:00
 30 08:39:23, mm2_main::mm2::lp_native_dex:500] INFO Version: 2.1.0-beta_a81f2a101 DT 2024-07-26T23:24:52+03:00
 30 08:39:23, crypto::crypto_ctx:324] INFO Public key hash: 7d6cbdd91788df3b764247721fe12853ce36b03d
 ```
 
 The location of this folder for each operating system is:
+
+```bash
 - Linux: $HOME/.kdf/DB/{'{wallet identifying hex string}'}/MM2.db'
 - MacOS: $HOME/Library/Application Support/kdf/DB/{'{wallet identifying hex string}'}/MM2.db'
-- Windows: %APPDATA%\kdf\DB\{'{wallet identifying hex string}'\MM2.db'
-
+- Windows: %APPDATA%\kdf\DB\{'{wallet identifying hex string}'}\MM2.db'
+```
 
 There are a variety of methods to query sqlite databases. Examples below show how to do a sqlite query in Linux terminal, but first you might need to install sqlite with `sudo apt install sqlite3`.
 
@@ -133,49 +135,45 @@ This table stores a record of all nodes [added for stats collection](/komodo-def
 
 `37|dragonhound_DEV|104.238.221.61|12D3KooWEnrvbqvtTowYMR8FnBeKtryTj9RcXGx8EPpFZHou2ruP`
 
-
 ## Coin tables
 
 Additional tables are created for each coin to store supplementary details such as block headers and transaction history. Using KMD as an example, these tables are listed below:
 
 ### KMD\_block\_headers\_cache
 
-| ID | Name      | Type         | Description                                  |
-| -- | --------- | ------------ | -------------------------------------------- |
-| 0  | id        | INTEGER      | Primary Key                                  |
+| ID | Name | Type    | Description |
+| -- | ---- | ------- | ----------- |
+| 0  | id   | INTEGER | Primary Key |
 
 ### KMD\_tx\_address
 
 1|ecfb45cc5d5fdf34dcc70b0db2a333b143f0b98f9a8470097e3a256c1760b6ff|RUYJYSTuCKm9gouWzQN1LirHFEYThwzA2d
 
-| ID | Name        | Type         | Description                                  |
-| -- | ----------- | ------------ | -------------------------------------------- |
-| 0  | id          | INTEGER      | Primary Key                                  |
-| 1  | internal_id | VARCHAR(255) | A hex string, representative of the address  |
-| 2  | address     | VARCHAR(255) | The coin's wallet address                    |
-
-
+| ID | Name         | Type         | Description                                 |
+| -- | ------------ | ------------ | ------------------------------------------- |
+| 0  | id           | INTEGER      | Primary Key                                 |
+| 1  | internal\_id | VARCHAR(255) | A hex string, representative of the address |
+| 2  | address      | VARCHAR(255) | The coin's wallet address                   |
 
 ### KMD\_tx\_cache
 
-tx_hash|tx_hex
+tx\_hash|tx\_hex
 
-| ID | Name      | Type         | Description                                  |
-| -- | --------- | ------------ | -------------------------------------------- |
-| 0  | tx_hash   | VARCHAR(255) | A transaction hash                           |
-| 1  | tx_hex    | VARCHAR(255) | Raw hex for transaction                      |
-
+| ID | Name     | Type         | Description             |
+| -- | -------- | ------------ | ----------------------- |
+| 0  | tx\_hash | VARCHAR(255) | A transaction hash      |
+| 1  | tx\_hex  | VARCHAR(255) | Raw hex for transaction |
 
 ### KMD\_tx\_history
 
-id|tx_hash|internal_id|block_height|confirmation_status|token_id|details_json
+id|tx\_hash|internal\_id|block\_height|confirmation\_status|token\_id|details\_json
 
-| ID | Name                 | Type         | Description                                  |
-| -- | -------------------- | ------------ | -------------------------------------------- |
-| 0  | id                   | INTEGER      | Primary Key                                  |
-| 1  | tx_hash              | VARCHAR(255) | A transaction hash                           |
-| 2  | internal_id          | VARCHAR(255) | A hex string, representative of the transaction  |
-| 3  | block_height         | INTEGER      | Block height of transaction                  |
-| 4  | confirmation_status  | BOOLEAN      | `True` if transaction has completed, `False` if it is pending |
-| 5  | token_id             | INTEGER      | Number representing the coin type            |
-| 6  | details_json         | VARCHAR(255) | Transaction details in JSON format           |
+| ID | Name                 | Type         | Description                                                   |
+| -- | -------------------- | ------------ | ------------------------------------------------------------- |
+| 0  | id                   | INTEGER      | Primary Key                                                   |
+| 1  | tx\_hash             | VARCHAR(255) | A transaction hash                                            |
+| 2  | internal\_id         | VARCHAR(255) | A hex string, representative of the transaction               |
+| 3  | block\_height        | INTEGER      | Block height of transaction                                   |
+| 4  | confirmation\_status | BOOLEAN      | `True` if transaction has completed, `False` if it is pending |
+| 5  | token\_id            | INTEGER      | Number representing the coin type                             |
+| 6  | details\_json        | VARCHAR(255) | Transaction details in JSON format                            |
