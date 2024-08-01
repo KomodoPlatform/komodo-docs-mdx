@@ -317,6 +317,40 @@ Where the value indicates:
   ```
 </CollapsibleSection>
 
+### EventStreamConfig
+
+The `EventStreamConfig` object defines which events will be streamed to the client:
+
+| Parameter                      | Type   | Description                                                                            |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------- |
+| access\_control\_allow\_origin | string | Defines CORS whitelist. Use "\*" to allow fromi any origin.                            |
+| active\_events                 | object | Events to be streamed to the client, along with configuration defineing frequency etc. |
+| worker\_path                   | string | WASM only. Path to a custom `worker.js` file.                                          |
+
+Active events are defined as follows:
+
+*   NETWORK: Network status changes. Requires `stream_interval_seconds` configuration.
+*   COIN\_BALANCE: Balance changes. Does not `stream_interval_seconds` configuration, as the event is triggered by the balance change.
+
+<Note>
+  The `COIN_BALANCE` event may not be available for all coins or tokens.
+</Note>
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  "event_stream_configuration": {
+      "access_control_allow_origin": "*",
+      "active_events": {
+          "NETWORK": {
+              "stream_interval_seconds": 1.5,
+          },
+          "COIN_BALANCE": {}
+      },
+      "worker_path": "index.js"
+  }
+  ```
+</CollapsibleSection>
+
 ### NumericFormatsValue
 
 The `NumericFormatsValue` returns a price or amount in three different formats: `fraction`, `rational`, and `decimal`.
