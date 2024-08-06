@@ -31,7 +31,7 @@ function findMissingIndexInDirs(dirPath) {
       if (curPath.endsWith("index.mdx")) {
         foundIndexFile = true;
       } else if (
-        !(curPath.endsWith("/_app.tsx") || curPath.endsWith("/_document.tsx"))
+        !(curPath.endsWith("/_app.tsx") || curPath.endsWith("/_document.tsx") || curPath.toLowerCase().includes(".ds_store"))
       ) {
         otherFilesInDir.push(curPath);
       }
@@ -52,7 +52,7 @@ findMissingIndexInDirs("./src/pages");
 const fileNames = [];
 const getFileNames = (filepath) => {
   if (
-    !(filepath.endsWith("/_app.tsx") || filepath.endsWith("/_document.tsx"))
+    !(filepath.endsWith("/_app.tsx") || filepath.endsWith("/_document.tsx") || filepath.toLowerCase().includes(".ds_store"))
   ) {
     let filePathURL = filepath
       .replace("src/pages", "")
@@ -81,13 +81,13 @@ if (invalidFilenames.length > 0) {
 }
 
 const sidebarPagesArray = [];
-const navbarPagesArray  = [];
+const navbarPagesArray = [];
 
-function readTitleLinksAndHrefsNavbar(data){
+function readTitleLinksAndHrefsNavbar(data) {
   Object.keys(data).forEach(function (key) {
     var dropdown = data[key];
     dropdown.items.forEach(function (item) {
-      if(!item.link.endsWith("/")) {
+      if (!item.link.endsWith("/")) {
         throw new Error(`In navbar.json, link: ${item.link} should end with /`)
       }
       navbarPagesArray.push(item.link)
@@ -99,7 +99,7 @@ function readTitleLinksAndHrefsSidebar(data) {
   Object.keys(data).forEach(function (key) {
     var navigation = data[key];
     Object.keys(navigation).forEach(function (navigationKey) {
-      if(!navigationKey.endsWith("/")) {
+      if (!navigationKey.endsWith("/")) {
         throw new Error(`In sidebar.json, navigationKey: ${navigationKey} should end with /`)
       }
       var sections = navigation[navigationKey];
@@ -108,14 +108,14 @@ function readTitleLinksAndHrefsSidebar(data) {
           throw new Error("To be able to have collapsible sections in left sidebar, title with titlelink can't have sub-items. 'page.titleLink': " + page.titleLink)
         }
         if (page.titleLink) {
-          if(!page.titleLink.endsWith("/")) {
+          if (!page.titleLink.endsWith("/")) {
             throw new Error(`In sidebar.json, titleLink: ${page.titleLink} should end with /`)
           }
           sidebarPagesArray.push(page.titleLink);
         }
-        if (page.links) {  
+        if (page.links) {
           for (const link of page.links) {
-            if(!link.href.endsWith("/")) {
+            if (!link.href.endsWith("/")) {
               throw new Error(`In sidebar.json, link: ${link.href} should end with /`)
             }
             sidebarPagesArray.push(link.href);
