@@ -1,0 +1,97 @@
+export const title = "Komodo DeFi Framework Method: Enable NFT";
+export const description =
+  "The enable_nft method allows you to activate NFT-like tokens on the platform.";
+
+# enable\_nft
+
+The 'enable_nft' method activates NFT-like tokens on the platform. Before using this method, you first need to use the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/) method.
+
+| parameter                                  | Type    | Description                                                                                        |
+| ------------------------------------------ | ------- | -------------------------------------------------------------------------------------------------- |
+| ticker                                     | string  | Ticker of the NFT-like token coin.                                                               |
+| activation\_params | object | A standard [NftProvider](komodo-defi-framework/api/commonstructures/nfts/#nftprovider) object |
+| proxy\_auth | boolean | Optional, defaults to false. Indicates if proxy authentication is needed when communicating with the specified NFT provider.|
+
+<CodeGroup title="" tag="POST" label="enable_erc20" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "enable_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "NFT_MATIC",
+      "activation_params": {
+        "provider": {
+          "type": "Moralis",
+          "info": {
+            "url": "http://localhost:6150/nft-test",
+            "proxy_auth": true
+          }
+        }
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "balances": {
+      "0x0d317904AF3BA3A993d557b6cba147FEA4DeB57E": {
+        "spendable": "0",
+        "unspendable": "0"
+      }
+    },
+    "platform_coin": "ETH",
+    "token_contract_address": "0x0d8775f648430679a709e98d2b0cb6250d2887ef",
+    "required_confirmations": 3
+  },
+  "id": null
+}
+```
+
+## Error - Platform coin is not yet activated
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Platform coin ETH is not activated",
+  "error_path": "token.lp_coins",
+  "error_trace": "token:126] lp_coins:2797]",
+  "error_type": "PlatformCoinIsNotActivated",
+  "error_data": "ETH",
+  "id": null
+}
+```
+
+## Error - Token already activated
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Token NFT_MATIC is already activated",
+  "error_path": "token",
+  "error_trace": "token:119]",
+  "error_type": "TokenIsAlreadyActivated",
+  "error_data": "NFT_MATIC",
+  "id": null
+}
+```
+
+## Error - Token config not found in coins file
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Token NFT_TESTTT config is not found",
+  "error_path": "token.prelude",
+  "error_trace": "token:122] prelude:79]",
+  "error_type": "TokenConfigIsNotFound",
+  "error_data": "NFT_TESTTT",
+  "id": null
+}
+```
