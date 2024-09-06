@@ -21,14 +21,12 @@ These coins can be activated using the [enable\_eth\_with\_tokens](/komodo-defi-
 
 ### Request Parameters
 
-
-| Parameter     | Type    | Description                                                                                                     |
-| ------------- | ------- | --------------------------------------------------------------------------------------------------------------- |
-| chains        | array   | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.              |
-| komodo\_proxy   | boolean | Optional. Indicates whether authentication is required for accessing the proxy URLs.                            |
-| url           | string  | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent (if komodo_proxy is set to true, will need to provide a new Komodo Proxy URL).               |
-| url\_antispam | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent.             |
-
+| Parameter     | Type    | Description                                                                                                                                                                    |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| chains        | array   | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.                                                                             |
+| komodo\_proxy | boolean | Optional. Indicates whether authentication is required for accessing the proxy URLs.                                                                                           |
+| url           | string  | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent (if komodo\_proxy is set to true, will need to provide a new Komodo Proxy URL). |
+| url\_antispam | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent.                                                                            |
 
 <Note>
   If there are no errors, this request will return an empty response.
@@ -44,13 +42,13 @@ These coins can be activated using the [enable\_eth\_with\_tokens](/komodo-defi-
     "method": "update_nft",
     "mmrpc": "2.0",
     "params": {
-      "chains": [ 
+      "chains": [
         "BSC",
         "POLYGON"
       ],
-      "komodo_proxy": false
+      "komodo_proxy": false,
       "url": "https://moralis-proxy.komodo.earth",
-      "url_antispam": "https://nft.antispam.dragonhound.info",
+      "url_antispam": "https://nft.antispam.dragonhound.info"
     }
   }
   ```
@@ -66,41 +64,38 @@ These coins can be activated using the [enable\_eth\_with\_tokens](/komodo-defi-
   ```
 </CollapsibleSection>
 
-
 <CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
+  ### Error Types
 
-### Error Types
+  #### TokenIsAlreadyActivated
 
-#### TokenIsAlreadyActivated
+  This error occurs when NFTs are already activated for the selected network.
 
-This error occurs when NFTs are already activated for the selected network.
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Token NFT_MATIC is already activated",
+      "error_path": "token",
+      "error_trace": "token:121]",
+      "error_type": "TokenIsAlreadyActivated",
+      "error_data": "NFT_MATIC",
+      "id": null
+  }
+  ```
 
+  #### TokenIsAlreadyActivated
 
-```json
-{
-    "mmrpc": "2.0",
-    "error": "Token NFT_MATIC is already activated",
-    "error_path": "token",
-    "error_trace": "token:121]",
-    "error_type": "TokenIsAlreadyActivated",
-    "error_data": "NFT_MATIC",
-    "id": null
-}
-```
+  This error occurs when NFTs are already activated for the selected network.
 
-#### TokenIsAlreadyActivated
-
-This error occurs when NFTs are already activated for the selected network.
-
-```json
-{
-    "mmrpc": "2.0",
-    "error": "Token NFT_MATICC config is not found",
-    "error_path": "token.prelude",
-    "error_trace": "token:124] prelude:79]",
-    "error_type": "TokenConfigIsNotFound",
-    "error_data": "NFT_MATICC",
-    "id": null
-}
-```
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Token NFT_MATICC config is not found",
+      "error_path": "token.prelude",
+      "error_trace": "token:124] prelude:79]",
+      "error_type": "TokenConfigIsNotFound",
+      "error_data": "NFT_MATICC",
+      "id": null
+  }
+  ```
 </CollapsibleSection>
