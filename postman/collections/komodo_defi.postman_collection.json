@@ -1,10 +1,11 @@
 {
 	"info": {
-		"_postman_id": "01b1b7d4-48d2-414d-b721-e1e7ea1c2c3a",
-		"name": "komodo_defi",
+		"_postman_id": "1b69d366-bcea-4ccf-bc91-39eb07c9b074",
+		"name": "Komodo DeFi Framework",
 		"description": "Komodo DeFi Framework RPC methods",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "12719479"
+		"_exporter_id": "12719479",
+		"_collection_link": "https://smk762.postman.co/workspace/KMD-QA~b04e9300-501c-4931-9886-94f79ebc51a5/collection/12719479-1b69d366-bcea-4ccf-bc91-39eb07c9b074?action=share&source=collection_link&creator=12719479"
 	},
 	"item": [
 		{
@@ -29,7 +30,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -44,7 +46,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10017\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10017\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10017\"\r\n        }\r\n    ]\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10020\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10020\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10020\"\r\n        }\r\n    ]\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -3221,6 +3223,352 @@
 							]
 						},
 						{
+							"name": "EVM",
+							"item": [
+								{
+									"name": "enable_eth_with_tokens",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "ETH",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"ticker\": \"ETH\",\n        \"gas_station_url\": \"https://ethgasstation.info/json/ethgasAPI.json\",\n        \"gas_station_decimals\": 8,\n        \"gas_station_policy\": {\n            \"policy\": \"MeanAverageFast\"\n        },\n        \"mm2\": 1,\n        \"nft_req\": {\n          \"provider\": {\n            \"type\": \"Moralis\",\n            \"info\": {\n              \"url\": \"https://moralis-proxy.komodo.earth\"\n            }\n          }\n        },\n        \"priv_key_policy\": \"ContextPrivKey\",\n        \"swap_contract_address\": \"0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80\",\n        \"fallback_swap_contract\": \"0x8500AFc0bc5214728082163326C2FF0C73f4a871\",\n        \"nodes\": [\n            {\n                \"url\": \"https://eth1.cipig.net:18555\",\n                \"gui_auth\": false\n            },\n            {\n                \"url\": \"https://eth2.cipig.net:18555\",\n                \"gui_auth\": false\n            },\n            {\n                \"url\": \"https://eth3.cipig.net:18555\",\n                \"gui_auth\": false\n            }\n        ],\n        \"tx_history\": true,\n        \"erc20_tokens_requests\": [\n            {\n                \"ticker\": \"APE-ERC20\",\n                \"required_confirmations\": 4\n            },\n            {\n                \"ticker\": \"BCH-ERC20\",\n                \"required_confirmations\": 4\n            },\n            {\n                \"ticker\": \"MINDS-ERC20\",\n                \"required_confirmations\": 4\n            },\n            {\n                \"ticker\": \"BUSD-ERC20\",\n                \"required_confirmations\": 4\n            }\n        ],\n        \"required_confirmations\": 5,\n        \"requires_notarization\": false\n    }\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "778"
+												},
+												{
+													"key": "date",
+													"value": "Fri, 23 Aug 2024 09:54:48 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":20590537,\"eth_addresses_infos\":{\"0x84ab…b27a\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04ec603f83519cc2150bd99ed0ed6b3f7f029dedff2957cd22542e2504e3d2a7953c084f907cce2f0e26fb0cfc55e06925bf0f88a92b904224dba8ebafdf98ce7b\",\"balances\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}},\"erc20_addresses_infos\":{\"0x84ab…b27a\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04ec603f83519cc2150bd99ed0ed6b3f7f029dedff2957cd22542e2504e3d2a7953c084f907cce2f0e26fb0cfc55e06925bf0f88a92b904224dba8ebafdf98ce7b\",\"balances\":{\"BUSD-ERC20\":{\"spendable\":\"0\",\"unspendable\":\"0\"},\"MINDS-ERC20\":{\"spendable\":\"0\",\"unspendable\":\"0\"},\"APE-ERC20\":{\"spendable\":\"0\",\"unspendable\":\"0\"},\"BCH-ERC20\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}}},\"nfts_infos\":{}},\"id\":null}"
+										},
+										{
+											"name": "BNB",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"BNB\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"swap_contract_address\": \"0xeDc5b89Fe1f0382F9E4316069971D90a0951DB31\",\n      \"fallback_swap_contract\": \"0xeDc5b89Fe1f0382F9E4316069971D90a0951DB31\",\n      \"nodes\": [\n        {\n          \"url\": \"https://bsc1.cipig.net:18655\"\n        },\n        {\n          \"url\": \"https://bsc3.cipig.net:18655\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/bnb\"\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"KMD-BEP20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "547"
+												},
+												{
+													"key": "date",
+													"value": "Tue, 27 Aug 2024 04:51:50 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":41720342,\"eth_addresses_infos\":{\"0x84ab…b27a\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04ec603f83519cc2150bd99ed0ed6b3f7f029dedff2957cd22542e2504e3d2a7953c084f907cce2f0e26fb0cfc55e06925bf0f88a92b904224dba8ebafdf98ce7b\"}},\"erc20_addresses_infos\":{\"0x84ab…b27a\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04ec603f83519cc2150bd99ed0ed6b3f7f029dedff2957cd22542e2504e3d2a7953c084f907cce2f0e26fb0cfc55e06925bf0f88a92b904224dba8ebafdf98ce7b\",\"tickers\":[\"KMD-BEP20\"]}},\"nfts_infos\":{}},\"id\":null}"
+										},
+										{
+											"name": "MATIC (without NFTs)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "560"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 02 Sep 2024 07:03:56 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"current_block\": 61329088,\n        \"eth_addresses_infos\": {\n            \"0xab95…6498\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\"\n            }\n        },\n        \"erc20_addresses_infos\": {\n            \"0xab95…6498\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\n                \"tickers\": [\n                    \"AAVE-PLG20\",\n                    \"PGX-PLG20\"\n                ]\n            }\n        },\n        \"nfts_infos\": {}\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "MATIC (with NFTs)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "14333"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 02 Sep 2024 07:06:30 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"current_block\": 61329162,\n        \"eth_addresses_infos\": {\n            \"0xab95…6498\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\"\n            }\n        },\n        \"erc20_addresses_infos\": {\n            \"0xab95…6498\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\n                \"tickers\": [\n                    \"PGX-PLG20\",\n                    \"AAVE-PLG20\"\n                ]\n            }\n        },\n        \"nfts_infos\": {\n            \"0xc37d76acc7b9482738ddec4370e6357776ab4619,1\": {\n                \"token_address\": \"0xc37d76acc7b9482738ddec4370e6357776ab4619\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x014ec9f122a9e245fdcd8d04669f6bd9767488e5,1\": {\n                \"token_address\": \"0x014ec9f122a9e245fdcd8d04669f6bd9767488e5\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x004ddffc02c9c20b3abbbe251811302dc578fec3,1\": {\n                \"token_address\": \"0x004ddffc02c9c20b3abbbe251811302dc578fec3\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xb927f724d51c228efac3cf01e54f1bfb72e5d8d8,1\": {\n                \"token_address\": \"0xb927f724d51c228efac3cf01e54f1bfb72e5d8d8\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xb26215cdf9637e58fde65abd4dfca373e9ac347c,1\": {\n                \"token_address\": \"0xb26215cdf9637e58fde65abd4dfca373e9ac347c\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,6\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"6\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x5c652b3213ff76eb6530bcbad38a21e177a61598,1\": {\n                \"token_address\": \"0x5c652b3213ff76eb6530bcbad38a21e177a61598\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xccf0fd8da6fa51ea019775f18d1fbc1bba088536,1\": {\n                \"token_address\": \"0xccf0fd8da6fa51ea019775f18d1fbc1bba088536\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xa0e168fc7965f19ad3f995d61d9a286f95290445,1\": {\n                \"token_address\": \"0xa0e168fc7965f19ad3f995d61d9a286f95290445\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,2\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"2\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x86956aee19a9ccc6526da18c9453597a639a9e67,1\": {\n                \"token_address\": \"0x86956aee19a9ccc6526da18c9453597a639a9e67\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xd5067901dc4eb8d0739cfd6a84b2293141b2bd45,1\": {\n                \"token_address\": \"0xd5067901dc4eb8d0739cfd6a84b2293141b2bd45\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x6d7b49528ee72983625252b9327b5486cd425b76,1\": {\n                \"token_address\": \"0x6d7b49528ee72983625252b9327b5486cd425b76\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x41a69f2c9da47b97bc86774c273dce0e827544d8,1\": {\n                \"token_address\": \"0x41a69f2c9da47b97bc86774c273dce0e827544d8\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x05bbb37a953fd4d18bcadecb09781ec24e90353d,1\": {\n                \"token_address\": \"0x05bbb37a953fd4d18bcadecb09781ec24e90353d\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xe1ab36eda8012483aa947263b7d9a857d9c37e05,32\": {\n                \"token_address\": \"0xe1ab36eda8012483aa947263b7d9a857d9c37e05\",\n                \"token_id\": \"32\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xc037b01261d7638cf0750bba085edfb59a616d37,1\": {\n                \"token_address\": \"0xc037b01261d7638cf0750bba085edfb59a616d37\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xb7350ac5b9326d675dacb3f2e38818c911abe660,1\": {\n                \"token_address\": \"0xb7350ac5b9326d675dacb3f2e38818c911abe660\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xb0e9bb5b186811bb532edecdb47c0a6caea26e44,1\": {\n                \"token_address\": \"0xb0e9bb5b186811bb532edecdb47c0a6caea26e44\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x852688002e14fdf0dd3ecbc0fb6136487cc692d8,1\": {\n                \"token_address\": \"0x852688002e14fdf0dd3ecbc0fb6136487cc692d8\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xe6c61f392ecf1d0abd815099bbcf2a7cbd2eb253,1\": {\n                \"token_address\": \"0xe6c61f392ecf1d0abd815099bbcf2a7cbd2eb253\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xd25f13e4ba534ef625c75b84934689194b7bd59e,14\": {\n                \"token_address\": \"0xd25f13e4ba534ef625c75b84934689194b7bd59e\",\n                \"token_id\": \"14\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC721\",\n                \"amount\": \"1\"\n            },\n            \"0x8d832817a3a94dfd4d1d2cb5d89a347e204fabdc,1\": {\n                \"token_address\": \"0x8d832817a3a94dfd4d1d2cb5d89a347e204fabdc\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xd96284039ca56796bcfa832262f94e3fb69908d4,1\": {\n                \"token_address\": \"0xd96284039ca56796bcfa832262f94e3fb69908d4\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x4f7c7ddd85ca11d957a8968bf94dcefd2d1ad4cd,1\": {\n                \"token_address\": \"0x4f7c7ddd85ca11d957a8968bf94dcefd2d1ad4cd\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xe843809065192c9fe94295315c2a1927f784a460,1\": {\n                \"token_address\": \"0xe843809065192c9fe94295315c2a1927f784a460\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x2953399124f0cbb46d2cbacd8a89cf0599974963,56787087360155483967447526621654293526681839490012288898340565660705956561896\": {\n                \"token_address\": \"0x2953399124f0cbb46d2cbacd8a89cf0599974963\",\n                \"token_id\": \"56787087360155483967447526621654293526681839490012288898340565660705956561896\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"4\"\n            },\n            \"0x8e45865c3766f322f9dd9fa8140a9e7419e0ec15,1\": {\n                \"token_address\": \"0x8e45865c3766f322f9dd9fa8140a9e7419e0ec15\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x0f845992467e901224c964c5e584c0026cdfcecb,1\": {\n                \"token_address\": \"0x0f845992467e901224c964c5e584c0026cdfcecb\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x92aa07d5f242a82eb1a39a41a0eae4d634b85b29,1\": {\n                \"token_address\": \"0x92aa07d5f242a82eb1a39a41a0eae4d634b85b29\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,4\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"4\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x2f10726f7b420ded058e225560832ecfdd692934,1\": {\n                \"token_address\": \"0x2f10726f7b420ded058e225560832ecfdd692934\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x4b81106c7c6d33b78773c749901cfe13341ab194,1\": {\n                \"token_address\": \"0x4b81106c7c6d33b78773c749901cfe13341ab194\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xaa625cfc68d5b2f6dabc8b29f17a9e764595f436,1\": {\n                \"token_address\": \"0xaa625cfc68d5b2f6dabc8b29f17a9e764595f436\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,7\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"7\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xe1d7e6a33d9c4f241652191315c88d3d3daf6ed0,1\": {\n                \"token_address\": \"0xe1d7e6a33d9c4f241652191315c88d3d3daf6ed0\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x2b4f183181215ed49f467c148a7cbed79e4f967f,0\": {\n                \"token_address\": \"0x2b4f183181215ed49f467c148a7cbed79e4f967f\",\n                \"token_id\": \"0\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xac56f690bfcc1f86caccfcf5ffdab5e30a671115,1\": {\n                \"token_address\": \"0xac56f690bfcc1f86caccfcf5ffdab5e30a671115\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xe432debcb66fd0a00efea30eeb5374516d3776a7,1\": {\n                \"token_address\": \"0xe432debcb66fd0a00efea30eeb5374516d3776a7\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x966f1e15249344499953887cb244d9f26989016d,1\": {\n                \"token_address\": \"0x966f1e15249344499953887cb244d9f26989016d\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,8\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"8\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x1016363a2af9c848e9daad19db9dfecbe5316bc3,0\": {\n                \"token_address\": \"0x1016363a2af9c848e9daad19db9dfecbe5316bc3\",\n                \"token_id\": \"0\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x88b04b7fef48677577da7baf0620a1ac0710910b,1\": {\n                \"token_address\": \"0x88b04b7fef48677577da7baf0620a1ac0710910b\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x34b3332a72daf3d19ebe485c6cb6cad5d81f86ab,0\": {\n                \"token_address\": \"0x34b3332a72daf3d19ebe485c6cb6cad5d81f86ab\",\n                \"token_id\": \"0\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x316d73824bc9c60f239d4c57082bcde4bfdf4f7a,3\": {\n                \"token_address\": \"0x316d73824bc9c60f239d4c57082bcde4bfdf4f7a\",\n                \"token_id\": \"3\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x39a54fa042e214d89fd8bcb0f1ad4fd6478c6e6f,1\": {\n                \"token_address\": \"0x39a54fa042e214d89fd8bcb0f1ad4fd6478c6e6f\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf95923992e508ecba70f6a28942006dc7bceeda4,1\": {\n                \"token_address\": \"0xf95923992e508ecba70f6a28942006dc7bceeda4\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xb6b17e34e9970c446eb103d46a7465c078428da2,1\": {\n                \"token_address\": \"0xb6b17e34e9970c446eb103d46a7465c078428da2\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xd99f7be919009c4e99de55298f8c2fb6a9f56d4d,1\": {\n                \"token_address\": \"0xd99f7be919009c4e99de55298f8c2fb6a9f56d4d\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xd2a622e8a45cf65917c92c540fe9c6553f92017e,1\": {\n                \"token_address\": \"0xd2a622e8a45cf65917c92c540fe9c6553f92017e\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf4953888c6c120ebbac848036331ff82beb809aa,1\": {\n                \"token_address\": \"0xf4953888c6c120ebbac848036331ff82beb809aa\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x0aa915b14b30df7589d79746c9d5f6cd39d48707,1\": {\n                \"token_address\": \"0x0aa915b14b30df7589d79746c9d5f6cd39d48707\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x96831c434841b9af60c9ec6d4e6992d89f3a307e,8\": {\n                \"token_address\": \"0x96831c434841b9af60c9ec6d4e6992d89f3a307e\",\n                \"token_id\": \"8\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x359b2d7b1ad60b50a88071b5699bca673dcb9d3c,1\": {\n                \"token_address\": \"0x359b2d7b1ad60b50a88071b5699bca673dcb9d3c\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x8476077092b4a67b58b5358787710f6bb0d3fcaf,0\": {\n                \"token_address\": \"0x8476077092b4a67b58b5358787710f6bb0d3fcaf\",\n                \"token_id\": \"0\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x396849212c0a846c0cf5deb41c9534cdfb111709,1\": {\n                \"token_address\": \"0x396849212c0a846c0cf5deb41c9534cdfb111709\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x2953399124f0cbb46d2cbacd8a89cf0599974963,56787087360155483967447526621654293526681839490012288898340565435306072867816\": {\n                \"token_address\": \"0x2953399124f0cbb46d2cbacd8a89cf0599974963\",\n                \"token_id\": \"56787087360155483967447526621654293526681839490012288898340565435306072867816\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"2\"\n            },\n            \"0x107679bef23a5e5684a66c4d00395cc8f8d71226,0\": {\n                \"token_address\": \"0x107679bef23a5e5684a66c4d00395cc8f8d71226\",\n                \"token_id\": \"0\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xc28a19e9a663d966cf99532bdb1229df1b0e344b,1\": {\n                \"token_address\": \"0xc28a19e9a663d966cf99532bdb1229df1b0e344b\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,5\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"5\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,9\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"9\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x77da7a6e8690bb0b805246f554c3a938d7139710,1\": {\n                \"token_address\": \"0x77da7a6e8690bb0b805246f554c3a938d7139710\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x518948db176e966eda1b10aa3137aba6a626caf9,1\": {\n                \"token_address\": \"0x518948db176e966eda1b10aa3137aba6a626caf9\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x0dc6ff017a62605b3160887675874d0146037686,1\": {\n                \"token_address\": \"0x0dc6ff017a62605b3160887675874d0146037686\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xc06a6ab4c2b0ed14ed5692adf324a9a463259c43,0\": {\n                \"token_address\": \"0xc06a6ab4c2b0ed14ed5692adf324a9a463259c43\",\n                \"token_id\": \"0\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,3\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"3\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,1\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xc6d46a02a73d180a08b985bbfad6441c70e418ec,1\": {\n                \"token_address\": \"0xc6d46a02a73d180a08b985bbfad6441c70e418ec\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xfe86052e0c1e2d770c97699dc1675fd08a94b804,1\": {\n                \"token_address\": \"0xfe86052e0c1e2d770c97699dc1675fd08a94b804\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x959e7680093345df3ec10fafdc01756e4d9ebd2c,1\": {\n                \"token_address\": \"0x959e7680093345df3ec10fafdc01756e4d9ebd2c\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x73a5299824cd955af6377b56f5762dc3ca4cc078,1\": {\n                \"token_address\": \"0x73a5299824cd955af6377b56f5762dc3ca4cc078\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC721\",\n                \"amount\": \"1\"\n            },\n            \"0x3987dfed574927e7a3309758ccf949ad2403fcbb,1\": {\n                \"token_address\": \"0x3987dfed574927e7a3309758ccf949ad2403fcbb\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668,0\": {\n                \"token_address\": \"0xf3fc2a3d15453515039d292d7c0d3d7514a93668\",\n                \"token_id\": \"0\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            },\n            \"0x521ce9d9c66af3ff7abf6f49186ddf0559ed75ed,1\": {\n                \"token_address\": \"0x521ce9d9c66af3ff7abf6f49186ddf0559ed75ed\",\n                \"token_id\": \"1\",\n                \"chain\": \"POLYGON\",\n                \"contract_type\": \"ERC1155\",\n                \"amount\": \"1\"\n            }\n        }\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "AVAX",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"AVAX\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n            {\n                \"url\": \"https://node.komodo.earth:8080/avalanche\",\n                \"gui_auth\": true\n            },\n            {\n                \"url\": \"https://api.avax.network/ext/bc/C/rpc\"\n            },\n            {\n                \"url\": \"https://block-proxy.komodo.earth/rpc/avax\",\n                \"ws_url\": \"wss://block-proxy.komodo.earth/rpc/avax/websocket\"\n            }\n      ],\n      \"erc20_tokens_requests\": [\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "907"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 05 Sep 2024 15:10:58 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":50155792,\"eth_addresses_infos\":{\"0xab95…6498\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\"}},\"erc20_addresses_infos\":{\"0xab95…6498\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\"tickers\":[]}},\"nfts_infos\":{\"0x16742be85e1f51949b80f52ca22f35cb9f5e7478,49\":{\"token_address\":\"0x16742be85e1f51949b80f52ca22f35cb9f5e7478\",\"token_id\":\"49\",\"chain\":\"AVALANCHE\",\"contract_type\":\"ERC721\",\"amount\":\"1\"},\"0xac737748362fbcd78fad7c982018afa164266cbb,307\":{\"token_address\":\"0xac737748362fbcd78fad7c982018afa164266cbb\",\"token_id\":\"307\",\"chain\":\"AVALANCHE\",\"contract_type\":\"ERC721\",\"amount\":\"1\"}}},\"id\":null}"
+										}
+									]
+								}
+							]
+						},
+						{
+							"name": "TENDERMINT",
+							"item": [
+								{
+									"name": "enable_tendermint_token",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"enable_tendermint_token\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"ticker\": \"ATOM-IBC_IRIS\",\r\n        \"activation_params\": {\r\n            \"required_confirmations\": 3\r\n        }\r\n    }\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "enable_tendermint_with_assets",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"enable_tendermint_with_assets\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"ticker\": \"IRIS\",\r\n        \"tx_history\": true,\r\n        \"get_balances\": true,\r\n        \"rpc_urls\": [\r\n            \"https://iris.komodo.earth/\",\r\n            \"https://rpc.irishub-1.irisnet.org\"\r\n        ],\r\n        \"tokens_params\": [\r\n            {\r\n                \"ticker\": \"ATOM-IBC_IRIS\"\r\n            }\r\n        ]\r\n    }\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
 							"name": "get_enabled_coins",
 							"event": [
 								{
@@ -3260,346 +3608,532 @@
 							"response": []
 						}
 					]
-				},				
-                {
-                    "name": "Non Fungible Tokens",
-                    "item": [
-                        {
-                            "name": "get_nft_list",
-                            "event": [
-                                {
-                                    "listen": "prerequest",
-                                    "script": {
-                                        "exec": [
-                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
-                                            ""
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"chains\": [\n            \"POLYGON\"\n        ]\n    }\n}",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{address}}",
-                                    "host": [
-                                        "{{address}}"
-                                    ]
-                                },
-                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
-                            },
-                            "response": [
-                                {
-                                    "name": "Example with optional limit & page_number params",
-                                    "originalRequest": {
-                                        "method": "POST",
-                                        "header": [],
-                                        "body": {
-                                            "mode": "raw",
-                                            "raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"chains\": [\n        \"BSC\",\n        \"POLYGON\"\n      ],\n      \"limit\": 1,\n      \"page_number\": 2\n    }\n  }",
-                                            "options": {
-                                                "raw": {
-                                                    "language": "json"
-                                                }
-                                            }
-                                        },
-                                        "url": {
-                                            "raw": "{{address}}",
-                                            "host": [
-                                                "{{address}}"
-                                            ]
-                                        },
-                                        "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
-                                    },
-                                    "_postman_previewlanguage": "JSON",
-                                    "header": null,
-                                    "cookie": [],
-                                    "body": null
-                                },
-                                {
-                                    "name": "Example with spam protection",
-                                    "originalRequest": {
-                                        "method": "POST",
-                                        "header": [],
-                                        "body": {
-                                            "mode": "raw",
-                                            "raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"chains\": [\n            \"BSC\",\n            \"POLYGON\"\n        ],\n        \"protect_from_spam\": true,\n        \"filters\": {\n            \"exclude_spam\": true,\n            \"exclude_phishing\": true\n        }\n    }\n}",
-                                            "options": {
-                                                "raw": {
-                                                    "language": "json"
-                                                }
-                                            }
-                                        },
-                                        "url": {
-                                            "raw": "{{address}}",
-                                            "host": [
-                                                "{{address}}"
-                                            ]
-                                        },
-                                        "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
-                                    },
-                                    "_postman_previewlanguage": "JSON",
-                                    "header": null,
-                                    "cookie": [],
-                                    "body": null
-                                }
-                            ]
-                        },
-                        {
-                            "name": "get_nft_transfers",
-                            "event": [
-                                {
-                                    "listen": "prerequest",
-                                    "script": {
-                                        "exec": [
-                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
-                                            ""
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"get_nft_transfers\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"chains\": [\n      \"POLYGON\"\n    ],\n    \"max\": true,\n    \"filters\": {\n      \"send\": true,\n      \"from_date\": 1690890685\n    }\n  }\n}\n",
-                                    "options": {
-                                        "raw": {
-                                            "language": "text"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{address}}",
-                                    "host": [
-                                        "{{address}}"
-                                    ]
-                                },
-                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers)"
-                            },
-                            "response": []
-                        },
-                        {
-                            "name": "get_nft_metadata",
-                            "event": [
-                                {
-                                    "listen": "prerequest",
-                                    "script": {
-                                        "exec": [
-                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
-                                            ""
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"get_nft_metadata\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"token_address\": \"0x2953399124f0cbb46d2cbacd8a89cf0599974963\",\n    \"token_id\": \"110473361632261669912565539602449606788298723469812631769659886404530570536720\",\n    \"chain\": \"POLYGON\"\n  }\n}",
-                                    "options": {
-                                        "raw": {
-                                            "language": "text"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{address}}",
-                                    "host": [
-                                        "{{address}}"
-                                    ]
-                                },
-                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata)"
-                            },
-                            "response": []
-                        },
-                        {
-                            "name": "refresh_nft_metadata",
-                            "event": [
-                                {
-                                    "listen": "prerequest",
-                                    "script": {
-                                        "exec": [
-                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
-                                            ""
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"refresh_nft_metadata\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"token_address\": \"0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff\",\n    \"token_id\": \"5\",\n    \"chain\": \"POLYGON\",\n    \"url\": \"https://moralis-proxy.komodo.earth\",\n    \"url_antispam\": \"https://nft.antispam.dragonhound.info\"\n  }\n}\n\n",
-                                    "options": {
-                                        "raw": {
-                                            "language": "text"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{address}}",
-                                    "host": [
-                                        "{{address}}"
-                                    ]
-                                },
-                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata)"
-                            },
-                            "response": []
-                        },
-                        {
-                            "name": "update_nft",
-                            "event": [
-                                {
-                                    "listen": "prerequest",
-                                    "script": {
-                                        "exec": [
-                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
-                                            ""
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"update_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"chains\": [\n      \"BSC\",\n      \"POLYGON\"\n    ],\n    \"url\": \"https://moralis-proxy.komodo.earth\",\n    \"url_antispam\": \"https://nft.antispam.dragonhound.info\"\n  }\n}\n",
-                                    "options": {
-                                        "raw": {
-                                            "language": "text"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{address}}",
-                                    "host": [
-                                        "{{address}}"
-                                    ]
-                                },
-                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#update-nft](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#update-nft)"
-                            },
-                            "response": []
-                        },
-                        {
-                            "name": "withdraw_nft",
-                            "event": [
-                                {
-                                    "listen": "prerequest",
-                                    "script": {
-                                        "exec": [
-                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
-                                            ""
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"type\": \"withdraw_erc721\",\n    \"withdraw_data\": {\n        \"chain\": \"POLYGON\",\n        \"to\": \"0x27Ad1F808c1ef82626277Ae38998AfA539565660\",\n        \"token_address\": \"0x73a5299824cd955af6377b56f5762dc3ca4cc078\",\n        \"token_id\": \"1\"\n    }\n  }\n}\n",
-                                    "options": {
-                                        "raw": {
-                                            "language": "text"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{address}}",
-                                    "host": [
-                                        "{{address}}"
-                                    ]
-                                },
-                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts)"
-                            },
-                            "response": []
-                        },
-                        {
-                            "name": "withdraw_nft (erc1155)",
-                            "event": [
-                                {
-                                    "listen": "prerequest",
-                                    "script": {
-                                        "exec": [
-                                            "pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
-                                            ""
-                                        ],
-                                        "type": "text/javascript"
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [],
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"type\": \"withdraw_erc1155\",\n    \"withdraw_data\": {\n      \"chain\": \"POLYGON\",\n      \"to\": \"0x27Ad1F808c1ef82626277Ae38998AfA539565660\",\n      \"token_address\": \"0x2953399124f0cbb46d2cbacd8a89cf0599974963\",\n      \"token_id\": \"110473361632261669912565539602449606788298723469812631769659886404530570536720\",\n      \"amount\": \"1\"\n    }\n  }\n}",
-                                    "options": {
-                                        "raw": {
-                                            "language": "text"
-                                        }
-                                    }
-                                },
-                                "url": {
-                                    "raw": "{{address}}",
-                                    "host": [
-                                        "{{address}}"
-                                    ]
-                                },
-                                "description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example)"
-                            },
-                            "response": [
-                                {
-                                    "name": "erc1155",
-                                    "originalRequest": {
-                                        "method": "POST",
-                                        "header": [],
-                                        "body": {
-                                            "mode": "raw",
-                                            "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"withdraw_type\": {\n      \"type\": \"withdraw_erc721\",\n      \"withdraw_data\": {\n        \"chain\": \"BSC\",\n        \"to\": \"0x6FAD0eC6bb76914b2a2a800686acc22970645820\",\n        \"token_address\": \"0xfd913a305d70a60aac4faac70c739563738e1f81\",\n        \"token_id\": \"214300044414\"\n      }\n    }\n  }\n}\n",
-                                            "options": {
-                                                "raw": {
-                                                    "language": "text"
-                                                }
-                                            }
-                                        },
-                                        "url": {
-                                            "raw": "{{address}}",
-                                            "host": [
-                                                "{{address}}"
-                                            ]
-                                        }
-                                    },
-                                    "_postman_previewlanguage": null,
-                                    "header": null,
-                                    "cookie": [],
-                                    "body": null
-                                }
-                            ]
-                        }
-                    ]
-                },
+				},
+				{
+					"name": "Non Fungible Tokens",
+					"item": [
+						{
+							"name": "get_nft_list",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"chains\": [\n            \"POLYGON\"\n        ]\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								},
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+							},
+							"response": [
+								{
+									"name": "Example with optional limit & page_number params",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"chains\": [\n        \"BSC\",\n        \"POLYGON\"\n      ],\n      \"limit\": 1,\n      \"page_number\": 2\n    }\n  }",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										},
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+									},
+									"_postman_previewlanguage": "JSON",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								},
+								{
+									"name": "Example with spam protection",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_nft_list\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"chains\": [\n            \"BSC\",\n            \"POLYGON\"\n        ],\n        \"protect_from_spam\": true,\n        \"filters\": {\n            \"exclude_spam\": true,\n            \"exclude_phishing\": true\n        }\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										},
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+									},
+									"_postman_previewlanguage": "JSON",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "get_nft_transfers",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"get_nft_transfers\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"chains\": [\n      \"POLYGON\"\n    ],\n    \"max\": true,\n    \"filters\": {\n      \"send\": true,\n      \"from_date\": 1690890685\n    }\n  }\n}\n",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								},
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers)"
+							},
+							"response": []
+						},
+						{
+							"name": "get_nft_metadata",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"get_nft_metadata\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"token_address\": \"0x2953399124f0cbb46d2cbacd8a89cf0599974963\",\n    \"token_id\": \"110473361632261669912565539602449606788298723469812631769659886404530570536720\",\n    \"chain\": \"POLYGON\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								},
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata)"
+							},
+							"response": []
+						},
+						{
+							"name": "refresh_nft_metadata",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"refresh_nft_metadata\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"token_address\": \"0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff\",\n    \"token_id\": \"5\",\n    \"chain\": \"POLYGON\",\n    \"url\": \"https://moralis-proxy.komodo.earth\",\n    \"url_antispam\": \"https://nft.antispam.dragonhound.info\"\n  }\n}\n\n",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								},
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata)"
+							},
+							"response": []
+						},
+						{
+							"name": "update_nft",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"update_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"chains\": [\n      \"POLYGON\"\n    ],\n    \"proxy_auth\": false,\n    \"url\": \"https://moralis-proxy.komodo.earth\",\n    \"url_antispam\": \"https://nft.antispam.dragonhound.info\"\n  }\n}\n",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								},
+								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/)"
+							},
+							"response": [
+								{
+									"name": "update_nft",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"update_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"chains\": [\n      \"POLYGON\",\n      \"BSC\"\n    ],\n    \"proxy_auth\": false,\n    \"url\": \"https://moralis-proxy.komodo.earth\",\n    \"url_antispam\": \"https://nft.antispam.dragonhound.info\"\n  }\n}\n",
+											"options": {
+												"raw": {
+													"language": "text"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "39"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 27 Aug 2024 04:49:58 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":null,\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "withdraw_nft",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"type\": \"withdraw_erc721\",\n    \"withdraw_data\": {\n        \"chain\": \"POLYGON\",\n        \"to\": \"0x27Ad1F808c1ef82626277Ae38998AfA539565660\",\n        \"token_address\": \"0x73a5299824cd955af6377b56f5762dc3ca4cc078\",\n        \"token_id\": \"1\"\n    }\n  }\n}\n",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								},
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts)"
+							},
+							"response": []
+						},
+						{
+							"name": "withdraw_nft (erc1155)",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"type\": \"withdraw_erc1155\",\n    \"withdraw_data\": {\n      \"chain\": \"POLYGON\",\n      \"to\": \"0x27Ad1F808c1ef82626277Ae38998AfA539565660\",\n      \"token_address\": \"0x2953399124f0cbb46d2cbacd8a89cf0599974963\",\n      \"token_id\": \"110473361632261669912565539602449606788298723469812631769659886404530570536720\",\n      \"amount\": \"1\"\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								},
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example)"
+							},
+							"response": [
+								{
+									"name": "erc1155",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"withdraw_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"withdraw_type\": {\n      \"type\": \"withdraw_erc721\",\n      \"withdraw_data\": {\n        \"chain\": \"BSC\",\n        \"to\": \"0x6FAD0eC6bb76914b2a2a800686acc22970645820\",\n        \"token_address\": \"0xfd913a305d70a60aac4faac70c739563738e1f81\",\n        \"token_id\": \"214300044414\"\n      }\n    }\n  }\n}\n",
+											"options": {
+												"raw": {
+													"language": "text"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"_postman_previewlanguage": "Text",
+									"header": [],
+									"cookie": [],
+									"body": ""
+								}
+							]
+						},
+						{
+							"name": "clear_nft_db",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"clear_nft_db\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"clear_all\": true,\n    \"chains\": [\"POLYGON\", \"FANTOM\", \"ETH\", \"BSC\", \"AVALANCHE\"]\n  }\n}\n",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								},
+								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/"
+							},
+							"response": [
+								{
+									"name": "clear_nft_db (clear all)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"clear_nft_db\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"clear_all\": true\n  }\n}\n",
+											"options": {
+												"raw": {
+													"language": "text"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "39"
+										},
+										{
+											"key": "date",
+											"value": "Fri, 23 Aug 2024 09:25:32 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":null,\"id\":null}"
+								},
+								{
+									"name": "clear_nft_db (by chains)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"clear_nft_db\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"chains\": [\"BSC\"]\n  }\n}\n",
+											"options": {
+												"raw": {
+													"language": "text"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "39"
+										},
+										{
+											"key": "date",
+											"value": "Fri, 23 Aug 2024 09:26:31 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":null,\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "enable_nft",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"enable_nft\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"ticker\": \"NFT_MATIC\",\n    \"activation_params\": {\n      \"provider\":{\n        \"type\": \"Moralis\",\n        \"info\": {\n          \"url\": \"https://moralis-proxy.komodo.earth\",\n          \"proxy_auth\": true\n        }\n      }\n    }\n  }\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
 				{
 					"name": "Wallet",
 					"item": [
@@ -7922,6 +8456,12 @@
 					]
 				}
 			]
+		}
+	],
+	"variable": [
+		{
+			"key": "userpass",
+			"value": ""
 		}
 	]
 }
