@@ -221,15 +221,13 @@ The idea is that people send funds to the faucet by locking it in faucet's globa
 
 There are only 7 functions in [faucet.cpp](https://github.com/jl777/komodo/blob/jl777/src/cc/faucet.cpp), a bit over 200 lines including comments. The first three are for validation, the last four for the rpc calls to use.
 
-<Note>
-  *   int64\_t IsFaucetvout(struct CCcontract\_info \*cp,const CTransaction& tx,int32\_t v)
-  *   bool FaucetExactAmounts(struct CCcontract\_info *cp,Eval* eval,const CTransaction \&tx,int32\_t minage,uint64\_t txfee)
-  *   bool FaucetValidate(struct CCcontract\_info *cp,Eval* eval,const CTransaction \&tx)
-  *   int64\_t AddFaucetInputs(struct CCcontract\_infoCC\_info \*cp,CMutableTransaction \&mtx,CPubKey pk,int64\_t total,int32\_t maxinputs)
-  *   std::string FaucetGet(uint64\_t txfee)
-  *   std::string FaucetFund(uint64\_t txfee,int64\_t funds)
-  *   UniValue FaucetInfo()
-</Note>
+*   int64\_t IsFaucetvout(struct CCcontract\_info \*cp,const CTransaction& tx,int32\_t v)
+*   bool FaucetExactAmounts(struct CCcontract\_info *cp,Eval* eval,const CTransaction \&tx,int32\_t minage,uint64\_t txfee)
+*   bool FaucetValidate(struct CCcontract\_info *cp,Eval* eval,const CTransaction \&tx)
+*   int64\_t AddFaucetInputs(struct CCcontract\_infoCC\_info \*cp,CMutableTransaction \&mtx,CPubKey pk,int64\_t total,int32\_t maxinputs)
+*   std::string FaucetGet(uint64\_t txfee)
+*   std::string FaucetFund(uint64\_t txfee,int64\_t funds)
+*   UniValue FaucetInfo()
 
 Functions in `rpcwallet` implement:
 
@@ -518,13 +516,11 @@ vout.n-1: opreturn 'W' sbits fundingtxid hentropy proof
 same as winner, just without hentropy or proof
 ```
 
-<Note type="warning">
-  There is an attack vector that precludes betting any large amounts, it goes as follows:
+There is an attack vector that precludes betting any large amounts, it goes as follows:
 
-  *   Do dicebet to get the house entropy revealed
-  *   Calculate bettor entropy that would win against the house entropy
-  *   Reorg the chain and make a big bet using the winning entropy calculated in 2.
-</Note>
+*   Do dicebet to get the house entropy revealed
+*   Calculate bettor entropy that would win against the house entropy
+*   Reorg the chain and make a big bet using the winning entropy calculated in 2.
 
 In order to mitigate this, the disclosure of the house entropy needs to be delayed beyond a reasonable reorg depth (notarization). It is recommended for production dice games with significant amounts of money to use such a delayed disclosure method.
 export const title = "Chapter 10 - Channels Example";
@@ -534,9 +530,7 @@ export const description = "Learn about the Channels example, a powerful CC cont
 
 It might be hard to believe, but channels CC implements an instant payment mechanism that is secured by dPoW in a way that is backward compatible with the existing wallets, explorers, etc. and channels CC does not require both nodes to be online. Its usecases are all the usecases for Lightning Network, it is just more secure, less expensive and backward compatible! The one aspect which some might consider a downside (and others another benefit) is that all payments are onchain. This means it would increase blockchain size, but the idea is for channels CC to be used on blockchains with relatively lower value coins, so a txfee of 0.0001 is not anything significant.
 
-<Note type="warning">
-  Very confusing blockchain reorganization issues described below. Will be confusing to most people
-</Note>
+Very confusing blockchain reorganization issues described below. Will be confusing to most people
 
 From a distance, the blockchain is a chain of blocks. One block after the next, each referencing all the prior blocks. Each block containing a group of transactions. Prior to getting into a block, the transactions are broadcast to the network and if it is valid, it enters the memory pool. Each miner then constructs a valid block from these memory pool transactions and when a transaction gets mined (confirmed), it is removed from the memory pool.
 
@@ -916,16 +910,12 @@ This document will be heavily example based so it will utilize many of the exist
 I hope this document will help you understand what a Komodo utxo based CC contract is and how it is different from the other smart contracts. If you are able to dive into the [cc directory](https://github.com/jl777/komodo/tree/FSM/src/cc/) and start making your own CC contract after reading this document, then I am very happy!
 
 This section contains the following docs:
-
-<TocForIndex />
 export const title = "Historical Documentation"
 export const description = "This section contains content that is interesting historically and may not have much necessity to be perused at this time."
 
 # Historical Documentation
 
 This section of the documentation contains content that is interesting historically and may not have much necessity to be perused at this time.
-
-<TocForIndex />
 export const title = "Whitepaper: Chapter-1";
 export const description = "Explore the foundations of blockchain security, including PoW and the Double Spend problem, and discover how Komodo's dPoW technology enhances security.";
 
@@ -988,9 +978,7 @@ the Internet. These devices will share the transaction information with other de
 supporting the cryptocurrency network. For this discussion, we need only focus on
 one type of device: a cryptocurrency miner.
 
-<Note>
-  The following descriptions are simplified explanations of a truly complex byzantine process. There are many other strategies cryptocurrency miners devise to out-mine their competition, and those strategies can vary widely.
-</Note>
+The following descriptions are simplified explanations of a truly complex byzantine process. There are many other strategies cryptocurrency miners devise to out-mine their competition, and those strategies can vary widely.
 
 ### A Miner Competes to Add Blocks to the Network’s History, in Exchange for a Reward
 
@@ -1229,9 +1217,7 @@ On a surface level, this rule prevents a double spend by a network user. For ins
 consider a husband and wife accidentally attempting to spend the same money at the
 exact same time, while each person is traveling in a different part of the world.
 
-<Note>
-  For the sake of the discussion, we are oversimplifying the following actions so that they take place within only a few milliseconds. We also oversimplify the technical details, for clarity. The full explanation of this process is provided in the [Bitcoin wiki](https://en.bitcoin.it/wiki/Main_Page), for those who would like to gain a deeper understanding.
-</Note>
+For the sake of the discussion, we are oversimplifying the following actions so that they take place within only a few milliseconds. We also oversimplify the technical details, for clarity. The full explanation of this process is provided in the [Bitcoin wiki](https://en.bitcoin.it/wiki/Main_Page), for those who would like to gain a deeper understanding.
 
 ### A Tale of Two Blockchains
 
@@ -1903,9 +1889,7 @@ of the most crucial attacks—the 51% Attack and the Genesis Attack.
 In a separate technical white paper, written by our lead developer, we provide
 several more discussions on how Komodo responds to many other forms of attack.
 
-<Note>
-  Some of this earlier paper is now deprecated, and therefore it has been removed from most locations on our website. There remain relevant sections regarding Komodo’s protections against various other attacks. Please reach out to our team directly for a copy of this white paper, if interested.
-</Note>
+Some of this earlier paper is now deprecated, and therefore it has been removed from most locations on our website. There remain relevant sections regarding Komodo’s protections against various other attacks. Please reach out to our team directly for a copy of this white paper, if interested.
 
 Some mentioned therein include the Sybil Attack, the Eclipse Attack, and more. We
 encourage any reader searching for information about the deepest levels of Komodo
@@ -2355,9 +2339,7 @@ enter the following command on the second device.
 Note that the first three elements of the command, \[./komodod], \[-ac\_name], and
 \[-ac\_supply], are the same. It is important that the parameters inserted into these commands match exactly. Otherwise, the instances of Komodod running on the separate devices will ignore each other, and the coin will not be mined.
 
-<Note>
-  In the second VPS, the \[-gen] command is not present. In this circumstance, we are assuming that the entrepreneur wants to capture the entire coin supply on the first device. Technically speaking, assuming the entrepreneur has ownership over both devices, it does not matter if both devices initiate the \[-gen] command. Both devices will attempt to mine the first block and the superior device will receive the coin supply.
-</Note>
+In the second VPS, the \[-gen] command is not present. In this circumstance, we are assuming that the entrepreneur wants to capture the entire coin supply on the first device. Technically speaking, assuming the entrepreneur has ownership over both devices, it does not matter if both devices initiate the \[-gen] command. Both devices will attempt to mine the first block and the superior device will receive the coin supply.
 
 There is another key difference in the command.
 
@@ -2590,10 +2572,8 @@ by the Iguana Core codebase. This enables a powerful combination of features.
 
 The following page is a high-level discussion of one method that Iguana Core supports the fluidity of the Komodo ecosystem. Newcomers to the cryptocurrency industry and those who are not familiar with developer language may find this section too challenging to understand. We welcome the reader to simply read the two warnings below, and then to skip to the next section.
 
-<Note type="warning">
-  *   Some of the features that Iguana Core enables are highly advanced, and therefore users interacting with BarterDEX and other Iguana-compatible GUI software applications should always perform proper research and exercise caution.
-  *   The important thing for users to understand is that they should be careful not to spend the same funding in two different standalone apps. In other words, if they are trading with funds in a BarterDEX GUI, they should not also try to spend those funds in their Agama Wallet (or another Iguana- compatible wallet). Instead, they should wait for both apps to be in sync before moving forward.
-</Note>
+*   Some of the features that Iguana Core enables are highly advanced, and therefore users interacting with BarterDEX and other Iguana-compatible GUI software applications should always perform proper research and exercise caution.
+*   The important thing for users to understand is that they should be careful not to spend the same funding in two different standalone apps. In other words, if they are trading with funds in a BarterDEX GUI, they should not also try to spend those funds in their Agama Wallet (or another Iguana- compatible wallet). Instead, they should wait for both apps to be in sync before moving forward.
 
 One specific feature is a specialty wallet that can manage and trade among a multiplicity of different blockchain coins. To explain the significance of this multi-coin wallet feature, let us observe how a standalone GUI app formerly interacted with cryptocurrencies.
 
@@ -2819,9 +2799,7 @@ We emphasize to users here that the process of performing these actions over a p
 
 Assuming Alice and Bob are successfully connected, the process from this point forward becomes quite simple:
 
-<Note>
-  In some cases, it is possible to perform an atomic swap with fewer steps, but for the sake of brevity we will focus only on this scenario.
-</Note>
+In some cases, it is possible to perform an atomic swap with fewer steps, but for the sake of brevity we will focus only on this scenario.
 
 A summary of the procedure:
 
@@ -2960,9 +2938,7 @@ Assuming everything successfully validates, the Alice-side protocol sends a "con
 
 Between the "request" being sent and the "reserved" packet being received there is a 10-second timeout which prevents Alice from making further trade requests. This gives BarterDEX the time necessary to perform all the calculations.
 
-<Note>
-  This 10-second timeout also provides a contribution to what we call "whale resistance" during the Komodo dICO process. Whale resistance is a way Komodo and BarterDEX resist "whales" from purchasing an entire coin supply and thus forcing an artificial market scarcity.
-</Note>
+This 10-second timeout also provides a contribution to what we call "whale resistance" during the Komodo dICO process. Whale resistance is a way Komodo and BarterDEX resist "whales" from purchasing an entire coin supply and thus forcing an artificial market scarcity.
 
 The Bob-side protocol now validates Alice’s "connect" packet and, assuming everything is in order, the protocol starts a new Bob-side thread of code, thus beginning the actual atomic swap. The Alice-side protocol also receives the "connect" packet, verifies, and then starts an Alice-side thread of code.
 
@@ -3028,9 +3004,7 @@ When considering how prices compare between two cryptocurrencies, BarterDEX uses
 
 To construct a public orderbook, a node needs to have price information. Since BarterDEX communicates primarily by means of pubkeys, the price for each currency must naturally be obtained from a pubkey. In the long run, for orderbook performance, we will need a specific `<txid>/<vout>` for each node, as each individual node could have hundreds of UTXOs. Currently, propagating all this information globally would use an excessive amount of bandwidth, so we therefore use a different solution. BarterDEX instead uses a hierarchical orderbook, where the skeleton of the orderbook is simply the (pubkey)/(price) for any (base)/(relevant) pair.
 
-<Note>
-  This means that purchasing a cryptocurrency at the (base)/(relevant) price is directly comparable to selling the cryptocurrency using (relevant)/(base) at a ratio of 1/(price).
-</Note>
+This means that purchasing a cryptocurrency at the (base)/(relevant) price is directly comparable to selling the cryptocurrency using (relevant)/(base) at a ratio of 1/(price).
 
 Using the (pubkey)/(price) pairing, all that is needed to populate the orderbook skeleton is for nodes to broadcast their pubkey and price for any (base)/(rel) pair. Nodes that are running a local coin daemon therefore broadcast their lists of UTXOs, which helps to propagate the orderbook. All of this is done in the background, on-demand.
 
@@ -3063,9 +3037,7 @@ Looking past our upcoming immediate dICOs, BarterDEX will continue to evolve. Th
 export const title = "Whitepaper: Chapter-7";
 export const description = "The features described on this page are deprecated and no longer available.";
 
-<Note>
-  The features described on this page are deprecated and no longer available.
-</Note>
+The features described on this page are deprecated and no longer available.
 
 # Abstract (Jumblr)
 
@@ -3207,10 +3179,8 @@ the chosen `<KMDaddress>`. So long as Komodod has access to the private keys of 
 "jumblr\_deposit `<KMDaddress>`" and Jumblr begins watching for and processing any
 funds in the `<KMDaddress>`.
 
-<Note>
-  *   We call a transparent address a "T address." These are fully accessible to the user, and they are the means of conducting normal transactions. All currency entering and leaving a T address is fully visible to the network.
-  *   On the other hand, we call a privacy-enabled address a "Z address," as they utilize the Zcash parameters and zk-SNARK technology. Z addresses are internal to the Jumblr process and a user typically does not directly interact with them.
-</Note>
+*   We call a transparent address a "T address." These are fully accessible to the user, and they are the means of conducting normal transactions. All currency entering and leaving a T address is fully visible to the network.
+*   On the other hand, we call a privacy-enabled address a "Z address," as they utilize the Zcash parameters and zk-SNARK technology. Z addresses are internal to the Jumblr process and a user typically does not directly interact with them.
 
 The first step Jumblr takes is to move the user’s funds from a T address to a Z
 address.
@@ -3293,9 +3263,7 @@ KMD. It then breaks down the remainder into quantities of \~100 KMD, and then th
 remainder thereafter into quantities of \~10 KMD. Any final remainder (which would
 be anything less than \~10 KMD) is ignored.
 
-<Note>
-  Jumblr also automatically extracts its 0.3% overall fee during the Jumblr process.
-</Note>
+Jumblr also automatically extracts its 0.3% overall fee during the Jumblr process.
 
 Therefore, the total amount is broken down into lot sizes of \~7770 KMD, \~100
 KMD, and \~10 KMD.
@@ -3695,8 +3663,6 @@ the course of reading this material, please reach out to our team directly. You 
 find our contact information on our accompanying website: [https://komodoplatform.com/en/](https://komodoplatform.com/en/)
 
 This section contains the following docs:
-
-<TocForIndex />
 export const title = "Acknowledgements and References";
 export const description = "This page has acknowledgements and references used in the whitepaper.";
 

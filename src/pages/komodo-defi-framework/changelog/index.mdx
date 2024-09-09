@@ -1,7 +1,156 @@
 export const title = "ChangeLog";
-export const description = "Find the Changelogs of various versions of Komodo DeFi Framework  on this page.";
+export const description =
+  "Find the Changelogs of various versions of Komodo DeFi Framework  on this page.";
 
 # Change Log
+
+## Komodo DeFi Framework v2.1.0-beta
+
+### Essential New Features: Trading Protocol Upgrade, HD Wallet, Event Streaming, and Seeds Management
+
+This release introduces a range of significant features designed to enhance the framework’s capabilities. The trading protocol has been upgraded to boost the security and reliability of swaps. HD Wallets have been integrated to enhance privacy and streamline address management for both UTXO and EVM chains. Event Streaming has been implemented to provide clients with real-time balance updates, with more real-time events planned for future updates. Seed Management has been enhanced to ensure robust seed generation and storage. These features are complemented by advancements in the NFT feature, expanded chain support for Trezor, fee improvements, ARRR/Pirate support in browser environments, and updates to the Tendermint protocol that facilitate integration with external wallets.
+
+### Release Notes
+
+#### Features:
+
+*   **Trading Protocol Upgrade:**
+
+    *   A major upgrade to the trading protocol (enabled with `"use_trading_proto_v2": true`) was implemented by @artemii235 in several PRs. This upgrade is currently available only for UTXO/UTXO swaps. All other swap types are not yet supported with this new protocol.
+
+    *   This upgrade introduces significant enhancements:
+
+        *   Immediate refund handling for taker payments, including DEX fee refunds, and subsequent immediate maker payment refunds, effectively solving maker/taker backout issues.
+        *   New RPCs: `my_swap_status`, `my_recent_swaps`, and `active_swaps` V2.
+        *   Upgraded swap data is also accessible through V1 RPCs.
+        *   *Important note:* Seednodes must be updated to support and rebroadcast new swap protocol messages.
+
+    *   **Relevant PRs:** [#1927](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1927), [#1958](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1958), [#1980](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1980), [#2015](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2015), [#2046](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2046).
+
+*   **HD Wallet:**
+
+    *   HD wallet functionalities were fully implemented by @shamardy for UTXO and EVM coins, allowing users to enable the feature with `"enable_hd": true`. For Tendermint and Pirate coins, only a single address is supported, following the BIP32/39/44 standards.
+
+    *   This implementation simplifies the process of importing mnemonics from other wallets into the Komodo DeFi Framework (KDF), enabling users to retain their balances, transaction history, and more.
+
+    *   Users can now manage multiple addresses for UTXO and EVM coins, enhancing flexibility and control. The `path_to_address` parameter was added to coin activation requests to set the default account'/change/address\_index path used for swaps. If not provided, the default path will be 0'/0/0.
+
+    *   HD withdrawals from any account'/change/address\_index path were added for UTXO, EVM, Tendermint, and ARRR coins.
+
+    *   Address scanning for balances is supported through the `scan_for_new_addresses` RPC, and users can manage their HD wallet with new RPCs such as `account_balance`, `get_new_address`, and `create_new_account`.
+
+    *   These RPCs (`scan_for_new_addresses`, `account_balance`, `get_new_address`, and `create_new_account`) can be managed through the task manager using `task::<rpc-name>::(init, cancel, status)`.
+
+    *   For full HD wallet functionalities, including balance scanning and withdrawals, use task manager-enabled methods like `task::enable_eth::init`, `task::enable_qtum::init`, `task::enable_utxo::init`, `task::enable_erc20::init`, and manage tasks through `task::<rpc-name>::(init, cancel, status)`.
+
+    *   Task manager withdrawals are also supported using `task::withdraw::init`.
+
+    *   **Relevant PRs:** [#1933](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1933), [#1962](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1962).
+
+*   **Event Streaming:**
+
+    *   Streaming channels using Server-Sent Events (SSE) to continuously send data to clients were implemented by @onur-ozkan in several PRs. This feature supports various event types, including P2P network events, coin balance events, error events, and heartbeat events.
+
+    *   **P2P network events**: Streaming real-time updates about the network status.
+
+    *   **Coin balance events**: For UTXOs, EVM, ARRR/Pirate by @borngraced, and Tendermint Protocols, providing continuous balance updates.
+
+    *   **Error events**: Emitted when there's an error in generating an event, ensuring robust monitoring.
+
+    *   **Heartbeat events**: Periodic notifications about the health of the streaming channel.
+
+    *   For WebAssembly (Wasm), event streaming uses Shared Workers instead of SSE, enabling a more flexible and efficient event handling mechanism.
+        *   SharedWorker support was added, allowing any worker path in `event_stream_configuration`, with a default to `event_streaming_worker.js`.
+        *   To handle broadcasted messages from the client side, an event listener must be implemented within the client browser environment to capture and process these events as they are streamed.
+
+    *   To utilize this feature, the `event_stream_configuration` needs to be added to the KDF config before starting.
+
+    *   **Relevant PRs:** [#1945](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1945), [#1978](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1978), [#2013](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2013), [#2041](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2041), [#2058](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2058), [#2076](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2076), [#2080](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2080).
+
+*   **Seed Management:**
+
+    *   Seed generation, encryption, and storage were implemented by @shamardy, introducing secure methods for seed handling, including strong encryption and key derivation techniques.
+
+    *   Introduced a new `get_mnemonic` API for retrieving mnemonics as plaintext or encrypted.
+
+    *   Added support for a `wallet_name` parameter in the configuration, enabling KDF to handle seed management.
+        *   If `wallet_name` is used, `wallet_password` must be provided, allowing for encrypted storage and retrieval of mnemonics.
+        *   If no mnemonic is provided, a new one is generated, encrypted, and stored.
+        *   Existing mnemonics can be imported and encrypted, or mnemonics can be imported in an encrypted format.
+
+    *   Introduced a global database for storing encrypted mnemonics and wallet names, separate from individual wallet-specific databases.
+
+    *   Seed management is fully integrated within KDF when `wallet_name` config parameter is used, bypassing the need for external mnemonic handling.
+
+    *   **Relevant PRs:** [#2014](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2014), [#1939](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1939).
+
+### NB - Backwards compatibility breaking changes
+
+*   The `mm2` binaries have been renamed to `kdf`, with backward-compatible copies provided for `mm2` naming. However, WASM binaries use the `kdf` naming only, which is a breaking change. [#2126](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2126) by @shamardy
+
+### New Contributors
+
+*   @mariocynicys made their first contribution in [https://github.com/KomodoPlatform/komodo-defi-framework/pull/2061](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2061)
+*   @r2st made their first contribution in [https://github.com/KomodoPlatform/komodo-defi-framework/pull/2091](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2091)
+*   @CharlVS made their first contribution in [https://github.com/KomodoPlatform/komodo-defi-framework/pull/2163](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2163)
+
+**Full Changelog**: [https://github.com/KomodoPlatform/komodo-defi-framework/compare/v2.0.0-beta...v2.1.0-beta](https://github.com/KomodoPlatform/komodo-defi-framework/compare/v2.0.0-beta...v2.1.0-beta)
+
+### Enhancements:
+
+*   **KMD Burn:**
+    *   KMD dex fee burn for upgraded swaps was added. [#2046](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2046) by @artemii235
+*   **Network Enhancements:**
+    *   A new `sign_raw_transaction` RPC was added for UTXO and EVM coins, facilitating future air-gapped wallet implementations. [#1930](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1930) by @dimxy
+*   **Hardware Wallet:**
+    *   Trezor now supports SegWit for withdrawals. [#1984](https://github.com/KomodoPlatform/atomicDEX-API/pull/1984) by @dimxy
+    *   Trezor support was added for EVM coins/tokens using task manager activation methods. [#1962](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1962) by @dimxy
+    *   Support for unsigned Tendermint transactions using Ledger's Keplr extension was added, excluding HTLC transactions and swap operations. [#2148](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2148) by @onur-ozkan
+*   **NFT Integration:**
+    *   A new `clear_nft_db` RPC for NFT data management was added, enabling selective or complete NFT DB data clearance. [#2039](https://github.com/KomodoPlatform/atomicDEX-API/pull/2039) by @laruh
+    *   NFT can now be enabled using `enable_eth_with_tokens` or `enable_nft`, similar to `enable_erc20`. [#2049](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2049) by @laruh
+*   **Simple Maker Bot:**
+    *   Maker bot was updated to support multiple price URLs. [#2027](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2027) by @shamardy
+    *   `testcoin` was added to provider options, allowing testing of the maker bot using test chain assets. [#2161](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2161) by @shamardy
+*   **Swap Stats DB:**
+    *   `stats_swaps` table now includes GUI and KDF version data used for a swap. [#2061](https://github.com/KomodoPlatform/atomicDEX-API/pull/2061) by @mariocynicys
+*   **P2P Layer:**
+    *   Added `max_concurrent_connections` to KDF config to control the maximum number of concurrent connections for Gossipsub. [#2063](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2063) by @onur-ozkan
+*   **ARRR/Pirate:**
+    *   ARRR/Pirate wallet and Dex operations now work in browser environments/WASM. [#1957](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1957), [#2077](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2077) by @borngraced
+    *   Syncing and activation improvements were made, including stopping sync status after main sync and refining `first_sync_block` handling. [#2089](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2089) by @borngraced
+*   **EVM Transport:**
+    *   ETH websocket transport was introduced, and `komodo-defi-proxy` signed messages were supported for websocket transport. [#2058](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2058) by @onur-ozkan
+*   **Tendermint Integration:**
+    *   Nucleus chain support was introduced as an alternative HTLC backend to Iris. [#2079](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2079) by @onur-ozkan
+    *   Pubkey-only mode for Tendermint protocol was introduced, allowing use of any external wallet for wallet and swap operations. [#2088](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2088) by @onur-ozkan
+    *   `ibc_withdraw` RPC was removed, and `withdraw` was refactored to support IBC transfers by automatically finding IBC channels. [#2088](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2088) by @onur-ozkan
+*   **Fees Improvements:**
+    *   EIP-1559 gas fee estimator and RPCs were added for ETH, including priority fee support for withdrawals and swaps, and improved gas limits for swap transactions. [#2051](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2051) by @dimxy
+    *   `gas_limit` parameter can be used in coin configs to override default gas limit values. [#2137](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2137) by @dimxy
+*   **Rust Toolchain:**
+    *   Toolchain was upgraded to Rust toolchain version 1.72 nightly (nightly-2023-06-01). [#2149](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2149) by @onur-ozkan
+    *   `rust-analyzer` was added into the workspace toolchain. [#2179](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2179) by @onur-ozkan
+*   **CI Builds:**
+    *   MacOS builds for Apple Silicon are now provided through the CI pipeline. [#2163](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2163) by @CharlVS
+*   Implemented root application directory `.kdf` under `$HOME` to consolidate all runtime files, enhancing user experience by following standard UNIX practices. [#2102](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2102) by @onur-ozkan
+*   Swaps and orders file handling was enhanced to use `.tmp` files to avoid concurrent reading/writing issues. [#2118](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2118) by @dimxy
+*   UTXO P2PK balance is now shown as part of the P2PKH/Legacy address balance and can be spent in withdrawals and swaps. [#2053](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2053) by @mariocynicys
+
+### Bug Fixes:
+
+*   Additional checks were added for malicious `token_uri` links. [#2100](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2100) by @laruh
+*   Improved environment detection to ensure the correct method is used for accessing the IndexedDB factory, accommodating both window and worker contexts. [#1953](https://github.com/KomodoPlatform/atomicDEX-API/pull/1953), [#2131](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2131) by @onur-ozkan @borngraced
+*   Cursor implementation was fixed, ensuring stable iteration over items. [#2028](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2028) by @borngraced
+*   **Tendermint Integration:**
+    *   Tendermint fee calculation was fixed to use `get_receiver_trade_fee` in platform coins. [#2106](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2106) by @onur-ozkan
+    *   Transaction history handling was enhanced to support base64 encoded transaction values for Cosmos-based networks, preventing missing transactions in the history table. [#2133](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2133) by @onur-ozkan
+    *   The precision of max amount handling was improved for Tendermint withdraw operations by simulating the transaction and removing the estimated fee. [#2155](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2155) by @onur-ozkan
+    *   Account sequence numbers are now resolved locally, avoiding incorrect sequence numbers from cached responses. [#2164](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2164) by @onur-ozkan
+*   **Swap Watchers:**
+    *   UTXO swaps were fixed to apply events that occurred while the taker was offline, such as maker spending or watcher refunding the taker payment. [#2114](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2114) by @dimxy
+*   BCH block header deserialization was fixed to match BTC's handling of `KAWPOW` version headers. [#2099](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2099) by @shamardy
+*   `wallet-only` restriction was removed from `max_maker_vol` RPC, enabling its use for wallet-only mode assets. [#2153](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2153) by @onur-ozkan
 
 ## Komodo DeFi Framework v2.0.0-beta
 
