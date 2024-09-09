@@ -7,8 +7,9 @@ import { remark } from 'remark'
 import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
 (async function () {
-    try {
-        await walkDir("./src/pages", async (filePath) => {
+
+    await walkDir("./src/pages", async (filePath) => {
+        try {
             const markdown = await fs.readFile(filePath, 'utf-8');
             //console.log(filePath)
             const file = await remark()
@@ -38,10 +39,14 @@ node: ${JSON.stringify(node, null, 2)}`);
                     }
                 })
                 .process(markdown);
-        });
-    } catch (error) {
-        if (error) throw error;
-    }
+
+        } catch (error) {
+            if (error) {
+                throw new Error(`Error in file: ${filePath} \n ${error}`);
+            };
+        }
+    });
+
 })()
 
 async function walkDir(dir, callback) {

@@ -31,7 +31,7 @@ function findMissingIndexInDirs(dirPath) {
       if (curPath.endsWith("index.mdx")) {
         foundIndexFile = true;
       } else if (
-        !(curPath.endsWith("/_app.tsx") || curPath.endsWith("/_document.tsx"))
+        !(curPath.endsWith("/_app.tsx") || curPath.endsWith("/_document.tsx") || curPath.toLowerCase().includes(".ds_store"))
       ) {
         otherFilesInDir.push(curPath);
       }
