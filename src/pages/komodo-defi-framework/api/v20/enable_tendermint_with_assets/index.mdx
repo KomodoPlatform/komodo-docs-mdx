@@ -30,7 +30,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 | tokens\_tickers  | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                                                |
 
 <Note>
- The `rpc_urls` parameter will be replaced with the `nodes` parameter in the next release. Instead of a list of url strings, the `nodes` parameter will be a list of [EvmNode objects](/komodo-defi-framework/api/common_structures/activation/#evm-node).
+  The `rpc_urls` parameter will be replaced with the `nodes` parameter in the kdf version 2.2.0 release. Instead of a list of url strings, the `nodes` parameter will be a list of [EvmNode objects](/komodo-defi-framework/api/common_structures/activation/#evm-node).
 </Note>
 
 ### 📌 Examples
@@ -41,6 +41,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   ```json
   {
     "method": "enable_tendermint_with_assets",
+    "userpass": "RPC_UserP@SSW0RD",
     "mmrpc": "2.0",
     "params": {
       "ticker": "IRIS",
@@ -53,8 +54,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
         "https://iris.komodo.earth/",
         "https://rpc.irishub-1.irisnet.org"
       ]
-    },
-    "userpass": "RPC_UserP@SSW0RD"
+    }
   }
   ```
 </CodeGroup>
@@ -91,6 +91,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   ```json
   {
     "method": "enable_tendermint_with_assets",
+    "userpass": "RPC_UserP@SSW0RD",
     "mmrpc": "2.0",
     "params": {
       "ticker": "IRIS",
@@ -105,8 +106,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
       ],
       "tx_history": true,
       "get_balances": false
-    },
-    "userpass": "RPC_UserP@SSW0RD"
+    }
   }
   ```
 </CodeGroup>
@@ -128,13 +128,13 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   ```
 </CollapsibleSection>
 
-#### Request using `nodes` parameter (dev branch)
+#### Request using `nodes` parameter (kdf version 2.2.0+)
 
 <CodeGroup title="" tag="POST" label="enable_tendermint_with_assets" mm2MethodDecorate="true">
   ```json
   {
     "method": "enable_tendermint_with_assets",
-    "userpass": "RPC_UserP@SSW0RD"
+    "userpass": "RPC_UserP@SSW0RD",
     "mmrpc": "2.0",
     "params": {
       "ticker": "IRIS",
@@ -144,16 +144,16 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
         }
       ],
       "nodes": [
-          {
-              "url": "https://iris-rpc.alpha.komodo.earth/",
-              "api_url": "https://iris-api.alpha.komodo.earth/",
-              "grpc_url": "https://iris-grpc.alpha.komodo.earth/",
-              "ws_url": "wss://iris-rpc.alpha.komodo.earth/websocket"
-          },
-          {
-              "url": "https://rpc.irishub-1.irisnet.org",
-              "komodo_auth": false
-          }
+        {
+          "url": "https://iris-rpc.alpha.komodo.earth/",
+          "api_url": "https://iris-api.alpha.komodo.earth/",
+          "grpc_url": "https://iris-grpc.alpha.komodo.earth/",
+          "ws_url": "wss://iris-rpc.alpha.komodo.earth/websocket"
+        },
+        {
+          "url": "https://rpc.irishub-1.irisnet.org",
+          "komodo_auth": false
+        }
       ]
     }
   }
@@ -185,9 +185,6 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   }
   ```
 </CollapsibleSection>
-
-
-
 
 <CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
   ### Error Types
