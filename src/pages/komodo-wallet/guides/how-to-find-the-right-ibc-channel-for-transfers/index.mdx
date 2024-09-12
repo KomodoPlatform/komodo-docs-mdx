@@ -1,3 +1,8 @@
+export const title = "How to find the right IBC channel for transfers on Komodo Wallet";
+export const description = "This guide describes how to activate coins in Komodo Wallet.";
+
+import ibcChannels from "@/public/images/docs/api-images/ibc-channels.png";
+
 # How to find the right IBC channel for transfers on Komodo Wallet
 
 This guide will help you find the correct IBC channel for making transfers using Komodo Wallet.
@@ -10,19 +15,20 @@ This guide will help you find the correct IBC channel for making transfers using
 
 ## Understanding IBC Channels
 
-## Steps to Find the Right IBC Channel
+### Sources to Find the IBC Channel information
 
-Lookup https://ibc.iobscan.io/relayers
+*   [https://ibc.iobscan.io/relayers](https://ibc.iobscan.io/relayers)
+*   [https://www.mintscan.io/cosmos/relayers?sector=networks](https://www.mintscan.io/cosmos/relayers?sector=networks)
 
-## Example: Transferring from Chain A to Chain B
+### Example: Transferring from IRIS to OSMOSIS
 
-Let's walk through an example:
+<OptimizedImage title="IBC channel information" src={ibcChannels} classNaming="w-full" alt="IBC channel information" />
 
-1. In Komodo Wallet, select Chain A as your sending chain.
-2. Choose Chain B as your receiving chain.
-3. The wallet displays available channels, e.g., "Channel 42".
-4. Verify that Channel 42 is marked as active and recommended.
-5. Use Channel 42 when prompted during the transfer process.
+1.  In Komodo Wallet, select IRIS and open the withdraw form.
+2.  Enter the amount and an OSMOSIS address as the destination.
+3.  Toggle on the "Set IBC channel" option.
+4.  Set the `ibc_source_channel` value to `channel-3` (the channel for IRIS in the above image alongside OSMOSIS).
+5.  Send your funds.
 
 <Note type="info">
   Channel IDs are specific to each chain pair and direction. The channel for
@@ -34,13 +40,15 @@ Let's walk through an example:
 
 After initiating a transfer:
 
-1. Note the transaction hash provided by Komodo Wallet.
-2. Use a block explorer for either the sending or receiving chain to track the transaction status.
-3. Allow some time for the transfer to complete, as IBC transfers may take longer than on-chain transactions.
+1.  Note the transaction hash provided by Komodo Wallet.
+2.  Use a block explorer for either the sending or receiving chain to track the transaction status.
+3.  Allow some time for the transfer to complete, as IBC transfers may take longer than on-chain transactions.
 
 ## Staying Updated
 
-- Regularly check for updates to the Komodo Wallet application.
-- Join official [Komodo community channels](https://komodoplatform.com/discord) to stay informed about any changes to IBC functionality or recommended practices.
+*   Regularly check for updates to the Komodo Wallet application.
+*   Join official [Komodo community channels](https://komodoplatform.com/discord) to stay informed about any changes to IBC functionality or recommended practices.
 
 By following these steps, you can ensure you're using the correct IBC channel for your transfers on Komodo Wallet, minimizing the risk of failed transactions or lost funds.
+
+To see the API method used behind the scenes for IBC transfers, refer to the [withdraw (v2)](/komodo-defi-framework/api/v20/withdraw/) method.
