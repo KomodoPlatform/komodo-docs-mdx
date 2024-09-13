@@ -9,22 +9,28 @@ The `my_recent_swaps` method returns the data of the most recent atomic swaps ex
 
 ## Arguments
 
-| Structure | Type   | Description                                                                                                                         |
-| --------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| filter    | Object | [FilterCriteria](/komodo-defi-framework/api/common_structures/#filter-criteria) containing all the filtering criteria for the swaps |
+| Parameter       | Type    | Description                                             |
+| --------------- | ------- | ------------------------------------------------------- |
+| my\_coin        | string  | Optional. Coin being used by you for the swap/trade.    |
+| other\_coin     | string  | Optional. Coin you are trading against                  |
+| from\_timestamp | integer | Optional. Start timestamp in UNIX format                |
+| to\_timestamp   | integer | Optional. End timestamp in UNIX format                  |
+| from\_uuid      | string  | Optional. The UUID from which to start fetching results |
+| limit           | integer | Optional. The maximum number fo results to return       |
+| page\_number    | integer | Optional. Offset for paginated results                  |
 
 #### Response
 
-| Structure      | Type             | Description                                                                                                                                                                                            |
-| -------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| swaps          | array of objects | A list of standard [SwapStatus](/komodo-defi-framework/api/common_structures/swaps/#swap-status) objects                                                                                               |
-| from\_uuid     | string           | the from\_uuid that was set in the request; this value is null if nothing was set                                                                                                                      |
-| skipped        | number           | the number of skipped records (i.e. the position of `from_uuid` in the list + 1 or `(page_number - 1) * limit`; the value is 0 if `from_uuid` or `page_number` were not set or `page_number` is 1)     |
-| limit          | number           | the limit that was set in the request; note that the actual number of swaps can differ from the specified limit (e.g. on the last page)                                                                |
-| total          | number           | total number of swaps available with the selected filters                                                                                                                                              |
-| page\_number   | number           | the page\_number that was set in the request; if both `page_number` and `from_uuid` are not set in request it will default to `1`; if `from_uuid` is present in request this value will be always null |
-| total\_pages   | number           | total pages available with the selected filters and limit                                                                                                                                              |
-| found\_records | number           | the number of returned swaps                                                                                                                                                                           |
+| Parameter      | Type              | Description                                                                                                                                                                                            |
+| -------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| swaps          | array of objects  | A list of standard [SwapStatus](/komodo-defi-framework/api/common_structures/swaps/#swap-status) objects                                                                                               |
+| from\_uuid     | string            | the from\_uuid that was set in the request; this value is null if nothing was set                                                                                                                      |
+| skipped        | integer           | the number of skipped records (i.e. the position of `from_uuid` in the list + 1 or `(page_number - 1) * limit`; the value is 0 if `from_uuid` or `page_number` were not set or `page_number` is 1)     |
+| limit          | integer           | the limit that was set in the request; note that the actual number of swaps can differ from the specified limit (e.g. on the last page)                                                                |
+| total          | integer           | total number of swaps available with the selected filters                                                                                                                                              |
+| page\_number   | integer           | the page\_number that was set in the request; if both `page_number` and `from_uuid` are not set in request it will default to `1`; if `from_uuid` is present in request this value will be always null |
+| total\_pages   | integer           | total pages available with the selected filters and limit                                                                                                                                              |
+| found\_records | integer           | the number of returned swaps                                                                                                                                                                           |
 
 #### 📌 Example
 
@@ -37,15 +43,13 @@ The `my_recent_swaps` method returns the data of the most recent atomic swaps ex
     "userpass": "RPC_UserP@SSW0RD",
     "method": "my_recent_swaps",
     "params": {
-      "filter": {
-        "my_coin": "BTC",
-        "other_coin": "ETH",
-        "from_timestamp": 1672531200,
-        "to_timestamp": 1704067200,
-        "from_uuid": null,
-        "limit": 5,
-        "page_number": 1
-      }
+      "my_coin": "MARTY",
+      "other_coin": "DOC",
+      "from_timestamp": 1672531200,
+      "to_timestamp": 1734067200,
+      "from_uuid": "0a3859ba-0e28-49de-b015-641c050a6409",
+      "limit": 5,
+      "page_number": 1
     }
   }
   ```
