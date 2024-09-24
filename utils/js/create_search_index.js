@@ -212,7 +212,7 @@ const runSearchIndexingOnAllMdxFiles = async () => {
     );
     fs.writeFileSync(
       "./utils/_allMdxFileContentTree.json",
-      JSON.stringify(allMdxFileContentTree, null, 2)
+      JSON.stringify(allMdxFileContentTree)
     );
   } catch (error) {
     throw new Error(error);
