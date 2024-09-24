@@ -91,9 +91,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          path: website-komodo-docs
+          path: website-komodoplatform.com
           ssh-key: ${{ secrets.DOCS_UI_SSH_PRIVATE_KEY }}
-          repository: KomodoPlatform/website-komodo-docs
+          repository: KomodoPlatform/website-komodoplatform.com
           ref: dev
           submodules: recursive
           fetch-depth: 0
@@ -122,13 +122,13 @@ jobs:
           pwd
           echo $GITHUB_WORKSPACE
           ls $GITHUB_WORKSPACE
-          cd $GITHUB_WORKSPACE/website-komodo-docs/utils
+          cd $GITHUB_WORKSPACE/website-komodoplatform.com/utils
           ./update_mdx_branch.sh ${{ steps.vars.outputs.BRANCH_NAME }}
           cd ..
           export CFP=yes
           ./update-content.sh
-          rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json $GITHUB_WORKSPACE/website-komodo-docs/_fileData.json
-          rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json $GITHUB_WORKSPACE/website-komodo-docs/lib/data/searchIndex.json
+          rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json $GITHUB_WORKSPACE/website-komodoplatform.com/_fileData.json
+          rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json $GITHUB_WORKSPACE/website-komodoplatform.com/lib/data/searchIndex.json
           yarn install
           yarn export          
           echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
@@ -140,7 +140,7 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: komodo-docs
-          directory: ./website-komodo-docs/out
+          directory: ./website-komodoplatform.com/out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: "3"
           branch: ${{ steps.vars.outputs.BRANCH_NAME }}
@@ -179,16 +179,16 @@ jobs:
       - name: Generate Preview Images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: |
-          cd $GITHUB_WORKSPACE/website-komodo-docs/
+          cd $GITHUB_WORKSPACE/website-komodoplatform.com/
           git status
           yarn gen:previewImgs
-      # TODO: update previewImgTimeStamps.json from $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json to $GITHUB_WORKSPACE/website-komodo-docs/src/data/docs/previewImgTimeStamps.json
+      # TODO: update previewImgTimeStamps.json from $GITHUB_WORKSPACE/website-komodoplatform.com/previewImgTimeStamps.json to $GITHUB_WORKSPACE/website-komodoplatform.com/src/data/docs/previewImgTimeStamps.json
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/preview-images-original/ $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/public/preview-images/ $GITHUB_WORKSPACE/preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json $GITHUB_WORKSPACE/preview-images/previewImgTimeStamps.json
+        run: mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/preview-images-original/ $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/public/preview-images/ $GITHUB_WORKSPACE/preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/previewImgTimeStamps.json $GITHUB_WORKSPACE/preview-images/previewImgTimeStamps.json
 
       - name: Delete repo checked out UI repo
-        run: rm -rf $GITHUB_WORKSPACE/website-komodo-docs
+        run: rm -rf $GITHUB_WORKSPACE/website-komodoplatform.com
 
       # - name: Check if diff exists
       #   id: diff_check
