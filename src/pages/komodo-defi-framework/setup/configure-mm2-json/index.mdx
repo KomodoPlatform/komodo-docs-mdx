@@ -30,6 +30,8 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 | metrics                      | integer         | Optional, defaults to `300`. The interval in seconds which metrics are logged. Set to `0` to disable metrics.                                                                                                                                                                                                                                                                                                                         |
 | prometheusport               | integer         | Optional. Only used if you are logging metrics in [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/). For more information check out the [Komodo DeFi metrics guide](/komodo-defi-framework/tutorials/api-metrics/)                                                                                                                                                                                             |
 | prometheus\_credentials      | integer         | Optional. Only used if you are logging metrics in [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/) with authentication. For more information check out the [Komodo DeFi metrics guide](/komodo-defi-framework/tutorials/api-metrics/)                                                                                                                                                                         |
+| https                        | boolean         | Optional. Only used with wss. Defaults to `false`, set to `true` to allow TLS/SSL enabled RPC (e.g. remote queries to a domain with a valid SSL certificate).                                                                                                                                                                                                                                                                         |
+| wss\_certs                   | object          | Optional. Contains fields for `server_priv_key` and `certificate` to allow RPC or P2P communications over TLS/SSL.                                                                                                                                                                                                                                                                                                                    |
 | event\_stream\_configuration | object          | Optional, a standard [EventStreamConfig](/komodo-defi-framework/api/v20/#derivation-method) object. Configuration for subscribing to events.                                                                                                                                                                                                                                                                                          |
 
 #### Example (allowing weak password):
@@ -55,6 +57,22 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
   "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
   "allow_weak_password": false,
   "dbdir": "/path/to/DB/folder"
+}
+```
+
+#### Example (WSS with certificates):
+
+```json
+{
+  "gui": "DEVDOCS_CLI",
+  "netid": 8762,
+  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
+  "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
+  "wss_certs": {
+    "server_priv_key": "/path/to/privkey.pem",
+    "certificate": "/path/to/fullchain.pem"
+  }
+
 }
 ```
 
@@ -91,12 +109,14 @@ The structure for adding additional coins can vary, please refer to the [listing
 
 ### Optional environment variables:
 
-| Variable        | Type   | Description                                                                                                                                                                                                          |
-| --------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MM2\_CONF\_PATH | string | A file path to load the `MM2.json` configuration file. Defaults to `MM2.json` in the same folder as the `mm2` binary.                                                                                                |
-| MM\_COINS\_PATH | string | A file path to load the `coins` configuration file. A comprehensive version for public use is maintained in the [Komodo Platform coins github repository](https://github.com/KomodoPlatform/coins/blob/master/coins) |
-| MM\_LOG         | string | A file path to store the Komodo DeFi-API logs.                                                                                                                                                                       |
-| USERPASS        | string | For convenience, this variable can store the value of your `rpc_password` to be referenced in any shell scripts                                                                                                      |
+| Variable            | Type   | Description                                                                                                                                                                                                          |
+| ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MM2\_CONF\_PATH     | string | A file path to load the `MM2.json` configuration file. Defaults to `MM2.json` in the same folder as the `mm2` binary.                                                                                                |
+| MM\_COINS\_PATH     | string | A file path to load the `coins` configuration file. A comprehensive version for public use is maintained in the [Komodo Platform coins github repository](https://github.com/KomodoPlatform/coins/blob/master/coins) |
+| MM\_LOG             | string | A file path to store the Komodo DeFi-API logs.                                                                                                                                                                       |
+| USERPASS            | string | For convenience, this variable can store the value of your `rpc_password` to be referenced in any shell scripts                                                                                                      |
+| MM\_CERT\_PATH      | string | Full path to TLS/SSL certificate file.                                                                                                                                                                               |
+| MM\_CERT\_KEY\_PATH | string | Full path to TLS/SSL certificate key file.                                                                                                                                                                           |
 
 ### What now?
 
