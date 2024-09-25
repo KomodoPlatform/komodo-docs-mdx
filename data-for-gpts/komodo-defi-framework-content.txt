@@ -594,6 +594,50 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
   "amount": "0.00001"
 }
 ```
+
+### FilterCriteria
+
+The `FilterCriteria` object includes different criteria to filter from the different recent swaps:
+
+| Parameter  | Type                     | Description                                                            |
+| ---------- | ------------------------ | ---------------------------------------------------------------------- |
+| status     | object                   | Return only swaps that match the specified status (e.g., "completed"). |
+| date\_from | string (ISO 8601 format) | Return only swaps that started on or after this date.                  |
+| date\_to   | string (ISO 8601 format) | Return only swaps that started before this date.                       |
+
+#### Example
+
+```json
+{
+  "filter": {
+      "status": "completed",
+      "date_from": "2024-01-01T00:00:00Z",
+      "date_to": "2024-07-01T00:00:00Z"
+  }
+}
+```
+
+### PagingOptions
+
+The `PagingOptions` object includes options of page selection to consult when looking for recent swaps:
+
+| Parameter    | Type             | Description                                                                                                            |
+| ------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| from\_uuid   | string (or null) | Skips records until this UUID, excluding the record with this UUID. Convenient for infinite scrolling implementations. |
+| limit        | number           | Limits the number of returned swaps.                                                                                   |
+| page\_number | number           | Returns limit swaps from the selected page. This parameter is ignored if from\_uuid is set.                            |
+
+#### Example
+
+```json
+{
+  "paging_options": {
+      "from_uuid": null,
+      "limit": 10,
+      "page_number": 1
+  }
+}
+```
 export const title = "Komodo DeFi SDK Common Structures: Lightning";
 export const description = "Lightning network functionality is now available in the Komodo DeFi SDK!";
 
