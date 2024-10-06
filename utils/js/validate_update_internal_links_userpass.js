@@ -24,7 +24,11 @@ if (fs.existsSync(manualLinkFile)) {
 (async function () {
   try {
     let filepaths = [];
-    walkDir("./src/pages", (filepath) => filepaths.push(filepath));
+    walkDir("./src/pages", (filepath) => {
+      if (!filepath.toLowerCase().includes(".ds_store")) {
+        filepaths.push(filepath)
+      }
+    });
     await createFileSlugs(filepaths); // can comment on repeat runs, while fixing internal links and not changing headings in content
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));

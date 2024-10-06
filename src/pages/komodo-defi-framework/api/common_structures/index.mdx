@@ -120,6 +120,46 @@ Where the value indicates:
   ```
 </CollapsibleSection>
 
+### EventStreamConfig
+
+The `EventStreamConfig` object defines which events will be streamed to the client:
+
+| Parameter                      | Type   | Description                                                                            |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------- |
+| access\_control\_allow\_origin | string | Defines CORS whitelist. Use "\*" to allow fromi any origin.                            |
+| active\_events                 | object | Events to be streamed to the client, along with configuration defineing frequency etc. |
+| worker\_path                   | string | WASM only. Path to a custom `worker.js` file.                                          |
+
+Active events are defined as follows:
+
+*   NETWORK: Network status changes. Requires `stream_interval_seconds` configuration.
+*   HEARTBEAT: Allows clients to easily determine whether channels are functioning. Requires `stream_interval_seconds` configuration.
+*   COIN\_BALANCE: Balance changes. Does not require `stream_interval_seconds` configuration, as the event is triggered by the balance change.
+
+<Note>
+  The `COIN_BALANCE` event may not be available for all coins or tokens.
+</Note>
+
+An example of the event stream output can then be viewed in [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html)
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  "event_stream_configuration": {
+      "access_control_allow_origin": "*",
+      "active_events": {
+          "NETWORK": {
+              "stream_interval_seconds": 1.5,
+          },
+          "COIN_BALANCE": {},
+          "HEATBEAT": {
+              "stream_interval_seconds": 2.4,
+          }
+      },
+      "worker_path": "index.js"
+  }
+  ```
+</CollapsibleSection>
+
 ### NumericFormatsValue
 
 The `NumericFormatsValue` returns a price or amount in three different formats: `fraction`, `rational`, and `decimal`.
@@ -392,6 +432,54 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
   {
     "type": "Utxo",
     "amount": "0.00001"
+  }
+  ```
+</CollapsibleSection>
+
+### FilterCriteria
+
+The `FilterCriteria` object includes different criteria to filter from the different recent swaps:
+
+| Parameter  | Type                     | Description                                                            |
+| ---------- | ------------------------ | ---------------------------------------------------------------------- |
+| status     | object                   | Return only swaps that match the specified status (e.g., "completed"). |
+| date\_from | string (ISO 8601 format) | Return only swaps that started on or after this date.                  |
+| date\_to   | string (ISO 8601 format) | Return only swaps that started before this date.                       |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example
+
+  ```json
+  {
+    "filter": {
+        "status": "completed",
+        "date_from": "2024-01-01T00:00:00Z",
+        "date_to": "2024-07-01T00:00:00Z"
+    }
+  }
+  ```
+</CollapsibleSection>
+
+### PagingOptions
+
+The `PagingOptions` object includes options of page selection to consult when looking for recent swaps:
+
+| Parameter    | Type             | Description                                                                                                            |
+| ------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| from\_uuid   | string (or null) | Skips records until this UUID, excluding the record with this UUID. Convenient for infinite scrolling implementations. |
+| limit        | number           | Limits the number of returned swaps.                                                                                   |
+| page\_number | number           | Returns limit swaps from the selected page. This parameter is ignored if from\_uuid is set.                            |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example
+
+  ```json
+  {
+    "paging_options": {
+        "from_uuid": null,
+        "limit": 10,
+        "page_number": 1
+    }
   }
   ```
 </CollapsibleSection>
