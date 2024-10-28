@@ -295,6 +295,42 @@ Where the value indicates:
 }
 ```
 
+### EventStreamConfig
+
+The `EventStreamConfig` object defines which events will be streamed to the client:
+
+| Parameter                      | Type   | Description                                                                            |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------- |
+| access\_control\_allow\_origin | string | Defines CORS whitelist. Use "\*" to allow fromi any origin.                            |
+| active\_events                 | object | Events to be streamed to the client, along with configuration defineing frequency etc. |
+| worker\_path                   | string | WASM only. Path to a custom `worker.js` file.                                          |
+
+Active events are defined as follows:
+
+*   NETWORK: Network status changes. Requires `stream_interval_seconds` configuration.
+*   HEARTBEAT: Allows clients to easily determine whether channels are functioning. Requires `stream_interval_seconds` configuration.
+*   COIN\_BALANCE: Balance changes. Does not require `stream_interval_seconds` configuration, as the event is triggered by the balance change.
+
+The `COIN_BALANCE` event may not be available for all coins or tokens.
+
+An example of the event stream output can then be viewed in [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html)
+
+```json
+"event_stream_configuration": {
+    "access_control_allow_origin": "*",
+    "active_events": {
+        "NETWORK": {
+            "stream_interval_seconds": 1.5,
+        },
+        "COIN_BALANCE": {},
+        "HEATBEAT": {
+            "stream_interval_seconds": 2.4,
+        }
+    },
+    "worker_path": "index.js"
+}
+```
+
 ### NumericFormatsValue
 
 The `NumericFormatsValue` returns a price or amount in three different formats: `fraction`, `rational`, and `decimal`.
@@ -556,6 +592,50 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
 {
   "type": "Utxo",
   "amount": "0.00001"
+}
+```
+
+### FilterCriteria
+
+The `FilterCriteria` object includes different criteria to filter from the different recent swaps:
+
+| Parameter  | Type                     | Description                                                            |
+| ---------- | ------------------------ | ---------------------------------------------------------------------- |
+| status     | object                   | Return only swaps that match the specified status (e.g., "completed"). |
+| date\_from | string (ISO 8601 format) | Return only swaps that started on or after this date.                  |
+| date\_to   | string (ISO 8601 format) | Return only swaps that started before this date.                       |
+
+#### Example
+
+```json
+{
+  "filter": {
+      "status": "completed",
+      "date_from": "2024-01-01T00:00:00Z",
+      "date_to": "2024-07-01T00:00:00Z"
+  }
+}
+```
+
+### PagingOptions
+
+The `PagingOptions` object includes options of page selection to consult when looking for recent swaps:
+
+| Parameter    | Type             | Description                                                                                                            |
+| ------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| from\_uuid   | string (or null) | Skips records until this UUID, excluding the record with this UUID. Convenient for infinite scrolling implementations. |
+| limit        | number           | Limits the number of returned swaps.                                                                                   |
+| page\_number | number           | Returns limit swaps from the selected page. This parameter is ignored if from\_uuid is set.                            |
+
+#### Example
+
+```json
+{
+  "paging_options": {
+      "from_uuid": null,
+      "limit": 10,
+      "page_number": 1
+  }
 }
 ```
 export const title = "Komodo DeFi SDK Common Structures: Lightning";
@@ -2372,7 +2452,7 @@ Below is a table of the currently available legacy, v2.0 and v2.0 (Dev) methods:
 | [min\_trading\_vol](/komodo-defi-framework/api/legacy/min_trading_vol/#min-trading-vol)                                       |                                                                                                                                    |                                                                                                                                   |
 | [my\_balance](/komodo-defi-framework/api/legacy/my_balance/#my-balance)                                                       |                                                                                                                                    |                                                                                                                                   |
 | [my\_orders](/komodo-defi-framework/api/legacy/my_orders/#my-orders)                                                          |                                                                                                                                    |                                                                                                                                   |
-| [my\_recent\_swaps](/komodo-defi-framework/api/legacy/my_recent_swaps/#my-recent-swaps)                                       |                                                                                                                                    |                                                                                                                                   |
+| [my\_recent\_swaps](/komodo-defi-framework/api/legacy/my_recent_swaps/#my-recent-swaps)                                       | [my\_recent\_swaps](/komodo-defi-framework/api/v20/my_recent_swaps/#my-recent-swaps)                                               |                                                                                                                                   |
 | [my\_swap\_status](/komodo-defi-framework/api/legacy/my_swap_status/#my-swap-status)                                          |                                                                                                                                    |                                                                                                                                   |
 | [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history)                                             | [my\_tx\_history](/komodo-defi-framework/api/v20/my_tx_history/#my-tx-history)                                                     |                                                                                                                                   |
 |                                                                                                                               |                                                                                                                                    | [open\_channel](/komodo-defi-framework/api/v20-dev/lightning/channels/#open-channel)                                              |
@@ -14426,6 +14506,302 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
 **InternalError:** An internal error occured during the verification process
 **SignatureDecodingError:** Given signature could not be decoded
 **AddressDecodingError:** Given address could not be decoded
+export const title = "Komodo DeFi Framework Method: My Recent Swaps V2";
+export const description = "The my_recent_swaps method returns the data of the most recent atomic swaps executed by the Komodo DeFi Framework API node.";
+
+# my\_recent\_swaps
+
+**my\_recent\_swaps (from\_uuid page\_number=1 limit=10 my\_coin other\_coin from\_timestamp to\_timestamp)**
+
+The `my_recent_swaps` method returns the data of the most recent atomic swaps executed by the Komodo DeFi Framework API node. Please note that all filters (my\_coin, from\_timestamp, etc.) are combined using logical AND.
+
+## Arguments
+
+| Parameter       | Type    | Description                                             |
+| --------------- | ------- | ------------------------------------------------------- |
+| my\_coin        | string  | Optional. Coin being used by you for the swap/trade.    |
+| other\_coin     | string  | Optional. Coin you are trading against                  |
+| from\_timestamp | integer | Optional. Start timestamp in UNIX format                |
+| to\_timestamp   | integer | Optional. End timestamp in UNIX format                  |
+| from\_uuid      | string  | Optional. The UUID from which to start fetching results |
+| limit           | integer | Optional. The maximum number fo results to return       |
+| page\_number    | integer | Optional. Offset for paginated results                  |
+
+#### Response
+
+| Parameter      | Type             | Description                                                                                                                                                                                            |
+| -------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| swaps          | array of objects | A list of standard [SwapStatus](/komodo-defi-framework/api/common_structures/swaps/#swap-status) objects                                                                                               |
+| from\_uuid     | string           | the from\_uuid that was set in the request; this value is null if nothing was set                                                                                                                      |
+| skipped        | integer          | the number of skipped records (i.e. the position of `from_uuid` in the list + 1 or `(page_number - 1) * limit`; the value is 0 if `from_uuid` or `page_number` were not set or `page_number` is 1)     |
+| limit          | integer          | the limit that was set in the request; note that the actual number of swaps can differ from the specified limit (e.g. on the last page)                                                                |
+| total          | integer          | total number of swaps available with the selected filters                                                                                                                                              |
+| page\_number   | integer          | the page\_number that was set in the request; if both `page_number` and `from_uuid` are not set in request it will default to `1`; if `from_uuid` is present in request this value will be always null |
+| total\_pages   | integer          | total pages available with the selected filters and limit                                                                                                                                              |
+| found\_records | integer          | the number of returned swaps                                                                                                                                                                           |
+
+#### 📌 Example
+
+#### Command
+
+```json
+{
+  "mmrpc": "2.0",
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "my_recent_swaps",
+  "params": {
+    "my_coin": "MARTY",
+    "other_coin": "DOC",
+    "from_timestamp": 1672531200,
+    "to_timestamp": 1734067200,
+    "from_uuid": "0a3859ba-0e28-49de-b015-641c050a6409",
+    "limit": 5,
+    "page_number": 1
+  }
+}
+```
+
+#### Response (success)
+
+```json
+{
+  "result": {
+      "swaps": [
+          {
+              "type": "Taker",
+              "uuid": "0a3859ba-0e28-49de-b015-641c050a6409",
+              "my_order_uuid": "0a3859ba-0e28-49de-b015-641c050a6409",
+              "events": [
+                  {
+                      "timestamp": 1725849334423,
+                      "event": {
+                          "type": "Started",
+                          "data": {
+                              "taker_coin": "MARTY",
+                              "maker_coin": "DOC",
+                              "maker": "15d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732",
+                              "my_persistent_pub": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
+                              "lock_duration": 7800,
+                              "maker_amount": "2.4",
+                              "taker_amount": "2.4",
+                              "maker_payment_confirmations": 1,
+                              "maker_payment_requires_nota": false,
+                              "taker_payment_confirmations": 1,
+                              "taker_payment_requires_nota": false,
+                              "taker_payment_lock": 1725857133,
+                              "uuid": "0a3859ba-0e28-49de-b015-641c050a6409",
+                              "started_at": 1725849333,
+                              "maker_payment_wait": 1725852453,
+                              "maker_coin_start_block": 724378,
+                              "taker_coin_start_block": 738955,
+                              "fee_to_send_taker_fee": {
+                                  "coin": "MARTY",
+                                  "amount": "0.00001",
+                                  "paid_from_trading_vol": false
+                              },
+                              "taker_payment_trade_fee": {
+                                  "coin": "MARTY",
+                                  "amount": "0.00001",
+                                  "paid_from_trading_vol": false
+                              },
+                              "maker_payment_spend_trade_fee": {
+                                  "coin": "DOC",
+                                  "amount": "0.00001",
+                                  "paid_from_trading_vol": true
+                              },
+                              "maker_coin_htlc_pubkey": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
+                              "taker_coin_htlc_pubkey": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
+                              "p2p_privkey": null
+                          }
+                      }
+                  },
+                  {
+                      "timestamp": 1725849338425,
+                      "event": {
+                          "type": "Negotiated",
+                          "data": {
+                              "maker_payment_locktime": 1725864931,
+                              "maker_pubkey": "000000000000000000000000000000000000000000000000000000000000000000",
+                              "secret_hash": "91ddaac214398b0b728d652af8d86f2e06fbbb34",
+                              "maker_coin_swap_contract_addr": null,
+                              "taker_coin_swap_contract_addr": null,
+                              "maker_coin_htlc_pubkey": "0315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732",
+                              "taker_coin_htlc_pubkey": "0315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732"
+                          }
+                      }
+                  },
+                  {
+                      "timestamp": 1725849339829,
+                      "event": {
+                          "type": "TakerFeeSent",
+                          "data": {
+                              "tx_hex": "0400008085202f890101280d9a0703a25cdd553babd5430708f303fe3d446cd79555a53619c987d7b3000000006a47304402205805ecb3fad4c69e27061a35197c470e6a72a2b762269d3ef6b249c835396cd5022046b710dd5b6bdda75cc32a2cb9511ca51c754e4f2bcac8cd0f2757728a1671c6012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff0290b60400000000001976a914ca1e04745e8ca0c60d8c5881531d51bec470743f88aca0e4dc11000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88acfb5ede66000000000000000000000000000000",
+                              "tx_hash": "614d3b1ef3666799d71f54ea242f2cb839646be3bfc81d8f1cfce26747cb9892"
+                          }
+                      }
+                  },
+                  {
+                      "timestamp": 1725849341830,
+                      "event": {
+                          "type": "TakerPaymentInstructionsReceived",
+                          "data": null
+                      }
+                  },
+                  {
+                      "timestamp": 1725849341831,
+                      "event": {
+                          "type": "MakerPaymentReceived",
+                          "data": {
+                              "tx_hex": "0400008085202f8901175391f3922ffcf7dc8929b9795c2fec8d82ed1649e0f3926e04709993dc35a6020000006a4730440220363ea815a237b46c5dd305809fcc103793bb4f620325c12caccb0c88f320e81c02205df417a4b806f3c3d50aa058c4d6a30203868ba786f2a1bd3b3b12917b3882ff01210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff03001c4e0e0000000017a914944cf7300280e31374b3994422a252bce1fcbd10870000000000000000166a1491ddaac214398b0b728d652af8d86f2e06fbbb34083d6aff050000001976a9141462c3dd3f936d595c9af55978003b27c250441f88acfc5ede66000000000000000000000000000000",
+                              "tx_hash": "70f6078b9d3312f14dff45fc1e56e503b01d33e22cac8ebd195e4951d468dca6"
+                          }
+                      }
+                  },
+                  {
+                      "timestamp": 1725849341832,
+                      "event": {
+                          "type": "MakerPaymentWaitConfirmStarted"
+                      }
+                  },
+                  {
+                      "timestamp": 1725849465809,
+                      "event": {
+                          "type": "MakerPaymentValidatedAndConfirmed"
+                      }
+                  },
+                  {
+                      "timestamp": 1725849469603,
+                      "event": {
+                          "type": "TakerPaymentSent",
+                          "data": {
+                              "tx_hex": "0400008085202f89019298cb4767e2fc1c8f1dc8bfe36b6439b82c2f24ea541fd7996766f31e3b4d61010000006a4730440220526bd1e2114642b2624cb283bada8dbeb734d3fae9184f6833e0eca87b20fffe0220554a3b38ecde2b8a521b681f5ac3e3940e08f45cc35a2fc19eeaeae513368a6c012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff03001c4e0e0000000017a9141036c1fcbdf2b3e2d8b65913c78ab7412422cf17870000000000000000166a1491ddaac214398b0b728d652af8d86f2e06fbbb34b8c48e03000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac7a5fde66000000000000000000000000000000",
+                              "tx_hash": "ffe2fe025d470996c3057dc561bd79d0a09f2aa5a14b25fb8e444b49394e5ad8"
+                          }
+                      }
+                  },
+                  {
+                      "timestamp": 1725849469604,
+                      "event": {
+                          "type": "WatcherMessageSent",
+                          "data": [
+                              [
+                                  4,
+                                  ...
+                                  0
+                              ]
+                          ]
+                      }
+                  },
+                  {
+                      "timestamp": 1725849486567,
+                      "event": {
+                          "type": "TakerPaymentSpent",
+                          "data": {
+                              "transaction": {
+                                  "tx_hex": "0400008085202f8901d85a4e39494b448efb254ba1a52a9fa0d079bd61c57d05c39609475d02fee2ff00000000d74730440220544c5a2eec1e3fb7a2c71e3b6bf3c612300a9c5375ca5c7131742f0afc8a6e8f02206df5b042ec1ff359bf7209269ce3b59d09f5f2340842d5e0a253875624bbce120120d178a7c8f88a2f6e496a36ff8d7220c2d48903b45a365b80d59fcfafbf694cb5004c6b63046d7dde66b1752103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ac6782012088a91491ddaac214398b0b728d652af8d86f2e06fbbb3488210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ac68ffffffff0118184e0e000000001976a9141462c3dd3f936d595c9af55978003b27c250441f88ac6d7dde66000000000000000000000000000000",
+                                  "tx_hash": "58813eb1037e40425d56146c2f6bfbe70b8bcc18e45b752b51c726503ad4f8df"
+                              },
+                              "secret": "d178a7c8f88a2f6e496a36ff8d7220c2d48903b45a365b80d59fcfafbf694cb5"
+                          }
+                      }
+                  },
+                  {
+                      "timestamp": 1725849488871,
+                      "event": {
+                          "type": "MakerPaymentSpent",
+                          "data": {
+                              "tx_hex": "0400008085202f8901a6dc68d451495e19bd8eac2ce2331db003e5561efc45ff4df112339d8b07f67000000000d74730440220286e61b401b1b57b4ddf93294c588a4614e755549168e73c922402ece652d9830220521c7f1df0cbcacf29f55e3a09f2332a6fff25834917307db91072da8f793b030120d178a7c8f88a2f6e496a36ff8d7220c2d48903b45a365b80d59fcfafbf694cb5004c6b6304e39bde66b175210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ac6782012088a91491ddaac214398b0b728d652af8d86f2e06fbbb34882103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ac68ffffffff0118184e0e000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ace39bde66000000000000000000000000000000",
+                              "tx_hash": "60f83a68e5851ff93308758763ce30c643bd94ae89f4ae43fe7e02dc88d61642"
+                          }
+                      }
+                  },
+                  {
+                      "timestamp": 1725849488872,
+                      "event": {
+                          "type": "Finished"
+                      }
+                  }
+              ],
+              "maker_amount": "2.4",
+              "maker_coin": "DOC",
+              "maker_coin_usd_price": "0.0000001",
+              "taker_amount": "2.4",
+              "taker_coin": "MARTY",
+              "taker_coin_usd_price": "0.00000005",
+              "gui": "mm2_777",
+              "mm_version": "2.2.0-beta_2bdee4f",
+              "success_events": [
+                  "Started",
+                  "Negotiated",
+                  "TakerFeeSent",
+                  "TakerPaymentInstructionsReceived",
+                  "MakerPaymentReceived",
+                  "MakerPaymentWaitConfirmStarted",
+                  "MakerPaymentValidatedAndConfirmed",
+                  "TakerPaymentSent",
+                  "WatcherMessageSent",
+                  "TakerPaymentSpent",
+                  "MakerPaymentSpent",
+                  "MakerPaymentSpentByWatcher",
+                  "Finished"
+              ],
+              "error_events": [
+                  "StartFailed",
+                  "NegotiateFailed",
+                  "TakerFeeSendFailed",
+                  "MakerPaymentValidateFailed",
+                  "MakerPaymentWaitConfirmFailed",
+                  "TakerPaymentTransactionFailed",
+                  "TakerPaymentWaitConfirmFailed",
+                  "TakerPaymentDataSendFailed",
+                  "TakerPaymentWaitForSpendFailed",
+                  "MakerPaymentSpendFailed",
+                  "TakerPaymentWaitRefundStarted",
+                  "TakerPaymentRefundStarted",
+                  "TakerPaymentRefunded",
+                  "TakerPaymentRefundedByWatcher",
+                  "TakerPaymentRefundFailed",
+                  "TakerPaymentRefundFinished"
+              ],
+              "my_info": {
+                  "my_coin": "MARTY",
+                  "other_coin": "DOC",
+                  "my_amount": "2.4",
+                  "other_amount": "2.4",
+                  "started_at": 1725849333
+              },
+              "recoverable": false,
+              "is_finished": true
+          }
+      ],
+      "from_uuid": null,
+      "skipped": 0,
+      "limit": 10,
+      "total": 1,
+      "page_number": 1,
+      "total_pages": 1,
+      "found_records": 1
+  }
+}
+```
+
+### Error Responses
+
+#### Invalid UUID
+
+```json
+{
+    "error": "rpc:215] dispatcher_legacy:141] lp_swap:1298] UUID parsing failed: invalid length: expected length 32 for simple format, found 64"
+}
+```
+
+#### Unknown SQL Error
+
+```json
+{
+    "error": "rpc:215] dispatcher_legacy:141] lp_swap:1299] my_swaps_storage:102] Unknown SQL error: Query returned no rows"
+}
+```
 export const title = "Komodo DeFi Framework Method: My TX History";
 export const description = "The my_tx_history method allows you to view the transaction history of coins.";
 
@@ -15789,8 +16165,10 @@ Coin does not exist or has not been activated.
   "id":0
 }
 ```
-export const title = "Komodo DeFi Framework Method: Start Simple Market Maker Bot";
-export const description = "The Komodo DeFi Framework API allows for simple bot trading via the start_simple_market_maker_bot method.";
+export const title =
+  "Komodo DeFi Framework Method: Start Simple Market Maker Bot";
+export const description =
+  "The Komodo DeFi Framework API allows for simple bot trading via the start_simple_market_maker_bot method.";
 
 # start\_simple\_market\_maker\_bot
 
@@ -15802,29 +16180,29 @@ For convenience, an online [tool for generating configs](https://stats.kmd.io/at
 
 ## Arguments
 
-| Structure                                                | Type    | Description                                                                                                                                                                                                 |
-| -------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| price\_url                                               | string  | Link to a price service API                                                                                                                                                                                 |
-| bot\_refresh\_rate                                       | float   | Bot loop interval in seconds (optional, 30 sec default)                                                                                                                                                     |
-| cfg.name                                                 | string  | The name assigned to this configuration (e.g. the pair being configured)                                                                                                                                    |
-| cfg.name.base                                            | string  | Ticker of the coin you wish to sell                                                                                                                                                                         |
-| cfg.name.rel                                             | string  | Ticker of the coin you wish to buy                                                                                                                                                                          |
-| cfg.name.max                                             | boolean | Set to `true` if you would like to trade your whole balance (optional)                                                                                                                                      |
-| cfg.name.max\_volume.percentage                          | string  | Percentage of balance to trade (optional; can not use at same time as `max_volume.usd`; if greater than 1.0 `max=true` is implied)                                                                          |
-| cfg.name.max\_volume.usd                                 | string  | Maximum USD trade volume value to trade (optional; can not use at same time as `max_volume.percentage`; if greater than full balance `max=true` is implied)                                                 |
-| cfg.name.min\_volume.percentage                          | string  | Minimum percentage of balance to accept in trade (optional, can not use at same time as `min_volume.usd`)                                                                                                   |
-| cfg.name.min\_volume.usd                                 | float   | Minimum USD trade volume of trades accepted for order (optional, can not use at same time as `min_volume.percentage`)                                                                                       |
-| cfg.name.min\_base\_price                                | float   | Minimum USD price of base coin to accept in trade (optional)                                                                                                                                                |
-| cfg.name.min\_rel\_price                                 | float   | Minimum USD price of rel coin to accept in trade (optional)                                                                                                                                                 |
-| cfg.name.min\_pair\_price                                | float   | Minimum USD price of pair (base/rel) to accept in trade (optional)                                                                                                                                          |
-| cfg.name.spread\*\*                                      | string  | Target price in relation to prices API value                                                                                                                                                                |
-| cfg.name.base\_confs                                     | integer | number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set                                                                            |
-| cfg.name.base\_nota                                      | boolean | whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set                                                                                  |
-| cfg.name.rel\_confs                                      | integer | number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set                                                                              |
-| cfg.name.rel\_nota                                       | boolean | whether dPoW notarization is required for rel coin atomic swap transaction; default to base coin configuration if not set                                                                                   |
-| cfg.name.enable                                          | boolean | Bot will ignore this config entry if set to false                                                                                                                                                           |
-| cfg.name.price\_elapsed\_validity                        | float   | Will cancel current orders for this pair and not submit a new order if last price update time has been longer than this value in seconds (optional; defaults to 5 minutes)                                  |
-| cfg.name.check\_last\_bidirectional\_trade\_thresh\_hold | boolean | Will readjust the calculated cex price if a precedent trade exists for the pair (or reversed pair), applied via a [VWAP logic](https://www.investopedia.com/terms/v/vwap.asp) (optional; defaults to false) |
+| Structure                                                | Type    | Description                                                                                                                                                                                                                                                                                            |
+| -------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| price\_urls                                              | list    | Optional. A list of URLs serving price data in JSON format. During each update loop, price data will be sourced from the first working URL in the list. If not defined, a [default list](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/lp_price.rs#L13) will be used. |
+| bot\_refresh\_rate                                       | float   | Bot loop interval in seconds (optional, 30 sec default)                                                                                                                                                                                                                                                |
+| cfg.name                                                 | string  | The name assigned to this configuration (e.g. the pair being configured)                                                                                                                                                                                                                               |
+| cfg.name.base                                            | string  | Ticker of the coin you wish to sell                                                                                                                                                                                                                                                                    |
+| cfg.name.rel                                             | string  | Ticker of the coin you wish to buy                                                                                                                                                                                                                                                                     |
+| cfg.name.max                                             | boolean | Set to `true` if you would like to trade your whole balance (optional)                                                                                                                                                                                                                                 |
+| cfg.name.max\_volume.percentage                          | string  | Percentage of balance to trade (optional; can not use at same time as `max_volume.usd`; if greater than 1.0 `max=true` is implied)                                                                                                                                                                     |
+| cfg.name.max\_volume.usd                                 | string  | Maximum USD trade volume value to trade (optional; can not use at same time as `max_volume.percentage`; if greater than full balance `max=true` is implied)                                                                                                                                            |
+| cfg.name.min\_volume.percentage                          | string  | Minimum percentage of balance to accept in trade (optional, can not use at same time as `min_volume.usd`)                                                                                                                                                                                              |
+| cfg.name.min\_volume.usd                                 | float   | Minimum USD trade volume of trades accepted for order (optional, can not use at same time as `min_volume.percentage`)                                                                                                                                                                                  |
+| cfg.name.min\_base\_price                                | float   | Minimum USD price of base coin to accept in trade (optional)                                                                                                                                                                                                                                           |
+| cfg.name.min\_rel\_price                                 | float   | Minimum USD price of rel coin to accept in trade (optional)                                                                                                                                                                                                                                            |
+| cfg.name.min\_pair\_price                                | float   | Minimum USD price of pair (base/rel) to accept in trade (optional)                                                                                                                                                                                                                                     |
+| cfg.name.spread\*\*                                      | string  | Target price in relation to prices API value                                                                                                                                                                                                                                                           |
+| cfg.name.base\_confs                                     | integer | number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set                                                                                                                                                                       |
+| cfg.name.base\_nota                                      | boolean | whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set                                                                                                                                                                             |
+| cfg.name.rel\_confs                                      | integer | number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set                                                                                                                                                                         |
+| cfg.name.rel\_nota                                       | boolean | whether dPoW notarization is required for rel coin atomic swap transaction; default to base coin configuration if not set                                                                                                                                                                              |
+| cfg.name.enable                                          | boolean | Bot will ignore this config entry if set to false                                                                                                                                                                                                                                                      |
+| cfg.name.price\_elapsed\_validity                        | float   | Will cancel current orders for this pair and not submit a new order if last price update time has been longer than this value in seconds (optional; defaults to 5 minutes)                                                                                                                             |
+| cfg.name.check\_last\_bidirectional\_trade\_thresh\_hold | boolean | Will readjust the calculated cex price if a precedent trade exists for the pair (or reversed pair), applied via a [VWAP logic](https://www.investopedia.com/terms/v/vwap.asp) (optional; defaults to false)                                                                                            |
 
 *   Percentage values are within the range of 0-1, such that 0.25 = 25%
 *   For spread, a value of 1.05 equates to 5% over the value returned from the prices API url.
@@ -15871,7 +16249,11 @@ The third config tells the bot to:
   "mmrpc": "2.0",
   "method": "start_simple_market_maker_bot",
   "params": {
-    "price_url": "https://prices.komodo.earth/api/v2/tickers?expire_at=600",
+    "price_urls": [
+      "https://prices.komodo.live:1313/api/v2/tickers?expire_at=600",
+      "https://prices.komodo.earth/api/v2/tickers?expire_at=600",
+      "https://prices.komodian.info/api/v2/tickers?expire_at=600"
+    ],
     "bot_refresh_rate": 60,
     "cfg": {
       "DASH/KMD": {
@@ -24044,24 +24426,27 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 
 ### Configuration Parameters
 
-| Parameter               | Type            | Description                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ----------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| gui                     | string          | Information to identify which app, tool or product is using the API, e.g. `KomodoWallet iOS 1.0.1`. Helps developers identify if an issue is related to specific builds or operating systems etc.                                                                                                                                                                                                                                     |
-| netid                   | integer         | Nework ID number, telling the Komodo DeFi Framework  which network to join. 8762 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it.                                                                                                                                                                                                        |
-| passphrase              | string          | Your passphrase; this is the source of each of your coins private keys. [**KEEP IT SAFE!**](https://www.youtube.com/watch?v=WFpxVbTqhB8)                                                                                                                                                                                                                                                                                              |
-| rpc\_password           | string          | For RPC requests that need authentication, this will need to match the `userpass` value in the request body.                                                                                                                                                                                                                                                                                                                          |
-| allow\_weak\_password   | boolean         | Optional, defaults to `false`. If `true`, will allow low entropy rpc\_password. If `false` rpc\_password must not have 3 of the same characters in a row, must be between 8-32 characters in length, must contain at least one of each of the following: numeric, uppercase, lowercase, special character (e.g. !#$\*). It also can not contain the word "password", or the chars `<`, `>`, or `&`.                                   |
-| dbdir                   | string          | Optional, defaults to a subfolder named `DB` in the path of your `mm2` binary. This path will store the Komodo DeFi-API database data.                                                                                                                                                                                                                                                                                                |
-| rpcip                   | string          | Optional, defaults to `127.0.0.1`. IP address to bind to for RPC server.                                                                                                                                                                                                                                                                                                                                                              |
-| rpcport                 | integer         | Optional, defaults to `7783`. Port to use for RPC communication.                                                                                                                                                                                                                                                                                                                                                                      |
-| rpc\_local\_only        | boolean         | Optional, defaults to `true`. If `false` the Komodo DeFi Framework API will allow rpc methods sent from external IP addresses. **Warning:** Only use this if you know what you are doing, and have put the appropriate security measures in place.                                                                                                                                                                                    |
-| i\_am\_seed             | boolean         | Optional, defaults to `false`. Runs Komodo DeFi Framework API as a seed node mode (acting as a relay for Komodo DeFi Framework API clients). Use of this mode is not reccomended on the main network (8762) as it could result in a pubkey ban if non-compliant. On alternative testing or private networks, at least one seed node is required to relay information to other Komodo DeFi Framework API clients using the same netID. |
-| seednodes               | list of strings | Optional. If operating on a test or private netID, the IP address of at least one seed node is required (on the main network, these are already hardcoded)                                                                                                                                                                                                                                                                            |
-| enable\_hd              | boolean         | Optional. If `true`, the Komodo DeFi-API will work in only the [HD mode](/komodo-defi-framework/api/v20-dev/hd_wallets_overview/), and coins will need to have a coin derivation path entry in the `coins` file for activation. Defaults to `false`.                                                                                                                                                                                  |
-| message\_service\_cfg   | object          | Optional. This data is used to configure [Telegram](https://telegram.org/) messenger alerts for swap events when running using the [makerbot functionality](/komodo-defi-framework/api/v20/start_simple_market_maker_bot/). For more information check out the [telegram alerts guide](/komodo-defi-framework/api/v20/telegram_alerts/)                                                                                               |
-| metrics                 | integer         | Optional, defaults to `300`. The interval in seconds which metrics are logged. Set to `0` to disable metrics.                                                                                                                                                                                                                                                                                                                         |
-| prometheusport          | integer         | Optional. Only used if you are logging metrics in [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/). For more information check out the [Komodo DeFi metrics guide](/komodo-defi-framework/tutorials/api-metrics/)                                                                                                                                                                                             |
-| prometheus\_credentials | integer         | Optional. Only used if you are logging metrics in [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/) with authentication. For more information check out the [Komodo DeFi metrics guide](/komodo-defi-framework/tutorials/api-metrics/)                                                                                                                                                                         |
+| Parameter                    | Type            | Description                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| gui                          | string          | Information to identify which app, tool or product is using the API, e.g. `KomodoWallet iOS 1.0.1`. Helps developers identify if an issue is related to specific builds or operating systems etc.                                                                                                                                                                                                                                     |
+| netid                        | integer         | Nework ID number, telling the Komodo DeFi Framework  which network to join. 8762 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it.                                                                                                                                                                                                        |
+| passphrase                   | string          | Your passphrase; this is the source of each of your coins private keys. [**KEEP IT SAFE!**](https://www.youtube.com/watch?v=WFpxVbTqhB8)                                                                                                                                                                                                                                                                                              |
+| rpc\_password                | string          | For RPC requests that need authentication, this will need to match the `userpass` value in the request body.                                                                                                                                                                                                                                                                                                                          |
+| allow\_weak\_password        | boolean         | Optional, defaults to `false`. If `true`, will allow low entropy rpc\_password. If `false` rpc\_password must not have 3 of the same characters in a row, must be between 8-32 characters in length, must contain at least one of each of the following: numeric, uppercase, lowercase, special character (e.g. !#$\*). It also can not contain the word "password", or the chars `<`, `>`, or `&`.                                   |
+| dbdir                        | string          | Optional, defaults to a subfolder named `DB` in the path of your `mm2` binary. This path will store the Komodo DeFi-API database data.                                                                                                                                                                                                                                                                                                |
+| rpcip                        | string          | Optional, defaults to `127.0.0.1`. IP address to bind to for RPC server.                                                                                                                                                                                                                                                                                                                                                              |
+| rpcport                      | integer         | Optional, defaults to `7783`. Port to use for RPC communication.                                                                                                                                                                                                                                                                                                                                                                      |
+| rpc\_local\_only             | boolean         | Optional, defaults to `true`. If `false` the Komodo DeFi Framework API will allow rpc methods sent from external IP addresses. **Warning:** Only use this if you know what you are doing, and have put the appropriate security measures in place.                                                                                                                                                                                    |
+| i\_am\_seed                  | boolean         | Optional, defaults to `false`. Runs Komodo DeFi Framework API as a seed node mode (acting as a relay for Komodo DeFi Framework API clients). Use of this mode is not reccomended on the main network (8762) as it could result in a pubkey ban if non-compliant. On alternative testing or private networks, at least one seed node is required to relay information to other Komodo DeFi Framework API clients using the same netID. |
+| seednodes                    | list of strings | Optional. If operating on a test or private netID, the IP address of at least one seed node is required (on the main network, these are already hardcoded)                                                                                                                                                                                                                                                                            |
+| enable\_hd                   | boolean         | Optional. If `true`, the Komodo DeFi-API will work in only the [HD mode](/komodo-defi-framework/api/v20-dev/hd_wallets_overview/), and coins will need to have a coin derivation path entry in the `coins` file for activation. Defaults to `false`.                                                                                                                                                                                  |
+| message\_service\_cfg        | object          | Optional. This data is used to configure [Telegram](https://telegram.org/) messenger alerts for swap events when running using the [makerbot functionality](/komodo-defi-framework/api/v20/start_simple_market_maker_bot/). For more information check out the [telegram alerts guide](/komodo-defi-framework/api/v20/telegram_alerts/)                                                                                               |
+| metrics                      | integer         | Optional, defaults to `300`. The interval in seconds which metrics are logged. Set to `0` to disable metrics.                                                                                                                                                                                                                                                                                                                         |
+| prometheusport               | integer         | Optional. Only used if you are logging metrics in [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/). For more information check out the [Komodo DeFi metrics guide](/komodo-defi-framework/tutorials/api-metrics/)                                                                                                                                                                                             |
+| prometheus\_credentials      | integer         | Optional. Only used if you are logging metrics in [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/) with authentication. For more information check out the [Komodo DeFi metrics guide](/komodo-defi-framework/tutorials/api-metrics/)                                                                                                                                                                         |
+| https                        | boolean         | Optional. Only used with wss. Defaults to `false`, set to `true` to allow TLS/SSL enabled RPC (e.g. remote queries to a domain with a valid SSL certificate).                                                                                                                                                                                                                                                                         |
+| wss\_certs                   | object          | Optional. Contains fields for `server_priv_key` and `certificate` to allow RPC or P2P communications over TLS/SSL.                                                                                                                                                                                                                                                                                                                    |
+| event\_stream\_configuration | object          | Optional, a standard [EventStreamConfig](/komodo-defi-framework/api/v20/#derivation-method) object. Configuration for subscribing to events.                                                                                                                                                                                                                                                                                          |
 
 #### Example (allowing weak password):
 
@@ -24086,6 +24471,22 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
   "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
   "allow_weak_password": false,
   "dbdir": "/path/to/DB/folder"
+}
+```
+
+#### Example (WSS with certificates):
+
+```json
+{
+  "gui": "DEVDOCS_CLI",
+  "netid": 8762,
+  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
+  "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
+  "wss_certs": {
+    "server_priv_key": "/path/to/privkey.pem",
+    "certificate": "/path/to/fullchain.pem"
+  }
+
 }
 ```
 
@@ -24120,12 +24521,14 @@ The structure for adding additional coins can vary, please refer to the [listing
 
 ### Optional environment variables:
 
-| Variable        | Type   | Description                                                                                                                                                                                                          |
-| --------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MM2\_CONF\_PATH | string | A file path to load the `MM2.json` configuration file. Defaults to `MM2.json` in the same folder as the `mm2` binary.                                                                                                |
-| MM\_COINS\_PATH | string | A file path to load the `coins` configuration file. A comprehensive version for public use is maintained in the [Komodo Platform coins github repository](https://github.com/KomodoPlatform/coins/blob/master/coins) |
-| MM\_LOG         | string | A file path to store the Komodo DeFi-API logs.                                                                                                                                                                       |
-| USERPASS        | string | For convenience, this variable can store the value of your `rpc_password` to be referenced in any shell scripts                                                                                                      |
+| Variable            | Type   | Description                                                                                                                                                                                                          |
+| ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MM2\_CONF\_PATH     | string | A file path to load the `MM2.json` configuration file. Defaults to `MM2.json` in the same folder as the `mm2` binary.                                                                                                |
+| MM\_COINS\_PATH     | string | A file path to load the `coins` configuration file. A comprehensive version for public use is maintained in the [Komodo Platform coins github repository](https://github.com/KomodoPlatform/coins/blob/master/coins) |
+| MM\_LOG             | string | A file path to store the Komodo DeFi-API logs.                                                                                                                                                                       |
+| USERPASS            | string | For convenience, this variable can store the value of your `rpc_password` to be referenced in any shell scripts                                                                                                      |
+| MM\_CERT\_PATH      | string | Full path to TLS/SSL certificate file.                                                                                                                                                                               |
+| MM\_CERT\_KEY\_PATH | string | Full path to TLS/SSL certificate key file.                                                                                                                                                                           |
 
 ### What now?
 
@@ -26637,13 +27040,28 @@ The token's contract **must** have `approve` and `transferFrom` methods. Additio
 *   Protocol `"type"` field: `"ETH"` or `"ERC20"`
 *   Protocol `"protocol_data"` field (ERC20 only): `"platform"` - `"ETH"`, `"ETC"` or other Ethereum forks. `"contract_address"` - ERC20 token [checksummed](https://coincodex.com/article/2078/ethereum-address-checksum-explained/) smart contract address.
 
-| Parameter                                 | Type    | Description                                                                                                                                                                                                         |
-| ----------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chain\_id                                 | integer | To find the EVM chain ID, see [Chainlist](https://chainlist.org/)                                                                                                                                                   |
-| protocol.type                             | string  | Platform / protocol - e.g `ETH` for Ethereum, `ERC20` for ERC20 tokens on the Ethereum network                                                                                                                      |
-| protocol.protocol\_data                   | object  | Required for tokens only.                                                                                                                                                                                           |
-| protocol.protocol\_data.platform          | string  | The parent coin of the token's platform - e.g `MATIC` for PLG20 tokens                                                                                                                                              |
-| protocol.protocol\_data.contract\_address | string  | **Must be mixed case** The indentifying hex string for the token's contract. Can be found on sites like [EthScan](https://etherscan.io/), [BscScan](https://bscscan.com/) & [PolygonScan](https://polygonscan.com/) |
+| Parameter                                 | Type    | Description                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chain\_id                                 | integer | To find the EVM chain ID, see [Chainlist](https://chainlist.org/)                                                                                                                                                                                                                                                                       |
+| gas\_limit                                | object  | Optional, required for tokens only. Defines more precise gas prices for swap or transaction operations. Some tokens are called over proxy contracts which often require more gas, though users may be able to choose higher/lower values than the default where required. See the `Gas Limit Options` table below for more information. |
+| protocol.type                             | string  | Platform / protocol - e.g `ETH` for Ethereum, `ERC20` for ERC20 tokens on the Ethereum network                                                                                                                                                                                                                                          |
+| protocol.protocol\_data                   | object  | Required for tokens only.                                                                                                                                                                                                                                                                                                               |
+| protocol.protocol\_data.platform          | string  | The parent coin of the token's platform - e.g `MATIC` for PLG20 tokens                                                                                                                                                                                                                                                                  |
+| protocol.protocol\_data.contract\_address | string  | **Must be mixed case** The identifying hex string for the token's contract. Can be found on sites like [EthScan](https://etherscan.io/), [BscScan](https://bscscan.com/) & [PolygonScan](https://polygonscan.com/)                                                                                                                      |
+
+### Gas Limit Options
+
+| Parameter              | Type    | Description                                             |
+| ---------------------- | ------- | ------------------------------------------------------- |
+| eth\_send\_coins       | integer | Gas limit for sending coins.                            |
+| eth\_send\_erc20       | integer | Gas limit for sending ERC20 tokens.                     |
+| eth\_payment           | integer | Gas limit for swap payment tx with coins.               |
+| erc20\_payment         | integer | Gas limit for swap payment tx with ERC20 tokens.        |
+| eth\_receiver\_spend   | integer | Gas limit for swap receiver spend tx with coins.        |
+| erc20\_receiver\_spend | integer | Gas limit for swap receiver spend tx with ERC20 tokens. |
+| eth\_sender\_refund    | integer | Gas limit for swap refund tx with coins.                |
+| erc20\_sender\_refund  | integer | Gas limit for swap refund tx with with ERC20 tokens.    |
+| eth\_max\_trade\_gas   | integer | Gas limit for other operations.                         |
 
 ### ERC20 token example
 
@@ -26663,6 +27081,17 @@ The token's contract **must** have `approve` and `transferFrom` methods. Additio
       "platform": "ETH",
       "contract_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     }
+  },
+  "gas_limit": {
+    "eth_send_coins": 21000,
+    "eth_send_erc20": 65000,
+    "eth_payment": 75000,
+    "erc20_payment": 120000,
+    "eth_receiver_spend": 55000,
+    "erc20_receiver_spend": 130000,
+    "eth_sender_refund": 110000,
+    "erc20_sender_refund": 110000,
+    "eth_max_trade_gas": 150000
   }
 }
 ```
@@ -26769,6 +27198,10 @@ QTUM & QRC20 tokens are a special case which also support all fields of UTXO spe
   }
 ]
 ```
+
+The `disable_cert_verification` field is optional and defaults to `false`. If set to `true`, the SSL certificate verification will be disabled.
+This can be used when the server has a self-signed certificate, but it is not recommended for production use.
+**To avoid SSL certificate validation issues, it is highly recommended to use [EFF's Certbot](https://certbot.eff.org/) to generate SSL certificates for ElectrumX servers.**
 
 ## 5. Ethereum info file (Required for EVM-like platforms)
 
@@ -27141,7 +27574,7 @@ $ komodefi-cli init
     > What is rpcip: None
     > What is the rpcport: 7783
     > What is rpc_local_only: 
-    > What is i_am_a_seed: 
+    > What is i_am_seed: 
     Reading seed nodes until tap enter is met
     > What is the next seednode: None
     > What is enable_hd: 
