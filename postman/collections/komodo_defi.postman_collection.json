@@ -230,6 +230,90 @@
 											],
 											"cookie": [],
 											"body": "{\"result\":\"success\",\"address\":\"RUYJYSTuCKm9gouWzQN1LirHFEYThwzA2d\",\"balance\":\"10654.92034535\",\"unspendable_balance\":\"0\",\"coin\":\"DOC\",\"required_confirmations\":1,\"requires_notarization\":false,\"mature_confirmations\":100}"
+										},
+										{
+											"name": "Error: min > max",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10020\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10020\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10020\"\r\n        }\r\n    ],\r\n    \"min_connected\": 2, // defaults to 1 when omitted\r\n    \"max_connected\": 1  // defaults to len(servers) when omitted\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "199"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 30 Oct 2024 10:45:41 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"error\":\"rpc:184] dispatcher_legacy:141] lp_commands_legacy:141] lp_coins:4462] utxo_standard:73] utxo_coin_builder:616] Internal error: manager:132] min_connected (2) must be <= max_connected (1)\"}"
+										},
+										{
+											"name": "Error: min < 1",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10020\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10020\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10020\"\r\n        }\r\n    ],\r\n    \"min_connected\": 0, // defaults to 1 when omitted\r\n    \"max_connected\": 0  // defaults to len(servers) when omitted\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "191"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 30 Oct 2024 10:46:35 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"error\":\"rpc:184] dispatcher_legacy:141] lp_commands_legacy:141] lp_coins:4462] utxo_standard:73] utxo_coin_builder:616] Internal error: manager:129] min_connected should be greater than 0\"}"
 										}
 									]
 								},
@@ -1337,6 +1421,48 @@
 									],
 									"cookie": [],
 									"body": "{\"tx_hash\":\"D87E4345B9C2091E7670EB1D527970040AA725385571D7F85711C282C6D468D9\"}"
+								},
+								{
+									"name": "send_raw_transaction (SIA)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"send_raw_transaction\",\r\n    \"coin\": \"TSIA\",\r\n    \"tx_hex\": \"{\\\"siacoinInputs\\\": [{\\\"parent\\\": {\\\"id\\\": \\\"h:ac0ba05f8777ebcc0a2981dd31367a7184e9155cf5a19db165cfcac7ba37c520\\\",\\\"leafIndex\\\": 35514, \\\"merkleProof\\\": [\\\"h:8cd35fe8f44230e2968ee3b72d7ec1995201db7b895ccb8d0415c7ed991b3f3f\\\",\\\"h:4d891b3eb03d00cd85c268dfe1470c8057d3705b1d396b3741eb1e50ad0df65c\\\",\\\"h:fb9702701e1443c8fddf029f0969adcb7492b1b273ec283e894afed55d803215\\\",\\\"h:79ab8a93129991e87a0b8b36255c68aa4389618196b64181c74749a5c3bb5a47\\\",\\\"h:0281315992e2ea4ca95ff3f41b2496c26b70e3e907e56cb2d49203b91f0e3266\\\",\\\"h:436a766658153eeccb1a9c6c59c369090ffa2749a2fd9d3f20007942f9e4dc47\\\",\\\"h:19128b239db22df5e8c0c9082c66dbaa0b54d017bea1b9cb7809c33c9b0e71ca\\\",\\\"h:945de7689978f393d34e395b6c28220efd64269fdcf4a59a1070e0a3581679ef\\\",\\\"h:69429e9433d2b8266645e4a322e6938f776a09db26edb20283914c06fd3f8fe8\\\",\\\"h:9c8b56f9c3c7c26c3b60f6449e1501f52b75d74dc82bed7fabbc973b0fff99f5\\\",\\\"h:be8364e9447e3bf70dd8f0240e37507ef1cb29b3d2c9cbe8a725fe830ab45a33\\\",\\\"h:28fd31d0444b9be59e3dc324efb7a552e6fb1db87f4fe879ef047bcaf45ca118\\\",\\\"h:137d8b1589543204223072ad2a0a5b8283ea05fcb680b05e0c8d399e5336e1e0\\\"],\\\"siacoinOutput\\\": {\\\"value\\\": \\\"1000000000000000000000000000000000\\\",\\\"address\\\": \\\"addr:5e0dca11b958bd1b621ecb3a3a5c9122b058802b90b3c739e8a0ec596f6f25138eb9c0ab59a4\\\"},\\\"maturityHeight\\\": 0},\\\"satisfiedPolicy\\\": {\\\"policy\\\": {\\\"type\\\": \\\"pk\\\",\\\"policy\\\": \\\"ed25519:7470b18df7faf8842e4550cdb993b879cad60e355cbce71bb095e4444fbc2ebb\\\"},\\\"signatures\\\": [\\\"sig:6b849c6421fe6802123a6d7a87c3c39e3c8d7345d57b08f1f81631b8e3035bccf17ef232a59681a982f557f8031c608c6208e226f3d64c3a850cc226a8a41a01\\\"]}}],\\\"siacoinOutputs\\\": [{\\\"value\\\": \\\"10000000000000000000000000000\\\",\\\"address\\\": \\\"addr:f98cd31f1f37b258b5bd42b093c6b522698b4dee2f9acee2c75321a18a2d3528dcbb5c24cec8\\\"},{\\\"value\\\": \\\"999989999999990000000000000000000\\\",\\\"address\\\": \\\"addr:5e0dca11b958bd1b621ecb3a3a5c9122b058802b90b3c739e8a0ec596f6f25138eb9c0ab59a4\\\"}],\\\"minerFee\\\": \\\"10000000000000000000\\\"}\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "80"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 28 Oct 2024 16:16:14 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"tx_hash\":\"h:df3f8a11fbace9a9fa3f3004b7890e6ac5fa4fc83052a47b006a6daf1a642048\"}"
 								}
 							]
 						},
@@ -5193,6 +5319,57 @@
 									]
 								}
 							]
+						},
+						{
+							"name": "SIA",
+							"item": [
+								{
+									"name": "Activate TSIA",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"enable_sia\",\n    \"params\": {\n        \"ticker\": \"TSIA\",\n        \"activation_params\": {\n            \"client_conf\": {\n                \"server_url\": \"https://sia-walletd.komodo.earth/\",\n                \"password\": \"dummy\"\n            }\n        }\n    }\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Activate TSIA status",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n\t\"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"task::enable_sia::status\",\n    \"params\": {\n        \"task_id\": 0\n    }\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						}
 					]
 				},
@@ -6885,6 +7062,55 @@
 											],
 											"cookie": [],
 											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"tx_hex\":\"0a9f020ab7010a292f6962632e6170706c69636174696f6e732e7472616e736665722e76312e4d73675472616e736665721289010a087472616e7366657212096368616e6e656c2d331a0f0a0575697269731206313030303030222a6961613136647271766c33753873756b667375346c6d3371736b32386a72336661686a6139767376366b2a2b6f736d6f3136647271766c33753873756b667375346c6d3371736b32386a72336661686a6163347264773438eed285fe8b98e6fa17125e576520617265206d6f7265206f6674656e20667269676874656e6564207468616e20687572743b20616e6420776520737566666572206d6f72652066726f6d20696d6167696e6174696f6e207468616e2066726f6d207265616c6974792e18e28cdb0c12680a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a2103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc212040a020801185d12140a0e0a0575697269731205313038323110e0c65b1a4078d2d1360fc0b091cb34c07f1beec957f88324688210852832ad121d1de7a3c737279b55783f10522733becc79ecdb5db565bd8626a8109a3be62196268d2ff9\",\"tx_hash\":\"D87E4345B9C2091E7670EB1D527970040AA725385571D7F85711C282C6D468D9\",\"from\":[\"iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k\"],\"to\":[\"osmo16drqvl3u8sukfsu4lm3qsk28jr3fahjac4rdw4\"],\"total_amount\":\"0.1108210000000000\",\"spent_by_me\":\"0.1108210000000000\",\"received_by_me\":\"0\",\"my_balance_change\":\"-0.1108210000000000\",\"block_height\":0,\"timestamp\":0,\"fee_details\":{\"type\":\"Tendermint\",\"coin\":\"IRIS\",\"amount\":\"0.010821\",\"gas_limit\":1500000},\"coin\":\"IRIS\",\"internal_id\":\"d87e4345b9c2091e7670eb1d527970040aa725385571d7f85711c282c6d468d9\",\"transaction_type\":\"TendermintIBCTransfer\",\"memo\":\"We are more often frightened than hurt; and we suffer more from imagination than from reality.\"},\"id\":null}"
+										},
+										{
+											"name": "Withdraw SIA",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"withdraw\",\r\n    \"params\": {\r\n        \"coin\": \"TSIA\",\r\n        \"to\": \"addr:f98cd31f1f37b258b5bd42b093c6b522698b4dee2f9acee2c75321a18a2d3528dcbb5c24cec8\",\r\n        \"amount\": 10000 // used only if: \"max\": false\r\n        //\"memo\": \"In the blackest of your moments, wait with no fear.\",\r\n        //\"fee\": {\r\n        //  \"type\": \"CosmosGas\",\r\n        //  \"gas_price\": 0.1,\r\n        //  \"gas_limit\": 1500000\r\n        //}\r\n        // \"ibc_source_channel\": \"channel-141\",\r\n        // \"from\": null,\r\n        // // \"from\": {\r\n        // //     \"account_id\": 0,\r\n        // //     \"chain\": \"External\", // Accepted values: \"External\", \"Internal\"\r\n        // //     \"address_id\": 0\r\n        // // },\r\n        // // \"from\": {\r\n        // //     \"derivation_path\": \"m/44'/501'/0'\"\r\n        // // },\r\n        // \"max\": false,\r\n        // \"fee\": {\r\n        //     \"type\": \"UtxoFixed\", // Accepted values: \"UtxoFixed\", \"UtxoPerKbyte\"\r\n        //     \"amount\": 0.00001 // default amount is 1000 of the smallest unit of the coin (0.00001 for 8 decimal places coins)\r\n        // } // Default: Coin Config\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "2567"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 28 Oct 2024 14:34:34 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"tx_json\": {\n            \"siacoinInputs\": [\n                {\n                    \"parent\": {\n                        \"id\": \"h:ac0ba05f8777ebcc0a2981dd31367a7184e9155cf5a19db165cfcac7ba37c520\",\n                        \"leafIndex\": 35514,\n                        \"merkleProof\": [\n                            \"h:8cd35fe8f44230e2968ee3b72d7ec1995201db7b895ccb8d0415c7ed991b3f3f\",\n                            \"h:4d891b3eb03d00cd85c268dfe1470c8057d3705b1d396b3741eb1e50ad0df65c\",\n                            \"h:fb9702701e1443c8fddf029f0969adcb7492b1b273ec283e894afed55d803215\",\n                            \"h:79ab8a93129991e87a0b8b36255c68aa4389618196b64181c74749a5c3bb5a47\",\n                            \"h:0281315992e2ea4ca95ff3f41b2496c26b70e3e907e56cb2d49203b91f0e3266\",\n                            \"h:436a766658153eeccb1a9c6c59c369090ffa2749a2fd9d3f20007942f9e4dc47\",\n                            \"h:19128b239db22df5e8c0c9082c66dbaa0b54d017bea1b9cb7809c33c9b0e71ca\",\n                            \"h:945de7689978f393d34e395b6c28220efd64269fdcf4a59a1070e0a3581679ef\",\n                            \"h:69429e9433d2b8266645e4a322e6938f776a09db26edb20283914c06fd3f8fe8\",\n                            \"h:9c8b56f9c3c7c26c3b60f6449e1501f52b75d74dc82bed7fabbc973b0fff99f5\",\n                            \"h:be8364e9447e3bf70dd8f0240e37507ef1cb29b3d2c9cbe8a725fe830ab45a33\",\n                            \"h:28fd31d0444b9be59e3dc324efb7a552e6fb1db87f4fe879ef047bcaf45ca118\",\n                            \"h:137d8b1589543204223072ad2a0a5b8283ea05fcb680b05e0c8d399e5336e1e0\"\n                        ],\n                        \"siacoinOutput\": {\n                            \"value\": \"1000000000000000000000000000000000\",\n                            \"address\": \"addr:5e0dca11b958bd1b621ecb3a3a5c9122b058802b90b3c739e8a0ec596f6f25138eb9c0ab59a4\"\n                        },\n                        \"maturityHeight\": 0\n                    },\n                    \"satisfiedPolicy\": {\n                        \"policy\": {\n                            \"type\": \"pk\",\n                            \"policy\": \"ed25519:7470b18df7faf8842e4550cdb993b879cad60e355cbce71bb095e4444fbc2ebb\"\n                        },\n                        \"signatures\": [\n                            \"sig:6b849c6421fe6802123a6d7a87c3c39e3c8d7345d57b08f1f81631b8e3035bccf17ef232a59681a982f557f8031c608c6208e226f3d64c3a850cc226a8a41a01\"\n                        ]\n                    }\n                }\n            ],\n            \"siacoinOutputs\": [\n                {\n                    \"value\": \"10000000000000000000000000000\",\n                    \"address\": \"addr:f98cd31f1f37b258b5bd42b093c6b522698b4dee2f9acee2c75321a18a2d3528dcbb5c24cec8\"\n                },\n                {\n                    \"value\": \"999989999999990000000000000000000\",\n                    \"address\": \"addr:5e0dca11b958bd1b621ecb3a3a5c9122b058802b90b3c739e8a0ec596f6f25138eb9c0ab59a4\"\n                }\n            ],\n            \"minerFee\": \"10000000000000000000\"\n        },\n        \"tx_hash\": \"h:df3f8a11fbace9a9fa3f3004b7890e6ac5fa4fc83052a47b006a6daf1a642048\",\n        \"from\": [\n            \"addr:5e0dca11b958bd1b621ecb3a3a5c9122b058802b90b3c739e8a0ec596f6f25138eb9c0ab59a4\"\n        ],\n        \"to\": [\n            \"addr:f98cd31f1f37b258b5bd42b093c6b522698b4dee2f9acee2c75321a18a2d3528dcbb5c24cec8\"\n        ],\n        \"total_amount\": \"1000000000.000000000000000000000000\",\n        \"spent_by_me\": \"1000000000.000000000000000000000000\",\n        \"received_by_me\": \"999989999.999990000000000000000000\",\n        \"my_balance_change\": \"-10000.000010000000000000000000\",\n        \"block_height\": 0,\n        \"timestamp\": 1730126075,\n        \"fee_details\": {\n            \"type\": \"Sia\",\n            \"coin\": \"TSIA\",\n            \"policy\": \"Fixed\",\n            \"total_amount\": \"0.000010000000000000000000\"\n        },\n        \"coin\": \"TSIA\",\n        \"internal_id\": \"\",\n        \"transaction_type\": \"SiaV2Transaction\",\n        \"memo\": null\n    },\n    \"id\": null\n}"
 										}
 									]
 								},
