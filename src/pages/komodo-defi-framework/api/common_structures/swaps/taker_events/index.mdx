@@ -21,6 +21,8 @@ Click on an Event below to view its structure:
 *   [TakerPaymentSent](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-sent)
 *   [TakerPaymentSpent](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-spent)
 *   [MakerPaymentSpent](/komodo-defi-framework/api/common_structures/swaps/taker_events/#maker-payment-spent)
+*   [MakerPaymentSpentByWatcher](/komodo-defi-framework/api/common_structures/swaps/taker_events/#maker-payment-spent-by-watcher)
+
 *   [Finished](/komodo-defi-framework/api/common_structures/swaps/taker_events/#finished)
 
 ## Taker Error Events
@@ -40,6 +42,7 @@ Click on an Event below to view its structure:
 *   [TakerPaymentWaitRefundStarted](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-wait-refund-started)
 *   [TakerPaymentRefundStarted](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refund-started)
 *   [TakerPaymentRefunded](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refunded)
+*   [TakerPaymentRefundedByWatcher](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refunded-by-watcher)
 *   [TakerPaymentRefundFailed](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refund-failed)
 *   [TakerPaymentRefundFinished](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refund-finished)
 
@@ -114,6 +117,7 @@ Click on an Event below to view its structure:
   ```
 </CollapsibleSection>
 
+
 #### StartFailed
 
 The `StartFailed` event indicates that some of the pre-checks did not pass, and therefore the swap did not start.
@@ -129,6 +133,7 @@ The swap finishes immediately when this event occurs.
   TODO: Example TBA
   ```
 </CollapsibleSection>
+
 
 #### Negotiated
 
@@ -157,6 +162,7 @@ Taker sends dex fee after this event occurs.
   ```
 </CollapsibleSection>
 
+
 #### NegotiateFailed
 
 The `NegotiateFailed` event indicates that maker negotiation data was not received or did not pass validation.
@@ -177,6 +183,7 @@ The swap finishes immediately when this event occurs.
   }
   ```
 </CollapsibleSection>
+
 
 #### TakerFeeSent
 
@@ -201,6 +208,7 @@ Taker starts waiting for maker payment after this event occurs.
   ```
 </CollapsibleSection>
 
+
 #### TakerFeeSendFailed
 
 The `TakerFeeSendFailed` event indicates that the taker dex fee transaction failed to broadcast to the taker coin blockchain, or that the taker failed to send the transaction data to maker.
@@ -217,6 +225,7 @@ The swap finishes immediately when this event occurs.
   ```
 </CollapsibleSection>
 
+
 #### TakerPaymentInstructionsReceived
 
 The `TakerPaymentInstructionsReceived` event indicates that the taker has received payment instructions.
@@ -231,6 +240,7 @@ This event does not have additional data.
   }
   ```
 </CollapsibleSection>
+
 
 #### MakerPaymentValidateFailed
 
@@ -247,6 +257,7 @@ The swap finishes immediately when this event occurs.
   TODO: Example TBA
   ```
 </CollapsibleSection>
+
 
 #### MakerPaymentReceived
 
@@ -295,6 +306,7 @@ Taker swap finishes immediately when this event occurs.
   ```
 </CollapsibleSection>
 
+
 #### MakerPaymentValidatedAndConfirmed
 
 The `MakerPaymentValidatedAndConfirmed` event indicates that taker validated maker payment and the payment was confirmed the required number of times.
@@ -310,6 +322,7 @@ This event does not have additional data.
   }
   ```
 </CollapsibleSection>
+
 
 #### TakerPaymentSent
 
@@ -334,6 +347,7 @@ Taker starts waiting for maker to spend this transaction.
   ```
 </CollapsibleSection>
 
+
 #### TakerPaymentTransactionFailed
 
 The `TakerPaymentTransactionFailed` event indicates that taker failed to broadcast transaction to taker coin blockchain.
@@ -349,6 +363,7 @@ The swap finishes immediately when this event occurs.
   TODO: Example TBA
   ```
 </CollapsibleSection>
+
 
 #### TakerPaymentWaitConfirmFailed
 
@@ -366,6 +381,7 @@ When this event occurs taker starts waiting for taker payment lock time expirati
   ```
 </CollapsibleSection>
 
+
 #### TakerPaymentDataSendFailed
 
 The `TakerPaymentDataSendFailed` event indicates that taker was not able to send his payment data to maker due to a network error.
@@ -381,6 +397,7 @@ When this event occurs taker starts waiting for taker payment lock time expirati
   TODO: Example TBA
   ```
 </CollapsibleSection>
+
 
 #### TakerPaymentSpent
 
@@ -410,6 +427,7 @@ When this event occurs taker extracts the secret from the transaction and attemp
   ```
 </CollapsibleSection>
 
+
 #### TakerPaymentWaitForSpendFailed
 
 The `TakerPaymentWaitForSpendFailed` event indicates that maker did not spend taker payment before lock time expiration.
@@ -425,6 +443,7 @@ When this event occurs taker attempts to refund the payment.
   TODO: Example TBA
   ```
 </CollapsibleSection>
+
 
 #### MakerPaymentSpendFailed
 
@@ -446,6 +465,7 @@ The swap finishes immediately when this event occurs.
   }
   ```
 </CollapsibleSection>
+
 
 #### MakerPaymentSpent
 
@@ -470,6 +490,31 @@ The swap finishes immediately when this event occurs.
   ```
 </CollapsibleSection>
 
+
+#### MakerPaymentSpentByWatcher
+
+The `MakerPaymentSpentByWatcher` event indicates that the maker payment has been released to the taker while the taker was offline.
+
+The swap finishes immediately when this event occurs.
+
+| Structure | Type   | Description                             |
+| --------- | ------ | --------------------------------------- |
+| tx\_hash  | string | the hash of the transaction             |
+| tx\_hex   | string | transaction bytes in hexadecimal format |
+
+<CollapsibleSection expandedText="Hide Event" collapsedText="Show Event">
+  ```json
+  {
+    "type" : "MakerPaymentSpentByWatcher",
+    "data" : {
+      "tx_hash" : "a2513faf3d479b8e14096be9b0ba8977d669a7a9ca722be0e2bbe3833fa51a4e",
+      "tx_hex" : "0400008085202f8901d331b98aec95c8ed36484398b7bdec98858d5efae3ac0eb8be4cb39ef016e0fd00000000d7473044022049a5831a2ef057c5a119b19a694dc653e37a1a8b0122125132aecd5dd47312ff02206672c43113830247623f508ee49ba2db15732c22d8f2fec3c8acfc1f19b84654012017456a9b1b3817b612737c929a731e241a28147fc0530e876f9f79e34abd86f7004c6b630457f7ec64b17521031bb83b58ec130e28e0a6d5d2acf2eb01b0d3f1670e021d47d31db8a858219da8ac6782012088a914c1eae4df923e04a343030902472e70664a525e6d8821023c5ba1d7ef6fa015eb33defb3aba2a961898a51bbb7ff30344d07ba75ad3f289ac68ffffffff01b2530000000000001976a91484c74592ed8ac05340906784d277ca4d4e0af08e88ac57f7ec64000000000000000000000000000000"
+    }
+  }
+  ```
+</CollapsibleSection>
+
+
 #### TakerPaymentWaitRefundStarted
 
 `TakerPaymentWaitRefundStarted` event indicates that taker started waiting for lock time expiration to refund the payment.
@@ -483,6 +528,7 @@ The swap finishes immediately when this event occurs.
   ```
 </CollapsibleSection>
 
+
 #### TakerPaymentRefundStarted
 
 `TakerPaymentRefundStarted` event indicates that taker was has initiated the refund process.
@@ -492,6 +538,23 @@ The swap finishes immediately when this event occurs.
   TODO: Table and Example TBA
   ```
 </CollapsibleSection>
+
+
+#### TakerPaymentRefundedByWatcher
+
+The `TakerPaymentRefundedByWatcher` is fired if the watcher refunded the taker payment for the taker while the taker is offline.
+It will be shown in the swap status when the taker runs the defi framework again after being offline (if the watcher refunded the swap during the time the taker was offline).
+
+| Structure | Type   | Description                        |
+| --------- | ------ | ---------------------------------- |
+| error     | string | error description with stack trace |
+
+<CollapsibleSection expandedText="Hide Event" collapsedText="Show Event">
+  ```json
+  TODO: Example TBA
+  ```
+</CollapsibleSection>
+
 
 #### TakerPaymentRefundFailed
 
@@ -508,6 +571,7 @@ The swap finishes immediately when this event occurs.
   ```
 </CollapsibleSection>
 
+
 #### TakerPaymentRefunded
 
 The `TakerPaymentRefunded` event indicates that taker broadcast the taker payment refund transaction.
@@ -518,6 +582,7 @@ The swap finishes immediately when this event occurs.
 | --------- | ------ | --------------------------------------- |
 | tx\_hash  | string | the hash of the transaction             |
 | tx\_hex   | string | transaction bytes in hexadecimal format |
+
 
 #### TakerPaymentRefundFinished
 
@@ -530,6 +595,7 @@ The swap finishes immediately when this event occurs. This event does not have a
   TODO: Example TBA
   ```
 </CollapsibleSection>
+
 
 #### Finished
 
