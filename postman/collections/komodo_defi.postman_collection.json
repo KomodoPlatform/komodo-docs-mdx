@@ -69,7 +69,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10020\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10020\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10020\"\r\n        }\r\n    ]\r\n    \"min_connected\": 2, // defaults to 1 when omitted\r\n    \"max_connected\": 2  // defaults to len(servers) when omitted\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"DOC\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10020\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10020\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10020\"\r\n        }\r\n    ],\r\n    \"min_connected\": 2, // defaults to 1 when omitted\r\n    \"max_connected\": 2  // defaults to len(servers) when omitted\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
 												},
 												"url": {
 													"raw": "{{address}}",
@@ -1353,7 +1353,50 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "my_tx_history",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"my_tx_history\",\r\n    \"coin\": \"TSIA\"\r\n    // \"from_id\": null, // Accepted values: Strings\r\n    // \"max\": false,\r\n    // \"limit\": 10,\r\n    // \"page_number\": 1, // used only if: \"from_id\": null\r\n\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "172"
+										},
+										{
+											"key": "date",
+											"value": "Fri, 01 Nov 2024 03:46:46 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"result\":{\"transactions\":[],\"limit\":10,\"skipped\":0,\"from_id\":null,\"total\":0,\"current_block\":22780,\"sync_status\":{\"state\":\"NotEnabled\"},\"page_number\":null,\"total_pages\":0}}"
+								}
+							]
 						},
 						{
 							"name": "send_raw_transaction",
@@ -1837,7 +1880,50 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "max_taker_vol",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"max_taker_vol\",\r\n    \"coin\": \"TSIA\"\r\n    // \"trade_with\": \"DOC\" // Default: \"coin\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "73"
+										},
+										{
+											"key": "date",
+											"value": "Fri, 01 Nov 2024 03:44:16 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"result\":{\"numer\":\"85469222999997669\",\"denom\":\"77800000\"},\"coin\":\"TSIA\"}"
+								}
+							]
 						},
 						{
 							"name": "min_trading_vol",
@@ -5428,7 +5514,49 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Activate TSIA",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"enable_sia\",\n    \"params\": {\n        \"ticker\": \"TSIA\",\n        \"activation_params\": {\n            \"client_conf\": {\n                \"server_url\": \"https://sia-walletd.komodo.earth/\",\n                \"password\": \"dummy\"\n            }\n        }\n    }\n}\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Fri, 01 Nov 2024 03:49:58 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"task_id\":0},\"id\":null}"
+										}
+									]
 								},
 								{
 									"name": "Activate TSIA status",
@@ -5451,7 +5579,49 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Activate TSIA status",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n\t\"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"task::enable_sia::status\",\n    \"params\": {\n        \"task_id\": 0\n    }\n}\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "332"
+												},
+												{
+													"key": "date",
+													"value": "Fri, 01 Nov 2024 03:50:14 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Ok\",\"details\":{\"ticker\":\"TSIA\",\"current_block\":22780,\"wallet_balance\":{\"wallet_type\":\"Iguana\",\"address\":\"addr:c67d77a585c13727dbba57cfc115995beb9b8737e9a8cb7bb0aa208744e646cdc0acc9c9fce2\",\"balance\":{\"spendable\":\"0.000000000000000000000000\",\"unspendable\":\"0.000000000000000000000000\"}}}},\"id\":null}"
+										}
+									]
 								}
 							]
 						}
