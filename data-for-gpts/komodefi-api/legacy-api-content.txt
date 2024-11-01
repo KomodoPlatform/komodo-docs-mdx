@@ -1289,23 +1289,18 @@ Electrum mode is only available for UTXO based coins and QTUM/QRC20 tokens.
 
 #### Arguments
 
-| Structure                                | Type                                    | Description                                                                                                                                                                                                                                |
-| ---------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| coin                                     | string                                  | Ticker of coin to activate                                                                                                                                                                                                                 |
-| servers                                  | array of objects                        | List of \[Electrum servers] ([https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums))                                                                               |
-| servers.url                              | string                                  | Electrum server URL                                                                                                                                                                                                                        |
-| servers.protocol                         | string (optional, defaults to `TCP`)    | Transport protocol used by Komodo DeFi Framework API to connect to the electrum server (`TCP` or `SSL`)                                                                                                                                    |
-| servers.disable\_cert\_verification      | bool (optional, defaults to `false`.)   | If `true`, this disables server SSL/TLS certificate verification (e.g. to use self-signed certificate). Use at your own risk                                                                                                               |
-| mm2                                      | integer                                 | Required if not set in `coins` file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                 |
-| tx\_history                              | bool                                    | If `true` the Komodo DeFi Framework API will preload trasaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                 |
-| required\_confirmations                  | integer (optional, defaults to `3`)     | Number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap.                                                                                                                          |
-| requires\_notarization                   | boolean (optional, defaults to `false`) | If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
-| swap\_contract\_address                  | string (required for QRC20 only)        | address of etomic swap smart contract                                                                                                                                                                                                      |
-| fallback\_swap\_contract                 | string (required for QRC20 only)        | address of backup etomic swap smart contract                                                                                                                                                                                               |
-| utxo\_merge\_params                      | object (optional)                       | If set, will consolidate excessive UTXOs (e.g. from mining)                                                                                                                                                                                |
-| utxo\_merge\_params.merge\_at            | integer                                 | Number of UTXOs in wallet required before merging                                                                                                                                                                                          |
-| utxo\_merge\_params.check\_every         | integer                                 | How often to check the UTXO count, in seconds. Ideally should be at least 3x the coins block time.                                                                                                                                         |
-| utxo\_merge\_params.max\_merge\_at\_once | integer                                 | Maximum number of UTXOs to merge in each consolidation transaction. Should be less that `merge_at` value, but will fail if so high the transaction becomes too large. Suggested maximum is 250.                                            |
+| Structure                | Type            | Description                                                                                                                                                                                                                                                               |   |
+| ------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | - |
+| coin                     | string          | Ticker of coin to activate                                                                                                                                                                                                                                                |   |
+| servers                  | list of objects | A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                                                              |   |
+| mm2                      | integer         | Required if not set in `coins` file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                |   |
+| min\_connected           | integer         | Optional, defaults to `1`. Minimum number of electrum servers to maintain an active connection to.                                                                                                                                                                        |   |
+| max\_connected           | integer         | Optional. Maximum number of electrum servers to maintain an active connection to. If not set, defaults to all servers in activation request.                                                                                                                              |   |
+| required\_confirmations  | integer         | Optional, defaults to `3`. Number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap.                                                                                                                              |   |
+| requires\_notarization   | boolean         | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |   |
+| swap\_contract\_address  | string          | QRC20 only. Address of etomic swap smart contract                                                                                                                                                                                                                         |   |
+| fallback\_swap\_contract | string          | QRC20 only. Address of backup etomic swap smart contract                                                                                                                                                                                                                  |   |
+| utxo\_merge\_params      | object          | A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params) object. Used to reduce a wallet's UTXO count in cases where it is causing significantly slower RPC responses.                                                    |   |
 
 #### Response
 
@@ -1330,15 +1325,22 @@ Electrum mode is only available for UTXO based coins and QTUM/QRC20 tokens.
   "method": "electrum",
   "servers": [
     {
-      "url": "electrum1.cipig.net:10063"
+      "url": "electrum1.cipig.net:10063",
+      "protocol": "TCP"
     },
     {
-      "url": "electrum2.cipig.net:10063"
+      "url": "electrum2.cipig.net:20063",
+      "protocol": "SSL",
+      "disable_cert_verification": true
     },
     {
-      "url": "electrum3.cipig.net:10063"
+      "url": "electrum3.cipig.net:20063",
+      "protocol": "SSL",
+      "ws_url": "electrum3.cipig.net:30063"
     }
   ],
+  "min_connected": 1,
+  "max_connected": 2,
   "userpass": "RPC_UserP@SSW0RD"
 }
 ```
@@ -1434,13 +1436,29 @@ Electrum mode is only available for UTXO based coins and QTUM/QRC20 tokens.
 }
 ```
 
-#### Response (Error, `mm2` is not set)
+#### Error responses
 
 If mm2 is not set in either the command or your `coins` file, you will see the following error:
 
 ```json
 {
   "error": "lp_coins:943] lp_coins:693] mm2 param is not set neither in coins config nor enable request, assuming that coin is not supported"
+}
+```
+
+If min\_connected is \< 1, you will see the following error:
+
+```json
+{
+  "error":"rpc:184] dispatcher_legacy:141] lp_commands_legacy:141] lp_coins:4462] utxo_standard:73] utxo_coin_builder:616] Internal error: manager:129] min_connected should be greater than 0"
+}
+```
+
+If max\_connected is \< min\_connected, you will see the following error:
+
+```json
+{
+  "error": "rpc:184] dispatcher_legacy:141] lp_commands_legacy:141] lp_coins:4462] utxo_standard:73] utxo_coin_builder:616] Internal error: manager:132] min_connected (2) must be <= max_connected (1)"
 }
 ```
 
@@ -1994,6 +2012,61 @@ The `disable_coin` method deactivates the previously enabled coin, and also canc
   }
 }
 ```
+export const title = "Komodo DeFi Framework Method: Get Peers Info";
+export const description = "The get_directly_connected_peers method returns an array of peers (with their multiaddresses) currently connected to the requesting node.";
+
+# get\_directly\_connected\_peers
+
+The `get_directly_connected_peers` method all connected peers with their multiaddresses. See [https://docs.libp2p.io/concepts/addressing/](https://docs.libp2p.io/concepts/addressing/) for more information.
+
+## Arguments
+
+| Structure | Type | Description |
+| --------- | ---- | ----------- |
+| (none)    |      |             |
+
+#### Response
+
+| Structure             | Type  | Description                                    |
+| --------------------- | ----- | ---------------------------------------------- |
+| PeerID-Multiaddresses | Array | All connected peers with their multiaddresses. |
+
+#### 📌 Example
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "get_directly_connected_peers"
+}
+```
+
+```json
+{
+  "result": {
+    "12D3KooWM8BrDBXc1TVw2vswoqYcQVn7fFvpAvcCfaV2Uqg2L9jU": [
+      "/ip4/89.248.168.39/tcp/42845"
+    ],
+    "12D3KooWJ3dEWK7ym1uwc5SmwbmfFSRmELrA9aPJYxFRrQCCNdwF": [
+      "/ip4/188.124.46.112/tcp/42845/p2p/12D3KooWJ3dEWK7ym1uwc5SmwbmfFSRmELrA9aPJYxFRrQCCNdwF"
+    ],
+    "12D3KooWL6yrrNACb7t7RPyTEPxKmq8jtrcbkcNd6H5G2hK7bXaL": [
+      "/ip4/168.119.236.233/tcp/42845/p2p/12D3KooWL6yrrNACb7t7RPyTEPxKmq8jtrcbkcNd6H5G2hK7bXaL"
+    ],
+    "12D3KooWPR2RoPi19vQtLugjCdvVmCcGLP2iXAzbDfP3tp81ZL4d": [
+      "/ip4/168.119.237.13/tcp/42845/p2p/12D3KooWPR2RoPi19vQtLugjCdvVmCcGLP2iXAzbDfP3tp81ZL4d"
+    ],
+    "12D3KooWKxavLCJVrQ5Gk1kd9m6cohctGQBmiKPS9XQFoXEoyGmS": [
+      "/ip4/168.119.236.249/tcp/42845/p2p/12D3KooWKxavLCJVrQ5Gk1kd9m6cohctGQBmiKPS9XQFoXEoyGmS"
+    ],
+    "12D3KooWDbBdifGp3viDR4dCECEFKepjhwhd2YwAqgNVdXpEeewu": [
+      "/ip4/80.82.76.214/tcp/42845"
+    ],
+    "12D3KooWJDoV9vJdy6PnzwVETZ3fWGMhV41VhSbocR1h2geFqq9Y": [
+      "/ip4/89.248.173.231/tcp/42845"
+    ]
+  }
+}
+```
 export const title = "Komodo DeFi Framework Method: Get Enabled Coins";
 export const description = "The get_enabled_coins method returns data of coins that are currently enabled on the user's Komodo DeFi Framework API node.";
 
@@ -2223,67 +2296,6 @@ The `get_my_peer_id` method returns your unique identifying Peer ID on the netwo
 ```json
 {
   "result": "12D3KooWS9MeuFZhJCfQTntwbTVnXMAJpz9Tvd1XYFuURrGqnJVR"
-}
-```
-export const title = "Komodo DeFi Framework Method: Get Peers Info";
-export const description = "The get_peers_info method all connected peers with their multiaddresses.";
-
-# get\_peers\_info
-
-**get\_peers\_info**
-
-The `get_peers_info` method all connected peers with their multiaddresses. See [https://docs.libp2p.io/concepts/addressing/](https://docs.libp2p.io/concepts/addressing/) for more information.
-
-## Arguments
-
-| Structure | Type | Description |
-| --------- | ---- | ----------- |
-| (none)    |      |             |
-
-#### Response
-
-| Structure             | Type  | Description                                    |
-| --------------------- | ----- | ---------------------------------------------- |
-| PeerID-Multiaddresses | Array | All connected peers with their multiaddresses. |
-
-#### 📌 Examples
-
-#### Command
-
-```json
-{
-  "userpass": "RPC_UserP@SSW0RD",
-  "method": "get_peers_info"
-}
-```
-
-#### Response (success)
-
-```json
-{
-  "result": {
-    "12D3KooWM8BrDBXc1TVw2vswoqYcQVn7fFvpAvcCfaV2Uqg2L9jU": [
-      "/ip4/89.248.168.39/tcp/42845"
-    ],
-    "12D3KooWJ3dEWK7ym1uwc5SmwbmfFSRmELrA9aPJYxFRrQCCNdwF": [
-      "/ip4/188.124.46.112/tcp/42845/p2p/12D3KooWJ3dEWK7ym1uwc5SmwbmfFSRmELrA9aPJYxFRrQCCNdwF"
-    ],
-    "12D3KooWL6yrrNACb7t7RPyTEPxKmq8jtrcbkcNd6H5G2hK7bXaL": [
-      "/ip4/168.119.236.233/tcp/42845/p2p/12D3KooWL6yrrNACb7t7RPyTEPxKmq8jtrcbkcNd6H5G2hK7bXaL"
-    ],
-    "12D3KooWPR2RoPi19vQtLugjCdvVmCcGLP2iXAzbDfP3tp81ZL4d": [
-      "/ip4/168.119.237.13/tcp/42845/p2p/12D3KooWPR2RoPi19vQtLugjCdvVmCcGLP2iXAzbDfP3tp81ZL4d"
-    ],
-    "12D3KooWKxavLCJVrQ5Gk1kd9m6cohctGQBmiKPS9XQFoXEoyGmS": [
-      "/ip4/168.119.236.249/tcp/42845/p2p/12D3KooWKxavLCJVrQ5Gk1kd9m6cohctGQBmiKPS9XQFoXEoyGmS"
-    ],
-    "12D3KooWDbBdifGp3viDR4dCECEFKepjhwhd2YwAqgNVdXpEeewu": [
-      "/ip4/80.82.76.214/tcp/42845"
-    ],
-    "12D3KooWJDoV9vJdy6PnzwVETZ3fWGMhV41VhSbocR1h2geFqq9Y": [
-      "/ip4/89.248.173.231/tcp/42845"
-    ]
-  }
 }
 ```
 export const title = "Komodo DeFi Framework Method: Get Relay Mesh";
