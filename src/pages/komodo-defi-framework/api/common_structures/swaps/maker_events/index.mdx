@@ -3,9 +3,13 @@ export const description = "A description of events and outcomes for each step o
 
 # Maker Swap Events
 
-<DevComment>
-  Needs update for watchtower events
-</DevComment>
+
+The atomic swap process goes through a series of steps to perform and confirm transactions, then release funds accordingly. If a swap fails, the taker payment will be returned to the taker's address (minus network transaction fees). Sometimes failed swaps were due to a taker or maker going offline in the middle of a swap, so `Swap Watcher` seednodes were created to process certain events on behalf of the maker/taker.
+
+Swap watchers act to complete a swap or refund if one or both sides go offline for too long. This is done in a non-custodial manner, and funds are still governed by HTLC which can only be released to either the maker or the taker's address, and only after specific conditions are met, such as completion on the side that is online and/or a timeout.
+
+Takers send all the necessary information to watch the swap on taker/maker chains together with two signed transactions to watchers: one to spend the maker payment (maker payment spend) and the other to refund the taker payment (taker payment refund). If the maker proceeds with the swap and spends the taker payment (and therefore exposes the secret), and the taker doesn't respond for a duration, the watcher sends the maker payment spend transaction to the chain on behalf of the taker (after appending the secret to the redeem script). If the taker sends the taker payment but the maker doesn't spend it, and the taker doesn't send the refund transaction for a duration, then the watchers complete the process by sending the taker payment refund transaction to the chain.
+
 
 ## Maker Success Events
 
