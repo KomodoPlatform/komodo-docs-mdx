@@ -14,7 +14,7 @@ The `RawTxInfo` object includes the following items:
 | to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
 | value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
 | gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
-| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                                   |
+| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
 
 <DevComment>
   TODO: Confirm units used in ETH/EVM transactions.
@@ -52,7 +52,6 @@ The `InputTxns` object includes the following items:
 | script\_pub\_key | string  | The [scriptpubkey](https://learnmeabitcoin.com/technical/scriptPubKey) of this unspent transaction output.                                                                                                                                          |
 | amount           | float   | The value of this unspent transaction output.                                                                                                                                                                                                       |
 
-
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
     {
@@ -68,21 +67,21 @@ The `InputTxns` object includes the following items:
 
 The `PayForGas` object includes the following items:
 
-| Parameter                    | Type    | Description                                                                                                                                                                                                                                         |
-| ---------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_type                     | string  | ERC20-like coins and tokens only. Options are `Legacy` or `Eip1559`. The type of transaction values being configured.                                                                                                                               |
-| max\_fee\_per\_gas           | decimal | Only used if tx_type is `Eip1559`. Values are in Gwei. The maximum amount to pay per unit of gas to get your transaction included in a block. |
-| max\_priority\_fee\_per\_gas | decimal | Only used if tx_type is `Eip1559`. Values are in Gwei. This is paid directly to the miner, and can be set by the user to attract minimal delay in transaction confirmation.                                                                         |
-| gas\_price                   | float   | Only used if tx_type is `Legacy`. The gas price for the transaction.                                                                                          |
+| Parameter                    | Type    | Description                                                                                                                                                                  |
+| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_type                     | string  | ERC20-like coins and tokens only. Options are `Legacy` or `Eip1559`. The type of transaction values being configured.                                                        |
+| max\_fee\_per\_gas           | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. The maximum amount to pay per unit of gas to get your transaction included in a block.                               |
+| max\_priority\_fee\_per\_gas | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. This is paid directly to the miner, and can be set by the user to attract minimal delay in transaction confirmation. |
+| gas\_price                   | float   | Only used if tx\_type is `Legacy`. The gas price for the transaction.                                                                                                        |
 
 <Note>
-[Eip1559](https://www.coinbase.com/en-au/blog/the-technical-benefits-of-eip-1559) allows users to save on gas fees. To use this feature for a coin/token, its entry in your `coins` file must include fields for `chain_id` and `max_eth_tx_type`. To allow eip-1559 transactions, `max_eth_tx_type` should be set to `2`. To find the `chain_id` for an [EVM network(https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/)], refer to (https://chainlist.org/)[https://chainlist.org/]. There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `provider` or `simple`.
+  [Eip1559](https://www.coinbase.com/en-au/blog/the-technical-benefits-of-eip-1559) allows users to save on gas fees. To use this feature for a coin/token, its entry in your `coins` file must include fields for `chain_id` and `max_eth_tx_type`. To allow eip-1559 transactions, `max_eth_tx_type` should be set to `2`. To find the `chain_id` for an \[EVM network([https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/](https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/))], refer to ([https://chainlist.org/)\[https://chainlist.org/](https://chainlist.org/\)\[https://chainlist.org/)]. There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `provider` or `simple`.
 
   By default, `simple` gas fee estimation suggests a fee based on fee history. If set `gas_fee_estimator` is set to `provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providors [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
 
-  Use the [start_eth_fee_estimator](/komodo-defi-framework/api/v20/swaps/start_eth_fee_estimator) method to begin tracking the fee market for a coin (and its tokens). You can stop tracking the fee market with [stop_eth_fee_estimator](/komodo-defi-framework/api/v20/swaps/stop_eth_fee_estimator).
+  Use the [start\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/) method to begin tracking the fee market for a coin (and its tokens). You can stop tracking the fee market with [stop\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/stop_eth_fee_estimator/).
 
-  To set or view the current swap transaction fee policy, use the [get_swap_transaction_fee_policy](/komodo-defi-framework/api/v20/swaps/get_swap_transaction_fee_policy) and [set_swap_transaction_fee_policy](/komodo-defi-framework/api/v20/swaps/set_swap_transaction_fee_policy) methods.
+  To set or view the current swap transaction fee policy, use the [get\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/get_swap_transaction_fee_policy/) and [set\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/set_swap_transaction_fee_policy/) methods.
 
   For more information about EIP1559, refer to [https://www.blocknative.com/blog/eip-1559-fees](https://www.blocknative.com/blog/eip-1559-fees)
 </Note>
