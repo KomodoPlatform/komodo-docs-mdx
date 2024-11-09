@@ -74,12 +74,13 @@ The `PayForGas` object includes the following items:
 
 | Parameter                    | Type    | Description                                                                                                                                                                  |
 | ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_type                     | string  | ERC20-like coins and tokens only. Options are `Legacy` or `Eip1559`. The type of transaction values being configured.                                                        |
-| gas\_price                   | decimal | Values are in Gwei. The base gas price for the transaction.                                                                                                                  |
+| tx\_type                     | string  | ETH/EVM coins and tokens only. Options are `Legacy` or `Eip1559`. The type of transaction values being configured.                                                        |
+| gas\_price                   | decimal | Only used if tx\_type is `Legacy`. Values are in Gwei. The maximium price per gas unit the user is willing to pay for the transaction.                                                                                                                  |
 | max\_fee\_per\_gas           | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. The maximum amount to pay per unit of gas to get your transaction included in a block.                               |
 | max\_priority\_fee\_per\_gas | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. This is paid directly to the miner, and can be set by the user to attract minimal delay in transaction confirmation. |
 | min\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated minimum transaction wait time in mempool (in ms) for this priority level.                                            |
-| max\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated mxnimum transaction wait time in mempool (in ms) for this priority level.                                            |
+| max\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated maximum transaction wait time in mempool (in ms) for this priority level.                                            |
+ 
 
 <Note>
   [Eip1559](https://www.coinbase.com/en-au/blog/the-technical-benefits-of-eip-1559) allows users to save on gas fees. To use this feature for a coin/token, its entry in your `coins` file must include fields for `chain_id` and `max_eth_tx_type`. To allow eip-1559 transactions, `max_eth_tx_type` should be set to `2`. To find the `chain_id` for an \[EVM network([https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/](https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/))], refer to [chainlist.org](https://chainlist.org). There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `provider` or `simple`.
