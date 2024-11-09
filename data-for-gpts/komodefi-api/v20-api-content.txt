@@ -2245,6 +2245,54 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   "id": null
 }
 ```
+export const title = "Komodo DeFi Framework Method: Get Current MTP";
+export const description = "The get_current_mtp method returns the Median Time Past (MTP) from electrum servers for UTXO coins.";
+
+# get\_current\_mtp
+
+The `get_current_mtp` method returns the Median Time Past (MTP) from electrum servers for UTXO coins. This information is useful for debugging, specifically in cases where an electrum server has been misconfigured.
+
+## Arguments
+
+| Parameter | Type    | Description                                                                             |
+| --------- | ------- | --------------------------------------------------------------------------------------- |
+| coin      | string  | A compatible (UTXO) coin's ticker                                                       |
+| id        | integer | Optional. Identifies a request to allow matching it with a response. Defaults to `null` |
+
+#### Response
+
+| Parameter | Type    | Description                                                                                                   |
+| --------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| mtp       | integer | Unix timestamp                                                                                                |
+| id        | integer | Identifies a response to allow matching it with a request. Defaults to `null` if `id` not provided in request |
+
+#### 📌 Examples
+
+#### Command
+
+```json
+{
+  "method": "get_current_mtp",
+  "userpass": "RPC_UserP@SSW0RD",
+  "mmrpc": "2.0",
+  "id": 42,
+  "params": {
+    "coin": "DOC"
+  }
+}
+```
+
+#### Response (success)
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "mtp": 1658746383
+  },
+  "id": 42
+}
+```
 export const title = "Komodo DeFi Framework Method: Get Public Key";
 export const description = "The get_public_key method returns the compressed secp256k1 pubkey corresponding to the user's seed phrase.";
 
@@ -4646,6 +4694,59 @@ The v2 `orderbook` method requests from the network the currently available orde
     }
   },
   "id": 42
+}
+```
+export const title = "Komodo DeFi Framework Method: Peer Connection Healthcheck";
+export const description = "The peer_connection_healthcheck method checks if a peer is connected to the KDF network.";
+
+# peer\_connection\_healthcheck
+
+The `peer_connection_healthcheck` method checks if a peer is connected to the KDF network using the [currently configured](/komodo-defi-framework/setup/configure-mm2-json/) `netid`.
+
+## Arguments
+
+| Structure | Type | Description |
+| --------- | ---- | ----------- |
+| (none)    |      |             |
+
+#### Response
+
+| Structure | Type    | Description                             |
+| --------- | ------- | --------------------------------------- |
+| result    | boolean | True if peer found connected to network |
+
+#### 📌 Examples
+
+#### Command
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "peer_connection_healthcheck",
+  "mmrpc": "2.0",
+  "params": {
+    "peer_address": "12D3KooWCcjBQ3kG3BzjVwuZqGDL2YxXik6SCDv2YAHj4E54NiAy"
+  }
+}
+```
+
+#### Response (peer found)
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": true,
+    "id": null
+}
+```
+
+#### Response (peer not found)
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": false,
+    "id": null
 }
 ```
 export const title = "Komodo DeFi Framework Method: Recreate Swap Data";
