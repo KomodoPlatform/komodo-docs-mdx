@@ -1502,7 +1502,7 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | priv\_key\_policy           | string           | Optional, defaults to `ContextPrivKey`. value can be `ContextPrivKey`,`Trezor` when Komodo DeFi Framework is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                                                                                        |
 | required\_confirmations     | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap                                                                                                                                                          |
 | requires\_notarization      | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.                                                                    |
-| rpc\_mode                   | string           | Optional, defaults to `Http`, value can be `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                                                                                                                                                                                                                               |
+| rpc\_mode                   | string           | Optional, defaults to `Default`. Can be set to `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                                                                                                                                                                                                                           |
 | tx\_history                 | boolean          | Optional, defaults to `false`. If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                                                                   |
 
 ### Response Parameters
@@ -1543,7 +1543,6 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
         "komodo_proxy": true
       }
     ],
-    "rpc_mode": "Http",
     "tx_history": true,
     "erc20_tokens_requests": [
       {
@@ -2310,6 +2309,292 @@ The `rpc_urls` parameter will be replaced with the `nodes` parameter in the kdf 
   },
   "id": null
 }
+```
+export const title = "Komodo DeFi Framework Method: Get ETH Estimated Fee per Gas";
+export const description =
+  "The get_eth_estimated_fee_per_gas method allows you to get the gas priority fees from the estimator (started with the 'start_eth_fee_estimator') for an active coin of your choice.";
+
+# get\_eth\_estimated\_fee\_per\_gas
+
+The `get_eth_estimated_fee_per_gas` method allows you to get the estimated gas priority fee for an active coin of your choice. Before using this method, you first need to use the [start\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/) method.
+
+| parameter | Type   | Description                                                                  |
+| --------- | ------ | ---------------------------------------------------------------------------- |
+| coin      | string | Ticker of the coin/asset for which we want to start the grass fee estimator. |
+
+## Request
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "get_eth_estimated_fee_per_gas",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH"
+  }
+}
+```
+
+## Response
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "base_fee": "10.890879158",
+    "low": {
+      "max_priority_fee_per_gas": "0.1101",
+      "max_fee_per_gas": "11.949818698",
+      "min_wait_time": null,
+      "max_wait_time": null
+    },
+    "medium": {
+      "max_priority_fee_per_gas": "1.258084291",
+      "max_fee_per_gas": "13.905056537",
+      "min_wait_time": null,
+      "max_wait_time": null
+    },
+    "high": {
+      "max_priority_fee_per_gas": "2.495532249",
+      "max_fee_per_gas": "15.949758042",
+      "min_wait_time": null,
+      "max_wait_time": null
+    },
+    "source": "simple",
+    "base_fee_trend": "",
+    "priority_fee_trend": "",
+    "units": "Gwei"
+  },
+  "id": null
+}
+
+```
+export const title = "Komodo DeFi Framework Method: Get Swap Transaction Fee Policy";
+export const description =
+  "The get_swap_transaction_fee_policy method allows you to get the current gas fees policy used when estimating swap transaction fees for supported for ETH/EVM coins/tokens..";
+
+# get\_swap\_transaction\_fee\_policy
+
+The `get_swap_transaction_fee_policy` method allows you to get the current gas fees policy used when estimating swap transaction fees for supported for ETH/EVM coins/tokens.
+
+| parameter | Type   | Description                                                                              |
+| --------- | ------ | ---------------------------------------------------------------------------------------- |
+| coin      | string | Ticker of the supported ETH/EVM coin/asset for which we want to view the fee policy for. |
+
+## Request
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "get_swap_transaction_fee_policy",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH"
+  }
+}
+```
+
+## Response
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": "High",
+    "id": null
+}
+
+```
+export const title = "Komodo DeFi Framework Method: EVM Fee Management";
+export const description =
+  "This document describes all the available methods for the EVM Network Fee Management on the Komodo DeFi Framework.";
+
+# EVM Network Fee Management
+
+[Ethereum Improvement Proposal 1559 (EIP-1559)](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md) was introduced to enhance Ethereum's transaction fee structure, aiming to stabilize transaction costs and improve network efficiency. Implemented as part of the London Hard Fork in August 2021, EIP-1559 revamped the traditional auction-style gas fee model, replacing it with a base fee mechanism that adjusts dynamically based on network demand. This base fee is burned (removed from circulation), reducing ETH supply and introducing a deflationary effect, while an optional "tip" incentivizes miners.
+
+For decentralized finance (DeFi) software, EIP-1559 has provided more predictable transaction fees, improving user experience and enabling more efficient budgeting for gas costs across DeFi protocols. This update is instrumental in reducing fee volatility, encouraging broader adoption, and laying groundwork for Ethereum's scalability roadmap.
+
+The Komodo Defi Framework allows users to benefit from this improvement with cheaper fees on EMV networks like Ethereum and Polygon.
+
+For more information about EIP1559, refer to [https://www.blocknative.com/blog/eip-1559-fees](https://www.blocknative.com/blog/eip-1559-fees)
+
+## Fee Management Methods
+
+*   Get estimated fee per gas for an EVM coin/token [get\_eth\_estimated\_fee\_per\_gas](/komodo-defi-framework/api/v20/fee_management/get_eth_estimated_fee_per_gas/).
+
+*   Get swap transaction fee policy for an EVM coin/token [get\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/get_swap_transaction_fee_policy/).
+
+*   Set swap transaction fee policy for an EVM coin/token [set\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/set_swap_transaction_fee_policy/).
+
+*   Start tracking the fee market for an EVM coin/token [start\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/).
+
+*   Stop tracking the fee market for an EVM coin/token [stop\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/stop_eth_fee_estimator/).
+
+## Fee Management Configuration
+
+There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `provider` or `simple`.
+
+By default, `simple` gas fee estimation suggests a fee based on fee history. If set `gas_fee_estimator` is set to `provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
+
+### In the coins file
+
+Below is an example of the information required in EVM token configurations in your [`coins` file](/komodo-defi-framework/tutorials/listing-a-new-coin/#erc-20-token-example).
+
+```json
+{
+  "coin": "1INCH-BEP20",
+  "name": "1inch_bep20",
+  "fname": "1Inch",
+  "rpcport": 80,
+  "mm2": 1,
+  "chain_id": 56,
+  "avg_blocktime": 3,
+  "required_confirmations": 3,
+  "protocol": {
+    "type": "ERC20",
+    "protocol_data": {
+      "platform": "BNB",
+      "contract_address": "0x111111111117dC0aa78b770fA6A738034120C302"
+    }
+  },
+  "derivation_path": "m/44'/60'",
+  "use_access_list": true,
+  "max_eth_tx_type": 2,
+  "gas_fee_estimator": "provider",
+  "gas_limit": {
+      "eth_send_erc20": 60000,
+      "erc20_payment": 110000,
+      "erc20_receiver_spend": 85000,
+      "erc20_sender_refund": 85000
+  }
+}
+```
+
+For EIP1559 features, a coin/token's config needs to include the `chain_id` (sourced from [chainlist.org](https://chainlist.org)) and `max_eth_tx_type` (set to `2` if compatible) fields.
+
+The [`gas_limit` object](/komodo-defi-framework/tutorials/listing-a-new-coin/) values in your `coins` file will set the default limits in both `Legacy` and `Eip1559` fee configs.
+
+### In the MM2.json file
+
+If `gas_fee_estimator` is set to `provider`, you'll also need to add the `gas_api` parameter to your [MM2.json configuration file](/komodo-defi-framework/setup/configure-mm2-json/):
+
+```json
+{
+    "netid": 8762,
+    "rpcport": 8777,
+    ...
+    "gas_api": {
+      "provider": "blocknative",
+      "url": https://your-provider-url.com
+    }
+}
+```
+
+The currently available third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
+export const title = "Komodo DeFi Framework Method: Set Swap Transaction Fee Policy";
+export const description =
+  "The set_swap_transaction_fee_policy method allows you to set the gas fee policy used by supported ETH/EVM coins or tokens when estimating swap transaction fees.";
+
+# set\_swap\_transaction\_fee\_policy
+
+The `set_swap_transaction_fee_policy` method allows you to set the gas fee policy used by supported ETH/EVM coins or tokens when estimating swap transaction fees.
+
+| parameter             | Type   | Description                                                                                 |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------- |
+| coin                  | string | Ticker of the supported ETH/EVM coin or tokens for which we want to set the fee policy for. |
+| swap\_tx\_fee\_policy | string | Possible values: `Low`, `Medium`, `High`, `Internal`.                                       |
+
+## Request
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "set_swap_transaction_fee_policy",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH",
+    "swap_tx_fee_policy": "High"
+  }
+}
+```
+
+## Response
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": "High",
+    "id": null
+}
+```
+export const title = "Komodo DeFi Framework Method: Start ETH Fee Estimator";
+export const description =
+  "The start_eth_fee_estimator method allows you to start the gas priority fee estimator loop for an active coin of your choice.";
+
+# start\_eth\_fee\_estimator
+
+The `start_eth_fee_estimator` method allows you to to start the gas priority fee estimator loop for an active coin of your choice. Before using this method, you first need to use the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/) method. For the gas fee estimator to work you also need to [configure your MM2.json and coins files](/komodo-defi-framework/api/v20/fee_management/#fee-management-configuration) with some extra parameters.
+
+| parameter | Type   | Description                                                                |
+| --------- | ------ | -------------------------------------------------------------------------- |
+| coin      | string | Ticker of the coin/asset for which we want to start the gas fee estimator. |
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "start_eth_fee_estimator",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH"
+  }
+}
+```
+
+## Response
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "result": "Success"
+  },
+  "id": null
+}
+```
+export const title = "Komodo DeFi Framework Method: Stop ETH Fee Estimator";
+export const description =
+  "The start_eth_fee_estimator method allows you to stop the gas priority fee estimator loop for an active coin of your choice.";
+
+# stop\_eth\_fee\_estimator
+
+The `stop_eth_fee_estimator` method allows you to to stop the gas priority fee estimator loop for an active coin of your choice. Before using this method, you first need to use the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/) method.
+
+| parameter | Type   | Description                                                                |
+| --------- | ------ | -------------------------------------------------------------------------- |
+| coin      | string | Ticker of the coin/asset for which we want to start the gas fee estimator. |
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "stop_eth_fee_estimator",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH"
+  }
+}
+```
+
+## Response
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "result": "Success"
+  },
+  "id": null
+}
+
 ```
 export const title = "Komodo DeFi Framework Method: Get Current MTP";
 export const description = "The get_current_mtp method returns the Median Time Past (MTP) from electrum servers for UTXO coins.";
@@ -5446,8 +5731,13 @@ If `prev_txns` is not provided, it will be sourced via electrums.
     "type": "ETH",
     "tx": {
       "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
-      "value": "1.4",
-      "gas_limit": "21000"
+      "value": "0.85",
+      "gas_limit": "21000",
+      "pay_for_gas": {
+        "tx_type": "Eip1559",
+        "max_fee_per_gas": "1234.567",
+        "max_priority_fee_per_gas": "1.2"
+      }
     }
   }
 }
