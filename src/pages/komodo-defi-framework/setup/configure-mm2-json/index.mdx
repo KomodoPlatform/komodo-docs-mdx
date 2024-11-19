@@ -26,6 +26,7 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 | i\_am\_seed                  | boolean         | Optional, defaults to `false`. Runs Komodo DeFi Framework API as a seed node mode (acting as a relay for Komodo DeFi Framework API clients). Use of this mode is not reccomended on the main network (8762) as it could result in a pubkey ban if non-compliant. On alternative testing or private networks, at least one seed node is required to relay information to other Komodo DeFi Framework API clients using the same netID. |
 | seednodes                    | list of strings | Optional. If operating on a test or private netID, the IP address of at least one seed node is required (on the main network, these are already hardcoded)                                                                                                                                                                                                                                                                            |
 | enable\_hd                   | boolean         | Optional. If `true`, the Komodo DeFi-API will work in only the [HD mode](/komodo-defi-framework/api/v20-dev/hd_wallets_overview/), and coins will need to have a coin derivation path entry in the `coins` file for activation. Defaults to `false`.                                                                                                                                                                                  |
+| gas\_api                     | object          | Optional, Used for [EVM gas fee management](/komodo-defi-framework/api/v20/fee_management/). Contains fields for `provider` and `url` to source third party fee market information.                                                                                                                                                                                                                                                   |
 | message\_service\_cfg        | object          | Optional. This data is used to configure [Telegram](https://telegram.org/) messenger alerts for swap events when running using the [makerbot functionality](/komodo-defi-framework/api/v20/start_simple_market_maker_bot/). For more information check out the [telegram alerts guide](/komodo-defi-framework/api/v20/telegram_alerts/)                                                                                               |
 | metrics                      | integer         | Optional, defaults to `300`. The interval in seconds which metrics are logged. Set to `0` to disable metrics.                                                                                                                                                                                                                                                                                                                         |
 | prometheusport               | integer         | Optional. Only used if you are logging metrics in [Prometheus](https://prometheus.io/) and [Grafana](https://grafana.com/). For more information check out the [Komodo DeFi metrics guide](/komodo-defi-framework/tutorials/api-metrics/)                                                                                                                                                                                             |
@@ -60,6 +61,21 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 }
 ```
 
+#### Example (using gas api):
+
+```json
+{
+  "gui": "DEVDOCS_CLI",
+  "netid": 8762,
+  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
+  "passphrase": "ENTER_UNIQUE_SEED_PHRASE_DONT_USE_THIS_CHANGE_IT_OR_FUNDS_NOT_SAFU",
+  "gas_api": {
+    "provider": "infura",
+    "url": https://your-provider-url.com
+  }
+}
+```
+
 #### Example (WSS with certificates):
 
 ```json
@@ -78,7 +94,7 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 
 #### Example for HD Wallets:
 
-If you are using HD wallets, you will need to set `enable_hd` to `true` in to your `MM2.json` file.
+If you are using HD wallets, you will need to set `enable_hd` to `true` in to your [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/).
 
 <Note>
   Using the same seed phrase with / without setting `enable_hd` to `true`
@@ -109,14 +125,14 @@ The structure for adding additional coins can vary, please refer to the [listing
 
 ### Optional environment variables:
 
-| Variable            | Type   | Description                                                                                                                                                                                                          |
-| ------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MM2\_CONF\_PATH     | string | A file path to load the `MM2.json` configuration file. Defaults to `MM2.json` in the same folder as the `mm2` binary.                                                                                                |
-| MM\_COINS\_PATH     | string | A file path to load the `coins` configuration file. A comprehensive version for public use is maintained in the [Komodo Platform coins github repository](https://github.com/KomodoPlatform/coins/blob/master/coins) |
-| MM\_LOG             | string | A file path to store the Komodo DeFi-API logs.                                                                                                                                                                       |
-| USERPASS            | string | For convenience, this variable can store the value of your `rpc_password` to be referenced in any shell scripts                                                                                                      |
-| MM\_CERT\_PATH      | string | Full path to TLS/SSL certificate file.                                                                                                                                                                               |
-| MM\_CERT\_KEY\_PATH | string | Full path to TLS/SSL certificate key file.                                                                                                                                                                           |
+| Variable            | Type   | Description                                                                                                                                                                                                                        |
+| ------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MM2\_CONF\_PATH     | string | A file path to load the `MM2.json` configuration file. Defaults to `MM2.json` in the same folder as the `mm2` binary.                                                                                                              |
+| MM\_COINS\_PATH     | string | A file path to load the `coins` configuration file. A comprehensive version for public use is maintained in the [Komodo Platform coins github repository](https://github.com/KomodoPlatform/coins/blob/master/coins)               |
+| MM\_LOG             | string | A file path to store the Komodo DeFi-API logs.                                                                                                                                                                                     |
+| MM\_CERT\_PATH      | string | Full path to TLS/SSL certificate file.                                                                                                                                                                                             |
+| MM\_CERT\_KEY\_PATH | string | Full path to TLS/SSL certificate key file.                                                                                                                                                                                         |
+| RUST\_LOG           | string | Global default log level is `info`. To modify the log level for specific module (e.g. for debugging `atomicdex_gossipsub::behaviour`) and keep the default at `info`, use the format `"info,atomicdex_gossipsub::behaviour=debug"` |
 
 ### What now?
 

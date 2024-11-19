@@ -7917,6 +7917,131 @@
 							]
 						},
 						{
+							"name": "sign_raw_transaction",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "\r\n  {\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"id\": 0,\r\n    \"method\": \"sign_raw_transaction\",\r\n    \"params\": {\r\n      \"coin\": \"MATIC\",\r\n      \"type\": \"ETH\",\r\n      \"tx\": {\r\n        \"to\": \"0x927DaFDDa16F1742BeFcBEAE6798090354B294A9\",\r\n        \"value\": \"0.85\",\r\n        \"gas_limit\": \"21000\",\r\n        \"pay_for_gas\": {\r\n            \"tx_type\": \"Eip1559\",\r\n            \"max_fee_per_gas\": \"1234.567\",\r\n            \"max_priority_fee_per_gas\": \"1.2\"\r\n        }\r\n      }\r\n    }\r\n  }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success: ETH/EVM",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "\r\n  {\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"id\": 0,\r\n    \"method\": \"sign_raw_transaction\",\r\n    \"params\": {\r\n      \"coin\": \"MATIC\",\r\n      \"type\": \"ETH\",\r\n      \"tx\": {\r\n        \"to\": \"0x927DaFDDa16F1742BeFcBEAE6798090354B294A9\",\r\n        \"value\": \"0.85\",\r\n        \"gas_limit\": \"21000\",\r\n        \"pay_for_gas\": {\r\n            \"tx_type\": \"Eip1559\",\r\n            \"max_fee_per_gas\": \"1234.567\",\r\n            \"max_priority_fee_per_gas\": \"1.2\"\r\n        }\r\n      }\r\n    }\r\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "287"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 12:13:56 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"tx_hex\":\"02f8768189808447868c0086011f71ed6fc08302100094927dafdda16f1742befcbeae6798090354b294a9880bcbce7f1b15000080c001a0cd160bbf4aac7a9f1ac819305c58ac778afbb4df82fdb3f9ad3f7127b680c89aa07437537646a7e99a4a1e05854e0db699372a3ff4980d152fa950afeec4d3636c\"},\"id\":0}"
+								},
+								{
+									"name": "Error: SigningError",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "\r\n  {\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"sign_raw_transaction\",\r\n    \"params\": {\r\n      \"coin\": \"KMD\",\r\n      \"type\": \"UTXO\",\r\n      \"tx\": {\r\n        \"tx_hex\": \"0400008085202f8901c8d6d8764e51bbadc0592b99f37b3b7d8c9719686d5a9bf63652a0802a1cd0360200000000feffffff0100dd96d8080000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac46366665000000000000000000000000000000\"\r\n      }\r\n    },\r\n    \"id\": 0\r\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "785"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 12:15:55 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Signing error: with_key_pair:114] P2PKH script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd64ad24e655ba7221ea51c7931aad5b98da77f3c\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n' built from input key pair doesn't match expected prev script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd346067e3c3c3964c395fee208594790e29ede5d\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n'\",\"error_path\":\"utxo_common\",\"error_trace\":\"utxo_common:2835]\",\"error_type\":\"SigningError\",\"error_data\":\"with_key_pair:114] P2PKH script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd64ad24e655ba7221ea51c7931aad5b98da77f3c\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n' built from input key pair doesn't match expected prev script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd346067e3c3c3964c395fee208594790e29ede5d\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n'\",\"id\":0}"
+								}
+							]
+						},
+						{
 							"name": "verify_message",
 							"event": [
 								{
@@ -10134,185 +10259,6 @@
 							]
 						},
 						{
-							"name": "start_eth_fee_estimator",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Strip JSON Comments\r",
-											"const rawData = pm.request.body.toString();\r",
-											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
-											"\r",
-											"pm.request.body.update(strippedData);"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"start_eth_fee_estimator\",\n    \"params\": {\n        \"coin\": \"ETH\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
-								},
-								"url": {
-									"raw": "{{address}}",
-									"host": [
-										"{{address}}"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "get_eth_estimated_fee_per_gas",
-							"event": [
-								{
-									"listen": "prerequest",
-									"script": {
-										"exec": [
-											"// Strip JSON Comments\r",
-											"const rawData = pm.request.body.toString();\r",
-											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
-											"\r",
-											"pm.request.body.update(strippedData);"
-										],
-										"type": "text/javascript",
-										"packages": {}
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_eth_estimated_fee_per_gas\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"ETH\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
-								},
-								"url": {
-									"raw": "{{address}}",
-									"host": [
-										"{{address}}"
-									]
-								}
-							},
-							"response": [
-								{
-									"name": "Error: CoinNotSupported",
-									"originalRequest": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_eth_estimated_fee_per_gas\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
-										},
-										"url": {
-											"raw": "{{address}}",
-											"host": [
-												"{{address}}"
-											]
-										}
-									},
-									"status": "Bad Request",
-									"code": 400,
-									"_postman_previewlanguage": "json",
-									"header": [
-										{
-											"key": "access-control-allow-origin",
-											"value": "http://localhost:3000"
-										},
-										{
-											"key": "content-length",
-											"value": "188"
-										},
-										{
-											"key": "date",
-											"value": "Mon, 09 Sep 2024 05:58:16 GMT"
-										},
-										{
-											"key": "Content-Type",
-											"value": "application/json",
-											"name": "Content-Type",
-											"description": "",
-											"type": "text"
-										}
-									],
-									"cookie": [],
-									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Gas fee estimation not supported for this coin\",\n    \"error_path\": \"get_estimated_fees\",\n    \"error_trace\": \"get_estimated_fees:206]\",\n    \"error_type\": \"CoinNotSupported\",\n    \"id\": null\n}"
-								},
-								{
-									"name": "Error: NoSuchCoin",
-									"originalRequest": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_eth_estimated_fee_per_gas\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"DOGE\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
-										},
-										"url": {
-											"raw": "{{address}}",
-											"host": [
-												"{{address}}"
-											]
-										}
-									},
-									"status": "Bad Request",
-									"code": 400,
-									"_postman_previewlanguage": "json",
-									"header": [
-										{
-											"key": "access-control-allow-origin",
-											"value": "http://localhost:3000"
-										},
-										{
-											"key": "content-length",
-											"value": "204"
-										},
-										{
-											"key": "date",
-											"value": "Mon, 09 Sep 2024 05:59:38 GMT"
-										},
-										{
-											"key": "Content-Type",
-											"value": "application/json",
-											"name": "Content-Type",
-											"description": "",
-											"type": "text"
-										}
-									],
-									"cookie": [],
-									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"No such coin DOGE\",\n    \"error_path\": \"get_estimated_fees.lp_coins\",\n    \"error_trace\": \"get_estimated_fees:244] lp_coins:4767]\",\n    \"error_type\": \"NoSuchCoin\",\n    \"error_data\": {\n        \"coin\": \"DOGE\"\n    },\n    \"id\": null\n}"
-								}
-							]
-						},
-						{
 							"name": "get_public_key",
 							"event": [
 								{
@@ -10681,6 +10627,906 @@
 									],
 									"cookie": [],
 									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"public_key_hash\":\"d346067e3c3c3964c395fee208594790e29ede5d\"},\"id\":null}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Fee Management",
+					"item": [
+						{
+							"name": "start_eth_fee_estimator",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"start_eth_fee_estimator\",\n    \"params\": {\n        \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: NoSuchCoin",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"start_eth_fee_estimator\",\n    \"params\": {\n        \"coin\": \"ETH\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "204"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:18:50 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"No such coin ETH\",\n    \"error_path\": \"get_estimated_fees.lp_coins\",\n    \"error_trace\": \"get_estimated_fees:244] lp_coins:4779]\",\n    \"error_type\": \"NoSuchCoin\",\n    \"error_data\": {\n        \"coin\": \"ETH\"\n    },\n    \"id\": null\n}"
+								},
+								{
+									"name": "Error: CoinNotSupported",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"start_eth_fee_estimator\",\n    \"params\": {\n        \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "188"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:21:57 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Gas fee estimation not supported for this coin\",\"error_path\":\"get_estimated_fees\",\"error_trace\":\"get_estimated_fees:206]\",\"error_type\":\"CoinNotSupported\",\"id\":null}"
+								},
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"start_eth_fee_estimator\",\n    \"params\": {\n        \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "55"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:27:17 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"result\": \"Success\"\n    },\n    \"id\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "stop_eth_fee_estimator",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"stop_eth_fee_estimator\",\n    \"params\": {\n        \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: NotRunning",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"stop_eth_fee_estimator\",\n    \"params\": {\n        \"coin\": \"ETH\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "168"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:29:26 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Gas fee estimator is not running\",\"error_path\":\"get_estimated_fees\",\"error_trace\":\"get_estimated_fees:233]\",\"error_type\":\"NotRunning\",\"id\":null}"
+								},
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"stop_eth_fee_estimator\",\n    \"params\": {\n        \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "55"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:30:01 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"result\": \"Success\"\n    },\n    \"id\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "set_swap_transaction_fee_policy",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"set_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"MATIC\",\n      \"swap_tx_fee_policy\": \"High\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success: Internal",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"MATIC\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "45"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:40:58 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":\"Internal\",\"id\":null}"
+								},
+								{
+									"name": "Error: Unsupported",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "48"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:41:56 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":\"Unsupported\",\"id\":null}"
+								},
+								{
+									"name": "Success: Set to Medium",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"set_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"MATIC\",\n      \"swap_tx_fee_policy\": \"Medium\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "43"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:50:29 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":\"Medium\",\"id\":null}"
+								},
+								{
+									"name": "Success: Set to High",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"set_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"MATIC\",\n      \"swap_tx_fee_policy\": \"High\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "41"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:50:56 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":\"High\",\"id\":null}"
+								},
+								{
+									"name": "Success: Set to Low",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"set_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"MATIC\",\n      \"swap_tx_fee_policy\": \"Low\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "40"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:51:24 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":\"Low\",\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "get_swap_transaction_fee_policy",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"MATIC\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success: Internal",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"MATIC\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "45"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:40:58 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":\"Internal\",\"id\":null}"
+								},
+								{
+									"name": "Error: Unsupported",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_swap_transaction_fee_policy\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "48"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:41:56 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":\"Unsupported\",\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "get_eth_estimated_fee_per_gas",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_eth_estimated_fee_per_gas\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: CoinNotSupported",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_eth_estimated_fee_per_gas\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "188"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 09 Sep 2024 05:58:16 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Gas fee estimation not supported for this coin\",\n    \"error_path\": \"get_estimated_fees\",\n    \"error_trace\": \"get_estimated_fees:206]\",\n    \"error_type\": \"CoinNotSupported\",\n    \"id\": null\n}"
+								},
+								{
+									"name": "Error: NoSuchCoin",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_eth_estimated_fee_per_gas\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"DOGE\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "204"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 09 Sep 2024 05:59:38 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"No such coin DOGE\",\n    \"error_path\": \"get_estimated_fees.lp_coins\",\n    \"error_trace\": \"get_estimated_fees:244] lp_coins:4767]\",\n    \"error_type\": \"NoSuchCoin\",\n    \"error_data\": {\n        \"coin\": \"DOGE\"\n    },\n    \"id\": null\n}"
+								},
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"get_eth_estimated_fee_per_gas\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"coin\": \"BNB\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "483"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 04 Nov 2024 11:31:08 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"base_fee\": \"5.155924173\",\n        \"low\": {\n            \"max_priority_fee_per_gas\": \"0.008999999\",\n            \"max_fee_per_gas\": \"6.09\",\n            \"min_wait_time\": null,\n            \"max_wait_time\": null\n        },\n        \"medium\": {\n            \"max_priority_fee_per_gas\": \"0.049\",\n            \"max_fee_per_gas\": \"6.13\",\n            \"min_wait_time\": null,\n            \"max_wait_time\": null\n        },\n        \"high\": {\n            \"max_priority_fee_per_gas\": \"0.089\",\n            \"max_fee_per_gas\": \"6.17\",\n            \"min_wait_time\": null,\n            \"max_wait_time\": null\n        },\n        \"source\": \"blocknative\",\n        \"base_fee_trend\": \"\",\n        \"priority_fee_trend\": \"\",\n        \"units\": \"Gwei\"\n    },\n    \"id\": null\n}"
 								}
 							]
 						}
