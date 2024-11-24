@@ -9,15 +9,16 @@ This method generates a raw transaction which should then be broadcast using [se
 
 ## Arguments
 
-| Structure | Type             | Description                                                                                                |
-| --------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| coin      | string           | The name of the coin the user desires to withdraw                                                          |
-| to        | string           | Coins are withdrawn to this address                                                                        |
-| amount    | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                           |
-| memo      | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem).                        |
-| max       | bool             | Withdraw the maximum available amount                                                                      |
-| fee       | object           | A standard [FeeInfo](/komodo-defi-framework/api/v20/#fee-info) object.                                     |
-| from      | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/v20/#withdraw-from-info) object. |
+| Structure            | Type             | Description                                                                                                                                     |
+| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                 | string           | The name of the coin the user desires to withdraw.                                                                                              |
+| to                   | string           | Coins are withdrawn to this address.                                                                                                            |
+| amount               | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`.                                                                               |
+| memo                 | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem).                                                             |
+| max                  | bool             | Optional. Withdraw the maximum available amount.                                                                                                |
+| fee                  | object           | Optional. A standard [FeeInfo](/komodo-defi-framework/api/v20/#fee-info) object.                                                                |
+| from                 | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/v20/#withdraw-from-info) object.                                      |
+| ibc\_source\_channel | string           | Tendermint IBC transfers only. The source channel for the [IBC](https://tutorials.cosmos.network/academy/3-ibc/1-what-is-ibc.html) transaction. |
 
 ### Response
 
@@ -555,6 +556,74 @@ This method generates a raw transaction which should then be broadcast using [se
       "memo": "It was a bright cold day in April, and the clocks were striking thirteen."
     },
     "id": 0
+  }
+  ```
+
+  You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
+</CollapsibleSection>
+
+##### Withdraw Tendermint IBC coins
+
+Using the Cosmos [Ecosystem IBC protocol](https://everstake.one/blog/cosmos-ibc-breaking-down-the-walls-between-blockchains), you can withdraw coins from one chain to another. This example shows a withdrawal from Cosmos to Osmosis.
+
+<CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "withdraw",
+    "params": {
+      "coin": "ATOM",
+      "to": "osmo16drqvl3u8sukfsu4lm3qsk28jr3fahjac4rdw4",
+      "amount": 0.1,
+      "memo": "In the blackest of your moments, wait with no fear.",
+      "ibc_source_channel": "channel-141",
+      "fee": {
+        "type": "CosmosGas",
+        "gas_price": 0.05,
+        "gas_limit": 150000
+      }
+    },
+    "id": 0
+  }
+  ```
+</CodeGroup>
+
+<Note>
+  The `ibc_source_channel` value above is for demonstration only. For more information regarding how to set a valid value, see our guide to [finding the right IBC channel](/komodo-wallet/guides/how-to-find-the-right-ibc-channel-for-transfers/).
+</Note>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "tx_hex": "0af9010abc010a292f6962632e6170706c69636174696f6e732e7472616e736665722e76312e4d73675472616e73666572128e010a087472616e73666572120b6368616e6e656c2d3134311a0f0a057561746f6d1206313030303030222d636f736d6f733136647271766c33753873756b667375346c6d3371736b32386a72336661686a617377736163382a2b6f736d6f3136647271766c33753873756b667375346c6d3371736b32386a72336661686a6163347264773438a6c5b9a089f29efa171233496e2074686520626c61636b657374206f6620796f7572206d6f6d656e74732c20776169742077697468206e6f20666561722e188df8c70a12680a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a2103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc212040a020801180b12140a0e0a057561746f6d1205313733353910e0c65b1a40042c4fa45d77405ee94e737a000b146f5019137d5a2d3275849c9ad66dd8ef1d0f087fb584f34b1ebcf7989e41bc0675e96c83f0eec4ffe355e078b6615d7a72",
+        "tx_hash": "06174E488B7BBC35180E841F2D170327BB7DE0A291CA69050D81F82A7CF103CB",
+        "from": [
+            "cosmos16drqvl3u8sukfsu4lm3qsk28jr3fahjaswsac8"
+        ],
+        "to": [
+            "osmo16drqvl3u8sukfsu4lm3qsk28jr3fahjac4rdw4"
+        ],
+        "total_amount": "0.1173590000000000",
+        "spent_by_me": "0.1173590000000000",
+        "received_by_me": "0",
+        "my_balance_change": "-0.1173590000000000",
+        "block_height": 0,
+        "timestamp": 0,
+        "fee_details": {
+            "type": "Tendermint",
+            "coin": "ATOM",
+            "amount": "0.017359",
+            "gas_limit": 1500000
+        },
+        "coin": "ATOM",
+        "internal_id": "06174e488b7bbc35180e841f2d170327bb7de0a291ca69050d81f82a7cf103cb",
+        "transaction_type": "TendermintIBCTransfer",
+        "memo": "In the blackest of your moments, wait with no fear."
+    },
+    "id": null
   }
   ```
 

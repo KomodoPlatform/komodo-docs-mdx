@@ -138,15 +138,57 @@ Contains information electrum servers for coins being used in `Electrum` or `Lig
 
 The `EvmNode` object includes the following items for a given coin or token:
 
-| Parameter | Type    | Description                                                                                                         |
-| --------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| url       | string  | URL of an RPC node                                                                                                  |
-| gui\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team |
+| Parameter    | Type    | Description                                                                                                         |
+| ------------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| url          | string  | URL of an RPC node                                                                                                  |
+| komodo\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team |
+
+#### v2.1.0 (current release)
 
 ```json
 {
     "url": "http://eth1.cipig.net:8555",
-    "gui_auth": false
+    "komodo_proxy": false
+}
+```
+
+Prior to the v2.2.0 release, the `gui_auth` field was used to access RPC nodes run officially by the Komodo Platform team. This field was replaced with the `komodo_proxy` field in the v2.2.0 release.
+
+#### v2.2.0+
+
+```json
+{
+    "url": "https://nucleus-rpc.alpha.komodo.earth",
+    "komodo_proxy": true
+}
+```
+
+### TendermintNode
+
+The `TendermintNode` object includes the following items for a given coin or token:
+
+| Parameter    | Type    | Description                                                                                                                                                  |
+| ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| url          | string  | URL of an RPC node                                                                                                                                           |
+| komodo\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run behind [komodo-defi-proxy](https://github.com/KomodoPlatform/komodo-defi-proxy) |
+
+#### v2.1.0 (current release)
+
+```json
+{
+    "url": "http://eth1.cipig.net:8555",
+    "komodo_proxy": false
+}
+```
+
+Prior to the v2.2.0 release, the `gui_auth` field was used to access RPC nodes run officially by the Komodo Platform team. This field was replaced with the `komodo_proxy` field in the v2.2.0 release.
+
+#### v2.2.0+
+
+```json
+{
+    "url": "https://nucleus-rpc.alpha.komodo.earth",
+    "komodo_proxy": true
 }
 ```
 
@@ -597,22 +639,30 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
 
 ### FilterCriteria
 
-The `FilterCriteria` object includes different criteria to filter from the different recent swaps:
+The 'FilterCriteria' object allows you to filter the results based on specific parameters.
 
-| Parameter  | Type                     | Description                                                            |
-| ---------- | ------------------------ | ---------------------------------------------------------------------- |
-| status     | object                   | Return only swaps that match the specified status (e.g., "completed"). |
-| date\_from | string (ISO 8601 format) | Return only swaps that started on or after this date.                  |
-| date\_to   | string (ISO 8601 format) | Return only swaps that started before this date.                       |
+| Parameter       | Type   | Description                                    |
+| --------------- | ------ | ---------------------------------------------- |
+| status          | string | Status of the transactions (e.g., "completed") |
+| date\_from      | string | \`Start date in ISO 8601 format                |
+| date\_to        | string | End date in ISO 8601 format                    |
+| my\_coin        | string | Coin being used by you for the swap/trade.     |
+| other\_coin     | string | Coin you are trading against                   |
+| from\_timestamp | number | Start timestamp in UNIX format                 |
+| to\_timestamp   | number | End timestamp in UNIX format                   |
 
 #### Example
 
 ```json
 {
   "filter": {
-      "status": "completed",
-      "date_from": "2024-01-01T00:00:00Z",
-      "date_to": "2024-07-01T00:00:00Z"
+    "status": "completed",
+    "date_from": "2024-01-01T00:00:00Z",
+    "date_to": "2024-07-01T00:00:00Z",
+    "my_coin": "BTC",
+    "other_coin": "ETH",
+    "from_timestamp": 1672531200,
+    "to_timestamp": 1704067200
   }
 }
 ```
@@ -632,9 +682,9 @@ The `PagingOptions` object includes options of page selection to consult when lo
 ```json
 {
   "paging_options": {
-      "from_uuid": null,
-      "limit": 10,
-      "page_number": 1
+    "from_uuid": null,
+    "limit": 10,
+    "page_number": 1
   }
 }
 ```
@@ -1405,7 +1455,11 @@ export const description = "A description of events and outcomes for each step o
 
 # Maker Swap Events
 
-Needs update for watchtower events
+The atomic swap process goes through a series of steps to perform and confirm transactions, then release funds accordingly. If a swap fails, the taker payment will be returned to the taker's address (minus network transaction fees). Sometimes failed swaps were due to a taker or maker going offline in the middle of a swap, so `Swap Watcher` seednodes were created to process certain events on behalf of the maker/taker.
+
+Swap watchers act to complete a swap or refund if one or both sides go offline for too long. This is done in a non-custodial manner, and funds are still governed by HTLC which can only be released to either the maker or the taker's address, and only after specific conditions are met, such as completion on the side that is online and/or a timeout.
+
+Takers send all the necessary information to watch the swap on taker/maker chains together with two signed transactions to watchers: one to spend the maker payment (maker payment spend) and the other to refund the taker payment (taker payment refund). If the maker proceeds with the swap and spends the taker payment (and therefore exposes the secret), and the taker doesn't respond for a duration, the watcher sends the maker payment spend transaction to the chain on behalf of the taker (after appending the secret to the redeem script). If the taker sends the taker payment but the maker doesn't spend it, and the taker doesn't send the refund transaction for a duration, then the watchers complete the process by sending the taker payment refund transaction to the chain.
 
 ## Maker Success Events
 
@@ -1835,7 +1889,11 @@ export const description = "A description of events and outcomes for each step o
 
 # Taker Swap Events
 
-Needs update for watchtower events
+The atomic swap process goes through a series of steps to perform and confirm transactions, then release funds accordingly. If a swap fails, the taker payment will be returned to the taker's address (minus network transaction fees). Sometimes failed swaps were due to a taker or maker going offline in the middle of a swap, so `Swap Watcher` seednodes were created to process certain events on behalf of the maker/taker.
+
+Swap watchers act to complete a swap or refund if one or both sides go offline for too long. This is done in a non-custodial manner, and funds are still governed by HTLC which can only be released to either the maker or the taker's address, and only after specific conditions are met, such as completion on the side that is online and/or a timeout.
+
+Takers send all the necessary information to watch the swap on taker/maker chains together with two signed transactions to watchers: one to spend the maker payment (maker payment spend) and the other to refund the taker payment (taker payment refund). If the maker proceeds with the swap and spends the taker payment (and therefore exposes the secret), and the taker doesn't respond for a duration, the watcher sends the maker payment spend transaction to the chain on behalf of the taker (after appending the secret to the redeem script). If the taker sends the taker payment but the maker doesn't spend it, and the taker doesn't send the refund transaction for a duration, then the watchers complete the process by sending the taker payment refund transaction to the chain.
 
 ## Taker Success Events
 
@@ -1851,6 +1909,8 @@ Click on an Event below to view its structure:
 *   [TakerPaymentSent](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-sent)
 *   [TakerPaymentSpent](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-spent)
 *   [MakerPaymentSpent](/komodo-defi-framework/api/common_structures/swaps/taker_events/#maker-payment-spent)
+*   [MakerPaymentSpendConfirmed](/komodo-defi-framework/api/common_structures/swaps/taker_events/#maker-payment-spend-confirmed)
+*   [MakerPaymentSpentByWatcher](/komodo-defi-framework/api/common_structures/swaps/taker_events/#maker-payment-spent-by-watcher)
 *   [Finished](/komodo-defi-framework/api/common_structures/swaps/taker_events/#finished)
 
 ## Taker Error Events
@@ -1866,10 +1926,12 @@ Click on an Event below to view its structure:
 *   [TakerPaymentWaitConfirmFailed](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-wait-confirm-failed)
 *   [TakerPaymentDataSendFailed](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-data-send-failed)
 *   [TakerPaymentWaitForSpendFailed](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-wait-for-spend-failed)
+*   [MakerPaymentSpendConfirmFailed](/komodo-defi-framework/api/common_structures/swaps/taker_events/#maker-payment-spend-confirm-failed)
 *   [MakerPaymentSpendFailed](/komodo-defi-framework/api/common_structures/swaps/taker_events/#maker-payment-spend-failed)
 *   [TakerPaymentWaitRefundStarted](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-wait-refund-started)
 *   [TakerPaymentRefundStarted](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refund-started)
 *   [TakerPaymentRefunded](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refunded)
+*   [TakerPaymentRefundedByWatcher](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refunded-by-watcher)
 *   [TakerPaymentRefundFailed](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refund-failed)
 *   [TakerPaymentRefundFinished](/komodo-defi-framework/api/common_structures/swaps/taker_events/#taker-payment-refund-finished)
 
@@ -1953,7 +2015,15 @@ The swap finishes immediately when this event occurs.
 | error     | string | error description with stack trace |
 
 ```json
-TODO: Example TBA
+{
+  "event" : {
+    "data" : {
+        "error" : "taker_swap:1046] !check_balance_for_taker_swap check_balance:75] Not enough KMD for swap: available 0.3496745089721220796661853315043096525096525096525096525096525096525096525096525096525096525096525097, required at least 0.6137602122212132901392050798062833976833976833976833976833976833976833976833976833976833976833976834, locked by swaps Some(BigDecimal(\"0.6135335210278779203338146684956903474903474903474903474903474903474903474903474903474903474903474903\"))"
+    },
+    "type" : "StartFailed"
+  },
+  "timestamp" : 1730115434533
+}
 ```
 
 #### Negotiated
@@ -2032,7 +2102,15 @@ The swap finishes immediately when this event occurs.
 | error     | string | error description with stack trace |
 
 ```json
-TODO: Example TBA
+{
+    "event" : {
+      "data" : {
+          "error" : "taker_swap:1267] Timeout 1730514773 > 1730514206"
+      },
+      "type" : "TakerFeeSendFailed"
+    },
+    "timestamp" : 1730514773992
+}
 ```
 
 #### TakerPaymentInstructionsReceived
@@ -2059,7 +2137,15 @@ The swap finishes immediately when this event occurs.
 | error     | string | error description with stack trace |
 
 ```json
-TODO: Example TBA
+{
+  "event" : {
+    "data" : {
+        "error" : "taker_swap:1366] Error waiting for 'maker-payment' data: lp_swap:411] Timeout (691 > 690)"
+    },
+    "type" : "MakerPaymentValidateFailed"
+  },
+  "timestamp" : 1730606274716
+}
 ```
 
 #### MakerPaymentReceived
@@ -2151,7 +2237,15 @@ The swap finishes immediately when this event occurs.
 | error     | string | error description with stack trace |
 
 ```json
-TODO: Example TBA
+{
+  "event" : {
+    "data" : {
+        "error" : "taker_swap:1561] mm2src\\coins\\utxo.rs:1804] utxo_common:4737] rpc_clients:2314] Rpc(ResponseParseError(JsonRpcError { client_info: \"coin: LBC-segwit\", request: JsonRpcRequest { jsonrpc: \"2.0\", id: \"342199\", method: \"blockchain.transaction.broadcast\", params: [String(\"01000000000102a61267a38f943e6c9672805d13aaf16c1b2c51097a23cd26f44a863d9769e8f30100000000ffffffff9c760b35795b49f805cfed029cac4aee6f932a0180a2905c4180da784f83eb660200000000ffffffff035cfee1c21e00000017a9144970b57257cf82ac33eb8d20369399c928235089870000000000000000166a14ac8eab9d229baa855a0ced1374840f1031020909f784043a030000001600141fde904f760f226e8e5afcfbf350dee0ab4377e8024730440220373524c71a2accabe458d66c29512fb5284468c0ee7e12348b98a5e88763927902207fcb97918f5cb7c7a0ed3f93e861e85c0f9e349f176cad39059d5f2dbaa875c0012102f70d90df545d767a53daa25e07875b4b588c476cba465a28dcafc4b6b792cf940247304402203ae36cda354e8e9f6889a7da6bead2f2929b35256c84dab5e63e67c6d5ddcb4d02203205dda8049eebe911d5d2c746156e2013c79832a7b59a0a9eef0b1c38e310e7012102f70d90df545d767a53daa25e07875b4b588c476cba465a28dcafc4b6b792cf946f400267\")] }, error: Response(electrum2.cipig.net:20067, Object({\"code\": Number(1), \"message\": String(\"the transaction was rejected by network rules.\\n\\ntoo-long-mempool-chain, too many unconfirmed ancestors [limit: 25] (code 64)\\n[01000000000102a61267a38f943e6c9672805d13aaf16c1b2c51097a23cd26f44a863d9769e8f30100000000ffffffff9c760b35795b49f805cfed029cac4aee6f932a0180a2905c4180da784f83eb660200000000ffffffff035cfee1c21e00000017a9144970b57257cf82ac33eb8d20369399c928235089870000000000000000166a14ac8eab9d229baa855a0ced1374840f1031020909f784043a030000001600141fde904f760f226e8e5afcfbf350dee0ab4377e8024730440220373524c71a2accabe458d66c29512fb5284468c0ee7e12348b98a5e88763927902207fcb97918f5cb7c7a0ed3f93e861e85c0f9e349f176cad39059d5f2dbaa875c0012102f70d90df545d767a53daa25e07875b4b588c476cba465a28dcafc4b6b792cf940247304402203ae36cda354e8e9f6889a7da6bead2f2929b35256c84dab5e63e67c6d5ddcb4d02203205dda8049eebe911d5d2c746156e2013c79832a7b59a0a9eef0b1c38e310e7012102f70d90df545d767a53daa25e07875b4b588c476cba465a28dcafc4b6b792cf946f400267]\")})) }))"
+    },
+    "type" : "TakerPaymentTransactionFailed"
+  },
+  "timestamp" : 1728200816018
+}
 ```
 
 #### TakerPaymentWaitConfirmFailed
@@ -2165,7 +2259,15 @@ When this event occurs taker starts waiting for taker payment lock time expirati
 | error     | string | error description with stack trace |
 
 ```json
-TODO: Example TBA
+{
+  "event" : {
+    "data" : {
+        "error" : "taker_swap:1698] !taker_coin.wait_for_confirmations: rpc_clients:158] Waited too long until 1730187904 for transaction ce94a6369e32d88fc7ec6feb3dce61cf953cb8f5647615f95faae7660b758695 to be confirmed 2 times"
+    },
+    "type" : "TakerPaymentWaitConfirmFailed"
+  },
+  "timestamp" : 1730187907451
+}
 ```
 
 #### TakerPaymentDataSendFailed
@@ -2179,7 +2281,15 @@ When this event occurs taker starts waiting for taker payment lock time expirati
 | error     | string | error description with stack trace |
 
 ```json
-TODO: Example TBA
+{
+  "event" : {
+    "data" : {
+        "error" : "taker_swap:1698] !taker_coin.wait_for_confirmations: rpc_clients:158] Waited too long until 1730187904 for data to be sent"
+    },
+    "type" : "TakerPaymentDataSendFailed"
+  },
+  "timestamp" : 1730187907451
+}
 ```
 
 #### TakerPaymentSpent
@@ -2219,7 +2329,15 @@ When this event occurs taker attempts to refund the payment.
 | error     | string | error description with stack trace |
 
 ```json
-TODO: Example TBA
+{
+    "event" : {
+      "data" : {
+          "error" : "utxo_common:2961] Waited too long until 1730570284 for transaction Transaction { version: 4, n_time: None, overwintered: true, version_group_id: 2301567109, inputs: [TransactionInput { previous_output: OutPoint { hash: 995f9a823455708020289fc21a19f0c8219e144f6c718b528a28d5b8997f0ccb, index: 1 }, script_sig: 483045022100bc4fef170983cd4c6ac9d66258b81d747c82c4fccb752210dac0f768a3bbe665022062713c040d19146b1a4709509f78d0301f34e40b5ab725d3494dbaed8a813fb5012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: b37f5511b46a3119e240b259db4ac9420ea02b5c7e61cbb5db7c7adccd4ba721, index: 0 }, script_sig: 473044022056ebd3193241b851093a7e1372f63b423d33290c7358d3e20ae511435ba2153b02204fe3f7444200a36b28b004a3fa98310c453ba942d27ad00001489a115d467ecd012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 2019cb34a44f282e79d2a2cac9bb0a63fa89a83760ae5396b993b87fe203b29b, index: 0 }, script_sig: 4730440220290ae0974a2fc451a79a49640b15cc66e6abd34f244ae744f4072867d4979a43022078dcd0c373eb80a5af313daae5fc146b088b6ec364ce1a0be091d3a4ec498abb012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: eb13b2203f1feec79915874bdd5088a69a471dfa5bd54adf7669e3f5576f7152, index: 1 }, script_sig: 483045022100db5e4165da4cc1cbf9ff6de304a5488884e8dcfa277afe90ee51f2ba51296f7a022024a7994d1165293e1e5592b73f9dd5562a50370aa07bce1d46efc8dba35237e1012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: b1ee4fab5793e1e695734fd31fd809831577acc545ebabe5db43d0f13f50f93e, index: 0 }, script_sig: 4830450221008831f889f4aef6beac68887ec29f29cb6920a48f86088205ad5764c93a849a64022044e8e42f7cb109b4ccd2be8af065e3eb9aacf1b3e9848b56e1ac685f72a3465a012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 40415a35a9f2508a1de331afe06331824b8721a9ad1d91fdbee1fe5fdac1bf1a, index: 0 }, script_sig: 473044022056aca041e981b0ae6608810d8dc4a8bfdb8d8ba436590a8f385052880f8bbfd002200b7e53bb701c3b9d9ed3acb1256ba5187319d49e1e364e39652396ee5f84f6d4012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 8a4098f1b16ed925753a45246f992eeadef7d68f74d1490bc7c9973080bd0cc8, index: 0 }, script_sig: 483045022100b50c048fcc4663fd11abc5afc9c0b216cff717f7df76a5a5773431db6d09c3cb02204e88bdbdcecc4a33c6fc5550e6a22d7d386db6c00eca49539a9a33a546a70d01012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: f16b745ff33a7d2fadad081a4a72a63ee4547f14f5e316ee8a15ceff02f9d1e8, index: 0 }, script_sig: 483045022100a45fe2dd61c1e645a0193ea4a4aaf7edb422aa688bcf21072687a76bfee102d202201d70b1f274b06376dee61c3d139d2ba784920dd1a7e09195906ad125bafc95e3012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: b8ebd497a0ad4a661ce75521ed4f979956d74d83cbdeabf414f27d6d499bde70, index: 1 }, script_sig: 473044022056a5f060b4785a5681949b855e1d7c72b509ec056e47b5798d6f543eac09cdaa02200be45555420d2343601180bde635a79cf12d3c44ec376ef329c4c32109942a72012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 848ec1288a258ddff87da0469ea46cb6a35656e30204f7492cf2d4d7905ae7ce, index: 1 }, script_sig: 47304402202943434716e3af3ff7c9232ec3c28ecc1c7f9095283c5bb1923bdce3153073520220076bc18c4833f0076ebef21e4473112ba2f5081a00310e683207d9ff5211bf87012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 1cca91bc087c143a8b3d081176ce519d49f389f992f3ac5662d44db7bd10555b, index: 1 }, script_sig: 483045022100b2992bce7ab157b3117a79dab0600965406c41508079d156fe7b7337c65e608902205ce13afe9b291076f57c8443796c3e7582543cf260d078aa51173559cc820fd3012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: c72429e5f614a9d4b189ca2b82bbdeefea7d3fd3eeef24e7bda2940b9de7c1e1, index: 1 }, script_sig: 47304402204775441d9a37148137b8f718220e32d060742f2f6b21fa9e33305f396a518e1202207a814750ea4d960c9e6d105a3e59d4669ff62dcbf8790ea89eea50bc61063067012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: bd07a05e8d1566cc81e87f74a308f7382b4183a1eee2eb494cb752a5e71ea70d, index: 1 }, script_sig: 483045022100cce515b71823c661f0460e3699b2c28e2307673dee10dee2ceb3860d15ed752b02207706d7b3734367caebbf1b6fbd24276c3b60dfe6023f809f8d4620a0df5a0327012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 1c253d54a5b8e61123262e7aa9aff698dd13e569accb561343eb4311c2276289, index: 1 }, script_sig: 483045022100c1a520421d5821615e6f7e62268764e7b1492dbf41641f93bbf8a78b54d7a9be02201a9fcbe74dcb630a9c83ca31693548837a484e0e0b182190a8b2f8e17fdff0a8012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 050cfa0cf2c188b2e19128c85cff854ce55d3b78a7fee43123e17325e0c703a4, index: 1 }, script_sig: 47304402200ed63fc9d8894a4b8b95359bc7d4b1546c6ff21fab5d7cee9b503476e18cf70a0220711318d6dd08ed7b2164b6d84851a77191f14dc928382d8bc2a36d0efcb5cbcf012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: edec4f13d2dea3d2ccbc2fda759f16db5e07e86e99312aee2b1628323f68b682, index: 1 }, script_sig: 473044022051b1bc375f96d4c4dcb9c1e82ae2ec8031acc82d247b22180099208e212f606102206dae9ca8a6efeecf38c8f4227b086ff8709e4a6bb7c96a08881a061a2755e148012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 77105be3f9e66e306552a21aaed33535d4896123a8d8e7428256457b6418106d, index: 0 }, script_sig: 483045022100fe9375bfd7a1fec63093497e6feff0c12b92d45f27a22d9e22dcb3b1e9642b74022023be3275a8c8b35a585ad1b57038681225a2c8619f624207c1fdf09e713eb914012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: d8310f0fedd3ea620d15ac074c49ec85a6dbc464677e9f67fb7500b660737cfb, index: 0 }, script_sig: 48304502210099847bb02d3b16c5e8e1d002d045c930dc5e338045170d9e4b19764859e5a7a702204da305bce483c3f8e099a495894aa92cf8bf89abff1d228789575d8b75594a43012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 98c23f997ca9c5b5baa48cda6678750e6309515aee59c78f29d06fe07f445437, index: 0 }, script_sig: 483045022100d6903660651a849f15cfe5a300f442edfd7fa9b9f14d3f6a254e71b57a3815bf022062ccd59091e6eea75be5f13dc94ce6558628af032a648accc7762903cfe4e123012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 2f82957efd4b8aa5ecb809f3cde725b8a1bc3caf97394ebf41e46f88d69c0dbc, index: 1 }, script_sig: 483045022100ca0d6687235493e62f1cea2c2ea2a84a7efb5d5c22baa638f9cd023dad00547d02203b77f22df320c7bf1fd5b21f13c62deacb3cb8f2e35692d18bf38ab5ff41aeef012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 2d102f0f87aafccd3b46eb905a5ed5956bee4bb4c431abc3a111e87692f96cd9, index: 0 }, script_sig: 483045022100afe93f59d3632249937c2cbd8baad0a8b8fc8e47762da63daee34eb2467660a1022022c7dee4cae0caf5c537274e8a0e1b581bc0ab2bf0a6a88032391704caa47f48012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 12b659b1aa1d4e912b0700a508bee2c9d81fbafd4324ed3e393611f499140df6, index: 2 }, script_sig: 473044022064827e57831648074b4ac6ed82d2196a0d69ccb901f264a84aed8bbf7f1103270220179e0af88b42093ebb3a96bc4df8432732b3106d69ec9accc80dce3d507d06a3012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: fd9b02f4bf5d581e35a41ef5147219946a7d9b1b8b67bb16033c70661fb2229e, index: 1 }, script_sig: 4730440220054d26a2a717ec034047b5b6f482ca88cf34456314054307497cea9be8140451022007cfa5d6566bd6cb5be26c93fa53c87ab850f01139044acf722b8b261bb1b85b012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 5b09730a23d4a1d9192be3bdc0d1f472aa7380a2c3ecfd97c479e892df7e2be4, index: 1 }, script_sig: 473044022041616d6ad6fa72648818be3781430169dd4bb1a284a7f884badbe26dec78044b022005f15b301313aa75d8a51854041676abc86d96ef87c81393bdf4d22633153260012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 22dd17a87ba71979ab22c6cab1a6355672c8257723dea01f0570afbe04a27e3c, index: 0 }, script_sig: 4730440220149a3724ac3f8536a338bbd7032055e69e899afef47c3066a1c8475b1bcbbfec022033fab76eb9b00ec8300da0f726a0ea4d307c3856e315d7b01f3659c69bff6d37012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 29b4dc2d68c9ab7e4498180a37974278fea331bb760e8c612a49bd6bec834e9a, index: 1 }, script_sig: 483045022100cddf37b0e6e38d74bd9a05973768f89075307327aad03326dede1f241fddb89a02200cdc63ef918c6cfadea6924bdae0fc02c984e152b7c639989eb382e7e47c1f66012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 5942623a64933e8900f499df4725b8c872f2c040759eec3ef454bb170d526654, index: 1 }, script_sig: 47304402205a3d7343de2216783ba21c3851a235bc2514b7e3c69b0db2e37403dad32e108402207a80625279c10dbc884ccaadd946eacf593b8cf12c2feb1370171ed247f3dbe4012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: f6ba07e5fda137b8397ca98519bf339271c169350f1d07671cede7b64c52fd32, index: 0 }, script_sig: 483045022100908c39cf34945d9479b7b629c060d5586ea58c04fbdc213d95d9e1b0bc09fb3602207217542bdc560c14c0d25bef52e9fecbf4705b8880864f4c6583ab30e3a2514f012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 3cb6e27daa02860f43e41fecfd90e0c3c4f8ff38b27d2cb1a7bef64b5ce890dd, index: 0 }, script_sig: 483045022100df93c2c7b6f681f7370cf42d72446b9d19809c0a2b3b9f1311a0f687c8dc606f022037e33bea0d484106480b6fdb3ef63474e289087e1dbd8dffac4df33190e2ded2012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: a1ce2f2e115428db5df08bde6175010ce0fe15149d90fead73d95bb1b7dbb1fe, index: 1 }, script_sig: 473044022043dd6502fefdffdb5d1ea383c4d2c4a1be79bea8c5ada698282b06d9aaf6e00f0220378c65b0e4cd8dda560dbf0fe221a7a4e65e65b14d494950e86b2186778a7f15012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 57be1444813980d17ba967765ae9ed5644c15e6fc456cc2fdc7e136233199c93, index: 0 }, script_sig: 473044022077fda3eaaa1e3515960fa300d0350cd7e672812e6bec95cbc9df2d62a83f5af20220116a7a79a503d01096143e5402c85431acfe6a9127d4c8e4aa92657fa0ad388f012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 34ab301a9868f00f5ede8320759a580fef89e2e460bbf06378e4de4e65918dce, index: 1 }, script_sig: 473044022001b8034e2a609b63c443030d16c9b3b1ad03edb2fb35b92ecc9a6c9c4c3f413602205ec71f44299e52b7edd2cf0b86bc7a4598e8afcd3c939f5fc591158212480b45012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: d6d8b926603f821f7113f02d5a32d3924da71591871944ef97d3800d6497af74, index: 0 }, script_sig: 483045022100a24909389b3fae2df094cda99880d4ed4f8be0f821fe18ebaf64dcfad96291b50220382c1697281be42dd712391cd62c26b7a5f3248af3e9362db5c794eafc752cbc012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 54b0300e4e762df062097368e08d269603548ba6e1a85f2cf06ceb8fe11059af, index: 1 }, script_sig: 483045022100a3a998c816815b124417ed8584c8bc6ec3360f81c162e10faf419b3f9652f83602205c94a8740458479a1b08f73a574447534e0d2a68eb583a75ef66b24c5762b3fa012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 153c95e3711cf3d8d41b2066e4cf537c86531ce9d3b6df139e5c077a524c8fbe, index: 0 }, script_sig: 483045022100c48c01d24b48d4dfaebf17ac1f0c23d769d7a3f45a3ef98be92b43fca319895e022038041d26d8923c1b3b6422d7739d55ec1f6746a601d30b098b0aff0b273a00f0012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 10b4c51eed87d2dd2581a0c15ca1d18bc85c3a0360d32b1caed205c86a660fcb, index: 1 }, script_sig: 4730440220386798392de4e9b7dc22fe2499589834d768153bbd049befcaedc02ba57474670220710929c1b6192a35ebe0e8ecea60135bd3a63f4ef59bb8c0eceddf351ae12730012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 9697d0c687fa817b9c36af4d863192d874536bac6969c06955c19873332024d5, index: 0 }, script_sig: 4730440220297ab66d200fb1731140a7c863851221a79a4659099213d11ec583f91737c0fe02201cd4f556103e0b7b429062528b356ebd31acc342617dabb770fde58f9c275b5a012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 15d67c858507bf26049cb8f54cefadcca9fb3f8b11ab2533a59e0964db7d52d4, index: 1 }, script_sig: 48304502210087c24b61d1fd22c5e066f7572c4815865b316b3945e681921f9ae98cbfdd91b2022008b24f34e74dc2a6e0bb44641895ddda4e38f3bb151f429264b6879745038b9a012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: afe30eae7d426475d1b7affb6b244639e5b2a5af55822629751a479a6a5e376f, index: 1 }, script_sig: 47304402204543f5bb6b3c2fcfe47a5b32be4a3dbe2b3ec4c7c1e27e27e38a2f738288798c022009ba32e60e1cb23b8c5915b0947236f8516beb78a95ee16c67a5018808de99a5012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: f4ce097a0631da310adc103c407beb4448abca654b063b7dc6ad7fe1748f64d9, index: 1 }, script_sig: 47304402205cdac8f11a7431d7e41ab832e30c25f7998ff7ed6f068874152d1f637bdcd5db02200d6064a797f951322380979410eb2d542070397a3e8af85dbb5d47a8a234904c012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 527f50f42a0208c456cdef75683b8ef36cc179ade1b78609fc4afab32d3aa8fe, index: 1 }, script_sig: 483045022100fc2036e61dffbd115b7c3083edadb5bdf179969367413c5fda3aa64464783c6702206214775b4716eb47c5c51a26eb09875dff4e7908b224154eb3a52dd9d8720c5e012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 851b1efeb96226204f16b25e2a9766680f354707baef61fe794bb3c932390817, index: 0 }, script_sig: 47304402206af93dcd589faea3b3701d4db98c79a32daec3bd62302d5746ddb43e4dc4d69d022053a547475e55637b8e0c75bab573e12ff79ffd8ca2f4dfe805864018669ffae3012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 9125c21285c8158e795681858e48e32755f7b6e29effd562fb5347cfc1e925a0, index: 1 }, script_sig: 483045022100910db47b62c3123d06fc435baf483e8daf3f706de4a95b81cff760cd1bb1a960022035b08fe7bf8ddaab82af9128c17fcf815f1afaa59f9fb6ae144337df8ba7186c012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 5138f89e2fc502490b5d3857e8cc81cacb7ac6c6047a3228311fbd91583b5600, index: 1 }, script_sig: 483045022100f0c3d5804b19d88cba234d1d0aeff02771d7d87587f8c3dba98bb88dd6fccbda0220581b878548e4e84ab553a1239b93af02fd279e94af7e865e93b87fc3d3529867012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 0efb0d2a99b4ecddf324cb77c41d41863649d4f8e314e35586869956225464aa, index: 1 }, script_sig: 483045022100ddd387fd4d91053ae00b1af9e6fa3c762fcd4d28881fafb5747d0dbc6fa36854022003e71c3e3205d929a322533307845143a6f8e57c385b1e13470dddace7291376012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: b323e9f6773b029b3bb741b86ae8724a8288e890d6f5ce08b37c5762c73cc80a, index: 1 }, script_sig: 483045022100899ff3533e8857db398cb1e26e80230c5288943598366711d59b940b8d5730fe0220747e23785e03e496c11edf482f4e2509fc169caafa4af3be59c67b3c0b002032012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 8c982935afcc6e4ee540541b54a0898920b252863e2bb2addf302b8904f4cdd8, index: 1 }, script_sig: 473044022033d86be42486c9f1021e6311ab767e878edd39b1ebe18e98eca598fbb80dca6b0220225449d70ff8a3442ea2bacccbb946e12e3291ed17ef7058d35fc2c62675e7a8012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: e5395bd55dc3cba43e9360dcf07ef611e9c45270107ddfd83143a853cafeb7bd, index: 1 }, script_sig: 483045022100fb5e5e12f9d273ffe63a37452f4f00716ce20f8dd3039d0813e7d6a922f53dff02202f290d6b2555dc4e3f7d22bc47da847fcbf537988debaf713f968563f8803f61012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 0d10992cc9310e839fb281158b33312e284c2ec8341921dc3b868d2ab1d7d1aa, index: 0 }, script_sig: 483045022100a1b9e276838711aab3f3a73d408ffaa07444f8da1172cd72e03dad427cfbf05e022044340bd3e5f7e5278d18869c10dc8d6dc50f6b4dc8beb3c751eca5e5447a2496012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 6df719ab4082d2d713af9c8b7cd0db6e4a81fa7750805cd1db2f6c7156545641, index: 1 }, script_sig: 483045022100f15c9d892f3e2fc1e7f5a2892d14e155c739b82d497c6dfade1246dc885c077d022070424516e2616f78b5a2e6f9fd352731ebf1dde58a156e03ca19da1212c790c5012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }, TransactionInput { previous_output: OutPoint { hash: 68b4cceaae7edccd7a097713f63344d36ab0aaa962883773d5193375b9235d13, index: 1 }, script_sig: 483045022100a433a6ed9204f327b6cc640df2bb10a0b0c048dffe8edabe857403e50470252202203e1ddbb6ca81e8436ac100284306c5529f87f2830c7b97604c39f10eec610a8e012103dfc0392064af0be9a9019b17b3960d37e35872372ca64c8c63c3b3fdd6c017cb, sequence: 4294967295, script_witness: [] }], outputs: [TransactionOutput { value: 378011018892, script_pubkey: a91447c202f68ab926a761bf74fd68c4fb8d3e1d763087 }, TransactionOutput { value: 0, script_pubkey: 6a146c141f5e1bdee6f8c64aba0c7b91c359b3be8d38 }, TransactionOutput { value: 48302426, script_pubkey: 76a914ec73fcb5923e5be096d02b483171761fbba00c2388ac }], lock_time: 1730540877, expiry_height: 0, shielded_spends: [], shielded_outputs: [], join_splits: [], value_balance: 0, join_split_pubkey: 0000000000000000000000000000000000000000000000000000000000000000, join_split_sig: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, binding_sig: 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000, zcash: true, posv: false, str_d_zeel: None, tx_hash_algo: DSHA256 } 0 to be spent "
+      },
+      "type" : "TakerPaymentWaitForSpendFailed"
+    },
+    "timestamp" : 1730570286779
+}
 ```
 
 #### MakerPaymentSpendFailed
@@ -2262,6 +2380,67 @@ The swap finishes immediately when this event occurs.
 }
 ```
 
+#### MakerPaymentSpendConfirmed
+
+The `MakerPaymentSpendConfirmed` event indicates that the broadcasted tx for taker spending maker payment was not reverted.
+
+| Structure | Type   | Description                             |
+| --------- | ------ | --------------------------------------- |
+| tx\_hash  | string | the hash of the transaction             |
+| tx\_hex   | string | transaction bytes in hexadecimal format |
+
+```json
+{
+  "type" : "MakerPaymentSpendConfirmed",
+  "data" : {
+    "tx_hash" : "a2513faf3d479b8e14096be9b0ba8977d669a7a9ca722be0e2bbe3833fa51a4e",
+    "tx_hex" : "0400008085202f8901d331b98aec95c8ed36484398b7bdec98858d5efae3ac0eb8be4cb39ef016e0fd00000000d7473044022049a5831a2ef057c5a119b19a694dc653e37a1a8b0122125132aecd5dd47312ff02206672c43113830247623f508ee49ba2db15732c22d8f2fec3c8acfc1f19b84654012017456a9b1b3817b612737c929a731e241a28147fc0530e876f9f79e34abd86f7004c6b630457f7ec64b17521031bb83b58ec130e28e0a6d5d2acf2eb01b0d3f1670e021d47d31db8a858219da8ac6782012088a914c1eae4df923e04a343030902472e70664a525e6d8821023c5ba1d7ef6fa015eb33defb3aba2a961898a51bbb7ff30344d07ba75ad3f289ac68ffffffff01b2530000000000001976a91484c74592ed8ac05340906784d277ca4d4e0af08e88ac57f7ec64000000000000000000000000000000"
+  }
+}
+```
+
+#### MakerPaymentSpendConfirmFailed
+
+The `MakerPaymentSpendConfirmFailed` event indicates that the broadcasted tx for taker spending maker payment was not reverted.
+
+| Structure | Type   | Description                             |
+| --------- | ------ | --------------------------------------- |
+| tx\_hash  | string | the hash of the transaction             |
+| tx\_hex   | string | transaction bytes in hexadecimal format |
+
+```json
+{
+  "event" : {
+    "data" : {
+        "error" : "Maker payment spend confirm failed..."
+    },
+    "type" : "MakerPaymentSpendConfirmFailed"
+  },
+  "timestamp" : 1727678432853
+}
+```
+
+#### MakerPaymentSpentByWatcher
+
+The `MakerPaymentSpentByWatcher` event indicates that the maker payment has been released to the taker while the taker was offline.
+
+The swap finishes immediately when this event occurs.
+
+| Structure | Type   | Description                             |
+| --------- | ------ | --------------------------------------- |
+| tx\_hash  | string | the hash of the transaction             |
+| tx\_hex   | string | transaction bytes in hexadecimal format |
+
+```json
+{
+  "type" : "MakerPaymentSpentByWatcher",
+  "data" : {
+    "tx_hash" : "a2513faf3d479b8e14096be9b0ba8977d669a7a9ca722be0e2bbe3833fa51a4e",
+    "tx_hex" : "0400008085202f8901d331b98aec95c8ed36484398b7bdec98858d5efae3ac0eb8be4cb39ef016e0fd00000000d7473044022049a5831a2ef057c5a119b19a694dc653e37a1a8b0122125132aecd5dd47312ff02206672c43113830247623f508ee49ba2db15732c22d8f2fec3c8acfc1f19b84654012017456a9b1b3817b612737c929a731e241a28147fc0530e876f9f79e34abd86f7004c6b630457f7ec64b17521031bb83b58ec130e28e0a6d5d2acf2eb01b0d3f1670e021d47d31db8a858219da8ac6782012088a914c1eae4df923e04a343030902472e70664a525e6d8821023c5ba1d7ef6fa015eb33defb3aba2a961898a51bbb7ff30344d07ba75ad3f289ac68ffffffff01b2530000000000001976a91484c74592ed8ac05340906784d277ca4d4e0af08e88ac57f7ec64000000000000000000000000000000"
+  }
+}
+```
+
 #### TakerPaymentWaitRefundStarted
 
 `TakerPaymentWaitRefundStarted` event indicates that taker started waiting for lock time expiration to refund the payment.
@@ -2271,6 +2450,15 @@ The swap finishes immediately when this event occurs.
 | wait\_until | number (UTC timestamp) | the timestamp at which a refund will occur |
 
 ```json
+{
+  "event" : {
+    "data" : {
+        "wait_until" : 1695668176
+    },
+    "type" : "TakerPaymentWaitRefundStarted"
+  },
+  "timestamp" : 1695664482303
+}
 ```
 
 #### TakerPaymentRefundStarted
@@ -2278,7 +2466,34 @@ The swap finishes immediately when this event occurs.
 `TakerPaymentRefundStarted` event indicates that taker was has initiated the refund process.
 
 ```json
-TODO: Table and Example TBA
+{
+  "event" : {
+    "type" : "TakerPaymentRefundStarted"
+  },
+  "timestamp" : 1695664482305
+}
+```
+
+#### TakerPaymentRefundedByWatcher
+
+The `TakerPaymentRefundedByWatcher` is fired if the watcher refunded the taker payment for the taker while the taker is offline.
+It will be shown in the swap status when the taker runs the defi framework again after being offline (if the watcher refunded the swap during the time the taker was offline).
+
+| Structure | Type   | Description                        |
+| --------- | ------ | ---------------------------------- |
+| error     | string | error description with stack trace |
+
+```json
+{
+  "event" : {
+    "data" : {
+        "tx_hash" : "f7c0bf10cee27c39bf84e77de88bbe734fe28487cc4cd8fe567082abefc8f6cd",
+        "tx_hex" : "0400008085202f89012308d7e1f531e2695602d7a180b472d20f63930662bf5ea33c23c3637b0b564f00000000b64730440220294ddc7b5eedee7697b28e21a01bbff027cfb2d569e8902653df52b1b549a85702207a4efe8fbbe8a08b0e8ecdb02eeb0f54bea268feae3cb4a2e524911be917f0f701514c6b6304251fa964b17521023c5ba1d7ef6fa015eb33defb3aba2a961898a51bbb7ff30344d07ba75ad3f289ac6782012088a914e8eeeea9c6e8988f1ace7bb5b0222efd9fc9d2ed882103081f37ad0ab55bcbd8e2f45e6a364ebf88f727f80c14e7a4f083e9d6555afee7ac68feffffff016aa93203000000001976a91484c74592ed8ac05340906784d277ca4d4e0af08e88ac9620a964000000000000000000000000000000"
+    },
+    "type" : "TakerPaymentRefundedByWatcher"
+  },
+  "timestamp" : 1690992836496
+}
 ```
 
 #### TakerPaymentRefundFailed
@@ -2291,7 +2506,15 @@ The swap finishes immediately when this event occurs.
 | error     | string | error description with stack trace |
 
 ```json
-TODO: Example TBA
+{
+  "event" : {
+    "data" : {
+        "error" : "taker_swap:1918] \"mm2src/coins/utxo/utxo_common.rs:1907] rpc_clients:2314] ResponseParseError(JsonRpcError { client_info: \\\"coin: ZEC\\\", request: JsonRpcRequest { jsonrpc: \\\"2.0\\\", id: \\\"2572\\\", method: \\\"blockchain.transaction.broadcast\\\", params: [String(\\\"0400008085202f8901274b68c78f9ab689f6efbdc1678bb3a3cb2f2e6dd685fe5bd10bee660a28de4400000000b647304402201c4176381ef6375a0e12a54d22f317613ce7a41ac61f963f7adce54a9247e0c30220292c37ff88742bc42317539f4c2a903424accd55a6d0c5c9499da1344eb8d39a01514c6b63043b45fa66b17521023c5ba1d7ef6fa015eb33defb3aba2a961898a51bbb7ff30344d07ba75ad3f289ac6782012088a914eab6c44aa1fb5607f3a115644fa3d2892905119c882102f70d90df545d767a53daa25e07875b4b588c476cba465a28dcafc4b6b792cf94ac68feffffff01e84e2300000000001976a91484c74592ed8ac05340906784d277ca4d4e0af08e88ac6f45fa66000000000000000000000000000000\\\")] }, error: Response(electrum1.cipig.net:20058, Object({\\\"code\\\": Number(1), \\\"message\\\": String(\\\"the transaction was rejected by network rules.\\\\n\\\\nMissing inputs\\\\n[0400008085202f8901274b68c78f9ab689f6efbdc1678bb3a3cb2f2e6dd685fe5bd10bee660a28de4400000000b647304402201c4176381ef6375a0e12a54d22f317613ce7a41ac61f963f7adce54a9247e0c30220292c37ff88742bc42317539f4c2a903424accd55a6d0c5c9499da1344eb8d39a01514c6b63043b45fa66b17521023c5ba1d7ef6fa015eb33defb3aba2a961898a51bbb7ff30344d07ba75ad3f289ac6782012088a914eab6c44aa1fb5607f3a115644fa3d2892905119c882102f70d90df545d767a53daa25e07875b4b588c476cba465a28dcafc4b6b792cf94ac68feffffff01e84e2300000000001976a91484c74592ed8ac05340906784d277ca4d4e0af08e88ac6f45fa66000000000000000000000000000000]\\\")})) })\""
+    },
+    "type" : "TakerPaymentRefundFailed"
+  },
+  "timestamp" : 1727678432853
+}
 ```
 
 #### TakerPaymentRefunded
@@ -2305,6 +2528,19 @@ The swap finishes immediately when this event occurs.
 | tx\_hash  | string | the hash of the transaction             |
 | tx\_hex   | string | transaction bytes in hexadecimal format |
 
+```json
+{
+    "event" : {
+      "data" : {
+          "tx_hash" : "6942bca7b871e196cda1f8eb1da9b0678b3f2baa45f9023bc116c2dae085a8a8",
+          "tx_hex" : "01000000e9d2116501040b1bd67c8760eadcfe70c6bf41b29c1c869bbc59cbfdfdd5b99b5ca89a18d300000000b647304402205ace6d71d20c98d0cb503988b2a93e337ebfd37347b9bd576c9b960eb79c05e60220459207fcb445dabd5e6e31b8dbc9ef59be2ddba9c1860a539d84d53fcbcb0c7d01514c6b63045cc91165b17521023c5ba1d7ef6fa015eb33defb3aba2a961898a51bbb7ff30344d07ba75ad3f289ac6782012088a9144a68a616ba60b001e3d2493aabc4a7885769760f882102f70d90df545d767a53daa25e07875b4b588c476cba465a28dcafc4b6b792cf94ac68feffffff0143392900000000001976a91484c74592ed8ac05340906784d277ca4d4e0af08e88ac56ca1165"
+      },
+      "type" : "TakerPaymentRefunded"
+    },
+    "timestamp" : 1695666921166
+}
+```
+
 #### TakerPaymentRefundFinished
 
 The `TakerPaymentRefundFinished` event indicates that taker refund process is complete.
@@ -2312,7 +2548,12 @@ The `TakerPaymentRefundFinished` event indicates that taker refund process is co
 The swap finishes immediately when this event occurs. This event does not have additional data.
 
 ```json
-TODO: Example TBA
+{
+  "event" : {
+    "type" : "TakerPaymentRefundFinished"
+  },
+  "timestamp" : 1695666921167
+}
 ```
 
 #### Finished
@@ -2329,13 +2570,14 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 The `RawTxInfo` object includes the following items:
 
-| Parameter  | Type   | Description                                                                                                                                                                                                                  |
-| ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_hex    | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
-| prev\_txns | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
-| to         | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
-| value      | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
-| gas\_limit | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
+| Parameter     | Type   | Description                                                                                                                                                                                                                  |
+| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_hex       | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
+| prev\_txns    | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
+| to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
+| value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
+| gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
+| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
 
 TODO: Confirm units used in ETH/EVM transactions.
 
@@ -2352,7 +2594,12 @@ TODO: Confirm units used in ETH/EVM transactions.
   {
       "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
       "value": "0.85",
-      "gas_limit": "21000"
+      "gas_limit": "21000",
+      "pay_for_gas": {
+          "tx_type": "Eip1559",
+          "max_fee_per_gas": "1234.567",
+          "max_priority_fee_per_gas": "1.2"
+      }
   }
 ```
 
@@ -2365,8 +2612,7 @@ The `InputTxns` object includes the following items:
 | tx\_hash         | string  | The transaction id of an unspent transaction from the same wallet output.                                                                                                                                                                           |
 | index            | integer | The \[output index([https://bitcoin.stackexchange.com/questions/100765/what-does-the-index-of-an-utxo-stand-for](https://bitcoin.stackexchange.com/questions/100765/what-does-the-index-of-an-utxo-stand-for))] of this unspent transaction output. |
 | script\_pub\_key | string  | The [scriptpubkey](https://learnmeabitcoin.com/technical/scriptPubKey) of this unspent transaction output.                                                                                                                                          |
-| amount           | float   | The value of this unspent transaction output.                                                                                                                                                                                                       |
-| amount           |         |                                                                                                                                                                                                                                                     |
+| amount           | decimal | The value of this unspent transaction output.                                                                                                                                                                                                       |
 
 ```json
   {
@@ -2375,6 +2621,44 @@ The `InputTxns` object includes the following items:
       "script_pub_key": "001449e3b6b4684c4d4a914b29411af51843c59bfff0",
       "amount": 0.00001000
   }
+```
+
+### PayForGas
+
+The `PayForGas` object includes the following items:
+
+| Parameter                    | Type    | Description                                                                                                                                                                  |
+| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_type                     | string  | ETH/EVM coins and tokens only. Options are `Legacy` or `Eip1559`. The type of transaction values being configured.                                                           |
+| gas\_price                   | decimal | Only used if tx\_type is `Legacy`. Values are in Gwei. The maximium price per gas unit the user is willing to pay for the transaction.                                       |
+| max\_fee\_per\_gas           | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. The maximum amount to pay per unit of gas to get your transaction included in a block.                               |
+| max\_priority\_fee\_per\_gas | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. This is paid directly to the miner, and can be set by the user to attract minimal delay in transaction confirmation. |
+| min\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated minimum transaction wait time in mempool (in ms) for this priority level.                                            |
+| max\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated maximum transaction wait time in mempool (in ms) for this priority level.                                            |
+
+[Eip1559](https://www.coinbase.com/en-au/blog/the-technical-benefits-of-eip-1559) allows users to save on gas fees. To use this feature for a coin/token, its entry in your `coins` file must include fields for `chain_id` and `max_eth_tx_type`. To allow eip-1559 transactions, `max_eth_tx_type` should be set to `2`. To find the `chain_id` for an \[EVM network([https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/](https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/))], refer to [chainlist.org](https://chainlist.org). There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `provider` or `simple`.
+
+By default, `simple` gas fee estimation suggests a fee based on fee history. If set `gas_fee_estimator` is set to `provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
+
+Use the [start\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/) method to begin tracking the fee market for a coin (and its tokens). You can stop tracking the fee market with [stop\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/stop_eth_fee_estimator/).
+
+To set or view the current swap transaction fee policy, use the [get\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/get_swap_transaction_fee_policy/) and [set\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/set_swap_transaction_fee_policy/) methods.
+
+For more information about EIP1559, refer to [https://www.blocknative.com/blog/eip-1559-fees](https://www.blocknative.com/blog/eip-1559-fees)
+
+```json
+{
+    "tx_type": "Legacy",
+    "gas_price": "1234.567"
+}
+```
+
+```json
+{
+    "tx_type": "Eip1559",
+    "max_fee_per_gas": "1234.567",
+    "max_priority_fee_per_gas": "1.2"
+}
 ```
 export const title = "Komodo DeFi Framework RPC Methods";
 export const description = "This document lists all available RPC methods of the Komodo DeFi Framework.";
@@ -2388,132 +2672,138 @@ To test the methods in v2.0 (Dev), you will need to [build the Komodo DeFi Frame
 
 Below is a table of the currently available legacy, v2.0 and v2.0 (Dev) methods:
 
-| Legacy                                                                                                                          | v2.0 (release)                                                                                                                     | v2.0 (dev)                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| [active\_swaps](/komodo-defi-framework/api/legacy/active_swaps/#active-swaps)                                                   |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 | [add\_delegation](/komodo-defi-framework/api/v20/add_delegation/#add-delegation)                                                   |                                                                                                                                   |
-|                                                                                                                                 | [add\_node\_to\_version\_stat](/komodo-defi-framework/api/v20/add_node_to_version_stat/#add-node-to-version-stat)                  |                                                                                                                                   |
-| [all\_swaps\_uuids\_by\_filter](/komodo-defi-framework/api/legacy/all_swaps_uuids_by_filter/#all-swaps-uuids-by-filter)         |                                                                                                                                    |                                                                                                                                   |
-| [ban\_pubkey](/komodo-defi-framework/api/legacy/ban_pubkey/#ban-pubkey)                                                         |                                                                                                                                    |                                                                                                                                   |
-| [best\_orders](/komodo-defi-framework/api/legacy/best_orders/#best-orders)                                                      | [best\_orders](/komodo-defi-framework/api/v20/best_orders/#best-orders)                                                            |                                                                                                                                   |
-| [buy](/komodo-defi-framework/api/legacy/buy/#buy)                                                                               |                                                                                                                                    |                                                                                                                                   |
-| [cancel\_all\_orders](/komodo-defi-framework/api/legacy/cancel_all_orders/#cancel-all-orders)                                   |                                                                                                                                    |                                                                                                                                   |
-| [cancel\_order](/komodo-defi-framework/api/legacy/cancel_order/#cancel-order)                                                   |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [clear\_nft\_db](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/#clear-nft-database)                         |
-|                                                                                                                                 |                                                                                                                                    | [close\_channel](/komodo-defi-framework/api/v20-dev/lightning/channels/#close-channel)                                            |
-| [coins\_needed\_for\_kick\_start](/komodo-defi-framework/api/legacy/coins_needed_for_kick_start/#coins-needed-for-kick-start)   |                                                                                                                                    |                                                                                                                                   |
-| [convert\_utxo\_address](/komodo-defi-framework/api/legacy/convert_utxo_address/#convert-utxo-address)                          |                                                                                                                                    |                                                                                                                                   |
-| [convertaddress](/komodo-defi-framework/api/legacy/convertaddress/#convertaddress)                                              |                                                                                                                                    |                                                                                                                                   |
-| [disable\_coin](/komodo-defi-framework/api/legacy/disable_coin/#disable-coin)                                                   |                                                                                                                                    |                                                                                                                                   |
-| [electrum](/komodo-defi-framework/api/legacy/coin_activation/#electrum-method)                                                  |                                                                                                                                    |                                                                                                                                   |
-| [enable](/komodo-defi-framework/api/legacy/coin_activation/#enable-method)                                                      |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 | [enable\_bch\_with\_tokens](/komodo-defi-framework/api/v20/enable_bch_with_tokens/#enable-bch-with-tokens)                         |                                                                                                                                   |
-|                                                                                                                                 | [enable\_erc20](/komodo-defi-framework/api/v20/enable_erc20/#enable-erc20)                                                         |                                                                                                                                   |
-|                                                                                                                                 | [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/#enable-eth-with-tokens)                         |                                                                                                                                   |
-|                                                                                                                                 | [enable\_slp](/komodo-defi-framework/api/v20/enable_slp/#enable-slp)                                                               |                                                                                                                                   |
-|                                                                                                                                 | [enable\_tendermint\_token](/komodo-defi-framework/api/v20/enable_tendermint_token/#enable-tendermint-token)                       |                                                                                                                                   |
-|                                                                                                                                 | [enable\_tendermint\_with\_assets](/komodo-defi-framework/api/v20/enable_tendermint_with_assets/#enable-tendermint-with-assets)    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [get\_channel\_details](/komodo-defi-framework/api/v20-dev/lightning/channels/#get-channel-details)                               |
-|                                                                                                                                 |                                                                                                                                    | [get\_claimable\_balances](/komodo-defi-framework/api/v20-dev/lightning/channels/#get-claimable-balances)                         |
-|                                                                                                                                 | [get\_current\_mtp](/komodo-defi-framework/api/v20/get_current_mtp/#get-current-mtp)                                               |                                                                                                                                   |
-| [get\_directly\_connected\_peers](/komodo-defi-framework/api/legacy/get_directly_connected_peers/#get-directly-connected-peers) |                                                                                                                                    |                                                                                                                                   |
-| [get\_enabled\_coins](/komodo-defi-framework/api/legacy/get_enabled_coins/#get-enabled-coins)                                   |                                                                                                                                    |                                                                                                                                   |
-| [get\_gossip\_mesh](/komodo-defi-framework/api/legacy/get_gossip_mesh/#get-gossip-mesh)                                         |                                                                                                                                    |                                                                                                                                   |
-| [get\_gossip\_peer\_topics](/komodo-defi-framework/api/legacy/get_gossip_peer_topics/#get-gossip-peer-topics)                   |                                                                                                                                    |                                                                                                                                   |
-| [get\_gossip\_topic\_peers](/komodo-defi-framework/api/legacy/get_gossip_topic_peers/#get-gossip-topic-peers)                   |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [get\_locked\_amount](/komodo-defi-framework/api/v20-dev/get_locked_amount/#get-locked-amount)                                    |
-| [get\_my\_peer\_id](/komodo-defi-framework/api/legacy/get_my_peer_id/#get-my-peer-id)                                           |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [get\_new\_address](/komodo-defi-framework/api/v20-dev/hd_address_management/#get-new-address)                                    |
-|                                                                                                                                 |                                                                                                                                    | [get\_nft\_list](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_list/#get-a-list-of-nfts)                         |
-|                                                                                                                                 |                                                                                                                                    | [get\_nft\_metadata](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_metadata/#get-nft-metadata)                   |
-|                                                                                                                                 |                                                                                                                                    | [get\_nft\_transfers](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_transfers/#get-a-list-of-nft-transfers)      |
-|                                                                                                                                 | [get\_public\_key](/komodo-defi-framework/api/v20/get_public_key/#get-public-key)                                                  |                                                                                                                                   |
-|                                                                                                                                 | [get\_public\_key\_hash](/komodo-defi-framework/api/v20/get_public_key_hash/#get-public-key-hash)                                  |                                                                                                                                   |
-|                                                                                                                                 | [get\_raw\_transaction](/komodo-defi-framework/api/v20/get_raw_transaction/#get-raw-transaction)                                   |                                                                                                                                   |
-| [get\_relay\_mesh](/komodo-defi-framework/api/legacy/get_relay_mesh/#get-relay-mesh)                                            |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 | [get\_staking\_infos](/komodo-defi-framework/api/v20/get_staking_infos/#get-staking-infos)                                         |                                                                                                                                   |
-| [get\_trade\_fee](/komodo-defi-framework/api/legacy/get_trade_fee/#get-trade-fee)                                               |                                                                                                                                    |                                                                                                                                   |
-| [import\_swaps](/komodo-defi-framework/api/legacy/import_swaps/#import-swaps)                                                   |                                                                                                                                    |                                                                                                                                   |
-| [kmd\_rewards\_info](/komodo-defi-framework/api/legacy/kmd_rewards_info/#kmd-rewards-info)                                      |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [lightning::nodes::add\_trusted\_node](/komodo-defi-framework/api/v20-dev/lightning/nodes/#add-trusted-node)                      |
-|                                                                                                                                 |                                                                                                                                    | [lightning::nodes::connect\_to\_node](/komodo-defi-framework/api/v20-dev/lightning/nodes/#connect-to-node)                        |
-|                                                                                                                                 |                                                                                                                                    | [lightning::nodes::list\_trusted\_nodes](/komodo-defi-framework/api/v20-dev/lightning/nodes/#list-trusted-nodes)                  |
-|                                                                                                                                 |                                                                                                                                    | [lightning::nodes::remove\_trusted\_node](/komodo-defi-framework/api/v20-dev/lightning/nodes/#remove-trusted-node)                |
-|                                                                                                                                 |                                                                                                                                    | [lightning::payments::generate\_invoice](/komodo-defi-framework/api/v20-dev/lightning/payments/#generate-invoice)                 |
-|                                                                                                                                 |                                                                                                                                    | [lightning::payments::get\_payment\_details](/komodo-defi-framework/api/v20-dev/lightning/payments/#get-payment-details)          |
-|                                                                                                                                 |                                                                                                                                    | [lightning::payments::list\_payments\_by\_filter](/komodo-defi-framework/api/v20-dev/lightning/payments/#list-payments-by-filter) |
-|                                                                                                                                 |                                                                                                                                    | [lightning::payments::send\_payment](/komodo-defi-framework/api/v20-dev/lightning/payments/#send-payment)                         |
-| [list\_banned\_pubkeys](/komodo-defi-framework/api/legacy/list_banned_pubkeys/#list-banned-pubkeys)                             |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [list\_closed\_channels\_by\_filter](/komodo-defi-framework/api/v20-dev/lightning/channels/#list-closed-channels-by-filter)       |
-|                                                                                                                                 |                                                                                                                                    | [list\_open\_channels\_by\_filter](/komodo-defi-framework/api/v20-dev/lightning/channels/#list-open-channels-by-filter)           |
-|                                                                                                                                 |                                                                                                                                    | [max\_maker\_vol](/komodo-defi-framework/api/v20-dev/max_maker_vol/#max-maker-vol)                                                |
-| [max\_taker\_vol](/komodo-defi-framework/api/legacy/max_taker_vol/#max-taker-vol)                                               |                                                                                                                                    |                                                                                                                                   |
-| [metrics](/komodo-defi-framework/api/legacy/metrics/#metrics)                                                                   |                                                                                                                                    |                                                                                                                                   |
-| [min\_trading\_vol](/komodo-defi-framework/api/legacy/min_trading_vol/#min-trading-vol)                                         |                                                                                                                                    |                                                                                                                                   |
-| [my\_balance](/komodo-defi-framework/api/legacy/my_balance/#my-balance)                                                         |                                                                                                                                    |                                                                                                                                   |
-| [my\_orders](/komodo-defi-framework/api/legacy/my_orders/#my-orders)                                                            |                                                                                                                                    |                                                                                                                                   |
-| [my\_recent\_swaps](/komodo-defi-framework/api/legacy/my_recent_swaps/#my-recent-swaps)                                         | [my\_recent\_swaps](/komodo-defi-framework/api/v20/my_recent_swaps/#my-recent-swaps)                                               |                                                                                                                                   |
-| [my\_swap\_status](/komodo-defi-framework/api/legacy/my_swap_status/#my-swap-status)                                            |                                                                                                                                    |                                                                                                                                   |
-| [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history)                                               | [my\_tx\_history](/komodo-defi-framework/api/v20/my_tx_history/#my-tx-history)                                                     |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [open\_channel](/komodo-defi-framework/api/v20-dev/lightning/channels/#open-channel)                                              |
-| [order\_status](/komodo-defi-framework/api/legacy/order_status/#order-status)                                                   |                                                                                                                                    |                                                                                                                                   |
-| [orderbook](/komodo-defi-framework/api/legacy/orderbook/#orderbook)                                                             | [orderbook](/komodo-defi-framework/api/v20/orderbook/#orderbook)                                                                   |                                                                                                                                   |
-| [orderbook\_depth](/komodo-defi-framework/api/legacy/orderbook_depth/#orderbook-depth)                                          |                                                                                                                                    |                                                                                                                                   |
-| [orders\_history\_by\_filter](/komodo-defi-framework/api/legacy/orders_history_by_filter/#orders-history-by-filter)             |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 | [peer\_connection\_healthcheck](/komodo-defi-framework/api/v20/peer_connection_healthcheck/#peer-connection-healthcheck)           |                                                                                                                                   |
-| [recover\_funds\_of\_swap](/komodo-defi-framework/api/legacy/recover_funds_of_swap/#recover-funds-of-swap)                      |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 | [recreate\_swap\_data](/komodo-defi-framework/api/v20/recreate_swap_data/#recreate-swap-data)                                      |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [refresh\_nft\_metadata](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/refresh_nft_metadata/#refresh-nft-metadata)       |
-|                                                                                                                                 | [remove\_delegation](/komodo-defi-framework/api/v20/remove_delegation/#remove-delegation)                                          |                                                                                                                                   |
-|                                                                                                                                 | [remove\_node\_from\_version\_stat](/komodo-defi-framework/api/v20/remove_node_from_version_stat/#remove-node-from-version-stat)   |                                                                                                                                   |
-| [sell](/komodo-defi-framework/api/legacy/sell/#sell)                                                                            |                                                                                                                                    |                                                                                                                                   |
-| [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/#send-raw-transaction)                          |                                                                                                                                    |                                                                                                                                   |
-| [set\_required\_confirmations](/komodo-defi-framework/api/legacy/set_required_confirmations/#set-required-confirmations)        |                                                                                                                                    |                                                                                                                                   |
-| [set\_requires\_notarization](/komodo-defi-framework/api/legacy/set_requires_notarization/#set-requires-notarization)           |                                                                                                                                    |                                                                                                                                   |
-| [setprice](/komodo-defi-framework/api/legacy/setprice/#setprice)                                                                |                                                                                                                                    |                                                                                                                                   |
-| [show\_priv\_key](/komodo-defi-framework/api/legacy/show_priv_key/#show-priv-key)                                               |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 | [sign\_message](/komodo-defi-framework/api/v20/message_signing/#sign-message)                                                      |                                                                                                                                   |
-|                                                                                                                                 | [sign\_raw\_transaction](/komodo-defi-framework/api/v20/sign_raw_transaction/#sign-raw-transaction)                                |                                                                                                                                   |
-|                                                                                                                                 | [start\_simple\_market\_maker\_bot](/komodo-defi-framework/api/v20/start_simple_market_maker_bot/#start-simple-market-maker-bot)   |                                                                                                                                   |
-|                                                                                                                                 | [start\_version\_stat\_collection](/komodo-defi-framework/api/v20/start_version_stat_collection/#start-version-stat-collection)    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [status](/komodo-defi-framework/api/v20-dev/task_create_new_account/#status)                                                      |
-|                                                                                                                                 | [stop\_simple\_market\_maker\_bot](/komodo-defi-framework/api/v20/stop_simple_market_maker_bot/#stop-simple-market-maker-bot)      |                                                                                                                                   |
-|                                                                                                                                 | [stop\_version\_stat\_collection](/komodo-defi-framework/api/v20/stop_version_stat_collection/#stop-version-stat-collection)       |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [task::account\_balance::cancel](/komodo-defi-framework/api/v20-dev/task_account_balance/#cancel)                                 |
-|                                                                                                                                 |                                                                                                                                    | [task::account\_balance::init](/komodo-defi-framework/api/v20-dev/task_account_balance/#init)                                     |
-|                                                                                                                                 |                                                                                                                                    | [task::account\_balance::status](/komodo-defi-framework/api/v20-dev/task_account_balance/#status)                                 |
-|                                                                                                                                 |                                                                                                                                    | [task::create\_new\_account::init](/komodo-defi-framework/api/v20-dev/task_create_new_account/#init)                              |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_lightning::cancel](/komodo-defi-framework/api/v20-dev/lightning/activation/#cancel-initialization)                 |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_lightning::init](/komodo-defi-framework/api/v20-dev/lightning/activation/#initialize-lightning)                    |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_lightning::status](/komodo-defi-framework/api/v20-dev/lightning/activation/#initialization-status)                 |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_qtum::init](/komodo-defi-framework/api/v20-dev/task_enable_qtum/#init)                                             |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_qtum::status](/komodo-defi-framework/api/v20-dev/task_enable_qtum/#status)                                         |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_qtum::user\_action](/komodo-defi-framework/api/v20-dev/task_enable_qtum/#user-action)                              |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_utxo::init](/komodo-defi-framework/api/v20-dev/task_enable_utxo/#init)                                             |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_utxo::status](/komodo-defi-framework/api/v20-dev/task_enable_utxo/#status)                                         |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_utxo::user\_action](/komodo-defi-framework/api/v20-dev/task_enable_utxo/#user-action)                              |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_z\_coin::cancel](/komodo-defi-framework/api/v20-dev/zhtlc_coins/activation/#cancel-activation)                     |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_z\_coin::init](/komodo-defi-framework/api/v20-dev/zhtlc_coins/activation/#initialize-zhtlc-coin-activation)        |
-|                                                                                                                                 |                                                                                                                                    | [task::enable\_z\_coin::status](/komodo-defi-framework/api/v20-dev/zhtlc_coins/activation/#activation-status)                     |
-|                                                                                                                                 |                                                                                                                                    | [task::init\_trezor::cancel](/komodo-defi-framework/api/v20-dev/task_init_trezor/#cancel)                                         |
-|                                                                                                                                 |                                                                                                                                    | [task::init\_trezor::init](/komodo-defi-framework/api/v20-dev/task_init_trezor/#init)                                             |
-|                                                                                                                                 |                                                                                                                                    | [task::init\_trezor::status](/komodo-defi-framework/api/v20-dev/task_init_trezor/#status)                                         |
-|                                                                                                                                 |                                                                                                                                    | [task::init\_trezor::user\_action](/komodo-defi-framework/api/v20-dev/task_init_trezor/#user-action)                              |
-|                                                                                                                                 |                                                                                                                                    | [task::withdraw::cancel](/komodo-defi-framework/api/v20-dev/task_withdraw/#cancel)                                                |
-|                                                                                                                                 |                                                                                                                                    | [task::withdraw::init](/komodo-defi-framework/api/v20-dev/task_withdraw/#init)                                                    |
-|                                                                                                                                 |                                                                                                                                    | [task::withdraw::status](/komodo-defi-framework/api/v20-dev/task_withdraw/#status)                                                |
-| [trade\_preimage](/komodo-defi-framework/api/legacy/trade_preimage/#trade-preimage)                                             | [trade\_preimage](/komodo-defi-framework/api/v20/trade_preimage/#trade-preimage)                                                   |                                                                                                                                   |
-| [unban\_pubkeys](/komodo-defi-framework/api/legacy/unban_pubkeys/#unban-pubkeys)                                                |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [update\_channel](/komodo-defi-framework/api/v20-dev/lightning/channels/#update-channel)                                          |
-| [update\_maker\_order](/komodo-defi-framework/api/legacy/update_maker_order/#update-maker-order)                                |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [update\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/#update-nft)                                      |
-|                                                                                                                                 | [update\_version\_stat\_collection](/komodo-defi-framework/api/v20/update_version_stat_collection/#update-version-stat-collection) |                                                                                                                                   |
-| [validateaddress](/komodo-defi-framework/api/legacy/validateaddress/#validateaddress)                                           |                                                                                                                                    |                                                                                                                                   |
-|                                                                                                                                 | [verify\_message](/komodo-defi-framework/api/v20/message_signing/#verify-message)                                                  |                                                                                                                                   |
-| [version](/komodo-defi-framework/api/legacy/version/#version)                                                                   |                                                                                                                                    |                                                                                                                                   |
-| [withdraw](/komodo-defi-framework/api/legacy/withdraw/#withdraw)                                                                | [withdraw](/komodo-defi-framework/api/v20/withdraw/#withdraw)                                                                      |                                                                                                                                   |
-|                                                                                                                                 |                                                                                                                                    | [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/#withdraw-nfts)                               |
-|                                                                                                                                 |                                                                                                                                    | [z\_coin\_tx\_history](/komodo-defi-framework/api/v20-dev/zhtlc_coins/transaction_history/#zhtlc-coin-transaction-history)        |
+| Legacy                                                                                                                          | v2.0 (release)                                                                                                                                        | v2.0 (dev)                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| [active\_swaps](/komodo-defi-framework/api/legacy/active_swaps/#active-swaps)                                                   |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [add\_delegation](/komodo-defi-framework/api/v20/add_delegation/#add-delegation)                                                                      |                                                                                                                                   |
+|                                                                                                                                 | [add\_node\_to\_version\_stat](/komodo-defi-framework/api/v20/add_node_to_version_stat/#add-node-to-version-stat)                                     |                                                                                                                                   |
+| [all\_swaps\_uuids\_by\_filter](/komodo-defi-framework/api/legacy/all_swaps_uuids_by_filter/#all-swaps-uuids-by-filter)         |                                                                                                                                                       |                                                                                                                                   |
+| [ban\_pubkey](/komodo-defi-framework/api/legacy/ban_pubkey/#ban-pubkey)                                                         |                                                                                                                                                       |                                                                                                                                   |
+| [best\_orders](/komodo-defi-framework/api/legacy/best_orders/#best-orders)                                                      | [best\_orders](/komodo-defi-framework/api/v20/best_orders/#best-orders)                                                                               |                                                                                                                                   |
+| [buy](/komodo-defi-framework/api/legacy/buy/#buy)                                                                               |                                                                                                                                                       |                                                                                                                                   |
+| [cancel\_all\_orders](/komodo-defi-framework/api/legacy/cancel_all_orders/#cancel-all-orders)                                   |                                                                                                                                                       |                                                                                                                                   |
+| [cancel\_order](/komodo-defi-framework/api/legacy/cancel_order/#cancel-order)                                                   |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [clear\_nft\_db](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/#clear-nft-database)                         |
+|                                                                                                                                 |                                                                                                                                                       | [close\_channel](/komodo-defi-framework/api/v20-dev/lightning/channels/#close-channel)                                            |
+| [coins\_needed\_for\_kick\_start](/komodo-defi-framework/api/legacy/coins_needed_for_kick_start/#coins-needed-for-kick-start)   |                                                                                                                                                       |                                                                                                                                   |
+| [convert\_utxo\_address](/komodo-defi-framework/api/legacy/convert_utxo_address/#convert-utxo-address)                          |                                                                                                                                                       |                                                                                                                                   |
+| [convertaddress](/komodo-defi-framework/api/legacy/convertaddress/#convertaddress)                                              |                                                                                                                                                       |                                                                                                                                   |
+| [disable\_coin](/komodo-defi-framework/api/legacy/disable_coin/#disable-coin)                                                   |                                                                                                                                                       |                                                                                                                                   |
+| [electrum](/komodo-defi-framework/api/legacy/coin_activation/#electrum-method)                                                  |                                                                                                                                                       |                                                                                                                                   |
+| [enable](/komodo-defi-framework/api/legacy/coin_activation/#enable-method)                                                      |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [enable\_bch\_with\_tokens](/komodo-defi-framework/api/v20/enable_bch_with_tokens/#enable-bch-with-tokens)                                            |                                                                                                                                   |
+|                                                                                                                                 | [enable\_erc20](/komodo-defi-framework/api/v20/enable_erc20/#enable-erc20)                                                                            |                                                                                                                                   |
+|                                                                                                                                 | [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/#enable-eth-with-tokens)                                            |                                                                                                                                   |
+|                                                                                                                                 | [enable\_slp](/komodo-defi-framework/api/v20/enable_slp/#enable-slp)                                                                                  |                                                                                                                                   |
+|                                                                                                                                 | [enable\_tendermint\_token](/komodo-defi-framework/api/v20/enable_tendermint_token/#enable-tendermint-token)                                          |                                                                                                                                   |
+|                                                                                                                                 | [enable\_tendermint\_with\_assets](/komodo-defi-framework/api/v20/enable_tendermint_with_assets/#enable-tendermint-with-assets)                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [get\_channel\_details](/komodo-defi-framework/api/v20-dev/lightning/channels/#get-channel-details)                               |
+|                                                                                                                                 |                                                                                                                                                       | [get\_claimable\_balances](/komodo-defi-framework/api/v20-dev/lightning/channels/#get-claimable-balances)                         |
+|                                                                                                                                 | [get\_current\_mtp](/komodo-defi-framework/api/v20/get_current_mtp/#get-current-mtp)                                                                  |                                                                                                                                   |
+| [get\_directly\_connected\_peers](/komodo-defi-framework/api/legacy/get_directly_connected_peers/#get-directly-connected-peers) |                                                                                                                                                       |                                                                                                                                   |
+| [get\_enabled\_coins](/komodo-defi-framework/api/legacy/get_enabled_coins/#get-enabled-coins)                                   | [get\_enabled\_coins](/komodo-defi-framework/api/v20/get_enabled_coins/#get-enabled-coins)                                                            |                                                                                                                                   |
+|                                                                                                                                 | [get\_eth\_estimated\_fee\_per\_gas](/komodo-defi-framework/api/v20/fee_management/get_eth_estimated_fee_per_gas/#get-eth-estimated-fee-per-gas)      |                                                                                                                                   |
+| [get\_gossip\_mesh](/komodo-defi-framework/api/legacy/get_gossip_mesh/#get-gossip-mesh)                                         |                                                                                                                                                       |                                                                                                                                   |
+| [get\_gossip\_peer\_topics](/komodo-defi-framework/api/legacy/get_gossip_peer_topics/#get-gossip-peer-topics)                   |                                                                                                                                                       |                                                                                                                                   |
+| [get\_gossip\_topic\_peers](/komodo-defi-framework/api/legacy/get_gossip_topic_peers/#get-gossip-topic-peers)                   |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [get\_locked\_amount](/komodo-defi-framework/api/v20-dev/get_locked_amount/#get-locked-amount)                                    |
+| [get\_my\_peer\_id](/komodo-defi-framework/api/legacy/get_my_peer_id/#get-my-peer-id)                                           |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [get\_new\_address](/komodo-defi-framework/api/v20-dev/hd_address_management/#get-new-address)                                    |
+|                                                                                                                                 |                                                                                                                                                       | [get\_nft\_list](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_list/#get-a-list-of-nfts)                         |
+|                                                                                                                                 |                                                                                                                                                       | [get\_nft\_metadata](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_metadata/#get-nft-metadata)                   |
+|                                                                                                                                 |                                                                                                                                                       | [get\_nft\_transfers](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_transfers/#get-a-list-of-nft-transfers)      |
+|                                                                                                                                 | [get\_public\_key](/komodo-defi-framework/api/v20/get_public_key/#get-public-key)                                                                     |                                                                                                                                   |
+|                                                                                                                                 | [get\_public\_key\_hash](/komodo-defi-framework/api/v20/get_public_key_hash/#get-public-key-hash)                                                     |                                                                                                                                   |
+|                                                                                                                                 | [get\_raw\_transaction](/komodo-defi-framework/api/v20/get_raw_transaction/#get-raw-transaction)                                                      |                                                                                                                                   |
+| [get\_relay\_mesh](/komodo-defi-framework/api/legacy/get_relay_mesh/#get-relay-mesh)                                            |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [get\_staking\_infos](/komodo-defi-framework/api/v20/get_staking_infos/#get-staking-infos)                                                            |                                                                                                                                   |
+|                                                                                                                                 | [get\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/get_swap_transaction_fee_policy/#get-swap-transaction-fee-policy) |                                                                                                                                   |
+| [get\_trade\_fee](/komodo-defi-framework/api/legacy/get_trade_fee/#get-trade-fee)                                               |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [get\_wallet\_names](/komodo-defi-framework/api/v20/get_wallet_names/#get-wallet-names)                                                               |                                                                                                                                   |
+| [import\_swaps](/komodo-defi-framework/api/legacy/import_swaps/#import-swaps)                                                   |                                                                                                                                                       |                                                                                                                                   |
+| [kmd\_rewards\_info](/komodo-defi-framework/api/legacy/kmd_rewards_info/#kmd-rewards-info)                                      |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [lightning::nodes::add\_trusted\_node](/komodo-defi-framework/api/v20-dev/lightning/nodes/#add-trusted-node)                      |
+|                                                                                                                                 |                                                                                                                                                       | [lightning::nodes::connect\_to\_node](/komodo-defi-framework/api/v20-dev/lightning/nodes/#connect-to-node)                        |
+|                                                                                                                                 |                                                                                                                                                       | [lightning::nodes::list\_trusted\_nodes](/komodo-defi-framework/api/v20-dev/lightning/nodes/#list-trusted-nodes)                  |
+|                                                                                                                                 |                                                                                                                                                       | [lightning::nodes::remove\_trusted\_node](/komodo-defi-framework/api/v20-dev/lightning/nodes/#remove-trusted-node)                |
+|                                                                                                                                 |                                                                                                                                                       | [lightning::payments::generate\_invoice](/komodo-defi-framework/api/v20-dev/lightning/payments/#generate-invoice)                 |
+|                                                                                                                                 |                                                                                                                                                       | [lightning::payments::get\_payment\_details](/komodo-defi-framework/api/v20-dev/lightning/payments/#get-payment-details)          |
+|                                                                                                                                 |                                                                                                                                                       | [lightning::payments::list\_payments\_by\_filter](/komodo-defi-framework/api/v20-dev/lightning/payments/#list-payments-by-filter) |
+|                                                                                                                                 |                                                                                                                                                       | [lightning::payments::send\_payment](/komodo-defi-framework/api/v20-dev/lightning/payments/#send-payment)                         |
+| [list\_banned\_pubkeys](/komodo-defi-framework/api/legacy/list_banned_pubkeys/#list-banned-pubkeys)                             |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [list\_closed\_channels\_by\_filter](/komodo-defi-framework/api/v20-dev/lightning/channels/#list-closed-channels-by-filter)       |
+|                                                                                                                                 |                                                                                                                                                       | [list\_open\_channels\_by\_filter](/komodo-defi-framework/api/v20-dev/lightning/channels/#list-open-channels-by-filter)           |
+|                                                                                                                                 |                                                                                                                                                       | [max\_maker\_vol](/komodo-defi-framework/api/v20-dev/max_maker_vol/#max-maker-vol)                                                |
+| [max\_taker\_vol](/komodo-defi-framework/api/legacy/max_taker_vol/#max-taker-vol)                                               |                                                                                                                                                       |                                                                                                                                   |
+| [metrics](/komodo-defi-framework/api/legacy/metrics/#metrics)                                                                   |                                                                                                                                                       |                                                                                                                                   |
+| [min\_trading\_vol](/komodo-defi-framework/api/legacy/min_trading_vol/#min-trading-vol)                                         |                                                                                                                                                       |                                                                                                                                   |
+| [my\_balance](/komodo-defi-framework/api/legacy/my_balance/#my-balance)                                                         |                                                                                                                                                       |                                                                                                                                   |
+| [my\_orders](/komodo-defi-framework/api/legacy/my_orders/#my-orders)                                                            |                                                                                                                                                       |                                                                                                                                   |
+| [my\_recent\_swaps](/komodo-defi-framework/api/legacy/my_recent_swaps/#my-recent-swaps)                                         | [my\_recent\_swaps](/komodo-defi-framework/api/v20/my_recent_swaps/#my-recent-swaps)                                                                  |                                                                                                                                   |
+| [my\_swap\_status](/komodo-defi-framework/api/legacy/my_swap_status/#my-swap-status)                                            |                                                                                                                                                       |                                                                                                                                   |
+| [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history)                                               | [my\_tx\_history](/komodo-defi-framework/api/v20/my_tx_history/#my-tx-history)                                                                        |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [open\_channel](/komodo-defi-framework/api/v20-dev/lightning/channels/#open-channel)                                              |
+| [order\_status](/komodo-defi-framework/api/legacy/order_status/#order-status)                                                   |                                                                                                                                                       |                                                                                                                                   |
+| [orderbook](/komodo-defi-framework/api/legacy/orderbook/#orderbook)                                                             | [orderbook](/komodo-defi-framework/api/v20/orderbook/#orderbook)                                                                                      |                                                                                                                                   |
+| [orderbook\_depth](/komodo-defi-framework/api/legacy/orderbook_depth/#orderbook-depth)                                          |                                                                                                                                                       |                                                                                                                                   |
+| [orders\_history\_by\_filter](/komodo-defi-framework/api/legacy/orders_history_by_filter/#orders-history-by-filter)             |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [peer\_connection\_healthcheck](/komodo-defi-framework/api/v20/peer_connection_healthcheck/#peer-connection-healthcheck)                              |                                                                                                                                   |
+| [recover\_funds\_of\_swap](/komodo-defi-framework/api/legacy/recover_funds_of_swap/#recover-funds-of-swap)                      |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [recreate\_swap\_data](/komodo-defi-framework/api/v20/recreate_swap_data/#recreate-swap-data)                                                         |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [refresh\_nft\_metadata](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/refresh_nft_metadata/#refresh-nft-metadata)       |
+|                                                                                                                                 | [remove\_delegation](/komodo-defi-framework/api/v20/remove_delegation/#remove-delegation)                                                             |                                                                                                                                   |
+|                                                                                                                                 | [remove\_node\_from\_version\_stat](/komodo-defi-framework/api/v20/remove_node_from_version_stat/#remove-node-from-version-stat)                      |                                                                                                                                   |
+| [sell](/komodo-defi-framework/api/legacy/sell/#sell)                                                                            |                                                                                                                                                       |                                                                                                                                   |
+| [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/#send-raw-transaction)                          |                                                                                                                                                       |                                                                                                                                   |
+| [set\_required\_confirmations](/komodo-defi-framework/api/legacy/set_required_confirmations/#set-required-confirmations)        |                                                                                                                                                       |                                                                                                                                   |
+| [set\_requires\_notarization](/komodo-defi-framework/api/legacy/set_requires_notarization/#set-requires-notarization)           |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [set\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/set_swap_transaction_fee_policy/#set-swap-transaction-fee-policy) |                                                                                                                                   |
+| [setprice](/komodo-defi-framework/api/legacy/setprice/#setprice)                                                                |                                                                                                                                                       |                                                                                                                                   |
+| [show\_priv\_key](/komodo-defi-framework/api/legacy/show_priv_key/#show-priv-key)                                               |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [sign\_message](/komodo-defi-framework/api/v20/message_signing/#sign-message)                                                                         |                                                                                                                                   |
+|                                                                                                                                 | [sign\_raw\_transaction](/komodo-defi-framework/api/v20/sign_raw_transaction/#sign-raw-transaction)                                                   |                                                                                                                                   |
+|                                                                                                                                 | [start\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/#start-eth-fee-estimator)                          |                                                                                                                                   |
+|                                                                                                                                 | [start\_simple\_market\_maker\_bot](/komodo-defi-framework/api/v20/start_simple_market_maker_bot/#start-simple-market-maker-bot)                      |                                                                                                                                   |
+|                                                                                                                                 | [start\_version\_stat\_collection](/komodo-defi-framework/api/v20/start_version_stat_collection/#start-version-stat-collection)                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [status](/komodo-defi-framework/api/v20-dev/task_create_new_account/#status)                                                      |
+|                                                                                                                                 | [stop\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/stop_eth_fee_estimator/#stop-eth-fee-estimator)                             |                                                                                                                                   |
+|                                                                                                                                 | [stop\_simple\_market\_maker\_bot](/komodo-defi-framework/api/v20/stop_simple_market_maker_bot/#stop-simple-market-maker-bot)                         |                                                                                                                                   |
+|                                                                                                                                 | [stop\_version\_stat\_collection](/komodo-defi-framework/api/v20/stop_version_stat_collection/#stop-version-stat-collection)                          |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [task::account\_balance::cancel](/komodo-defi-framework/api/v20-dev/task_account_balance/#cancel)                                 |
+|                                                                                                                                 |                                                                                                                                                       | [task::account\_balance::init](/komodo-defi-framework/api/v20-dev/task_account_balance/#init)                                     |
+|                                                                                                                                 |                                                                                                                                                       | [task::account\_balance::status](/komodo-defi-framework/api/v20-dev/task_account_balance/#status)                                 |
+|                                                                                                                                 |                                                                                                                                                       | [task::create\_new\_account::init](/komodo-defi-framework/api/v20-dev/task_create_new_account/#init)                              |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_lightning::cancel](/komodo-defi-framework/api/v20-dev/lightning/activation/#cancel-initialization)                 |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_lightning::init](/komodo-defi-framework/api/v20-dev/lightning/activation/#initialize-lightning)                    |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_lightning::status](/komodo-defi-framework/api/v20-dev/lightning/activation/#initialization-status)                 |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_qtum::init](/komodo-defi-framework/api/v20-dev/task_enable_qtum/#init)                                             |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_qtum::status](/komodo-defi-framework/api/v20-dev/task_enable_qtum/#status)                                         |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_qtum::user\_action](/komodo-defi-framework/api/v20-dev/task_enable_qtum/#user-action)                              |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_utxo::init](/komodo-defi-framework/api/v20-dev/task_enable_utxo/#init)                                             |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_utxo::status](/komodo-defi-framework/api/v20-dev/task_enable_utxo/#status)                                         |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_utxo::user\_action](/komodo-defi-framework/api/v20-dev/task_enable_utxo/#user-action)                              |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_z\_coin::cancel](/komodo-defi-framework/api/v20-dev/zhtlc_coins/activation/#cancel-activation)                     |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_z\_coin::init](/komodo-defi-framework/api/v20-dev/zhtlc_coins/activation/#initialize-zhtlc-coin-activation)        |
+|                                                                                                                                 |                                                                                                                                                       | [task::enable\_z\_coin::status](/komodo-defi-framework/api/v20-dev/zhtlc_coins/activation/#activation-status)                     |
+|                                                                                                                                 |                                                                                                                                                       | [task::init\_trezor::cancel](/komodo-defi-framework/api/v20-dev/task_init_trezor/#cancel)                                         |
+|                                                                                                                                 |                                                                                                                                                       | [task::init\_trezor::init](/komodo-defi-framework/api/v20-dev/task_init_trezor/#init)                                             |
+|                                                                                                                                 |                                                                                                                                                       | [task::init\_trezor::status](/komodo-defi-framework/api/v20-dev/task_init_trezor/#status)                                         |
+|                                                                                                                                 |                                                                                                                                                       | [task::init\_trezor::user\_action](/komodo-defi-framework/api/v20-dev/task_init_trezor/#user-action)                              |
+|                                                                                                                                 |                                                                                                                                                       | [task::withdraw::cancel](/komodo-defi-framework/api/v20-dev/task_withdraw/#cancel)                                                |
+|                                                                                                                                 |                                                                                                                                                       | [task::withdraw::init](/komodo-defi-framework/api/v20-dev/task_withdraw/#init)                                                    |
+|                                                                                                                                 |                                                                                                                                                       | [task::withdraw::status](/komodo-defi-framework/api/v20-dev/task_withdraw/#status)                                                |
+| [trade\_preimage](/komodo-defi-framework/api/legacy/trade_preimage/#trade-preimage)                                             | [trade\_preimage](/komodo-defi-framework/api/v20/trade_preimage/#trade-preimage)                                                                      |                                                                                                                                   |
+| [unban\_pubkeys](/komodo-defi-framework/api/legacy/unban_pubkeys/#unban-pubkeys)                                                |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [update\_channel](/komodo-defi-framework/api/v20-dev/lightning/channels/#update-channel)                                          |
+| [update\_maker\_order](/komodo-defi-framework/api/legacy/update_maker_order/#update-maker-order)                                |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [update\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/#update-nft)                                      |
+|                                                                                                                                 | [update\_version\_stat\_collection](/komodo-defi-framework/api/v20/update_version_stat_collection/#update-version-stat-collection)                    |                                                                                                                                   |
+| [validateaddress](/komodo-defi-framework/api/legacy/validateaddress/#validateaddress)                                           |                                                                                                                                                       |                                                                                                                                   |
+|                                                                                                                                 | [verify\_message](/komodo-defi-framework/api/v20/message_signing/#verify-message)                                                                     |                                                                                                                                   |
+| [version](/komodo-defi-framework/api/legacy/version/#version)                                                                   |                                                                                                                                                       |                                                                                                                                   |
+| [withdraw](/komodo-defi-framework/api/legacy/withdraw/#withdraw)                                                                | [withdraw](/komodo-defi-framework/api/v20/withdraw/#withdraw)                                                                                         |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/#withdraw-nfts)                               |
+|                                                                                                                                 |                                                                                                                                                       | [z\_coin\_tx\_history](/komodo-defi-framework/api/v20-dev/zhtlc_coins/transaction_history/#zhtlc-coin-transaction-history)        |
 export const title = "Komodo DeFi Framework Method: Active Swaps";
 export const description =
   "The active_swaps method returns all the swaps that are currently running on the Komodo DeFi Framework API node.";
@@ -4591,6 +4881,9 @@ export const description = "The get_enabled_coins method returns data of coins t
 **get\_enabled\_coins**
 
 The `get_enabled_coins` method returns data of coins that are currently enabled on the user's Komodo DeFi Framework API node.
+
+This function has been deprecated by [get\_enabled\_coins v2.0](/komodo-defi-framework/api/v20/get_enabled_coins/). The v2 method does not return addresses, as it was designed for HD wallets, which generate addresses on the fly.
+If you need to get the addresses for coins and have not set `enable_hd` in your [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/), use the v1 method.
 
 ## Arguments
 
@@ -12439,7 +12732,7 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | priv\_key\_policy           | string           | Optional, defaults to `ContextPrivKey`. value can be `ContextPrivKey`,`Trezor` when Komodo DeFi Framework is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                                                                                        |
 | required\_confirmations     | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap                                                                                                                                                          |
 | requires\_notarization      | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.                                                                    |
-| rpc\_mode                   | string           | Optional, defaults to `Http`, value can be `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                                                                                                                                                                                                                               |
+| rpc\_mode                   | string           | Optional, defaults to `Default`. Can be set to `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                                                                                                                                                                                                                           |
 | tx\_history                 | boolean          | Optional, defaults to `false`. If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                                                                   |
 
 ### Response Parameters
@@ -12473,14 +12766,13 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
     "nodes": [
       {
         "url": "http://eth1.cipig.net:18555",
-        "gui_auth": false
+        "komodo_proxy": false
       },
       {
         "url": "https://node.komodo.earth:8080/ethereum",
-        "gui_auth": true
+        "komodo_proxy": true
       }
     ],
-    "rpc_mode": "Http",
     "tx_history": true,
     "erc20_tokens_requests": [
       {
@@ -12945,6 +13237,8 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 | ticker                  | string           | Ticker of the platform protocol coin.  Options: `ATOM`, `IRIS`, `OSMOSIS`                                                                                                                                                                                                 |
 | mm2                     | integer          | Required if not set in `coins` file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                |
 | tokens\_params          | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                                                      |
+| rpc\_urls               | array of strings | **v2.1.0 and earlier only.** A list of RPC urls for Tendermint full node servers.                                                                                                                                                                                         |
+| nodes                   | array of objects | **v2.2.0+ only.** A list of [TendermintNode objects](/komodo-defi-framework/api/common_structures/activation/#tendermint-node).                                                                                                                                           |
 | priv\_key\_policy       | string           | Optional, defaults to `ContextPrivKey`. value can be `ContextPrivKey`,`Trezor` when Komodo DeFi Framework is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                     |
 | tx\_history             | boolean          | Optional, defaults to `false`. If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                |
 | required\_confirmations | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap                                                                                       |
@@ -12962,13 +13256,16 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 | tokens\_balances | array of objects | Only returned when `get_balances` is `true`. A list of standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) objects, one for each token. |
 | tokens\_tickers  | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                                                |
 
+The `rpc_urls` parameter will be replaced with the `nodes` parameter in the kdf version 2.2.0 release. Instead of a list of url strings, the `nodes` parameter will be a list of [TendermintNode objects](/komodo-defi-framework/api/common_structures/activation/#tendermint-node).
+
 ### 📌 Examples
 
-#### Request default optional values
+#### Request using `rpc_urls` parameter (kdf version \< 2.2.0)
 
 ```json
 {
   "method": "enable_tendermint_with_assets",
+  "userpass": "RPC_UserP@SSW0RD",
   "mmrpc": "2.0",
   "params": {
     "ticker": "IRIS",
@@ -12981,8 +13278,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
       "https://iris.komodo.earth/",
       "https://rpc.irishub-1.irisnet.org"
     ]
-  },
-  "userpass": "RPC_UserP@SSW0RD"
+  }
 }
 ```
 
@@ -13015,6 +13311,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 ```json
 {
   "method": "enable_tendermint_with_assets",
+  "userpass": "RPC_UserP@SSW0RD",
   "mmrpc": "2.0",
   "params": {
     "ticker": "IRIS",
@@ -13023,14 +13320,21 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
         "ticker": "ATOM-IBC_IRIS"
       }
     ],
-    "rpc_urls": [
-      "https://iris.komodo.earth/",
-      "https://rpc.irishub-1.irisnet.org"
+    "nodes": [
+      {
+        "url": "https://iris-rpc.alpha.komodo.earth/",
+        "api_url": "https://iris-api.alpha.komodo.earth/",
+        "grpc_url": "https://iris-grpc.alpha.komodo.earth/",
+        "ws_url": "wss://iris-rpc.alpha.komodo.earth/websocket"
+      },
+      {
+        "url": "https://rpc.irishub-1.irisnet.org",
+        "komodo_proxy": false
+      }
     ],
     "tx_history": true,
     "get_balances": false
-  },
-  "userpass": "RPC_UserP@SSW0RD"
+  }
 }
 ```
 
@@ -13044,6 +13348,60 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 		"address": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
 		"current_block": 19769628,
 		"tokens_tickers": ["ATOM-IBC_IRIS"]
+	},
+	"id": null
+}
+```
+
+#### Request using `nodes` parameter (kdf version 2.2.0+)
+
+```json
+{
+  "method": "enable_tendermint_with_assets",
+  "userpass": "RPC_UserP@SSW0RD",
+  "mmrpc": "2.0",
+  "params": {
+    "ticker": "IRIS",
+    "tokens_params": [
+      {
+        "ticker": "ATOM-IBC_IRIS"
+      }
+    ],
+    "nodes": [
+      {
+        "url": "https://iris-rpc.alpha.komodo.earth/",
+        "api_url": "https://iris-api.alpha.komodo.earth/",
+        "grpc_url": "https://iris-grpc.alpha.komodo.earth/",
+        "ws_url": "wss://iris-rpc.alpha.komodo.earth/websocket"
+      },
+      {
+        "url": "https://rpc.irishub-1.irisnet.org",
+        "komodo_proxy": false
+      }
+    ]
+  }
+}
+```
+
+#### Response
+
+```json
+{
+	"mmrpc": "2.0",
+	"result": {
+		"ticker": "IRIS",
+		"address": "iaa16drqvl3u8sukfsu4lm3qsk28jr3fahja9vsv6k",
+		"current_block": 19769638,
+		"balance": {
+			"spendable": "44.147264",
+			"unspendable": "0"
+		},
+		"tokens_balances": {
+			"ATOM-IBC_IRIS": {
+				"spendable": "0.028306",
+				"unspendable": "0"
+			}
+		}
 	},
 	"id": null
 }
@@ -13182,6 +13540,292 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   "id": null
 }
 ```
+export const title = "Komodo DeFi Framework Method: Get ETH Estimated Fee per Gas";
+export const description =
+  "The get_eth_estimated_fee_per_gas method allows you to get the gas priority fees from the estimator (started with the 'start_eth_fee_estimator') for an active coin of your choice.";
+
+# get\_eth\_estimated\_fee\_per\_gas
+
+The `get_eth_estimated_fee_per_gas` method allows you to get the estimated gas priority fee for an active coin of your choice. Before using this method, you first need to use the [start\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/) method.
+
+| parameter | Type   | Description                                                                  |
+| --------- | ------ | ---------------------------------------------------------------------------- |
+| coin      | string | Ticker of the coin/asset for which we want to start the grass fee estimator. |
+
+## Request
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "get_eth_estimated_fee_per_gas",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH"
+  }
+}
+```
+
+## Response
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "base_fee": "10.890879158",
+    "low": {
+      "max_priority_fee_per_gas": "0.1101",
+      "max_fee_per_gas": "11.949818698",
+      "min_wait_time": null,
+      "max_wait_time": null
+    },
+    "medium": {
+      "max_priority_fee_per_gas": "1.258084291",
+      "max_fee_per_gas": "13.905056537",
+      "min_wait_time": null,
+      "max_wait_time": null
+    },
+    "high": {
+      "max_priority_fee_per_gas": "2.495532249",
+      "max_fee_per_gas": "15.949758042",
+      "min_wait_time": null,
+      "max_wait_time": null
+    },
+    "source": "simple",
+    "base_fee_trend": "",
+    "priority_fee_trend": "",
+    "units": "Gwei"
+  },
+  "id": null
+}
+
+```
+export const title = "Komodo DeFi Framework Method: Get Swap Transaction Fee Policy";
+export const description =
+  "The get_swap_transaction_fee_policy method allows you to get the current gas fees policy used when estimating swap transaction fees for supported for ETH/EVM coins/tokens..";
+
+# get\_swap\_transaction\_fee\_policy
+
+The `get_swap_transaction_fee_policy` method allows you to get the current gas fees policy used when estimating swap transaction fees for supported for ETH/EVM coins/tokens.
+
+| parameter | Type   | Description                                                                              |
+| --------- | ------ | ---------------------------------------------------------------------------------------- |
+| coin      | string | Ticker of the supported ETH/EVM coin/asset for which we want to view the fee policy for. |
+
+## Request
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "get_swap_transaction_fee_policy",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH"
+  }
+}
+```
+
+## Response
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": "High",
+    "id": null
+}
+
+```
+export const title = "Komodo DeFi Framework Method: EVM Fee Management";
+export const description =
+  "This document describes all the available methods for the EVM Network Fee Management on the Komodo DeFi Framework.";
+
+# EVM Network Fee Management
+
+[Ethereum Improvement Proposal 1559 (EIP-1559)](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md) was introduced to enhance Ethereum's transaction fee structure, aiming to stabilize transaction costs and improve network efficiency. Implemented as part of the London Hard Fork in August 2021, EIP-1559 revamped the traditional auction-style gas fee model, replacing it with a base fee mechanism that adjusts dynamically based on network demand. This base fee is burned (removed from circulation), reducing ETH supply and introducing a deflationary effect, while an optional "tip" incentivizes miners.
+
+For decentralized finance (DeFi) software, EIP-1559 has provided more predictable transaction fees, improving user experience and enabling more efficient budgeting for gas costs across DeFi protocols. This update is instrumental in reducing fee volatility, encouraging broader adoption, and laying groundwork for Ethereum's scalability roadmap.
+
+The Komodo Defi Framework allows users to benefit from this improvement with cheaper fees on EMV networks like Ethereum and Polygon.
+
+For more information about EIP1559, refer to [https://www.blocknative.com/blog/eip-1559-fees](https://www.blocknative.com/blog/eip-1559-fees)
+
+## Fee Management Methods
+
+*   Get estimated fee per gas for an EVM coin/token [get\_eth\_estimated\_fee\_per\_gas](/komodo-defi-framework/api/v20/fee_management/get_eth_estimated_fee_per_gas/).
+
+*   Get swap transaction fee policy for an EVM coin/token [get\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/get_swap_transaction_fee_policy/).
+
+*   Set swap transaction fee policy for an EVM coin/token [set\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/set_swap_transaction_fee_policy/).
+
+*   Start tracking the fee market for an EVM coin/token [start\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/).
+
+*   Stop tracking the fee market for an EVM coin/token [stop\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/stop_eth_fee_estimator/).
+
+## Fee Management Configuration
+
+There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `provider` or `simple`.
+
+By default, `simple` gas fee estimation suggests a fee based on fee history. If set `gas_fee_estimator` is set to `provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
+
+### In the coins file
+
+Below is an example of the information required in EVM token configurations in your [`coins` file](/komodo-defi-framework/tutorials/listing-a-new-coin/#erc-20-token-example).
+
+```json
+{
+  "coin": "1INCH-BEP20",
+  "name": "1inch_bep20",
+  "fname": "1Inch",
+  "rpcport": 80,
+  "mm2": 1,
+  "chain_id": 56,
+  "avg_blocktime": 3,
+  "required_confirmations": 3,
+  "protocol": {
+    "type": "ERC20",
+    "protocol_data": {
+      "platform": "BNB",
+      "contract_address": "0x111111111117dC0aa78b770fA6A738034120C302"
+    }
+  },
+  "derivation_path": "m/44'/60'",
+  "use_access_list": true,
+  "max_eth_tx_type": 2,
+  "gas_fee_estimator": "provider",
+  "gas_limit": {
+      "eth_send_erc20": 60000,
+      "erc20_payment": 110000,
+      "erc20_receiver_spend": 85000,
+      "erc20_sender_refund": 85000
+  }
+}
+```
+
+For EIP1559 features, a coin/token's config needs to include the `chain_id` (sourced from [chainlist.org](https://chainlist.org)) and `max_eth_tx_type` (set to `2` if compatible) fields.
+
+The [`gas_limit` object](/komodo-defi-framework/tutorials/listing-a-new-coin/) values in your `coins` file will set the default limits in both `Legacy` and `Eip1559` fee configs.
+
+### In the MM2.json file
+
+If `gas_fee_estimator` is set to `provider`, you'll also need to add the `gas_api` parameter to your [MM2.json configuration file](/komodo-defi-framework/setup/configure-mm2-json/):
+
+```json
+{
+    "netid": 8762,
+    "rpcport": 8777,
+    ...
+    "gas_api": {
+      "provider": "blocknative",
+      "url": https://your-provider-url.com
+    }
+}
+```
+
+The currently available third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
+export const title = "Komodo DeFi Framework Method: Set Swap Transaction Fee Policy";
+export const description =
+  "The set_swap_transaction_fee_policy method allows you to set the gas fee policy used by supported ETH/EVM coins or tokens when estimating swap transaction fees.";
+
+# set\_swap\_transaction\_fee\_policy
+
+The `set_swap_transaction_fee_policy` method allows you to set the gas fee policy used by supported ETH/EVM coins or tokens when estimating swap transaction fees.
+
+| parameter             | Type   | Description                                                                                 |
+| --------------------- | ------ | ------------------------------------------------------------------------------------------- |
+| coin                  | string | Ticker of the supported ETH/EVM coin or tokens for which we want to set the fee policy for. |
+| swap\_tx\_fee\_policy | string | Possible values: `Low`, `Medium`, `High`, `Internal`.                                       |
+
+## Request
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "set_swap_transaction_fee_policy",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH",
+    "swap_tx_fee_policy": "High"
+  }
+}
+```
+
+## Response
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": "High",
+    "id": null
+}
+```
+export const title = "Komodo DeFi Framework Method: Start ETH Fee Estimator";
+export const description =
+  "The start_eth_fee_estimator method allows you to start the gas priority fee estimator loop for an active coin of your choice.";
+
+# start\_eth\_fee\_estimator
+
+The `start_eth_fee_estimator` method allows you to to start the gas priority fee estimator loop for an active coin of your choice. Before using this method, you first need to use the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/) method. For the gas fee estimator to work you also need to [configure your MM2.json and coins files](/komodo-defi-framework/api/v20/fee_management/#fee-management-configuration) with some extra parameters.
+
+| parameter | Type   | Description                                                                |
+| --------- | ------ | -------------------------------------------------------------------------- |
+| coin      | string | Ticker of the coin/asset for which we want to start the gas fee estimator. |
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "start_eth_fee_estimator",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH"
+  }
+}
+```
+
+## Response
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "result": "Success"
+  },
+  "id": null
+}
+```
+export const title = "Komodo DeFi Framework Method: Stop ETH Fee Estimator";
+export const description =
+  "The start_eth_fee_estimator method allows you to stop the gas priority fee estimator loop for an active coin of your choice.";
+
+# stop\_eth\_fee\_estimator
+
+The `stop_eth_fee_estimator` method allows you to to stop the gas priority fee estimator loop for an active coin of your choice. Before using this method, you first need to use the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/) method.
+
+| parameter | Type   | Description                                                                |
+| --------- | ------ | -------------------------------------------------------------------------- |
+| coin      | string | Ticker of the coin/asset for which we want to start the gas fee estimator. |
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "stop_eth_fee_estimator",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ETH"
+  }
+}
+```
+
+## Response
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "result": "Success"
+  },
+  "id": null
+}
+
+```
 export const title = "Komodo DeFi Framework Method: Get Current MTP";
 export const description = "The get_current_mtp method returns the Median Time Past (MTP) from electrum servers for UTXO coins.";
 
@@ -13228,6 +13872,85 @@ The `get_current_mtp` method returns the Median Time Past (MTP) from electrum se
     "mtp": 1658746383
   },
   "id": 42
+}
+```
+export const title = "Komodo DeFi Framework Method: Get Enabled Coins";
+export const description = "The get_enabled_coins method returns data of coins that are currently enabled on the user's Komodo DeFi Framework API node.";
+
+# get\_enabled\_coins
+
+The `get_enabled_coins` method returns data of coins that are currently enabled on the user's Komodo DeFi Framework API node.
+
+## Parameters
+
+| Structure | Type | Description |
+| --------- | ---- | ----------- |
+| (none)    |      |             |
+
+#### Response
+
+| Structure    | Type             | Description                                     |
+| ------------ | ---------------- | ----------------------------------------------- |
+| coins        | array of objects | A list of key value pairs for activated tickers |
+| coins.ticker | string           | the ticker of an activated coin                 |
+
+The \[get\_enabled\_coins v2.0] method does not return addresses, as it was designed for HD wallets, which generate addresses on the fly.
+If you need to get the addresses for coins and have not set `enable_hd` in your [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/), use the [v1 method](/komodo-defi-framework/api/legacy/get_enabled_coins/#get-enabled-coins).
+
+#### 📌 Examples
+
+#### Command
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "mmrpc": "2.0",
+  "method": "get_enabled_coins",
+  "params": {},
+  "id": 0
+}
+```
+
+#### Response
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+      "coins": [
+          {
+              "ticker": "ETH"
+          },
+          {
+              "ticker": "PGX-PLG20"
+          },
+          {
+              "ticker": "ATOM-IBC_IRIS"
+          },
+          {
+              "ticker": "NFT_ETH"
+          },
+          {
+              "ticker": "KMD"
+          },
+          {
+              "ticker": "IRIS"
+          },
+          {
+              "ticker": "AAVE-PLG20"
+          },
+          {
+              "ticker": "MINDS-ERC20"
+          },
+          {
+              "ticker": "NFT_MATIC"
+          },
+          {
+              "ticker": "MATIC"
+          }
+      ]
+  },
+  "id": 0
 }
 ```
 export const title = "Komodo DeFi Framework Method: Get Public Key";
@@ -13510,6 +14233,64 @@ The `get_staking_infos` method returns information about your node's staking. Cu
     }
   },
   "id": 0
+}
+```
+export const title = "Komodo DeFi Framework Method: Get Wallet Names";
+export const description = "The get_wallet_names method returns a list of wallet names for a user's device.";
+
+# get\_wallet\_names
+
+The `get_wallet_names` method returns returns a list of wallet names for a user's device. If the user is logged in, it will also return the name of the active wallet.
+
+## Arguments
+
+| Structure | Type | Description |
+| --------- | ---- | ----------- |
+| (none)    |      |             |
+
+#### Response
+
+| Structure         | Type   | Description                                                                  |
+| ----------------- | ------ | ---------------------------------------------------------------------------- |
+| wallet\_names     | list   | Names of wallets stored on a user's device.                                  |
+| activated\_wallet | string | Names of the currrently active wallet. If not yet logged in, returns `null`. |
+
+#### 📌 Examples
+
+#### Command
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "mmrpc": "2.0",
+  "method": "get_wallet_names",
+  "id": 0
+}
+```
+
+#### Response (in no-login mode)
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": {
+        "wallet_names": ["Robert Paulson", "Spartacus", "John Galt", "Kaiser Soze"],
+        "activated_wallet": null
+    },
+    "id": 0
+}
+```
+
+#### Response (while logged in)
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": {
+        "wallet_names": ["Robert Paulson", "Spartacus", "John Galt", "Kaiser Soze"],
+        "activated_wallet": "Robert Paulson"
+    },
+    "id": 0
 }
 ```
 export const title = "Komodo DeFi SDK RPC Protocol v2.0";
@@ -13870,22 +14651,6 @@ Where the value indicates:
 ```json
 {
     "type": "Iguana"
-}
-```
-
-### EvmNode
-
-The `EvmNode` object includes the following items for a given coin or token:
-
-| Parameter | Type    | Description                                                                                                         |
-| --------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| url       | string  | URL of an RPC node                                                                                                  |
-| gui\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team |
-
-```json
-{
-    "url": "http://eth1.cipig.net:8555",
-    "gui_auth": false
 }
 ```
 
@@ -16196,8 +16961,13 @@ If `prev_txns` is not provided, it will be sourced via electrums.
     "type": "ETH",
     "tx": {
       "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
-      "value": "1.4",
-      "gas_limit": "21000"
+      "value": "0.85",
+      "gas_limit": "21000",
+      "pay_for_gas": {
+        "tx_type": "Eip1559",
+        "max_fee_per_gas": "1234.567",
+        "max_priority_fee_per_gas": "1.2"
+      }
     }
   }
 }
@@ -17379,15 +18149,16 @@ This method generates a raw transaction which should then be broadcast using [se
 
 ## Arguments
 
-| Structure | Type             | Description                                                                                                |
-| --------- | ---------------- | ---------------------------------------------------------------------------------------------------------- |
-| coin      | string           | The name of the coin the user desires to withdraw                                                          |
-| to        | string           | Coins are withdrawn to this address                                                                        |
-| amount    | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                           |
-| memo      | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem).                        |
-| max       | bool             | Withdraw the maximum available amount                                                                      |
-| fee       | object           | A standard [FeeInfo](/komodo-defi-framework/api/v20/#fee-info) object.                                     |
-| from      | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/v20/#withdraw-from-info) object. |
+| Structure            | Type             | Description                                                                                                                                     |
+| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                 | string           | The name of the coin the user desires to withdraw.                                                                                              |
+| to                   | string           | Coins are withdrawn to this address.                                                                                                            |
+| amount               | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`.                                                                               |
+| memo                 | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem).                                                             |
+| max                  | bool             | Optional. Withdraw the maximum available amount.                                                                                                |
+| fee                  | object           | Optional. A standard [FeeInfo](/komodo-defi-framework/api/v20/#fee-info) object.                                                                |
+| from                 | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/v20/#withdraw-from-info) object.                                      |
+| ibc\_source\_channel | string           | Tendermint IBC transfers only. The source channel for the [IBC](https://tutorials.cosmos.network/academy/3-ibc/1-what-is-ibc.html) transaction. |
 
 ### Response
 
@@ -17887,6 +18658,68 @@ This method generates a raw transaction which should then be broadcast using [se
 
 You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
 
+##### Withdraw Tendermint IBC coins
+
+Using the Cosmos [Ecosystem IBC protocol](https://everstake.one/blog/cosmos-ibc-breaking-down-the-walls-between-blockchains), you can withdraw coins from one chain to another. This example shows a withdrawal from Cosmos to Osmosis.
+
+```json
+{
+  "mmrpc": "2.0",
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "withdraw",
+  "params": {
+    "coin": "ATOM",
+    "to": "osmo16drqvl3u8sukfsu4lm3qsk28jr3fahjac4rdw4",
+    "amount": 0.1,
+    "memo": "In the blackest of your moments, wait with no fear.",
+    "ibc_source_channel": "channel-141",
+    "fee": {
+      "type": "CosmosGas",
+      "gas_price": 0.05,
+      "gas_limit": 150000
+    }
+  },
+  "id": 0
+}
+```
+
+The `ibc_source_channel` value above is for demonstration only. For more information regarding how to set a valid value, see our guide to [finding the right IBC channel](/komodo-wallet/guides/how-to-find-the-right-ibc-channel-for-transfers/).
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+      "tx_hex": "0af9010abc010a292f6962632e6170706c69636174696f6e732e7472616e736665722e76312e4d73675472616e73666572128e010a087472616e73666572120b6368616e6e656c2d3134311a0f0a057561746f6d1206313030303030222d636f736d6f733136647271766c33753873756b667375346c6d3371736b32386a72336661686a617377736163382a2b6f736d6f3136647271766c33753873756b667375346c6d3371736b32386a72336661686a6163347264773438a6c5b9a089f29efa171233496e2074686520626c61636b657374206f6620796f7572206d6f6d656e74732c20776169742077697468206e6f20666561722e188df8c70a12680a500a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a2103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc212040a020801180b12140a0e0a057561746f6d1205313733353910e0c65b1a40042c4fa45d77405ee94e737a000b146f5019137d5a2d3275849c9ad66dd8ef1d0f087fb584f34b1ebcf7989e41bc0675e96c83f0eec4ffe355e078b6615d7a72",
+      "tx_hash": "06174E488B7BBC35180E841F2D170327BB7DE0A291CA69050D81F82A7CF103CB",
+      "from": [
+          "cosmos16drqvl3u8sukfsu4lm3qsk28jr3fahjaswsac8"
+      ],
+      "to": [
+          "osmo16drqvl3u8sukfsu4lm3qsk28jr3fahjac4rdw4"
+      ],
+      "total_amount": "0.1173590000000000",
+      "spent_by_me": "0.1173590000000000",
+      "received_by_me": "0",
+      "my_balance_change": "-0.1173590000000000",
+      "block_height": 0,
+      "timestamp": 0,
+      "fee_details": {
+          "type": "Tendermint",
+          "coin": "ATOM",
+          "amount": "0.017359",
+          "gas_limit": 1500000
+      },
+      "coin": "ATOM",
+      "internal_id": "06174e488b7bbc35180e841f2d170327bb7de0a291ca69050d81f82a7cf103cb",
+      "transaction_type": "TendermintIBCTransfer",
+      "memo": "In the blackest of your moments, wait with no fear."
+  },
+  "id": null
+}
+```
+
+You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
+
 ### Error Responses
 
 #### InvalidRequest: Unknown fee type
@@ -18223,7 +19056,7 @@ HD wallets offer several advantages over traditional wallets:
 *   Privacy: HD wallets can generate new addresses for each transaction, making it more difficult for malicious parties to track a user’s transaction history.
 *   Access Control: A user who controls the root seed can create new addresses & keypairs which can be shared with a 3rd party, providing limited or regulated access to funds held under specific pairs.
 
-To use HD wallet functionality with the Komodo DeFi Framework API, you must include `"enable_hd":true` in your `MM2.json` file.
+To use HD wallet functionality with the Komodo DeFi Framework API, you must include `"enable_hd":true` in your [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/).
 Hardware wallets like [Trezor](https://trezor.io/) are always in HD mode, and this parameter **must** to be set to `true`.
 
 In some cases, the methods used to interact with HD wallets are the same as those used with legacy wallets. However, there are some differences, which are detailed in the links below.

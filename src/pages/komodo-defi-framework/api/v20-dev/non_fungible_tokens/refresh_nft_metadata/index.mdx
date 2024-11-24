@@ -1,6 +1,6 @@
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes all the refresh_nft_metadata method Komodo DeFi Framework  provides to refresh an NFT's metadata";
+  "This document describes all the refresh_nft_metadata method Komodo DeFi Framework provides to refresh an NFT's metadata";
 
 # Refresh NFT Metadata {{label : 'refresh_nft_metadata', tag : 'API-v2'}}
 
@@ -8,14 +8,14 @@ This method refreshes metadata of one NFT and metadata of related transactions w
 
 ### Request Parameters
 
-| Parameter      | Type    | Description                                                                                                                                                                                                       |
-| -------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chain          | string  | Chains which holds the NFT you would like to updated metadata for.                                                                                                                                                |
-| token\_address | string  | Token address.                                                                                                                                                                                                    |
-| token\_id      | string  | Token ID.                                                                                                                                                                                                         |
-| proxy\_auth    | boolean | Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false).                                                                                 |
-| url            | string  | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent (if proxy\_auth is set to true, will need to provide a new Komodo Proxy URL). |
-| url\_antispam  | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs).                                                           |
+| Parameter      | Type    | Description                                                                                                                                                                                                         |
+| -------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chain          | string  | Chains which holds the NFT you would like to updated metadata for.                                                                                                                                                  |
+| token\_address | string  | Token address.                                                                                                                                                                                                      |
+| token\_id      | string  | Token ID.                                                                                                                                                                                                           |
+| komodo\_proxy  | boolean | Optional. Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false).                                                                         |
+| url            | string  | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent (if komodo\_proxy is set to true, will need to provide a new Komodo Proxy URL). |
+| url\_antispam  | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs).                                                             |
 
 <Note>
   If there are no errors, this request will return an empty response.
@@ -54,6 +54,22 @@ This method refreshes metadata of one NFT and metadata of related transactions w
   ```
 </CollapsibleSection>
 
-<DevComment>
-  Need to add some error responses here.
-</DevComment>
+## Error responses
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Token: token_address 0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff, token_id 5 was not found in wallet",
+    "error_path": "nft",
+    "error_trace": "nft:504]",
+    "error_type": "GetNftInfoError",
+    "error_data": {
+        "error_type": "TokenNotFoundInWallet",
+        "error_data": {
+            "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+            "token_id": "5"
+        }
+    },
+    "id": null
+}
+```

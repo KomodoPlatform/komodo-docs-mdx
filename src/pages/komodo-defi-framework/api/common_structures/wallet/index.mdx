@@ -7,13 +7,14 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 The `RawTxInfo` object includes the following items:
 
-| Parameter  | Type   | Description                                                                                                                                                                                                                  |
-| ---------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_hex    | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
-| prev\_txns | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
-| to         | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
-| value      | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
-| gas\_limit | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
+| Parameter     | Type   | Description                                                                                                                                                                                                                  |
+| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_hex       | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
+| prev\_txns    | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
+| to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
+| value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
+| gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
+| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
 
 <DevComment>
   TODO: Confirm units used in ETH/EVM transactions.
@@ -35,7 +36,12 @@ The `RawTxInfo` object includes the following items:
     {
         "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
         "value": "0.85",
-        "gas_limit": "21000"
+        "gas_limit": "21000",
+        "pay_for_gas": {
+            "tx_type": "Eip1559",
+            "max_fee_per_gas": "1234.567",
+            "max_priority_fee_per_gas": "1.2"
+        }
     }
   ```
 </CollapsibleSection>
@@ -49,8 +55,7 @@ The `InputTxns` object includes the following items:
 | tx\_hash         | string  | The transaction id of an unspent transaction from the same wallet output.                                                                                                                                                                           |
 | index            | integer | The \[output index([https://bitcoin.stackexchange.com/questions/100765/what-does-the-index-of-an-utxo-stand-for](https://bitcoin.stackexchange.com/questions/100765/what-does-the-index-of-an-utxo-stand-for))] of this unspent transaction output. |
 | script\_pub\_key | string  | The [scriptpubkey](https://learnmeabitcoin.com/technical/scriptPubKey) of this unspent transaction output.                                                                                                                                          |
-| amount           | float   | The value of this unspent transaction output.                                                                                                                                                                                                       |
-| amount           |         |                                                                                                                                                                                                                                                     |
+| amount           | decimal | The value of this unspent transaction output.                                                                                                                                                                                                       |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
@@ -60,5 +65,49 @@ The `InputTxns` object includes the following items:
         "script_pub_key": "001449e3b6b4684c4d4a914b29411af51843c59bfff0",
         "amount": 0.00001000
     }
+  ```
+</CollapsibleSection>
+
+### PayForGas
+
+The `PayForGas` object includes the following items:
+
+| Parameter                    | Type    | Description                                                                                                                                                                  |
+| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_type                     | string  | ETH/EVM coins and tokens only. Options are `Legacy` or `Eip1559`. The type of transaction values being configured.                                                           |
+| gas\_price                   | decimal | Only used if tx\_type is `Legacy`. Values are in Gwei. The maximium price per gas unit the user is willing to pay for the transaction.                                       |
+| max\_fee\_per\_gas           | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. The maximum amount to pay per unit of gas to get your transaction included in a block.                               |
+| max\_priority\_fee\_per\_gas | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. This is paid directly to the miner, and can be set by the user to attract minimal delay in transaction confirmation. |
+| min\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated minimum transaction wait time in mempool (in ms) for this priority level.                                            |
+| max\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated maximum transaction wait time in mempool (in ms) for this priority level.                                            |
+
+<Note>
+  [Eip1559](https://www.coinbase.com/en-au/blog/the-technical-benefits-of-eip-1559) allows users to save on gas fees. To use this feature for a coin/token, its entry in your `coins` file must include fields for `chain_id` and `max_eth_tx_type`. To allow eip-1559 transactions, `max_eth_tx_type` should be set to `2`. To find the `chain_id` for an \[EVM network([https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/](https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/))], refer to [chainlist.org](https://chainlist.org). There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `provider` or `simple`.
+
+  By default, `simple` gas fee estimation suggests a fee based on fee history. If set `gas_fee_estimator` is set to `provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
+
+  Use the [start\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/) method to begin tracking the fee market for a coin (and its tokens). You can stop tracking the fee market with [stop\_eth\_fee\_estimator](/komodo-defi-framework/api/v20/fee_management/stop_eth_fee_estimator/).
+
+  To set or view the current swap transaction fee policy, use the [get\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/get_swap_transaction_fee_policy/) and [set\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/fee_management/set_swap_transaction_fee_policy/) methods.
+
+  For more information about EIP1559, refer to [https://www.blocknative.com/blog/eip-1559-fees](https://www.blocknative.com/blog/eip-1559-fees)
+</Note>
+
+<CollapsibleSection expandedText="Hide Legacy Example" collapsedText="Show Legacy Example">
+  ```json
+  {
+      "tx_type": "Legacy",
+      "gas_price": "1234.567"
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide EIP1559 Example" collapsedText="Show EIP1559 Example">
+  ```json
+  {
+      "tx_type": "Eip1559",
+      "max_fee_per_gas": "1234.567",
+      "max_priority_fee_per_gas": "1.2"
+  }
   ```
 </CollapsibleSection>
