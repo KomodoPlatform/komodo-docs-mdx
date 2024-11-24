@@ -192,6 +192,24 @@ Prior to the v2.2.0 release, the `gui_auth` field was used to access RPC nodes r
 }
 ```
 
+### SwapV2Contracts
+
+The `SwapV2Contracts` object includes the following items for a given coin or token:
+
+| Parameter                      | Type   | Description                                                                                                                       |
+| ------------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| maker\_swap\_v2\_contract      | string | Address for the maker's new V2 swap smart contract. Must be provided if "use\_trading\_proto\_v2"is true in mm2 configuration     |
+| taker\_swap\_v2\_contract      | string | Address for the taker's new V2 swap smart contract. Must be provided if "use\_trading\_proto\_v2"is true in mm2 configuration     |
+| nft\_maker\_swap\_v2\_contract | string | Address for the maker's new V2 NFT swap smart contract. Must be provided if "use\_trading\_proto\_v2"is true in mm2 configuration |
+
+```json
+{
+      "maker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+      "taker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+      "nft_maker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE"
+}
+```
+
 ### TokensRequest
 
 The `TokensRequest` object includes the following items for a given coin or token:
@@ -850,6 +868,18 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 The following structures are used in the Komodo DeFi SDK for non-fungible tokens (NFTs).
 
+### NftInfoBasic
+
+The `NftInfoBasic` object includes the following items for a given token:
+
+| Parameter      | Type   | Description                                                           |
+| -------------- | ------ | --------------------------------------------------------------------- |
+| amount         | string | The amount of this NFT the user owns (used by `ERC1155`).             |
+| chain          | string | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`. |
+| contract\_type | string | The type of NFT contract standard. One of `ERC721` or `ERC1155`.      |
+| token\_address | string | The address of the NFT contract.                                      |
+| token\_id      | string | The token ID of the NFT.                                              |
+
 ### NftInfo
 
 The `NftInfo` object includes the following items for a given token:
@@ -1034,6 +1064,27 @@ When the `type` parameter in a [withdraw\_nft](/komodo-defi-framework/api/v20-de
 than 1 user to own one or more of the same NFT (with an identical `token_id`).
 Due to this difference, the `amount` and `max` fields are only used the when
 the `type` value is `withdraw_erc1155`.
+
+### NftProvider
+
+The `NftProvider` object is used in the 'enable\_nft' RPC method. It defines the NFT providers that are avaialable and their configuration.
+
+| Parameter          | Type    | Description                                                                  |
+| ------------------ | ------- | ---------------------------------------------------------------------------- |
+| type               | string  | Specifies the type of the provider.                                          |
+| info               | object  | Additional information about the provider                                    |
+| info.url           | string  | URL of the provider's endpoint                                               |
+| info.komodo\_proxy | boolean | Optional. Indicates whether proxy authentication is enabled for the endpoint |
+
+```json
+{
+    "type": "Moralis",
+    "info": {
+        "url": "https://moralis-proxy.komodo.earth",
+        "komodo_proxy": true
+    }
+}
+```
 export const title = "Komodo DeFi SDK Common Structures: Orders";
 export const description = "Each order on the Komodo Defi oderbook can be queried to view full details of each order for a pair, or the best orders for a ticker.";
 
@@ -2694,6 +2745,7 @@ Below is a table of the currently available legacy, v2.0 and v2.0 (Dev) methods:
 |                                                                                                                                 | [enable\_bch\_with\_tokens](/komodo-defi-framework/api/v20/enable_bch_with_tokens/#enable-bch-with-tokens)                                            |                                                                                                                                   |
 |                                                                                                                                 | [enable\_erc20](/komodo-defi-framework/api/v20/enable_erc20/#enable-erc20)                                                                            |                                                                                                                                   |
 |                                                                                                                                 | [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/#enable-eth-with-tokens)                                            |                                                                                                                                   |
+|                                                                                                                                 |                                                                                                                                                       | [enable\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/enable_nft/#enable-nft)                                      |
 |                                                                                                                                 | [enable\_slp](/komodo-defi-framework/api/v20/enable_slp/#enable-slp)                                                                                  |                                                                                                                                   |
 |                                                                                                                                 | [enable\_tendermint\_token](/komodo-defi-framework/api/v20/enable_tendermint_token/#enable-tendermint-token)                                          |                                                                                                                                   |
 |                                                                                                                                 | [enable\_tendermint\_with\_assets](/komodo-defi-framework/api/v20/enable_tendermint_with_assets/#enable-tendermint-with-assets)                       |                                                                                                                                   |
@@ -2707,6 +2759,7 @@ Below is a table of the currently available legacy, v2.0 and v2.0 (Dev) methods:
 | [get\_gossip\_peer\_topics](/komodo-defi-framework/api/legacy/get_gossip_peer_topics/#get-gossip-peer-topics)                   |                                                                                                                                                       |                                                                                                                                   |
 | [get\_gossip\_topic\_peers](/komodo-defi-framework/api/legacy/get_gossip_topic_peers/#get-gossip-topic-peers)                   |                                                                                                                                                       |                                                                                                                                   |
 |                                                                                                                                 |                                                                                                                                                       | [get\_locked\_amount](/komodo-defi-framework/api/v20-dev/get_locked_amount/#get-locked-amount)                                    |
+|                                                                                                                                 | [get\_mnemonic](/komodo-defi-framework/api/v20/get_mnemonic/#get-mnemonic)                                                                            |                                                                                                                                   |
 | [get\_my\_peer\_id](/komodo-defi-framework/api/legacy/get_my_peer_id/#get-my-peer-id)                                           |                                                                                                                                                       |                                                                                                                                   |
 |                                                                                                                                 |                                                                                                                                                       | [get\_new\_address](/komodo-defi-framework/api/v20-dev/hd_address_management/#get-new-address)                                    |
 |                                                                                                                                 |                                                                                                                                                       | [get\_nft\_list](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_list/#get-a-list-of-nfts)                         |
@@ -12720,11 +12773,8 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | ticker                      | string           | Ticker of the platform protocol coin. Options: `ETH`, `AVAX`, `BNB`, `FTM`, `MATIC`, `ONE`, `ETH-ARB20`                                                                                                                                                                                                                                      |
 | mm2                         | integer          | Required if not set in `coins` file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                                                                                                                   |
 | swap\_contract\_address     | string           | Address of etomic swap smart contract                                                                                                                                                                                                                                                                                                        |
-| fallback\_swap\_contract    | string           | Address of backup etomic swap smart contract                                                                                                                                                                                                                                                                                                 |
-| maker\_swap\_v2\_contract   | string           | Backup address for the maker's swap smart contract                                                                                                                                                                                                                                                                                           |
-| taker\_swap\_v2\_contract   | string           | Backup address for the taker's swap smart contract                                                                                                                                                                                                                                                                                           |
-| nodes                       | array of objects | A list of standard [EvmNode](/komodo-defi-framework/api/common_structures/activation/#evm-node) objects. ([https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums)).                                                                                                   |
-|                             |                  |                                                                                                                                                                                                                                                                                                                                              |
+| fallback\_swap\_contract    | string           | Address of backup etomic swap smart contract.                                                                                                                                                                                                                                                                                                |
+| nodes                       | array of objects | A list of standard [EvmNode](/komodo-defi-framework/api/common_structures/activation/#evm-node) objects.                                                                                                                                                                                                                                     |
 | erc20\_tokens\_requests     | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                                                                                                                         |
 | gas\_station\_decimals      | integer          | Optional, for ETH/ERC20 and other gas model chains. Defaults to `8`. Defines the decimals used to denominate the gas station response to gwei units. For example, the ETH gas station uses 8 decimals, which means that "average": 860 is equal to 86 gwei. While the Matic gas station uses 9 decimals, so 860 would mean 860 gwei exactly. |
 | gas\_station\_policy.policy | string           | Optional, for ETH/ERC20 and other gas model chains. Defaults to `"MeanAverageFast"`. Defines the method of gas price calculation from the station response. `"MeanAverageFast"` will use the mean between average and fast fields. `"Average"` will return a simple average value.                                                           |
@@ -12732,8 +12782,10 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | priv\_key\_policy           | string           | Optional, defaults to `ContextPrivKey`. value can be `ContextPrivKey`,`Trezor` when Komodo DeFi Framework is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                                                                                        |
 | required\_confirmations     | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap                                                                                                                                                          |
 | requires\_notarization      | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.                                                                    |
-| rpc\_mode                   | string           | Optional, defaults to `Default`. Can be set to `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                                                                                                                                                                                                                           |
+| rpc\_mode                   | string           | Optional, defaults to `Default`. Value can be `Metamask` only when the Komodo DeFi Framework is built targeting `wasm`.                                                                                                                                                                                                                      |
 | tx\_history                 | boolean          | Optional, defaults to `false`. If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                                                                   |
+| nft\_req                    | object           | Optional, encapsulates the request parameters for NFT activation, including NFT provider configuration.                                                                                                                                                                                                                                      |
+| swap\_v2\_contracts         | object           | Optional, must be provided if "use\_trading\_proto\_v2" is true in [your configuration](/komodo-defi-framework/setup/configure-mm2-json/). A standard [SwapV2Contracts](/komodo-defi-framework/api/common_structures/activation/#tokens-request) object.                                                                                     |
 
 ### Response Parameters
 
@@ -12742,6 +12794,7 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | current\_block          | integer | Block height of the coin being activated                                                                                                                                      |
 | eth\_addresses\_infos   | object  | A standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) object. Note: the structure may vary based on the value of the `get_balances` parameter. |
 | erc20\_addresses\_infos | object  | A standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) object. Note: the structure may vary based on the value of the `get_balances` parameter. |
+| nfts\_infos             | list    | A list of standard [NftInfoBasic](/komodo-defi-framework/api/common_structures/nfts/#nft-info) objects.                                                                       |
 
 ### 📌 Examples
 
@@ -12765,12 +12818,16 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
     "fallback_swap_contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
     "nodes": [
       {
-        "url": "http://eth1.cipig.net:18555",
-        "komodo_proxy": false
+        "url": "https://eth1.cipig.net:18555",
+        "gui_auth": false
       },
       {
-        "url": "https://node.komodo.earth:8080/ethereum",
-        "komodo_proxy": true
+        "url": "https://eth2.cipig.net:18555",
+        "gui_auth": false
+      },
+      {
+        "url": "https://eth3.cipig.net:18555",
+        "gui_auth": false
       }
     ],
     "tx_history": true,
@@ -12802,49 +12859,50 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 
 ```json
 {
-	"mmrpc": "2.0",
-	"result": {
-		"current_block": 16145371,
-		"eth_addresses_infos": {
-			"0x0d317904AF3BA3A993d557b6cba147FEA4DeB57E": {
-				"derivation_method": {
-					"type": "Iguana"
-				},
-				"pubkey": "042e6e6b1ca76a7cd1fd2e1ed13bdc83909ad17b17748781308abe55caf863bec6dac19a0ead812d54c8c07508e2f30a258628832c1337f4fdd423a879f67bc823",
-				"balances": {
-					"spendable": "0",
-					"unspendable": "0"
-				}
-			}
-		},
-		"erc20_addresses_infos": {
-			"0x0d317904AF3BA3A993d557b6cba147FEA4DeB57E": {
-				"derivation_method": {
-					"type": "Iguana"
-				},
-				"pubkey": "042e6e6b1ca76a7cd1fd2e1ed13bdc83909ad17b17748781308abe55caf863bec6dac19a0ead812d54c8c07508e2f30a258628832c1337f4fdd423a879f67bc823",
-				"balances": {
-					"MINDS-ERC20": {
-						"spendable": "0",
-						"unspendable": "0"
-					},
-					"APE-ERC20": {
-						"spendable": "0",
-						"unspendable": "0"
-					},
-					"BUSD-ERC20": {
-						"spendable": "0",
-						"unspendable": "0"
-					},
-					"BCH-ERC20": {
-						"spendable": "0",
-						"unspendable": "0"
-					}
-				}
-			}
-		}
-	},
-	"id": null
+  "mmrpc": "2.0",
+  "result": {
+      "current_block": 20590537,
+      "eth_addresses_infos": {
+          "0x083C32B38e8050473f6999e22f670d1404235592": {
+              "derivation_method": {
+                  "type": "Iguana"
+              },
+              "pubkey": "04ec603f83519cc2150bd99ed0ed6b3f7f029dedff2957cd22542e2504e3d2a7953c084f907cce2f0e26fb0cfc55e06925bf0f88a92b904224dba8ebafdf98ce7b",
+              "balances": {
+                  "spendable": "0",
+                  "unspendable": "0"
+              }
+          }
+      },
+      "erc20_addresses_infos": {
+          "0x083C32B38e8050473f6999e22f670d1404235592": {
+              "derivation_method": {
+                  "type": "Iguana"
+              },
+              "pubkey": "04ec603f83519cc2150bd99ed0ed6b3f7f029dedff2957cd22542e2504e3d2a7953c084f907cce2f0e26fb0cfc55e06925bf0f88a92b904224dba8ebafdf98ce7b",
+              "balances": {
+                  "BUSD-ERC20": {
+                      "spendable": "0",
+                      "unspendable": "0"
+                  },
+                  "MINDS-ERC20": {
+                      "spendable": "0",
+                      "unspendable": "0"
+                  },
+                  "APE-ERC20": {
+                      "spendable": "0",
+                      "unspendable": "0"
+                  },
+                  "BCH-ERC20": {
+                      "spendable": "0",
+                      "unspendable": "0"
+                  }
+              }
+          }
+      },
+      "nfts_infos": {}
+  },
+  "id": null
 }
 ```
 
@@ -12859,6 +12917,91 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
     "ticker": "MATIC",
     "get_balances": false,
     "tx_history": false,
+    "gas_station_url": "https://gasstation-mainnet.matic.network/",
+    "swap_contract_address": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+    "fallback_swap_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+    "swap_v2_contracts": {
+      "maker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+      "taker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+      "nft_maker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE"
+    },
+    "nodes": [
+      {
+        "url": "https://polygon-rpc.com"
+      },
+      {
+        "url": "https://node.komodo.earth:8080/polygon"
+      },
+      {
+        "url": "https://block-proxy.komodo.earth/rpc/matic"
+      }
+    ],
+    "erc20_tokens_requests": [
+      {
+        "ticker": "PGX-PLG20",
+        "required_confirmations": 4
+      },
+      {
+        "ticker": "AAVE-PLG20",
+        "required_confirmations": 4
+      }
+    ],
+    "required_confirmations": 5,
+    "requires_notarization": false
+  }
+}
+```
+
+#### Response
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": {
+        "current_block": 60937035,
+        "eth_addresses_infos": {
+            "0x083C32B38e8050473f6999e22f670d1404235592": {
+                "derivation_method": {
+                    "type": "Iguana"
+                },
+                "pubkey": "04ec603f83519cc2150bd99ed0ed6b3f7f029dedff2957cd22542e2504e3d2a7953c084f907cce2f0e26fb0cfc55e06925bf0f88a92b904224dba8ebafdf98ce7b"
+            }
+        },
+        "erc20_addresses_infos": {
+            "0x083C32B38e8050473f6999e22f670d1404235592": {
+                "derivation_method": {
+                    "type": "Iguana"
+                },
+                "pubkey": "04ec603f83519cc2150bd99ed0ed6b3f7f029dedff2957cd22542e2504e3d2a7953c084f907cce2f0e26fb0cfc55e06925bf0f88a92b904224dba8ebafdf98ce7b",
+                "tickers": [
+                    "PGX-PLG20",
+                    "AAVE-PLG20"
+                ]
+            }
+        },
+        "nfts_infos": {}
+    },
+    "id": null
+}
+```
+
+#### Request including NFT initialization
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "enable_eth_with_tokens",
+  "mmrpc": "2.0",
+  "params": {
+    "ticker": "MATIC",
+    "get_balances": false,
+    "tx_history": false,
+    "nft_req": {
+      "type": "Moralis",
+      "info": {
+        "url": "https://moralis-proxy.komodo.earth"
+      }
+    },
     "gas_station_url": "https://gasstation-mainnet.matic.network/",
     "swap_contract_address": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
     "fallback_swap_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
@@ -12893,30 +13036,51 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 
 ```json
 {
-	"mmrpc": "2.0",
-	"result": {
-		"current_block": 42328813,
-		"eth_addresses_infos": {
-			"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498": {
-				"derivation_method": {
-					"type": "Iguana"
-				},
-				"pubkey": "04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b"
-			}
-		},
-		"erc20_addresses_infos": {
-			"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498": {
-				"derivation_method": {
-					"type": "Iguana"
-				},
-				"pubkey": "04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b",
-				"tickers": ["AAVE-PLG20", "PGX-PLG20"]
-			}
-		}
-	},
-	"id": null
+  "mmrpc": "2.0",
+  "result": {
+      "current_block": 61329162,
+      "eth_addresses_infos": {
+          "0x083C32B38e8050473f6999e22f670d1404235592": {
+              "derivation_method": {
+                  "type": "Iguana"
+              },
+              "pubkey": "04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b"
+          }
+      },
+      "erc20_addresses_infos": {
+          "0x083C32B38e8050473f6999e22f670d1404235592": {
+              "derivation_method": {
+                  "type": "Iguana"
+              },
+              "pubkey": "04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b",
+              "tickers": [
+                  "PGX-PLG20",
+                  "AAVE-PLG20"
+              ]
+          }
+      },
+      "nfts_infos": {
+          "0x73a5299824cd955af6377b56f5762dc3ca4cc078,1": {
+              "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+              "token_id": "1",
+              "chain": "POLYGON",
+              "contract_type": "ERC721",
+              "amount": "1"
+          },
+          "0x3987dfed574927e7a3309758ccf949ad2403fcbb,1": {
+              "token_address": "0x3987dfed574927e7a3309758ccf949ad2403fcbb",
+              "token_id": "1",
+              "chain": "POLYGON",
+              "contract_type": "ERC1155",
+              "amount": "1"
+          }
+      }
+  },
+  "id": null
 }
 ```
+
+### Error Responses
 
 ### Error Types
 
@@ -13046,6 +13210,38 @@ In this case, you need to [disable](/komodo-defi-framework/api/legacy/disable_co
             }
         }
     },
+    "id": null
+}
+```
+
+#### InvalidRequest Error
+
+Returned when the `rpc_mode` parameter is set to `Metamask` but the Komodo DeFi Framework was not built targeting `wasm`.
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Error parsing request: unknown variant `Metamask`, expected `Default`",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:118]",
+    "error_type": "InvalidRequest",
+    "error_data": "unknown variant `Metamask`, expected `Default`",
+    "id": null
+}
+```
+
+#### Transport Error
+
+Returned when coin nodes are unresponsive.
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Failed to get client version for all nodes",
+    "error_path": "platform_coin_with_tokens.mod",
+    "error_trace": "platform_coin_with_tokens:454] mod:717]",
+    "error_type": "Transport",
+    "error_data": "Failed to get client version for all nodes",
     "id": null
 }
 ```
@@ -13951,6 +14147,102 @@ If you need to get the addresses for coins and have not set `enable_hd` in your 
       ]
   },
   "id": 0
+}
+```
+export const title = "Komodo DeFi Framework Method: Get Mnemonic";
+export const description = "The get_mnemonic method returns the user's mnemonic seed phrase, in encrypted or plain text format.";
+
+# get\_mnemonic
+
+"The get\_mnemonic method returns the user's mnemonic seed phrase, in encrypted or plain text format."
+
+## Arguments
+
+| Structure | Type   | Description                                                                                            |
+| --------- | ------ | ------------------------------------------------------------------------------------------------------ |
+| format    | string | Either `encrypted` or `plaintext`. Defaults to `encrypted`.                                            |
+| password  | string | The password to decrypt your stored mnemonic phrase. Only required if `plaintext` format is requested. |
+
+#### Response
+
+| Structure                 | Type   | Description                                                                                |
+| ------------------------- | ------ | ------------------------------------------------------------------------------------------ |
+| format                    | string | Same as the input `format` parameter.                                                      |
+| mnemonic                  | string | For `plaintext` requests, the decrypted mnemonic seed phrase                               |
+| encrypted\_mnemonic\_data | object | For `encrpyted` requests, the encrypted format and ciphertext for the mnemonic seed phrase |
+
+#### 📌 Examples
+
+#### For encrypted output
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "mmrpc": "2.0",
+  "method": "get_mnemonic",
+  "params": {
+    "format": "encrypted"
+  },
+  "id": 0
+}
+```
+
+#### Response (success)
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+      "format": "encrypted",
+      "encrypted_mnemonic_data": {
+          "encryption_algorithm": "AES256CBC",
+          "key_derivation_details": {
+              "Argon2": {
+                  "params": {
+                      "algorithm": "Argon2id",
+                      "version": "0x13",
+                      "m_cost": 65536,
+                      "t_cost": 2,
+                      "p_cost": 1
+                  },
+                  "salt_aes": "CqkfcntVxFJNXqOKPHaG8w",
+                  "salt_hmac": "i63qgwjc+3oWMuHWC2XSJA"
+              }
+          },
+          "iv": "mNjmbZLJqgLzulKFBDBuPA==",
+          "ciphertext": "tP2vF0hRhllW00pGvYiKysBI0vl3acLj+aoocBViTTByXCpjpkLuaMWqe0Vs02cb1wvgPsVqZkE4MPg4sCQxbd18iS7Er6+BbVY3HQ2LSig=",
+          "tag": "TwWXhIFQl1TSdR4cJpbkK2oNXd9zIEhJmO6pML1uc2E="
+      }
+  },
+  "id": null
+}
+```
+
+#### For plain text output
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "mmrpc": "2.0",
+  "method": "get_mnemonic",
+  "params": {
+    "format": "plaintext",
+    "password": "Q^wJZg~Ck3.tPW~asnM-WrL"
+  },
+  "id": 0
+}
+```
+
+#### Response (success)
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+      "format": "plaintext",
+      "mnemonic": "unique spy ugly child cup sad capital invest essay lunch doctor know"
+  },
+  "id": null
 }
 ```
 export const title = "Komodo DeFi Framework Method: Get Public Key";
@@ -21392,7 +21684,7 @@ The `max_maker_vol` method returns the maximum volume of a coin which can be use
 ```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the clear_nft_db method Komodo DeFi Framework  provides to clear NFT data from your local database";
+  "This document describes the clear_nft_db method Komodo DeFi Framework provides to clear NFT data from your local database";
 
 # Clear NFT Database {{label : 'clear_nft_db', tag : 'API-v2'}}
 
@@ -21470,9 +21762,125 @@ Returned when the `chains` parameter contains an unsupported network.
     "id": null
 }
 ```
+
+#### InvalidRequest
+
+Returned when neither the `chains` or `clear_all` parameters are present.
+
+```json
+{
+    "mmrpc":"2.0",
+    "error":"Invalid request: Nothing to clear was specified","error_path":"nft","error_trace":"nft:1512]",
+    "error_type":"InvalidRequest",
+    "error_data":"Nothing to clear was specified",
+    "id":null
+}
+```
+export const title = "Komodo DeFi Framework Method: Enable NFT";
+export const description =
+  "The enable_nft method allows you to activate NFT-like tokens on the platform.";
+
+# enable\_nft
+
+The 'enable\_nft' method activates NFT-like tokens on the platform, if the NFT network was already activated with the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/) method, but without the `nft_req` parameter.
+
+| parameter          | Type   | Description                                                                                      |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------------ |
+| ticker             | string | The ticker of the NFT network, with `NFT_` as a prefix.                                          |
+| activation\_params | object | A standard [NftProvider](/komodo-defi-framework/api/common_structures/nfts/#nft-provider) object |
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "enable_nft",
+  "mmrpc": "2.0",
+  "params": {
+    "ticker": "NFT_MATIC",
+    "activation_params": {
+      "provider": {
+        "type": "Moralis",
+        "info": {
+          "url": "https://moralis-proxy.komodo.earth",
+          "komodo_proxy": true
+        }
+      }
+    }
+  }
+}
+```
+
+## Response
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": {
+        "nfts": {
+            "0xc28a19e9a663d966cf99532bdb1229df1b0e344b,1": {
+                "token_address": "0xc28a19e9a663d966cf99532bdb1229df1b0e344b",
+                "token_id": "1",
+                "chain": "POLYGON",
+                "contract_type": "ERC1155",
+                "amount": "1"
+            },
+            "0xd25f13e4ba534ef625c75b84934689194b7bd59e,14": {
+                "token_address": "0xd25f13e4ba534ef625c75b84934689194b7bd59e",
+                "token_id": "14",
+                "chain": "POLYGON",
+                "contract_type": "ERC721",
+                "amount": "1"
+            }
+        },
+        "platform_coin": "MATIC"
+    },
+    "id": null
+}
+```
+
+## Error - Platform coin is not yet activated
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Platform coin MATIC is not activated",
+  "error_path": "token.lp_coins",
+  "error_trace": "token:126] lp_coins:2797]",
+  "error_type": "PlatformCoinIsNotActivated",
+  "error_data": "MATIC",
+  "id": null
+}
+```
+
+## Error - Token already activated
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Token NFT_MATIC is already activated",
+  "error_path": "token",
+  "error_trace": "token:119]",
+  "error_type": "TokenIsAlreadyActivated",
+  "error_data": "NFT_MATIC",
+  "id": null
+}
+```
+
+## Error - Token config not found in coins file
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Token NFT_TESTTT config is not found",
+  "error_path": "token.prelude",
+  "error_trace": "token:122] prelude:79]",
+  "error_type": "TokenConfigIsNotFound",
+  "error_data": "NFT_TESTTT",
+  "id": null
+}
+```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens - Get NFT List";
 export const description =
-  "This document describes all the get_nft_list method Komodo DeFi Framework  provides to get a list of your wallets NFTs";
+  "This document describes all the get_nft_list method Komodo DeFi Framework provides to get a list of your wallets NFTs";
 
 # Get a list of NFTs {{label : 'get_nft_list', tag : 'API-v2'}}
 
@@ -21781,7 +22189,7 @@ The supported chains are
 ```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the get_nft_metadata method Komodo DeFi Framework  provides to get metadata for your NFTs";
+  "This document describes the get_nft_metadata method Komodo DeFi Framework provides to get metadata for your NFTs";
 
 # Get NFT Metadata {{label : 'get_nft_metadata', tag : 'API-v2'}}
 
@@ -21893,7 +22301,7 @@ export const description =
 ```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the get_nft_transfers method Komodo DeFi Framework  provides to get information about your NFT transactions";
+  "This document describes the get_nft_transfers method Komodo DeFi Framework provides to get information about your NFT transactions";
 
 # Get a list of NFT transfers {{label : 'get_nft_transfers', tag : 'API-v2'}}
 
@@ -21990,11 +22398,14 @@ To view NFT transactions, you must [activate the coin](/komodo-defi-framework/ap
 ```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes all the methods Komodo DeFi Framework  provides to get information and transact with NFTs";
+  "This document describes all the methods Komodo DeFi Framework provides to get information and transact with NFTs";
 
 # Non Fungible Tokens (NFTs)
 
 The Komodo DeFi Framework API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1155+Multi+token) and [ERC721](https://www.nftstandards.wtf/Standards/ERC721+Non+Fungible+Standard) NFTs via the [Moralis API](https://docs.moralis.io/) on the Avalanche (AVAX), BNB Smart Chain (BNB), Ethereum (ETH), Fantom (FTM), Polygon (MATIC) networks.
+
+To interact with NFTs, you will first need to activate the coin for the network the NFT is on, and initialise NFT support for the network.
+This can be done with either the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/) method (if including the `nft_req` param) or the [enable\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/enable_nft/) method (if the network is already activated without NFT support).
 
 Before using other NFT methods, you should first call the [update\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/)
 method to populate/refresh the local database.
@@ -22011,6 +22422,10 @@ method to populate/refresh the local database.
 
 *   Withdraw ERC721 tokens with [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/#erc-721-withdraw-example)
 *   Withdraw ERC1155 tokens with [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/#erc-1155-withdraw-example)
+
+## NFT Utility Methods
+
+*   Clear local NFT data with [clear\_nft\db](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/)
 
 View the source code at: [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs)
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens - Query NFT database tables";
@@ -22140,7 +22555,7 @@ It has the following columns:
 | AVAX  | 0                    |
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes all the refresh_nft_metadata method Komodo DeFi Framework  provides to refresh an NFT's metadata";
+  "This document describes all the refresh_nft_metadata method Komodo DeFi Framework provides to refresh an NFT's metadata";
 
 # Refresh NFT Metadata {{label : 'refresh_nft_metadata', tag : 'API-v2'}}
 
@@ -22148,14 +22563,14 @@ This method refreshes metadata of one NFT and metadata of related transactions w
 
 ### Request Parameters
 
-| Parameter      | Type    | Description                                                                                                                                                                                                       |
-| -------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chain          | string  | Chains which holds the NFT you would like to updated metadata for.                                                                                                                                                |
-| token\_address | string  | Token address.                                                                                                                                                                                                    |
-| token\_id      | string  | Token ID.                                                                                                                                                                                                         |
-| proxy\_auth    | boolean | Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false).                                                                                 |
-| url            | string  | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent (if proxy\_auth is set to true, will need to provide a new Komodo Proxy URL). |
-| url\_antispam  | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs).                                                           |
+| Parameter      | Type    | Description                                                                                                                                                                                                         |
+| -------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chain          | string  | Chains which holds the NFT you would like to updated metadata for.                                                                                                                                                  |
+| token\_address | string  | Token address.                                                                                                                                                                                                      |
+| token\_id      | string  | Token ID.                                                                                                                                                                                                           |
+| komodo\_proxy  | boolean | Optional. Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false).                                                                         |
+| url            | string  | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent (if komodo\_proxy is set to true, will need to provide a new Komodo Proxy URL). |
+| url\_antispam  | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs).                                                             |
 
 If there are no errors, this request will return an empty response.
 
@@ -22186,10 +22601,28 @@ If there are no errors, this request will return an empty response.
 }
 ```
 
-Need to add some error responses here.
+## Error responses
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Token: token_address 0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff, token_id 5 was not found in wallet",
+    "error_path": "nft",
+    "error_trace": "nft:504]",
+    "error_type": "GetNftInfoError",
+    "error_data": {
+        "error_type": "TokenNotFoundInWallet",
+        "error_data": {
+            "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+            "token_id": "5"
+        }
+    },
+    "id": null
+}
+```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the update_nft method Komodo DeFi Framework  provides to update NFT information in your local database";
+  "This document describes the update_nft method Komodo DeFi Framework provides to update NFT information in your local database";
 
 # Update NFT {{label : 'update_nft', tag : 'API-v2'}}
 
@@ -22210,12 +22643,12 @@ These coins can be activated using the [enable\_eth\_with\_tokens](/komodo-defi-
 
 ### Request Parameters
 
-| Parameter     | Type    | Description                                                                                                                                                                  |
-| ------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chains        | array   | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.                                                                           |
-| proxy\_auth   | boolean | Indicates whether authentication is required for accessing the proxy URLs (true if necessary, false otherwise).                                                              |
-| url           | string  | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent (if proxy\_auth is set to true, will need to provide a new Komodo Proxy URL). |
-| url\_antispam | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent.                                                                          |
+| Parameter     | Type    | Description                                                                                                                                                                    |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| chains        | array   | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.                                                                             |
+| komodo\_proxy | boolean | Optional. Indicates whether authentication is required for accessing the proxy URLs.                                                                                           |
+| url           | string  | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent (if komodo\_proxy is set to true, will need to provide a new Komodo Proxy URL). |
+| url\_antispam | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent.                                                                            |
 
 If there are no errors, this request will return an empty response.
 When updating multiple networks, or wallets with numerous NFTs, this request may take a while to complete.
@@ -22229,11 +22662,12 @@ When updating multiple networks, or wallets with numerous NFTs, this request may
   "mmrpc": "2.0",
   "params": {
     "chains": [
+      "BSC",
       "POLYGON"
     ],
+    "komodo_proxy": false,
     "url": "https://moralis-proxy.komodo.earth",
-    "url_antispam": "https://nft.antispam.dragonhound.info",
-    "proxy_auth": false
+    "url_antispam": "https://nft.antispam.dragonhound.info"
   }
 }
 ```
@@ -22246,10 +22680,42 @@ When updating multiple networks, or wallets with numerous NFTs, this request may
 }
 ```
 
-Need to add some error responses here.
+### Error Types
+
+#### TokenIsAlreadyActivated
+
+This error occurs when NFTs are already activated for the selected network.
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Token NFT_MATIC is already activated",
+    "error_path": "token",
+    "error_trace": "token:121]",
+    "error_type": "TokenIsAlreadyActivated",
+    "error_data": "NFT_MATIC",
+    "id": null
+}
+```
+
+#### TokenIsAlreadyActivated
+
+This error occurs when NFTs are already activated for the selected network.
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Token NFT_MATICC config is not found",
+    "error_path": "token.prelude",
+    "error_trace": "token:124] prelude:79]",
+    "error_type": "TokenConfigIsNotFound",
+    "error_data": "NFT_MATICC",
+    "id": null
+}
+```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the withdraw_nft method Komodo DeFi Framework  provides to send NFTs to an address";
+  "This document describes the withdraw_nft method Komodo DeFi Framework provides to send NFTs to an address";
 
 # Withdraw NFTs {{label : 'withdraw_nft', tag : 'API-v2'}}
 
