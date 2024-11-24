@@ -3,7 +3,26 @@ export const description = "This guide describes how to query the MM2 SQLite dat
 
 # How to Query the MM2 SQLite Database
 
-The Komodo DeFi Framework API stores historical information such as swaps and orders within an SQLite database, located under the DB user data folder (e.g. {'{folder continaing mm2 binary}'}/DB/{'{wallet identifying hex string}'}/MM2.db').
+The Komodo DeFi Framework API stores historical information such as swaps and orders within an SQLite database, located under the DB user data folder with each wallet having its own subfolder represented by a hexideciaml string.
+This string is shown in the runtime logs of the `kdf` binary as `Public key hash` when it starts up.
+
+```bash
+30 08:39:23, mm2:269] AtomicDEX API 2.1.0-beta_a81f2a101 DT 2024-07-26T23:24:52+03:00
+30 08:39:23, mm2_main::mm2::lp_native_dex:500] INFO Version: 2.1.0-beta_a81f2a101 DT 2024-07-26T23:24:52+03:00
+30 08:39:23, crypto::crypto_ctx:324] INFO Public key hash: 7d6cbdd91788df3b764247721fe12853ce36b03d
+```
+
+The default location of this folder for each operating system is:
+
+```bash
+- Linux: $HOME/.kdf/DB/{'{wallet identifying hex string}'}/MM2.db'
+- MacOS: $HOME/.kdf/DB/{'{wallet identifying hex string}'}/MM2.db'
+- Windows: %APPDATA%\kdf\DB\{'{wallet identifying hex string}'}\MM2.db'
+```
+
+<Note>
+  You can define a different location for the DB folder via the [`dbdir` configuration parameter](/komodo-defi-framework/setup/configure-mm2-json/) in your MM2.json file.
+</Note>
 
 There are a variety of methods to query sqlite databases. Examples below show how to do a sqlite query in Linux terminal, but first you might need to install sqlite with `sudo apt install sqlite3`.
 
@@ -52,6 +71,10 @@ This table keeps a detailed record of all swaps performed (including failed) in 
 | 14 | taker\_coin\_usd\_price | DECIMAL      | USD price of taker coin at the time of the swap |
 | 15 | taker\_pubkey           | DECIMAL      | Taker pubkey                                    |
 | 16 | maker\_pubkey           | DECIMAL      | Maker pubkey                                    |
+| 17 | maker\_gui              | VARCHAR(255) | Maker application                               |
+| 18 | taker\_gui              | VARCHAR(255) | Taker application                               |
+| 19 | maker\_version          | VARCHAR(255) | Maker KDF binary version                        |
+| 20 | taker\_version          | VARCHAR(255) | Taker KDF binary version                        |
 
 #### Query:
 
@@ -60,7 +83,7 @@ This table keeps a detailed record of all swaps performed (including failed) in 
 #### Response:
 
 ```bash
-8|DGB|DOGE|c9515636-f5a4-4767-a0af-c69e59086899|1678815183|1678815631|200|28|1|DGB||DOGE||0.0108|0.07673|02d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2|03a93f666b9030958f282edd2904f0a33278c0c676ae132d2094840fe722f011c3
+8|DGB|DOGE|c9515636-f5a4-4767-a0af-c69e59086899|1678815183|1678815631|200|28|1|DGB||DOGE||0.0108|0.07673|02d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2|03a93f666b9030958f282edd2904f0a33278c0c676ae132d2094840fe722f011c3|mm2_777|web_dex web|2.1.0-beta_c5e0e00|2.1.0-beta_af571608c
 ```
 
 ## my\_orders
@@ -116,26 +139,45 @@ This table stores a record of all nodes [added for stats collection](/komodo-def
 
 `37|dragonhound_DEV|104.238.221.61|12D3KooWEnrvbqvtTowYMR8FnBeKtryTj9RcXGx8EPpFZHou2ruP`
 
-## stats\_nodes
+## Coin tables
 
-This table stores a record of results returned by registered nodes [tracked for node stats collection](/komodo-defi-framework/api/v20/start_version_stat_collection/) in this pubkey's MM2.db
+Additional tables are created for each coin to store supplementary details such as block headers and transaction history. Using KMD as an example, these tables are listed below:
 
-| ID | Name      | Type         | Description                                  |
-| -- | --------- | ------------ | -------------------------------------------- |
-| 0  | id        | INTEGER      | Primary Key                                  |
-| 1  | name      | VARCHAR(255) | Node name                                    |
-| 2  | version   | VARCHAR(255) | Node Komodo DeFi Framework API (mm2) version |
-| 3  | timestamp | INTEGER      | Timestamp                                    |
-| 4  | error     | VARCHAR(255) | Error details                                |
+### KMD\_block\_headers\_cache
 
-#### Query:
+| ID | Name | Type    | Description |
+| -- | ---- | ------- | ----------- |
+| 0  | id   | INTEGER | Primary Key |
 
-`sqlite3 ${PATH_TO_MM2_DB_FILE} "SELECT * FROM stats_nodes WHERE name = 'dragonhound_DEV'" LIMIT 3`
+### KMD\_tx\_address
 
-#### Response:
+1|ecfb45cc5d5fdf34dcc70b0db2a333b143f0b98f9a8470097e3a256c1760b6ff|RUYJYSTuCKm9gouWzQN1LirHFEYThwzA2d
 
-```bash
-540|dragonhound_DEV||1638542507|DialFailure
-70638|dragonhound_DEV|2.1.4401_mm2.1_87837cb54_Linux_Release|1640270702|
-70692|dragonhound_DEV||1640271615|Error on request the peer PeerId("12D3KooWEnrvbqvtTowYMR8FnBeKtryTj9RcXGx8EPpFZHou2ruP"): "Canceled". Request next peer
-```
+| ID | Name         | Type         | Description                                 |
+| -- | ------------ | ------------ | ------------------------------------------- |
+| 0  | id           | INTEGER      | Primary Key                                 |
+| 1  | internal\_id | VARCHAR(255) | A hex string, representative of the address |
+| 2  | address      | VARCHAR(255) | The coin's wallet address                   |
+
+### KMD\_tx\_cache
+
+tx\_hash|tx\_hex
+
+| ID | Name     | Type         | Description             |
+| -- | -------- | ------------ | ----------------------- |
+| 0  | tx\_hash | VARCHAR(255) | A transaction hash      |
+| 1  | tx\_hex  | VARCHAR(255) | Raw hex for transaction |
+
+### KMD\_tx\_history
+
+id|tx\_hash|internal\_id|block\_height|confirmation\_status|token\_id|details\_json
+
+| ID | Name                 | Type         | Description                                                   |
+| -- | -------------------- | ------------ | ------------------------------------------------------------- |
+| 0  | id                   | INTEGER      | Primary Key                                                   |
+| 1  | tx\_hash             | VARCHAR(255) | A transaction hash                                            |
+| 2  | internal\_id         | VARCHAR(255) | A hex string, representative of the transaction               |
+| 3  | block\_height        | INTEGER      | Block height of transaction                                   |
+| 4  | confirmation\_status | BOOLEAN      | `True` if transaction has completed, `False` if it is pending |
+| 5  | token\_id            | INTEGER      | Number representing the coin type                             |
+| 6  | details\_json        | VARCHAR(255) | Transaction details in JSON format                            |
