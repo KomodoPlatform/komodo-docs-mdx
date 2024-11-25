@@ -115,6 +115,9 @@ function readTitleLinksAndHrefsSidebar(data) {
         }
         if (page.links) {
           for (const link of page.links) {
+            if (!link.href) {
+              throw new Error(`In sidebar.json, link: ${JSON.stringify(link)}`)
+            }
             if (!link.href.endsWith("/")) {
               throw new Error(`In sidebar.json, link: ${link.href} should end with /`)
             }
