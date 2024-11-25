@@ -1,3 +1,258 @@
+export const title = "Komodo DeFi Framework Method: Active Swaps (v2)";
+export const description =
+  "The active_swaps method returns all the swaps that are currently running on the Komodo DeFi Framework API node.";
+
+# active\_swaps
+
+The `active_swaps` method returns all the swaps that are currently running on the Komodo DeFi Framework API node.
+
+## Arguments
+
+| Structure       | Type | Description                                                                  |
+| --------------- | ---- | ---------------------------------------------------------------------------- |
+| include\_status | bool | Optional, defaults to `false`. Whether to include swap statuses in response; |
+
+## Response
+
+| Structure | Type             | Description                                                                                                                                                                                            |
+| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| uuids     | array of strings | A list of currently active swap UUIDs.                                                                                                                                                                 |
+| statuses  | object (map)     | Only visible if `include_status` request parameter is `true`. A map of standard [SwapStatus](/komodo-defi-framework/api/common_structures/swaps/#swap-status) objects, delineated by the related UUID. |
+
+#### 📌 Examples
+
+#### Command (without include\_status)
+
+```json
+{
+  "mmrpc": "2.0",
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "active_swaps",
+  "params": {
+    "include_status": false
+  }
+}
+```
+
+#### Response (uuids only)
+
+```json
+{
+  "result": {
+    "uuids": [
+      "015c13bc-da79-43e1-a6d4-4ac8b3099b34",
+      "7592a07a-2805-4050-8ab8-984480e812f0",
+      "82cbad96-ea9f-40fb-9225-07496323e35d",
+      "177f7fa5-c9f3-4673-a2fa-28451a123e61"
+    ],
+    "statuses": {}
+  },
+  "id": null
+}
+```
+
+#### Command (include\_status = true)
+
+```json
+{
+  "mmrpc": "2.0",
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "active_swaps",
+  "params": {
+    "include_status": true
+  },
+  "id": 42
+}
+```
+
+#### Response (statuses included)
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+      "uuids": [
+          "7b60a494-f159-419c-8f41-02e10f897513"
+      ],
+      "statuses": {
+          "7b60a494-f159-419c-8f41-02e10f897513": {
+              "swap_type": "TakerV1",
+              "swap_data": {
+                  "uuid": "7b60a494-f159-419c-8f41-02e10f897513",
+                  "my_order_uuid": "7b60a494-f159-419c-8f41-02e10f897513",
+                  "events": [
+                      {
+                          "timestamp": 1730633787643,
+                          "event": {
+                              "type": "Started",
+                              "data": {
+                                  "taker_coin": "MARTY",
+                                  "maker_coin": "DOC",
+                                  "maker": "15d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732",
+                                  "my_persistent_pub": "034cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256",
+                                  "lock_duration": 7800,
+                                  "maker_amount": "2.4",
+                                  "taker_amount": "2.4",
+                                  "maker_payment_confirmations": 1,
+                                  "maker_payment_requires_nota": false,
+                                  "taker_payment_confirmations": 1,
+                                  "taker_payment_requires_nota": false,
+                                  "taker_payment_lock": 1730641586,
+                                  "uuid": "7b60a494-f159-419c-8f41-02e10f897513",
+                                  "started_at": 1730633786,
+                                  "maker_payment_wait": 1730636906,
+                                  "maker_coin_start_block": 803888,
+                                  "taker_coin_start_block": 818500,
+                                  "fee_to_send_taker_fee": {
+                                      "coin": "MARTY",
+                                      "amount": "0.00001",
+                                      "paid_from_trading_vol": false
+                                  },
+                                  "taker_payment_trade_fee": {
+                                      "coin": "MARTY",
+                                      "amount": "0.00001",
+                                      "paid_from_trading_vol": false
+                                  },
+                                  "maker_payment_spend_trade_fee": {
+                                      "coin": "DOC",
+                                      "amount": "0.00001",
+                                      "paid_from_trading_vol": true
+                                  },
+                                  "maker_coin_htlc_pubkey": "034cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256",
+                                  "taker_coin_htlc_pubkey": "034cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256",
+                                  "p2p_privkey": null
+                              }
+                          }
+                      },
+                      {
+                          "timestamp": 1730633801655,
+                          "event": {
+                              "type": "Negotiated",
+                              "data": {
+                                  "maker_payment_locktime": 1730649385,
+                                  "maker_pubkey": "000000000000000000000000000000000000000000000000000000000000000000",
+                                  "secret_hash": "b476e27c0c6680ac67765163b1b5736dd7649512",
+                                  "maker_coin_swap_contract_addr": null,
+                                  "taker_coin_swap_contract_addr": null,
+                                  "maker_coin_htlc_pubkey": "0315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732",
+                                  "taker_coin_htlc_pubkey": "0315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732"
+                              }
+                          }
+                      },
+                      {
+                          "timestamp": 1730633802415,
+                          "event": {
+                              "type": "TakerFeeSent",
+                              "data": {
+                                  "tx_hex": "0400008085202f8901a12c9c4c1c0e3ebd6329a7a0cd3c0a34a2355e5bea93b50faaa46d8889eb4ee0000000006a47304402200774c8e6fbb94df8ab73d9dbbd858326b361cc132d14c90e4ebf7d2a6bc5f9b402204fa716b684c20a3c56b28a42e63bfa3edcd3a76e261bee674f00ec0ccff674160121034cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256ffffffff0290b60400000000001976a914ca1e04745e8ca0c60d8c5881531d51bec470743f88ac882e4317120000001976a914d64ad24e655ba7221ea51c7931aad5b98da77f3c88ac4a602767000000000000000000000000000000",
+                                  "tx_hash": "3febb9949f3e751c568b774719a9fbf851bc9b4c6083da8c0927e4d1c078c21c"
+                              }
+                          }
+                      },
+                      {
+                          "timestamp": 1730633804416,
+                          "event": {
+                              "type": "TakerPaymentInstructionsReceived",
+                              "data": null
+                          }
+                      },
+                      {
+                          "timestamp": 1730633804421,
+                          "event": {
+                              "type": "MakerPaymentReceived",
+                              "data": {
+                                  "tx_hex": "0400008085202f89045c20450775f07a4c448fbfebe47fdfa058c9a25254d36874765b44e1b3aaa193020000006a473044022079e6fbe2a24beb093858c644f765403d7a23714c17bee99c0b88fdd4b1d2bfbf02206f104b94437e4ce39d6854b48c1abccd218ee42436c8b5ac29e9136d538aa89501210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff620a3f975950554a03ecce8a2918958e8f1a17db70e7efe420618f3622844196000000006a47304402205721b4ce8c079604ce6f5779289fdc66912e064f12c40cc174daab80534a623f0220575fcc814edbec126834ce408ecbcf7ec2d7a8df2e323273266c8b47518ba9e701210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff9ac8dbb806e5722c00c60623c7313c41892649531a1c134f5d700b8f85157559000000006a473044022074a909367ba10cf375fb84414bad2ee41ffb35940132d94a9033736185df4b58022032b6dd0aeb5e102584e63d294d66367e19eaa599ed438d0209a039190bca10f401210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff46c38d985571abe367e07c7415b278bebdaa7b6b7283a7d069dfde6fb820cb8d020000006a47304402203397ffb5b16d0c829aac977ae92d8bc76cd3e9afc17bef3da436272bb672a0bd02207b3c026e25fd70048f12c166851a1d53ff2931e5073028588dde9715d63a527501210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff03001c4e0e0000000017a914f9bb3725cdd5d07b6f2b5387b5cf4471a4ad0463870000000000000000166a14b476e27c0c6680ac67765163b1b5736dd7649512dee80841410500001976a9141462c3dd3f936d595c9af55978003b27c250441f88ac4b602767000000000000000000000000000000",
+                                  "tx_hash": "ebeba78542427dcf9bc720063582b99153afe6efcde49d16aacf67a8e597a41e"
+                              }
+                          }
+                      },
+                      {
+                          "timestamp": 1730633804421,
+                          "event": {
+                              "type": "MakerPaymentWaitConfirmStarted"
+                          }
+                      },
+                      {
+                          "timestamp": 1730633836140,
+                          "event": {
+                              "type": "MakerPaymentValidatedAndConfirmed"
+                          }
+                      },
+                      {
+                          "timestamp": 1730633839137,
+                          "event": {
+                              "type": "TakerPaymentSent",
+                              "data": {
+                                  "tx_hex": "0400008085202f89011cc278c0d1e427098cda83604c9bbc51f8fba91947778b561c753e9f94b9eb3f010000006a473044022024b2c5bc5b23e8e774f6a8001de8f94a4e6888456722fede2be6b061d6d93c9302203805a7d1c9361fee2066e26f6196476f73f34246f60308cfafa3783a94a3cab30121034cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256ffffffff03001c4e0e0000000017a914fbb04e8d9b7b4098c887aed16124291646462525870000000000000000166a14b476e27c0c6680ac67765163b1b5736dd7649512a00ef508120000001976a914d64ad24e655ba7221ea51c7931aad5b98da77f3c88ac6c602767000000000000000000000000000000",
+                                  "tx_hash": "08e94af501630e46f4b2c5d64e6851c6bc9a3828506fef9f6668938d36c7b2da"
+                              }
+                          }
+                      },
+                      {
+                          "timestamp": 1730633839137,
+                          "event": {
+                              "type": "WatcherMessageSent",
+                              "data": [
+                                  [
+                                      ...
+                                  ],
+                                  [
+                                      ...
+                                  ]
+                              ]
+                          }
+                      }
+                  ],
+                  "maker_amount": "2.4",
+                  "maker_coin": "DOC",
+                  "maker_coin_usd_price": null,
+                  "taker_amount": "2.4",
+                  "taker_coin": "MARTY",
+                  "taker_coin_usd_price": null,
+                  "gui": "mm2_777",
+                  "mm_version": "2.2.0-beta_caf803b",
+                  "success_events": [
+                      "Started",
+                      "Negotiated",
+                      "TakerFeeSent",
+                      "TakerPaymentInstructionsReceived",
+                      "MakerPaymentReceived",
+                      "MakerPaymentWaitConfirmStarted",
+                      "MakerPaymentValidatedAndConfirmed",
+                      "TakerPaymentSent",
+                      "WatcherMessageSent",
+                      "TakerPaymentSpent",
+                      "MakerPaymentSpent",
+                      "MakerPaymentSpentByWatcher",
+                      "MakerPaymentSpendConfirmed",
+                      "Finished"
+                  ],
+                  "error_events": [
+                      "StartFailed",
+                      "NegotiateFailed",
+                      "TakerFeeSendFailed",
+                      "MakerPaymentValidateFailed",
+                      "MakerPaymentWaitConfirmFailed",
+                      "TakerPaymentTransactionFailed",
+                      "TakerPaymentWaitConfirmFailed",
+                      "TakerPaymentDataSendFailed",
+                      "TakerPaymentWaitForSpendFailed",
+                      "MakerPaymentSpendFailed",
+                      "MakerPaymentSpendConfirmFailed",
+                      "TakerPaymentWaitRefundStarted",
+                      "TakerPaymentRefundStarted",
+                      "TakerPaymentRefunded",
+                      "TakerPaymentRefundedByWatcher",
+                      "TakerPaymentRefundFailed",
+                      "TakerPaymentRefundFinished"
+                  ]
+              }
+          }
+      }
+  },
+  "id": 42
+}
+```
 export const title = "Komodo DeFi Framework Method: Add Delegation";
 export const description =
   "The add_delegation method initiates your node's staking of a compatible coin.";
@@ -2739,54 +2994,6 @@ The `stop_eth_fee_estimator` method allows you to to stop the gas priority fee e
 }
 
 ```
-export const title = "Komodo DeFi Framework Method: Get Current MTP";
-export const description = "The get_current_mtp method returns the Median Time Past (MTP) from electrum servers for UTXO coins.";
-
-# get\_current\_mtp
-
-The `get_current_mtp` method returns the Median Time Past (MTP) from electrum servers for UTXO coins. This information is useful for debugging, specifically in cases where an electrum server has been misconfigured.
-
-## Arguments
-
-| Parameter | Type    | Description                                                                             |
-| --------- | ------- | --------------------------------------------------------------------------------------- |
-| coin      | string  | A compatible (UTXO) coin's ticker                                                       |
-| id        | integer | Optional. Identifies a request to allow matching it with a response. Defaults to `null` |
-
-#### Response
-
-| Parameter | Type    | Description                                                                                                   |
-| --------- | ------- | ------------------------------------------------------------------------------------------------------------- |
-| mtp       | integer | Unix timestamp                                                                                                |
-| id        | integer | Identifies a response to allow matching it with a request. Defaults to `null` if `id` not provided in request |
-
-#### 📌 Examples
-
-#### Command
-
-```json
-{
-  "method": "get_current_mtp",
-  "userpass": "RPC_UserP@SSW0RD",
-  "mmrpc": "2.0",
-  "id": 42,
-  "params": {
-    "coin": "DOC"
-  }
-}
-```
-
-#### Response (success)
-
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "mtp": 1658746383
-  },
-  "id": 42
-}
-```
 export const title = "Komodo DeFi Framework Method: Get Enabled Coins";
 export const description = "The get_enabled_coins method returns data of coins that are currently enabled on the user's Komodo DeFi Framework API node.";
 
@@ -3665,10 +3872,10 @@ Where the value indicates:
 
 ### CoinProtocol
 
-| Parameter      | Type    | Description                                                                               |
-| -------------- | ------- | ----------------------------------------------------------------------------------------- |
-| type           | integer | One of the supported \[coin types]\(link TBA)                                             |
-| protocol\_data | object  | A standard [CoinProtocolData](/komodo-defi-framework/api/v20/#coin-protocol-data) object. |
+| Parameter      | Type    | Description                                                                                  |
+| -------------- | ------- | -------------------------------------------------------------------------------------------- |
+| type           | integer | One of the supported [coin types](https://github.com/KomodoPlatform/coins/blob/master/coins) |
+| protocol\_data | object  | A standard [CoinProtocolData](/komodo-defi-framework/api/v20/#coin-protocol-data) object.    |
 
 ### CoinProtocolData
 
@@ -3865,7 +4072,7 @@ For requests which return many results, pagination offsets may be applied. \*\* 
 
 ### HistoryTarget
 
-Used to specify a HD wallet `account_id` or `address_id` for \[my\_tx\_history (v2)] requests.
+Used to specify a HD wallet `account_id` or `address_id` for [my\_tx\_history v2](/komodo-defi-framework/api/v20/my_tx_history/) requests.
 
 | Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                              |
 | ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -5405,59 +5612,6 @@ The v2 `orderbook` method requests from the network the currently available orde
     }
   },
   "id": 42
-}
-```
-export const title = "Komodo DeFi Framework Method: Peer Connection Healthcheck";
-export const description = "The peer_connection_healthcheck method checks if a peer is connected to the KDF network.";
-
-# peer\_connection\_healthcheck
-
-The `peer_connection_healthcheck` method checks if a peer is connected to the KDF network using the [currently configured](/komodo-defi-framework/setup/configure-mm2-json/) `netid`.
-
-## Arguments
-
-| Structure | Type | Description |
-| --------- | ---- | ----------- |
-| (none)    |      |             |
-
-#### Response
-
-| Structure | Type    | Description                             |
-| --------- | ------- | --------------------------------------- |
-| result    | boolean | True if peer found connected to network |
-
-#### 📌 Examples
-
-#### Command
-
-```json
-{
-  "userpass": "RPC_UserP@SSW0RD",
-  "method": "peer_connection_healthcheck",
-  "mmrpc": "2.0",
-  "params": {
-    "peer_address": "12D3KooWCcjBQ3kG3BzjVwuZqGDL2YxXik6SCDv2YAHj4E54NiAy"
-  }
-}
-```
-
-#### Response (peer found)
-
-```json
-{
-    "mmrpc": "2.0",
-    "result": true,
-    "id": null
-}
-```
-
-#### Response (peer not found)
-
-```json
-{
-    "mmrpc": "2.0",
-    "result": false,
-    "id": null
 }
 ```
 export const title = "Komodo DeFi Framework Method: Recreate Swap Data";
@@ -7145,6 +7299,198 @@ The `update_version_stat_collection` method updates the polling interval for ver
   "error_trace": "lp_stats:374]",
   "error_type": "NotRunning",
   "id": null
+}
+```
+export const title = "Komodo DeFi Framework Method: Get Current MTP";
+export const description = "The get_current_mtp method returns the Median Time Past (MTP) from electrum servers for UTXO coins.";
+
+# get\_current\_mtp
+
+The `get_current_mtp` method returns the Median Time Past (MTP) from electrum servers for UTXO coins. This information is useful for debugging, specifically in cases where an electrum server has been misconfigured.
+
+## Arguments
+
+| Parameter | Type    | Description                                                                             |
+| --------- | ------- | --------------------------------------------------------------------------------------- |
+| coin      | string  | A compatible (UTXO) coin's ticker                                                       |
+| id        | integer | Optional. Identifies a request to allow matching it with a response. Defaults to `null` |
+
+#### Response
+
+| Parameter | Type    | Description                                                                                                   |
+| --------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| mtp       | integer | Unix timestamp                                                                                                |
+| id        | integer | Identifies a response to allow matching it with a request. Defaults to `null` if `id` not provided in request |
+
+#### 📌 Examples
+
+#### Command
+
+```json
+{
+  "method": "get_current_mtp",
+  "userpass": "RPC_UserP@SSW0RD",
+  "mmrpc": "2.0",
+  "id": 42,
+  "params": {
+    "coin": "DOC"
+  }
+}
+```
+
+#### Response (success)
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+    "mtp": 1658746383
+  },
+  "id": 42
+}
+```
+export const title = "Komodo DeFi Framework Method: Get Token Info";
+export const description = "The `get_token_info` method returns the ticker and decimals values (required for activation) given a platform and contract as input.";
+
+# get\_token\_info
+
+The `get_token_info` method returns the ticker and decimals values (required for activation) given a platform and contract as input.
+The platform parent coin (e.g. ETH, AVAX, MATIC etc) must be activated before using this method. After requesting the token info, you will be able to activate the custom token.
+
+Custom tokens will be `wallet_only` - i.e. you can send and recieve tokens, but will not be able to do atomic swaps.
+To apply for a formal listing of the custom token, please [review the requirements](/komodo-defi-framework/tutorials/listing-a-new-coin/) in our "coins" github repository, and get in our with our team on the [KomodoPlatform Discord](https://komodoplatform.com/discord).
+
+## Arguments
+
+| Structure                                 | Type   | Description                                                                                                                                                                                                        |
+| ----------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| protocol.type                             | string | Token type - e.g `ERC20` for tokens on the Ethereum network                                                                                                                                                        |
+| protocol.protocol\_data                   | object | Required for tokens only.                                                                                                                                                                                          |
+| protocol.protocol\_data.platform          | string | The parent coin of the token's platform - e.g `MATIC` for PLG20 tokens                                                                                                                                             |
+| protocol.protocol\_data.contract\_address | string | **Must be mixed case** The identifying hex string for the token's contract. Can be found on sites like [EthScan](https://etherscan.io/), [BscScan](https://bscscan.com/) & [PolygonScan](https://polygonscan.com/) |
+
+### Response
+
+| Structure     | Type    | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type          | string  | Token type - e.g `PLG20` for tokens on the Polygon network                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| info.symbol   | string  | The ticker of the token linked to the contract address and network requested                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| info.decimals | integer | Defines the number of digits after the decimal point that should be used to display the orderbook amounts, balance, and the value of inputs to be used in the case of order creation or a `withdraw` transaction. The default value used for a UTXO type coin (Bitcoin Protocol) is `8` and the default value used for a ERC20 Token is `18`. It is **very important** for this value to be set correctly. For example, if this value was set as `9` for BTC, a command to withdraw `1 BTC` tries to withdraw `10^9` satoshis of Bitcoin, i.e., `10 BTC` |
+
+### 📌 Examples
+
+#### Get Token Info on Avalanche
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "mmrpc": "2.0",
+  "method": "get_token_info",
+  "params": {
+    "protocol": {
+      "type": "ERC20",
+      "protocol_data": {
+        "platform": "AVAX",
+        "contract_address": "0x4f3c5C53279536fFcfe8bCafb78E612E933D53c6"
+      }
+    }
+  }
+}
+```
+
+#### Response (success)
+
+```json
+{
+  "mmrpc": "2.0",
+  "result": {
+      "type": "ERC20",
+      "info": {
+          "symbol": "PNIC",
+          "decimals": 18
+      }
+  },
+  "id": null
+}
+```
+
+### Error Responses
+
+#### InvalidRequest: Protocol parent coin not active
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "No such coin AVAX",
+    "error_path": "tokens.lp_coins",
+    "error_trace": "tokens:68] lp_coins:4744]",
+    "error_type": "NoSuchCoin",
+    "error_data": {
+        "coin": "AVAX"
+    },
+    "id": null
+}
+```
+export const title = "Komodo DeFi Framework Method: v2 Utilities";
+export const description =
+  "This section includes utility methods for the Komodo DeFi Framework.";
+
+# v2 Utility Methods
+
+*   [get\_current\_mtp](/komodo-defi-framework/api/v20/utils/get_current_mtp/)
+*   [get\_token\_info](/komodo-defi-framework/api/v20/utils/get_token_info/)
+*   [peer\_connection\_healthcheck](/komodo-defi-framework/api/v20/utils/peer_connection_healthcheck/)
+export const title = "Komodo DeFi Framework Method: Peer Connection Healthcheck";
+export const description = "The peer_connection_healthcheck method checks if a peer is connected to the KDF network.";
+
+# peer\_connection\_healthcheck
+
+The `peer_connection_healthcheck` method checks if a peer is connected to the KDF network using the [currently configured](/komodo-defi-framework/setup/configure-mm2-json/) `netid`.
+
+## Arguments
+
+| Structure | Type | Description |
+| --------- | ---- | ----------- |
+| (none)    |      |             |
+
+#### Response
+
+| Structure | Type    | Description                             |
+| --------- | ------- | --------------------------------------- |
+| result    | boolean | True if peer found connected to network |
+
+#### 📌 Examples
+
+#### Command
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "peer_connection_healthcheck",
+  "mmrpc": "2.0",
+  "params": {
+    "peer_address": "12D3KooWCcjBQ3kG3BzjVwuZqGDL2YxXik6SCDv2YAHj4E54NiAy"
+  }
+}
+```
+
+#### Response (peer found)
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": true,
+    "id": null
+}
+```
+
+#### Response (peer not found)
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": false,
+    "id": null
 }
 ```
 export const title = "Komodo DeFi Framework Method: Withdraw";
