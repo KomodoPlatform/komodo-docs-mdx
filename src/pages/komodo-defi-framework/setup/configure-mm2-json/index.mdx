@@ -16,7 +16,6 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 | ---------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | gui                          | string          | Information to identify which app, tool or product is using the API, e.g. `KomodoWallet iOS 1.0.1`. Helps developers identify if an issue is related to specific builds or operating systems etc.                                                                                                                                                                                                                                     |
 | netid                        | integer         | Nework ID number, telling the Komodo DeFi Framework  which network to join. 8762 is the current main network, though alternative netids can be used for testing or "private" trades as long as seed nodes exist to support it.                                                                                                                                                                                                        |
-| passphrase                   | string          | Your passphrase; this is the source of each of your coins private keys. [**KEEP IT SAFE!**](https://www.youtube.com/watch?v=WFpxVbTqhB8)                                                                                                                                                                                                                                                                                              |
 | rpc\_password                | string          | For RPC requests that need authentication, this will need to match the `userpass` value in the request body.                                                                                                                                                                                                                                                                                                                          |
 | allow\_weak\_password        | boolean         | Optional, defaults to `false`. If `true`, will allow low entropy rpc\_password. If `false` rpc\_password must not have 3 of the same characters in a row, must be between 8-32 characters in length, must contain at least one of each of the following: numeric, uppercase, lowercase, special character (e.g. !#$\*). It also can not contain the word "password", or the chars `<`, `>`, or `&`.                                   |
 | dbdir                        | string          | Optional, defaults to a subfolder named `DB` in the path of your `mm2` binary. This path will store the Komodo DeFi-API database data.                                                                                                                                                                                                                                                                                                |
@@ -34,6 +33,10 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 | https                        | boolean         | Optional. Only used with wss. Defaults to `false`, set to `true` to allow TLS/SSL enabled RPC (e.g. remote queries to a domain with a valid SSL certificate).                                                                                                                                                                                                                                                                         |
 | wss\_certs                   | object          | Optional. Contains fields for `server_priv_key` and `certificate` to allow RPC or P2P communications over TLS/SSL.                                                                                                                                                                                                                                                                                                                    |
 | event\_stream\_configuration | object          | Optional, a standard [EventStreamConfig](/komodo-defi-framework/api/v20/#derivation-method) object. Configuration for subscribing to events.                                                                                                                                                                                                                                                                                          |
+| use\_\trading\_\proto\_\v2   | boolean         | Optional, defaults to `false`. If `true`, the Komodo DeFi-API will use the upgraded v2 trading protocol introduced in Komodo DeFi Framework v2.1.0-beta.                                                                                                                                                                                                                                                                              |
+| passphrase                   | string          | Optional. Your passphrase (mnemonic phrase) in plain text. This is the source of each of your coins private keys. [**KEEP IT SAFE!**](https://www.youtube.com/watch?v=WFpxVbTqhB8). For more secure, encrypted storage in a local database, use the `wallet_name` and `wallet_password` parameters below.                                                                                                                             |
+| wallet\_name                 | string          | Optional. An arbitrary name for the wallet. If no `passphrase` is provided, and the wallet has been used already, the `wallet_password` will be used to decrypt the local stored mnemonic phrase. If it has not been used before, a mnemonic will be generated and encrypted for local storage. The mnemonic phrase can be seen in plain text using the (/komodo-defi-framework/api/v20/get\_mnemonic)\[] method.                     |
+| wallet\_password             | string          | Optional, required if using `wallet_name`. The password use to encrypt your wallet's mnemonic phrase for local storage, and decrypt the wallet when logging in.                                                                                                                                                                                                                                                                       |
 
 #### Example (allowing weak password):
 
@@ -89,6 +92,18 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
     "certificate": "/path/to/fullchain.pem"
   }
 
+}
+```
+
+#### Example with `wallet_name` and `wallet_password`
+
+```json
+{
+  "gui": "DEVDOCS_CLI",
+  "netid": 8762,
+  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd"
+  "wallet_name": "Gringotts Retirement Fund",
+  "wallet_password": "Q^wJZg~Ck3.tPW~asnM-WrL"
 }
 ```
 
