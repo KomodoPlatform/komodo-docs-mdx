@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./gen_api_methods_table.py
+#./gen_api_methods_table.py
 
 cd js && npm ci
 cd ../../
