@@ -2627,7 +2627,7 @@ The `max_maker_vol` method returns the maximum volume of a coin which can be use
 ```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the clear_nft_db method Komodo DeFi Framework  provides to clear NFT data from your local database";
+  "This document describes the clear_nft_db method Komodo DeFi Framework provides to clear NFT data from your local database";
 
 # Clear NFT Database {{label : 'clear_nft_db', tag : 'API-v2'}}
 
@@ -2705,9 +2705,125 @@ Returned when the `chains` parameter contains an unsupported network.
     "id": null
 }
 ```
+
+#### InvalidRequest
+
+Returned when neither the `chains` or `clear_all` parameters are present.
+
+```json
+{
+    "mmrpc":"2.0",
+    "error":"Invalid request: Nothing to clear was specified","error_path":"nft","error_trace":"nft:1512]",
+    "error_type":"InvalidRequest",
+    "error_data":"Nothing to clear was specified",
+    "id":null
+}
+```
+export const title = "Komodo DeFi Framework Method: Enable NFT";
+export const description =
+  "The enable_nft method allows you to activate NFT-like tokens on the platform.";
+
+# enable\_nft
+
+The 'enable\_nft' method activates NFT-like tokens on the platform, if the NFT network was already activated with the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/) method, but without the `nft_req` parameter.
+
+| parameter          | Type   | Description                                                                                      |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------------ |
+| ticker             | string | The ticker of the NFT network, with `NFT_` as a prefix.                                          |
+| activation\_params | object | A standard [NftProvider](/komodo-defi-framework/api/common_structures/nfts/#nft-provider) object |
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "enable_nft",
+  "mmrpc": "2.0",
+  "params": {
+    "ticker": "NFT_MATIC",
+    "activation_params": {
+      "provider": {
+        "type": "Moralis",
+        "info": {
+          "url": "https://moralis-proxy.komodo.earth",
+          "komodo_proxy": true
+        }
+      }
+    }
+  }
+}
+```
+
+## Response
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": {
+        "nfts": {
+            "0xc28a19e9a663d966cf99532bdb1229df1b0e344b,1": {
+                "token_address": "0xc28a19e9a663d966cf99532bdb1229df1b0e344b",
+                "token_id": "1",
+                "chain": "POLYGON",
+                "contract_type": "ERC1155",
+                "amount": "1"
+            },
+            "0xd25f13e4ba534ef625c75b84934689194b7bd59e,14": {
+                "token_address": "0xd25f13e4ba534ef625c75b84934689194b7bd59e",
+                "token_id": "14",
+                "chain": "POLYGON",
+                "contract_type": "ERC721",
+                "amount": "1"
+            }
+        },
+        "platform_coin": "MATIC"
+    },
+    "id": null
+}
+```
+
+## Error - Platform coin is not yet activated
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Platform coin MATIC is not activated",
+  "error_path": "token.lp_coins",
+  "error_trace": "token:126] lp_coins:2797]",
+  "error_type": "PlatformCoinIsNotActivated",
+  "error_data": "MATIC",
+  "id": null
+}
+```
+
+## Error - Token already activated
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Token NFT_MATIC is already activated",
+  "error_path": "token",
+  "error_trace": "token:119]",
+  "error_type": "TokenIsAlreadyActivated",
+  "error_data": "NFT_MATIC",
+  "id": null
+}
+```
+
+## Error - Token config not found in coins file
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Token NFT_TESTTT config is not found",
+  "error_path": "token.prelude",
+  "error_trace": "token:122] prelude:79]",
+  "error_type": "TokenConfigIsNotFound",
+  "error_data": "NFT_TESTTT",
+  "id": null
+}
+```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens - Get NFT List";
 export const description =
-  "This document describes all the get_nft_list method Komodo DeFi Framework  provides to get a list of your wallets NFTs";
+  "This document describes all the get_nft_list method Komodo DeFi Framework provides to get a list of your wallets NFTs";
 
 # Get a list of NFTs {{label : 'get_nft_list', tag : 'API-v2'}}
 
@@ -3016,7 +3132,7 @@ The supported chains are
 ```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the get_nft_metadata method Komodo DeFi Framework  provides to get metadata for your NFTs";
+  "This document describes the get_nft_metadata method Komodo DeFi Framework provides to get metadata for your NFTs";
 
 # Get NFT Metadata {{label : 'get_nft_metadata', tag : 'API-v2'}}
 
@@ -3128,7 +3244,7 @@ export const description =
 ```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the get_nft_transfers method Komodo DeFi Framework  provides to get information about your NFT transactions";
+  "This document describes the get_nft_transfers method Komodo DeFi Framework provides to get information about your NFT transactions";
 
 # Get a list of NFT transfers {{label : 'get_nft_transfers', tag : 'API-v2'}}
 
@@ -3225,11 +3341,14 @@ To view NFT transactions, you must [activate the coin](/komodo-defi-framework/ap
 ```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes all the methods Komodo DeFi Framework  provides to get information and transact with NFTs";
+  "This document describes all the methods Komodo DeFi Framework provides to get information and transact with NFTs";
 
 # Non Fungible Tokens (NFTs)
 
 The Komodo DeFi Framework API supports [ERC1155](https://www.nftstandards.wtf/Standards/ERC1155+Multi+token) and [ERC721](https://www.nftstandards.wtf/Standards/ERC721+Non+Fungible+Standard) NFTs via the [Moralis API](https://docs.moralis.io/) on the Avalanche (AVAX), BNB Smart Chain (BNB), Ethereum (ETH), Fantom (FTM), Polygon (MATIC) networks.
+
+To interact with NFTs, you will first need to activate the coin for the network the NFT is on, and initialise NFT support for the network.
+This can be done with either the [enable\_eth\_with\_tokens](/komodo-defi-framework/api/v20/enable_eth_with_tokens/) method (if including the `nft_req` param) or the [enable\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/enable_nft/) method (if the network is already activated without NFT support).
 
 Before using other NFT methods, you should first call the [update\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/)
 method to populate/refresh the local database.
@@ -3246,6 +3365,10 @@ method to populate/refresh the local database.
 
 *   Withdraw ERC721 tokens with [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/#erc-721-withdraw-example)
 *   Withdraw ERC1155 tokens with [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/#erc-1155-withdraw-example)
+
+## NFT Utility Methods
+
+*   Clear local NFT data with [clear\_nft\db](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/)
 
 View the source code at: [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs)
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens - Query NFT database tables";
@@ -3375,7 +3498,7 @@ It has the following columns:
 | AVAX  | 0                    |
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes all the refresh_nft_metadata method Komodo DeFi Framework  provides to refresh an NFT's metadata";
+  "This document describes all the refresh_nft_metadata method Komodo DeFi Framework provides to refresh an NFT's metadata";
 
 # Refresh NFT Metadata {{label : 'refresh_nft_metadata', tag : 'API-v2'}}
 
@@ -3383,14 +3506,14 @@ This method refreshes metadata of one NFT and metadata of related transactions w
 
 ### Request Parameters
 
-| Parameter      | Type    | Description                                                                                                                                                                                                       |
-| -------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chain          | string  | Chains which holds the NFT you would like to updated metadata for.                                                                                                                                                |
-| token\_address | string  | Token address.                                                                                                                                                                                                    |
-| token\_id      | string  | Token ID.                                                                                                                                                                                                         |
-| proxy\_auth    | boolean | Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false).                                                                                 |
-| url            | string  | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent (if proxy\_auth is set to true, will need to provide a new Komodo Proxy URL). |
-| url\_antispam  | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs).                                                           |
+| Parameter      | Type    | Description                                                                                                                                                                                                         |
+| -------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chain          | string  | Chains which holds the NFT you would like to updated metadata for.                                                                                                                                                  |
+| token\_address | string  | Token address.                                                                                                                                                                                                      |
+| token\_id      | string  | Token ID.                                                                                                                                                                                                           |
+| komodo\_proxy  | boolean | Optional. Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false).                                                                         |
+| url            | string  | URL link to the Moralis API proxy base url ([https://moralis-proxy.komodo.earth](https://moralis-proxy.komodo.earth)) or equivalent (if komodo\_proxy is set to true, will need to provide a new Komodo Proxy URL). |
+| url\_antispam  | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent. [docs](https://nft.antispam.dragonhound.info/docs).                                                             |
 
 If there are no errors, this request will return an empty response.
 
@@ -3421,10 +3544,28 @@ If there are no errors, this request will return an empty response.
 }
 ```
 
-Need to add some error responses here.
+## Error responses
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Token: token_address 0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff, token_id 5 was not found in wallet",
+    "error_path": "nft",
+    "error_trace": "nft:504]",
+    "error_type": "GetNftInfoError",
+    "error_data": {
+        "error_type": "TokenNotFoundInWallet",
+        "error_data": {
+            "token_address": "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff",
+            "token_id": "5"
+        }
+    },
+    "id": null
+}
+```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the update_nft method Komodo DeFi Framework  provides to update NFT information in your local database";
+  "This document describes the update_nft method Komodo DeFi Framework provides to update NFT information in your local database";
 
 # Update NFT {{label : 'update_nft', tag : 'API-v2'}}
 
@@ -3445,12 +3586,12 @@ These coins can be activated using the [enable\_eth\_with\_tokens](/komodo-defi-
 
 ### Request Parameters
 
-| Parameter     | Type    | Description                                                                                                                                                                  |
-| ------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chains        | array   | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.                                                                           |
-| proxy\_auth   | boolean | Indicates whether authentication is required for accessing the proxy URLs (true if necessary, false otherwise).                                                              |
-| url           | string  | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent (if proxy\_auth is set to true, will need to provide a new Komodo Proxy URL). |
-| url\_antispam | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent.                                                                          |
+| Parameter     | Type    | Description                                                                                                                                                                    |
+| ------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| chains        | array   | List of networks to scan for NFTs. Options are: `POLYGON`, `FANTOM`, `ETH`, `BSC`, or `AVALANCHE`.                                                                             |
+| komodo\_proxy | boolean | Optional. Indicates whether authentication is required for accessing the proxy URLs.                                                                                           |
+| url           | string  | URL link to the [Moralis API proxy base url](https://moralis-proxy.komodo.earth) or equivalent (if komodo\_proxy is set to true, will need to provide a new Komodo Proxy URL). |
+| url\_antispam | string  | URL link to the [Antispam API proxy base url](https://nft.antispam.dragonhound.info) or equivalent.                                                                            |
 
 If there are no errors, this request will return an empty response.
 When updating multiple networks, or wallets with numerous NFTs, this request may take a while to complete.
@@ -3464,11 +3605,12 @@ When updating multiple networks, or wallets with numerous NFTs, this request may
   "mmrpc": "2.0",
   "params": {
     "chains": [
+      "BSC",
       "POLYGON"
     ],
+    "komodo_proxy": false,
     "url": "https://moralis-proxy.komodo.earth",
-    "url_antispam": "https://nft.antispam.dragonhound.info",
-    "proxy_auth": false
+    "url_antispam": "https://nft.antispam.dragonhound.info"
   }
 }
 ```
@@ -3481,10 +3623,42 @@ When updating multiple networks, or wallets with numerous NFTs, this request may
 }
 ```
 
-Need to add some error responses here.
+### Error Types
+
+#### TokenIsAlreadyActivated
+
+This error occurs when NFTs are already activated for the selected network.
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Token NFT_MATIC is already activated",
+    "error_path": "token",
+    "error_trace": "token:121]",
+    "error_type": "TokenIsAlreadyActivated",
+    "error_data": "NFT_MATIC",
+    "id": null
+}
+```
+
+#### TokenIsAlreadyActivated
+
+This error occurs when NFTs are already activated for the selected network.
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Token NFT_MATICC config is not found",
+    "error_path": "token.prelude",
+    "error_trace": "token:124] prelude:79]",
+    "error_type": "TokenConfigIsNotFound",
+    "error_data": "NFT_MATICC",
+    "id": null
+}
+```
 export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
 export const description =
-  "This document describes the withdraw_nft method Komodo DeFi Framework  provides to send NFTs to an address";
+  "This document describes the withdraw_nft method Komodo DeFi Framework provides to send NFTs to an address";
 
 # Withdraw NFTs {{label : 'withdraw_nft', tag : 'API-v2'}}
 

@@ -4,6 +4,128 @@ export const description =
 
 # Change Log
 
+## Komodo DeFi Framework v2.2.0-beta
+
+### Custom Token Support and various optimizations
+
+This release introduces significant improvements to connection handling and token support capabilities. Key highlights include an intelligent Electrum client architecture with configurable connection modes, support for custom EVM tokens without pre-configuration, and a robust connection health check system. The release also brings notable stability enhancements to the Cosmos integration and delivers substantial performance optimizations and bug fixes across multiple components.
+
+### Release Notes
+
+#### Features
+
+*   **Custom Tokens Support**
+    *   Support for enabling custom EVM tokens without requiring them to be in the coins config was added by @shamardy. This feature allows users to interact with any ERC20 token by providing the contract address.
+    *   **Relevant PR:** [#2141](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2141)
+
+*   **Connection Healthcheck**
+    *   Connection healthcheck implementation for peers was introduced by @onur-ozkan.
+    *   **Relevant PR:**  [#2194](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2194)
+
+### Enhancements
+
+*   **Electrum Client**
+    *   Electrum client was refactored by @rozhkovdmitrii and @mariocynicys to add min/max connection controls, with server priority based on list order.
+        *   Electrum client can now operate in single-server mode (1,1) to reduce resource usage (especially beneficial for mobile) or multi-server (legacy) mode for reliability.
+
+        *   Higher priority servers automatically replace lower priority ones when reconnecting during periodic retries or when connection count drops below minimum.
+    *   **Relevant PR:** [#1966](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1966)
+
+*   **Seed Management**
+    *   A new `get_wallet_names` RPC was added by @shamardy to retrieve information about all wallet names and the currently active one.
+    *   **Relevant PR:** [#2202](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2202)
+
+*   **RPC Service**
+    *   OPTIONS requests to KDF server were added by @shamardy
+    *   **Relevant PR:** [#2191](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2191)
+
+***
+
+## NB - Backwards compatibility breaking changes
+
+### ❌ Removals
+
+*   **adex-cli** 🗑️
+    *   Status: Removed in v2.2.0-beta
+    *   Rationale: To be replaced with a simpler, more maintainable implementation
+    *   Reference: [#2234](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2234)
+
+### ⚡ API Changes
+
+*   **RPC Renaming**
+    *   `get_peers_info` RPC was renamed to `get_directly_connected_peers` by @onur-ozkan [#2195](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2195)
+*   **Cosmos Integration**
+    *   'rpc\_urls' field (previously a list of plain string values) was replaced by @onur-ozkan with 'nodes' (a list of JSON objects) in Cosmos activation payloads. [#2173](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2173)
+*   **Komodo DeFi Proxy**
+    *   All RPC methods fields controlling komodo-defi-proxy were renamed to 'komodo\_proxy' by @onur-ozkan. This affects various activations, including ETH/EVM. [#2173](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2173)
+
+***
+
+### Bug Fixes:
+
+<CollapsibleSection expandedText="Click to Hide" collapsedText="Click to Expand">
+  *   **NFT integration**
+      *   `token_id` field was added to the tx history primary key by @laruh [#2209](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2209)
+  *   **Graceful Shutdown**
+      *   CTRL-C signal handling with graceful shutdown was implemented by @onur-ozkan [#2213](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2213)
+  *   **Cosmos Integration**
+      *   Cosmos tx broadcasting error was fixed by @onur-ozkan by upgrading cosmrs to version 15. [#2238](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2238)
+      *   A bug in Cosmos transaction history address parsing logic was fixed by @onur-ozkan [#2245](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2245)
+  *   **Order Management**
+      *   Cancel order race condition was addressed using time-based cache by @shamardy [#2232](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2232)
+  *   **Legacy Swaps**
+      *   A legacy swap issue was resolved by @laruh where taker spent maker payment transactions were sometimes incorrectly marked as successful when they were actually reverted or not confirmed, particularly in EVM-based swaps. [#2199](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2199)
+          *   Two new events were added: "MakerPaymentSpendConfirmed" and "MakerPaymentSpendConfirmFailed"
+      *   A fix was introduced by @shamardy where Takers don't need to confirm their own payment as they can wait for the spending of it straight away. [#2249](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2249)
+          *   This invalidates this fix [#1442](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1442), a better solution will be introduced where taker rebroadcasts their transaction if it's not on the chain.
+      *   A fix was introduced by @shamardy for recover funds for takers when the swap was marked as unsuccessful due to the maker payment spend transaction not being confirmed. [#2242](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2242)
+          *   The required confirmations from coin config for taker/maker payment spend are now used instead of using 1 confirmation max. This is because some chains require more than 1 confirmation for finality, e.g. Polygon.
+  *   **Swap watchers**
+      *   Taker fee validation retries was fixed by @shamardy to work the same way as for makers. [#2263](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2263)
+  *   **Coins Activation**
+      *   EVM addresses are now displayed in full in iguana v2 activation response by @borngraced [#2254](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2254)
+  *   **HD Wallet**
+      *   Balance is now returned as `CoinBalanceMap` for both UTXOs and QTUM by @shamardy [#2259](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2259)
+      *   EVM addresses are displayed in full in `get_new_address` response after [#2264](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2264) by @shamardy
+  *   **RPC Service**
+      *   A fix was introduced by @mariocynicys to run rpc request futures till completion in [#1966](https://github.com/KomodoPlatform/komodo-defi-framework/pull/1966). This ensures RPC request futures complete fully even if clients disconnect, preventing partial state updates and maintaining data consistency.
+      *   Escaped response body in native RPC was removed by @borngraced [#2219](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2219)
+  *   **Security Enhancements**
+      *   Remote files are now handled in a safer way in CI by @onur-ozkan [#2217](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2217)
+  *   **Database**
+      *   Creation of the all-zeroes dir on KDF start was stopped by @shamardy [#2218](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2218)
+  *   **Build Process**
+      *   `wasm-opt` overriding was removed by @onur-ozkan [#2200](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2200)
+</CollapsibleSection>
+
+**Full Changelog**: [https://github.com/KomodoPlatform/komodo-defi-framework/compare/v2.1.0-beta...v2.2.0-beta](https://github.com/KomodoPlatform/komodo-defi-framework/compare/v2.1.0-beta...v2.2.0-beta)
+
+**Checksum & VirusTotal Analysis:**
+
+| Link                                                                                                                                         | SHA256                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| [mm2-bb749a993-Darwin-Release.zip](https://www.virustotal.com/gui/file/62c3ef36cb3cd4fc166d381d7efce6b67d3b5dc62de4080bfb39462c0c4efb48)     | `62c3ef36cb3cd4fc166d381d7efce6b67d3b5dc62de4080bfb39462c0c4efb48` |
+| [mm2-bb749a993-Linux-Release.zip](https://www.virustotal.com/gui/file/e8c4cc2b6fbddc229820e7868591b757e223a47553a66755131330345a624093)      | `e8c4cc2b6fbddc229820e7868591b757e223a47553a66755131330345a624093` |
+| [mm2-bb749a993-Win64.zip](https://www.virustotal.com/gui/file/88a723d584ef10e528b11a16327a6bcdf25867cdb6c7e6afadc77a62c8bed7dc)              | `88a723d584ef10e528b11a16327a6bcdf25867cdb6c7e6afadc77a62c8bed7dc` |
+| [mm2-bb749a993-android-aarch64-CI.zip](https://www.virustotal.com/gui/file/bdead61715e5f95e5f1d842691b7ee19b8dc9ef780bc13f1207589214ff0fc24) | `bdead61715e5f95e5f1d842691b7ee19b8dc9ef780bc13f1207589214ff0fc24` |
+| [mm2-bb749a993-android-armv7-CI.zip](https://www.virustotal.com/gui/file/bfc294ece8481aabedf21b2d3e785eedc9719f066b396da91811427fa857f2b3)   | `bfc294ece8481aabedf21b2d3e785eedc9719f066b396da91811427fa857f2b3` |
+| [mm2-bb749a993-ios-aarch64-CI.zip](https://www.virustotal.com/gui/file/545e657f6d15a1bd552e59f6006811f84876ae39837b6b68a39b1eec3094f8dc)     | `545e657f6d15a1bd552e59f6006811f84876ae39837b6b68a39b1eec3094f8dc` |
+| [mm2\_bb749a993-wasm.zip](https://www.virustotal.com/gui/file/877d42c9051c060609b969aa3dfa550d73ae24f53153dea08143d820e7d317c7)              | `877d42c9051c060609b969aa3dfa550d73ae24f53153dea08143d820e7d317c7` |
+
+This release was signed by [https://keybase.io/deckersu](https://keybase.io/deckersu) (GPG fingerprint: `FD9A 772C 7300 F4C8 94D1 A819 FE50 4808 62E6 451C`).
+
+<CollapsibleSection expandedText="Click to hide 🛡 VirusTotal analysis" collapsedText="Click to expand 🛡 VirusTotal analysis">
+  *   [`mm2-bb749a993-android-aarch64-CI.zip`](https://www.virustotal.com/gui/file-analysis/NjUxMjgyMjhmOWE1OWY4ZDI4MDQwOThhM2EwZTU2OWM6MTczMjMxOTM2OA==/detection)
+  *   [`mm2-bb749a993-android-armv7-CI.zip`](https://www.virustotal.com/gui/file-analysis/MzdmNjIwOTg5NWFjMjIxNTYyY2U5OTFmNTQ2ZWMyYjI6MTczMjMxOTM3Mg==/detection)
+  *   [`mm2-bb749a993-Darwin-Release.zip`](https://www.virustotal.com/gui/file-analysis/NDIzZTdlNTJkZTc0YTgyNmVlYWViYTI3NjU4ZTNmZmE6MTczMjMxOTM5Ng==/detection)
+  *   [`mm2-bb749a993-ios-aarch64-CI.zip`](https://www.virustotal.com/gui/file-analysis/ODM5OWQ4MzJjZjU3Njg3MmVlOTkzODQ4YTQ3MDQzMzc6MTczMjMxOTQwMw==/detection)
+  *   [`mm2-bb749a993-Linux-Release.zip`](https://www.virustotal.com/gui/file-analysis/ZGE5YWI5MGRlOTcxNTIyZTJkMDdiY2FkZGE5Yzg2NjM6MTczMjMxOTQzMQ==/detection)
+  *   [`mm2-bb749a993-Win64.zip`](https://www.virustotal.com/gui/file-analysis/NTA3ZDQxM2RmNmY2ZDU2YjdhNDNkMDBmNWJkNzdkNjE6MTczMjMxOTQ1Nw==/detection)
+  *   [`mm2_bb749a993-wasm.zip`](https://www.virustotal.com/gui/file-analysis/MmNmNDVmNTIyZmM0MzNiMGYwY2Q1MTdlOWViYWVjZDI6MTczMjMxOTQ2Ng==/detection)
+
+  <em>These scans were produced by the [VirusTotal GitHub Action](https://github.com/crazy-max/ghaction-virustotal)</em>
+</CollapsibleSection>
+
 ## Komodo DeFi Framework v2.1.0-beta
 
 ### Essential New Features: Trading Protocol Upgrade, HD Wallet, Event Streaming, and Seeds Management
