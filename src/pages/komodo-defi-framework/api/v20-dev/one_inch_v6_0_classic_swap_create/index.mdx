@@ -8,94 +8,64 @@ The `1inch_v6_0_classic_swap_create` method returns transaction data for classic
 
 ## Arguments
 
-| Structure       | Type | Description                                                                  |
-| --------------- | ---- | ---------------------------------------------------------------------------- |
-| base | string | Base coin name |
-| rel | string | Rel coin name (must be from the same EVM chain as the base coin) |
-| amount | numeric string or rational | Swap amount (in coins units) |
-| slippage | float | Allowed slippage, min: 0; max: 50 |
-| fee | float | Optional. Partner fee, percentage of src token amount will be sent to referrer address, min: 0; max: 3. Should be the same for quote and swap rpc. Default is 0 |
-| protocols | string | Optional. Specify liquidity sources e.g.: &protocols=WETH,CURVE,BALANCER,...,ZRX (by default - all used) |
-| gas_price | numeric string | Optional. Network price per gas, in Gwei. 1inch takes in account gas expenses to determine exchange route. Should be the same for a quote and swap |
-| complexity_level | numeric | Optional. Maximum number of token-connectors to be used in a transaction, min: 0; max: 3; default: 2 |
-| parts | numeric | Optional. Limit maximum number of parts each main route parts can be split into. Should be the same for a quote and swap. Default: 20; max: 100 |
-| main_route_parts | numeric | Optional. Limit maximum number of main route parts. Should be the same for a quote and swap. Default: 20; max: 50 |
-| gas_limit | numeric | Optional. Maximum amount of gas for a swap. Should be the same for a quote and swap. Default: 11500000; max: 11500000 |
-| include_tokens_info | boolean | Optional. Return fromToken and toToken info in response (default is true) |
-| include_protocols | boolean | Optional. Return used swap protocols in response (default is true) |
-| include_gas | boolean | Optional. Include estimated gas in return value (default is true) |
-| connector_tokens | string | Optional. Token-connectors can be specified via this parameter. If not set, default token-connectors will be used |
-| excluded_protocols | string | Optional. Excluded supported liquidity sources. Should be the same for a quote and swap, max: 5 |
-| permit | string | Optional. Used according https://eips.ethereum.org/EIPS/eip-2612 |
-| compatibility | bool | Optional. Exclude the Unoswap method |
-| receiver | bool | Optional. This address will receive funds after the swap. By default same address as 'my address' |
-| referrer | bool | Optional. Address to receive the partner fee. Must be set explicitly if fee is also set |
-| disable_estimate | bool | Optional. if true, disable most of the checks, default: false |
-| allow_partial_fill | bool | Optional. if true, the algorithm can cancel part of the route, if the rate has become less attractive. Unswapped tokens will return to 'my address'. Default: true |
-| use_permit2 | bool | Optional. Enable this flag for auto approval by Permit2 contract if you did an approval to Uniswap Permit2 smart contract for this token. Default is false |
+| Structure             | Type                       | Description                                                                                                                                                        |
+| --------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| base                  | string                     | Base coin name                                                                                                                                                     |
+| rel                   | string                     | Rel coin name (must be from the same EVM chain as the base coin)                                                                                                   |
+| amount                | numeric string or rational | Swap amount (in coins units)                                                                                                                                       |
+| slippage              | float                      | Allowed slippage, min: 0; max: 50                                                                                                                                  |
+| fee                   | float                      | Optional. Partner fee, percentage of src token amount will be sent to referrer address, min: 0; max: 3. Should be the same for quote and swap rpc. Default is 0    |
+| protocols             | string                     | Optional. Specify liquidity sources e.g.: \&protocols=WETH,CURVE,BALANCER,...,ZRX (by default - all used)                                                          |
+| gas\_price            | numeric string             | Optional. Network price per gas, in Gwei. 1inch takes in account gas expenses to determine exchange route. Should be the same for a quote and swap                 |
+| complexity\_level     | numeric                    | Optional. Maximum number of token-connectors to be used in a transaction, min: 0; max: 3; default: 2                                                               |
+| parts                 | numeric                    | Optional. Limit maximum number of parts each main route parts can be split into. Should be the same for a quote and swap. Default: 20; max: 100                    |
+| main\_route\_parts    | numeric                    | Optional. Limit maximum number of main route parts. Should be the same for a quote and swap. Default: 20; max: 50                                                  |
+| gas\_limit            | numeric                    | Optional. Maximum amount of gas for a swap. Should be the same for a quote and swap. Default: 11500000; max: 11500000                                              |
+| include\_tokens\_info | boolean                    | Optional. Return fromToken and toToken info in response (default is true)                                                                                          |
+| include\_protocols    | boolean                    | Optional. Return used swap protocols in response (default is true)                                                                                                 |
+| include\_gas          | boolean                    | Optional. Include estimated gas in return value (default is true)                                                                                                  |
+| connector\_tokens     | string                     | Optional. Token-connectors can be specified via this parameter. If not set, default token-connectors will be used                                                  |
+| excluded\_protocols   | string                     | Optional. Excluded supported liquidity sources. Should be the same for a quote and swap, max: 5                                                                    |
+| permit                | string                     | Optional. Used according [https://eips.ethereum.org/EIPS/eip-2612](https://eips.ethereum.org/EIPS/eip-2612)                                                        |
+| compatibility         | bool                       | Optional. Exclude the Unoswap method                                                                                                                               |
+| receiver              | bool                       | Optional. This address will receive funds after the swap. By default same address as 'my address'                                                                  |
+| referrer              | bool                       | Optional. Address to receive the partner fee. Must be set explicitly if fee is also set                                                                            |
+| disable\_estimate     | bool                       | Optional. if true, disable most of the checks, default: false                                                                                                      |
+| allow\_partial\_fill  | bool                       | Optional. if true, the algorithm can cancel part of the route, if the rate has become less attractive. Unswapped tokens will return to 'my address'. Default: true |
+| use\_permit2          | bool                       | Optional. Enable this flag for auto approval by Permit2 contract if you did an approval to Uniswap Permit2 smart contract for this token. Default is false         |
 
 ## Response
 
-| Structure | Type             | Description                                                                                                                                                                                            |
-| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| dst_amount | rational number | Destination token amount, in coins units. |
-| src_token | [TokenInfo](/komodo-defi-framework/api/v20/one_inch_v6_0_classic_swap_create/#TokenInfo) | Source (base) token info. |
-| dst_token | [TokenInfo](/komodo-defi-framework/api/v20/one_inch_v6_0_classic_swap_create/#TokenInfo) | Destination (rel) token info. |
-| protocols | list of [ProtocolInfo](/komodo-defi-framework/api/v20/one_inch_v6_0_classic_swap_create/#ProtocolInfo) | Optional. Used liquidity sources to route trade. |
-| tx | [TxFields](/komodo-defi-framework/api/v20/one_inch_v6_0_classic_swap_create/#TxFields) | Swap tx fields (returned only for create swap rpc) |
-
-### TokenInfo
-| Structure | Type             | Description                                                                                                                                                                                            |
-| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| address | string | Token contract address. |
-| symbol | string | Token symbol. |
-| name | string | Token name. |
-| decimals | numeric | Number of digits after decimal point for the token amount. |
-| eip2612 | boolean | Is Eip-2612 supported. |
-| is_fot | boolean | Is FoT token. |
-| logo_uri | string | Token logo uri. |
-| tags | list of string | Token tags. |
-
-### ProtocolInfo
-| Structure | Type             | Description                                                                                                                                                                                            |
-| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| name | string | Liquidity source name. |
-| part | numeric | Protocol part. |
-| from_token_address | string | From-token contract address. |
-| to_token_address | numeric | To-token contract address. |
-
-### TxFields
-| Structure | Type             | Description                                                                                                                                                                                            |
-| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| from | string | From address |
-| to | string | To address |
-| data | string | Transaction data |
-| value | numeric | Transaction value |
-| gas_price | float | Gas price |
-| gas | numeric | Gas |
+| Structure   | Type   | Description                                                                                                                                                                        |
+| ----------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| dst\_amount | number | Destination token amount, in coins units.                                                                                                                                          |
+| src\_token  | object | Source (base) token information. A standard [1inchTokenInfo](/komodo-defi-framework/api/common_structures/orders/#1inch-token-info) object.                                        |
+| dst\_token  | object | Destination (rel) token info. A standard [1inchTokenInfo](/komodo-defi-framework/api/common_structures/orders/#1inch-token-info) object.                                           |
+| protocols   | list   | Optional. A list of standard [1inchProtocolInfo](/komodo-defi-framework/api/common_structures/orders/#1inch-protocol-info) objects, used as liquidity sources used to route trade. |
+| tx          | object | A standard [1inchTxFields](/komodo-defi-framework/api/common_structures/orders/#1inch-tx-fields) object.                                                                           |
 
 #### 📌 Examples
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="1inch_v6_0_classic_swap_quote" mm2MethodDecorate="true">
+<CodeGroup title="" tag="POST" label="1inch_v6_0_classic_swap_create" mm2MethodDecorate="true">
   ```json
   {
     "mmrpc": "2.0",
     "userpass": "RPC_UserP@SSW0RD",
-    "method": "1inch_v6_0_classic_swap_quote",
+    "method": "1inch_v6_0_classic_swap_create",
     "params": {
-      "base": "ETH", 
-      "rel": "USDC-ERC20", 
-      "amount": 0.1, 
-      "include_tokens_info": true, 
-      "include_protocols": true, 
-      "include_gas": true, 
-      "fee": 0.0, 
-      "complexity_level": 3, 
-      "gas_limit": 11500000, 
-      "main_route_parts": 50, 
-      "parts": 100, 
+      "base": "ETH",
+      "rel": "USDC-ERC20",
+      "amount": 0.1,
+      "include_tokens_info": true,
+      "include_protocols": true,
+      "include_gas": true,
+      "fee": 0,
+      "complexity_level": 3,
+      "gas_limit": 11500000,
+      "main_route_parts": 50,
+      "parts": 100,
       "protocols": ""
     }
   }
@@ -187,4 +157,3 @@ The `1inch_v6_0_classic_swap_create` method returns transaction data for classic
     }
   ```
 </CollapsibleSection>
-
