@@ -37,6 +37,9 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 | passphrase                   | string          | Optional. Your passphrase (mnemonic phrase) in plain text. This is the source of each of your coins private keys. [**KEEP IT SAFE!**](https://www.youtube.com/watch?v=WFpxVbTqhB8). For more secure, encrypted storage in a local database, use the `wallet_name` and `wallet_password` parameters below.                                                                                                                             |
 | wallet\_name                 | string          | Optional. An arbitrary name for the wallet. If no `passphrase` is provided, and the wallet has been used already, the `wallet_password` will be used to decrypt the local stored mnemonic phrase. If it has not been used before, a mnemonic will be generated and encrypted for local storage. The mnemonic phrase can be seen in plain text using the (/komodo-defi-framework/api/v20/get\_mnemonic)\[] method.                     |
 | wallet\_password             | string          | Optional, required if using `wallet_name`. The password use to encrypt your wallet's mnemonic phrase for local storage, and decrypt the wallet when logging in.                                                                                                                                                                                                                                                                       |
+| 1inch\_api                   | string          | Optional, required if using [1inch integration methods](/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_create/). URL for 1inch API, e.g. "https://api.1inch.dev" |
+
+
 
 #### Example (allowing weak password):
 
@@ -107,6 +110,21 @@ When running the Komodo DeFi API via commandline with the `mm2` binary, some bas
 }
 ```
 
+#### Example with `1inch_api`
+
+```json
+{
+  "gui": "DEVDOCS_CLI",
+  "netid": 8762,
+  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd"
+  "1inch_api": "https://api.1inch.dev"
+}
+```
+<Note>
+  To use methods which interface with the 1inch API, you'll also need to set your 1inch API key as an environment variable called `ONE_INCH_API_TEST_AUTH`, e.g. `ONE_INCH_API_TEST_AUTH="Bearer YourAPIkey"`.
+</Note>
+
+
 #### Example for HD Wallets:
 
 If you are using HD wallets, you will need to set `enable_hd` to `true` in to your [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/).
@@ -140,14 +158,16 @@ The structure for adding additional coins can vary, please refer to the [listing
 
 ### Optional environment variables:
 
-| Variable            | Type   | Description                                                                                                                                                                                                                        |
-| ------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MM2\_CONF\_PATH     | string | A file path to load the `MM2.json` configuration file. Defaults to `MM2.json` in the same folder as the `mm2` binary.                                                                                                              |
-| MM\_COINS\_PATH     | string | A file path to load the `coins` configuration file. A comprehensive version for public use is maintained in the [Komodo Platform coins github repository](https://github.com/KomodoPlatform/coins/blob/master/coins)               |
-| MM\_LOG             | string | A file path to store the Komodo DeFi-API logs.                                                                                                                                                                                     |
-| MM\_CERT\_PATH      | string | Full path to TLS/SSL certificate file.                                                                                                                                                                                             |
-| MM\_CERT\_KEY\_PATH | string | Full path to TLS/SSL certificate key file.                                                                                                                                                                                         |
-| RUST\_LOG           | string | Global default log level is `info`. To modify the log level for specific module (e.g. for debugging `atomicdex_gossipsub::behaviour`) and keep the default at `info`, use the format `"info,atomicdex_gossipsub::behaviour=debug"` |
+| Variable                   | Type   | Description                                                                                                                                                                                                                        |
+| -------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MM2\_CONF\_PATH            | string | A file path to load the `MM2.json` configuration file. Defaults to `MM2.json` in the same folder as the `mm2` binary.                                                                                                              |
+| MM\_COINS\_PATH            | string | A file path to load the `coins` configuration file. A comprehensive version for public use is maintained in the [Komodo Platform coins github repository](https://github.com/KomodoPlatform/coins/blob/master/coins)               |
+| MM\_LOG                    | string | A file path to store the Komodo DeFi-API logs.                                                                                                                                                                                     |
+| MM\_CERT\_PATH             | string | Full path to TLS/SSL certificate file.                                                                                                                                                                                             |
+| MM\_CERT\_KEY\_PATH        | string | Full path to TLS/SSL certificate key file.                                                                                                                                                                                         |
+| RUST\_LOG                  | string | Global default log level is `info`. To modify the log level for specific module (e.g. for debugging `atomicdex_gossipsub::behaviour`) and keep the default at `info`, use the format `"info,atomicdex_gossipsub::behaviour=debug"` |
+| ONE\_INCH\_API\_TEST\_AUTH | string | 1inch API key to authenticate for using [1inch integration methods](/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_create/).                                                                                                                                                                                         |
+
 
 ### What now?
 
