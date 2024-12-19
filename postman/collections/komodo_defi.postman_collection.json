@@ -4065,7 +4065,50 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "task::enable_utxo::init",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::init\",\r\n    \"params\": {\r\n        \"ticker\":\"KMD\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\":\"Electrum\", // Accepted values: \"Electrum\", \"Native\"\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:20001\",\r\n                            \"protocol\": \"SSL\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n                            // \"disable_cert_verification\": false\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:20001\",\r\n                            \"protocol\": \"SSL\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:20001\",\r\n                            \"protocol\": \"SSL\"\r\n                        }\r\n                    ]\r\n                } // Required only if: \"rpc\": \"Electrum\"\r\n            }\r\n            // \"tx_history\": false,\r\n            // \"required_confirmations\": 1, // Default: Coin Config\r\n            // \"requires_notarization\": false, // Default: Coin Config\r\n            // \"address_format\": {\r\n            //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n            // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n            // }, // Default: Coin Config\r\n            // \"utxo_merge_params\": null,\r\n            // // \"utxo_merge_params\": {\r\n            // //     \"merge_at\":50\r\n            // //     // \"check_every\":10,\r\n            // //     // \"max_merge_at_once\":100\r\n            // //     },\r\n            // \"check_utxo_maturity\": false,\r\n            // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n            // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"min_addresses_number\": 3 // used only if \"priv_key_policy\": \"Trezor\"\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:10:37 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"task_id\":0},\"id\":null}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_utxo::status",
@@ -4789,7 +4832,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -4950,7 +4993,7 @@
 											},
 											"status": "OK",
 											"code": 200,
-											"_postman_previewlanguage": "plain",
+											"_postman_previewlanguage": "json",
 											"header": [
 												{
 													"key": "access-control-allow-origin",
@@ -4963,10 +5006,17 @@
 												{
 													"key": "date",
 													"value": "Thu, 14 Nov 2024 06:48:22 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
 												}
 											],
 											"cookie": [],
-											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":64265247,\"eth_addresses_infos\":{\"0x083C32B38e8050473f6999e22f670d1404235592\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\"}},\"erc20_addresses_infos\":{\"0x083C32B38e8050473f6999e22f670d1404235592\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\"tickers\":[\"PGX-PLG20\",\"AAVE-PLG20\"]}},\"nfts_infos\":{}},\"id\":null}"
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"current_block\": 64265247,\n        \"eth_addresses_infos\": {\n            \"0x083C32B38e8050473f6999e22f670d1404235592\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\"\n            }\n        },\n        \"erc20_addresses_infos\": {\n            \"0x083C32B38e8050473f6999e22f670d1404235592\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\n                \"tickers\": [\n                    \"PGX-PLG20\",\n                    \"AAVE-PLG20\"\n                ]\n            }\n        },\n        \"nfts_infos\": {}\n    },\n    \"id\": null\n}"
 										},
 										{
 											"name": "MATIC (with NFTs)",
@@ -4991,7 +5041,7 @@
 											},
 											"status": "OK",
 											"code": 200,
-											"_postman_previewlanguage": "plain",
+											"_postman_previewlanguage": "json",
 											"header": [
 												{
 													"key": "access-control-allow-origin",
@@ -5004,10 +5054,136 @@
 												{
 													"key": "date",
 													"value": "Thu, 14 Nov 2024 06:51:50 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
 												}
 											],
 											"cookie": [],
-											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":64265343,\"eth_addresses_infos\":{\"0x083C32B38e8050473f6999e22f670d1404235592\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\"}},\"erc20_addresses_infos\":{\"0x083C32B38e8050473f6999e22f670d1404235592\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\"tickers\":[\"AAVE-PLG20\",\"PGX-PLG20\"]}},\"nfts_infos\":{}},\"id\":null}"
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"current_block\": 64265343,\n        \"eth_addresses_infos\": {\n            \"0x083C32B38e8050473f6999e22f670d1404235592\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\"\n            }\n        },\n        \"erc20_addresses_infos\": {\n            \"0x083C32B38e8050473f6999e22f670d1404235592\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\n                \"tickers\": [\n                    \"AAVE-PLG20\",\n                    \"PGX-PLG20\"\n                ]\n            }\n        },\n        \"nfts_infos\": {}\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "enable_eth_with_tokens",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": true,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "1669"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:03:52 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":65658249,\"eth_addresses_infos\":{\"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\"balances\":{\"spendable\":\"16.651562360509102537\",\"unspendable\":\"0\"}}},\"erc20_addresses_infos\":{\"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\"balances\":{\"AAVE-PLG20\":{\"spendable\":\"0\",\"unspendable\":\"0\"},\"PGX-PLG20\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}}},\"nfts_infos\":{\"0xb9ae3b7632be11420bd3e59fd41c300dd67274ac,0\":{\"token_address\":\"0xb9ae3b7632be11420bd3e59fd41c300dd67274ac\",\"token_id\":\"0\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"},\"0xd25f13e4ba534ef625c75b84934689194b7bd59e,14\":{\"token_address\":\"0xd25f13e4ba534ef625c75b84934689194b7bd59e\",\"token_id\":\"14\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC721\",\"amount\":\"1\"},\"0x73a5299824cd955af6377b56f5762dc3ca4cc078,1\":{\"token_address\":\"0x73a5299824cd955af6377b56f5762dc3ca4cc078\",\"token_id\":\"1\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC721\",\"amount\":\"1\"},\"0x3f368660b013a59b245a093a5ede57fa9deb911f,0\":{\"token_address\":\"0x3f368660b013a59b245a093a5ede57fa9deb911f\",\"token_id\":\"0\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"},\"0xe1ab36eda8012483aa947263b7d9a857d9c37e05,32\":{\"token_address\":\"0xe1ab36eda8012483aa947263b7d9a857d9c37e05\",\"token_id\":\"32\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"}}},\"id\":null}"
+										}
+									]
+								},
+								{
+									"name": "enable_erc20",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_erc20\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"BAT-PLG20\",\n      \"activation_params\": {\n        \"required_confirmations\": 3\n      }\n    }\n  }",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "251"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:07:32 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"balances\":{\"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\":{\"spendable\":\"0\",\"unspendable\":\"0\"}},\"platform_coin\":\"MATIC\",\"token_contract_address\":\"0x3cef98bb43d732e2f285ee605a8158cde967d219\",\"required_confirmations\":3},\"id\":null}"
 										}
 									]
 								},
@@ -6049,7 +6225,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
 							},
 							"response": [
 								{
@@ -6072,7 +6248,7 @@
 												"{{address}}"
 											]
 										},
-										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
 									},
 									"_postman_previewlanguage": "JSON",
 									"header": [],
@@ -6099,7 +6275,7 @@
 												"{{address}}"
 											]
 										},
-										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
 									},
 									"_postman_previewlanguage": "JSON",
 									"header": [],
@@ -6140,7 +6316,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nft-transfers)"
 							},
 							"response": []
 						},
@@ -6176,7 +6352,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-nft-metadata)"
 							},
 							"response": []
 						},
@@ -6212,7 +6388,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#refresh-nft-metadata)"
 							},
 							"response": []
 						},
@@ -6249,7 +6425,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/)"
+								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/)"
 							},
 							"response": [
 								{
@@ -6327,7 +6503,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#withdraw-nfts)"
 							},
 							"response": []
 						},
@@ -6363,7 +6539,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#erc-1155-withdraw-example)"
 							},
 							"response": [
 								{
@@ -6427,7 +6603,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/"
+								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/clear_nft_db/"
 							},
 							"response": [
 								{
@@ -6641,7 +6817,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -6656,7 +6833,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"account_balance\",\r\n    \"params\": {\r\n        \"coin\": \"DOC\",\r\n        \"account_index\": 0,\r\n        \"chain\": \"External\" // Accepted values: \"External\", \"Internal\"\r\n        // \"limit\": 10,\r\n        // \"paging_options\": {\r\n        //     \"PageNumber\": 1\r\n        //     // \"FromId\": 4 // used instead of: \"PageNumber\"\r\n        // }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"account_balance\",\r\n    \"params\": {\r\n        \"coin\": \"KMD\",\r\n        \"account_index\": 0,\r\n        \"chain\": \"External\" // Accepted values: \"External\", \"Internal\"\r\n        // \"limit\": 10,\r\n        // \"paging_options\": {\r\n        //     \"PageNumber\": 1\r\n        //     // \"FromId\": 4 // used instead of: \"PageNumber\"\r\n        // }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -6665,7 +6842,112 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Error: Not in HD mode",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"account_balance\",\r\n    \"params\": {\r\n        \"coin\": \"KMD\",\r\n        \"account_index\": 0,\r\n        \"chain\": \"External\" // Accepted values: \"External\", \"Internal\"\r\n        // \"limit\": 10,\r\n        // \"paging_options\": {\r\n        //     \"PageNumber\": 1\r\n        //     // \"FromId\": 4 // used instead of: \"PageNumber\"\r\n        // }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "242"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:15:44 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Coin is expected to be activated with the HD wallet derivation method\",\n    \"error_path\": \"account_balance.lp_coins\",\n    \"error_trace\": \"account_balance:94] lp_coins:4128]\",\n    \"error_type\": \"CoinIsActivatedNotWithHDWallet\",\n    \"id\": null\n}"
+										},
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"account_balance\",\r\n    \"params\": {\r\n        \"coin\": \"KMD\",\r\n        \"account_index\": 0,\r\n        \"chain\": \"External\" // Accepted values: \"External\", \"Internal\"\r\n        // \"limit\": 10,\r\n        // \"paging_options\": {\r\n        //     \"PageNumber\": 1\r\n        //     // \"FromId\": 4 // used instead of: \"PageNumber\"\r\n        // }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "406"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:19:58 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"account_index\": 0,\n        \"derivation_path\": \"m/44'/141'/0'\",\n        \"addresses\": [\n            {\n                \"address\": \"RMC1cWXngQf2117apEKoLh3x27NoG88yzd\",\n                \"derivation_path\": \"m/44'/141'/0'/0/0\",\n                \"chain\": \"External\",\n                \"balance\": {\n                    \"KMD\": {\n                        \"spendable\": \"20\",\n                        \"unspendable\": \"0\"\n                    }\n                }\n            }\n        ],\n        \"page_balance\": {\n            \"KMD\": {\n                \"spendable\": \"20\",\n                \"unspendable\": \"0\"\n            }\n        },\n        \"limit\": 10,\n        \"skipped\": 0,\n        \"total\": 1,\n        \"total_pages\": 1,\n        \"paging_options\": {\n            \"PageNumber\": 1\n        }\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "get_new_address",
@@ -6719,7 +7001,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"task::account_balance::init\",\n    \"params\": {\n        \"coin\": \"DOC\",\n        \"account_index\": 0\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"task::account_balance::init\",\n    \"params\": {\n        \"coin\": \"KMD\",\n        \"account_index\": 0\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -6733,7 +7015,62 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"task::account_balance::init\",\n    \"params\": {\n        \"coin\": \"KMD\",\n        \"account_index\": 0\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:16:22 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"task_id\": 1\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "task::account_balance::status",
@@ -6748,7 +7085,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -6763,7 +7101,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::account_balance::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::account_balance::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -6772,7 +7110,112 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Error: CoinIsActivatedNotWithHDWallet",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::account_balance::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "293"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:16:47 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"status\": \"Error\",\n        \"details\": {\n            \"error\": \"Coin is expected to be activated with the HD wallet derivation method\",\n            \"error_path\": \"init_account_balance.lp_coins\",\n            \"error_trace\": \"init_account_balance:146] lp_coins:4128]\",\n            \"error_type\": \"CoinIsActivatedNotWithHDWallet\"\n        }\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "task::account_balance::status",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::account_balance::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "350"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:20:47 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"status\": \"Ok\",\n        \"details\": {\n            \"account_index\": 0,\n            \"derivation_path\": \"m/44'/141'/0'\",\n            \"total_balance\": {\n                \"KMD\": {\n                    \"spendable\": \"20\",\n                    \"unspendable\": \"0\"\n                }\n            },\n            \"addresses\": [\n                {\n                    \"address\": \"RMC1cWXngQf2117apEKoLh3x27NoG88yzd\",\n                    \"derivation_path\": \"m/44'/141'/0'/0/0\",\n                    \"chain\": \"External\",\n                    \"balance\": {\n                        \"KMD\": {\n                            \"spendable\": \"20\",\n                            \"unspendable\": \"0\"\n                        }\n                    }\n                }\n            ]\n        }\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "task::account_balance::cancel",
@@ -8624,13 +9067,19 @@
 										"header": [
 											{
 												"key": "Content-Type",
+												"name": "Content-Type",
 												"value": "application/json",
 												"type": "text"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"get_mnemonic\",\r\n    \"params\": {\r\n        \"format\": \"encrypted\" // `plaintext` or `encrypted`. If `plaintext`, `password` is required ,\r\n        // \"password\": \"password123\" // The password used to encrypt the passphrase when the wallet was created\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"get_mnemonic\",\r\n    \"params\": {\r\n        \"format\": \"encrypted\" // `plaintext` or `encrypted`. If `plaintext`, `password` is required ,\r\n        // \"password\": \"password123\" // The password used to encrypt the passphrase when the wallet was created\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -8667,19 +9116,25 @@
 									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"format\": \"encrypted\",\n        \"encrypted_mnemonic_data\": {\n            \"encryption_algorithm\": \"AES256CBC\",\n            \"key_derivation_details\": {\n                \"Argon2\": {\n                    \"params\": {\n                        \"algorithm\": \"Argon2id\",\n                        \"version\": \"0x13\",\n                        \"m_cost\": 65536,\n                        \"t_cost\": 2,\n                        \"p_cost\": 1\n                    },\n                    \"salt_aes\": \"CqkfcntVxFJNXqOKPHaG8w\",\n                    \"salt_hmac\": \"i63qgwjc+3oWMuHWC2XSJA\"\n                }\n            },\n            \"iv\": \"mNjmbZLJqgLzulKFBDBuPA==\",\n            \"ciphertext\": \"tP2vF0hRhllW00pGvYiKysBI0vl3acLj+aoocBViTTByXCpjpkLuaMWqe0Vs02cb1wvgPsVqZkE4MPg4sCQxbd18iS7Er6+BbVY3HQ2LSig=\",\n            \"tag\": \"TwWXhIFQl1TSdR4cJpbkK2oNXd9zIEhJmO6pML1uc2E=\"\n        }\n    },\n    \"id\": null\n}"
 								},
 								{
-									"name": "get_wallet_names Copy",
+									"name": "get_mnemonic (plaintext)",
 									"originalRequest": {
 										"method": "POST",
 										"header": [
 											{
 												"key": "Content-Type",
+												"name": "Content-Type",
 												"value": "application/json",
 												"type": "text"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"get_mnemonic\",\r\n    \"params\": {\r\n        \"format\": \"plaintext\" // `plaintext` or `encrypted`. If `plaintext`, `password` is required ,\r\n        // \"password\": \"password123\" // The password used to encrypt the passphrase when the wallet was created\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"get_mnemonic\",\r\n    \"params\": {\r\n        \"format\": \"plaintext\", // `plaintext` or `encrypted`. If `plaintext`, `password` is required ,\r\n        \"password\": \"RPC_CONTRoL<&>USERP@SSW0RD\"\r\n    }\r\n}\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -8688,8 +9143,8 @@
 											]
 										}
 									},
-									"status": "Bad Request",
-									"code": 400,
+									"status": "OK",
+									"code": 200,
 									"_postman_previewlanguage": "json",
 									"header": [
 										{
@@ -8698,11 +9153,11 @@
 										},
 										{
 											"key": "content-length",
-											"value": "211"
+											"value": "139"
 										},
 										{
 											"key": "date",
-											"value": "Sun, 03 Nov 2024 09:31:03 GMT"
+											"value": "Sun, 03 Nov 2024 09:32:26 GMT"
 										},
 										{
 											"key": "Content-Type",
@@ -8713,7 +9168,62 @@
 										}
 									],
 									"cookie": [],
-									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Error parsing request: missing field `password`\",\n    \"error_path\": \"dispatcher\",\n    \"error_trace\": \"dispatcher:112]\",\n    \"error_type\": \"InvalidRequest\",\n    \"error_data\": \"missing field `password`\",\n    \"id\": null\n}"
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"format\": \"plaintext\",\n        \"mnemonic\": \"unique spy ugly child cup sad capital invest essay lunch doctor know\"\n    },\n    \"id\": null\n}"
+								},
+								{
+									"name": "get_mnemonic",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"name": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"get_mnemonic\",\r\n    \"params\": {\r\n        \"format\": \"plaintext\", // `plaintext` or `encrypted`. If `plaintext`, `password` is required ,\r\n        \"password\": \"test\" // The password used to encrypt the passphrase when the wallet was created\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "357"
+										},
+										{
+											"key": "date",
+											"value": "Thu, 12 Dec 2024 04:18:10 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Wallets storage error: Wallets storage error: Internal error: `wallet_name` cannot be None!\",\n    \"error_path\": \"lp_wallet.mnemonics_storage\",\n    \"error_trace\": \"lp_wallet:494] lp_wallet:137] mnemonics_storage:48]\",\n    \"error_type\": \"WalletsStorageError\",\n    \"error_data\": \"Wallets storage error: Internal error: `wallet_name` cannot be None!\",\n    \"id\": null\n}"
 								},
 								{
 									"name": "Error: Wrong password",
@@ -8763,10 +9273,36 @@
 									],
 									"cookie": [],
 									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Wallets storage error: Error decrypting passphrase: Error decrypting mnemonic: HMAC error: MAC tag mismatch\",\n    \"error_path\": \"lp_wallet.mnemonic.decrypt\",\n    \"error_trace\": \"lp_wallet:494] lp_wallet:141] mnemonic:125] decrypt:56]\",\n    \"error_type\": \"WalletsStorageError\",\n    \"error_data\": \"Error decrypting passphrase: Error decrypting mnemonic: HMAC error: MAC tag mismatch\",\n    \"id\": null\n}"
-								},
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Orders",
+					"item": [
+						{
+							"name": "1inch",
+							"item": [
 								{
-									"name": "get_mnemonic (plaintext)",
-									"originalRequest": {
+									"name": "approve_token",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
 										"method": "POST",
 										"header": [
 											{
@@ -8777,7 +9313,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"get_mnemonic\",\r\n    \"params\": {\r\n        \"format\": \"plaintext\", // `plaintext` or `encrypted`. If `plaintext`, `password` is required ,\r\n        \"password\": \"test\" // The password used to encrypt the passphrase when the wallet was created\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"approve_token\",\r\n    \"params\": {\r\n        \"coin\": \"AAVE-PLG20\",\r\n        \"spender\": \"0x083C32B38e8050473f6999e22f670d1404235592\",\r\n        \"amount\": 1.23\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -8786,40 +9322,915 @@
 											]
 										}
 									},
-									"status": "OK",
-									"code": 200,
-									"_postman_previewlanguage": "json",
-									"header": [
+									"response": [
 										{
-											"key": "access-control-allow-origin",
-											"value": "http://localhost:3000"
+											"name": "Error: Token not activated",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"approve_token\",\r\n    \"params\": {\r\n        \"coin\": \"USDT-ERC20\",\r\n        \"spender\": \"0x083C32B38e8050473f6999e22f670d1404235592\",\r\n        \"amount\": 1.23\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "170"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 12 Dec 2024 10:24:30 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"No such coin USDT-ERC20\",\"error_path\":\"tokens\",\"error_trace\":\"tokens:171]\",\"error_type\":\"NoSuchCoin\",\"error_data\":{\"coin\":\"USDT-ERC20\"},\"id\":null}"
 										},
 										{
-											"key": "content-length",
-											"value": "139"
+											"name": "Error: Insufficient Funds",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"approve_token\",\r\n    \"params\": {\r\n        \"coin\": \"AAVE-PLG20\",\r\n        \"spender\": \"0x083C32B38e8050473f6999e22f670d1404235592\",\r\n        \"amount\": 1.23\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "1676"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 12 Dec 2024 10:26:24 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Transaction error mm2src/coins/eth.rs:4834] eth:4720] Transport(\\\"request MethodCall(MethodCall { jsonrpc: Some(V2), method: \\\\\\\"eth_estimateGas\\\\\\\", params: Array([Object({\\\\\\\"from\\\\\\\": String(\\\\\\\"0x083c32b38e8050473f6999e22f670d1404235592\\\\\\\"), \\\\\\\"to\\\\\\\": String(\\\\\\\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\\\\\\\"), \\\\\\\"gasPrice\\\\\\\": String(\\\\\\\"0x6fc23a56a\\\\\\\"), \\\\\\\"value\\\\\\\": String(\\\\\\\"0x0\\\\\\\"), \\\\\\\"data\\\\\\\": String(\\\\\\\"0x095ea7b3000000000000000000000000083c32b38e8050473f6999e22f670d14042355920000000000000000000000000000000000000000000000001111d67bb1bb0000\\\\\\\")})]), id: Num(1) }) failed: Invalid response: Server: 'https://electrum3.cipig.net:18755/', error: RPC error: Error { code: ServerError(-32000), message: \\\\\\\"insufficient funds for transfer\\\\\\\", data: None }\\\")\",\n    \"error_path\": \"tokens\",\n    \"error_trace\": \"tokens:161]\",\n    \"error_type\": \"TransactionError\",\n    \"error_data\": \"mm2src/coins/eth.rs:4834] eth:4720] Transport(\\\"request MethodCall(MethodCall { jsonrpc: Some(V2), method: \\\\\\\"eth_estimateGas\\\\\\\", params: Array([Object({\\\\\\\"from\\\\\\\": String(\\\\\\\"0x083c32b38e8050473f6999e22f670d1404235592\\\\\\\"), \\\\\\\"to\\\\\\\": String(\\\\\\\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\\\\\\\"), \\\\\\\"gasPrice\\\\\\\": String(\\\\\\\"0x6fc23a56a\\\\\\\"), \\\\\\\"value\\\\\\\": String(\\\\\\\"0x0\\\\\\\"), \\\\\\\"data\\\\\\\": String(\\\\\\\"0x095ea7b3000000000000000000000000083c32b38e8050473f6999e22f670d14042355920000000000000000000000000000000000000000000000001111d67bb1bb0000\\\\\\\")})]), id: Num(1) }) failed: Invalid response: Server: 'https://electrum3.cipig.net:18755/', error: RPC error: Error { code: ServerError(-32000), message: \\\\\\\"insufficient funds for transfer\\\\\\\", data: None }\\\")\",\n    \"id\": null\n}"
 										},
 										{
-											"key": "date",
-											"value": "Sun, 03 Nov 2024 09:32:26 GMT"
-										},
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"approve_token\",\r\n    \"params\": {\r\n        \"coin\": \"AAVE-PLG20\",\r\n        \"spender\": \"0x083C32B38e8050473f6999e22f670d1404235592\",\r\n        \"amount\": 1.23\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "103"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 12 Dec 2024 10:31:04 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":\"0x9e51b5654ddf92efdc422d9f687d11e4dd5bdb909d01afacc7e37ce5929bad59\",\"id\":null}"
+										}
+									]
+								},
+								{
+									"name": "get_token_allowance",
+									"event": [
 										{
-											"key": "Content-Type",
-											"value": "application/json",
-											"name": "Content-Type",
-											"description": "",
-											"type": "text"
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
 										}
 									],
-									"cookie": [],
-									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"format\": \"plaintext\",\n        \"mnemonic\": \"unique spy ugly child cup sad capital invest essay lunch doctor know\"\n    },\n    \"id\": null\n}"
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"get_token_allowance\",\r\n    \"params\": {\r\n        \"coin\": \"AAVE-PLG20\",\r\n        \"spender\": \"0x083C32B38e8050473f6999e22f670d1404235592\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"get_token_allowance\",\r\n    \"params\": {\r\n        \"coin\": \"AAVE-PLG20\",\r\n        \"spender\": \"0x083C32B38e8050473f6999e22f670d1404235592\"\r\n    }\r\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "41"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 12 Dec 2024 10:49:40 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": \"1.23\",\n    \"id\": null\n}"
+										},
+										{
+											"name": "Error: Token not activated",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"get_token_allowance\",\r\n    \"params\": {\r\n        \"coin\": \"AAVE-ERC20\",\r\n        \"spender\": \"0x083C32B38e8050473f6999e22f670d1404235592\"\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "170"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 12 Dec 2024 10:54:24 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"No such coin AAVE-ERC20\",\"error_path\":\"tokens\",\"error_trace\":\"tokens:171]\",\"error_type\":\"NoSuchCoin\",\"error_data\":{\"coin\":\"AAVE-ERC20\"},\"id\":null}"
+										}
+									]
+								},
+								{
+									"name": "1inch_v6_0_classic_swap_tokens",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_tokens\",\r\n    \"params\": {\r\n        \"chain_id\": 137\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Error: No API config",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_tokens\",\r\n    \"params\": {\r\n        \"chain_id\": 1\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "183"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 12 Dec 2024 11:56:44 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"No API config param\",\"error_path\":\"rpcs.client\",\"error_trace\":\"rpcs:137] client:105]\",\"error_type\":\"InvalidParam\",\"error_data\":\"No API config param\",\"id\":null}"
+										},
+										{
+											"name": "Error: 401 Unauthorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_tokens\",\r\n    \"params\": {\r\n        \"chain_id\": 1\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Gateway",
+											"code": 502,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "288"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 12 Dec 2024 12:01:30 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"1inch API error: General API error: Unauthorized description: \",\"error_path\":\"rpcs.client\",\"error_trace\":\"rpcs:140] client:152]\",\"error_type\":\"OneInchError\",\"error_data\":{\"GeneralApiError\":{\"error_msg\":\"Unauthorized\",\"description\":\"\",\"status_code\":401}},\"id\":null}"
+										},
+										{
+											"name": "Error: Invalid type",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_tokens\",\r\n    \"params\": {\r\n        \"chain_id\": 137\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Gateway",
+											"code": 502,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "263"
+												},
+												{
+													"key": "date",
+													"value": "Sun, 15 Dec 2024 08:43:16 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"1inch API error: invalid type: null, expected a string\",\"error_path\":\"rpcs.mod\",\"error_trace\":\"rpcs:140] mod:717]\",\"error_type\":\"OneInchError\",\"error_data\":{\"ParseBodyError\":{\"error_msg\":\"invalid type: null, expected a string\"}},\"id\":null}"
+										},
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_tokens\",\r\n    \"params\": {\r\n        \"chain_id\": 137\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "55463"
+												},
+												{
+													"key": "date",
+													"value": "Sun, 15 Dec 2024 08:47:05 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"tokens\":{\"0xc17c30e98541188614df99239cabd40280810ca3\":{\"address\":\"0xc17c30e98541188614df99239cabd40280810ca3\",\"symbol\":\"RISE\",\"name\":\"EverRise\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc17c30e98541188614df99239cabd40280810ca3.png\",\"tags\":[\"tokens\"]},\"0x2f800db0fdb5223b3c3f354886d907a671414a7f\":{\"address\":\"0x2f800db0fdb5223b3c3f354886d907a671414a7f\",\"symbol\":\"BCT\",\"name\":\"Toucan Protocol: Base Carbon Tonne\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2f800db0fdb5223b3c3f354886d907a671414a7f.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x431cd3c9ac9fc73644bf68bf5691f4b83f9e104f\":{\"address\":\"0x431cd3c9ac9fc73644bf68bf5691f4b83f9e104f\",\"symbol\":\"RBW\",\"name\":\"Rainbow Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x431cd3c9ac9fc73644bf68bf5691f4b83f9e104f.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xb33eaad8d922b1083446dc23f610c2567fb5180f\":{\"address\":\"0xb33eaad8d922b1083446dc23f610c2567fb5180f\",\"symbol\":\"UNI\",\"name\":\"Uniswap\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.png\",\"tags\":[\"crosschain\",\"GROUP:UNI\",\"tokens\"]},\"0x2791bca1f2de4661ed88a30c99a7a9449aa84174\":{\"address\":\"0x2791bca1f2de4661ed88a30c99a7a9449aa84174\",\"symbol\":\"USDC.e\",\"name\":\"USD Coin (PoS)\",\"decimals\":6,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png\",\"tags\":[\"crosschain\",\"GROUP:USDC.e\",\"PEG:USD\",\"tokens\"]},\"0xcd7361ac3307d1c5a46b63086a90742ff44c63b3\":{\"address\":\"0xcd7361ac3307d1c5a46b63086a90742ff44c63b3\",\"symbol\":\"RAIDER\",\"name\":\"RaiderToken\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xcd7361ac3307d1c5a46b63086a90742ff44c63b3.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x6985884c4392d348587b19cb9eaaf157f13271cd\":{\"address\":\"0x6985884c4392d348587b19cb9eaaf157f13271cd\",\"symbol\":\"ZRO\",\"name\":\"LayerZero\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens-data.1inch.io/images/137/0x6985884c4392d348587b19cb9eaaf157f13271cd.png\",\"tags\":[\"crosschain\",\"GROUP:ZRO\",\"tokens\"]},\"0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590\":{\"address\":\"0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590\",\"symbol\":\"STG\",\"name\":\"StargateToken\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2f6f07cdcf3588944bf4c42ac74ff24bf56e7590.png\",\"tags\":[\"crosschain\",\"GROUP:STG\",\"tokens\"]},\"0xd55fce7cdab84d84f2ef3f99816d765a2a94a509\":{\"address\":\"0xd55fce7cdab84d84f2ef3f99816d765a2a94a509\",\"symbol\":\"CHAIN\",\"name\":\"Chain Games\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd55fce7cdab84d84f2ef3f99816d765a2a94a509.png\",\"tags\":[\"crosschain\",\"GROUP:CHAIN\",\"tokens\"]},\"0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4\":{\"address\":\"0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4\",\"symbol\":\"stMATIC\",\"name\":\"Staked MATIC (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3a58a54c066fdc0f2d55fc9c89f0415c92ebf3c4.png\",\"tags\":[\"crosschain\",\"PEG:MATIC\",\"tokens\"]},\"0x172370d5cd63279efa6d502dab29171933a610af\":{\"address\":\"0x172370d5cd63279efa6d502dab29171933a610af\",\"symbol\":\"CRV\",\"name\":\"CRV\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd533a949740bb3306d119cc777fa900ba034cd52.png\",\"tags\":[\"crosschain\",\"GROUP:CRV\",\"tokens\"]},\"0xc6c855ad634dcdad23e64da71ba85b8c51e5ad7c\":{\"address\":\"0xc6c855ad634dcdad23e64da71ba85b8c51e5ad7c\",\"symbol\":\"ICE_2\",\"name\":\"Decentral Games ICE\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc6c855ad634dcdad23e64da71ba85b8c51e5ad7c.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x229b1b6c23ff8953d663c4cbb519717e323a0a84\":{\"address\":\"0x229b1b6c23ff8953d663c4cbb519717e323a0a84\",\"symbol\":\"BLOK\",\"name\":\"BLOK\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x229b1b6c23ff8953d663c4cbb519717e323a0a84.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xa55870278d6389ec5b524553d03c04f5677c061e\":{\"address\":\"0xa55870278d6389ec5b524553d03c04f5677c061e\",\"symbol\":\"XCAD\",\"name\":\"XCAD Token (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xa55870278d6389ec5b524553d03c04f5677c061e.png\",\"tags\":[\"crosschain\",\"GROUP:XCAD\",\"tokens\"]},\"0x62f594339830b90ae4c084ae7d223ffafd9658a7\":{\"address\":\"0x62f594339830b90ae4c084ae7d223ffafd9658a7\",\"symbol\":\"SPHERE\",\"name\":\"Sphere Finance\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x62f594339830b90ae4c084ae7d223ffafd9658a7.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xf84bd51eab957c2e7b7d646a3427c5a50848281d\":{\"address\":\"0xf84bd51eab957c2e7b7d646a3427c5a50848281d\",\"symbol\":\"AGAr\",\"name\":\"AGA Rewards\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xb453f1f2ee776daf2586501361c457db70e1ca0f.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x255707b70bf90aa112006e1b07b9aea6de021424\":{\"address\":\"0x255707b70bf90aa112006e1b07b9aea6de021424\",\"symbol\":\"TETU\",\"name\":\"TETU Reward Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x255707b70bf90aa112006e1b07b9aea6de021424.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x4ff0b68abc2b9e4e1401e9b691dba7d66b264ac8\":{\"address\":\"0x4ff0b68abc2b9e4e1401e9b691dba7d66b264ac8\",\"symbol\":\"RIOT\",\"name\":\"RIOT (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x4ff0b68abc2b9e4e1401e9b691dba7d66b264ac8.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x9c9e5fd8bbc25984b178fdce6117defa39d2db39\":{\"address\":\"0x9c9e5fd8bbc25984b178fdce6117defa39d2db39\",\"symbol\":\"BUSD\",\"name\":\"BUSD Token\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x9c9e5fd8bbc25984b178fdce6117defa39d2db39.png\",\"tags\":[\"crosschain\",\"GROUP:BUSD\",\"tokens\"]},\"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\":{\"address\":\"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"symbol\":\"POL\",\"name\":\"Polygon Ecosystem Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0.png\",\"tags\":[\"crosschain\",\"GROUP:POL\",\"native\"]},\"0x236eec6359fb44cce8f97e99387aa7f8cd5cde1f\":{\"address\":\"0x236eec6359fb44cce8f97e99387aa7f8cd5cde1f\",\"symbol\":\"USD+\",\"name\":\"USD+\",\"decimals\":6,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x236eec6359fb44cce8f97e99387aa7f8cd5cde1f.png\",\"tags\":[\"crosschain\",\"GROUP:USD+\",\"PEG:USD\",\"tokens\"]},\"0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39\":{\"address\":\"0x53e0bca35ec356bd5dddfebbd1fc0fd03fabad39\",\"symbol\":\"LINK\",\"name\":\"ChainLink Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x514910771af9ca656af840dff83e8264ecf986ca.png\",\"tags\":[\"crosschain\",\"GROUP:LINK\",\"tokens\"]},\"0xd3b71117e6c1558c1553305b44988cd944e97300\":{\"address\":\"0xd3b71117e6c1558c1553305b44988cd944e97300\",\"symbol\":\"YEL\",\"name\":\"YEL Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd3b71117e6c1558c1553305b44988cd944e97300.png\",\"tags\":[\"crosschain\",\"GROUP:YEL\",\"tokens\"]},\"0xe82808eaa78339b06a691fd92e1be79671cad8d3\":{\"address\":\"0xe82808eaa78339b06a691fd92e1be79671cad8d3\",\"symbol\":\"PLOT\",\"name\":\"PLOT\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x72f020f8f3e8fd9382705723cd26380f8d0c66bb.png\",\"tags\":[\"crosschain\",\"GROUP:PLOT\",\"tokens\"]},\"0xff2382bd52efacef02cc895bcbfc4618608aa56f\":{\"address\":\"0xff2382bd52efacef02cc895bcbfc4618608aa56f\",\"symbol\":\"ORARE\",\"name\":\"One Rare Token\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xff2382bd52efacef02cc895bcbfc4618608aa56f.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xd28449bb9bb659725accad52947677cce3719fd7\":{\"address\":\"0xd28449bb9bb659725accad52947677cce3719fd7\",\"symbol\":\"DMT\",\"name\":\"Dark Matter Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd28449bb9bb659725accad52947677cce3719fd7.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x7ceb23fd6bc0add59e62ac25578270cff1b9f619\":{\"address\":\"0x7ceb23fd6bc0add59e62ac25578270cff1b9f619\",\"symbol\":\"WETH\",\"name\":\"Wrapped Ether\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x7ceb23fd6bc0add59e62ac25578270cff1b9f619.png\",\"tags\":[\"crosschain\",\"GROUP:WETH\",\"tokens\"]},\"0x1ba17c639bdaecd8dc4aac37df062d17ee43a1b8\":{\"address\":\"0x1ba17c639bdaecd8dc4aac37df062d17ee43a1b8\",\"symbol\":\"WIXS\",\"name\":\"Wrapped Ixs Token\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x1ba17c639bdaecd8dc4aac37df062d17ee43a1b8.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x2bc07124d8dac638e290f401046ad584546bc47b\":{\"address\":\"0x2bc07124d8dac638e290f401046ad584546bc47b\",\"symbol\":\"TOWER\",\"name\":\"TOWER\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2bc07124d8dac638e290f401046ad584546bc47b.png\",\"tags\":[\"crosschain\",\"GROUP:TOWER\",\"tokens\"]},\"0x8623e66bea0dce41b6d47f9c44e806a115babae0\":{\"address\":\"0x8623e66bea0dce41b6d47f9c44e806a115babae0\",\"symbol\":\"NFTY\",\"name\":\"NFTY Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x8623e66bea0dce41b6d47f9c44e806a115babae0.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x3b1a0c9252ee7403093ff55b4a5886d49a3d837a\":{\"address\":\"0x3b1a0c9252ee7403093ff55b4a5886d49a3d837a\",\"symbol\":\"UM\",\"name\":\"Continuum\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3b1a0c9252ee7403093ff55b4a5886d49a3d837a.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xa69d14d6369e414a32a5c7e729b7afbafd285965\":{\"address\":\"0xa69d14d6369e414a32a5c7e729b7afbafd285965\",\"symbol\":\"GCR\",\"name\":\"Global Coin Research (PoS)\",\"decimals\":4,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xa69d14d6369e414a32a5c7e729b7afbafd285965.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x60d55f02a771d515e077c9c2403a1ef324885cec\":{\"address\":\"0x60d55f02a771d515e077c9c2403a1ef324885cec\",\"symbol\":\"amUSDT\",\"name\":\"Aave Matic Market USDT\",\"decimals\":6,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3ed3b47dd13ec9a98b44e6204a523e766b225811.png\",\"tags\":[\"crosschain\",\"PEG:USD\",\"tokens\"]},\"0x29f1e986fca02b7e54138c04c4f503dddd250558\":{\"address\":\"0x29f1e986fca02b7e54138c04c4f503dddd250558\",\"symbol\":\"VSQ\",\"name\":\"VSQ\",\"decimals\":9,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x29f1e986fca02b7e54138c04c4f503dddd250558.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x723b17718289a91af252d616de2c77944962d122\":{\"address\":\"0x723b17718289a91af252d616de2c77944962d122\",\"symbol\":\"GAIA\",\"name\":\"GAIA Everworld\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x723b17718289a91af252d616de2c77944962d122.png\",\"tags\":[\"crosschain\",\"GROUP:GAIA\",\"tokens\"]},\"0x28424507fefb6f7f8e9d3860f56504e4e5f5f390\":{\"address\":\"0x28424507fefb6f7f8e9d3860f56504e4e5f5f390\",\"symbol\":\"amWETH\",\"name\":\"Aave Matic Market WETH\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x030ba81f1c18d280636f32af80b9aad02cf0854e.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xbd1463f02f61676d53fd183c2b19282bff93d099\":{\"address\":\"0xbd1463f02f61676d53fd183c2b19282bff93d099\",\"symbol\":\"jCHF\",\"name\":\"Jarvis Synthetic Swiss Franc\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xbd1463f02f61676d53fd183c2b19282bff93d099.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xc10358f062663448a3489fc258139944534592ac\":{\"address\":\"0xc10358f062663448a3489fc258139944534592ac\",\"symbol\":\"BCMC\",\"name\":\"Blockchain Monster Coin\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc10358f062663448a3489fc258139944534592ac.png\",\"tags\":[\"crosschain\",\"GROUP:BCMC\",\"tokens\"]},\"0x9c32185b81766a051e08de671207b34466dd1021\":{\"address\":\"0x9c32185b81766a051e08de671207b34466dd1021\",\"symbol\":\"BTCpx\",\"name\":\"BTC Proxy\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x9c32185b81766a051e08de671207b34466dd1021.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x034b2090b579228482520c589dbd397c53fc51cc\":{\"address\":\"0x034b2090b579228482520c589dbd397c53fc51cc\",\"symbol\":\"VISION\",\"name\":\"Vision Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x034b2090b579228482520c589dbd397c53fc51cc.png\",\"tags\":[\"crosschain\",\"GROUP:VISION\",\"tokens\"]},\"0x282d8efce846a88b159800bd4130ad77443fa1a1\":{\"address\":\"0x282d8efce846a88b159800bd4130ad77443fa1a1\",\"symbol\":\"mOCEAN\",\"name\":\"Ocean Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x967da4048cd07ab37855c090aaf366e4ce1b9f48.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xc168e40227e4ebd8c1cae80f7a55a4f0e6d66c97\":{\"address\":\"0xc168e40227e4ebd8c1cae80f7a55a4f0e6d66c97\",\"symbol\":\"DFYN\",\"name\":\"DFYN Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc168e40227e4ebd8c1cae80f7a55a4f0e6d66c97.png\",\"tags\":[\"crosschain\",\"GROUP:DFYN\",\"tokens\"]},\"0x235737dbb56e8517391473f7c964db31fa6ef280\":{\"address\":\"0x235737dbb56e8517391473f7c964db31fa6ef280\",\"symbol\":\"KASTA\",\"name\":\"KastaToken\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x235737dbb56e8517391473f7c964db31fa6ef280.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x4e1581f01046efdd7a1a2cdb0f82cdd7f71f2e59\":{\"address\":\"0x4e1581f01046efdd7a1a2cdb0f82cdd7f71f2e59\",\"symbol\":\"ICE_3\",\"name\":\"IceToken\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x4e1581f01046efdd7a1a2cdb0f82cdd7f71f2e59.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xfe712251173a2cd5f5be2b46bb528328ea3565e1\":{\"address\":\"0xfe712251173a2cd5f5be2b46bb528328ea3565e1\",\"symbol\":\"MVI\",\"name\":\"Metaverse Index (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xfe712251173a2cd5f5be2b46bb528328ea3565e1.png\",\"tags\":[\"crosschain\",\"GROUP:MVI\",\"tokens\"]},\"0x16eccfdbb4ee1a85a33f3a9b21175cd7ae753db4\":{\"address\":\"0x16eccfdbb4ee1a85a33f3a9b21175cd7ae753db4\",\"symbol\":\"ROUTE (PoS)\",\"name\":\"Route\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x16eccfdbb4ee1a85a33f3a9b21175cd7ae753db4.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x7f67639ffc8c93dd558d452b8920b28815638c44\":{\"address\":\"0x7f67639ffc8c93dd558d452b8920b28815638c44\",\"symbol\":\"LIME\",\"name\":\"iMe Lab\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x7f67639ffc8c93dd558d452b8920b28815638c44.png\",\"tags\":[\"crosschain\",\"GROUP:LIME\",\"tokens\"]},\"0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7\":{\"address\":\"0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7\",\"symbol\":\"GHST\",\"name\":\"Aavegotchi GHST Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3f382dbd960e3a9bbceae22651e88158d2791550.png\",\"tags\":[\"crosschain\",\"GROUP:GHST\",\"tokens\"]},\"0x5f0197ba06860dac7e31258bdf749f92b6a636d4\":{\"address\":\"0x5f0197ba06860dac7e31258bdf749f92b6a636d4\",\"symbol\":\"1FLR\",\"name\":\"Flare Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x5f0197ba06860dac7e31258bdf749f92b6a636d4.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xa3fa99a148fa48d14ed51d610c367c61876997f1\":{\"address\":\"0xa3fa99a148fa48d14ed51d610c367c61876997f1\",\"symbol\":\"miMATIC\",\"name\":\"miMATIC\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xa3fa99a148fa48d14ed51d610c367c61876997f1.png\",\"tags\":[\"crosschain\",\"GROUP:miMATIC\",\"PEG:MATIC\",\"tokens\"]},\"0x82362ec182db3cf7829014bc61e9be8a2e82868a\":{\"address\":\"0x82362ec182db3cf7829014bc61e9be8a2e82868a\",\"symbol\":\"MESH\",\"name\":\"Meshswap Protocol\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x82362ec182db3cf7829014bc61e9be8a2e82868a.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x200c234721b5e549c3693ccc93cf191f90dc2af9\":{\"address\":\"0x200c234721b5e549c3693ccc93cf191f90dc2af9\",\"symbol\":\"METAL\",\"name\":\"METAL\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x200c234721b5e549c3693ccc93cf191f90dc2af9.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x65a05db8322701724c197af82c9cae41195b0aa8\":{\"address\":\"0x65a05db8322701724c197af82c9cae41195b0aa8\",\"symbol\":\"FOX\",\"name\":\"FOX (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x65a05db8322701724c197af82c9cae41195b0aa8.png\",\"tags\":[\"crosschain\",\"GROUP:FOX\",\"tokens\"]},\"0xf4c83080e80ae530d6f8180572cbbf1ac9d5d435\":{\"address\":\"0xf4c83080e80ae530d6f8180572cbbf1ac9d5d435\",\"symbol\":\"BLANK\",\"name\":\"GoBlank Token (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xf4c83080e80ae530d6f8180572cbbf1ac9d5d435.png\",\"tags\":[\"crosschain\",\"GROUP:BLANK\",\"tokens\"]},\"0xd0258a3fd00f38aa8090dfee343f10a9d4d30d3f\":{\"address\":\"0xd0258a3fd00f38aa8090dfee343f10a9d4d30d3f\",\"symbol\":\"VOXEL\",\"name\":\"VOXEL Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd0258a3fd00f38aa8090dfee343f10a9d4d30d3f.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xc2132d05d31c914a87c6611c10748aeb04b58e8f\":{\"address\":\"0xc2132d05d31c914a87c6611c10748aeb04b58e8f\",\"symbol\":\"USDT\",\"name\":\"Tether USD\",\"decimals\":6,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png\",\"tags\":[\"crosschain\",\"GROUP:USDT\",\"PEG:USD\",\"tokens\"]},\"0x6968105460f67c3bf751be7c15f92f5286fd0ce5\":{\"address\":\"0x6968105460f67c3bf751be7c15f92f5286fd0ce5\",\"symbol\":\"MONA\",\"name\":\"Monavale\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x275f5ad03be0fa221b4c6649b8aee09a42d9412a.png\",\"tags\":[\"crosschain\",\"GROUP:MONA\",\"tokens\"]},\"0xba3cb8329d442e6f9eb70fafe1e214251df3d275\":{\"address\":\"0xba3cb8329d442e6f9eb70fafe1e214251df3d275\",\"symbol\":\"SWASH\",\"name\":\"Swash Token\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xba3cb8329d442e6f9eb70fafe1e214251df3d275.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x1a13f4ca1d028320a707d99520abfefca3998b7f\":{\"address\":\"0x1a13f4ca1d028320a707d99520abfefca3998b7f\",\"symbol\":\"amUSDC\",\"name\":\"Aave Matic Market USDC\",\"decimals\":6,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xbcca60bb61934080951369a648fb03df4f96263c.png\",\"tags\":[\"crosschain\",\"PEG:USD\",\"tokens\"]},\"0xee7666aacaefaa6efeef62ea40176d3eb21953b9\":{\"address\":\"0xee7666aacaefaa6efeef62ea40176d3eb21953b9\",\"symbol\":\"MCHC\",\"name\":\"MCHCoin (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xee7666aacaefaa6efeef62ea40176d3eb21953b9.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xd8ca34fd379d9ca3c6ee3b3905678320f5b45195\":{\"address\":\"0xd8ca34fd379d9ca3c6ee3b3905678320f5b45195\",\"symbol\":\"gOHM\",\"name\":\"Governance OHM\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd8ca34fd379d9ca3c6ee3b3905678320f5b45195.png\",\"tags\":[\"crosschain\",\"GROUP:gOHM\",\"tokens\"]},\"0x23e8b6a3f6891254988b84da3738d2bfe5e703b9\":{\"address\":\"0x23e8b6a3f6891254988b84da3738d2bfe5e703b9\",\"symbol\":\"WELT\",\"name\":\"FABWELT\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x23e8b6a3f6891254988b84da3738d2bfe5e703b9.png\",\"tags\":[\"tokens\"]},\"0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270\":{\"address\":\"0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270\",\"symbol\":\"WPOL\",\"name\":\"Wrapped Polygon Ecosystem Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270.png\",\"tags\":[\"crosschain\",\"PEG:MATIC\",\"tokens\"]},\"0x05089c9ebffa4f0aca269e32056b1b36b37ed71b\":{\"address\":\"0x05089c9ebffa4f0aca269e32056b1b36b37ed71b\",\"symbol\":\"Krill\",\"name\":\"Krill\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x05089c9ebffa4f0aca269e32056b1b36b37ed71b.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x750e4c4984a9e0f12978ea6742bc1c5d248f40ed\":{\"address\":\"0x750e4c4984a9e0f12978ea6742bc1c5d248f40ed\",\"symbol\":\"axlUSDC\",\"name\":\"Axelar Wrapped USDC\",\"decimals\":6,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x750e4c4984a9e0f12978ea6742bc1c5d248f40ed.png\",\"tags\":[\"crosschain\",\"GROUP:axlUSDC\",\"tokens\"]},\"0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4\":{\"address\":\"0xa1c57f48f0deb89f569dfbe6e2b7f46d33606fd4\",\"symbol\":\"MANA\",\"name\":\"Decentraland MANA\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x0f5d2fb29fb7d3cfee444a200298f468908cc942.png\",\"tags\":[\"crosschain\",\"GROUP:MANA\",\"tokens\"]},\"0xd4945a3d0de9923035521687d4bf18cc9b0c7c2a\":{\"address\":\"0xd4945a3d0de9923035521687d4bf18cc9b0c7c2a\",\"symbol\":\"LUXY\",\"name\":\"LUXY\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd4945a3d0de9923035521687d4bf18cc9b0c7c2a.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x431d5dff03120afa4bdf332c61a6e1766ef37bdb\":{\"address\":\"0x431d5dff03120afa4bdf332c61a6e1766ef37bdb\",\"symbol\":\"JPYC\",\"name\":\"JPY Coin\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x431d5dff03120afa4bdf332c61a6e1766ef37bdb.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x23d29d30e35c5e8d321e1dc9a8a61bfd846d4c5c\":{\"address\":\"0x23d29d30e35c5e8d321e1dc9a8a61bfd846d4c5c\",\"symbol\":\"HEX\",\"name\":\"HEXX\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2b591e99afe9f32eaa6214f7b7629768c40eeb39.png\",\"tags\":[\"crosschain\",\"GROUP:HEX\",\"tokens\"]},\"0xfa68fb4628dff1028cfec22b4162fccd0d45efb6\":{\"address\":\"0xfa68fb4628dff1028cfec22b4162fccd0d45efb6\",\"symbol\":\"MaticX\",\"name\":\"Liquid Staking Matic (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xfa68fb4628dff1028cfec22b4162fccd0d45efb6.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x580a84c73811e1839f75d86d75d88cca0c241ff4\":{\"address\":\"0x580a84c73811e1839f75d86d75d88cca0c241ff4\",\"symbol\":\"QI\",\"name\":\"Qi Dao\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x580a84c73811e1839f75d86d75d88cca0c241ff4.png\",\"tags\":[\"crosschain\",\"GROUP:QI\",\"tokens\"]},\"0xeeeeeb57642040be42185f49c52f7e9b38f8eeee\":{\"address\":\"0xeeeeeb57642040be42185f49c52f7e9b38f8eeee\",\"symbol\":\"ELK\",\"name\":\"Elk\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xeeeeeb57642040be42185f49c52f7e9b38f8eeee.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x6f7c932e7684666c9fd1d44527765433e01ff61d\":{\"address\":\"0x6f7c932e7684666c9fd1d44527765433e01ff61d\",\"symbol\":\"MKR\",\"name\":\"Maker\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"\",\"tags\":[\"crosschain\",\"GROUP:MKR\",\"tokens\"]},\"0x7075cab6bcca06613e2d071bd918d1a0241379e2\":{\"address\":\"0x7075cab6bcca06613e2d071bd918d1a0241379e2\",\"symbol\":\"GFARM2\",\"name\":\"Gains V2\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x7075cab6bcca06613e2d071bd918d1a0241379e2.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xe111178a87a3bff0c8d18decba5798827539ae99\":{\"address\":\"0xe111178a87a3bff0c8d18decba5798827539ae99\",\"symbol\":\"EURS\",\"name\":\"STASIS EURS Token (PoS)\",\"decimals\":2,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xe111178a87a3bff0c8d18decba5798827539ae99.png\",\"tags\":[\"crosschain\",\"GROUP:EURS\",\"tokens\"]},\"0xbbba073c31bf03b8acf7c28ef0738decf3695683\":{\"address\":\"0xbbba073c31bf03b8acf7c28ef0738decf3695683\",\"symbol\":\"SAND\",\"name\":\"SAND\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xbbba073c31bf03b8acf7c28ef0738decf3695683.png\",\"tags\":[\"crosschain\",\"GROUP:SAND\",\"tokens\"]},\"0x64ca1571d1476b7a21c5aaf9f1a750a193a103c0\":{\"address\":\"0x64ca1571d1476b7a21c5aaf9f1a750a193a103c0\",\"symbol\":\"BONDLY\",\"name\":\"Bondly (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x64ca1571d1476b7a21c5aaf9f1a750a193a103c0.png\",\"tags\":[\"crosschain\",\"GROUP:BONDLY\",\"tokens\"]},\"0xdc3326e71d45186f113a2f448984ca0e8d201995\":{\"address\":\"0xdc3326e71d45186f113a2f448984ca0e8d201995\",\"symbol\":\"XSGD\",\"name\":\"XSGD\",\"decimals\":6,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xdc3326e71d45186f113a2f448984ca0e8d201995.png\",\"tags\":[\"crosschain\",\"GROUP:XSGD\",\"tokens\"]},\"0xe06bd4f5aac8d0aa337d13ec88db6defc6eaeefe\":{\"address\":\"0xe06bd4f5aac8d0aa337d13ec88db6defc6eaeefe\",\"symbol\":\"IXT\",\"name\":\"PlanetIX\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xe06bd4f5aac8d0aa337d13ec88db6defc6eaeefe.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xe5b49820e5a1063f6f4ddf851327b5e8b2301048\":{\"address\":\"0xe5b49820e5a1063f6f4ddf851327b5e8b2301048\",\"symbol\":\"Bonk\",\"name\":\"Bonk\",\"decimals\":5,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"\",\"tags\":[\"GROUP:BONK\",\"tokens\"]},\"0xbfa35599c7aebb0dace9b5aa3ca5f2a79624d8eb\":{\"address\":\"0xbfa35599c7aebb0dace9b5aa3ca5f2a79624d8eb\",\"symbol\":\"RETRO\",\"name\":\"RETRO\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xbfa35599c7aebb0dace9b5aa3ca5f2a79624d8eb.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x5c2ed810328349100a66b82b78a1791b101c9d61\":{\"address\":\"0x5c2ed810328349100a66b82b78a1791b101c9d61\",\"symbol\":\"amWBTC\",\"name\":\"Aave Matic Market WBTC\",\"decimals\":8,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x9ff58f4ffb29fa2266ab25e75e2a8b3503311656.png\",\"tags\":[\"crosschain\",\"PEG:BTC\",\"tokens\"]},\"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359\":{\"address\":\"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359\",\"symbol\":\"USDC\",\"name\":\"USD Coin\",\"decimals\":6,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3c499c542cef5e3811e1192ce70d8cc03d5c3359.png\",\"tags\":[\"crosschain\",\"GROUP:USDC\",\"tokens\"]},\"0xb35fcbcf1fd489fce02ee146599e893fdcdc60e6\":{\"address\":\"0xb35fcbcf1fd489fce02ee146599e893fdcdc60e6\",\"symbol\":\"DERC\",\"name\":\"DeRace Token\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xb35fcbcf1fd489fce02ee146599e893fdcdc60e6.png\",\"tags\":[\"crosschain\",\"GROUP:DERC\",\"tokens\"]},\"0x3a3e7650f8b9f667da98f236010fbf44ee4b2975\":{\"address\":\"0x3a3e7650f8b9f667da98f236010fbf44ee4b2975\",\"symbol\":\"xUSD\",\"name\":\"xDollar Stablecoin\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3a3e7650f8b9f667da98f236010fbf44ee4b2975.png\",\"tags\":[\"crosschain\",\"PEG:USD\",\"tokens\"]},\"0xd838290e877e0188a4a44700463419ed96c16107\":{\"address\":\"0xd838290e877e0188a4a44700463419ed96c16107\",\"symbol\":\"NCT\",\"name\":\"Toucan Protocol: Nature Carbon Tonne\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd838290e877e0188a4a44700463419ed96c16107.png\",\"tags\":[\"crosschain\",\"GROUP:NCT\",\"tokens\"]},\"0x7e4c577ca35913af564ee2a24d882a4946ec492b\":{\"address\":\"0x7e4c577ca35913af564ee2a24d882a4946ec492b\",\"symbol\":\"MOONED\",\"name\":\"MoonEdge\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x7e4c577ca35913af564ee2a24d882a4946ec492b.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xe26cda27c13f4f87cffc2f437c5900b27ebb5bbb\":{\"address\":\"0xe26cda27c13f4f87cffc2f437c5900b27ebb5bbb\",\"symbol\":\"RBLS\",\"name\":\"Rebel Bots Token\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xe26cda27c13f4f87cffc2f437c5900b27ebb5bbb.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x071ac29d569a47ebffb9e57517f855cb577dcc4c\":{\"address\":\"0x071ac29d569a47ebffb9e57517f855cb577dcc4c\",\"symbol\":\"GFC\",\"name\":\"GCOIN\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x071ac29d569a47ebffb9e57517f855cb577dcc4c.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x8839e639f210b80ffea73aedf51baed8dac04499\":{\"address\":\"0x8839e639f210b80ffea73aedf51baed8dac04499\",\"symbol\":\"DWEB\",\"name\":\"DecentraWeb (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x8839e639f210b80ffea73aedf51baed8dac04499.png\",\"tags\":[\"crosschain\",\"GROUP:DWEB\",\"tokens\"]},\"0x67eb41a14c0fe5cd701fc9d5a3d6597a72f641a6\":{\"address\":\"0x67eb41a14c0fe5cd701fc9d5a3d6597a72f641a6\",\"symbol\":\"GIDDY\",\"name\":\"Giddy Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x67eb41a14c0fe5cd701fc9d5a3d6597a72f641a6.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x27f8d03b3a2196956ed754badc28d73be8830a6e\":{\"address\":\"0x27f8d03b3a2196956ed754badc28d73be8830a6e\",\"symbol\":\"amDAI\",\"name\":\"Aave Matic Market DAI\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x028171bca77440897b824ca71d1c56cac55b68a3.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x59b5654a17ac44f3068b3882f298881433bb07ef\":{\"address\":\"0x59b5654a17ac44f3068b3882f298881433bb07ef\",\"symbol\":\"CHP\",\"name\":\"CoinPoker Chips (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x59b5654a17ac44f3068b3882f298881433bb07ef.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x1599fe55cda767b1f631ee7d414b41f5d6de393d\":{\"address\":\"0x1599fe55cda767b1f631ee7d414b41f5d6de393d\",\"symbol\":\"MILK\",\"name\":\"Milk\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x1599fe55cda767b1f631ee7d414b41f5d6de393d.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x2e1ad108ff1d8c782fcbbb89aad783ac49586756\":{\"address\":\"0x2e1ad108ff1d8c782fcbbb89aad783ac49586756\",\"symbol\":\"TUSD\",\"name\":\"TrueUSD (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2e1ad108ff1d8c782fcbbb89aad783ac49586756.png\",\"tags\":[\"crosschain\",\"GROUP:TUSD\",\"PEG:USD\",\"tokens\"]},\"0x3a3df212b7aa91aa0402b9035b098891d276572b\":{\"address\":\"0x3a3df212b7aa91aa0402b9035b098891d276572b\",\"symbol\":\"FISH\",\"name\":\"Fish\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3a3df212b7aa91aa0402b9035b098891d276572b.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xba0dda8762c24da9487f5fa026a9b64b695a07ea\":{\"address\":\"0xba0dda8762c24da9487f5fa026a9b64b695a07ea\",\"symbol\":\"OX\",\"name\":\"OX Coin\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xba0dda8762c24da9487f5fa026a9b64b695a07ea.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xa486c6bc102f409180ccb8a94ba045d39f8fc7cb\":{\"address\":\"0xa486c6bc102f409180ccb8a94ba045d39f8fc7cb\",\"symbol\":\"NEX\",\"name\":\"Nash Exchange Token (PoS)\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xa486c6bc102f409180ccb8a94ba045d39f8fc7cb.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x692597b009d13c4049a947cab2239b7d6517875f\":{\"address\":\"0x692597b009d13c4049a947cab2239b7d6517875f\",\"symbol\":\"UST\",\"name\":\"Wrapped UST Token (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x692597b009d13c4049a947cab2239b7d6517875f.png\",\"tags\":[\"crosschain\",\"GROUP:UST\",\"tokens\"]},\"0xef6ab48ef8dfe984fab0d5c4cd6aff2e54dfda14\":{\"address\":\"0xef6ab48ef8dfe984fab0d5c4cd6aff2e54dfda14\",\"symbol\":\"CRISP-M\",\"name\":\"CRISP Scored Mangroves\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xef6ab48ef8dfe984fab0d5c4cd6aff2e54dfda14.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xdb725f82818de83e99f1dac22a9b5b51d3d04dd4\":{\"address\":\"0xdb725f82818de83e99f1dac22a9b5b51d3d04dd4\",\"symbol\":\"GET\",\"name\":\"GET Protocol (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xdb725f82818de83e99f1dac22a9b5b51d3d04dd4.png\",\"tags\":[\"crosschain\",\"GROUP:GET\",\"tokens\"]},\"0x236aa50979d5f3de3bd1eeb40e81137f22ab794b\":{\"address\":\"0x236aa50979d5f3de3bd1eeb40e81137f22ab794b\",\"symbol\":\"tBTC\",\"name\":\"Polygon tBTC v2\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens-data.1inch.io/images/137/0x236aa50979d5f3de3bd1eeb40e81137f22ab794b.png\",\"tags\":[\"crosschain\",\"GROUP:tBTC\",\"PEG:BTC\",\"tokens\"]},\"0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a\":{\"address\":\"0x0b3f868e0be5597d5db7feb59e1cadbb0fdda50a\",\"symbol\":\"SUSHI\",\"name\":\"SushiToken\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x6b3595068778dd592e39a122f4f5a5cf09c90fe2.png\",\"tags\":[\"crosschain\",\"GROUP:SUSHI\",\"tokens\"]},\"0x1379e8886a944d2d9d440b3d88df536aea08d9f3\":{\"address\":\"0x1379e8886a944d2d9d440b3d88df536aea08d9f3\",\"symbol\":\"MYST\",\"name\":\"Mysterium (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x1379e8886a944d2d9d440b3d88df536aea08d9f3.png\",\"tags\":[\"crosschain\",\"GROUP:MYST\",\"tokens\"]},\"0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6\":{\"address\":\"0x1bfd67037b42cf73acf2047067bd4f2c47d9bfd6\",\"symbol\":\"WBTC\",\"name\":\"Wrapped BTC\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png\",\"tags\":[\"crosschain\",\"GROUP:WBTC\",\"PEG:BTC\",\"tokens\"]},\"0x1d2a0e5ec8e5bbdca5cb219e649b565d8e5c3360\":{\"address\":\"0x1d2a0e5ec8e5bbdca5cb219e649b565d8e5c3360\",\"symbol\":\"amAAVE\",\"name\":\"Aave Matic Market AAVE\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xffc97d72e13e01096502cb8eb52dee56f74dad7b.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x187ae45f2d361cbce37c6a8622119c91148f261b\":{\"address\":\"0x187ae45f2d361cbce37c6a8622119c91148f261b\",\"symbol\":\"POLX\",\"name\":\"Polylastic\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x187ae45f2d361cbce37c6a8622119c91148f261b.png\",\"tags\":[\"tokens\"]},\"0x2c89bbc92bd86f8075d1decc58c7f4e0107f286b\":{\"address\":\"0x2c89bbc92bd86f8075d1decc58c7f4e0107f286b\",\"symbol\":\"AVAX\",\"name\":\"Avalanche Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2c89bbc92bd86f8075d1decc58c7f4e0107f286b.png\",\"tags\":[\"crosschain\",\"GROUP:AVAX\",\"tokens\"]},\"0x34d4ab47bee066f361fa52d792e69ac7bd05ee23\":{\"address\":\"0x34d4ab47bee066f361fa52d792e69ac7bd05ee23\",\"symbol\":\"AURUM\",\"name\":\"RaiderAurum\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x34d4ab47bee066f361fa52d792e69ac7bd05ee23.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x6c0ab120dbd11ba701aff6748568311668f63fe0\":{\"address\":\"0x6c0ab120dbd11ba701aff6748568311668f63fe0\",\"symbol\":\"APW\",\"name\":\"APWine Token (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x4104b135dbc9609fc1a9490e61369036497660c8.png\",\"tags\":[\"crosschain\",\"GROUP:APW\",\"tokens\"]},\"0x8f3cf7ad23cd3cadbd9735aff958023239c6a063\":{\"address\":\"0x8f3cf7ad23cd3cadbd9735aff958023239c6a063\",\"symbol\":\"DAI\",\"name\":\"(PoS) Dai Stablecoin\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x6b175474e89094c44da98b954eedeac495271d0f.png\",\"tags\":[\"crosschain\",\"GROUP:DAI\",\"PEG:USD\",\"tokens\"]},\"0x50b728d8d964fd00c2d0aad81718b71311fef68a\":{\"address\":\"0x50b728d8d964fd00c2d0aad81718b71311fef68a\",\"symbol\":\"SNX\",\"name\":\"Synthetix Network Token (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x50b728d8d964fd00c2d0aad81718b71311fef68a.png\",\"tags\":[\"crosschain\",\"GROUP:SNX\",\"tokens\"]},\"0x30de46509dbc3a491128f97be0aaf70dc7ff33cb\":{\"address\":\"0x30de46509dbc3a491128f97be0aaf70dc7ff33cb\",\"symbol\":\"XZAR\",\"name\":\"South African Tether (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x30de46509dbc3a491128f97be0aaf70dc7ff33cb.png\",\"tags\":[\"crosschain\",\"GROUP:XZAR\",\"tokens\"]},\"0x8c92e38eca8210f4fcbf17f0951b198dd7668292\":{\"address\":\"0x8c92e38eca8210f4fcbf17f0951b198dd7668292\",\"symbol\":\"DHT\",\"name\":\"dHedge DAO Token (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x8c92e38eca8210f4fcbf17f0951b198dd7668292.png\",\"tags\":[\"crosschain\",\"GROUP:DHT\",\"tokens\"]},\"0x70c006878a5a50ed185ac4c87d837633923de296\":{\"address\":\"0x70c006878a5a50ed185ac4c87d837633923de296\",\"symbol\":\"REVV\",\"name\":\"REVV\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x70c006878a5a50ed185ac4c87d837633923de296.png\",\"tags\":[\"crosschain\",\"GROUP:REVV\",\"tokens\"]},\"0xe46b4a950c389e80621d10dfc398e91613c7e25e\":{\"address\":\"0xe46b4a950c389e80621d10dfc398e91613c7e25e\",\"symbol\":\"pFi\",\"name\":\"PartyFinance\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xe46b4a950c389e80621d10dfc398e91613c7e25e.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x0e9b89007eee9c958c0eda24ef70723c2c93dd58\":{\"address\":\"0x0e9b89007eee9c958c0eda24ef70723c2c93dd58\",\"symbol\":\"ankrMATIC\",\"name\":\"Ankr Staked MATIC\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x0e9b89007eee9c958c0eda24ef70723c2c93dd58.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x00e5646f60ac6fb446f621d146b6e1886f002905\":{\"address\":\"0x00e5646f60ac6fb446f621d146b6e1886f002905\",\"symbol\":\"RAI\",\"name\":\"Rai Reflex Index (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x00e5646f60ac6fb446f621d146b6e1886f002905.png\",\"tags\":[\"crosschain\",\"GROUP:RAI\",\"tokens\"]},\"0x361a5a4993493ce00f61c32d4ecca5512b82ce90\":{\"address\":\"0x361a5a4993493ce00f61c32d4ecca5512b82ce90\",\"symbol\":\"SDT\",\"name\":\"Stake DAO Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x73968b9a57c6e53d41345fd57a6e6ae27d6cdb2f.png\",\"tags\":[\"crosschain\",\"GROUP:SDT\",\"tokens\"]},\"0xdbf31df14b66535af65aac99c32e9ea844e14501\":{\"address\":\"0xdbf31df14b66535af65aac99c32e9ea844e14501\",\"symbol\":\"renBTC\",\"name\":\"renBTC\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xdbf31df14b66535af65aac99c32e9ea844e14501.png\",\"tags\":[\"crosschain\",\"GROUP:renBTC\",\"tokens\"]},\"0xab0b2ddb9c7e440fac8e140a89c0dbcbf2d7bbff\":{\"address\":\"0xab0b2ddb9c7e440fac8e140a89c0dbcbf2d7bbff\",\"symbol\":\"iFARM\",\"name\":\"iFARM\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xa0246c9032bc3a600820415ae600c6388619a14d.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x4e78011ce80ee02d2c3e649fb657e45898257815\":{\"address\":\"0x4e78011ce80ee02d2c3e649fb657e45898257815\",\"symbol\":\"KLIMA\",\"name\":\"Klima DAO\",\"decimals\":9,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x4e78011ce80ee02d2c3e649fb657e45898257815.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x033d942a6b495c4071083f4cde1f17e986fe856c\":{\"address\":\"0x033d942a6b495c4071083f4cde1f17e986fe856c\",\"symbol\":\"AGA\",\"name\":\"AGA Token\",\"decimals\":4,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2d80f5f5328fdcb6eceb7cacf5dd8aedaec94e20.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x4e3decbb3645551b8a19f0ea1678079fcb33fb4c\":{\"address\":\"0x4e3decbb3645551b8a19f0ea1678079fcb33fb4c\",\"symbol\":\"jEUR\",\"name\":\"Jarvis Synthetic Euro\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x4e3decbb3645551b8a19f0ea1678079fcb33fb4c.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x1c954e8fe737f99f68fa1ccda3e51ebdb291948c\":{\"address\":\"0x1c954e8fe737f99f68fa1ccda3e51ebdb291948c\",\"symbol\":\"KNC\",\"name\":\"Kyber Network Crystal v2\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x1c954e8fe737f99f68fa1ccda3e51ebdb291948c.png\",\"tags\":[\"crosschain\",\"GROUP:KNC\",\"tokens\"]},\"0xee9a352f6aac4af1a5b9f467f6a93e0ffbe9dd35\":{\"address\":\"0xee9a352f6aac4af1a5b9f467f6a93e0ffbe9dd35\",\"symbol\":\"MASQ\",\"name\":\"MASQ (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xee9a352f6aac4af1a5b9f467f6a93e0ffbe9dd35.png\",\"tags\":[\"crosschain\",\"GROUP:MASQ\",\"tokens\"]},\"0x78a0a62fba6fb21a83fe8a3433d44c73a4017a6f\":{\"address\":\"0x78a0a62fba6fb21a83fe8a3433d44c73a4017a6f\",\"symbol\":\"OX_OLD\",\"name\":\"Open Exchange Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x78a0a62fba6fb21a83fe8a3433d44c73a4017a6f.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x8f9e8e833a69aa467e42c46cca640da84dd4585f\":{\"address\":\"0x8f9e8e833a69aa467e42c46cca640da84dd4585f\",\"symbol\":\"CHAMP\",\"name\":\"NFT Champions\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x8f9e8e833a69aa467e42c46cca640da84dd4585f.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x5fe2b58c013d7601147dcdd68c143a77499f5531\":{\"address\":\"0x5fe2b58c013d7601147dcdd68c143a77499f5531\",\"symbol\":\"GRT\",\"name\":\"Graph Token (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x5fe2b58c013d7601147dcdd68c143a77499f5531.png\",\"tags\":[\"crosschain\",\"GROUP:GRT\",\"tokens\"]},\"0xa1428174f516f527fafdd146b883bb4428682737\":{\"address\":\"0xa1428174f516f527fafdd146b883bb4428682737\",\"symbol\":\"SUPER\",\"name\":\"SuperFarm\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xe53ec727dbdeb9e2d5456c3be40cff031ab40a55.png\",\"tags\":[\"crosschain\",\"GROUP:SUPER\",\"tokens\"]},\"0x8f18dc399594b451eda8c5da02d0563c0b2d0f16\":{\"address\":\"0x8f18dc399594b451eda8c5da02d0563c0b2d0f16\",\"symbol\":\"WOLF\",\"name\":\"moonwolf.io\",\"decimals\":9,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x8f18dc399594b451eda8c5da02d0563c0b2d0f16.png\",\"tags\":[\"tokens\"]},\"0xdab625853c2b35d0a9c6bd8e5a097a664ef4ccfb\":{\"address\":\"0xdab625853c2b35d0a9c6bd8e5a097a664ef4ccfb\",\"symbol\":\"eQUAD\",\"name\":\"Quadrant Protocol\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xdab625853c2b35d0a9c6bd8e5a097a664ef4ccfb.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x04b33078ea1aef29bf3fb29c6ab7b200c58ea126\":{\"address\":\"0x04b33078ea1aef29bf3fb29c6ab7b200c58ea126\",\"symbol\":\"SAFLE\",\"name\":\"Safle\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x04b33078ea1aef29bf3fb29c6ab7b200c58ea126.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x88c949b4eb85a90071f2c0bef861bddee1a7479d\":{\"address\":\"0x88c949b4eb85a90071f2c0bef861bddee1a7479d\",\"symbol\":\"mSHEESHA\",\"name\":\"SHEESHA POLYGON\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x88c949b4eb85a90071f2c0bef861bddee1a7479d.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x45c32fa6df82ead1e2ef74d17b76547eddfaff89\":{\"address\":\"0x45c32fa6df82ead1e2ef74d17b76547eddfaff89\",\"symbol\":\"FRAX\",\"name\":\"Frax\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x45c32fa6df82ead1e2ef74d17b76547eddfaff89.png\",\"tags\":[\"crosschain\",\"GROUP:FRAX\",\"tokens\"]},\"0x2b9e7ccdf0f4e5b24757c1e1a80e311e34cb10c7\":{\"address\":\"0x2b9e7ccdf0f4e5b24757c1e1a80e311e34cb10c7\",\"symbol\":\"MASK\",\"name\":\"Mask Network (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2b9e7ccdf0f4e5b24757c1e1a80e311e34cb10c7.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xf50d05a1402d0adafa880d36050736f9f6ee7dee\":{\"address\":\"0xf50d05a1402d0adafa880d36050736f9f6ee7dee\",\"symbol\":\"INST\",\"name\":\"Instadapp (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xf50d05a1402d0adafa880d36050736f9f6ee7dee.png\",\"tags\":[\"crosschain\",\"GROUP:INST\",\"tokens\"]},\"0xc004e2318722ea2b15499d6375905d75ee5390b8\":{\"address\":\"0xc004e2318722ea2b15499d6375905d75ee5390b8\",\"symbol\":\"KOM\",\"name\":\"Kommunitas\",\"decimals\":8,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc004e2318722ea2b15499d6375905d75ee5390b8.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x55555555a687343c6ce28c8e1f6641dc71659fad\":{\"address\":\"0x55555555a687343c6ce28c8e1f6641dc71659fad\",\"symbol\":\"XY\",\"name\":\"XY Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x55555555a687343c6ce28c8e1f6641dc71659fad.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xe5417af564e4bfda1c483642db72007871397896\":{\"address\":\"0xe5417af564e4bfda1c483642db72007871397896\",\"symbol\":\"GNS\",\"name\":\"Gains Network\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xe5417af564e4bfda1c483642db72007871397896.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x3a9a81d576d83ff21f26f325066054540720fc34\":{\"address\":\"0x3a9a81d576d83ff21f26f325066054540720fc34\",\"symbol\":\"DATA\",\"name\":\"Streamr\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3a9a81d576d83ff21f26f325066054540720fc34.png\",\"tags\":[\"crosschain\",\"GROUP:DATA\",\"tokens\"]},\"0x5d47baba0d66083c52009271faf3f50dcc01023c\":{\"address\":\"0x5d47baba0d66083c52009271faf3f50dcc01023c\",\"symbol\":\"BANANA\",\"name\":\"ApeSwapFinance Banana\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x5d47baba0d66083c52009271faf3f50dcc01023c.png\",\"tags\":[\"crosschain\",\"GROUP:BANANA\",\"tokens\"]},\"0x840195888db4d6a99ed9f73fcd3b225bb3cb1a79\":{\"address\":\"0x840195888db4d6a99ed9f73fcd3b225bb3cb1a79\",\"symbol\":\"SX\",\"name\":\"SportX\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x99fe3b1391503a1bc1788051347a1324bff41452.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xe0b52e49357fd4daf2c15e02058dce6bc0057db4\":{\"address\":\"0xe0b52e49357fd4daf2c15e02058dce6bc0057db4\",\"symbol\":\"EURA\",\"name\":\"EURA (previously agEUR)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xe0b52e49357fd4daf2c15e02058dce6bc0057db4.png\",\"tags\":[\"crosschain\",\"GROUP:EURA\",\"PEG:EUR\",\"tokens\"]},\"0x0d0b8488222f7f83b23e365320a4021b12ead608\":{\"address\":\"0x0d0b8488222f7f83b23e365320a4021b12ead608\",\"symbol\":\"NXTT\",\"name\":\"NextEarthToken\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x0d0b8488222f7f83b23e365320a4021b12ead608.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x61299774020da444af134c82fa83e3810b309991\":{\"address\":\"0x61299774020da444af134c82fa83e3810b309991\",\"symbol\":\"RNDR\",\"name\":\"Render Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"\",\"tags\":[\"crosschain\",\"GROUP:RNDR\",\"tokens\"]},\"0x9c78ee466d6cb57a4d01fd887d2b5dfb2d46288f\":{\"address\":\"0x9c78ee466d6cb57a4d01fd887d2b5dfb2d46288f\",\"symbol\":\"MUST\",\"name\":\"Must\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x9c78ee466d6cb57a4d01fd887d2b5dfb2d46288f.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xc3ec80343d2bae2f8e680fdadde7c17e71e114ea\":{\"address\":\"0xc3ec80343d2bae2f8e680fdadde7c17e71e114ea\",\"symbol\":\"OM\",\"name\":\"OM\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens-data.1inch.io/images/137/0xc3ec80343d2bae2f8e680fdadde7c17e71e114ea.webp\",\"tags\":[\"crosschain\",\"GROUP:OM\",\"tokens\"]},\"0x2934b36ca9a4b31e633c5be670c8c8b28b6aa015\":{\"address\":\"0x2934b36ca9a4b31e633c5be670c8c8b28b6aa015\",\"symbol\":\"THX\",\"name\":\"THX Network (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2934b36ca9a4b31e633c5be670c8c8b28b6aa015.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xdf7837de1f2fa4631d716cf2502f8b230f1dcc32\":{\"address\":\"0xdf7837de1f2fa4631d716cf2502f8b230f1dcc32\",\"symbol\":\"TEL\",\"name\":\"Telcoin\",\"decimals\":2,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x467bccd9d29f223bce8043b84e8c8b282827790f.png\",\"tags\":[\"crosschain\",\"GROUP:TEL\",\"tokens\"]},\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\":{\"address\":\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\",\"symbol\":\"AAVE\",\"name\":\"Aave\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens-data.1inch.io/images/137/0xd6df932a45c0f255f85145f286ea0b292b21c90b.webp\",\"tags\":[\"crosschain\",\"GROUP:AAVE\",\"tokens\"]},\"0xc1c93d475dc82fe72dbc7074d55f5a734f8ceeae\":{\"address\":\"0xc1c93d475dc82fe72dbc7074d55f5a734f8ceeae\",\"symbol\":\"PGX\",\"name\":\"Pegaxy Stone\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc1c93d475dc82fe72dbc7074d55f5a734f8ceeae.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x76e63a3e7ba1e2e61d3da86a87479f983de89a7e\":{\"address\":\"0x76e63a3e7ba1e2e61d3da86a87479f983de89a7e\",\"symbol\":\"OMEN\",\"name\":\"Augury Finance\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x76e63a3e7ba1e2e61d3da86a87479f983de89a7e.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xb9638272ad6998708de56bbc0a290a1de534a578\":{\"address\":\"0xb9638272ad6998708de56bbc0a290a1de534a578\",\"symbol\":\"IQ\",\"name\":\"Everipedia IQ (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xb9638272ad6998708de56bbc0a290a1de534a578.png\",\"tags\":[\"crosschain\",\"GROUP:IQ\",\"tokens\"]},\"0x2760e46d9bb43dafcbecaad1f64b93207f9f0ed7\":{\"address\":\"0x2760e46d9bb43dafcbecaad1f64b93207f9f0ed7\",\"symbol\":\"MVX\",\"name\":\"Metavault Trade\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x2760e46d9bb43dafcbecaad1f64b93207f9f0ed7.png\",\"tags\":[\"crosschain\",\"GROUP:MVX\",\"tokens\"]},\"0xb0b195aefa3650a6908f15cdac7d92f8a5791b0b\":{\"address\":\"0xb0b195aefa3650a6908f15cdac7d92f8a5791b0b\",\"symbol\":\"BOB\",\"name\":\"BOB\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xb0b195aefa3650a6908f15cdac7d92f8a5791b0b.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xf1428850f92b87e629c6f3a3b75bffbc496f7ba6\":{\"address\":\"0xf1428850f92b87e629c6f3a3b75bffbc496f7ba6\",\"symbol\":\"GEO$\",\"name\":\"GEOPOLY\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xf1428850f92b87e629c6f3a3b75bffbc496f7ba6.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xec38621e72d86775a89c7422746de1f52bba5320\":{\"address\":\"0xec38621e72d86775a89c7422746de1f52bba5320\",\"symbol\":\"DAVOS\",\"name\":\"Davos\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xec38621e72d86775a89c7422746de1f52bba5320.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xc3fdbadc7c795ef1d6ba111e06ff8f16a20ea539\":{\"address\":\"0xc3fdbadc7c795ef1d6ba111e06ff8f16a20ea539\",\"symbol\":\"ADDY\",\"name\":\"Adamant\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc3fdbadc7c795ef1d6ba111e06ff8f16a20ea539.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x44d09156c7b4acf0c64459fbcced7613f5519918\":{\"address\":\"0x44d09156c7b4acf0c64459fbcced7613f5519918\",\"symbol\":\"$KMC\",\"name\":\"$KMC\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x44d09156c7b4acf0c64459fbcced7613f5519918.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xaaa5b9e6c589642f98a1cda99b9d024b8407285a\":{\"address\":\"0xaaa5b9e6c589642f98a1cda99b9d024b8407285a\",\"symbol\":\"TITAN\",\"name\":\"IRON Titanium Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xaaa5b9e6c589642f98a1cda99b9d024b8407285a.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x3b56a704c01d650147ade2b8cee594066b3f9421\":{\"address\":\"0x3b56a704c01d650147ade2b8cee594066b3f9421\",\"symbol\":\"FYN\",\"name\":\"Affyn\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x3b56a704c01d650147ade2b8cee594066b3f9421.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd\":{\"address\":\"0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd\",\"symbol\":\"WstETH\",\"name\":\"Wrapped liquid staked Ether 2.0 (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x03b54a6e9a984069379fae1a4fc4dbae93b3bccd.png\",\"tags\":[\"crosschain\",\"GROUP:Wst ETH\",\"tokens\"]},\"0x598e49f01befeb1753737934a5b11fea9119c796\":{\"address\":\"0x598e49f01befeb1753737934a5b11fea9119c796\",\"symbol\":\"ADS\",\"name\":\"Adshares (PoS)\",\"decimals\":11,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x598e49f01befeb1753737934a5b11fea9119c796.png\",\"tags\":[\"crosschain\",\"GROUP:ADS\",\"tokens\"]},\"0xd93f7e271cb87c23aaa73edc008a79646d1f9912\":{\"address\":\"0xd93f7e271cb87c23aaa73edc008a79646d1f9912\",\"symbol\":\"SOL\",\"name\":\"Wrapped SOL\",\"decimals\":9,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd93f7e271cb87c23aaa73edc008a79646d1f9912.png\",\"tags\":[\"crosschain\",\"GROUP:SOL\",\"tokens\"]},\"0xa3c322ad15218fbfaed26ba7f616249f7705d945\":{\"address\":\"0xa3c322ad15218fbfaed26ba7f616249f7705d945\",\"symbol\":\"MV\",\"name\":\"Metaverse (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xa3c322ad15218fbfaed26ba7f616249f7705d945.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x8a953cfe442c5e8855cc6c61b1293fa648bae472\":{\"address\":\"0x8a953cfe442c5e8855cc6c61b1293fa648bae472\",\"symbol\":\"PolyDoge\",\"name\":\"PolyDoge\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x8a953cfe442c5e8855cc6c61b1293fa648bae472.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x228b5c21ac00155cf62c57bcc704c0da8187950b\":{\"address\":\"0x228b5c21ac00155cf62c57bcc704c0da8187950b\",\"symbol\":\"NXD\",\"name\":\"Nexus Dubai\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x228b5c21ac00155cf62c57bcc704c0da8187950b.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xd1f9c58e33933a993a3891f8acfe05a68e1afc05\":{\"address\":\"0xd1f9c58e33933a993a3891f8acfe05a68e1afc05\",\"symbol\":\"SFL\",\"name\":\"Sunflower Land\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xd1f9c58e33933a993a3891f8acfe05a68e1afc05.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x695fc8b80f344411f34bdbcb4e621aa69ada384b\":{\"address\":\"0x695fc8b80f344411f34bdbcb4e621aa69ada384b\",\"symbol\":\"NITRO\",\"name\":\"Nitro (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x695fc8b80f344411f34bdbcb4e621aa69ada384b.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x8df3aad3a84da6b69a4da8aec3ea40d9091b2ac4\":{\"address\":\"0x8df3aad3a84da6b69a4da8aec3ea40d9091b2ac4\",\"symbol\":\"amWMATIC\",\"name\":\"Aave Matic Market WMATIC\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x8df3aad3a84da6b69a4da8aec3ea40d9091b2ac4.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3\":{\"address\":\"0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3\",\"symbol\":\"BAL\",\"name\":\"Balancer\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x9a71012b13ca4d3d0cdc72a177df3ef03b0e76a3.png\",\"tags\":[\"crosschain\",\"GROUP:BAL\",\"tokens\"]},\"0xe2aa7db6da1dae97c5f5c6914d285fbfcc32a128\":{\"address\":\"0xe2aa7db6da1dae97c5f5c6914d285fbfcc32a128\",\"symbol\":\"PAR\",\"name\":\"PAR Stablecoin\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xe2aa7db6da1dae97c5f5c6914d285fbfcc32a128.png\",\"tags\":[\"crosschain\",\"GROUP:PAR\",\"tokens\"]},\"0x90f3edc7d5298918f7bb51694134b07356f7d0c7\":{\"address\":\"0x90f3edc7d5298918f7bb51694134b07356f7d0c7\",\"symbol\":\"DDAO\",\"name\":\"DEFI HUNTERS DAO Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x90f3edc7d5298918f7bb51694134b07356f7d0c7.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xb77e62709e39ad1cbeebe77cf493745aec0f453a\":{\"address\":\"0xb77e62709e39ad1cbeebe77cf493745aec0f453a\",\"symbol\":\"WISE\",\"name\":\"Wise Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x66a0f676479cee1d7373f3dc2e2952778bff5bd6.png\",\"tags\":[\"crosschain\",\"GROUP:WISE\",\"tokens\"]},\"0x428360b02c1269bc1c79fbc399ad31d58c1e8fda\":{\"address\":\"0x428360b02c1269bc1c79fbc399ad31d58c1e8fda\",\"symbol\":\"DEFIT\",\"name\":\"Digital Fitness\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x428360b02c1269bc1c79fbc399ad31d58c1e8fda.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x1b815d120b3ef02039ee11dc2d33de7aa4a8c603\":{\"address\":\"0x1b815d120b3ef02039ee11dc2d33de7aa4a8c603\",\"symbol\":\"WOO\",\"name\":\"Wootrade Network\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x1b815d120b3ef02039ee11dc2d33de7aa4a8c603.png\",\"tags\":[\"crosschain\",\"GROUP:WOO\",\"tokens\"]},\"0x614389eaae0a6821dc49062d56bda3d9d45fa2ff\":{\"address\":\"0x614389eaae0a6821dc49062d56bda3d9d45fa2ff\",\"symbol\":\"ORBS\",\"name\":\"Orbs (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x614389eaae0a6821dc49062d56bda3d9d45fa2ff.png\",\"tags\":[\"crosschain\",\"GROUP:ORBS\",\"tokens\"]},\"0xb5c064f955d8e7f38fe0460c556a72987494ee17\":{\"address\":\"0xb5c064f955d8e7f38fe0460c556a72987494ee17\",\"symbol\":\"QUICK\",\"name\":\"QuickSwap\",\"decimals\":18,\"eip2612\":true,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xb5c064f955d8e7f38fe0460c556a72987494ee17.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0xc19669a405067927865b40ea045a2baabbbe57f5\":{\"address\":\"0xc19669a405067927865b40ea045a2baabbbe57f5\",\"symbol\":\"STAR\",\"name\":\"STAR\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc19669a405067927865b40ea045a2baabbbe57f5.png\",\"tags\":[\"crosschain\",\"tokens\"]},\"0x27f485b62c4a7e635f561a87560adf5090239e93\":{\"address\":\"0x27f485b62c4a7e635f561a87560adf5090239e93\",\"symbol\":\"DFX_1\",\"name\":\"DFX Token (L2)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens-data.1inch.io/images/137/0x27f485b62c4a7e635f561a87560adf5090239e93.webp\",\"tags\":[\"tokens\"]},\"0xc3c7d422809852031b44ab29eec9f1eff2a58756\":{\"address\":\"0xc3c7d422809852031b44ab29eec9f1eff2a58756\",\"symbol\":\"LDO\",\"name\":\"Lido DAO Token (PoS)\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0xc3c7d422809852031b44ab29eec9f1eff2a58756.png\",\"tags\":[\"crosschain\",\"GROUP:LDO\",\"tokens\"]}}},\"id\":null}"
+										}
+									]
+								},
+								{
+									"name": "1inch_v6_0_classic_swap_create",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_create\",\r\n    \"params\": {\r\n      \"base\": \"MATIC\",\r\n      \"rel\": \"AAVE-PLG20\",\r\n      \"amount\": 0.1,\r\n      \"slippage\": 1,\r\n      \"include_tokens_info\": true,\r\n      \"include_protocols\": true,\r\n      \"include_gas\": true,\r\n      \"fee\": 0,\r\n      \"complexity_level\": 3,\r\n      \"gas_limit\": 11500000,\r\n      \"main_route_parts\": 50,\r\n      \"parts\": 100,\r\n      \"protocols\": \"\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Error: missing param",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_create\",\r\n    \"params\": {\r\n      \"base\": \"MATIC\",\r\n      \"rel\": \"AAVE-PLG20\",\r\n      \"amount\": 0.1,\r\n      \"include_tokens_info\": true,\r\n      \"include_protocols\": true,\r\n      \"include_gas\": true,\r\n      \"fee\": 0,\r\n      \"complexity_level\": 3,\r\n      \"gas_limit\": 11500000,\r\n      \"main_route_parts\": 50,\r\n      \"parts\": 100,\r\n      \"protocols\": \"\"\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "211"
+												},
+												{
+													"key": "date",
+													"value": "Fri, 13 Dec 2024 00:50:49 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"Error parsing request: missing field `slippage`\",\"error_path\":\"dispatcher\",\"error_trace\":\"dispatcher:121]\",\"error_type\":\"InvalidRequest\",\"error_data\":\"missing field `slippage`\",\"id\":null}"
+										},
+										{
+											"name": "Error: 401 Unauthorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_create\",\r\n    \"params\": {\r\n      \"base\": \"MATIC\",\r\n      \"rel\": \"AAVE-PLG20\",\r\n      \"amount\": 0.1,\r\n      \"slippage\": 1,\r\n      \"include_tokens_info\": true,\r\n      \"include_protocols\": true,\r\n      \"include_gas\": true,\r\n      \"fee\": 0,\r\n      \"complexity_level\": 3,\r\n      \"gas_limit\": 11500000,\r\n      \"main_route_parts\": 50,\r\n      \"parts\": 100,\r\n      \"protocols\": \"\"\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Gateway",
+											"code": 502,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "288"
+												},
+												{
+													"key": "date",
+													"value": "Fri, 13 Dec 2024 00:52:00 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"1inch API error: General API error: Unauthorized description: \",\"error_path\":\"rpcs.client\",\"error_trace\":\"rpcs:109] client:152]\",\"error_type\":\"OneInchError\",\"error_data\":{\"GeneralApiError\":{\"error_msg\":\"Unauthorized\",\"description\":\"\",\"status_code\":401}},\"id\":null}"
+										},
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_create\",\r\n    \"params\": {\r\n      \"base\": \"MATIC\",\r\n      \"rel\": \"AAVE-PLG20\",\r\n      \"amount\": 0.1,\r\n      \"slippage\": 1,\r\n      \"include_tokens_info\": true,\r\n      \"include_protocols\": true,\r\n      \"include_gas\": true,\r\n      \"fee\": 0,\r\n      \"complexity_level\": 3,\r\n      \"gas_limit\": 11500000,\r\n      \"main_route_parts\": 50,\r\n      \"parts\": 100,\r\n      \"protocols\": \"\"\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "1313"
+												},
+												{
+													"key": "date",
+													"value": "Sun, 15 Dec 2024 08:47:47 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"dst_amount\":{\"amount\":\"0.000161419548382137\",\"amount_fraction\":{\"numer\":\"161419548382137\",\"denom\":\"1000000000000000000\"},\"amount_rat\":[[1,[1792496569,37583]],[1,[2808348672,232830643]]]},\"src_token\":{\"address\":\"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"symbol\":\"POL\",\"name\":\"Polygon Ecosystem Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0.png\",\"tags\":[\"crosschain\",\"GROUP:POL\",\"native\"]},\"dst_token\":{\"address\":\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\",\"symbol\":\"AAVE\",\"name\":\"Aave\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens-data.1inch.io/images/137/0xd6df932a45c0f255f85145f286ea0b292b21c90b.webp\",\"tags\":[\"crosschain\",\"GROUP:AAVE\",\"tokens\"]},\"protocols\":[[[{\"name\":\"POLYGON_SUSHISWAP\",\"part\":100.0,\"fromTokenAddress\":\"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"toTokenAddress\":\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\"}]]],\"tx\":{\"from\":\"0xab95d01bc8214e4d993043e8ca1b68db2c946498\",\"to\":\"0x111111125421ca6dc452d289314280a0f8842a65\",\"data\":\"a76dfc3b00000000000000000000000000000000000000000000000000009157954aef0b00800000000000003b6d03407d88d931504d04bfbee6f9745297a93063cab24cc095c0a2\",\"value\":\"0.1\",\"gas_price\":\"149.512528885\",\"gas\":186626},\"gas\":null},\"id\":null}"
+										}
+									]
+								},
+								{
+									"name": "1inch_v6_0_classic_swap_liquidity_sources",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_liquidity_sources\",\r\n    \"params\": {\r\n        \"chain_id\": 1\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Error: 401 Unauthorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_liquidity_sources\",\r\n    \"params\": {\r\n        \"chain_id\": 1\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Gateway",
+											"code": 502,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "288"
+												},
+												{
+													"key": "date",
+													"value": "Fri, 13 Dec 2024 00:53:56 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"1inch API error: General API error: Unauthorized description: \",\"error_path\":\"rpcs.client\",\"error_trace\":\"rpcs:124] client:152]\",\"error_type\":\"OneInchError\",\"error_data\":{\"GeneralApiError\":{\"error_msg\":\"Unauthorized\",\"description\":\"\",\"status_code\":401}},\"id\":null}"
+										},
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_liquidity_sources\",\r\n    \"params\": {\r\n        \"chain_id\": 1\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "23831"
+												},
+												{
+													"key": "date",
+													"value": "Sun, 15 Dec 2024 08:42:50 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"protocols\": [\n            {\n                \"id\": \"UNISWAP_V1\",\n                \"title\": \"Uniswap V1\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/uniswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/uniswap_color.png\"\n            },\n            {\n                \"id\": \"UNISWAP_V2\",\n                \"title\": \"Uniswap V2\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/uniswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/uniswap_color.png\"\n            },\n            {\n                \"id\": \"SUSHI\",\n                \"title\": \"SushiSwap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/sushiswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/sushiswap_color.png\"\n            },\n            {\n                \"id\": \"MOONISWAP\",\n                \"title\": \"Mooniswap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/mooniswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/mooniswap_color.png\"\n            },\n            {\n                \"id\": \"BALANCER\",\n                \"title\": \"Balancer\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/balancer.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/balancer_color.png\"\n            },\n            {\n                \"id\": \"COMPOUND\",\n                \"title\": \"Compound\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/compound.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/compound_color.png\"\n            },\n            {\n                \"id\": \"CURVE\",\n                \"title\": \"Curve\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_SPELL_2_ASSET\",\n                \"title\": \"Curve Spell\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_SGT_2_ASSET\",\n                \"title\": \"Curve SGT\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_THRESHOLDNETWORK_2_ASSET\",\n                \"title\": \"Curve Threshold\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CHAI\",\n                \"title\": \"Chai\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/chai.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/chai_color.png\"\n            },\n            {\n                \"id\": \"OASIS\",\n                \"title\": \"Oasis\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/oasis.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/oasis_color.png\"\n            },\n            {\n                \"id\": \"KYBER\",\n                \"title\": \"Kyber\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/kyber.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/kyber_color.png\"\n            },\n            {\n                \"id\": \"AAVE\",\n                \"title\": \"Aave\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/aave.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/aave_color.png\"\n            },\n            {\n                \"id\": \"IEARN\",\n                \"title\": \"yearn\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/yearn.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/yearn_color.png\"\n            },\n            {\n                \"id\": \"BANCOR\",\n                \"title\": \"Bancor\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/bancor.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/bancor_color.png\"\n            },\n            {\n                \"id\": \"SWERVE\",\n                \"title\": \"Swerve\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/swerve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/swerve_color.png\"\n            },\n            {\n                \"id\": \"BLACKHOLESWAP\",\n                \"title\": \"BlackholeSwap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/blackholeswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/blackholeswap_color.png\"\n            },\n            {\n                \"id\": \"DODO\",\n                \"title\": \"DODO\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/dodo.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/dodo_color.png\"\n            },\n            {\n                \"id\": \"DODO_V2\",\n                \"title\": \"DODO v2\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/dodo.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/dodo_color.png\"\n            },\n            {\n                \"id\": \"VALUELIQUID\",\n                \"title\": \"Value Liquid\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/valueliquid.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/valueliquid_color.png\"\n            },\n            {\n                \"id\": \"SHELL\",\n                \"title\": \"Shell\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/shell.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/shell_color.png\"\n            },\n            {\n                \"id\": \"DEFISWAP\",\n                \"title\": \"DeFi Swap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/defiswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/defiswap_color.png\"\n            },\n            {\n                \"id\": \"SAKESWAP\",\n                \"title\": \"Sake Swap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/sakeswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/sakeswap_color.png\"\n            },\n            {\n                \"id\": \"LUASWAP\",\n                \"title\": \"Lua Swap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/luaswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/luaswap_color.png\"\n            },\n            {\n                \"id\": \"MINISWAP\",\n                \"title\": \"Mini Swap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/miniswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/miniswap_color.png\"\n            },\n            {\n                \"id\": \"MSTABLE\",\n                \"title\": \"MStable\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/mstable.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/mstable_color.png\"\n            },\n            {\n                \"id\": \"AAVE_V2\",\n                \"title\": \"Aave V2\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/aave.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/aave_color.png\"\n            },\n            {\n                \"id\": \"ST_ETH\",\n                \"title\": \"LiDo\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/steth.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/steth_color.png\"\n            },\n            {\n                \"id\": \"ONE_INCH_LP\",\n                \"title\": \"1INCH LP v1.0\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch_color.png\"\n            },\n            {\n                \"id\": \"ONE_INCH_LP_1_1\",\n                \"title\": \"1INCH LP v1.1\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch_color.png\"\n            },\n            {\n                \"id\": \"LINKSWAP\",\n                \"title\": \"LINKSWAP\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/linkswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/linkswap_color.png\"\n            },\n            {\n                \"id\": \"S_FINANCE\",\n                \"title\": \"sFinance\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/sfinance.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/sfinance_color.png\"\n            },\n            {\n                \"id\": \"PSM\",\n                \"title\": \"PSM USDC\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/maker.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/maker_color.png\"\n            },\n            {\n                \"id\": \"POWERINDEX\",\n                \"title\": \"POWERINDEX\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/powerindex.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/powerindex_color.png\"\n            },\n            {\n                \"id\": \"XSIGMA\",\n                \"title\": \"xSigma\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/xsigma.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/xsigma_color.png\"\n            },\n            {\n                \"id\": \"SMOOTHY_FINANCE\",\n                \"title\": \"Smoothy Finance\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/smoothy.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/smoothy_color.png\"\n            },\n            {\n                \"id\": \"SADDLE\",\n                \"title\": \"Saddle Finance\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/saddle.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/saddle_color.png\"\n            },\n            {\n                \"id\": \"KYBER_DMM\",\n                \"title\": \"Kyber DMM\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/kyber.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/kyber_color.png\"\n            },\n            {\n                \"id\": \"BALANCER_V2\",\n                \"title\": \"Balancer V2\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/balancer.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/balancer_color.png\"\n            },\n            {\n                \"id\": \"UNISWAP_V3\",\n                \"title\": \"Uniswap V3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/uniswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/uniswap_color.png\"\n            },\n            {\n                \"id\": \"SETH_WRAPPER\",\n                \"title\": \"sETH Wrapper\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2\",\n                \"title\": \"Curve V2\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_EURS_2_ASSET\",\n                \"title\": \"Curve V2 EURS\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_ETH_CRV\",\n                \"title\": \"Curve V2 ETH CRV\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_ETH_CVX\",\n                \"title\": \"Curve V2 ETH CVX\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CONVERGENCE_X\",\n                \"title\": \"Convergence X\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/convergence.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/convergence_color.png\"\n            },\n            {\n                \"id\": \"ONE_INCH_LIMIT_ORDER\",\n                \"title\": \"1inch Limit Order Protocol\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch_color.png\"\n            },\n            {\n                \"id\": \"ONE_INCH_LIMIT_ORDER_V2\",\n                \"title\": \"1inch Limit Order Protocol V2\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch_color.png\"\n            },\n            {\n                \"id\": \"ONE_INCH_LIMIT_ORDER_V3\",\n                \"title\": \"1inch Limit Order Protocol V3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch_color.png\"\n            },\n            {\n                \"id\": \"ONE_INCH_LIMIT_ORDER_V4\",\n                \"title\": \"1inch Limit Order Protocol V4\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch_color.png\"\n            },\n            {\n                \"id\": \"DFX_FINANCE\",\n                \"title\": \"DFX Finance\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/dfx.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/dfx_color.png\"\n            },\n            {\n                \"id\": \"FIXED_FEE_SWAP\",\n                \"title\": \"Fixed Fee Swap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch_color.png\"\n            },\n            {\n                \"id\": \"DXSWAP\",\n                \"title\": \"Swapr\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/swapr.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/swapr_color.png\"\n            },\n            {\n                \"id\": \"SHIBASWAP\",\n                \"title\": \"ShibaSwap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/shiba.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/shiba_color.png\"\n            },\n            {\n                \"id\": \"UNIFI\",\n                \"title\": \"Unifi\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/unifi.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/unifi_color.png\"\n            },\n            {\n                \"id\": \"PSM_PAX\",\n                \"title\": \"PSM USDP\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/maker.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/maker_color.png\"\n            },\n            {\n                \"id\": \"WSTETH\",\n                \"title\": \"wstETH\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/steth.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/steth_color.png\"\n            },\n            {\n                \"id\": \"DEFI_PLAZA\",\n                \"title\": \"DeFi Plaza\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/defiplaza.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/defiplaza_color.png\"\n            },\n            {\n                \"id\": \"FIXED_FEE_SWAP_V3\",\n                \"title\": \"Fixed Rate Swap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/1inch_color.png\"\n            },\n            {\n                \"id\": \"SYNTHETIX_WRAPPER\",\n                \"title\": \"Wrapped Synthetix\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix_color.png\"\n            },\n            {\n                \"id\": \"SYNAPSE\",\n                \"title\": \"Synapse\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/synapse.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/synapse_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_YFI_2_ASSET\",\n                \"title\": \"Curve Yfi\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_ETH_PAL\",\n                \"title\": \"Curve V2 ETH Pal\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"POOLTOGETHER\",\n                \"title\": \"Pooltogether\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/pooltogether.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/pooltogether_color.png\"\n            },\n            {\n                \"id\": \"ETH_BANCOR_V3\",\n                \"title\": \"Bancor V3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/bancor.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/bancor_color.png\"\n            },\n            {\n                \"id\": \"ELASTICSWAP\",\n                \"title\": \"ElasticSwap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/elastic_swap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/elastic_swap_color.png\"\n            },\n            {\n                \"id\": \"BALANCER_V2_WRAPPER\",\n                \"title\": \"Balancer V2 Aave Wrapper\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/balancer.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/balancer_color.png\"\n            },\n            {\n                \"id\": \"FRAXSWAP\",\n                \"title\": \"FraxSwap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/frax_swap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/frax_swap_color.png\"\n            },\n            {\n                \"id\": \"RADIOSHACK\",\n                \"title\": \"RadioShack\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/radioshack.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/radioshack_color.png\"\n            },\n            {\n                \"id\": \"KYBERSWAP_ELASTIC\",\n                \"title\": \"KyberSwap Elastic\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/kyber.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/kyber_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_TWO_CRYPTO\",\n                \"title\": \"Curve V2 2Crypto\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"STABLE_PLAZA\",\n                \"title\": \"Stable Plaza\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/defiplaza.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/defiplaza_color.png\"\n            },\n            {\n                \"id\": \"ZEROX_LIMIT_ORDER\",\n                \"title\": \"0x Limit Order\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/0x.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/0x_color.png\"\n            },\n            {\n                \"id\": \"CURVE_3CRV\",\n                \"title\": \"Curve 3CRV\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"KYBER_DMM_STATIC\",\n                \"title\": \"Kyber DMM Static\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/kyber.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/kyber_color.png\"\n            },\n            {\n                \"id\": \"ANGLE\",\n                \"title\": \"Angle\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/angle.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/angle_color.png\"\n            },\n            {\n                \"id\": \"ROCKET_POOL\",\n                \"title\": \"Rocket Pool\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/rocketpool.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/rocketpool_color.png\"\n            },\n            {\n                \"id\": \"ETHEREUM_ELK\",\n                \"title\": \"ELK\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/elk.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/elk_color.png\"\n            },\n            {\n                \"id\": \"ETHEREUM_PANCAKESWAP_V2\",\n                \"title\": \"Pancake Swap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/pancakeswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/pancakeswap_color.png\"\n            },\n            {\n                \"id\": \"SYNTHETIX_ATOMIC_SIP288\",\n                \"title\": \"Synthetix Atomic SIP288\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix_color.png\"\n            },\n            {\n                \"id\": \"PSM_GUSD\",\n                \"title\": \"PSM GUSD\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/maker.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/maker_color.png\"\n            },\n            {\n                \"id\": \"INTEGRAL\",\n                \"title\": \"Integral\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/integral.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/integral_color.png\"\n            },\n            {\n                \"id\": \"MAINNET_SOLIDLY\",\n                \"title\": \"Solidly\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/solidly.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/solidly_color.png\"\n            },\n            {\n                \"id\": \"NOMISWAP_STABLE\",\n                \"title\": \"Nomiswap Stable\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/nomiswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/nomiswap_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_TWOCRYPTO_META\",\n                \"title\": \"Curve V2 2Crypto Meta\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"MAVERICK_V1\",\n                \"title\": \"Maverick V1\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/maverick.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/maverick_color.png\"\n            },\n            {\n                \"id\": \"VERSE\",\n                \"title\": \"Verse\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/verse.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/verse_color.png\"\n            },\n            {\n                \"id\": \"DFX_FINANCE_V3\",\n                \"title\": \"DFX Finance V3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/dfx.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/dfx_color.png\"\n            },\n            {\n                \"id\": \"ZK_BOB\",\n                \"title\": \"BobSwap\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/zkbob.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/zkbob_color.png\"\n            },\n            {\n                \"id\": \"PANCAKESWAP_V3\",\n                \"title\": \"Pancake Swap V3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/pancakeswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/pancakeswap_color.png\"\n            },\n            {\n                \"id\": \"NOMISWAPEPCS\",\n                \"title\": \"Nomiswap-epcs\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/nomiswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/nomiswap_color.png\"\n            },\n            {\n                \"id\": \"XFAI\",\n                \"title\": \"Xfai\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/xfai.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/xfai_color.png\"\n            },\n            {\n                \"id\": \"PMM11\",\n                \"title\": \"PMM11\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/pmm.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/pmm_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_LLAMMA\",\n                \"title\": \"Curve Llama\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_TRICRYPTO_NG\",\n                \"title\": \"Curve 3Crypto NG\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"CURVE_V2_TWOCRYPTO_NG\",\n                \"title\": \"Curve 2Crypto NG\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"SUSHISWAP_V3\",\n                \"title\": \"SushiSwap V3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/sushiswap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/sushiswap_color.png\"\n            },\n            {\n                \"id\": \"SFRX_ETH\",\n                \"title\": \"sFrxEth\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/frax_swap.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/frax_swap_color.png\"\n            },\n            {\n                \"id\": \"SDAI\",\n                \"title\": \"sDAI\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/maker.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/maker_color.png\"\n            },\n            {\n                \"id\": \"ETHEREUM_WOMBATSWAP\",\n                \"title\": \"Wombat\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/wombat.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/wombat_color.png\"\n            },\n            {\n                \"id\": \"CARBON\",\n                \"title\": \"Carbon\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/carbon.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/carbon_color.png\"\n            },\n            {\n                \"id\": \"COMPOUND_V3\",\n                \"title\": \"Compound V3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/compound.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/compound_color.png\"\n            },\n            {\n                \"id\": \"DODO_V3\",\n                \"title\": \"DODO v3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/dodo.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/dodo_color.png\"\n            },\n            {\n                \"id\": \"SMARDEX\",\n                \"title\": \"Smardex\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/smardex.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/smardex_color.png\"\n            },\n            {\n                \"id\": \"TRADERJOE_V2_1\",\n                \"title\": \"TraderJoe V2.1\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/traderjoe.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/traderjoe_color.png\"\n            },\n            {\n                \"id\": \"PMM15\",\n                \"title\": \"PMM15\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/pmm.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/pmm_color.png\"\n            },\n            {\n                \"id\": \"SOLIDLY_V3\",\n                \"title\": \"Solidly v3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/solidlyv3.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/solidlyv3_color.png\"\n            },\n            {\n                \"id\": \"RAFT_PSM\",\n                \"title\": \"Raft PSM\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/raftpsm.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/raftpsm_color.png\"\n            },\n            {\n                \"id\": \"CLAYSTACK\",\n                \"title\": \"Claystack\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/claystack.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/claystack_color.png\"\n            },\n            {\n                \"id\": \"CURVE_STABLE_NG\",\n                \"title\": \"Curve Stable NG\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"LIF3\",\n                \"title\": \"Lif3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/lif3.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/lif3_color.png\"\n            },\n            {\n                \"id\": \"BLUEPRINT\",\n                \"title\": \"Blueprint\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/blueprint.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/blueprint_color.png\"\n            },\n            {\n                \"id\": \"AAVE_V3\",\n                \"title\": \"Aave V3\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/aave.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/aave_color.png\"\n            },\n            {\n                \"id\": \"ORIGIN\",\n                \"title\": \"Origin\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/origin.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/origin_color.png\"\n            },\n            {\n                \"id\": \"BGD_AAVE_STATIC\",\n                \"title\": \"Bgd Aave Static\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/bgd_aave_static.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/bgd_aave_static_color.png\"\n            },\n            {\n                \"id\": \"SYNTHETIX_SUSD\",\n                \"title\": \"Synthetix\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix_color.png\"\n            },\n            {\n                \"id\": \"ORIGIN_WOETH\",\n                \"title\": \"Origin Wrapper\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/origin.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/origin_color.png\"\n            },\n            {\n                \"id\": \"ETHENA\",\n                \"title\": \"Ethena\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/ethena_susde.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/ethena_susde_color.png\"\n            },\n            {\n                \"id\": \"SFRAX\",\n                \"title\": \"sFrax\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/_color.png\"\n            },\n            {\n                \"id\": \"SDOLA\",\n                \"title\": \"sDola\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/_color.png\"\n            },\n            {\n                \"id\": \"POL_MIGRATOR\",\n                \"title\": \"POL MIGRATOR\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/wmatic.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/wmatic_color.png\"\n            },\n            {\n                \"id\": \"LITEPSM_USDC\",\n                \"title\": \"LITEPSM USDC\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/maker.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/maker_color.png\"\n            },\n            {\n                \"id\": \"USDS_MIGRATOR\",\n                \"title\": \"USDS MIGRATOR\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/sky.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/sky_color.png\"\n            },\n            {\n                \"id\": \"MAVERICK_V2\",\n                \"title\": \"Maverick V2\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/maverick.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/maverick_color.png\"\n            },\n            {\n                \"id\": \"GHO_WRAPPER\",\n                \"title\": \"GHO Wrapper\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix_color.png\"\n            },\n            {\n                \"id\": \"CRVUSD_WRAPPER\",\n                \"title\": \"CRVUSD Wrapper\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix_color.png\"\n            },\n            {\n                \"id\": \"USDE_WRAPPER\",\n                \"title\": \"USDE Wrapper\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/synthetix_color.png\"\n            },\n            {\n                \"id\": \"FLUID_DEX_T1\",\n                \"title\": \"FLUID\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/fluid.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/fluid_color.png\"\n            },\n            {\n                \"id\": \"SCRVUSD\",\n                \"title\": \"SCRV\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/curve.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/curve_color.png\"\n            },\n            {\n                \"id\": \"ORIGIN_ARMOETH\",\n                \"title\": \"Origin ARM OETH\",\n                \"img\": \"https://cdn.1inch.io/liquidity-sources-logo/origin.png\",\n                \"img_color\": \"https://cdn.1inch.io/liquidity-sources-logo/origin_color.png\"\n            }\n        ]\n    },\n    \"id\": null\n}"
+										}
+									]
+								},
+								{
+									"name": "1inch_v6_0_classic_swap_quote",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"// Strip JSON Comments\r",
+													"const rawData = pm.request.body.toString();\r",
+													"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+													"\r",
+													"pm.request.body.update(strippedData);"
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_quote\",\r\n    \"params\": {\r\n        \"base\": \"MATIC\",\r\n        \"rel\": \"AAVE-PLG20\",\r\n        \"amount\": 0.1,\r\n        \"include_tokens_info\": true,\r\n        \"include_protocols\": true,\r\n        \"include_gas\": true,\r\n        \"fee\": 0,\r\n        \"complexity_level\": 3,\r\n        \"gas_limit\": 11500000,\r\n        \"main_route_parts\": 50,\r\n        \"parts\": 100,\r\n        \"protocols\": \"\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Error: 401 Unauthorised",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_quote\",\r\n    \"params\": {\r\n        \"base\": \"MATIC\",\r\n        \"rel\": \"AAVE-PLG20\",\r\n        \"amount\": 0.1,\r\n        \"include_tokens_info\": true,\r\n        \"include_protocols\": true,\r\n        \"include_gas\": true,\r\n        \"fee\": 0,\r\n        \"complexity_level\": 3,\r\n        \"gas_limit\": 11500000,\r\n        \"main_route_parts\": 50,\r\n        \"parts\": 100,\r\n        \"protocols\": \"\"\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Gateway",
+											"code": 502,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "287"
+												},
+												{
+													"key": "date",
+													"value": "Fri, 13 Dec 2024 00:55:30 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"1inch API error: General API error: Unauthorized description: \",\"error_path\":\"rpcs.client\",\"error_trace\":\"rpcs:54] client:152]\",\"error_type\":\"OneInchError\",\"error_data\":{\"GeneralApiError\":{\"error_msg\":\"Unauthorized\",\"description\":\"\",\"status_code\":401}},\"id\":null}"
+										},
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"mmrpc\": \"2.0\",\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"1inch_v6_0_classic_swap_quote\",\r\n    \"params\": {\r\n        \"base\": \"MATIC\",\r\n        \"rel\": \"AAVE-PLG20\",\r\n        \"amount\": 0.1,\r\n        \"include_tokens_info\": true,\r\n        \"include_protocols\": true,\r\n        \"include_gas\": true,\r\n        \"fee\": 0,\r\n        \"complexity_level\": 3,\r\n        \"gas_limit\": 11500000,\r\n        \"main_route_parts\": 50,\r\n        \"parts\": 100,\r\n        \"protocols\": \"\"\r\n    }\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "995"
+												},
+												{
+													"key": "date",
+													"value": "Sun, 15 Dec 2024 08:48:05 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"dst_amount\":{\"amount\":\"0.000161974310674394\",\"amount_fraction\":{\"numer\":\"80987155337197\",\"denom\":\"500000000000000000\"},\"amount_rat\":[[1,[1252003821,18856]],[1,[3551657984,116415321]]]},\"src_token\":{\"address\":\"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"symbol\":\"POL\",\"name\":\"Polygon Ecosystem Token\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens.1inch.io/0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0.png\",\"tags\":[\"crosschain\",\"GROUP:POL\",\"native\"]},\"dst_token\":{\"address\":\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\",\"symbol\":\"AAVE\",\"name\":\"Aave\",\"decimals\":18,\"eip2612\":false,\"isFoT\":false,\"logoURI\":\"https://tokens-data.1inch.io/images/137/0xd6df932a45c0f255f85145f286ea0b292b21c90b.webp\",\"tags\":[\"crosschain\",\"GROUP:AAVE\",\"tokens\"]},\"protocols\":[[[{\"name\":\"POLYGON_QUICKSWAP\",\"part\":100.0,\"fromTokenAddress\":\"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\",\"toTokenAddress\":\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\"}]]],\"gas\":220000},\"id\":null}"
+										}
+									]
 								}
 							]
-						}
-					]
-				},
-				{
-					"name": "Orders",
-					"item": [
+						},
 						{
 							"name": "best_orders",
 							"event": [
