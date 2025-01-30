@@ -3,7 +3,7 @@ export const description = "This guide describes how to query the MM2 SQLite dat
 
 # How to Query the MM2 SQLite Database
 
-The Komodo DeFi Framework API stores historical information such as swaps and orders within an SQLite database, located under the DB user data folder with each wallet having its own subfolder represented by a hexideciaml string.
+The Komodo DeFi Framework API stores historical information such as swaps and orders within an SQLite database, located under the DB user data folder with each wallet having its own subfolder represented by a hexadecimal string.
 This string is shown in the runtime logs of the `kdf` binary as `Public key hash` when it starts up.
 
 ```bash
@@ -22,11 +22,12 @@ The default location of this folder for each operating system is:
 
 <Note>
   You can define a different location for the DB folder via the [`dbdir` configuration parameter](/komodo-defi-framework/setup/configure-mm2-json/) in your MM2.json file.
+  There is also a sqlite database named `KOMODEFI.db` which [can be queried for information related to NFTs](/komodo-defi-framework/api/v20/non_fungible_tokens/query_nft_database_tables/).
 </Note>
 
 There are a variety of methods to query sqlite databases. Examples below show how to do a sqlite query in Linux terminal, but first you might need to install sqlite with `sudo apt install sqlite3`.
 
-The tables and columns available to query are as follows:
+The tables and columns available to query in MM2.db are as follows:
 
 ## my\_swaps
 
@@ -138,6 +139,30 @@ This table stores a record of all nodes [added for stats collection](/komodo-def
 #### Respose:
 
 `37|dragonhound_DEV|104.238.221.61|12D3KooWEnrvbqvtTowYMR8FnBeKtryTj9RcXGx8EPpFZHou2ruP`
+
+## stats\_nodes
+
+This table stores a record of results returned by registered nodes [tracked for node stats collection](/komodo-defi-framework/api/v20/utils/start_version_stat_collection/) in this pubkey's MM2.db
+
+| ID | Name      | Type         | Description                                  |
+| -- | --------- | ------------ | -------------------------------------------- |
+| 0  | id        | INTEGER      | Primary Key                                  |
+| 1  | name      | VARCHAR(255) | Node name                                    |
+| 2  | version   | VARCHAR(255) | Node Komodo DeFi Framework API (kdf) version |
+| 3  | timestamp | INTEGER      | Timestamp                                    |
+| 4  | error     | VARCHAR(255) | Error details                                |
+
+#### Query:
+
+`sqlite3 ${PATH_TO_MM2_DB_FILE} "SELECT * FROM stats_nodes WHERE name = 'dragonhound_DEV'" LIMIT 3`
+
+#### Response:
+
+```bash
+540|dragonhound_DEV||1638542507|DialFailure
+70638|dragonhound_DEV|2.1.4401_mm2.1_87837cb54_Linux_Release|1640270702|
+70692|dragonhound_DEV||1640271615|Error on request the peer PeerId("12D3KooWEnrvbqvtTowYMR8FnBeKtryTj9RcXGx8EPpFZHou2ruP"): "Canceled". Request next peer
+```
 
 ## Coin tables
 

@@ -19,6 +19,32 @@ the following tables are available in `DB/KOMODEFI.db`:
 *   MATIC\_nft\_transfer\_history
 *   scanned\_nft\_blocks
 
+This SQLite database is located under the DB user data folder with each wallet having its own subfolder represented by a hexadecimal string.
+This string is shown in the runtime logs of the `kdf` binary as `Public key hash` when it starts up.
+
+```bash
+30 08:39:23, mm2:269] AtomicDEX API 2.1.0-beta_a81f2a101 DT 2024-07-26T23:24:52+03:00
+30 08:39:23, mm2_main::mm2::lp_native_dex:500] INFO Version: 2.1.0-beta_a81f2a101 DT 2024-07-26T23:24:52+03:00
+30 08:39:23, crypto::crypto_ctx:324] INFO Public key hash: 7d6cbdd91788df3b764247721fe12853ce36b03d
+```
+
+The default location of this folder for each operating system is:
+
+```bash
+- Linux: $HOME/.kdf/DB/{'{wallet identifying hex string}'}/MM2.db'
+- MacOS: $HOME/.kdf/DB/{'{wallet identifying hex string}'}/MM2.db'
+- Windows: %APPDATA%\kdf\DB\{'{wallet identifying hex string}'}\MM2.db'
+```
+
+<Note>
+  You can define a different location for the DB folder via the [`dbdir` configuration parameter](/komodo-defi-framework/setup/configure-mm2-json/) in your MM2.json file.
+  There is also a sqlite database named `MM2.db` which [can be queried for information related to swaps, transactions and other information](/komodo-defi-framework/tutorials/query-the-mm2-database/).
+</Note>
+
+There are a variety of methods to query sqlite databases. Examples below show how to do a sqlite query in Linux terminal, but first you might need to install sqlite with `sudo apt install sqlite3`.
+
+The tables and columns available to query in KOMODEFI.db are as follows:
+
 ## NFT List tables
 
 The COIN\_nft\_list tables contain the NFTs that you own
