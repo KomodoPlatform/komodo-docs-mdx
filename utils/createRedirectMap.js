@@ -85,9 +85,9 @@ const nameChangedMap = {
   "/basic-docs/atomicdex-api-20-dev/account_balance_tasks.html":
     "/komodo-defi-framework/api/v20-dev/task_account_balance/",
   "/basic-docs/atomicdex-api-20-dev/coin_activation_tasks.html":
-    "/komodo-defi-framework/api/v20-dev/task_enable_qtum/",
+    "/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_qtum/",
   "/basic-docs/atomicdex-api-20-dev/trezor_initialisation.html":
-    "/komodo-defi-framework/api/v20-dev/task_init_trezor/",
+    "/komodo-defi-framework/api/v20/utils/task_init_trezor/",
   "/basic-docs/atomicdex-api-20-dev/withdraw_tasks.html":
     "/komodo-defi-framework/api/v20-dev/task_withdraw/",
   "/basic-docs/atomicdex-api-20-dev/zhtlc_coins.html":

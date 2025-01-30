@@ -4065,7 +4065,50 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "task::enable_utxo::init",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::init\",\r\n    \"params\": {\r\n        \"ticker\":\"KMD\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\":\"Electrum\", // Accepted values: \"Electrum\", \"Native\"\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:20001\",\r\n                            \"protocol\": \"SSL\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n                            // \"disable_cert_verification\": false\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:20001\",\r\n                            \"protocol\": \"SSL\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:20001\",\r\n                            \"protocol\": \"SSL\"\r\n                        }\r\n                    ]\r\n                } // Required only if: \"rpc\": \"Electrum\"\r\n            }\r\n            // \"tx_history\": false,\r\n            // \"required_confirmations\": 1, // Default: Coin Config\r\n            // \"requires_notarization\": false, // Default: Coin Config\r\n            // \"address_format\": {\r\n            //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n            // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n            // }, // Default: Coin Config\r\n            // \"utxo_merge_params\": null,\r\n            // // \"utxo_merge_params\": {\r\n            // //     \"merge_at\":50\r\n            // //     // \"check_every\":10,\r\n            // //     // \"max_merge_at_once\":100\r\n            // //     },\r\n            // \"check_utxo_maturity\": false,\r\n            // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n            // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"min_addresses_number\": 3 // used only if \"priv_key_policy\": \"Trezor\"\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:10:37 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"task_id\":0},\"id\":null}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_utxo::status",
@@ -4789,7 +4832,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -5022,6 +5065,125 @@
 											],
 											"cookie": [],
 											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"current_block\": 64265343,\n        \"eth_addresses_infos\": {\n            \"0x083C32B38e8050473f6999e22f670d1404235592\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\"\n            }\n        },\n        \"erc20_addresses_infos\": {\n            \"0x083C32B38e8050473f6999e22f670d1404235592\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\n                \"tickers\": [\n                    \"AAVE-PLG20\",\n                    \"PGX-PLG20\"\n                ]\n            }\n        },\n        \"nfts_infos\": {}\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "enable_eth_with_tokens",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": true,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "1669"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:03:52 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":65658249,\"eth_addresses_infos\":{\"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\"balances\":{\"spendable\":\"16.651562360509102537\",\"unspendable\":\"0\"}}},\"erc20_addresses_infos\":{\"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\"balances\":{\"AAVE-PLG20\":{\"spendable\":\"0\",\"unspendable\":\"0\"},\"PGX-PLG20\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}}},\"nfts_infos\":{\"0xb9ae3b7632be11420bd3e59fd41c300dd67274ac,0\":{\"token_address\":\"0xb9ae3b7632be11420bd3e59fd41c300dd67274ac\",\"token_id\":\"0\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"},\"0xd25f13e4ba534ef625c75b84934689194b7bd59e,14\":{\"token_address\":\"0xd25f13e4ba534ef625c75b84934689194b7bd59e\",\"token_id\":\"14\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC721\",\"amount\":\"1\"},\"0x73a5299824cd955af6377b56f5762dc3ca4cc078,1\":{\"token_address\":\"0x73a5299824cd955af6377b56f5762dc3ca4cc078\",\"token_id\":\"1\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC721\",\"amount\":\"1\"},\"0x3f368660b013a59b245a093a5ede57fa9deb911f,0\":{\"token_address\":\"0x3f368660b013a59b245a093a5ede57fa9deb911f\",\"token_id\":\"0\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"},\"0xe1ab36eda8012483aa947263b7d9a857d9c37e05,32\":{\"token_address\":\"0xe1ab36eda8012483aa947263b7d9a857d9c37e05\",\"token_id\":\"32\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"}}},\"id\":null}"
+										}
+									]
+								},
+								{
+									"name": "enable_erc20",
+									"event": [
+										{
+											"listen": "prerequest",
+											"script": {
+												"exec": [
+													"pm.collectionVariables.set(\"userpass\", pm.environment.get(\"userpass\"));",
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_erc20\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"BAT-PLG20\",\n      \"activation_params\": {\n        \"required_confirmations\": 3\n      }\n    }\n  }",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "251"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:07:32 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"balances\":{\"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\":{\"spendable\":\"0\",\"unspendable\":\"0\"}},\"platform_coin\":\"MATIC\",\"token_contract_address\":\"0x3cef98bb43d732e2f285ee605a8158cde967d219\",\"required_confirmations\":3},\"id\":null}"
 										}
 									]
 								},
@@ -6063,7 +6225,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
 							},
 							"response": [
 								{
@@ -6086,7 +6248,7 @@
 												"{{address}}"
 											]
 										},
-										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
 									},
 									"_postman_previewlanguage": "JSON",
 									"header": [],
@@ -6113,7 +6275,7 @@
 												"{{address}}"
 											]
 										},
-										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
 									},
 									"_postman_previewlanguage": "JSON",
 									"header": [],
@@ -6154,7 +6316,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nft-transfers)"
 							},
 							"response": []
 						},
@@ -6190,7 +6352,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-nft-metadata)"
 							},
 							"response": []
 						},
@@ -6226,7 +6388,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#refresh-nft-metadata)"
 							},
 							"response": []
 						},
@@ -6263,7 +6425,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/)"
+								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/)"
 							},
 							"response": [
 								{
@@ -6341,7 +6503,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#withdraw-nfts)"
 							},
 							"response": []
 						},
@@ -6377,7 +6539,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#erc-1155-withdraw-example)"
 							},
 							"response": [
 								{
@@ -6441,7 +6603,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/"
+								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/clear_nft_db/"
 							},
 							"response": [
 								{
@@ -6655,7 +6817,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -6670,7 +6833,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"account_balance\",\r\n    \"params\": {\r\n        \"coin\": \"DOC\",\r\n        \"account_index\": 0,\r\n        \"chain\": \"External\" // Accepted values: \"External\", \"Internal\"\r\n        // \"limit\": 10,\r\n        // \"paging_options\": {\r\n        //     \"PageNumber\": 1\r\n        //     // \"FromId\": 4 // used instead of: \"PageNumber\"\r\n        // }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"account_balance\",\r\n    \"params\": {\r\n        \"coin\": \"KMD\",\r\n        \"account_index\": 0,\r\n        \"chain\": \"External\" // Accepted values: \"External\", \"Internal\"\r\n        // \"limit\": 10,\r\n        // \"paging_options\": {\r\n        //     \"PageNumber\": 1\r\n        //     // \"FromId\": 4 // used instead of: \"PageNumber\"\r\n        // }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -6679,7 +6842,112 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Error: Not in HD mode",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"account_balance\",\r\n    \"params\": {\r\n        \"coin\": \"KMD\",\r\n        \"account_index\": 0,\r\n        \"chain\": \"External\" // Accepted values: \"External\", \"Internal\"\r\n        // \"limit\": 10,\r\n        // \"paging_options\": {\r\n        //     \"PageNumber\": 1\r\n        //     // \"FromId\": 4 // used instead of: \"PageNumber\"\r\n        // }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Bad Request",
+											"code": 400,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "242"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:15:44 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Coin is expected to be activated with the HD wallet derivation method\",\n    \"error_path\": \"account_balance.lp_coins\",\n    \"error_trace\": \"account_balance:94] lp_coins:4128]\",\n    \"error_type\": \"CoinIsActivatedNotWithHDWallet\",\n    \"id\": null\n}"
+										},
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"account_balance\",\r\n    \"params\": {\r\n        \"coin\": \"KMD\",\r\n        \"account_index\": 0,\r\n        \"chain\": \"External\" // Accepted values: \"External\", \"Internal\"\r\n        // \"limit\": 10,\r\n        // \"paging_options\": {\r\n        //     \"PageNumber\": 1\r\n        //     // \"FromId\": 4 // used instead of: \"PageNumber\"\r\n        // }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "406"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:19:58 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"account_index\": 0,\n        \"derivation_path\": \"m/44'/141'/0'\",\n        \"addresses\": [\n            {\n                \"address\": \"RMC1cWXngQf2117apEKoLh3x27NoG88yzd\",\n                \"derivation_path\": \"m/44'/141'/0'/0/0\",\n                \"chain\": \"External\",\n                \"balance\": {\n                    \"KMD\": {\n                        \"spendable\": \"20\",\n                        \"unspendable\": \"0\"\n                    }\n                }\n            }\n        ],\n        \"page_balance\": {\n            \"KMD\": {\n                \"spendable\": \"20\",\n                \"unspendable\": \"0\"\n            }\n        },\n        \"limit\": 10,\n        \"skipped\": 0,\n        \"total\": 1,\n        \"total_pages\": 1,\n        \"paging_options\": {\n            \"PageNumber\": 1\n        }\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "get_new_address",
@@ -6733,7 +7001,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"task::account_balance::init\",\n    \"params\": {\n        \"coin\": \"DOC\",\n        \"account_index\": 0\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"task::account_balance::init\",\n    \"params\": {\n        \"coin\": \"KMD\",\n        \"account_index\": 0\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -6747,7 +7015,62 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"task::account_balance::init\",\n    \"params\": {\n        \"coin\": \"KMD\",\n        \"account_index\": 0\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:16:22 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"task_id\": 1\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "task::account_balance::status",
@@ -6762,7 +7085,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -6777,7 +7101,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::account_balance::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::account_balance::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -6786,7 +7110,112 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Error: CoinIsActivatedNotWithHDWallet",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::account_balance::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "293"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:16:47 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"status\": \"Error\",\n        \"details\": {\n            \"error\": \"Coin is expected to be activated with the HD wallet derivation method\",\n            \"error_path\": \"init_account_balance.lp_coins\",\n            \"error_trace\": \"init_account_balance:146] lp_coins:4128]\",\n            \"error_type\": \"CoinIsActivatedNotWithHDWallet\"\n        }\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "task::account_balance::status",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"name": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::account_balance::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "350"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 19 Dec 2024 04:20:47 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"status\": \"Ok\",\n        \"details\": {\n            \"account_index\": 0,\n            \"derivation_path\": \"m/44'/141'/0'\",\n            \"total_balance\": {\n                \"KMD\": {\n                    \"spendable\": \"20\",\n                    \"unspendable\": \"0\"\n                }\n            },\n            \"addresses\": [\n                {\n                    \"address\": \"RMC1cWXngQf2117apEKoLh3x27NoG88yzd\",\n                    \"derivation_path\": \"m/44'/141'/0'/0/0\",\n                    \"chain\": \"External\",\n                    \"balance\": {\n                        \"KMD\": {\n                            \"spendable\": \"20\",\n                            \"unspendable\": \"0\"\n                        }\n                    }\n                }\n            ]\n        }\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "task::account_balance::cancel",
