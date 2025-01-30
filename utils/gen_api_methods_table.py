@@ -52,6 +52,9 @@ def gen_api_methods_table():
                                 v20 = j["link"]
                             if i == "v20-dev":
                                 v20_dev = j["link"]
+                legacy = escape_underscores(legacy)
+                v20 = escape_underscores(v20)
+                v20_dev = escape_underscores(v20_dev)
                 line = "| {:^108} | {:^108} | {:^108} |".format(legacy, v20, v20_dev)
                 f2.write(f"{line}\n")
 
@@ -59,7 +62,7 @@ def escape_underscores(s):
     output = ""
     for letter in s:
         if letter == "_":
-            output += "\_"
+            output += "\\_"
         else:
             output += letter
     return output

@@ -188,7 +188,7 @@ The `NumericFormatsValue` returns a price or amount in three different formats: 
 
 ### FeeInfo
 
-The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/withdraw/) requests:
+The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests:
 
 | Parameter  | Type             | Description                                                                                                                               |
 | ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -438,23 +438,31 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
 
 ### FilterCriteria
 
-The `FilterCriteria` object includes different criteria to filter from the different recent swaps:
+The 'FilterCriteria' object allows you to filter the results based on specific parameters.
 
-| Parameter  | Type                     | Description                                                            |
-| ---------- | ------------------------ | ---------------------------------------------------------------------- |
-| status     | object                   | Return only swaps that match the specified status (e.g., "completed"). |
-| date\_from | string (ISO 8601 format) | Return only swaps that started on or after this date.                  |
-| date\_to   | string (ISO 8601 format) | Return only swaps that started before this date.                       |
+| Parameter       | Type   | Description                                    |
+| --------------- | ------ | ---------------------------------------------- |
+| status          | string | Status of the transactions (e.g., "completed") |
+| date\_from      | string | \`Start date in ISO 8601 format                |
+| date\_to        | string | End date in ISO 8601 format                    |
+| my\_coin        | string | Coin being used by you for the swap/trade.     |
+| other\_coin     | string | Coin you are trading against                   |
+| from\_timestamp | number | Start timestamp in UNIX format                 |
+| to\_timestamp   | number | End timestamp in UNIX format                   |
 
-<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   #### Example
 
   ```json
   {
     "filter": {
-        "status": "completed",
-        "date_from": "2024-01-01T00:00:00Z",
-        "date_to": "2024-07-01T00:00:00Z"
+      "status": "completed",
+      "date_from": "2024-01-01T00:00:00Z",
+      "date_to": "2024-07-01T00:00:00Z",
+      "my_coin": "BTC",
+      "other_coin": "ETH",
+      "from_timestamp": 1672531200,
+      "to_timestamp": 1704067200
     }
   }
   ```
@@ -476,9 +484,9 @@ The `PagingOptions` object includes options of page selection to consult when lo
   ```json
   {
     "paging_options": {
-        "from_uuid": null,
-        "limit": 10,
-        "page_number": 1
+      "from_uuid": null,
+      "limit": 10,
+      "page_number": 1
     }
   }
   ```

@@ -42,7 +42,8 @@ jobs:
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
 
-      - name: Generate configs
+      - name: Generate API methods table
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         shell: bash
         run: ${GITHUB_WORKSPACE}/utils/gen_api_methods_table.py
 

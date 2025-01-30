@@ -1,0 +1,298 @@
+export const title = "Komodo DeFi Framework Method: Non Fungible Tokens";
+export const description =
+  "This document describes the withdraw_nft method Komodo DeFi Framework provides to send NFTs to an address";
+
+# Withdraw NFTs {{label : 'withdraw_nft', tag : 'API-v2'}}
+
+<Note>
+  To withdraw NFTs, you must [activate the coin](/komodo-defi-framework/api/legacy/coin_activation/) which holds the NFTs first.
+  The `withdraw_nft` method will return signed raw transaction hex which must be broadcast using the [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) method to complete the withdrawal.
+</Note>
+
+### Request Parameters
+
+| Parameter      | Type   | Description                                                                                                |
+| -------------- | ------ | ---------------------------------------------------------------------------------------------------------- |
+| type           | string | The contract type of the NFT to withdraw. Either `withdraw_erc721` or `withdraw_erc1155`                   |
+| withdraw\_data | object | A standard [WithdrawNftData](/komodo-defi-framework/api/common_structures/nfts/#withdraw-nft-data) object. |
+
+### Response Parameters
+
+| Parameter         | Type    | Description                                                                                                                                                          |
+| ----------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount            | string  | Amount of tokens to withdraw.                                                                                                                                        |
+| tx\_hex           | string  | Raw hex of signed transaction. Use this with the [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) RPC to broadcast the transaction. |
+| tx\_hash          | string  | Transaction ID of the withdrawl.                                                                                                                                     |
+| from              | array   | List of source addresses.                                                                                                                                            |
+| to                | array   | List of destination addresses.                                                                                                                                       |
+| contract\_type    | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                                |
+| token\_address    | string  | Token address.                                                                                                                                                       |
+| token\_id         | string  | Token ID.                                                                                                                                                            |
+| fee\_details      | object  | A standard [WithdrawFee](/komodo-defi-framework/api/common_structures/#withdraw-fee) object.                                                                         |
+| coin              | string  | Coin name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| block\_height     | integer | Block height of the transaction. If the value is `0`, the transaction is unconfirmed.                                                                                |
+| timestamp         | integer | Timestamp of the block containing the withdrawl transaction in [unix epoch format](https://www.epochconverter.com/).                                                 |
+| internal\_id      | integer | Used for internal transaction identification, for some coins it may be equal to transaction hash.                                                                    |
+| transaction\_type | string  | This will always be `NftTransfer`.                                                                                                                                   |
+
+#### 📌 ERC721 Withdraw Example
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "type": "withdraw_erc721",
+      "withdraw_data": {
+        "chain": "POLYGON",
+        "to": "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498",
+        "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+        "token_id": "1"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "tx_hex": "f8cb2a8509818733db8289929473a5299824cd955af6377b56f5762dc3ca4cc07880b86442842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c9464980000000000000000000000000000000000000000000000000000000000000001820136a0564b5c9c8309a3f8f6cc007ca957e4c411259026d68c2c34419158aff4d3ebf8a007afaa0590da01a2ce36c7edb5380f41235168f3633ed459b1fc8a750fecd38d",
+          "tx_hash": "bb030f618702715eb39035dccd218355f78ae5379ff6d0691f0f3c0db3c03789",
+          "from": [
+              "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"
+          ],
+          "to": [
+              "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"
+          ],
+          "contract_type": "ERC721",
+          "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+          "token_id": "1",
+          "amount": "1",
+          "fee_details": {
+              "type": "Eth",
+              "coin": "MATIC",
+              "gas": 35218,
+              "gas_price": "0.000000040827827163",
+              "total_fee": "0.001437874417026534"
+          },
+          "coin": "MATIC",
+          "block_height": 0,
+          "timestamp": 1700732198,
+          "internal_id": 0,
+          "transaction_type": "NftTransfer"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### 📌 ERC1155 Withdraw Example
+
+If you are sending 2 or more NFTs, you must use the `withdraw_erc1155` withdraw type.
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "type": "withdraw_erc1155",
+      "withdraw_data": {
+        "chain": "POLYGON",
+        "to": "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498",
+        "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+        "token_id": "1"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "tx_hex": "f8cb2a8502dffe7b4682f3a09473a5299824cd955af6377b56f5762dc3ca4cc07880b86442842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c94649800000000000000000000000027ad1f808c1ef82626277ae38998afa5395656600000000000000000000000000000000000000000000000000000000000000001820135a0476a4623c9df31cecbd319e0571c62d14a6dcedd5a760ced945ffa2e39fb12c5a03293f3c10d115edcc3795e414670f070c04ad936e2e87001da12f961df5962a7",
+          "tx_hash": "d6b46e70bf755617366a5c10875eb639d55586bb568010ea82ef42e8d68c6523",
+          "from": [
+              "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"
+          ],
+          "to": [
+              "0x27Ad1F808c1ef82626277Ae38998AfA539565660"
+          ],
+          "contract_type": "ERC721",
+          "token_address": "0x73a5299824cd955af6377b56f5762dc3ca4cc078",
+          "token_id": "1",
+          "amount": "1",
+          "fee_details": {
+              "type": "Eth",
+              "coin": "MATIC",
+              "gas": 62368,
+              "gas_price": "0.000000012347931462",
+              "total_fee": "0.000770115789422016"
+          },
+          "coin": "MATIC",
+          "block_height": 0,
+          "timestamp": 1700732805,
+          "internal_id": 0,
+          "transaction_type": "NftTransfer"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### 📌 ERC1155 Withdraw Max Example
+
+If you would like to withdraw all NFTs from a token\_address, you must use the `withdraw_erc1155` withdraw type and set `max` to `true`.
+
+<CodeGroup title="Withdraw NFTs" tag="POST" label="withdraw_nft" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "withdraw_nft",
+    "mmrpc": "2.0",
+    "params": {
+      "type": "withdraw_erc1155",
+      "withdraw_data": {
+        "chain": "POLYGON",
+        "to": "0x27Ad1F808c1ef82626277Ae38998AfA539565660",
+        "token_address": "0x2953399124f0cbb46d2cbacd8a89cf0599974963",
+        "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536720",
+        "max": true
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "tx_hex": "f9014b2a8508d579565282ea3b942953399124f0cbb46d2cbacd8a89cf059997496380b8e4f242432a000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c94649800000000000000000000000027ad1f808c1ef82626277ae38998afa539565660f43db4f488f644b73a9442de4978fb7572b73d85000000000000110000002710000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000023078000000000000000000000000000000000000000000000000000000000000820135a0feb67607bd5e5c58f7533c8d2c88ef0ba3beac7fea29bfe11c3ce9bd10641f2ca02f1045b9f87536e45fe63556805734293e534284efecd9210f614316a3e8dca7",
+          "tx_hash": "9dce8e555d388532bdafd42dd44cd6a2bdcbf74bdda079e15f71b808c8395bcc",
+          "from": [
+              "0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"
+          ],
+          "to": [
+              "0x27Ad1F808c1ef82626277Ae38998AfA539565660"
+          ],
+          "contract_type": "ERC1155",
+          "token_address": "0x2953399124f0cbb46d2cbacd8a89cf0599974963",
+          "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536720",
+          "amount": "7",
+          "fee_details": {
+              "type": "Eth",
+              "coin": "MATIC",
+              "gas": 59963,
+              "gas_price": "0.00000003794123733",
+              "total_fee": "0.00227507041401879"
+          },
+          "coin": "MATIC",
+          "block_height": 0,
+          "timestamp": 1700732937,
+          "internal_id": 0,
+          "transaction_type": "NftTransfer"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ### 📌 Withdraw NFTs Error Responses
+
+  #### InvalidRequest (missing field)
+
+  ```json
+    {
+        "mmrpc": "2.0",
+        "error": "Error parsing request: missing field `type`",
+        "error_path": "dispatcher",
+        "error_trace": "dispatcher:109]",
+        "error_type": "InvalidRequest",
+        "error_data": "missing field `type`",
+        "id": null
+    }
+  ```
+
+  #### InvalidRequest (wrong withdraw type)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Error parsing request: unknown variant `withdraw_erc420`, expected `withdraw_erc1155` or `withdraw_erc721`",
+      "error_path": "dispatcher",
+      "error_trace": "dispatcher:109]",
+      "error_type": "InvalidRequest",
+      "error_data": "unknown variant `withdraw_erc420`, expected `withdraw_erc1155` or `withdraw_erc721`",
+      "id": null
+  }
+  ```
+
+  #### TokenNotFoundInWallet (trying to send NFT you dont own)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Token: token_address 0xfd913a305d70a60aac4faac70c739563738e1f82, token_id 110473361632261669912565539602449606788298723469812631769659886404530570536722 was not found in wallet",
+      "error_path": "eth.nft",
+      "error_trace": "eth:883] nft:1177]",
+      "error_type": "GetNftInfoError",
+      "error_data": {
+          "error_type": "TokenNotFoundInWallet",
+          "error_data": {
+              "token_address": "0xfd913a305d70a60aac4faac70c739563738e1f82",
+              "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536722"
+          }
+      },
+      "id": null
+  }
+  ```
+
+  #### TransportError (unable to estimate gas)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Transport error: request MethodCall(MethodCall { jsonrpc: Some(V2), method: \"eth_estimateGas\", params: Array([Object({\"from\": String(\"0xab95d01bc8214e4d993043e8ca1b68db2c946498\"), \"to\": String(\"0x2953399124f0cbb46d2cbacd8a89cf0599974963\"), \"gasPrice\": String(\"0x9ddeaaffe\"), \"value\": String(\"0x0\"), \"data\": String(\"0x42842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498f43db4f488f644b73a9442de4978fb7572b73d85000000000000110000002710\")})]), id: Num(64) }) failed: InvalidResponse(\"Server: 'https://polygon-rpc.com/', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); InvalidResponse(\"Server: 'https://polygon.blockpi.network/v1/rpc/public', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); Transport(\"Server: 'https://node.komodo.earth:8080/polygon', response !200: 502 Bad Gateway, &lt;html&gt;..&lt;head&gt;&lt;title&gt;502 Bad Gateway&lt;/title&gt;&lt;/head&gt;..&lt;body&gt;..&lt;center&gt;&lt;h1&gt;502 Bad Gateway&lt;/h1&gt;&lt;/center&gt;..&lt;hr&gt;&lt;center&gt;nginx/1.18.0 (Ubuntu)&lt;/center&gt;..&lt;/body&gt;..&lt;/html&gt;..\"); InvalidResponse(\"Server: 'https://polygon.llamarpc.com/', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); ",
+      "error_path": "eth",
+      "error_trace": "eth:1004] eth:5792]",
+      "error_type": "Transport",
+      "error_data": "request MethodCall(MethodCall { jsonrpc: Some(V2), method: \"eth_estimateGas\", params: Array([Object({\"from\": String(\"0xab95d01bc8214e4d993043e8ca1b68db2c946498\"), \"to\": String(\"0x2953399124f0cbb46d2cbacd8a89cf0599974963\"), \"gasPrice\": String(\"0x9ddeaaffe\"), \"value\": String(\"0x0\"), \"data\": String(\"0x42842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498f43db4f488f644b73a9442de4978fb7572b73d85000000000000110000002710\")})]), id: Num(64) }) failed: InvalidResponse(\"Server: 'https://polygon-rpc.com/', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); InvalidResponse(\"Server: 'https://polygon.blockpi.network/v1/rpc/public', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); Transport(\"Server: 'https://node.komodo.earth:8080/polygon', response !200: 502 Bad Gateway, &lt;html&gt;..&lt;head&gt;&lt;title&gt;502 Bad Gateway&lt;/title&gt;&lt;/head&gt;..&lt;body&gt;..&lt;center&gt;&lt;h1&gt;502 Bad Gateway&lt;/h1&gt;&lt;/center&gt;..&lt;hr&gt;&lt;center&gt;nginx/1.18.0 (Ubuntu)&lt;/center&gt;..&lt;/body&gt;..&lt;/html&gt;..\"); InvalidResponse(\"Server: 'https://polygon.llamarpc.com/', error: RPC error: Error { code: ServerError(-32000), message: \\\"execution reverted\\\", data: None }\"); ",
+      "id": null
+  }
+  ```
+
+  #### NotEnoughNftsAmount (trying to send more NFTs than you have)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Not enough NFTs amount with token_address: 0x2953399124f0cbb46d2cbacd8a89cf0599974963 and token_id 110473361632261669912565539602449606788298723469812631769659886404530570536720. Available 1, required 2",
+      "error_path": "eth",
+      "error_trace": "eth:897]",
+      "error_type": "NotEnoughNftsAmount",
+      "error_data": {
+          "token_address": "0x2953399124f0cbb46d2cbacd8a89cf0599974963",
+          "token_id": "110473361632261669912565539602449606788298723469812631769659886404530570536720",
+          "available": "1",
+          "required": "2"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+<Note>
+  View the source code at: [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/mm2src/coins/nft.rs)
+</Note>
