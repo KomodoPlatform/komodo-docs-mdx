@@ -19,7 +19,7 @@ apt-get install -y unzip jq curl
 wget $(curl --silent https://api.github.com/repos/KomodoPlatform/komodo-defi-framework/releases | jq -r '.[0].assets[] | select(.name | endswith("Linux-Release.zip")).browser_download_url')
 wget https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins
 unzip *Linux-Release.zip
-./mm2 "{\"netid\":8762,\"gui\":\"aws_cli\",\"passphrase\":\"SEED_WORDS_PLEASE_REPLACE\",\"rpc_password\":\"RPC_PASS_PLEASE_REPLACE\",\"myipaddr\":\"0.0.0.0\"}"
+./kdf "{\"netid\":8762,\"gui\":\"aws_cli\",\"passphrase\":\"SEED_WORDS_PLEASE_REPLACE\",\"rpc_password\":\"RPC_PASS_PLEASE_REPLACE\",\"myipaddr\":\"0.0.0.0\"}"
 ```
 
 ## Install AWS CLI , get AWS access credentials
@@ -47,9 +47,9 @@ In the terminal commands below, note that you must first change the texts `REPLA
 ```bash
 export AWS_ACCESS_KEY_ID=REPLACE_ACCESS_KEY_ID
 export AWS_SECRET_ACCESS_KEY=REPLACE_SECRET_ACCESS_KEY
-aws ec2 create-key-pair --region us-east-1 --key-name mm2Keypair | jq -r .KeyMaterial > ~/.ssh/mm2.pem
-chmod 400 ~/.ssh/mm2.pem
-sgID=$(aws ec2 create-security-group --region us-east-1 --group-name sgMM2 --description "sg-mm2"| jq -r '.GroupId')
+aws ec2 create-key-pair --region us-east-1 --key-name mm2Keypair | jq -r .KeyMaterial > ~/.ssh/kdf.pem
+chmod 400 ~/.ssh/kdf.pem
+sgID=$(aws ec2 create-security-group --region us-east-1 --group-name sgMM2 --description "sg-kdf"| jq -r '.GroupId')
 aws ec2 authorize-security-group-ingress --region us-east-1 --group-name sgMM2 --protocol all --cidr 0.0.0.0/0
 aws ec2 run-instances --region us-east-1 --image-id ami-083d24fb90054e5f0 --count 1 --instance-type t3.micro --key-name mm2Keypair --security-group-ids $sgID --user-data file://komodo_defi_framework_setup.txt
 ```
@@ -69,7 +69,7 @@ From the linked page above, copy the "IPv4 Public IP" of the instance and use it
 
 ```bash
 nodeIp=REPLACE_PUBLIC_IP
-ssh -o IdentitiesOnly=yes -i ~/.ssh/mm2.pem admin@$nodeIp 'curl -s --url "http://127.0.0.1:7783" --data "{\"userpass\":\"RPC_UserP@SSW0RD\",\"method\":\"version\"}"'
+ssh -o IdentitiesOnly=yes -i ~/.ssh/kdf.pem admin@$nodeIp 'curl -s --url "http://127.0.0.1:7783" --data "{\"userpass\":\"RPC_UserP@SSW0RD\",\"method\":\"version\"}"'
 ```
 
 Edit the command above as necessary to exchange one curl command for another from [the Komodo DeFi Framework API.](/komodo-defi-framework/api/)

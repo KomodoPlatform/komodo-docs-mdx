@@ -5,6 +5,18 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 The following structures are used in the Komodo DeFi SDK for non-fungible tokens (NFTs).
 
+### NftInfoBasic
+
+The `NftInfoBasic` object includes the following items for a given token:
+
+| Parameter      | Type   | Description                                                           |
+| -------------- | ------ | --------------------------------------------------------------------- |
+| amount         | string | The amount of this NFT the user owns (used by `ERC1155`).             |
+| chain          | string | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`. |
+| contract\_type | string | The type of NFT contract standard. One of `ERC721` or `ERC1155`.      |
+| token\_address | string | The address of the NFT contract.                                      |
+| token\_id      | string | The token ID of the NFT.                                              |
+
 ### NftInfo
 
 The `NftInfo` object includes the following items for a given token:
@@ -189,11 +201,34 @@ The `WithdrawNftData` object is used for withdrawals of NFTs on ERC721 and ERC11
 | max            | boolean | Optional, ERC1155 only. Defaults to `false`. If `true`, amount parameter will be ignored and all NFTs with this `token_id` will be sent. |
 
 <Note>
-  When the `type` parameter in a [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc721`, it means the NFT is absolutely unique,
+  When the `type` parameter in a [withdraw\_nft](/komodo-defi-framework/api/v20/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc721`, it means the NFT is absolutely unique,
   and it has only 1 owner and the owner can own only 1 NFT with this `token_id`
   in its `token_address` (also referred to as contract address).
-  When the `type` parameter in a [withdraw\_nft](/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc1155`, it means that it is possible for more
+  When the `type` parameter in a [withdraw\_nft](/komodo-defi-framework/api/v20/non_fungible_tokens/withdraw_nft/) request is `withdraw_erc1155`, it means that it is possible for more
   than 1 user to own one or more of the same NFT (with an identical `token_id`).
   Due to this difference, the `amount` and `max` fields are only used the when
   the `type` value is `withdraw_erc1155`.
 </Note>
+
+### NftProvider
+
+The `NftProvider` object is used in the 'enable\_nft' RPC method. It defines the NFT providers that are avaialable and their configuration.
+
+| Parameter          | Type    | Description                                                                  |
+| ------------------ | ------- | ---------------------------------------------------------------------------- |
+| type               | string  | Specifies the type of the provider.                                          |
+| info               | object  | Additional information about the provider                                    |
+| info.url           | string  | URL of the provider's endpoint                                               |
+| info.komodo\_proxy | boolean | Optional. Indicates whether proxy authentication is enabled for the endpoint |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "type": "Moralis",
+      "info": {
+          "url": "https://moralis-proxy.komodo.earth",
+          "komodo_proxy": true
+      }
+  }
+  ```
+</CollapsibleSection>

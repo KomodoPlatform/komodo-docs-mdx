@@ -2020,6 +2020,7 @@
     "tendermint-node",
     "v2-1-0-current-release-2",
     "v2-2-0-2",
+    "swap-v2-contracts",
     "tokens-request",
     "utxo-merge-params"
   ],
@@ -2071,12 +2072,14 @@
   ],
   "src/pages/komodo-defi-framework/api/common_structures/nfts/index.mdx": [
     "non-fungible-token-structures",
+    "nft-info-basic",
     "nft-info",
     "nft-filter",
     "nft-transfer",
     "nft-transfer-filter",
     "nft-metadata",
-    "withdraw-nft-data"
+    "withdraw-nft-data",
+    "nft-provider"
   ],
   "src/pages/komodo-defi-framework/api/common_structures/orders/index.mdx": [
     "order-structures",
@@ -2089,7 +2092,11 @@
     "order-data-v1",
     "order-data-v2",
     "order-summary-data",
-    "match-by"
+    "match-by",
+    "1inch-token-info",
+    "1inch-protocol-info",
+    "1inch-tx-fields",
+    "1inch-protocol-image"
   ],
   "src/pages/komodo-defi-framework/api/common_structures/swaps/index.mdx": [
     "swap-structures",
@@ -2718,38 +2725,7 @@
     "response-success-6",
     "withdraw-qrc-20-with-gas-limit"
   ],
-  "src/pages/komodo-defi-framework/api/v20/add_delegation/index.mdx": [
-    "add-delegation",
-    "arguments",
-    "examples",
-    "command",
-    "response-success",
-    "response-error-already-delegating"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/add_node_to_version_stat/index.mdx": [
-    "add-node-to-version-stat",
-    "arguments",
-    "examples",
-    "command",
-    "response-success",
-    "response-error-peer-id-already-in-database",
-    "response-error-name-already-in-database",
-    "response-error-invalid-peer-id"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/best_orders/index.mdx": [
-    "best-orders",
-    "arguments",
-    "response",
-    "examples",
-    "command-by-number",
-    "response-by-number-success",
-    "command-by-number-exclude-own-orders",
-    "response-by-number-success-2",
-    "command-by-volume",
-    "response-by-volume-success",
-    "error-responses"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/enable_bch_with_tokens/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/enable_bch_with_tokens/index.mdx": [
     "enable-bch-with-tokens",
     "request-parameters",
     "response-parameters",
@@ -2767,14 +2743,14 @@
     "platform-coin-creation-error-error-native",
     "platform-coin-creation-error-error-electrum-server-not-responding"
   ],
-  "src/pages/komodo-defi-framework/api/v20/enable_erc20/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/enable_erc20/index.mdx": [
     "enable-erc20",
     "response",
     "error-platform-coin-is-not-yet-activated",
     "error-token-already-activated",
     "error-token-config-not-found-in-coins-file"
   ],
-  "src/pages/komodo-defi-framework/api/v20/enable_eth_with_tokens/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/enable_eth_with_tokens/index.mdx": [
     "enable-eth-with-tokens",
     "request-parameters",
     "response-parameters",
@@ -2783,6 +2759,9 @@
     "response",
     "request-with-get-balances-set-to-false",
     "response-2",
+    "request-including-nft-initialization",
+    "response-3",
+    "error-responses",
     "error-types",
     "platform-is-already-activated-error",
     "platform-config-is-not-found-error",
@@ -2790,23 +2769,25 @@
     "unexpected-platform-protocol-error",
     "token-config-is-not-found-error",
     "token-protocol-parse-error-error",
-    "unexpected-token-protocol-error"
+    "unexpected-token-protocol-error",
+    "invalid-request-error",
+    "transport-error"
   ],
-  "src/pages/komodo-defi-framework/api/v20/enable_slp/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/enable_slp/index.mdx": [
     "enable-slp",
     "response",
     "error-bch-not-yet-activated",
     "error-token-already-activated",
     "error-token-config-not-found-in-coins-file"
   ],
-  "src/pages/komodo-defi-framework/api/v20/enable_tendermint_token/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/enable_tendermint_token/index.mdx": [
     "enable-tendermint-token",
     "response",
     "error-platform-coin-is-not-yet-activated",
     "error-token-already-activated",
     "error-token-config-not-found-in-coins-file"
   ],
-  "src/pages/komodo-defi-framework/api/v20/enable_tendermint_with_assets/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/enable_tendermint_with_assets/index.mdx": [
     "enable-tendermint-with-assets",
     "request-parameters",
     "response-parameters",
@@ -2826,98 +2807,85 @@
     "token-protocol-parse-error-error",
     "unexpected-token-protocol-error"
   ],
-  "src/pages/komodo-defi-framework/api/v20/fee_management/get_eth_estimated_fee_per_gas/index.mdx": [
-    "get-eth-estimated-fee-per-gas",
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx": [
+    "zhtlc-coin-methods"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/index.mdx": [
+    "task-managed-coin-activation"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_qtum/index.mdx": [
+    "task-enable-qtum",
+    "init",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-2",
+    "status",
+    "arguments-2",
     "request",
-    "response"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/fee_management/get_swap_transaction_fee_policy/index.mdx": [
-    "get-swap-transaction-fee-policy",
-    "request",
-    "response"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/fee_management/index.mdx": [
-    "evm-network-fee-management",
-    "fee-management-methods",
-    "fee-management-configuration",
-    "in-the-coins-file",
-    "in-the-mm-2-json-file"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/fee_management/set_swap_transaction_fee_policy/index.mdx": [
-    "set-swap-transaction-fee-policy",
-    "request",
-    "response"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/fee_management/start_eth_fee_estimator/index.mdx": [
-    "start-eth-fee-estimator",
-    "response"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/fee_management/stop_eth_fee_estimator/index.mdx": [
-    "stop-eth-fee-estimator",
-    "response"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/get_current_mtp/index.mdx": [
-    "get-current-mtp",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-success"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/get_enabled_coins/index.mdx": [
-    "get-enabled-coins",
-    "parameters",
-    "response",
-    "examples",
-    "command",
-    "response-2"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/get_public_key/index.mdx": [
-    "get-public-key",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-success"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/get_public_key_hash/index.mdx": [
-    "get-public-key-hash",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-success"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/get_raw_transaction/index.mdx": [
-    "get-raw-transaction",
-    "arguments",
-    "response",
-    "examples",
-    "request-doc",
+    "user-action",
+    "arguments-3",
+    "response-3",
+    "examples-2",
+    "command-2",
     "response-success",
-    "request-eth",
-    "response-success-2",
-    "error-response-no-such-coin",
-    "error-invalid-hash",
-    "error-invalid-ec-signature",
-    "error-types"
+    "error-cases"
   ],
-  "src/pages/komodo-defi-framework/api/v20/get_staking_infos/index.mdx": [
-    "get-staking-infos",
-    "arguments",
-    "examples",
-    "command",
-    "response-not-currently-staking",
-    "response-staking-active"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/get_wallet_names/index.mdx": [
-    "get-wallet-names",
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_utxo/index.mdx": [
+    "task-enable-utxo",
+    "init",
     "arguments",
     "response",
     "examples",
+    "activation-in-trezor-mode",
+    "response-2",
+    "status",
+    "arguments-2",
     "command",
-    "response-in-no-login-mode",
-    "response-while-logged-in"
+    "response-ready-successful-trezor-mode",
+    "response-ready-successful-iguana-mode",
+    "response-in-progress",
+    "response-ready-error",
+    "user-action",
+    "arguments-3",
+    "response-3",
+    "examples-2",
+    "command-2",
+    "response-success"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_z_coin/index.mdx": [
+    "initialize-zhtlc-coin-activation",
+    "arguments",
+    "response",
+    "examples",
+    "enable-z-coin-without-any-optional-parameters",
+    "sync-from-block-2528700-with-custom-zcash-params-path-and-scan-params",
+    "sync-from-sapling-activation-height-earliest",
+    "using-websockets-to-sync-from-proof-of-keys-day-2023",
+    "response-2",
+    "activation-status",
+    "arguments-2",
+    "response-3",
+    "examples-2",
+    "status-of-z-coin-activation",
+    "response-activating-coin-enabling-has-started",
+    "response-updating-blocks-cache",
+    "response-building-wallet-db",
+    "response-coin-creation-error-no-zcash-params",
+    "response-error-no-such-task",
+    "response-error-invalid-request",
+    "response-enabling-complete",
+    "response-no-zcash-params",
+    "response-error-no-such-task-2",
+    "cancel-activation",
+    "arguments-3",
+    "response-4",
+    "examples-3",
+    "command",
+    "response-success",
+    "response-success-already-finished",
+    "response-error-no-such-task-3"
   ],
   "src/pages/komodo-defi-framework/api/v20/index.mdx": [
     "komodo-de-fi-sdk-rpc-protocol-v2-0",
@@ -2985,257 +2953,7 @@
     "error-coin-enabled-without-tx-history-true",
     "error-local-database-failed"
   ],
-  "src/pages/komodo-defi-framework/api/v20/message_signing/index.mdx": [
-    "signing-and-verifying-messages",
-    "sign-message",
-    "arguments",
-    "response",
-    "command",
-    "response-success",
-    "error-types",
-    "verify-message",
-    "arguments-2",
-    "response-2",
-    "command-2",
-    "response-valid",
-    "response-not-valid",
-    "error-types-2"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/my_recent_swaps/index.mdx": [
-    "my-recent-swaps",
-    "arguments",
-    "response",
-    "example",
-    "command",
-    "response-success",
-    "error-responses",
-    "invalid-uuid",
-    "unknown-sql-error"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/my_tx_history/index.mdx": [
-    "my-tx-history",
-    "arguments",
-    "response",
-    "hd-wallet-account-request",
-    "response-2",
-    "hd-wallet-address-request",
-    "response-3",
-    "response-4",
-    "request-ttt-slp-with-from-id",
-    "response-5",
-    "request-iris-with-limit-50",
-    "response-6"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/orderbook/index.mdx": [
-    "orderbook",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-2"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/peer_connection_healthcheck/index.mdx": [
-    "peer-connection-healthcheck",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-peer-found",
-    "response-peer-not-found"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/recreate_swap_data/index.mdx": [
-    "recreate-swap-data",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-success"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/remove_delegation/index.mdx": [
-    "remove-delegation",
-    "arguments",
-    "examples",
-    "command",
-    "response-success"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/remove_node_from_version_stat/index.mdx": [
-    "remove-node-from-version-stat",
-    "arguments",
-    "examples",
-    "command",
-    "response-success"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/sign_raw_transaction/index.mdx": [
-    "sign-raw-transaction",
-    "request-parameters",
-    "response-parameters",
-    "sign-utxo-raw-transaction-hex",
-    "response-success",
-    "sign-utxo-raw-transaction-hex-with-inputs",
-    "response-success-2",
-    "signed-an-eth-evm-raw-transaction",
-    "response-success-3",
-    "errors",
-    "signing-error",
-    "invalid-request",
-    "invalid-parameter",
-    "no-such-coin"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/start_simple_market_maker_bot/index.mdx": [
-    "start-simple-market-maker-bot",
-    "arguments",
-    "examples",
-    "command",
-    "response-success",
-    "response-error-bot-already-started"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/start_version_stat_collection/index.mdx": [
-    "start-version-stat-collection",
-    "arguments",
-    "examples",
-    "command",
-    "response-success",
-    "response-error-invalid-peer-id-unable-to-parse"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/stop_simple_market_maker_bot/index.mdx": [
-    "stop-simple-market-maker-bot",
-    "arguments",
-    "examples",
-    "command",
-    "response-success",
-    "response-error-bot-already-stopped"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/stop_version_stat_collection/index.mdx": [
-    "stop-version-stat-collection",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-success",
-    "response-error-stats-collection-not-running"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/telegram_alerts/index.mdx": [
-    "telegram-alerts-for-market-maker-bot"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/trade_preimage/index.mdx": [
-    "trade-preimage",
-    "arguments",
-    "result",
-    "error-types",
-    "not-sufficient-balance",
-    "not-sufficient-base-coin-balance",
-    "volume-too-low",
-    "no-such-coin",
-    "coin-is-wallet-only",
-    "base-equal-rel",
-    "invalid-param",
-    "price-too-low",
-    "transport",
-    "internal-error",
-    "examples",
-    "command-setprice",
-    "response",
-    "command-buy",
-    "response-2",
-    "command-sell-max",
-    "response-3",
-    "command-erc-20-and-qrc-20",
-    "response-4",
-    "response-not-sufficient-balance-error",
-    "response-volume-too-low-error",
-    "response-transport-error",
-    "response-incorrect-use-of-max-error"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/update_version_stat_collection/index.mdx": [
-    "update-version-stat-collection",
-    "arguments",
-    "examples",
-    "command",
-    "response-success",
-    "response-error-stats-collection-not-running"
-  ],
-  "src/pages/komodo-defi-framework/api/v20/withdraw/index.mdx": [
-    "withdraw",
-    "arguments",
-    "response",
-    "examples",
-    "withdraw-btc-kmd-and-other-btc-based-forks",
-    "response-kmd-success",
-    "hd-withdraw-with-derivation-path",
-    "response-kmd-success-2",
-    "hd-withdraw-with-account-id-chain-and-address-id",
-    "response-kmd-success-3",
-    "withdraw-btc-kmd-and-other-btc-based-forks-fixed-fee",
-    "response-success",
-    "withdraw-btc-kmd-and-other-btc-based-forks-1-coin-per-kbyte-fee",
-    "response-success-2",
-    "withdraw-eth-erc-20-and-other-eth-based-forks",
-    "response-success-3",
-    "eth-erc-20-and-other-eth-based-forks-with-gas-fee",
-    "response-success-4",
-    "withdraw-maximum",
-    "response-success-5",
-    "withdraw-qrc-20-coins",
-    "response-success-6",
-    "withdraw-qrc-20-coins-with-gas-limit",
-    "withdraw-tendermint-coins-with-a-memo-and-custom-gas-fee",
-    "withdraw-tendermint-ibc-coins",
-    "error-responses",
-    "invalid-request-unknown-fee-type",
-    "invalid-request-wrong-parameter-type",
-    "invalid-fee-policy-attempt-to-use-eth-gas-for-utxo-coin"
-  ],
-  "src/pages/komodo-defi-framework/api/v20-dev/get_locked_amount/index.mdx": [
-    "get-locked-amount",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-success",
-    "response-error"
-  ],
-  "src/pages/komodo-defi-framework/api/v20-dev/hd_address_management/index.mdx": [
-    "hierarchical-deterministic-address-management",
-    "get-new-address",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-success",
-    "task-scan-for-new-addresses-init",
-    "arguments-2",
-    "response-2",
-    "examples-2",
-    "command-2",
-    "response-success-2",
-    "task-scan-for-new-addresses-status",
-    "arguments-3",
-    "response-3",
-    "examples-3",
-    "command-3",
-    "response-success-no-new-address-found",
-    "response-success-new-address-found"
-  ],
-  "src/pages/komodo-defi-framework/api/v20-dev/hd_wallets_overview/index.mdx": [
-    "hd-wallets-overview",
-    "initialisation-and-authentication-hardware-wallets-only",
-    "utxo-and-qtum-coin-activation-in-hd-mode",
-    "withdrawing-your-funds",
-    "viewing-hardware-wallet-coin-balances",
-    "creating-new-addresses",
-    "viewing-transaction-history"
-  ],
-  "src/pages/komodo-defi-framework/api/v20-dev/index.mdx": [
-    "komodo-de-fi-framework-api-rpc-protocol-v2-0-dev",
-    "request",
-    "response-success",
-    "response-error",
-    "examples",
-    "command",
-    "response-success-2",
-    "response-error-2"
-  ],
-  "src/pages/komodo-defi-framework/api/v20-dev/lightning/activation/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/lightning/activation/index.mdx": [
     "lightning-network-initialization-tasks",
     "initialize-lightning",
     "request-parameters",
@@ -3260,7 +2978,7 @@
     "response-2",
     "task-finished-error"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/lightning/channels/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/lightning/channels/index.mdx": [
     "lightning-network-channels",
     "open-channel",
     "request-parameters",
@@ -3318,7 +3036,7 @@
     "command-8",
     "response-13"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/lightning/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/lightning/index.mdx": [
     "lightning-network-methods",
     "lightning-network-initialization-tasks",
     "lightning-network-nodes-methods",
@@ -3328,7 +3046,7 @@
     "lightning-network-coins-file-configuration",
     "lightning-coin-config-parameters"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/lightning/nodes/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/lightning/nodes/index.mdx": [
     "lightning-network-nodes",
     "connect-to-node",
     "request-parameters",
@@ -3350,7 +3068,7 @@
     "example-4",
     "response-3"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/lightning/payments/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/lightning/payments/index.mdx": [
     "lightning-network-payments",
     "generate-invoice",
     "request-parameters",
@@ -3384,26 +3102,23 @@
     "example-for-successful-payments-on-the-20th-of-april-2023",
     "response-6"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/max_maker_vol/index.mdx": [
-    "max-maker-vol",
-    "arguments",
-    "response",
-    "examples",
-    "command",
-    "response-success",
-    "response-error",
-    "response-balance-too-low",
-    "response-transport-error"
-  ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/clear_nft_db/index.mdx": [
     "clear-nft-database",
     "request-parameters",
     "example-to-clear-binance-smart-chain-and-polygon-nft-data",
     "example-to-clear-all-nft-data",
     "error-responses",
-    "unsupported-chain-type"
+    "unsupported-chain-type",
+    "invalid-request"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_list/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/enable_nft/index.mdx": [
+    "enable-nft",
+    "response",
+    "error-platform-coin-is-not-yet-activated",
+    "error-token-already-activated",
+    "error-token-config-not-found-in-coins-file"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/get_nft_list/index.mdx": [
     "get-a-list-of-nfts",
     "request-parameters",
     "response-parameters",
@@ -3413,25 +3128,26 @@
     "error-responses",
     "unsupported-chain-type"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_metadata/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/get_nft_metadata/index.mdx": [
     "get-nft-metadata",
     "request-parameters",
     "response-parameters",
     "example",
     "error-responses"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/get_nft_transfers/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/get_nft_transfers/index.mdx": [
     "get-a-list-of-nft-transfers",
     "request-parameters",
     "response-parameters",
     "example-with-date-and-send-filters"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/index.mdx": [
     "non-fungible-tokens-nfts",
     "nft-information-methods",
-    "nft-transaction-methods"
+    "nft-transaction-methods",
+    "nft-utility-methods"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/query_nft_database_tables/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/query_nft_database_tables/index.mdx": [
     "query-nft-database-tables",
     "nft-list-tables",
     "example-coin-nft-list-table-query",
@@ -3440,17 +3156,21 @@
     "nft-last-scanned-block-table",
     "example-scanned-nft-blocks-table-query"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/refresh_nft_metadata/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/refresh_nft_metadata/index.mdx": [
     "refresh-nft-metadata",
     "request-parameters",
-    "example"
+    "example",
+    "error-responses"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/index.mdx": [
     "update-nft",
     "request-parameters",
-    "example"
+    "example",
+    "error-types",
+    "token-is-already-activated",
+    "token-is-already-activated-2"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/non_fungible_tokens/withdraw_nft/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/withdraw_nft/index.mdx": [
     "withdraw-nfts",
     "request-parameters",
     "response-parameters",
@@ -3464,86 +3184,239 @@
     "transport-error-unable-to-estimate-gas",
     "not-enough-nfts-amount-trying-to-send-more-nfts-than-you-have"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/task_account_balance/index.mdx": [
-    "account-balance-tasks",
-    "init",
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/active_swaps/index.mdx": [
+    "active-swaps",
     "arguments",
     "response",
     "examples",
-    "command",
-    "response-ready-successful",
-    "status",
-    "arguments-2",
-    "response-2",
-    "examples-2",
-    "command-2",
-    "response-ready-successful-2",
-    "cancel",
-    "arguments-3",
-    "response-3",
-    "examples-3",
-    "command-3",
-    "response-ready-successful-3",
-    "response-error-task-already-finished"
+    "command-without-include-status",
+    "response-uuids-only",
+    "command-include-status-true",
+    "response-statuses-included"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/task_create_new_account/index.mdx": [
-    "task-create-new-account",
-    "init",
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/best_orders/index.mdx": [
+    "best-orders",
     "arguments",
     "response",
     "examples",
-    "command",
-    "response-ready-successful",
-    "status",
-    "arguments-2",
-    "response-2",
-    "examples-2",
-    "command-2",
-    "response-ready-successful-2",
-    "response-in-progress"
+    "command-by-number",
+    "response-by-number-success",
+    "command-by-number-exclude-own-orders",
+    "response-by-number-success-2",
+    "command-by-volume",
+    "response-by-volume-success",
+    "error-responses"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/task_enable_qtum/index.mdx": [
-    "task-enable-qtum",
-    "init",
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/get_locked_amount/index.mdx": [
+    "get-locked-amount",
     "arguments",
     "response",
     "examples",
     "command",
-    "response-2",
-    "status",
-    "arguments-2",
-    "request",
-    "user-action",
-    "arguments-3",
-    "response-3",
-    "examples-2",
-    "command-2",
     "response-success",
-    "error-cases"
+    "response-error"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/task_enable_utxo/index.mdx": [
-    "task-enable-utxo",
-    "init",
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/index.mdx": [
+    "swaps-and-orders"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/max_maker_vol/index.mdx": [
+    "max-maker-vol",
     "arguments",
     "response",
     "examples",
-    "activation-in-trezor-mode",
-    "response-2",
-    "status",
-    "arguments-2",
     "command",
-    "response-ready-successful-trezor-mode",
-    "response-ready-successful-iguana-mode",
-    "response-in-progress",
-    "response-ready-error",
-    "user-action",
-    "arguments-3",
-    "response-3",
-    "examples-2",
-    "command-2",
+    "response-success",
+    "response-error",
+    "response-balance-too-low",
+    "response-transport-error"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/my_recent_swaps/index.mdx": [
+    "my-recent-swaps",
+    "arguments",
+    "response",
+    "example",
+    "command",
+    "response-success",
+    "error-responses",
+    "invalid-uuid",
+    "unknown-sql-error"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/orderbook/index.mdx": [
+    "orderbook",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-2"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/recreate_swap_data/index.mdx": [
+    "recreate-swap-data",
+    "arguments",
+    "response",
+    "examples",
+    "command",
     "response-success"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/task_init_trezor/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/start_simple_market_maker_bot/index.mdx": [
+    "start-simple-market-maker-bot",
+    "arguments",
+    "examples",
+    "command",
+    "response-success",
+    "response-error-bot-already-started"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/stop_simple_market_maker_bot/index.mdx": [
+    "stop-simple-market-maker-bot",
+    "arguments",
+    "examples",
+    "command",
+    "response-success",
+    "response-error-bot-already-stopped"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/swaps_and_orders/trade_preimage/index.mdx": [
+    "trade-preimage",
+    "arguments",
+    "result",
+    "error-types",
+    "not-sufficient-balance",
+    "not-sufficient-base-coin-balance",
+    "volume-too-low",
+    "no-such-coin",
+    "coin-is-wallet-only",
+    "base-equal-rel",
+    "invalid-param",
+    "price-too-low",
+    "transport",
+    "internal-error",
+    "examples",
+    "command-setprice",
+    "response",
+    "command-buy",
+    "response-2",
+    "command-sell-max",
+    "response-3",
+    "command-erc-20-and-qrc-20",
+    "response-4",
+    "response-not-sufficient-balance-error",
+    "response-volume-too-low-error",
+    "response-transport-error",
+    "response-incorrect-use-of-max-error"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/add_node_to_version_stat/index.mdx": [
+    "add-node-to-version-stat",
+    "arguments",
+    "examples",
+    "command",
+    "response-success",
+    "response-error-peer-id-already-in-database",
+    "response-error-name-already-in-database",
+    "response-error-invalid-peer-id"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/get_current_mtp/index.mdx": [
+    "get-current-mtp",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-success"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/get_enabled_coins/index.mdx": [
+    "get-enabled-coins",
+    "parameters",
+    "response",
+    "examples",
+    "command",
+    "response-2"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/get_mnemonic/index.mdx": [
+    "get-mnemonic",
+    "arguments",
+    "response",
+    "examples",
+    "for-encrypted-output",
+    "response-success",
+    "for-plain-text-output",
+    "response-success-2"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/get_public_key/index.mdx": [
+    "get-public-key",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-success"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/get_public_key_hash/index.mdx": [
+    "get-public-key-hash",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-success"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/get_token_info/index.mdx": [
+    "get-token-info",
+    "arguments",
+    "response",
+    "examples",
+    "get-token-info-on-avalanche",
+    "response-success",
+    "error-responses",
+    "invalid-request-protocol-parent-coin-not-active"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/index.mdx": [
+    "v2-utility-methods"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/message_signing/index.mdx": [
+    "signing-and-verifying-messages",
+    "sign-message",
+    "arguments",
+    "response",
+    "command",
+    "response-success",
+    "error-types",
+    "verify-message",
+    "arguments-2",
+    "response-2",
+    "command-2",
+    "response-valid",
+    "response-not-valid",
+    "error-types-2"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/peer_connection_healthcheck/index.mdx": [
+    "peer-connection-healthcheck",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-peer-found",
+    "response-peer-not-found"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/remove_node_from_version_stat/index.mdx": [
+    "remove-node-from-version-stat",
+    "arguments",
+    "examples",
+    "command",
+    "response-success"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/start_version_stat_collection/index.mdx": [
+    "start-version-stat-collection",
+    "arguments",
+    "examples",
+    "command",
+    "response-success",
+    "response-error-invalid-peer-id-unable-to-parse"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/stop_version_stat_collection/index.mdx": [
+    "stop-version-stat-collection",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-success",
+    "response-error-stats-collection-not-running"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/task_init_trezor/index.mdx": [
     "trezor-initialisation",
     "init",
     "arguments",
@@ -3579,7 +3452,158 @@
     "found-multiple-devices",
     "no-trezor-device-available"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/task_withdraw/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/utils/telegram_alerts/index.mdx": [
+    "telegram-alerts-for-market-maker-bot"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/utils/update_version_stat_collection/index.mdx": [
+    "update-version-stat-collection",
+    "arguments",
+    "examples",
+    "command",
+    "response-success",
+    "response-error-stats-collection-not-running"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/fee_management/get_eth_estimated_fee_per_gas/index.mdx": [
+    "get-eth-estimated-fee-per-gas",
+    "request",
+    "response"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/fee_management/get_swap_transaction_fee_policy/index.mdx": [
+    "get-swap-transaction-fee-policy",
+    "request",
+    "response"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/fee_management/index.mdx": [
+    "evm-network-fee-management",
+    "fee-management-methods",
+    "fee-management-configuration",
+    "in-the-coins-file",
+    "in-the-mm-2-json-file"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/fee_management/set_swap_transaction_fee_policy/index.mdx": [
+    "set-swap-transaction-fee-policy",
+    "request",
+    "response"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/fee_management/start_eth_fee_estimator/index.mdx": [
+    "start-eth-fee-estimator",
+    "response"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/fee_management/stop_eth_fee_estimator/index.mdx": [
+    "stop-eth-fee-estimator",
+    "response"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/hd/address_management/index.mdx": [
+    "hierarchical-deterministic-address-management",
+    "get-new-address",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-success",
+    "task-scan-for-new-addresses-init",
+    "arguments-2",
+    "response-2",
+    "examples-2",
+    "command-2",
+    "response-success-2",
+    "task-scan-for-new-addresses-status",
+    "arguments-3",
+    "response-3",
+    "examples-3",
+    "command-3",
+    "response-success-no-new-address-found",
+    "response-success-new-address-found"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/hd/get_wallet_names/index.mdx": [
+    "get-wallet-names",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-in-no-login-mode",
+    "response-while-logged-in"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/hd/index.mdx": [
+    "hd-wallets-overview",
+    "initialisation-and-authentication-hardware-wallets-only",
+    "utxo-and-qtum-coin-activation-in-hd-mode",
+    "withdrawing-your-funds",
+    "viewing-hardware-wallet-coin-balances",
+    "creating-new-addresses",
+    "viewing-transaction-history"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/hd/task_account_balance/index.mdx": [
+    "account-balance-tasks",
+    "init",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-ready-successful",
+    "status",
+    "arguments-2",
+    "response-2",
+    "examples-2",
+    "command-2",
+    "response-ready-successful-2",
+    "cancel",
+    "arguments-3",
+    "response-3",
+    "examples-3",
+    "command-3",
+    "response-ready-successful-3",
+    "response-error-task-already-finished"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/hd/task_create_new_account/index.mdx": [
+    "task-create-new-account",
+    "init",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-ready-successful",
+    "status",
+    "arguments-2",
+    "response-2",
+    "examples-2",
+    "command-2",
+    "response-ready-successful-2",
+    "response-in-progress"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/index.mdx": [
+    "wallet-methods"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/staking/add_delegation/index.mdx": [
+    "add-delegation",
+    "arguments",
+    "examples",
+    "command",
+    "response-success",
+    "response-error-already-delegating"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/staking/get_staking_infos/index.mdx": [
+    "get-staking-infos",
+    "arguments",
+    "examples",
+    "command",
+    "response-not-currently-staking",
+    "response-staking-active"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/staking/index.mdx": [
+    "staking"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/staking/remove_delegation/index.mdx": [
+    "remove-delegation",
+    "arguments",
+    "examples",
+    "command",
+    "response-success"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/task_managed/index.mdx": [
+    "task-managed-wallet-methods"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/task_managed/task_withdraw/index.mdx": [
     "withdraw-tasks",
     "init",
     "arguments",
@@ -3611,43 +3635,85 @@
     "response-error-no-such-task-task-expired",
     "response-error-task-already-finished"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/zhtlc_coins/activation/index.mdx": [
-    "initialize-zhtlc-coin-activation",
+  "src/pages/komodo-defi-framework/api/v20/wallet/tx/get_raw_transaction/index.mdx": [
+    "get-raw-transaction",
     "arguments",
     "response",
     "examples",
-    "enable-z-coin-without-any-optional-parameters",
-    "sync-from-block-2528700-with-custom-zcash-params-path-and-scan-params",
-    "sync-from-sapling-activation-height-earliest",
-    "using-websockets-to-sync-from-proof-of-keys-day-2023",
-    "response-2",
-    "activation-status",
-    "arguments-2",
-    "response-3",
-    "examples-2",
-    "status-of-z-coin-activation",
-    "response-activating-coin-enabling-has-started",
-    "response-updating-blocks-cache",
-    "response-building-wallet-db",
-    "response-coin-creation-error-no-zcash-params",
-    "response-error-no-such-task",
-    "response-error-invalid-request",
-    "response-enabling-complete",
-    "response-no-zcash-params",
-    "response-error-no-such-task-2",
-    "cancel-activation",
-    "arguments-3",
-    "response-4",
-    "examples-3",
-    "command",
+    "request-doc",
     "response-success",
-    "response-success-already-finished",
-    "response-error-no-such-task-3"
+    "request-eth",
+    "response-success-2",
+    "error-response-no-such-coin",
+    "error-invalid-hash",
+    "error-invalid-ec-signature",
+    "error-types"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/zhtlc_coins/index.mdx": [
-    "zhtlc-coin-methods"
+  "src/pages/komodo-defi-framework/api/v20/wallet/tx/index.mdx": [
+    "transaction-methods"
   ],
-  "src/pages/komodo-defi-framework/api/v20-dev/zhtlc_coins/transaction_history/index.mdx": [
+  "src/pages/komodo-defi-framework/api/v20/wallet/tx/my_tx_history/index.mdx": [
+    "my-tx-history",
+    "arguments",
+    "response",
+    "hd-wallet-account-request",
+    "response-2",
+    "hd-wallet-address-request",
+    "response-3",
+    "response-4",
+    "request-ttt-slp-with-from-id",
+    "response-5",
+    "request-iris-with-limit-50",
+    "response-6"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/tx/sign_raw_transaction/index.mdx": [
+    "sign-raw-transaction",
+    "request-parameters",
+    "response-parameters",
+    "sign-utxo-raw-transaction-hex",
+    "response-success",
+    "sign-utxo-raw-transaction-hex-with-inputs",
+    "response-success-2",
+    "signed-an-eth-evm-raw-transaction",
+    "response-success-3",
+    "errors",
+    "signing-error",
+    "invalid-request",
+    "invalid-parameter",
+    "no-such-coin"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/tx/withdraw/index.mdx": [
+    "withdraw",
+    "arguments",
+    "response",
+    "examples",
+    "withdraw-btc-kmd-and-other-btc-based-forks",
+    "response-kmd-success",
+    "hd-withdraw-with-derivation-path",
+    "response-kmd-success-2",
+    "hd-withdraw-with-account-id-chain-and-address-id",
+    "response-kmd-success-3",
+    "withdraw-btc-kmd-and-other-btc-based-forks-fixed-fee",
+    "response-success",
+    "withdraw-btc-kmd-and-other-btc-based-forks-1-coin-per-kbyte-fee",
+    "response-success-2",
+    "withdraw-eth-erc-20-and-other-eth-based-forks",
+    "response-success-3",
+    "eth-erc-20-and-other-eth-based-forks-with-gas-fee",
+    "response-success-4",
+    "withdraw-maximum",
+    "response-success-5",
+    "withdraw-qrc-20-coins",
+    "response-success-6",
+    "withdraw-qrc-20-coins-with-gas-limit",
+    "withdraw-tendermint-coins-with-a-memo-and-custom-gas-fee",
+    "withdraw-tendermint-ibc-coins",
+    "error-responses",
+    "invalid-request-unknown-fee-type",
+    "invalid-request-wrong-parameter-type",
+    "invalid-fee-policy-attempt-to-use-eth-gas-for-utxo-coin"
+  ],
+  "src/pages/komodo-defi-framework/api/v20/wallet/tx/zhtlc_tx_history/index.mdx": [
     "zhtlc-coin-transaction-history",
     "arguments",
     "response",
@@ -3656,20 +3722,91 @@
     "response-error-coin-not-supported",
     "response-error-coin-not-active"
   ],
+  "src/pages/komodo-defi-framework/api/v20-dev/approve_token/index.mdx": [
+    "approve-token",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-2",
+    "error-token-config-not-activated",
+    "error-insufficient-funds"
+  ],
+  "src/pages/komodo-defi-framework/api/v20-dev/get_token_allowance/index.mdx": [
+    "get-token-allowance",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-success",
+    "error-token-config-not-activated"
+  ],
+  "src/pages/komodo-defi-framework/api/v20-dev/index.mdx": [
+    "komodo-de-fi-framework-api-rpc-protocol-v2-0-dev"
+  ],
+  "src/pages/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_create/index.mdx": [
+    "1inch-v6-0-classic-swap-create",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-2",
+    "error-configuration-missing",
+    "error-authentication-failure"
+  ],
+  "src/pages/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_liquidity_sources/index.mdx": [
+    "1inch-v6-0-classic-swap-liquidity-sources",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-2",
+    "error-configuration-missing",
+    "error-authentication-failure"
+  ],
+  "src/pages/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_quote/index.mdx": [
+    "1inch-v6-0-classic-swap-quote",
+    "arguments",
+    "response",
+    "examples",
+    "command",
+    "response-2",
+    "error-configuration-missing",
+    "error-authentication-failure"
+  ],
+  "src/pages/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_tokens/index.mdx": [
+    "1inch-v6-0-classic-swap-tokens",
+    "arguments",
+    "response",
+    "token-info",
+    "examples",
+    "command",
+    "response-2"
+  ],
   "src/pages/komodo-defi-framework/changelog/index.mdx": [
     "change-log",
-    "komodo-de-fi-framework-v2-1-0-beta",
-    "essential-new-features-trading-protocol-upgrade-hd-wallet-event-streaming-and-seeds-management",
+    "komodo-de-fi-framework-v2-3-0-beta",
+    "komodo-de-fi-framework-v2-2-0-beta",
+    "custom-token-support-and-various-optimizations",
     "release-notes",
     "features",
-    "nb-backwards-compatibility-breaking-changes",
-    "new-contributors",
     "enhancements",
+    "nb-backwards-compatibility-breaking-changes",
+    "removals",
+    "api-changes",
     "bug-fixes",
+    "komodo-de-fi-framework-v2-1-0-beta",
+    "essential-new-features-trading-protocol-upgrade-hd-wallet-event-streaming-and-seeds-management",
+    "release-notes-2",
+    "features-2",
+    "nb-backwards-compatibility-breaking-changes-2",
+    "new-contributors",
+    "enhancements-2",
+    "bug-fixes-2",
     "komodo-de-fi-framework-v2-0-0-beta",
     "network-evolution-and-kmd-burn-enhancing-kmds-role-in-komodos-de-fi-framework",
-    "release-notes-2",
-    "nb-backwards-compatibility-breaking-changes-2",
+    "release-notes-3",
+    "nb-backwards-compatibility-breaking-changes-3",
     "komodo-de-fi-framework-v1-0-7-beta",
     "komodo-de-fi-framework-v1-0-6-beta",
     "atomic-dex-v1-0-5-beta",
@@ -3700,6 +3837,8 @@
     "example-not-allowing-weak-password",
     "example-using-gas-api",
     "example-wss-with-certificates",
+    "example-with-wallet-name-and-wallet-password",
+    "example-with-1inch-api",
     "example-for-hd-wallets",
     "coins-file-configuration",
     "optional-environment-variables",
@@ -3842,7 +3981,7 @@
     "command-13",
     "response-10"
   ],
-  "src/pages/komodo-defi-framework/tutorials/how-to-compile-mm2-from-source/index.mdx": [
+  "src/pages/komodo-defi-framework/tutorials/how-to-compile-kdf-from-source/index.mdx": [
     "how-to-compile-komodo-de-fi-framework-api-from-source",
     "installing-dependencies",
     "step-1-os-packages",
@@ -3912,7 +4051,12 @@
     "respose",
     "stats-nodes",
     "query-5",
-    "response-4"
+    "response-4",
+    "coin-tables",
+    "kmd-block-headers-cache",
+    "kmd-tx-address",
+    "kmd-tx-cache",
+    "kmd-tx-history"
   ],
   "src/pages/komodo-defi-framework/tutorials/setup-komodefi-api-aws/index.mdx": [
     "how-to-setup-and-use-the-komodo-de-fi-framework-api-on-an-aws-ec-2-instance",
@@ -3952,8 +4096,8 @@
   "src/pages/komodo-wallet/desktop/reset-configuration-to-default/index.mdx": [
     "resetting-komodo-wallet-configuration-to-default"
   ],
-  "src/pages/komodo-wallet/desktop/send-commands-to-mm2-instance/index.mdx": [
-    "send-commands-to-an-mm-2-instance-being-run-by-komodo-wallet-desktop-using-postman"
+  "src/pages/komodo-wallet/desktop/send-commands-to-kdf-instance/index.mdx": [
+    "send-commands-to-a-kdf-instance-being-run-by-komodo-wallet-desktop-using-postman"
   ],
   "src/pages/komodo-wallet/desktop/simple-view-trading/index.mdx": [
     "simple-view-trading-on-komodo-wallet-desktop"

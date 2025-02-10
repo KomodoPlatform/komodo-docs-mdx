@@ -1,0 +1,86 @@
+export const title = "Komodo DeFi Framework Method: Approve Token (v2)";
+export const description =
+  "The approve_token method approves token spending for address";
+
+# approve\_token
+
+The `approve_token` method grants permission for a given smart contract to spend a defined amount of your tokens.
+
+Refer to the [1inch Classic Swap documentation](https://portal.1inch.dev/documentation/apis/swap/classic-swap/quick-start) for more information.
+
+## Arguments
+
+| Structure | Type   | Description                                       |
+| --------- | ------ | ------------------------------------------------- |
+| coin      | string | Token ticker                                      |
+| spender   | string | Address of smart contract to approve for spending |
+| amount    | float  | Approved amount to spend (in coins units)         |
+
+## Response
+
+| Structure | Type   | Description             |
+| --------- | ------ | ----------------------- |
+| result    | string | Approval transaction id |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="approve_token" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "approve_token",
+    "params": {
+      "coin": "USDT-ERC20",
+      "spender": "0x1234567890123456789",
+      "amount": 1.23
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": "0x1234567890abcdef01234567890abcdef0",
+    "id": "null"
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  #### Error: Token config not activated
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "No such coin USDT-ERC20",
+      "error_path": "tokens",
+      "error_trace": "tokens:171]",
+      "error_type": "NoSuchCoin",
+      "error_data": {
+          "coin": "USDT-ERC20"
+      },
+      "id": null
+  }
+  ```
+
+  #### Error: Insufficient funds
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Transaction error mm2src/coins/eth.rs:4834] eth:4720] Transport(\"request MethodCall(MethodCall { jsonrpc: Some(V2), method: \\\"eth_estimateGas\\\", params: Array([Object({\\\"from\\\": String(\\\"0x083c32b38e8050473f6999e22f670d1404235592\\\"), \\\"to\\\": String(\\\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\\\"), \\\"gasPrice\\\": String(\\\"0x6fc23a56a\\\"), \\\"value\\\": String(\\\"0x0\\\"), \\\"data\\\": String(\\\"0x095ea7b3000000000000000000000000083c32b38e8050473f6999e22f670d14042355920000000000000000000000000000000000000000000000001111d67bb1bb0000\\\")})]), id: Num(1) }) failed: Invalid response: Server: 'https://electrum3.cipig.net:18755/', error: RPC error: Error { code: ServerError(-32000), message: \\\"insufficient funds for transfer\\\", data: None }\")",
+      "error_path": "tokens",
+      "error_trace": "tokens:161]",
+      "error_type": "TransactionError",
+      "error_data": "mm2src/coins/eth.rs:4834] eth:4720] Transport(\"request MethodCall(MethodCall { jsonrpc: Some(V2), method: \\\"eth_estimateGas\\\", params: Array([Object({\\\"from\\\": String(\\\"0x083c32b38e8050473f6999e22f670d1404235592\\\"), \\\"to\\\": String(\\\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\\\"), \\\"gasPrice\\\": String(\\\"0x6fc23a56a\\\"), \\\"value\\\": String(\\\"0x0\\\"), \\\"data\\\": String(\\\"0x095ea7b3000000000000000000000000083c32b38e8050473f6999e22f670d14042355920000000000000000000000000000000000000000000000001111d67bb1bb0000\\\")})]), id: Num(1) }) failed: Invalid response: Server: 'https://electrum3.cipig.net:18755/', error: RPC error: Error { code: ServerError(-32000), message: \\\"insufficient funds for transfer\\\", data: None }\")",
+      "id": null
+  }
+  ```
+</CollapsibleSection>
