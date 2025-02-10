@@ -3,46 +3,34 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 # Wallet Operations Structures
 
-### RawTxInfo
+### HistoryTarget
 
-The `RawTxInfo` object includes the following items:
+Used to specify a HD wallet `account_id` or `address_id` for [my\_tx\_history v2](/komodo-defi-framework/api/v20/wallet/tx/my_tx_history/) requests.
 
-| Parameter     | Type   | Description                                                                                                                                                                                                                  |
-| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_hex       | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
-| prev\_txns    | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
-| to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
-| value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
-| gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
-| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
+| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                              |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type        | string  | Filters results by `account_id` or `address_id` part of the derivation path.                                                                                                                                                                                                                                             |
+| account\_id | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                                                              |
+| address\_id | integer | Only required when `type` is `address_id`. `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
+| chain       | string  | Only required when `type` is `address_id`. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
-<DevComment>
-  TODO: Confirm units used in ETH/EVM transactions.
-</DevComment>
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Example
 
-<CollapsibleSection expandedText="Hide UTXO Example" collapsedText="Show UTXO Example">
   ```json
-    {
-        "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
-        "prev_txns": [
-            ...
-        ]
-    }
+  {
+    "type": "account_id",
+    "account_id": 77
+  }
   ```
-</CollapsibleSection>
 
-<CollapsibleSection expandedText="Hide ETH/EVM Example" collapsedText="Show ETH/EVM Example">
   ```json
-    {
-        "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
-        "value": "0.85",
-        "gas_limit": "21000",
-        "pay_for_gas": {
-            "tx_type": "Eip1559",
-            "max_fee_per_gas": "1234.567",
-            "max_priority_fee_per_gas": "1.2"
-        }
-    }
+  {
+    "type": "address_id",
+    "account_id": 0,
+    "chain": "External", // Accepted values: "External" and "Internal"
+    "address_id": 1
+  }
   ```
 </CollapsibleSection>
 
@@ -68,6 +56,17 @@ The `InputTxns` object includes the following items:
     }
   ```
 </CollapsibleSection>
+
+### NewAddressInfo
+
+The `NewAddressInfo` response object includes the following items for request in HD mode:
+
+| Parameter        | Type   | Description                                                                                                                                                                                                                                                                   |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| address          | string | The account address for a specific derivation path under the `account_index`.                                                                                                                                                                                                 |
+| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. If there are no more addresses with balances within the gap limit, the address index will increment.                                                              |
+| balance          | object | A standard [balanceInfo](/komodo-defi-framework/api/common_structures/#balance-info) object.                                                                                                                                                                                  |
+| chain            | string | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
 ### PayForGas
 
@@ -112,3 +111,117 @@ The `PayForGas` object includes the following items:
   }
   ```
 </CollapsibleSection>
+
+### RawTxInfo
+
+The `RawTxInfo` object includes the following items:
+
+| Parameter     | Type   | Description                                                                                                                                                                                                                  |
+| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_hex       | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
+| prev\_txns    | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
+| to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
+| value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
+| gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
+| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
+
+<DevComment>
+  TODO: Confirm units used in ETH/EVM transactions.
+</DevComment>
+
+<CollapsibleSection expandedText="Hide UTXO Example" collapsedText="Show UTXO Example">
+  ```json
+    {
+        "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
+        "prev_txns": [
+            ...
+        ]
+    }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide ETH/EVM Example" collapsedText="Show ETH/EVM Example">
+  ```json
+    {
+        "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
+        "value": "0.85",
+        "gas_limit": "21000",
+        "pay_for_gas": {
+            "tx_type": "Eip1559",
+            "max_fee_per_gas": "1234.567",
+            "max_priority_fee_per_gas": "1.2"
+        }
+    }
+  ```
+</CollapsibleSection>
+
+### ScanAddressesInfo
+
+The `ScanAddressesInfo` response object includes the following items for request in HD mode:
+
+| Parameter        | Type    | Description                                                                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the account.                                   |
+| new\_addresses   | list    | A list of standard [NewAddressInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) objects.                           |
+
+<DevComment>
+  Confirm `new_addresses` array has the structure of `NewAddressInfo`.
+</DevComment>
+
+### WalletBalanceInfo
+
+The `WalletBalanceInfo` object includes the following items in the activation response for a coin in HD mode:
+
+| Parameter    | Type   | Description                                                                                                      |
+| ------------ | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| wallet\_type | string | In HD wallet mode, this will return `HD`. <DevComment> What are the other values? </DevComment>                  |
+| accounts     | object | A standard [WalletAccountInfo](/komodo-defi-framework/api/common_structures/wallet/#wallet-account-info) object. |
+
+```json
+{
+    "wallet_balance": {
+        "wallet_type": "HD",
+        "accounts": [
+            ...
+        ]
+    }
+}
+```
+
+### WithdrawFromInfo
+
+The `WithdrawFromInfo` response object includes the following items for HD Wallet [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests.
+You can use either the `derivation_path` on its own, or the `account_id`, `chain` and `address_id` together.
+
+| Parameter        | Type    | Description                                                                                                                                                                                                                                                                   |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.                                                                                                                                                                   |
+| account\_id      | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.**                                                                                                                                 |
+| address\_id      | integer | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
+| chain            | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
+
+### WalletAccountInfo
+
+The `WalletAccountInfo` object includes the following items in the activation response for a coin in HD mode:
+
+| Parameter        | Type    | Description                                                                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| derivation\_path | string  | Derivation path up to the `COIN` child. E.g. `"m/44'/141'/0'"`                                                                                |
+| total\_balance   | object  | A standard [balanceInfo](/komodo-defi-framework/api/common_structures/#balance-info) object.                                                  |
+| addresses        | list    | A list of standard [AccountAddressInfo](/komodo-defi-framework/api/common_structures/activation/#account-address-info) objects.               |
+
+```json
+{
+    "account_index": 0,
+    "derivation_path": "m/44'/141'/0'",
+    "total_balance": {
+        "spendable": "23.08710255",
+        "unspendable": "0"
+    },
+    "addresses": [
+        ...
+    ]
+}
+```
