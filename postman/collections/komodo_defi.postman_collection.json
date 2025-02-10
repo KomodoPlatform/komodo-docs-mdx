@@ -238,8 +238,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -2671,8 +2671,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -2726,8 +2726,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -4149,7 +4149,7 @@
 									},
 									"response": [
 										{
-											"name": "task::enable_utxo::status (RequestingWalletBalance)",
+											"name": "RequestingWalletBalance (HD)",
 											"originalRequest": {
 												"method": "POST",
 												"header": [
@@ -4191,7 +4191,7 @@
 											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"InProgress\",\"details\":\"RequestingWalletBalance\"},\"id\":null}"
 										},
 										{
-											"name": "task::enable_utxo::status (complete)",
+											"name": "Complete (HD)",
 											"originalRequest": {
 												"method": "POST",
 												"header": [
@@ -4238,6 +4238,48 @@
 											],
 											"cookie": [],
 											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"status\": \"Ok\",\n        \"details\": {\n            \"ticker\": \"KMD\",\n            \"current_block\": 4141373,\n            \"wallet_balance\": {\n                \"wallet_type\": \"HD\",\n                \"accounts\": [\n                    {\n                        \"account_index\": 0,\n                        \"derivation_path\": \"m/44'/141'/0'\",\n                        \"total_balance\": {\n                            \"spendable\": \"20\",\n                            \"unspendable\": \"0\"\n                        },\n                        \"addresses\": [\n                            {\n                                \"address\": \"RMC1cWXngQf2117apEKoLh3x27NoG88yzd\",\n                                \"derivation_path\": \"m/44'/141'/0'/0/0\",\n                                \"chain\": \"External\",\n                                \"balance\": {\n                                    \"spendable\": \"20\",\n                                    \"unspendable\": \"0\"\n                                }\n                            }\n                        ]\n                    }\n                ]\n            }\n        }\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "Complete (Non-HD)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "255"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 10 Feb 2025 04:40:11 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Ok\",\"details\":{\"ticker\":\"KMD\",\"current_block\":4305707,\"wallet_balance\":{\"wallet_type\":\"Iguana\",\"address\":\"RUYJYSTuCKm9gouWzQN1LirHFEYThwzA2d\",\"balance\":{\"KMD\":{\"spendable\":\"723.08294605\",\"unspendable\":\"0\"}}}}},\"id\":null}"
 										}
 									]
 								},
@@ -4361,7 +4403,50 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_qtum::init\",\r\n    \"params\": {\r\n        \"ticker\":\"tQTUM\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\":\"Electrum\", // Accepted values: \"Electrum\", \"Native\"\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:10071\"\r\n                            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n                            // \"disable_cert_verification\": false\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:10071\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:10071\"\r\n                        }\r\n                    ]\r\n                } // Required only if: \"rpc\": \"Electrum\"\r\n            }\r\n            // \"tx_history\": false,\r\n            // \"required_confirmations\": 1, // Default: Coin Config\r\n            // \"address_format\": {\r\n            //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\"\r\n            // }, // Default: Coin Config\r\n            // \"utxo_merge_params\": null,\r\n            // // \"utxo_merge_params\": {\r\n            // //     \"merge_at\":50\r\n            // //     // \"check_every\":10,\r\n            // //     // \"max_merge_at_once\":100\r\n            // //     },\r\n            // \"check_utxo_maturity\": false,\r\n            // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n            // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"min_addresses_number\": 3 // used only if \"priv_key_policy\": \"Trezor\"\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 10 Feb 2025 04:44:25 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"task_id\":1},\"id\":null}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_qtum::status",
@@ -4376,7 +4461,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -4391,7 +4477,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_qtum::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_qtum::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -4400,7 +4486,50 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Success (non-HD)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_qtum::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "248"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 10 Feb 2025 04:44:34 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Ok\",\"details\":{\"ticker\":\"tQTUM\",\"current_block\":4619066,\"wallet_balance\":{\"wallet_type\":\"Iguana\",\"address\":\"qcpVcxMBo9ZikpGiTaM8SFBV1W14QVmGzo\",\"balance\":{\"tQTUM\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}}}},\"id\":null}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_qtum::user_action",
@@ -4603,9 +4732,59 @@
 											"host": [
 												"{{address}}"
 											]
-										}
+										},
+										"description": "``` json\n{\n    \"mmrpc\": \"\",\n    \"result\": {\n        \"task_id\": 0\n    },\n    \"id\": null\n}\n\n ```\n\n[https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_z_coin/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_z_coin/)"
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::init\",\r\n    \"params\": {\r\n        \"ticker\": \"ZOMBIE\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\": \"Light\", // Accepted values: \"Native\", \"Light\"\r\n                \"rpc_data\": {\r\n                    \"electrum_servers\": [\r\n                        {\r\n                            \"url\": \"zombie.dragonhound.info:10033\"\r\n                            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n                            // \"disable_cert_verification\": false\r\n                        }\r\n                    ],\r\n                    \"light_wallet_d_servers\": [\r\n                        \"http://zombie.sirseven.me:443\",\r\n                        \"http://zombie.dragonhound.info:443\"\r\n                    ]\r\n                } // Required only if: \"rpc\": \"Light\"\r\n            }\r\n            // \"required_confirmations\": 1, // Default: Coin Config\r\n            // \"requires_notarization\": false, // Default: Coin Config\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 05 Feb 2025 05:20:45 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"task_id\": 0\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_z_coin::status",
@@ -4620,7 +4799,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -4635,7 +4815,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -4644,7 +4824,141 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Error: ZCashParamsNotFound",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "336"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 05 Feb 2025 05:27:16 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Error\",\"details\":{\"error\":\"Error on platform coin ZOMBIE creation: ZCashParamsNotFound\",\"error_path\":\"lib.z_coin_activation.z_coin\",\"error_trace\":\"lib:104] z_coin_activation:247] z_coin:1032]\",\"error_type\":\"CoinCreationError\",\"error_data\":{\"ticker\":\"ZOMBIE\",\"error\":\"ZCashParamsNotFound\"}}},\"id\":null}"
+										},
+										{
+											"name": "Error: SPV Unavailable",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "417"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 05 Feb 2025 05:44:43 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Error\",\"details\":{\"error\":\"Error on platform coin ZOMBIE creation: All the current light clients are unavailable.\",\"error_path\":\"lib.z_coin_activation.z_coin.z_rpc\",\"error_trace\":\"lib:104] z_coin_activation:247] z_coin:925] z_rpc:524] z_rpc:191]\",\"error_type\":\"CoinCreationError\",\"error_data\":{\"ticker\":\"ZOMBIE\",\"error\":\"All the current light clients are unavailable.\"}}},\"id\":null}"
+										},
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "361"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 10 Feb 2025 01:30:14 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"name": "Content-Type",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"status\": \"Ok\",\n        \"details\": {\n            \"ticker\": \"ZOMBIE\",\n            \"current_block\": 794431,\n            \"wallet_balance\": {\n                \"wallet_type\": \"Iguana\",\n                \"address\": \"zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj\",\n                \"balance\": {\n                    \"spendable\": \"0\",\n                    \"unspendable\": \"0\"\n                }\n            },\n            \"first_sync_block\": {\n                \"requested\": 792991,\n                \"is_pre_sapling\": false,\n                \"actual\": 792991\n            }\n        }\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_z_coin::user_action",
@@ -5630,8 +5944,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5726,8 +6040,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5781,8 +6095,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5836,8 +6150,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5891,8 +6205,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5946,8 +6260,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -6001,8 +6315,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -6225,7 +6539,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
 							},
 							"response": [
 								{
@@ -6248,7 +6562,7 @@
 												"{{address}}"
 											]
 										},
-										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
 									},
 									"_postman_previewlanguage": "JSON",
 									"header": [],
@@ -6275,7 +6589,7 @@
 												"{{address}}"
 											]
 										},
-										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
 									},
 									"_postman_previewlanguage": "JSON",
 									"header": [],
@@ -6316,7 +6630,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nft-transfers)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers)"
 							},
 							"response": []
 						},
@@ -6352,7 +6666,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-nft-metadata)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata)"
 							},
 							"response": []
 						},
@@ -6388,7 +6702,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#refresh-nft-metadata)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata)"
 							},
 							"response": []
 						},
@@ -6425,7 +6739,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/)"
+								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/)"
 							},
 							"response": [
 								{
@@ -6503,7 +6817,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#withdraw-nfts)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts)"
 							},
 							"response": []
 						},
@@ -6539,7 +6853,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#erc-1155-withdraw-example)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example)"
 							},
 							"response": [
 								{
@@ -6603,7 +6917,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/clear_nft_db/"
+								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/"
 							},
 							"response": [
 								{
@@ -6899,8 +7213,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -7167,8 +7481,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -7863,8 +8177,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -8002,8 +8316,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -8057,8 +8371,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -8211,7 +8525,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -8250,7 +8565,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -8265,7 +8581,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::withdraw::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::withdraw::status\",\r\n    \"params\": {\r\n        \"task_id\": 0,\r\n        \"forget_if_finished\": false\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -8768,6 +9084,48 @@
 									],
 									"cookie": [],
 									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Signing error: with_key_pair:114] P2PKH script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd64ad24e655ba7221ea51c7931aad5b98da77f3c\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n' built from input key pair doesn't match expected prev script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd346067e3c3c3964c395fee208594790e29ede5d\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n'\",\"error_path\":\"utxo_common\",\"error_trace\":\"utxo_common:2835]\",\"error_type\":\"SigningError\",\"error_data\":\"with_key_pair:114] P2PKH script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd64ad24e655ba7221ea51c7931aad5b98da77f3c\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n' built from input key pair doesn't match expected prev script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd346067e3c3c3964c395fee208594790e29ede5d\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n'\",\"id\":0}"
+								},
+								{
+									"name": "Success: UTXO",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "\r\n  {\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"id\": 0,\r\n    \"method\": \"sign_raw_transaction\",\r\n    \"params\": {\r\n      \"coin\": \"KMD\",\r\n      \"type\": \"UTXO\",\r\n      \"tx\": {\r\n        \"tx_hex\": \"0400008085202f8901de43841dc545d6e82a96ba6607530a03a91c31a7fd579b2c5ac12d8b445ed409020000006a473044022044fe29f64d6deff16c7f394bba745c15f3bb5ad2f6adb02bbd286dc6ffe86b0902206e28d97928c6418049631f99ee9dbb5ddbab941cb72c04af20fbe12968e970a8012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff02a0061c06000000001976a9148d757e06a0bc7c8b5011bef06527c63104173c7688accd54d6cf100000001976a914d346067e3c3c3964c395fee208594790e29ede5d88accf7fa967000000000000000000000000000000\"\r\n      }\r\n    }\r\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "533"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 10 Feb 2025 04:32:32 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"tx_hex\":\"0400008085202f8901de43841dc545d6e82a96ba6607530a03a91c31a7fd579b2c5ac12d8b445ed409020000006a473044022044fe29f64d6deff16c7f394bba745c15f3bb5ad2f6adb02bbd286dc6ffe86b0902206e28d97928c6418049631f99ee9dbb5ddbab941cb72c04af20fbe12968e970a8012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff02a0061c06000000001976a9148d757e06a0bc7c8b5011bef06527c63104173c7688accd54d6cf100000001976a914d346067e3c3c3964c395fee208594790e29ede5d88accf7fa967000000000000000000000000000000\"},\"id\":0}"
 								}
 							]
 						},
@@ -9067,8 +9425,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -9122,8 +9480,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -9177,8 +9535,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -9504,8 +9862,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -10753,8 +11111,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -12002,8 +12360,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -12608,8 +12966,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -12746,8 +13104,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -13316,8 +13674,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
