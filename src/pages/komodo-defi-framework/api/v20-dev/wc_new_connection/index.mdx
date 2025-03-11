@@ -1,0 +1,86 @@
+export const title = "Komodo DeFi Framework Method: Walletconnect: new connection";
+export const description =
+  "The wc_new_connection method returns a connection string which can be scanned as a QR code.";
+
+# wc\_new\_connection
+
+The `wc_new_connection` method returns a connection string which can be scanned as a QR code.
+
+<Note>
+  A list of EIP155 chain IDs can be viewed at [https://chainid.network/](https://chainid.network/).
+  For more detailed technical information, check out the [Walletconnect documentation](https://specs.walletconnect.com/2.0).
+</Note>
+
+## Arguments
+
+| Structure            | Type   | Description                                                                                                                                                                                                   |
+| -------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| required\_namespaces | object | Contains two [WcConnNs](/komodo-defi-framework/api/common_structures/#wc-conn-ns) objects under the keys `eip155` and `cosmos`, which contain details of approved chains, methods and events while connected. |
+
+## Response
+
+| Structure | Type   | Description                                                                                                                               |
+| --------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| url       | string | A WalletConnect URI address ([EIP-1328](https://eips.ethereum.org/EIPS/eip-1328)) used to send a connection request to the bridge server. |
+
+Generally, this WalletConnect URI will be converted into a scanable [QR code](https://www.qr-code-generator.com/) in front end user interfaces, so mobile dapps can easily request a connection.
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="wc_new_connection" mm2MethodDecorate="true">
+  ```json
+  {
+    "method": "wc_new_connection",
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "params": {
+      "required_namespaces": {
+        "eip155": {
+          "chains": [
+            "eip155:1",
+            "eip155:56",
+            "eip155:137",
+            "eip155:43114"
+          ],
+          "methods": [
+            "eth_sendTransaction",
+            "eth_signTransaction",
+            "personal_sign"
+          ],
+          "events": [
+            "accountsChanged",
+            "chainChanged"
+          ]
+        },
+        "cosmos": {
+          "chains": [
+            "cosmos:cosmoshub-4"
+          ],
+          "methods": [
+            "cosmos_signDirect",
+            "cosmos_signAmino",
+            "cosmos_getAccounts"
+          ],
+          "events": []
+        }
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "url": "wc:31ad8ac6f21312e01ef7ff656ed5507eb9fdf435662fd86331e00b301e3627bfc14@2?symKey=589807f2063d237adfacc18d9443232785b532eaabe7838162c3d78cc3a9060f&relay-protocol=irn&expiryTimestamp=1741584419"
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
