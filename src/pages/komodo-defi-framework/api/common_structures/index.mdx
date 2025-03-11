@@ -502,7 +502,7 @@ The `PagingOptions` object includes options of page selection to consult when lo
 
 ### WcConnNs
 
-The WcConnNs\` object contains details of approved chains, methods and events while connected via [WalletConnect](https://specs.walletconnect.com/2.0/).
+The `WcConnNs` object contains details of approved chains, methods and events while connected via [WalletConnect](https://specs.walletconnect.com/2.0/).
 
 | Parameter | Type            | Description                                                                                                                                                                                                                                                                                                                                                                              |
 | --------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -551,3 +551,32 @@ The WcConnNs\` object contains details of approved chains, methods and events wh
   }
   ```
 </CollapsibleSection>
+
+### WcSession
+
+The `WcSession` object contains details of active WalletConnect sessions.
+
+| Parameter        | Type    | Description                                                                                                                                                                                                                                                                |
+| ---------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| topic            | string  | The session topic hex string, used to identify the session for communications with the external wallet/dapp.                                                                                                                                                               |
+| metadata         | object  | Arbitrary data returned from the external wallet/dapp on connection.                                                                                                                                                                                                       |
+| peer\_pubkey     | string  | TBA                                                                                                                                                                                                                                                                        |
+| pairing\_topic   | string  | The pairing topic hex string, used for the initial external wallet/dapp connection.                                                                                                                                                                                        |
+| namespaces       | object  | Contains the same two [WcConnNs](/komodo-defi-framework/api/common_structures/#wc-conn-ns) objects for Cosmos/EIP155 which were input when initialising the connection via [wc\_new\_connection](/komodo-defi-framework/api/v20-dev/wc_new_connection/#wc-new-connection). |
+| subscription\_id | string  | A hex string to identify the connection's subscription                                                                                                                                                                                                                     |
+| properties       | Null    | TBA                                                                                                                                                                                                                                                                        |
+| expiry           | integer | A timestamp in [unix epoch format](https://www.epochconverter.com/) indicating when the connection will expire if not otherwise closed.                                                                                                                                    |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example
+
+  ```json
+
+
+  ```
+</CollapsibleSection>
+
+Within each session object, there are a some values which are required as input in other WalletConnect methods:
+
+*   `pairing_topic`: Only used when initally connecting with external wallets/dapps.
+*   `topic`: Once connected, this is use for communications with the connected external wallet/dapp.
