@@ -3844,22 +3844,26 @@ The `my_swap_status` method returns the data of an atomic swap executed on an Ko
 
 ## Response
 
-| Structure       | Type                       | Description                                                                                                                                                                                                                                                                                                                        |
-| --------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| events          | array of objects           | A standard [SwapEvent](/komodo-defi-framework/api/common_structures/swaps/#swap-event) object. Events which occurred for a swap. See [Maker Events](/komodo-defi-framework/api/common_structures/swaps/maker_events/) and [Taker Events](/komodo-defi-framework/api/common_structures/swaps/maker_events/) for more info.          |
-| success\_events | array of strings           | a list of events that gained a `success` swap state; the contents are listed in the order in which they should occur in the `events` array                                                                                                                                                                                         |
-| error\_events   | array of strings           | a list of events that fell into an `error` swap state; if at least 1 of the events happens, the swap is considered a failure                                                                                                                                                                                                       |
-| type            | string                     | whether the node acted as a market `Maker` or `Taker`                                                                                                                                                                                                                                                                              |
-| uuid            | string                     | swap uuid                                                                                                                                                                                                                                                                                                                          |
-| gui             | string (optional)          | information about gui; copied from Komodo DeFi Framework API configuration in your [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/)                                                                                                                                                                               |
-| mm\_version     | string (optional)          | Komodo DeFi Framework API version                                                                                                                                                                                                                                                                                                  |
-| maker\_coin     | string (optional)          | ticker of maker coin                                                                                                                                                                                                                                                                                                               |
-| taker\_coin     | string (optional)          | ticker of taker coin                                                                                                                                                                                                                                                                                                               |
-| maker\_amount   | string (numeric, optional) | the amount of coins to be swapped by maker                                                                                                                                                                                                                                                                                         |
-| taker\_amount   | string (numeric, optional) | the amount of coins to be swapped by taker                                                                                                                                                                                                                                                                                         |
-| my\_info        | object (optional)          | this object maps event data to make displaying swap data in a GUI simpler (`my_coin`, `my_amount`, etc.)                                                                                                                                                                                                                           |
-| recoverable     | bool                       | whether the swap can be recovered using the `recover_funds_of_swap` API command. Important note: The Komodo DeFi Framework API does not record the state regarding whether the swap was recovered or not. The Komodo DeFi Framework API allows as many calls to the `recover_funds_of_swap` method as necessary, in case of errors |
-| my\_order\_uuid | string (uuid, optional)    | the uuid of order that matched to start the swap                                                                                                                                                                                                                                                                                   |
+| Structure               | Type              | Description                                                                                                                                                                                                                                                                                                                        |
+| ----------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| events                  | array of objects  | A standard [SwapEvent](/komodo-defi-framework/api/common_structures/swaps/#swap-event) object. Events which occurred for a swap. See [Maker Events](/komodo-defi-framework/api/common_structures/swaps/maker_events/) and [Taker Events](/komodo-defi-framework/api/common_structures/swaps/maker_events/) for more info.          |
+| success\_events         | array of strings  | a list of events that gained a `success` swap state; the contents are listed in the order in which they should occur in the `events` array                                                                                                                                                                                         |
+| error\_events           | array of strings  | a list of events that fell into an `error` swap state; if at least 1 of the events happens, the swap is considered a failure                                                                                                                                                                                                       |
+| type                    | string            | whether the node acted as a market `Maker` or `Taker`                                                                                                                                                                                                                                                                              |
+| uuid                    | string            | swap uuid                                                                                                                                                                                                                                                                                                                          |
+| gui                     | string (optional) | information about gui; copied from Komodo DeFi Framework API configuration in your [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/)                                                                                                                                                                               |
+| mm\_version             | string (optional) | Komodo DeFi Framework API version                                                                                                                                                                                                                                                                                                  |
+| maker\_coin             | string (optional) | ticker of maker coin                                                                                                                                                                                                                                                                                                               |
+| taker\_coin             | string (optional) | ticker of taker coin                                                                                                                                                                                                                                                                                                               |
+| maker\_amount           | string (numeric)  | the amount of coins to be swapped by maker                                                                                                                                                                                                                                                                                         |
+| taker\_amount           | string (numeric)  | the amount of coins to be swapped by taker                                                                                                                                                                                                                                                                                         |
+| maker\_coin\_usd\_price | string (numeric)  | the USD price of the maker coin at time of trade (if available)                                                                                                                                                                                                                                                                    |
+| taker\_coin\_usd\_price | string (numeric)  | the USD price of the taker coin at time of trade (if available)                                                                                                                                                                                                                                                                    |
+| my\_info                | object (optional) | this object maps event data to make displaying swap data in a GUI simpler (`my_coin`, `my_amount`, etc.)                                                                                                                                                                                                                           |
+| recoverable             | boolean           | whether the swap can be recovered using the `recover_funds_of_swap` API command. Important note: The Komodo DeFi Framework API does not record the state regarding whether the swap was recovered or not. The Komodo DeFi Framework API allows as many calls to the `recover_funds_of_swap` method as necessary, in case of errors |
+| my\_order\_uuid         | string (uuid)     | the uuid of order that matched to start the swap                                                                                                                                                                                                                                                                                   |
+| is\_finished            | boolean           | `true` indicates a swap that has completed. `false` indicates a swap that is in progress.                                                                                                                                                                                                                                          |
+| is\_success             | boolean           | Not visible until swap completes. A value of `false` indicates a failed swap, and a value of `true` indicates the swap completed successfully.                                                                                                                                                                                     |
 
 #### 📌 Examples
 
@@ -3869,7 +3873,7 @@ The `my_swap_status` method returns the data of an atomic swap executed on an Ko
 {
   "method": "my_swap_status",
   "params": {
-    "uuid": "d14452bb-e82d-44a0-86b0-10d4cdcb8b24"
+    "uuid": "3d2286d1-1eef-487b-a07a-904f33034792"
   },
   "userpass": "RPC_UserP@SSW0RD"
 }
@@ -3878,197 +3882,217 @@ The `my_swap_status` method returns the data of an atomic swap executed on an Ko
 #### Successful Taker Swap
 
 ```json
-{
-  "result": {
-    "type": "Taker",
-    "uuid": "0d72c435-821e-4278-b2a7-e36ab1ba8cb7",
-    "my_order_uuid": "0d72c435-821e-4278-b2a7-e36ab1ba8cb7",
-    "events": [
-      {
-        "timestamp": 1674802079095,
-        "event": {
-          "type": "Started",
-          "data": {
-            "taker_coin": "MARTY",
+    {
+        "result": {
+            "type": "Taker",
+            "uuid": "3d2286d1-1eef-487b-a07a-904f33034792",
+            "my_order_uuid": "3d2286d1-1eef-487b-a07a-904f33034792",
+            "events": [
+                {
+                    "timestamp": 1741586700536,
+                    "event": {
+                        "type": "Started",
+                        "data": {
+                            "taker_coin": "MARTY",
+                            "maker_coin": "DOC",
+                            "maker": "15d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732",
+                            "my_persistent_pub": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
+                            "lock_duration": 7800,
+                            "maker_amount": "2.4",
+                            "taker_amount": "2.4",
+                            "maker_payment_confirmations": 1,
+                            "maker_payment_requires_nota": false,
+                            "taker_payment_confirmations": 1,
+                            "taker_payment_requires_nota": false,
+                            "taker_payment_lock": 1741594499,
+                            "uuid": "3d2286d1-1eef-487b-a07a-904f33034792",
+                            "started_at": 1741586699,
+                            "maker_payment_wait": 1741589819,
+                            "maker_coin_start_block": 985827,
+                            "taker_coin_start_block": 983998,
+                            "fee_to_send_taker_fee": {
+                                "coin": "MARTY",
+                                "amount": "0.00001",
+                                "paid_from_trading_vol": false
+                            },
+                            "taker_payment_trade_fee": {
+                                "coin": "MARTY",
+                                "amount": "0.00001",
+                                "paid_from_trading_vol": false
+                            },
+                            "maker_payment_spend_trade_fee": {
+                                "coin": "DOC",
+                                "amount": "0.00001",
+                                "paid_from_trading_vol": true
+                            },
+                            "maker_coin_htlc_pubkey": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
+                            "taker_coin_htlc_pubkey": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
+                            "p2p_privkey": null
+                        }
+                    }
+                },
+                {
+                    "timestamp": 1741586716540,
+                    "event": {
+                        "type": "Negotiated",
+                        "data": {
+                            "maker_payment_locktime": 1741602298,
+                            "maker_pubkey": "000000000000000000000000000000000000000000000000000000000000000000",
+                            "secret_hash": "a8345095a6704818cb3578fb12ddca8657d9d95f",
+                            "maker_coin_swap_contract_addr": null,
+                            "taker_coin_swap_contract_addr": null,
+                            "maker_coin_htlc_pubkey": "0315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732",
+                            "taker_coin_htlc_pubkey": "0315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732"
+                        }
+                    }
+                },
+                {
+                    "timestamp": 1741586717374,
+                    "event": {
+                        "type": "TakerFeeSent",
+                        "data": {
+                            "tx_hex": "0400008085202f890299c61f69903417067f2d3ec99bdf6beba178ceca78390e0ad4395266cb6f9e70000000006a473044022042d198609cc4a276c5e367255219384f8a0f7febdae57fb6dfe2c4f9b2b1b317022009f1ff2e90c3b8c3bd4f056a1a2cbd4eee50d384d3eb3834ae466bb427c4510f012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff6cc0dbda33bb0f8b95d5e3fef9797cb5438d1a2466e87119dfa275f5b09c5164020000006a4730440220695f208e981128f5f847aedb0f7cf1c42d4f191714a80ee98a8618c20ba9545d02200459e69cba37de8d454f955f4402f913ea3c57db7f15ca699107fb09e0f5d858012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff0290b60400000000001976a914ca1e04745e8ca0c60d8c5881531d51bec470743f88acd0fbe60b000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac1d81ce67000000000000000000000000000000",
+                            "tx_hash": "52ae1233c6b59d151b2e0dc22bbbd3ba7029019d8c21ae10755867353e64d9c4"
+                        }
+                    }
+                },
+                {
+                    "timestamp": 1741586719375,
+                    "event": {
+                        "type": "TakerPaymentInstructionsReceived",
+                        "data": null
+                    }
+                },
+                {
+                    "timestamp": 1741586719376,
+                    "event": {
+                        "type": "MakerPaymentReceived",
+                        "data": {
+                            "tx_hex": "0400008085202f8903d71ca3b9981a5746ead0f6faeda4edfa15009fdb89e612855a997f882af27b36020000006a473044022038bf42ab84b80d066503dafcb8ef9dabfec319db7afc00d467dd10cf69f4fe410220053ba0b45f646952466a181c05c7c8d6fa34927629f8a56d6f9543c14debfb8c01210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff1de4b6a07e7c9fdda34ae19887a2ea3ae262bd794da2fb76e077be67ea2fe0b5000000006a47304402201e00b5ab452d571fd309234320dc3725783ae22b8127ba394efd8e3f01935af7022013c25560638e5c460fd7de991b6f16b92533b2e3593e1ab29928ad1c62bb5f3201210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff0e890e4942edc5c863df4023b32a891f52997d2e6a1af32ae7c17a3615f853d3000000006a47304402202bf9ff5616a75d9ab3eccf4fc7c73be7d7b09f4cc6962e5ee4fedc0ccfcbdcb902205ce5cdb33ab8888a3092185e9c09f530da5f397b3b58670f0017f530db28c14901210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff03001c4e0e0000000017a9148c7885603bd52f372699a13076384d4d4a56346e870000000000000000166a14a8345095a6704818cb3578fb12ddca8657d9d95f90739809000000001976a9141462c3dd3f936d595c9af55978003b27c250441f88ac1e81ce67000000000000000000000000000000",
+                            "tx_hash": "51858295667fce55978409e3276e463564b2ae519fa94a674a1325444f45ac6d"
+                        }
+                    }
+                },
+                {
+                    "timestamp": 1741586719384,
+                    "event": {
+                        "type": "MakerPaymentWaitConfirmStarted"
+                    }
+                },
+                {
+                    "timestamp": 1741586766238,
+                    "event": {
+                        "type": "MakerPaymentValidatedAndConfirmed"
+                    }
+                },
+                {
+                    "timestamp": 1741586768459,
+                    "event": {
+                        "type": "TakerPaymentSent",
+                        "data": {
+                            "tx_hex": "0400008085202f8902c4d9643e3567587510ae218c9d012970bad3bb2bc20d2e1b159db5c63312ae52010000006a4730440220417e5fed632ed02d316ef328a8c02706de6db60e493bd2e8ab49d0ee51a5e7d702207b7b625c96c30abe47dd57284ee38380ebb3e86a734ec7d8d55c3598d5d32608012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff28412c4aeb7c960255f1fc056d280f94eb0d16d66e409b36a00faaad0127f657000000006a473044022008780ece9e3c2d0003a910f8aaa8818278c1400a5f3c552077e691c172d18d7902207e29f7112d34099958e7fa5d6e90b1528477a0a7eaebeeffec4ed63dcdc553ed012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff03001c4e0e0000000017a914485fc13185dc4357feffbffdb686cc0be9466e63870000000000000000166a14a8345095a6704818cb3578fb12ddca8657d9d95f009a8409000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac4e81ce67000000000000000000000000000000",
+                            "tx_hash": "d3f36f3ab07011a9af26cc0edc3cf606a511bf8235e029298f8aa738fd9400ce"
+                        }
+                    }
+                },
+                {
+                    "timestamp": 1741586768468,
+                    "event": {
+                        "type": "WatcherMessageSent",
+                        "data": [ ... ]
+                    }
+                },
+                {
+                    "timestamp": 1741589025331,
+                    "event": {
+                        "type": "TakerPaymentSpent",
+                        "data": {
+                            "transaction": {
+                                "tx_hex": "0400008085202f8901ce0094fd38a78a8f2929e03582bf11a506f63cdc0ecc26afa91170b03a6ff3d300000000d747304402202dfce25db5e303fe043bf5b1ab28c9c3a2a06941099da7cb5b0036366be5e02a02202597378057d50508fdf941e4fa46e583c9419bc8eeb613d6a685d582f9dfe0020120ebada9e9d323b990af0ee98ee81c8a818e3dfc13b13103d15ababb6dfed83402004c6b6304839fce67b1752103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ac6782012088a914a8345095a6704818cb3578fb12ddca8657d9d95f88210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ac68ffffffff0118184e0e000000001976a9141462c3dd3f936d595c9af55978003b27c250441f88ac839fce67000000000000000000000000000000",
+                                "tx_hash": "61c9a7c7debaec248547911c6015c32a7911551277d5e88a9d25f6090c2765be"
+                            },
+                            "secret": "ebada9e9d323b990af0ee98ee81c8a818e3dfc13b13103d15ababb6dfed83402"
+                        }
+                    }
+                },
+                {
+                    "timestamp": 1741589026883,
+                    "event": {
+                        "type": "MakerPaymentSpent",
+                        "data": {
+                            "tx_hex": "0400008085202f89016dac454f4425134a674aa99f51aeb26435466e27e309849755ce7f669582855100000000d7473044022035382130644fed6183b352b3cb9099d1204aa1cff54c3a74b44164d5ac1d77b602200130745982af2dc3b5eb12ba7609d533b2aac91c90c2c76b1143c4f2e39876aa0120ebada9e9d323b990af0ee98ee81c8a818e3dfc13b13103d15ababb6dfed83402004c6b6304fabdce67b175210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ac6782012088a914a8345095a6704818cb3578fb12ddca8657d9d95f882103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ac68ffffffff0118184e0e000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88acfabdce67000000000000000000000000000000",
+                            "tx_hash": "c2a67ae6f9af4501f0d7255088fc6395dcbc875c90775fceb3835be891924a42"
+                        }
+                    }
+                },
+                {
+                    "timestamp": 1741589150355,
+                    "event": {
+                        "type": "MakerPaymentSpendConfirmed"
+                    }
+                },
+                {
+                    "timestamp": 1741589150356,
+                    "event": {
+                        "type": "Finished"
+                    }
+                }
+            ],
+            "maker_amount": "2.4",
             "maker_coin": "DOC",
-            "maker": "7310a8fb9fd8f198a1a21db830252ad681fccda580ed4101f3f6bfb98b34fab5",
-            "my_persistent_pub": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
-            "lock_duration": 7800,
-            "maker_amount": "1",
-            "taker_amount": "1",
-            "maker_payment_confirmations": 1,
-            "maker_payment_requires_nota": false,
-            "taker_payment_confirmations": 0,
-            "taker_payment_requires_nota": false,
-            "taker_payment_lock": 1674809878,
-            "uuid": "0d72c435-821e-4278-b2a7-e36ab1ba8cb7",
-            "started_at": 1674802078,
-            "maker_payment_wait": 1674805198,
-            "maker_coin_start_block": 1800637,
-            "taker_coin_start_block": 1813161,
-            "fee_to_send_taker_fee": {
-              "coin": "MARTY",
-              "amount": "0.00001",
-              "paid_from_trading_vol": false
+            "maker_coin_usd_price": "0.0000001",
+            "taker_amount": "2.4",
+            "taker_coin": "MARTY",
+            "taker_coin_usd_price": "0.00000005",
+            "gui": "mm2_777",
+            "mm_version": "2.4.0-beta_cbf92c7bc",
+            "success_events": [
+                "Started",
+                "Negotiated",
+                "TakerFeeSent",
+                "TakerPaymentInstructionsReceived",
+                "MakerPaymentReceived",
+                "MakerPaymentWaitConfirmStarted",
+                "MakerPaymentValidatedAndConfirmed",
+                "TakerPaymentSent",
+                "WatcherMessageSent",
+                "TakerPaymentSpent",
+                "MakerPaymentSpent",
+                "MakerPaymentSpentByWatcher",
+                "MakerPaymentSpendConfirmed",
+                "Finished"
+            ],
+            "error_events": [
+                "StartFailed",
+                "NegotiateFailed",
+                "TakerFeeSendFailed",
+                "MakerPaymentValidateFailed",
+                "MakerPaymentWaitConfirmFailed",
+                "TakerPaymentTransactionFailed",
+                "TakerPaymentWaitConfirmFailed",
+                "TakerPaymentDataSendFailed",
+                "TakerPaymentWaitForSpendFailed",
+                "MakerPaymentSpendFailed",
+                "MakerPaymentSpendConfirmFailed",
+                "TakerPaymentWaitRefundStarted",
+                "TakerPaymentRefundStarted",
+                "TakerPaymentRefunded",
+                "TakerPaymentRefundedByWatcher",
+                "TakerPaymentRefundFailed",
+                "TakerPaymentRefundFinished"
+            ],
+            "my_info": {
+                "my_coin": "MARTY",
+                "other_coin": "DOC",
+                "my_amount": "2.4",
+                "other_amount": "2.4",
+                "started_at": 1741586699
             },
-            "taker_payment_trade_fee": {
-              "coin": "MARTY",
-              "amount": "0.00002",
-              "paid_from_trading_vol": false
-            },
-            "maker_payment_spend_trade_fee": {
-              "coin": "DOC",
-              "amount": "0.00001",
-              "paid_from_trading_vol": true
-            },
-            "maker_coin_htlc_pubkey": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
-            "taker_coin_htlc_pubkey": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
-            "p2p_privkey": null
-          }
+            "recoverable": false,
+            "is_finished": true,
+            "is_success": true
         }
-      },
-      {
-        "timestamp": 1674802095105,
-        "event": {
-          "type": "Negotiated",
-          "data": {
-            "maker_payment_locktime": 1674817676,
-            "maker_pubkey": "000000000000000000000000000000000000000000000000000000000000000000",
-            "secret_hash": "9af6a305578518d693fca3f1e4c529224a81f654",
-            "maker_coin_swap_contract_addr": null,
-            "taker_coin_swap_contract_addr": null,
-            "maker_coin_htlc_pubkey": "037310a8fb9fd8f198a1a21db830252ad681fccda580ed4101f3f6bfb98b34fab5",
-            "taker_coin_htlc_pubkey": "037310a8fb9fd8f198a1a21db830252ad681fccda580ed4101f3f6bfb98b34fab5"
-          }
-        }
-      },
-      {
-        "timestamp": 1674802095885,
-        "event": {
-          "type": "TakerFeeSent",
-          "data": {
-            "tx_hex": "0400008085202f89014b9e44ba75ed80361776ac385feee7bba13b6c2d3147a3d9b5d71362a4624219000000006b483045022100a45de07b5d211c62e8ecf90cd5bee5076f6b6f20715f5618d7d0d93a6209ad870220596ca01682d2dbd4efeba3a0e90a373fd61b619471747df26afc2e2bb167de4c012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff02bcf60100000000001976a914ca1e04745e8ca0c60d8c5881531d51bec470743f88acf4979600000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88acaf73d363000000000000000000000000000000",
-            "tx_hash": "b2ee0e692523c5ca081f62e36325d09a629004850be8b86df149fc979e9e3e87"
-          }
-        }
-      },
-      {
-        "timestamp": 1674802097888,
-        "event": {
-          "type": "TakerPaymentInstructionsReceived",
-          "data": null
-        }
-      },
-      {
-        "timestamp": 1674802097890,
-        "event": {
-          "type": "MakerPaymentReceived",
-          "data": {
-            "tx_hex": "0400008085202f89036aefd7ae1e6933ef997ad44adf5d0c19bc2bbede499a3421eb2022d06fa772f7000000006b4830450221009ad555b27ee9d0e2044bfc14aec47c160819d79dfaacc36e0426b4c35b5626aa02207624ef91881e42b210f16ce96bca00ce3d7cde46e7aaca76bd39f3aa64489e940121037310a8fb9fd8f198a1a21db830252ad681fccda580ed4101f3f6bfb98b34fab5ffffffff66f0d84da9abf07914969af7479934a518a5363353e0968efebc78eac561f07e020000006a4730440220597126d39bb86ce6f6e478eeae7714daa08d05d57df69e641293d70cfe78f510022037bdff2a77ead08b8a60cafff9524beacf28513499e57a15615e66955e51636e0121037310a8fb9fd8f198a1a21db830252ad681fccda580ed4101f3f6bfb98b34fab5ffffffffffe65f8d99d56844f9f5c94a590bf4d6cca116b170fee21e6c04c1a4ab39f4a7000000006a47304402202f2ab19d0f70bfbbc649e78eeda8c14afc72e41a80c9f81c25466307cef619440220466ed647fe07cc75dba20176c05aef671c04cb929e30ce4988014e1c553fe84b0121037310a8fb9fd8f198a1a21db830252ad681fccda580ed4101f3f6bfb98b34fab5ffffffff0300e1f5050000000017a914252fe9c1a8b61a9ca1da6bcbc017e4677e89c480870000000000000000166a149af6a305578518d693fca3f1e4c529224a81f654798b0306000000001976a91486f747b28c60ad1130bdd3f84f48eeaf1801ca9888acb173d363000000000000000000000000000000",
-            "tx_hash": "879535fa1057a1f2587245f0d656ff4126848060574b85f581f7ac57200dcf80"
-          }
-        }
-      },
-      {
-        "timestamp": 1674802097894,
-        "event": {
-          "type": "MakerPaymentWaitConfirmStarted"
-        }
-      },
-      {
-        "timestamp": 1674802191003,
-        "event": {
-          "type": "MakerPaymentValidatedAndConfirmed"
-        }
-      },
-      {
-        "timestamp": 1674802192167,
-        "event": {
-          "type": "TakerPaymentSent",
-          "data": {
-            "tx_hex": "0400008085202f8908873e9e9e97fc49f16db8e80b850490629ad02563e3621f08cac52325690eeeb2010000006a47304402204208734d38019ab1940348bd5091b392cab57565591f26447cdb5396e006dba50220365770af3714083901571635407d43dc87e9abfc05b382c8fde598f624eae2d1012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffffc895dd30ec91dafeb8023af40625a367aaf2a835141c537a4c746fe27e8160b8000000006a4730440220432cb8c44befb2fb076979f275aa205ddd9853a296f7b6df0bfb15dcd7e659fd0220741262c04a3697e474474cdb1e18c908511a7edfec9a7d350403bd8c90039a93012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffffaad904fafd259e9d5960866964c2e2752853b36dcd7bf205196e443f1f611453000000006b483045022100982d3ffb1a0bab130fc51071c0e60de08354161f8ba29593cbb849de31152da502200d74a8edbadf816b2076b14c74b5236b6d98ced09f6700b7411f008726b7d570012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff354c776ffd2c883236d9135ea72e5991adf27f10f5fdc39e42be9be0d748539b000000006a4730440220742fa6411298f2c02edb690327860729d6a90c74b35f529065f6c15d29e609c20220008b68bd92a7f3c8ac8f00d161658a315103c3e2783c62e57172202c3db6016c012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2fffffffff191e32dca5ace0ca52c8d4dfa59a1e12e5c32968e08c7289fb7e4823fd119c2000000006b483045022100d1ba0bf5aadc658f61d6a348cfd3edaf2341ebafb12209d1da375130d8d17a8602201b09147377c70fead7f8dba9d9d0f2335c85b960e76affeb05cc7bff6cbb7aff012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffffd3cfdb64be12f201fa3ae27871f200f395c014864f87b9744e51540a769ab58c000000006a473044022030214231517e3787c9bf6f85695401d5923ec3d69a5eead708986bc0490bcab302201073be01e5298baaa65f80d6e35dfde54ff81469439e27d741719c31779065f6012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffffa945e0db62d26072c2b20b1e7a959e9cdf09ad840584ae1467264e2658b1f1ca010000006b483045022100aa0f00f2f60dac8ab5944183804a6a92c8b4f6a8cd29a027cac20e6a494a6c3d0220457ff0d4ca023e1f311485c42088043fa5f9a0c37c583ffb510f9caa2fe6b210012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff1a95c4f75da608bc81f39bed78dc6658da2042ecf1d2cd4da1980a0cc404e2f1010000006b483045022100e933ef22abfb3c6832ecda2b7465a8e218fb2ce7fb4cef2733e7424e6cc5e41f022001e8a9635b5377fe211fb4821557afb7eabe45b04028526e017c8e615a5d4320012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff0300e1f5050000000017a9144a8ff1f3c9a654f6ef8b4b12773c8d242ef3cfaa870000000000000000166a149af6a305578518d693fca3f1e4c529224a81f6546761eb02000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac0f74d363000000000000000000000000000000",
-            "tx_hash": "c6536056800b211635c4f64dbe941a967361fbe92c0c4d4c575f157f922a080a"
-          }
-        }
-      },
-      {
-        "timestamp": 1674802203724,
-        "event": {
-          "type": "TakerPaymentSpent",
-          "data": {
-            "transaction": {
-              "tx_hex": "0400008085202f89010a082a927f155f574c4d0c2ce9fb6173961a94be4df6c43516210b80566053c600000000d747304402202ad8f7c2319e6097f5d28953bf45b02ec4501cf82b849d3f2286c8e98aa1ab6d02205e631875f0ff327c24665213195d29f86ba015a0d7c3e134e14b9109331375fc01201e2e0289634d42865e0f82ff0546ce2a384ae3548fb3f927c4aa1faefb0aa5d4004c6b63041692d363b1752103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ac6782012088a9149af6a305578518d693fca3f1e4c529224a81f6548821037310a8fb9fd8f198a1a21db830252ad681fccda580ed4101f3f6bfb98b34fab5ac68ffffffff0118ddf505000000001976a91486f747b28c60ad1130bdd3f84f48eeaf1801ca9888ac1692d363000000000000000000000000000000",
-              "tx_hash": "9a72b62bb99bee92f9e3a047c65fcf7cdd3fc8443286c97647550df42f0f81d4"
-            },
-            "secret": "1e2e0289634d42865e0f82ff0546ce2a384ae3548fb3f927c4aa1faefb0aa5d4"
-          }
-        }
-      },
-      {
-        "timestamp": 1674802205274,
-        "event": {
-          "type": "MakerPaymentSpent",
-          "data": {
-            "tx_hex": "0400008085202f890180cf0d2057acf781f5854b576080842641ff56d6f0457258f2a15710fa35958700000000d74730440220159ac3c574bed4473bd6da6eb4b37a3c073dbe5311a4648795f2b0c02b68ef8d022034bc743cbe656b3d335a138f21093fcc9039f50bff40cf56e2654eb9eb225ca901201e2e0289634d42865e0f82ff0546ce2a384ae3548fb3f927c4aa1faefb0aa5d4004c6b63048cb0d363b17521037310a8fb9fd8f198a1a21db830252ad681fccda580ed4101f3f6bfb98b34fab5ac6782012088a9149af6a305578518d693fca3f1e4c529224a81f654882103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ac68ffffffff0118ddf505000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac8cb0d363000000000000000000000000000000",
-            "tx_hash": "02c6bc927712478b866c3303cfdfacb868545a6730513605d4d7b5b2dbe97b09"
-          }
-        }
-      },
-      {
-        "timestamp": 1674802205278,
-        "event": {
-          "type": "Finished"
-        }
-      }
-    ],
-    "maker_amount": "1",
-    "maker_coin": "DOC",
-    "maker_coin_usd_price": null,
-    "taker_amount": "1",
-    "taker_coin": "MARTY",
-    "taker_coin_usd_price": null,
-    "gui": "MM2CLI",
-    "mm_version": "2.1.9780_dev_89f720751_Linux_CI",
-    "success_events": [
-      "Started",
-      "Negotiated",
-      "TakerFeeSent",
-      "TakerPaymentInstructionsReceived",
-      "MakerPaymentReceived",
-      "MakerPaymentWaitConfirmStarted",
-      "MakerPaymentValidatedAndConfirmed",
-      "TakerPaymentSent",
-      "TakerPaymentSpent",
-      "MakerPaymentSpent",
-      "Finished"
-    ],
-    "error_events": [
-      "StartFailed",
-      "NegotiateFailed",
-      "TakerFeeSendFailed",
-      "MakerPaymentValidateFailed",
-      "MakerPaymentWaitConfirmFailed",
-      "TakerPaymentTransactionFailed",
-      "TakerPaymentWaitConfirmFailed",
-      "TakerPaymentDataSendFailed",
-      "TakerPaymentWaitForSpendFailed",
-      "MakerPaymentSpendFailed",
-      "TakerPaymentWaitRefundStarted",
-      "TakerPaymentRefundStarted",
-      "TakerPaymentRefunded",
-      "TakerPaymentRefundFailed",
-      "TakerPaymentRefundFinished"
-    ],
-    "my_info": {
-      "my_coin": "MARTY",
-      "other_coin": "DOC",
-      "my_amount": "1",
-      "other_amount": "1",
-      "started_at": 1674802078
-    },
-    "recoverable": false
-  }
-}
+    }
 ```
 
 #### Taker Swap Failed with MakerPaymentSpendFailed Event
