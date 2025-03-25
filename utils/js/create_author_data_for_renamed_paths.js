@@ -77,8 +77,8 @@ function updateRedirectMaps(oldPath, newPath) {
     let redirectMapText = [];
 
     try {
-        redirectMapJson = JSON.parse(fs.readFileSync("./utils/Redirect-map.json", 'utf8'));
-        redirectMapText = fs.readFileSync("./utils/Redirect-map.txt", 'utf8').split('\n').filter(line => line.trim());
+        redirectMapJson = JSON.parse(fs.readFileSync("./utils/New-Redirect-map.json", 'utf8'));
+        redirectMapText = fs.readFileSync("./utils/New-Redirect-map.txt", 'utf8').split('\n').filter(line => line.trim());
     } catch (error) {
         console.warn("Could not read existing redirect maps, creating new ones");
     }
@@ -89,17 +89,17 @@ function updateRedirectMaps(oldPath, newPath) {
     const newFullPath = 'https://komodoplatform.com/en/docs' + newDocsPath;
 
     // Check if redirect already exists
-    if (!redirectMapJson[oldHtmlPath] || !redirectMapText.includes(`${oldHtmlPath} ${newFullPath};`)) {
+    if (!redirectMapJson[oldHtmlPath] || !redirectMapText.includes(`/en/docs${oldHtmlPath} ${newFullPath};`)) {
         // Add to JSON map
         redirectMapJson[oldHtmlPath] = newDocsPath;
 
         // Add to text map
-        redirectMapText.push(`${oldHtmlPath} ${newFullPath};`);
-        redirectMapText.push(`${oldHtmlPath}/ ${newFullPath};`);
+        redirectMapText.push(`/en/docs${oldHtmlPath} ${newFullPath};`);
+        redirectMapText.push(`/en/docs${oldHtmlPath}/ ${newFullPath};`);
 
         // Write updated maps
-        fs.writeFileSync("./utils/Redirect-map.json", JSON.stringify(redirectMapJson, null, 2));
-        fs.writeFileSync("./utils/Redirect-map.txt", redirectMapText.join('\n') + '\n');
+        fs.writeFileSync("./utils/New-Redirect-map.json", JSON.stringify(redirectMapJson, null, 2));
+        fs.writeFileSync("./utils/New-Redirect-map.txt", redirectMapText.join('\n') + '\n');
 
         console.log(`Added redirect: ${oldHtmlPath} → ${newDocsPath}`);
     }
