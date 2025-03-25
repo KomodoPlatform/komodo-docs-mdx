@@ -70,6 +70,40 @@ function getEarliestDate(dates) {
         .sort()[0]; // Sort and take first (earliest) date
 }
 
+// Function to update redirect maps
+function updateRedirectMaps(oldPath, newPath) {
+    // Read existing redirect maps
+    let redirectMapJson = {};
+    let redirectMapText = [];
+
+    try {
+        redirectMapJson = JSON.parse(fs.readFileSync("./utils/Redirect-map.json", 'utf8'));
+        redirectMapText = fs.readFileSync("./utils/Redirect-map.txt", 'utf8').split('\n').filter(line => line.trim());
+    } catch (error) {
+        console.warn("Could not read existing redirect maps, creating new ones");
+    }
+
+    // Format paths for redirect maps
+    const oldHtmlPath = oldPath.replace(/\/$/, '');
+    const newDocsPath = newPath.replace(/\/$/, '') + '/';
+    const newFullPath = 'https://komodoplatform.com/en/docs' + newDocsPath;
+
+    // Check if redirect already exists
+    if (!redirectMapJson[oldHtmlPath]) {
+        // Add to JSON map
+        redirectMapJson[oldHtmlPath] = newDocsPath;
+
+        // Add to text map
+        redirectMapText.push(`${oldHtmlPath} ${newFullPath};`);
+
+        // Write updated maps
+        fs.writeFileSync("./utils/Redirect-map.json", JSON.stringify(redirectMapJson, null, 2));
+        fs.writeFileSync("./utils/Redirect-map.txt", redirectMapText.join('\n') + '\n');
+
+        console.log(`Added redirect: ${oldHtmlPath} → ${newDocsPath}`);
+    }
+}
+
 (async () => {
     try {
         // Get list of renamed files from PR
@@ -137,6 +171,12 @@ function getEarliestDate(dates) {
             // as it's now part of the chain in the new route
             if (renamedPathsData[oldRoute]) {
                 delete renamedPathsData[oldRoute];
+            }
+
+            // Update redirect maps for the current rename and all previous routes
+            updateRedirectMaps(oldRoute, newRoute);
+            for (const prevRoute of renamedPathsData[newRoute].previousRoutes || []) {
+                updateRedirectMaps(prevRoute, newRoute);
             }
         }
 
