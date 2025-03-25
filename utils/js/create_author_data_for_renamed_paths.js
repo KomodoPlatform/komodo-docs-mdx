@@ -89,12 +89,13 @@ function updateRedirectMaps(oldPath, newPath) {
     const newFullPath = 'https://komodoplatform.com/en/docs' + newDocsPath;
 
     // Check if redirect already exists
-    if (!redirectMapJson[oldHtmlPath]) {
+    if (!redirectMapJson[oldHtmlPath] || !redirectMapText.includes(`${oldHtmlPath} ${newFullPath};`)) {
         // Add to JSON map
         redirectMapJson[oldHtmlPath] = newDocsPath;
 
         // Add to text map
         redirectMapText.push(`${oldHtmlPath} ${newFullPath};`);
+        redirectMapText.push(`${oldHtmlPath}/ ${newFullPath};`);
 
         // Write updated maps
         fs.writeFileSync("./utils/Redirect-map.json", JSON.stringify(redirectMapJson, null, 2));
