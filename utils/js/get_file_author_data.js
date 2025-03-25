@@ -106,10 +106,16 @@ const fileData = {};
                         )
                     );
 
-                    // Update creation date if the old one is earlier
+                    // Update creation date if any date in the chain is earlier
                     if (data.dateCreated && (!fileData[newRoute].dateCreated || new Date(data.dateCreated) < new Date(fileData[newRoute].dateCreated))) {
                         fileData[newRoute].dateCreated = data.dateCreated;
                     }
+
+                    // Store the rename history if not already present
+                    fileData[newRoute].previousPaths = [
+                        ...(fileData[newRoute].previousPaths || []),
+                        ...(data.previousRoutes || [])
+                    ].filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
                 }
             }
         }
