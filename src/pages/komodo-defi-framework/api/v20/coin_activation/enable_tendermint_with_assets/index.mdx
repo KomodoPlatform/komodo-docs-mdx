@@ -19,7 +19,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 | required\_confirmations | integer          | Optional, defaults to `3`. When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap                                                                                       |
 | requires\_notarization  | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
 | get\_balances           | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                   |
-| activation_params       | object           | Optional, only used with Metamask, Keplr or WalletConnect activations. Defines the `session_topic` of the connection, under `wallet_connect.session_topic`.
+| activation\_params      | object           | Optional, only used with Metamask, Keplr or WalletConnect activations. Defines the `session_topic` of the connection, under `wallet_connect.session_topic`.                                                                                                               |
 
 ### Response Parameters
 
@@ -32,9 +32,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 | tokens\_balances | array of objects | Only returned when `get_balances` is `true`. A list of standard [AddressInfo](/komodo-defi-framework/api/common_structures/#address-info) objects, one for each token. |
 | tokens\_tickers  | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                                                |
 
-
 ### 📌 Examples
-
 
 #### Request with `get_balances` set to `false`
 
@@ -145,63 +143,60 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   ```
 </CollapsibleSection>
 
-
 #### Request for Metamask / WalletConnect activation
 
 <CodeGroup title="" tag="POST" label="enable_tendermint_with_assets" mm2MethodDecorate="true">
   ```json
-{
-    "userpass": "{{userpass}}",
+  {
+    "userpass": "RPC_UserP@SSW0RD",
     "method": "enable_tendermint_with_assets",
     "mmrpc": "2.0",
     "params": {
-        "ticker": "ATOM",
-        "tx_history": true,
-        "get_balances": true,
-        "activation_params": {
-            "wallet_connect": {
-                "session_topic": "{{session_topic}}"
-            }
+      "ticker": "ATOM",
+      "tx_history": true,
+      "get_balances": true,
+      "activation_params": {
+        "wallet_connect": {
+          "session_topic": "{{session_topic}}"
+        }
+      },
+      "nodes": [
+        {
+          "url": "https://cosmos-rpc.alpha.komodo.earth/",
+          "api_url": "https://cosmos-api.alpha.komodo.earth/",
+          "grpc_url": "https://cosmos-grpc.alpha.komodo.earth/",
+          "ws_url": "wss://cosmos-rpc.alpha.komodo.earth/websocket"
         },
-        "nodes": [
-            {
-                "url": "https://cosmos-rpc.alpha.komodo.earth/",
-                "api_url": "https://cosmos-api.alpha.komodo.earth/",
-                "grpc_url": "https://cosmos-grpc.alpha.komodo.earth/",
-                "ws_url": "wss://cosmos-rpc.alpha.komodo.earth/websocket"
-            },
-            {
-                "url": "https://cosmoshub.rpc.stakin-nodes.com/"
-            }
-        ],
-        "tokens_params": []
+        {
+          "url": "https://cosmoshub.rpc.stakin-nodes.com/"
+        }
+      ],
+      "tokens_params": []
     }
-}
+  }
   ```
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   #### Response
 
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-      "ticker": "ATOM",
-      "address": "cosmos16drqvl3u8sukfsu4lm3qsk28jr3fahjaswsac8",
-      "current_block": 22148347,
-      "balance": {
-          "spendable": "1.003381",
-          "unspendable": "0"
-      },
-      "tokens_balances": {}
-  },
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "ticker": "ATOM",
+        "address": "cosmos16drqvl3u8sukfsu4lm3qsk28jr3fahjaswsac8",
+        "current_block": 22148347,
+        "balance": {
+            "spendable": "1.003381",
+            "unspendable": "0"
+        },
+        "tokens_balances": {}
+    },
+    "id": null
+  }
+  ```
 </CollapsibleSection>
-
-
 
 <CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
   ### Error Types

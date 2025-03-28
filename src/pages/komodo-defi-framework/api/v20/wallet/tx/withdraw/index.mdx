@@ -9,16 +9,16 @@ This method generates a raw transaction which should then be broadcast using [se
 
 ## Arguments
 
-| Structure            | Type             | Description                                                                                                                                     |
-| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                 | string           | The name of the coin the user desires to withdraw.                                                                                              |
-| to                   | string           | Coins are withdrawn to this address.                                                                                                            |
-| amount               | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`.                                                                               |
-| memo                 | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem).                                                             |
-| max                  | bool             | Optional. Withdraw the maximum available amount.                                                                                                |
-| fee                  | object           | Optional. A standard [FeeInfo](/komodo-defi-framework/api/v20/#fee-info) object.                                                                |
-| from                 | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/v20/#withdraw-from-info) object.                                      |
-| ibc\_source\_channel | string           | Tendermint IBC transfers only. The source channel for the [IBC](https://tutorials.cosmos.network/academy/3-ibc/1-what-is-ibc.html) transaction. |
+| Structure            | Type             | Description                                                                                                                                                                                                                                     |
+| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                 | string           | The name of the coin the user desires to withdraw.                                                                                                                                                                                              |
+| to                   | string           | Coins are withdrawn to this address.                                                                                                                                                                                                            |
+| amount               | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`.                                                                                                                                                                               |
+| memo                 | string           | Optional. Adds a transaction memo for compatible coins (e.g. Tendermint ecosystem).                                                                                                                                                             |
+| max                  | bool             | Optional. Withdraw the maximum available amount.                                                                                                                                                                                                |
+| fee                  | object           | Optional. A standard [FeeInfo](/komodo-defi-framework/api/v20/#fee-info) object.                                                                                                                                                                |
+| from                 | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/v20/#withdraw-from-info) object.                                                                                                                                      |
+| ibc\_source\_channel | string           | Tendermint IBC transfers only. The source channel for the [IBC](https://tutorials.cosmos.network/academy/3-ibc/1-what-is-ibc.html) transaction.                                                                                                 |
 | broadcast            | bool             | Optional, defaults to `false`. When `false`, signed transaction hex must be broadcast manually with [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/). Must be set to `true` for Metamask managed transactions. |
 
 ### Response
@@ -33,7 +33,7 @@ This method generates a raw transaction which should then be broadcast using [se
 | total\_amount                | string (numeric)           | the total amount of coins transferred                                                                                                                                                                   |
 | fee\_details                 | object                     | the fee details of the generated transaction; this value differs for utxo and ETH/ERC20 coins, check the examples for more details                                                                      |
 | tx\_hash                     | string                     | the hash of the generated transaction                                                                                                                                                                   |
-| tx\_hex                      | string                     | transaction bytes in hexadecimal format; use this value as input for [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/)                                                                                                  |
+| tx\_hex                      | string                     | transaction bytes in hexadecimal format; use this value as input for [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/)                                                  |
 | coin                         | string                     | the name of the coin the user wants to withdraw                                                                                                                                                         |
 | kmd\_rewards                 | object (optional)          | an object containing information about accrued rewards; always exists if the coin is `KMD`                                                                                                              |
 | kmd\_rewards.amount          | string (numeric, optional) | the amount of accrued rewards                                                                                                                                                                           |
@@ -506,8 +506,6 @@ This method generates a raw transaction which should then be broadcast using [se
   ```
 </CollapsibleSection>
 
-
-
 ##### Withdraw with broadcast = true
 
 Metamask doesn't allow `eth_signTransaction` for security reasons, so we can only use `eth_sendTransaction` for processing withdrawals.
@@ -562,7 +560,6 @@ As a result, when submitting a withdrawal via metamask it will be rejected unles
 
   You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
 </CollapsibleSection>
-
 
 ##### Withdraw Tendermint coins with a memo and custom gas fee
 
