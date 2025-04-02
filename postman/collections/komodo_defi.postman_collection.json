@@ -160,7 +160,7 @@
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"KMD\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10001\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10001\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10001\"\r\n        }\r\n    ]\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"KMD\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10001\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10001\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10001\"\r\n        }\r\n    ],\r\n    \"required_confirmations\": 1,\r\n    \"requires_notarization\": false\r\n}\r\n"
 												},
 												"url": {
 													"raw": "{{address}}",
@@ -238,8 +238,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -1763,7 +1763,50 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "cancel_all_orders for coin",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"cancel_all_orders\",\r\n    \"cancel_by\": {\r\n        \"type\": \"Coin\", // Accepted values: \"All\", \"Pair\", \"Coin\"\r\n        \"data\": {\r\n        //     \"base\": \"DOC\", // Required only if: \"type\": \"Pair\"\r\n        //     \"rel\": \"MARTY\" // Required only if: \"type\": \"Pair\"\r\n               \"ticker\": \"SEPOLIAETH\" // Required only if: \"type\": \"Coin\"\r\n        } // Required only if: \"type\": \"Pair\", \"type\": \"Coin\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "167"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 25 Feb 2025 10:09:16 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"result\":{\"cancelled\":[\"083a286e-8c21-4815-967a-c368a1d8ada5\",\"a29d6e0f-0e7a-4647-aacc-620969213abc\",\"0a1dd9aa-14bb-4e64-9bf8-a8f2ce9b5cfd\"],\"currently_matching\":[]}}"
+								}
+							]
 						},
 						{
 							"name": "cancel_order",
@@ -2605,7 +2648,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"my_recent_swaps\",\r\n    // \"limit\": 10,\r\n    // \"page_number\": 1,\r\n    \"from_uuid\": \"fc72979a-68f6-422a-ade0-42dd7faaf421\"\r\n    // \"my_coin\": null, // Accepted values: Strings\r\n    // \"other_coin\": null, // Accepted values: Strings\r\n    // \"from_timestamp\": null, // Accepted values: Integers\r\n    // \"to_timestamp\": null // Accepted values: Integers\r\n}\r\n"
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"my_recent_swaps\"\r\n    // \"limit\": 10,\r\n    // \"page_number\": 1,\r\n    // \"from_uuid\": \"fc72979a-68f6-422a-ade0-42dd7faaf421\"\r\n    // \"my_coin\": null, // Accepted values: Strings\r\n    // \"other_coin\": null, // Accepted values: Strings\r\n    // \"from_timestamp\": null, // Accepted values: Integers\r\n    // \"to_timestamp\": null // Accepted values: Integers\r\n}\r\n"
 								},
 								"url": {
 									"raw": "{{address}}",
@@ -2671,8 +2714,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -2726,8 +2769,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -2789,7 +2832,8 @@
 											"\r",
 											"pm.request.body.update(strippedData);"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -2804,7 +2848,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"my_swap_status\",\r\n    \"params\": {\r\n        \"uuid\": \"99041f7f-a4cd-4d79-a9df-55440345ed75\"\r\n    }\r\n}\r\n"
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"my_swap_status\",\r\n    \"params\": {\r\n        \"uuid\": \"3d2286d1-1eef-487b-a07a-904f33034792\"\r\n    }\r\n}\r\n"
 								},
 								"url": {
 									"raw": "{{address}}",
@@ -2813,7 +2857,50 @@
 									]
 								}
 							},
-							"response": []
+							"response": [
+								{
+									"name": "in progress",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"my_swap_status\",\r\n    \"params\": {\r\n        \"uuid\": \"3d2286d1-1eef-487b-a07a-904f33034792\"\r\n    }\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "5447"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 10 Mar 2025 06:06:06 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"result\":{\"type\":\"Taker\",\"uuid\":\"3d2286d1-1eef-487b-a07a-904f33034792\",\"my_order_uuid\":\"3d2286d1-1eef-487b-a07a-904f33034792\",\"events\":[{\"timestamp\":1741586700536,\"event\":{\"type\":\"Started\",\"data\":{\"taker_coin\":\"MARTY\",\"maker_coin\":\"DOC\",\"maker\":\"15d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732\",\"my_persistent_pub\":\"03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2\",\"lock_duration\":7800,\"maker_amount\":\"2.4\",\"taker_amount\":\"2.4\",\"maker_payment_confirmations\":1,\"maker_payment_requires_nota\":false,\"taker_payment_confirmations\":1,\"taker_payment_requires_nota\":false,\"taker_payment_lock\":1741594499,\"uuid\":\"3d2286d1-1eef-487b-a07a-904f33034792\",\"started_at\":1741586699,\"maker_payment_wait\":1741589819,\"maker_coin_start_block\":985827,\"taker_coin_start_block\":983998,\"fee_to_send_taker_fee\":{\"coin\":\"MARTY\",\"amount\":\"0.00001\",\"paid_from_trading_vol\":false},\"taker_payment_trade_fee\":{\"coin\":\"MARTY\",\"amount\":\"0.00001\",\"paid_from_trading_vol\":false},\"maker_payment_spend_trade_fee\":{\"coin\":\"DOC\",\"amount\":\"0.00001\",\"paid_from_trading_vol\":true},\"maker_coin_htlc_pubkey\":\"03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2\",\"taker_coin_htlc_pubkey\":\"03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2\",\"p2p_privkey\":null}}},{\"timestamp\":1741586716540,\"event\":{\"type\":\"Negotiated\",\"data\":{\"maker_payment_locktime\":1741602298,\"maker_pubkey\":\"000000000000000000000000000000000000000000000000000000000000000000\",\"secret_hash\":\"a8345095a6704818cb3578fb12ddca8657d9d95f\",\"maker_coin_swap_contract_addr\":null,\"taker_coin_swap_contract_addr\":null,\"maker_coin_htlc_pubkey\":\"0315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732\",\"taker_coin_htlc_pubkey\":\"0315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732\"}}},{\"timestamp\":1741586717374,\"event\":{\"type\":\"TakerFeeSent\",\"data\":{\"tx_hex\":\"0400008085202f890299c61f69903417067f2d3ec99bdf6beba178ceca78390e0ad4395266cb6f9e70000000006a473044022042d198609cc4a276c5e367255219384f8a0f7febdae57fb6dfe2c4f9b2b1b317022009f1ff2e90c3b8c3bd4f056a1a2cbd4eee50d384d3eb3834ae466bb427c4510f012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff6cc0dbda33bb0f8b95d5e3fef9797cb5438d1a2466e87119dfa275f5b09c5164020000006a4730440220695f208e981128f5f847aedb0f7cf1c42d4f191714a80ee98a8618c20ba9545d02200459e69cba37de8d454f955f4402f913ea3c57db7f15ca699107fb09e0f5d858012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff0290b60400000000001976a914ca1e04745e8ca0c60d8c5881531d51bec470743f88acd0fbe60b000000001976a914d346067e3c3c3964c395fee208594790e29ede5d88ac1d81ce67000000000000000000000000000000\",\"tx_hash\":\"52ae1233c6b59d151b2e0dc22bbbd3ba7029019d8c21ae10755867353e64d9c4\"}}},{\"timestamp\":1741586719375,\"event\":{\"type\":\"TakerPaymentInstructionsReceived\",\"data\":null}},{\"timestamp\":1741586719376,\"event\":{\"type\":\"MakerPaymentReceived\",\"data\":{\"tx_hex\":\"0400008085202f8903d71ca3b9981a5746ead0f6faeda4edfa15009fdb89e612855a997f882af27b36020000006a473044022038bf42ab84b80d066503dafcb8ef9dabfec319db7afc00d467dd10cf69f4fe410220053ba0b45f646952466a181c05c7c8d6fa34927629f8a56d6f9543c14debfb8c01210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff1de4b6a07e7c9fdda34ae19887a2ea3ae262bd794da2fb76e077be67ea2fe0b5000000006a47304402201e00b5ab452d571fd309234320dc3725783ae22b8127ba394efd8e3f01935af7022013c25560638e5c460fd7de991b6f16b92533b2e3593e1ab29928ad1c62bb5f3201210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff0e890e4942edc5c863df4023b32a891f52997d2e6a1af32ae7c17a3615f853d3000000006a47304402202bf9ff5616a75d9ab3eccf4fc7c73be7d7b09f4cc6962e5ee4fedc0ccfcbdcb902205ce5cdb33ab8888a3092185e9c09f530da5f397b3b58670f0017f530db28c14901210315d9c51c657ab1be4ae9d3ab6e76a619d3bccfe830d5363fa168424c0d044732ffffffff03001c4e0e0000000017a9148c7885603bd52f372699a13076384d4d4a56346e870000000000000000166a14a8345095a6704818cb3578fb12ddca8657d9d95f90739809000000001976a9141462c3dd3f936d595c9af55978003b27c250441f88ac1e81ce67000000000000000000000000000000\",\"tx_hash\":\"51858295667fce55978409e3276e463564b2ae519fa94a674a1325444f45ac6d\"}}},{\"timestamp\":1741586719384,\"event\":{\"type\":\"MakerPaymentWaitConfirmStarted\"}},{\"timestamp\":1741586766238,\"event\":{\"type\":\"MakerPaymentValidatedAndConfirmed\"}}],\"maker_amount\":\"2.4\",\"maker_coin\":\"DOC\",\"maker_coin_usd_price\":null,\"taker_amount\":\"2.4\",\"taker_coin\":\"MARTY\",\"taker_coin_usd_price\":null,\"gui\":\"mm2_777\",\"mm_version\":\"2.4.0-beta_cbf92c7bc\",\"success_events\":[\"Started\",\"Negotiated\",\"TakerFeeSent\",\"TakerPaymentInstructionsReceived\",\"MakerPaymentReceived\",\"MakerPaymentWaitConfirmStarted\",\"MakerPaymentValidatedAndConfirmed\",\"TakerPaymentSent\",\"WatcherMessageSent\",\"TakerPaymentSpent\",\"MakerPaymentSpent\",\"MakerPaymentSpentByWatcher\",\"MakerPaymentSpendConfirmed\",\"Finished\"],\"error_events\":[\"StartFailed\",\"NegotiateFailed\",\"TakerFeeSendFailed\",\"MakerPaymentValidateFailed\",\"MakerPaymentWaitConfirmFailed\",\"TakerPaymentTransactionFailed\",\"TakerPaymentWaitConfirmFailed\",\"TakerPaymentDataSendFailed\",\"TakerPaymentWaitForSpendFailed\",\"MakerPaymentSpendFailed\",\"MakerPaymentSpendConfirmFailed\",\"TakerPaymentWaitRefundStarted\",\"TakerPaymentRefundStarted\",\"TakerPaymentRefunded\",\"TakerPaymentRefundedByWatcher\",\"TakerPaymentRefundFailed\",\"TakerPaymentRefundFinished\"],\"my_info\":{\"my_coin\":\"MARTY\",\"other_coin\":\"DOC\",\"my_amount\":\"2.4\",\"other_amount\":\"2.4\",\"started_at\":1741586699},\"recoverable\":false,\"is_finished\":false}}"
+								}
+							]
 						},
 						{
 							"name": "recover_funds_of_swap",
@@ -3930,6 +4017,92 @@
 									"body": "{\n    \"result\": \"2.2.0-beta_d1a8ea7\",\n    \"datetime\": \"2024-09-10T09:26:03+03:00\"\n}"
 								}
 							]
+						},
+						{
+							"name": "version Copy",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"version\"\r\n}\r\n"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "version",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"version\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "content-type",
+											"value": "application/json"
+										},
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "70"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 10 Sep 2024 10:20:12 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"result\": \"2.2.0-beta_d1a8ea7\",\n    \"datetime\": \"2024-09-10T09:26:03+03:00\"\n}"
+								}
+							]
 						}
 					]
 				},
@@ -4149,7 +4322,7 @@
 									},
 									"response": [
 										{
-											"name": "task::enable_utxo::status (RequestingWalletBalance)",
+											"name": "RequestingWalletBalance (HD)",
 											"originalRequest": {
 												"method": "POST",
 												"header": [
@@ -4191,7 +4364,7 @@
 											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"InProgress\",\"details\":\"RequestingWalletBalance\"},\"id\":null}"
 										},
 										{
-											"name": "task::enable_utxo::status (complete)",
+											"name": "Complete (HD)",
 											"originalRequest": {
 												"method": "POST",
 												"header": [
@@ -4238,6 +4411,48 @@
 											],
 											"cookie": [],
 											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"status\": \"Ok\",\n        \"details\": {\n            \"ticker\": \"KMD\",\n            \"current_block\": 4141373,\n            \"wallet_balance\": {\n                \"wallet_type\": \"HD\",\n                \"accounts\": [\n                    {\n                        \"account_index\": 0,\n                        \"derivation_path\": \"m/44'/141'/0'\",\n                        \"total_balance\": {\n                            \"spendable\": \"20\",\n                            \"unspendable\": \"0\"\n                        },\n                        \"addresses\": [\n                            {\n                                \"address\": \"RMC1cWXngQf2117apEKoLh3x27NoG88yzd\",\n                                \"derivation_path\": \"m/44'/141'/0'/0/0\",\n                                \"chain\": \"External\",\n                                \"balance\": {\n                                    \"spendable\": \"20\",\n                                    \"unspendable\": \"0\"\n                                }\n                            }\n                        ]\n                    }\n                ]\n            }\n        }\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "Complete (Non-HD)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_utxo::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "255"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 10 Feb 2025 04:40:11 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Ok\",\"details\":{\"ticker\":\"KMD\",\"current_block\":4305707,\"wallet_balance\":{\"wallet_type\":\"Iguana\",\"address\":\"RUYJYSTuCKm9gouWzQN1LirHFEYThwzA2d\",\"balance\":{\"KMD\":{\"spendable\":\"723.08294605\",\"unspendable\":\"0\"}}}}},\"id\":null}"
 										}
 									]
 								},
@@ -4361,7 +4576,50 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_qtum::init\",\r\n    \"params\": {\r\n        \"ticker\":\"tQTUM\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\":\"Electrum\", // Accepted values: \"Electrum\", \"Native\"\r\n                \"rpc_data\": {\r\n                    \"servers\": [\r\n                        {\r\n                            \"url\": \"electrum1.cipig.net:10071\"\r\n                            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n                            // \"disable_cert_verification\": false\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum2.cipig.net:10071\"\r\n                        },\r\n                        {\r\n                            \"url\": \"electrum3.cipig.net:10071\"\r\n                        }\r\n                    ]\r\n                } // Required only if: \"rpc\": \"Electrum\"\r\n            }\r\n            // \"tx_history\": false,\r\n            // \"required_confirmations\": 1, // Default: Coin Config\r\n            // \"address_format\": {\r\n            //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\"\r\n            // }, // Default: Coin Config\r\n            // \"utxo_merge_params\": null,\r\n            // // \"utxo_merge_params\": {\r\n            // //     \"merge_at\":50\r\n            // //     // \"check_every\":10,\r\n            // //     // \"max_merge_at_once\":100\r\n            // //     },\r\n            // \"check_utxo_maturity\": false,\r\n            // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n            // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n            // \"min_addresses_number\": 3 // used only if \"priv_key_policy\": \"Trezor\"\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 10 Feb 2025 04:44:25 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"task_id\":1},\"id\":null}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_qtum::status",
@@ -4376,7 +4634,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -4391,7 +4650,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_qtum::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_qtum::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -4400,7 +4659,50 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Success (non-HD)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_qtum::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "248"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 10 Feb 2025 04:44:34 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Ok\",\"details\":{\"ticker\":\"tQTUM\",\"current_block\":4619066,\"wallet_balance\":{\"wallet_type\":\"Iguana\",\"address\":\"qcpVcxMBo9ZikpGiTaM8SFBV1W14QVmGzo\",\"balance\":{\"tQTUM\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}}}},\"id\":null}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_qtum::user_action",
@@ -4603,9 +4905,59 @@
 											"host": [
 												"{{address}}"
 											]
-										}
+										},
+										"description": "``` json\n{\n    \"mmrpc\": \"\",\n    \"result\": {\n        \"task_id\": 0\n    },\n    \"id\": null\n}\n\n ```\n\n[https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_z_coin/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_z_coin/)"
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::init\",\r\n    \"params\": {\r\n        \"ticker\": \"ZOMBIE\",\r\n        \"activation_params\": {\r\n            \"mode\": {\r\n                \"rpc\": \"Light\", // Accepted values: \"Native\", \"Light\"\r\n                \"rpc_data\": {\r\n                    \"electrum_servers\": [\r\n                        {\r\n                            \"url\": \"zombie.dragonhound.info:10033\"\r\n                            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n                            // \"disable_cert_verification\": false\r\n                        }\r\n                    ],\r\n                    \"light_wallet_d_servers\": [\r\n                        \"http://zombie.sirseven.me:443\",\r\n                        \"http://zombie.dragonhound.info:443\"\r\n                    ]\r\n                } // Required only if: \"rpc\": \"Light\"\r\n            }\r\n            // \"required_confirmations\": 1, // Default: Coin Config\r\n            // \"requires_notarization\": false, // Default: Coin Config\r\n        }\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "48"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 05 Feb 2025 05:20:45 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"task_id\": 0\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_z_coin::status",
@@ -4620,7 +4972,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -4635,7 +4988,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -4644,7 +4997,140 @@
 											]
 										}
 									},
-									"response": []
+									"response": [
+										{
+											"name": "Error: ZCashParamsNotFound",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "336"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 05 Feb 2025 05:27:16 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Error\",\"details\":{\"error\":\"Error on platform coin ZOMBIE creation: ZCashParamsNotFound\",\"error_path\":\"lib.z_coin_activation.z_coin\",\"error_trace\":\"lib:104] z_coin_activation:247] z_coin:1032]\",\"error_type\":\"CoinCreationError\",\"error_data\":{\"ticker\":\"ZOMBIE\",\"error\":\"ZCashParamsNotFound\"}}},\"id\":null}"
+										},
+										{
+											"name": "Error: SPV Unavailable",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "417"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 05 Feb 2025 05:44:43 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"status\":\"Error\",\"details\":{\"error\":\"Error on platform coin ZOMBIE creation: All the current light clients are unavailable.\",\"error_path\":\"lib.z_coin_activation.z_coin.z_rpc\",\"error_trace\":\"lib:104] z_coin_activation:247] z_coin:925] z_rpc:524] z_rpc:191]\",\"error_type\":\"CoinCreationError\",\"error_data\":{\"ticker\":\"ZOMBIE\",\"error\":\"All the current light clients are unavailable.\"}}},\"id\":null}"
+										},
+										{
+											"name": "Success",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::enable_z_coin::status\",\r\n    \"params\": {\r\n        \"task_id\": 1\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "361"
+												},
+												{
+													"key": "date",
+													"value": "Mon, 10 Feb 2025 01:30:14 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"status\": \"Ok\",\n        \"details\": {\n            \"ticker\": \"ZOMBIE\",\n            \"current_block\": 794431,\n            \"wallet_balance\": {\n                \"wallet_type\": \"Iguana\",\n                \"address\": \"zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj\",\n                \"balance\": {\n                    \"spendable\": \"0\",\n                    \"unspendable\": \"0\"\n                }\n            },\n            \"first_sync_block\": {\n                \"requested\": 792991,\n                \"is_pre_sapling\": false,\n                \"actual\": 792991\n            }\n        }\n    },\n    \"id\": null\n}"
+										}
+									]
 								},
 								{
 									"name": "task::enable_z_coin::user_action",
@@ -4832,7 +5318,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"ticker\": \"MATIC\",\n        \"get_balances\": false,\n        \"tx_history\": false,\n        \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n        \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n        \"priv_key_policy\": {\n            \"wallet_connect\": {\n                \"session_topic\": \"7320725519c81f17ba098eb2b76463da4c556d08b22e22779005011610bc2a9a\"\n            }\n        },\n        \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n        \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n        \"swap_v2_contracts\": {\n            \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n            \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n            \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n        },\n        \"nft_req\": {\n            \"provider\": {\n                \"type\": \"Moralis\",\n                \"info\": {\n                    \"url\": \"https://moralis-proxy.komodo.earth\"\n                }\n            }\n        },\n        \"nodes\": [\n            {\n                \"url\": \"https://polygon-rpc.com\"\n            },\n            {\n                \"url\": \"https://electrum3.cipig.net:18755\"\n            },\n            {\n                \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n            },\n            {\n                \"url\": \"https://node.komodo.earth:8080/polygon\",\n                \"komodo_proxy\": true\n            }\n        ],\n        \"erc20_tokens_requests\": [\n            {\n                \"ticker\": \"PGX-PLG20\",\n                \"required_confirmations\": 4\n            },\n            {\n                \"ticker\": \"AAVE-PLG20\",\n                \"required_confirmations\": 4\n            }\n        ],\n        \"required_confirmations\": 5,\n        \"requires_notarization\": false\n    }\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -4928,6 +5414,53 @@
 											],
 											"cookie": [],
 											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":21184239,\"eth_addresses_infos\":{\"0x083C32B38e8050473f6999e22f670d1404235592\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\"balances\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}},\"erc20_addresses_infos\":{\"0x083C32B38e8050473f6999e22f670d1404235592\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\"balances\":{\"MINDS-ERC20\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}}},\"nfts_infos\":{}},\"id\":null}"
+										},
+										{
+											"name": "ETH (wallet connect)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"ticker\": \"ETH\",\n        \"gas_station_url\": \"https://ethgasstation.info/json/ethgasAPI.json\",\n        \"gas_station_decimals\": 8,\n        \"gas_station_policy\": {\n            \"policy\": \"MeanAverageFast\"\n        },\n        \"mm2\": 1,\n        \"rpc_mode\": \"Default\",\n        \"priv_key_policy\": {\n            \"wallet_connect\": {\n                \"session_topic\": \"7320725519c81f17ba098eb2b76463da4c556d08b22e22779005011610bc2a9a\"\n            }\n        },\n        \"swap_contract_address\": \"0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80\",\n        \"fallback_swap_contract\": \"0x8500AFc0bc5214728082163326C2FF0C73f4a871\",\n        \"nodes\": [\n            {\n                \"url\": \"https://eth1.cipig.net:18555\",\n                \"komodo_proxy\": false\n            },\n            {\n                \"url\": \"https://eth2.cipig.net:18555\",\n                \"komodo_proxy\": false\n            },\n            {\n                \"url\": \"https://eth3.cipig.net:18555\",\n                \"komodo_proxy\": false\n            }\n        ],\n        \"erc20_tokens_requests\": [\n            {\n                \"ticker\": \"PEPE-ERC20\",\n                \"required_confirmations\": 4\n            }\n        ],\n        \"required_confirmations\": 3\n    }\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "691"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 14 Nov 2024 06:47:57 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"current_block\": 21184239,\n        \"eth_addresses_infos\": {\n            \"0x083C32B38e8050473f6999e22f670d1404235592\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\n                \"balances\": {\n                    \"spendable\": \"0\",\n                    \"unspendable\": \"0\"\n                }\n            }\n        },\n        \"erc20_addresses_infos\": {\n            \"0x083C32B38e8050473f6999e22f670d1404235592\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"044cbf74541c1d3436bc7638a2738f64df4fee22d4443cdf11d54cea7d7f55f256eb93f0bdb93a767314eaf7455c383a8d1397b0fe80fb5e81ab0e72c7e26fa885\",\n                \"balances\": {\n                    \"MINDS-ERC20\": {\n                        \"spendable\": \"0\",\n                        \"unspendable\": \"0\"\n                    }\n                }\n            }\n        },\n        \"nfts_infos\": {}\n    },\n    \"id\": null\n}"
 										},
 										{
 											"name": "BNB",
@@ -5106,6 +5639,135 @@
 											],
 											"cookie": [],
 											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":65658249,\"eth_addresses_infos\":{\"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\"balances\":{\"spendable\":\"16.651562360509102537\",\"unspendable\":\"0\"}}},\"erc20_addresses_infos\":{\"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\"balances\":{\"AAVE-PLG20\":{\"spendable\":\"0\",\"unspendable\":\"0\"},\"PGX-PLG20\":{\"spendable\":\"0\",\"unspendable\":\"0\"}}}},\"nfts_infos\":{\"0xb9ae3b7632be11420bd3e59fd41c300dd67274ac,0\":{\"token_address\":\"0xb9ae3b7632be11420bd3e59fd41c300dd67274ac\",\"token_id\":\"0\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"},\"0xd25f13e4ba534ef625c75b84934689194b7bd59e,14\":{\"token_address\":\"0xd25f13e4ba534ef625c75b84934689194b7bd59e\",\"token_id\":\"14\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC721\",\"amount\":\"1\"},\"0x73a5299824cd955af6377b56f5762dc3ca4cc078,1\":{\"token_address\":\"0x73a5299824cd955af6377b56f5762dc3ca4cc078\",\"token_id\":\"1\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC721\",\"amount\":\"1\"},\"0x3f368660b013a59b245a093a5ede57fa9deb911f,0\":{\"token_address\":\"0x3f368660b013a59b245a093a5ede57fa9deb911f\",\"token_id\":\"0\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"},\"0xe1ab36eda8012483aa947263b7d9a857d9c37e05,32\":{\"token_address\":\"0xe1ab36eda8012483aa947263b7d9a857d9c37e05\",\"token_id\":\"32\",\"chain\":\"POLYGON\",\"contract_type\":\"ERC1155\",\"amount\":\"1\"}}},\"id\":null}"
+										},
+										{
+											"name": "enable_sepolia",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "\n{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"enable_eth_with_tokens\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"ticker\": \"SEPOLIAETH\",\n    \"mm2\": 1,\n    \"swap_contract_address\": \"0xf9000589c66Df3573645B59c10aa87594Edc318F\",\n    \"swap_v2_contracts\":{\n\t    \"maker_swap_v2_contract\": \"0xf9000589c66Df3573645B59c10aa87594Edc318F\",\n\t    \"taker_swap_v2_contract\": \"0x3B19873b81a6B426c8B2323955215F7e89CfF33F\",\n\t    \"nft_maker_swap_v2_contract\": \"0xf9000589c66Df3573645B59c10aa87594Edc318F\"\n    },    \n    \"fallback_swap_contract\": \"0xf9000589c66Df3573645B59c10aa87594Edc318F\",\n    \"nodes\": [\n      {\n        \"url\": \"https://ethereum-sepolia-rpc.publicnode.com\"\n      }\n    ],\n    \"erc20_tokens_requests\": []\n  }\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "641"
+												},
+												{
+													"key": "date",
+													"value": "Tue, 25 Feb 2025 08:13:12 GMT"
+												},
+												{
+													"key": "Content-Type",
+													"value": "application/json",
+													"description": "",
+													"type": "text"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"current_block\": 7781449,\n        \"eth_addresses_infos\": {\n            \"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\n                \"balances\": {\n                    \"spendable\": \"0\",\n                    \"unspendable\": \"0\"\n                }\n            }\n        },\n        \"erc20_addresses_infos\": {\n            \"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\": {\n                \"derivation_method\": {\n                    \"type\": \"Iguana\"\n                },\n                \"pubkey\": \"04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b\",\n                \"balances\": {}\n            }\n        },\n        \"nfts_infos\": {}\n    },\n    \"id\": null\n}"
+										},
+										{
+											"name": "MATIC (wallet connect)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"ticker\": \"MATIC\",\n        \"get_balances\": false,\n        \"tx_history\": false,\n        \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n        \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n        \"priv_key_policy\": {\n            \"wallet_connect\": {\n                \"session_topic\": \"6fc0226619974a1190f56d9946abc9af0f593a7987208be112664dc267b01bfd\"\n            }\n        },\n        \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n        \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n        \"swap_v2_contracts\": {\n            \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n            \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n            \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n        },\n        \"nodes\": [\n            {\n                \"url\": \"https://polygon-rpc.com\"\n            },\n            {\n                \"url\": \"https://electrum3.cipig.net:18755\"\n            },\n            {\n                \"url\": \"https://polygon-bor-rpc.publicnode.com\"\n            },\n            {\n                \"url\": \"https://node.komodo.earth:8080/polygon\",\n                \"komodo_proxy\": true\n            }\n        ],\n        \"erc20_tokens_requests\": [\n            {\n                \"ticker\": \"PGX-PLG20\",\n                \"required_confirmations\": 4\n            },\n            {\n                \"ticker\": \"AAVE-PLG20\",\n                \"required_confirmations\": 4\n            }\n        ],\n        \"required_confirmations\": 5,\n        \"requires_notarization\": false\n    }\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "618"
+												},
+												{
+													"key": "date",
+													"value": "Thu, 13 Mar 2025 06:01:55 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"result\":{\"current_block\":68987119,\"eth_addresses_infos\":{\"0x80e40C9FBDe46D7CB2525d58DBb2047504676AD5\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"0493623bb507a8054654496754781bc941ef228c919b9b1ba2806ec62d8fdbcadf07b6c8b7abbb446eea1e3cac838b3294a72976b9a46c3dd05af40bea430ba7bf\"}},\"erc20_addresses_infos\":{\"0x80e40C9FBDe46D7CB2525d58DBb2047504676AD5\":{\"derivation_method\":{\"type\":\"Iguana\"},\"pubkey\":\"0493623bb507a8054654496754781bc941ef228c919b9b1ba2806ec62d8fdbcadf07b6c8b7abbb446eea1e3cac838b3294a72976b9a46c3dd05af40bea430ba7bf\",\"tickers\":[\"AAVE-PLG20\",\"PGX-PLG20\"]}},\"nfts_infos\":{}},\"id\":null}"
+										},
+										{
+											"name": "Error: ChainID not supported (WC)",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n        \"ticker\": \"MATIC\",\n        \"get_balances\": false,\n        \"tx_history\": false,\n        \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n        \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n        \"priv_key_policy\": {\n            \"wallet_connect\": {\n                \"session_topic\": \"7320725519c81f17ba098eb2b76463da4c556d08b22e22779005011610bc2a9a\"\n            }\n        },\n        \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n        \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n        \"swap_v2_contracts\": {\n            \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n            \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n            \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n        },\n        \"nft_req\": {\n            \"provider\": {\n                \"type\": \"Moralis\",\n                \"info\": {\n                    \"url\": \"https://moralis-proxy.komodo.earth\"\n                }\n            }\n        },\n        \"nodes\": [\n            {\n                \"url\": \"https://polygon-rpc.com\"\n            },\n            {\n                \"url\": \"https://electrum3.cipig.net:18755\"\n            },\n            {\n                \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n            },\n            {\n                \"url\": \"https://node.komodo.earth:8080/polygon\",\n                \"komodo_proxy\": true\n            }\n        ],\n        \"erc20_tokens_requests\": [\n            {\n                \"ticker\": \"PGX-PLG20\",\n                \"required_confirmations\": 4\n            },\n            {\n                \"ticker\": \"AAVE-PLG20\",\n                \"required_confirmations\": 4\n            }\n        ],\n        \"required_confirmations\": 5,\n        \"requires_notarization\": false\n    }\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "335"
+												},
+												{
+													"key": "date",
+													"value": "Wed, 12 Mar 2025 03:35:58 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"mmrpc\":\"2.0\",\"error\":\"ChainId not supported: eip155:137\",\"error_path\":\"platform_coin_with_tokens.eth_with_token_activation.wallet_connect.lib\",\"error_trace\":\"platform_coin_with_tokens:454] eth_with_token_activation:489] wallet_connect:170] lib:510]\",\"error_type\":\"Internal\",\"error_data\":\"ChainId not supported: eip155:137\",\"id\":null}"
 										}
 									]
 								},
@@ -5129,7 +5791,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_eth_with_tokens\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"MATIC\",\n      \"get_balances\": false,\n      \"tx_history\": false,\n      \"rpc_mode\": \"Default\", // Accepted values: Default, Metamask\n      \"gas_station_url\": \"https://gasstation-mainnet.matic.network/\",\n      \"swap_contract_address\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"fallback_swap_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n      \"swap_v2_contracts\": {\n\t    \"taker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\",\n\t    \"nft_maker_swap_v2_contract\": \"0x9130b257D37A52E52F21054c4DA3450c72f595CE\"\n      },\n      \"nft_req\": {\n        \"provider\": {\n          \"type\": \"Moralis\",\n          \"info\": {\n            \"url\": \"https://moralis-proxy.komodo.earth\"\n          }\n        }\n      },\n      \"nodes\": [\n        {\n          \"url\": \"https://polygon-rpc.com\"\n        },\n        {\n          \"url\": \"https://electrum3.cipig.net:18755\"\n        },\n        {\n          \"url\": \"https://block-proxy.komodo.earth/rpc/matic\"\n        },\n        {\n            \"url\": \"https://node.komodo.earth:8080/polygon\",\n            \"komodo_proxy\": true\n        }\n      ],\n      \"erc20_tokens_requests\": [\n        {\n          \"ticker\": \"PGX-PLG20\",\n          \"required_confirmations\": 4\n        },\n        {\n          \"ticker\": \"AAVE-PLG20\",\n          \"required_confirmations\": 4\n        }\n      ],\n      \"required_confirmations\": 5,\n      \"requires_notarization\": false\n    }\n  }",
+											"raw": "\n  {\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"enable_erc20\",\n    \"mmrpc\": \"2.0\",\n    \"params\": {\n      \"ticker\": \"BAT-PLG20\",\n      \"activation_params\": {\n        \"required_confirmations\": 3\n      }\n    }\n  }",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -5630,8 +6292,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5720,20 +6382,19 @@
 									},
 									"response": [
 										{
-											"name": "Activate IRIS without assets",
+											"name": "Activate IRIS via Keplr",
 											"originalRequest": {
 												"method": "POST",
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
 														"type": "text"
 													}
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"enable_tendermint_with_assets\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"ticker\": \"IRIS\",\r\n        \"tx_history\": true,\r\n        \"get_balances\": true,\r\n        \"nodes\":[\r\n            {\r\n                \"url\": \"https://iris-rpc.alpha.komodo.earth/\",\r\n                \"api_url\": \"https://iris-api.alpha.komodo.earth/\",\r\n                \"grpc_url\": \"https://iris-grpc.alpha.komodo.earth/\",\r\n                \"ws_url\": \"wss://iris-rpc.alpha.komodo.earth/websocket\"\r\n            },\r\n            {\r\n                \"url\": \"https://rpc.irishub-1.irisnet.org\"\r\n            }\r\n        ],\r\n        \"tokens_params\": []\r\n    }\r\n}\r\n",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"enable_tendermint_with_assets\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"ticker\": \"IRIS\",\r\n        \"tx_history\": true,\r\n        \"get_balances\": true,\r\n        \"activation_params\": {\r\n            \"wallet_connect\": {\r\n                \"session_topic\": \"{{session_topic}}\"\r\n            }\r\n        },\r\n        \"nodes\":[\r\n            {\r\n                \"url\": \"https://iris-rpc.alpha.komodo.earth/\",\r\n                \"api_url\": \"https://iris-api.alpha.komodo.earth/\",\r\n                \"grpc_url\": \"https://iris-grpc.alpha.komodo.earth/\",\r\n                \"ws_url\": \"wss://iris-rpc.alpha.komodo.earth/websocket\"\r\n            },\r\n            {\r\n                \"url\": \"https://rpc.irishub-1.irisnet.org\"\r\n            }\r\n        ],\r\n        \"tokens_params\": []\r\n    }\r\n}\r\n",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -5766,7 +6427,6 @@
 												{
 													"key": "Content-Type",
 													"value": "application/json",
-													"name": "Content-Type",
 													"description": "",
 													"type": "text"
 												}
@@ -5781,8 +6441,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5836,8 +6496,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5891,8 +6551,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -5946,8 +6606,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -6001,14 +6661,13 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
 														"type": "text"
 													}
 												],
 												"body": {
 													"mode": "raw",
-													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"enable_tendermint_with_assets\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"ticker\": \"OSMO\",\r\n        \"tx_history\": true,\r\n        \"get_balances\": true,\r\n        \"nodes\": [\r\n            {\r\n                \"url\": \"https://rpc.osmosis.zone/\"\r\n            },\r\n            {\r\n                \"url\": \"https://osmosis.rpc.stakin-nodes.com\"\r\n            },\r\n            {\r\n                \"url\": \"https://rpc-osmosis-ia.cosmosia.notional.ventures/\"\r\n            },\r\n            {\r\n                \"url\": \"https://osmosis-rpc.alpha.komodo.earth/\",\r\n                \"api_url\": \"https://osmosis-api.alpha.komodo.earth/\",\r\n                \"grpc_url\": \"https://osmosis-grpc.alpha.komodo.earth/\",\r\n                \"ws_url\": \"wss://osmosis-rpc.alpha.komodo.earth/websocket\"\r\n            }\r\n        ],\r\n        \"tokens_params\": []\r\n    }\r\n}\r\n",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"enable_tendermint_with_assets\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"ticker\": \"OSMO\",\r\n        \"tx_history\": true,\r\n        \"get_balances\": true,\r\n        \"activation_params\": {\r\n            \"wallet_connect\": {\r\n                \"session_topic\": \"{{session_topic}}\"\r\n            }\r\n        },\r\n        \"nodes\": [\r\n            {\r\n                \"url\": \"https://rpc.osmosis.zone/\"\r\n            },\r\n            {\r\n                \"url\": \"https://osmosis.rpc.stakin-nodes.com\"\r\n            },\r\n            {\r\n                \"url\": \"https://rpc-osmosis-ia.cosmosia.notional.ventures/\"\r\n            },\r\n            {\r\n                \"url\": \"https://osmosis-rpc.alpha.komodo.earth/\",\r\n                \"api_url\": \"https://osmosis-api.alpha.komodo.earth/\",\r\n                \"grpc_url\": \"https://osmosis-grpc.alpha.komodo.earth/\",\r\n                \"ws_url\": \"wss://osmosis-rpc.alpha.komodo.earth/websocket\"\r\n            }\r\n        ],\r\n        \"tokens_params\": []\r\n    }\r\n}\r\n",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -6187,6 +6846,88 @@
 									]
 								}
 							]
+						},
+						{
+							"name": "get_enabled_coins",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"get_enabled_coins\"\r\n}\r\n"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "get_enabled_coins",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"get_enabled_coins\"\r\n}\r\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "78"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 10 Sep 2024 10:21:20 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"result\":[{\"ticker\":\"MARTY\",\"address\":\"RUYJYSTuCKm9gouWzQN1LirHFEYThwzA2d\"}]}"
+								}
+							]
 						}
 					]
 				},
@@ -6225,7 +6966,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
 							},
 							"response": [
 								{
@@ -6248,7 +6989,7 @@
 												"{{address}}"
 											]
 										},
-										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
 									},
 									"_postman_previewlanguage": "JSON",
 									"header": [],
@@ -6275,7 +7016,7 @@
 												"{{address}}"
 											]
 										},
-										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nfts)"
+										"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nfts)"
 									},
 									"_postman_previewlanguage": "JSON",
 									"header": [],
@@ -6316,7 +7057,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-a-list-of-nft-transfers)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-a-list-of-nft-transfers)"
 							},
 							"response": []
 						},
@@ -6352,7 +7093,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#get-nft-metadata)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#get-nft-metadata)"
 							},
 							"response": []
 						},
@@ -6388,7 +7129,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#refresh-nft-metadata)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#refresh-nft-metadata)"
 							},
 							"response": []
 						},
@@ -6425,7 +7166,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/)"
+								"description": "DevDocs Link: [https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/](https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/update_nft/)"
 							},
 							"response": [
 								{
@@ -6503,7 +7244,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#withdraw-nfts)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#withdraw-nfts)"
 							},
 							"response": []
 						},
@@ -6539,7 +7280,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/#erc-1155-withdraw-example)"
+								"description": "[https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example](https://nft-methods.komodo-docs-revamp-2023.pages.dev/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/#erc-1155-withdraw-example)"
 							},
 							"response": [
 								{
@@ -6603,7 +7344,7 @@
 										"{{address}}"
 									]
 								},
-								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20/non_fungible_tokens/clear_nft_db/"
+								"description": "DevDocs Link: https://komodoplatform.com/en/docs/komodo-defi-framework/api/v20-dev/non_fungible_tokens/clear_nft_db/"
 							},
 							"response": [
 								{
@@ -6899,8 +7640,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -7167,8 +7908,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -7846,7 +8587,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"withdraw\",\r\n    \"params\": {\r\n        \"coin\": \"IRIS\",\r\n        \"to\": \"osmo16drqvl3u8sukfsu4lm3qsk28jr3fahjac4rdw4\",\r\n        \"amount\": 0.1, // used only if: \"max\": false\r\n        \"memo\": \"In the blackest of your moments, wait with no fear.\",\r\n        \"fee\": {\r\n          \"type\": \"CosmosGas\",\r\n          \"gas_price\": 0.1,\r\n          \"gas_limit\": 1500000\r\n        }\r\n        // \"ibc_source_channel\": \"channel-141\",\r\n        // \"from\": null,\r\n        // // \"from\": {\r\n        // //     \"account_id\": 0,\r\n        // //     \"chain\": \"External\", // Accepted values: \"External\", \"Internal\"\r\n        // //     \"address_id\": 0\r\n        // // },\r\n        // // \"from\": {\r\n        // //     \"derivation_path\": \"m/44'/501'/0'\"\r\n        // // },\r\n        // \"max\": false,\r\n        // \"fee\": {\r\n        //     \"type\": \"UtxoFixed\", // Accepted values: \"UtxoFixed\", \"UtxoPerKbyte\"\r\n        //     \"amount\": 0.00001 // default amount is 1000 of the smallest unit of the coin (0.00001 for 8 decimal places coins)\r\n        // } // Default: Coin Config\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"withdraw\",\r\n    \"params\": {\r\n        \"coin\": \"USDC-PLG20\",\r\n        \"to\": \"0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498\",\r\n        \"amount\": 0.0762\r\n        // \"broadcast\": true,\r\n        // \"max\": true\r\n        // \"ibc_source_channel\": \"channel-141\",\r\n        // \"from\": null,\r\n        // // \"from\": {\r\n        // //     \"account_id\": 0,\r\n        // //     \"chain\": \"External\", // Accepted values: \"External\", \"Internal\"\r\n        // //     \"address_id\": 0\r\n        // // },\r\n        // // \"from\": {\r\n        // //     \"derivation_path\": \"m/44'/501'/0'\"\r\n        // // },\r\n        // \"max\": false,\r\n        // \"fee\": {\r\n        //     \"type\": \"UtxoFixed\", // Accepted values: \"UtxoFixed\", \"UtxoPerKbyte\"\r\n        //     \"amount\": 0.00001 // default amount is 1000 of the smallest unit of the coin (0.00001 for 8 decimal places coins)\r\n        // } // Default: Coin Config\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -7863,8 +8604,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -8002,8 +8743,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -8057,8 +8798,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -8211,7 +8952,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -8250,7 +8992,8 @@
 													"\r",
 													"pm.request.body.update(strippedData);"
 												],
-												"type": "text/javascript"
+												"type": "text/javascript",
+												"packages": {}
 											}
 										}
 									],
@@ -8265,7 +9008,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::withdraw::status\",\r\n    \"params\": {\r\n        \"task_id\": 0\r\n        // \"forget_if_finished\": true\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"method\": \"task::withdraw::status\",\r\n    \"params\": {\r\n        \"task_id\": 0,\r\n        \"forget_if_finished\": false\r\n    }\r\n    // \"id\": null // Accepted values: Integers\r\n}\r\n"
 										},
 										"url": {
 											"raw": "{{address}}",
@@ -8768,6 +9511,48 @@
 									],
 									"cookie": [],
 									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Signing error: with_key_pair:114] P2PKH script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd64ad24e655ba7221ea51c7931aad5b98da77f3c\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n' built from input key pair doesn't match expected prev script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd346067e3c3c3964c395fee208594790e29ede5d\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n'\",\"error_path\":\"utxo_common\",\"error_trace\":\"utxo_common:2835]\",\"error_type\":\"SigningError\",\"error_data\":\"with_key_pair:114] P2PKH script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd64ad24e655ba7221ea51c7931aad5b98da77f3c\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n' built from input key pair doesn't match expected prev script 'OP_DUP\\nOP_HASH160\\nOP_PUSHBYTES_20 0xd346067e3c3c3964c395fee208594790e29ede5d\\nOP_EQUALVERIFY\\nOP_CHECKSIG\\n'\",\"id\":0}"
+								},
+								{
+									"name": "Success: UTXO",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "\r\n  {\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"id\": 0,\r\n    \"method\": \"sign_raw_transaction\",\r\n    \"params\": {\r\n      \"coin\": \"KMD\",\r\n      \"type\": \"UTXO\",\r\n      \"tx\": {\r\n        \"tx_hex\": \"0400008085202f8901de43841dc545d6e82a96ba6607530a03a91c31a7fd579b2c5ac12d8b445ed409020000006a473044022044fe29f64d6deff16c7f394bba745c15f3bb5ad2f6adb02bbd286dc6ffe86b0902206e28d97928c6418049631f99ee9dbb5ddbab941cb72c04af20fbe12968e970a8012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff02a0061c06000000001976a9148d757e06a0bc7c8b5011bef06527c63104173c7688accd54d6cf100000001976a914d346067e3c3c3964c395fee208594790e29ede5d88accf7fa967000000000000000000000000000000\"\r\n      }\r\n    }\r\n  }"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "533"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 10 Feb 2025 04:32:32 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"tx_hex\":\"0400008085202f8901de43841dc545d6e82a96ba6607530a03a91c31a7fd579b2c5ac12d8b445ed409020000006a473044022044fe29f64d6deff16c7f394bba745c15f3bb5ad2f6adb02bbd286dc6ffe86b0902206e28d97928c6418049631f99ee9dbb5ddbab941cb72c04af20fbe12968e970a8012103d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2ffffffff02a0061c06000000001976a9148d757e06a0bc7c8b5011bef06527c63104173c7688accd54d6cf100000001976a914d346067e3c3c3964c395fee208594790e29ede5d88accf7fa967000000000000000000000000000000\"},\"id\":0}"
 								}
 							]
 						},
@@ -9067,8 +9852,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -9122,8 +9907,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -9177,8 +9962,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -9504,8 +10289,8 @@
 												"header": [
 													{
 														"key": "Content-Type",
-														"name": "Content-Type",
 														"value": "application/json",
+														"name": "Content-Type",
 														"type": "text"
 													}
 												],
@@ -10753,8 +11538,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -11957,6 +12742,319 @@
 							]
 						},
 						{
+							"name": "change_mnemonic_password",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"get_current_mtp\",\n    \"params\": {\n        \"coin\": \"DOC\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: Wallet name not found",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"change_mnemonic_password\",\n    \"params\": {\n        \"current_password\": \"foo\",\n        \"new_password\": \"bar\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "206"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 11 Feb 2025 07:31:03 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Internal error: `wallet_name` cannot be None!\",\n    \"error_path\": \"lp_wallet\",\n    \"error_trace\": \"lp_wallet:542]\",\n    \"error_type\": \"Internal\",\n    \"error_data\": \"`wallet_name` cannot be None!\",\n    \"id\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "get_wallet_names",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"get_wallet_names\"\n    // \"id\": null // Accepted values: Integers\n}\n"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"get_wallet_names\"\n    // \"id\": null // Accepted values: Integers\n}\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "119"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 11 Feb 2025 07:33:30 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"wallet_names\": [\n            \"Gringotts Retirement Fund\",\n            \"potato king\"\n        ],\n        \"activated_wallet\": null\n    },\n    \"id\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "get_mnemonic",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"get_mnemonic\",\n    \"params\": {\n      \"format\": \"plaintext\",\n      \"password\": \"Q^wJZg~Ck3.tPW~asnM-WrL\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: Wallet name not found (encrypted)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"get_mnemonic\",\n    \"params\": {\n      \"format\": \"encrypted\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "296"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 11 Feb 2025 07:36:56 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"Wallets storage error: Internal error: `wallet_name` cannot be None!\",\n    \"error_path\": \"lp_wallet.mnemonics_storage\",\n    \"error_trace\": \"lp_wallet:489] mnemonics_storage:48]\",\n    \"error_type\": \"WalletsStorageError\",\n    \"error_data\": \"Internal error: `wallet_name` cannot be None!\",\n    \"id\": null\n}"
+								},
+								{
+									"name": "Error: Wallet name not found (plaintext)",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"mmrpc\": \"2.0\",\n    \"method\": \"get_mnemonic\",\n    \"params\": {\n      \"format\": \"plaintext\",\n      \"password\": \"Q^wJZg~Ck3.tPW~asnM-WrL\"\n    }\n    // \"id\": null // Accepted values: Integers\n}\n"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "357"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 11 Feb 2025 07:38:30 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Wallets storage error: Wallets storage error: Internal error: `wallet_name` cannot be None!\",\"error_path\":\"lp_wallet.mnemonics_storage\",\"error_trace\":\"lp_wallet:497] lp_wallet:137] mnemonics_storage:48]\",\"error_type\":\"WalletsStorageError\",\"error_data\":\"Wallets storage error: Internal error: `wallet_name` cannot be None!\",\"id\":null}"
+								}
+							]
+						},
+						{
 							"name": "get_token_info",
 							"event": [
 								{
@@ -12002,8 +13100,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -12608,8 +13706,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -12746,8 +13844,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -13316,8 +14414,8 @@
 										"header": [
 											{
 												"key": "Content-Type",
-												"name": "Content-Type",
 												"value": "application/json",
+												"name": "Content-Type",
 												"type": "text"
 											}
 										],
@@ -13363,6 +14461,593 @@
 									],
 									"cookie": [],
 									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"base_fee\": \"5.155924173\",\n        \"low\": {\n            \"max_priority_fee_per_gas\": \"0.008999999\",\n            \"max_fee_per_gas\": \"6.09\",\n            \"min_wait_time\": null,\n            \"max_wait_time\": null\n        },\n        \"medium\": {\n            \"max_priority_fee_per_gas\": \"0.049\",\n            \"max_fee_per_gas\": \"6.13\",\n            \"min_wait_time\": null,\n            \"max_wait_time\": null\n        },\n        \"high\": {\n            \"max_priority_fee_per_gas\": \"0.089\",\n            \"max_fee_per_gas\": \"6.17\",\n            \"min_wait_time\": null,\n            \"max_wait_time\": null\n        },\n        \"source\": \"blocknative\",\n        \"base_fee_trend\": \"\",\n        \"priority_fee_trend\": \"\",\n        \"units\": \"Gwei\"\n    },\n    \"id\": null\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Wallet Connect",
+					"item": [
+						{
+							"name": "wc_new_connection",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+											"});",
+											"// Extracting the substring and storing it as a variable",
+											"pm.test(\"Extract the pairing_topic\", function () {",
+											"    var jsonData = pm.response.json();",
+											"    var url = jsonData.result.url;",
+											"    var startIndex = url.indexOf(\":\") + 1;",
+											"    var endIndex = url.indexOf(\"@\");",
+											"    let topic = url.substring(startIndex, endIndex);",
+											"    pm.collectionVariables.set(\"pairing_topic\", topic);",
+											"    console.log(\"pairing_topic updated to \" + topic)",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"method\": \"wc_new_connection\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"required_namespaces\": {\r\n\t\t\t\"eip155\": {\r\n\t\t\t\t\"chains\": [\r\n\t\t\t\t\t\"eip155:137\"\r\n\t\t\t\t],\r\n\t\t\t\t\"methods\": [\r\n\t\t\t\t\t\"eth_sendTransaction\",\r\n\t\t\t\t\t\"eth_signTransaction\",\r\n\t\t\t\t\t\"personal_sign\"\r\n\t\t\t\t],\r\n\t\t\t\t\"events\": [\r\n\t\t\t\t\t\"accountsChanged\",\r\n\t\t\t\t\t\"chainChanged\"\r\n\t\t\t\t]\r\n\t\t\t},\r\n\t\t\t\"cosmos\": {\r\n\t\t\t\t\"chains\": [\r\n\t\t\t\t\t\"cosmos:cosmoshub-4\",\r\n\t\t\t\t\t\"cosmos:irishub-1\",\r\n\t\t\t\t\t\"cosmos:osmosis-1\"\r\n\t\t\t\t],\r\n\t\t\t\t\"methods\": [\r\n\t\t\t\t\t\"cosmos_signDirect\",\r\n\t\t\t\t\t\"cosmos_signAmino\",\r\n\t\t\t\t\t\"cosmos_getAccounts\"\r\n\t\t\t\t],\r\n\t\t\t\t\"events\": []\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "wc_new_connection",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"method\": \"wc_new_connection\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"required_namespaces\": {\r\n\t\t\t\"eip155\": {\r\n\t\t\t\t\"chains\": [\r\n\t\t\t\t\t\"eip155:137\"\r\n\t\t\t\t],\r\n\t\t\t\t\"methods\": [\r\n\t\t\t\t\t\"eth_sendTransaction\",\r\n\t\t\t\t\t\"eth_signTransaction\",\r\n\t\t\t\t\t\"personal_sign\"\r\n\t\t\t\t],\r\n\t\t\t\t\"events\": [\r\n\t\t\t\t\t\"accountsChanged\",\r\n\t\t\t\t\t\"chainChanged\"\r\n\t\t\t\t]\r\n\t\t\t},\r\n\t\t\t\"cosmos\": {\r\n\t\t\t\t\"chains\": [\r\n\t\t\t\t\t\"cosmos:cosmoshub-4\"\r\n\t\t\t\t],\r\n\t\t\t\t\"methods\": [\r\n\t\t\t\t\t\"cosmos_signDirect\",\r\n\t\t\t\t\t\"cosmos_signAmino\",\r\n\t\t\t\t\t\"cosmos_getAccounts\"\r\n\t\t\t\t],\r\n\t\t\t\t\"events\": []\r\n\t\t\t}\r\n\t\t}\r\n\t}\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "232"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 10 Mar 2025 03:55:52 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"url\": \"wc:2e6e4a25f2d55c26bba9c7c8dbb4979ff6eff30adac83fbc67110d67399f6023@2?symKey=81630af135949921a2a9f70f64510231eb228f27870989348252f77399cee69d&relay-protocol=irn&expiryTimestamp=1741579252\"\n    },\n    \"id\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "wc_get_session",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"method\": \"wc_get_session\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"with_pairing_topic\": true,\r\n\t\t\"topic\": \"00a0447960af53a3a1e520989955cc710f0197d728f34fc1d86ded51b3b4e875\"\r\n\t}\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "via pairing_topic",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"method\": \"wc_get_session\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"with_pairing_topic\": true,\r\n\t\t\"topic\": \"ad2fbcc28d410158431a3dc181d4365462df5cef6c90402b3e415c9d75f7c6f1\"\r\n\t}\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "1065"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 12 Mar 2025 02:34:04 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"session\": {\n            \"topic\": \"008bb50bc495f768d74d1a0c558fc3ca32ef35f5c507790ea27d01983421ed95\",\n            \"metadata\": {\n                \"description\": \"Trust Wallet is a secure and easy-to-use mobile wallet\",\n                \"url\": \"https://trustwallet.com\",\n                \"icons\": [\n                    \"https://trustwallet.com/assets/images/media/assets/TWT.png\"\n                ],\n                \"name\": \"Trust Wallet\"\n            },\n            \"peer_pubkey\": \"e398a29c585d04df0ee555a9613e2106b1e0f80ae9decee70f0be7721c4c7a41\",\n            \"pairing_topic\": \"ad2fbcc28d410158431a3dc181d4365462df5cef6c90402b3e415c9d75f7c6f1\",\n            \"namespaces\": {\n                \"cosmos\": {\n                    \"chains\": [\n                        \"cosmos:cosmoshub-4\"\n                    ],\n                    \"accounts\": [\n                        \"cosmos:cosmoshub-4:cosmos1r5expjvu46u4s9yd4d2lpmss22p848lw2a7wa8\"\n                    ],\n                    \"methods\": [\n                        \"cosmos_getAccounts\",\n                        \"cosmos_signAmino\",\n                        \"cosmos_signDirect\"\n                    ],\n                    \"events\": []\n                },\n                \"eip155\": {\n                    \"chains\": [\n                        \"eip155:43114\"\n                    ],\n                    \"accounts\": [\n                        \"eip155:43114:0x85ed99633e9d03a30ed60209079944e1f4272048\"\n                    ],\n                    \"methods\": [\n                        \"eth_sendTransaction\",\n                        \"eth_signTransaction\",\n                        \"personal_sign\"\n                    ],\n                    \"events\": [\n                        \"accountsChanged\",\n                        \"chainChanged\"\n                    ]\n                }\n            },\n            \"subscription_id\": \"59e1d7f1d60e799288e4381d6887ec94961e5f55f3d49375156c2792a7db5b3b\",\n            \"properties\": null,\n            \"expiry\": 1742187410\n        }\n    },\n    \"id\": null\n}"
+								},
+								{
+									"name": "via session topic",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"method\": \"wc_get_session\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"topic\": \"008bb50bc495f768d74d1a0c558fc3ca32ef35f5c507790ea27d01983421ed95\"\r\n\t}\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "1065"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 12 Mar 2025 02:36:20 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"session\":{\"topic\":\"008bb50bc495f768d74d1a0c558fc3ca32ef35f5c507790ea27d01983421ed95\",\"metadata\":{\"description\":\"Trust Wallet is a secure and easy-to-use mobile wallet\",\"url\":\"https://trustwallet.com\",\"icons\":[\"https://trustwallet.com/assets/images/media/assets/TWT.png\"],\"name\":\"Trust Wallet\"},\"peer_pubkey\":\"e398a29c585d04df0ee555a9613e2106b1e0f80ae9decee70f0be7721c4c7a41\",\"pairing_topic\":\"ad2fbcc28d410158431a3dc181d4365462df5cef6c90402b3e415c9d75f7c6f1\",\"namespaces\":{\"cosmos\":{\"chains\":[\"cosmos:cosmoshub-4\"],\"accounts\":[\"cosmos:cosmoshub-4:cosmos1r5expjvu46u4s9yd4d2lpmss22p848lw2a7wa8\"],\"methods\":[\"cosmos_getAccounts\",\"cosmos_signAmino\",\"cosmos_signDirect\"],\"events\":[]},\"eip155\":{\"chains\":[\"eip155:43114\"],\"accounts\":[\"eip155:43114:0x85ed99633e9d03a30ed60209079944e1f4272048\"],\"methods\":[\"eth_sendTransaction\",\"eth_signTransaction\",\"personal_sign\"],\"events\":[\"accountsChanged\",\"chainChanged\"]}},\"subscription_id\":\"59e1d7f1d60e799288e4381d6887ec94961e5f55f3d49375156c2792a7db5b3b\",\"properties\":null,\"expiry\":1742187410}},\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "wc_get_sessions",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"pm.test(\"Successful POST request\", function () {",
+											"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+											"});",
+											"// Extracting the substring and storing it as a variable",
+											"pm.test(\"Extract the session_topic\", function () {",
+											"    ",
+											"    var jsonData = pm.response.json();",
+											"    var sessions = jsonData.result.sessions;",
+											"    if (Array.isArray(sessions)) {",
+											"        sessions.forEach(item => {",
+											"            if (item.pairing_topic === pm.collectionVariables.get(\"pairing_topic\")) {",
+											"                pm.collectionVariables.set(\"session_topic\", item.topic);",
+											"                console.log(\"session_topic updated to \" + item.topic)",
+											"            }",
+											"        });",
+											"    }",
+											"});"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"method\": \"wc_get_sessions\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {}\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "wc_get_sessions",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"method\": \"wc_get_sessions\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t}\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "4371"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 10 Mar 2025 04:06:37 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"sessions\": [\n            {\n                \"topic\": \"feeabbad7ac1f1ba720d4441c299eab2b239f0deefb050fe50dbc7a350d55f75\",\n                \"metadata\": {\n                    \"description\": \"Trust Wallet is a secure and easy-to-use mobile wallet\",\n                    \"url\": \"https://trustwallet.com\",\n                    \"icons\": [\n                        \"https://trustwallet.com/assets/images/media/assets/TWT.png\"\n                    ],\n                    \"name\": \"Trust Wallet\"\n                },\n                \"peer_pubkey\": \"f6c6c9c9ec460b631395192e83ff77625136b13ce2c36acd71290b7d816e2113\",\n                \"pairing_topic\": \"ad604cd186f5dc9498343fbd763f6d6963ea511de0e5d557a33a8e3790d6d4d5\",\n                \"namespaces\": {\n                    \"cosmos\": {\n                        \"chains\": [\n                            \"cosmos:cosmoshub-4\"\n                        ],\n                        \"accounts\": [\n                            \"cosmos:cosmoshub-4:cosmos1r5expjvu46u4s9yd4d2lpmss22p848lw2a7wa8\"\n                        ],\n                        \"methods\": [\n                            \"cosmos_getAccounts\",\n                            \"cosmos_signAmino\",\n                            \"cosmos_signDirect\"\n                        ],\n                        \"events\": []\n                    },\n                    \"eip155\": {\n                        \"chains\": [\n                            \"eip155:1\"\n                        ],\n                        \"accounts\": [\n                            \"eip155:1:0x85ed99633e9d03a30ed60209079944e1f4272048\"\n                        ],\n                        \"methods\": [\n                            \"eth_sendTransaction\",\n                            \"eth_signTransaction\",\n                            \"personal_sign\"\n                        ],\n                        \"events\": [\n                            \"accountsChanged\",\n                            \"chainChanged\"\n                        ]\n                    }\n                },\n                \"subscription_id\": \"8deb29d0c19eb5c3eb0d7ee3beda3693bda4bcc46656dc4f6dcec8db5348751c\",\n                \"properties\": null,\n                \"expiry\": 1741952829\n            },\n            {\n                \"topic\": \"ed6c18e392b5d944f46b189be4403beaf8553279dfab946c333cc6d45ddb60a5\",\n                \"metadata\": {\n                    \"description\": \"Trust Wallet is a secure and easy-to-use mobile wallet\",\n                    \"url\": \"https://trustwallet.com\",\n                    \"icons\": [\n                        \"https://trustwallet.com/assets/images/media/assets/TWT.png\"\n                    ],\n                    \"name\": \"Trust Wallet\"\n                },\n                \"peer_pubkey\": \"07ac7fc4cd4a565354f016da0ac6da086fb43d12e9467d88b5bdf2485f00ac76\",\n                \"pairing_topic\": \"5686b8065981fafca63bb4b2e7e9384bf348612981e69ac99fb8a698204aaed4\",\n                \"namespaces\": {\n                    \"cosmos\": {\n                        \"chains\": [\n                            \"cosmos:cosmoshub-4\"\n                        ],\n                        \"accounts\": [\n                            \"cosmos:cosmoshub-4:cosmos1r5expjvu46u4s9yd4d2lpmss22p848lw2a7wa8\"\n                        ],\n                        \"methods\": [\n                            \"cosmos_getAccounts\",\n                            \"cosmos_signAmino\",\n                            \"cosmos_signDirect\"\n                        ],\n                        \"events\": []\n                    },\n                    \"eip155\": {\n                        \"chains\": [\n                            \"eip155:1\"\n                        ],\n                        \"accounts\": [\n                            \"eip155:1:0x85ed99633e9d03a30ed60209079944e1f4272048\"\n                        ],\n                        \"methods\": [\n                            \"eth_sendTransaction\",\n                            \"eth_signTransaction\",\n                            \"personal_sign\"\n                        ],\n                        \"events\": [\n                            \"accountsChanged\",\n                            \"chainChanged\"\n                        ]\n                    }\n                },\n                \"subscription_id\": \"12d3d0c41d1d329fb3dcd3db3fcf7edad4643eae83ef9dc0f612777460b03f7d\",\n                \"properties\": null,\n                \"expiry\": 1741952162\n            },\n            {\n                \"topic\": \"24880ee97c56b95491e63d45aa7c743da4ea10bdffa73de7420ed91450c79c09\",\n                \"metadata\": {\n                    \"description\": \"Trust Wallet is a secure and easy-to-use mobile wallet\",\n                    \"url\": \"https://trustwallet.com\",\n                    \"icons\": [\n                        \"https://trustwallet.com/assets/images/media/assets/TWT.png\"\n                    ],\n                    \"name\": \"Trust Wallet\"\n                },\n                \"peer_pubkey\": \"1ea2ee2d46eaa017cd0c217878a8690b4039a781a87f8b8ed860fd46cb648b4a\",\n                \"pairing_topic\": \"2e6e4a25f2d55c26bba9c7c8dbb4979ff6eff30adac83fbc67110d67399f6023\",\n                \"namespaces\": {\n                    \"cosmos\": {\n                        \"chains\": [\n                            \"cosmos:cosmoshub-4\"\n                        ],\n                        \"accounts\": [\n                            \"cosmos:cosmoshub-4:cosmos1r5expjvu46u4s9yd4d2lpmss22p848lw2a7wa8\"\n                        ],\n                        \"methods\": [\n                            \"cosmos_getAccounts\",\n                            \"cosmos_signAmino\",\n                            \"cosmos_signDirect\"\n                        ],\n                        \"events\": []\n                    },\n                    \"eip155\": {\n                        \"chains\": [\n                            \"eip155:1\",\n                            \"eip155:137\",\n                            \"eip155:43114\",\n                            \"eip155:56\"\n                        ],\n                        \"accounts\": [\n                            \"eip155:137:0x85ed99633e9d03a30ed60209079944e1f4272048\",\n                            \"eip155:1:0x85ed99633e9d03a30ed60209079944e1f4272048\",\n                            \"eip155:43114:0x85ed99633e9d03a30ed60209079944e1f4272048\",\n                            \"eip155:56:0x85ed99633e9d03a30ed60209079944e1f4272048\"\n                        ],\n                        \"methods\": [\n                            \"eth_sendTransaction\",\n                            \"eth_signTransaction\",\n                            \"personal_sign\"\n                        ],\n                        \"events\": [\n                            \"accountsChanged\",\n                            \"chainChanged\"\n                        ]\n                    }\n                },\n                \"subscription_id\": \"a673fa087ec93ee4fcfd4910ff1ebb04a3b8c5fc01e13d57f0ea646ce3c0c843\",\n                \"properties\": null,\n                \"expiry\": 1742183855\n            },\n            {\n                \"topic\": \"bdff85bde684f2f90237d37515177e21d8fa90297c0bf254393629bd9a134a92\",\n                \"metadata\": {\n                    \"description\": \"Trust Wallet is a secure and easy-to-use mobile wallet\",\n                    \"url\": \"https://trustwallet.com\",\n                    \"icons\": [\n                        \"https://trustwallet.com/assets/images/media/assets/TWT.png\"\n                    ],\n                    \"name\": \"Trust Wallet\"\n                },\n                \"peer_pubkey\": \"ac8c3149b4285c5fcb7259318697b4c125f35f1a57423b8e7b4da5b93772db3f\",\n                \"pairing_topic\": \"f8aedf596dde182559ed75ea6358db9f49cf5a8757c0f32551fca8062d613191\",\n                \"namespaces\": {\n                    \"cosmos\": {\n                        \"chains\": [\n                            \"cosmos:cosmoshub-4\"\n                        ],\n                        \"accounts\": [\n                            \"cosmos:cosmoshub-4:cosmos1r5expjvu46u4s9yd4d2lpmss22p848lw2a7wa8\"\n                        ],\n                        \"methods\": [\n                            \"cosmos_getAccounts\",\n                            \"cosmos_signAmino\",\n                            \"cosmos_signDirect\"\n                        ],\n                        \"events\": []\n                    },\n                    \"eip155\": {\n                        \"chains\": [\n                            \"eip155:1\",\n                            \"eip155:137\"\n                        ],\n                        \"accounts\": [\n                            \"eip155:137:0x85ed99633e9d03a30ed60209079944e1f4272048\",\n                            \"eip155:1:0x85ed99633e9d03a30ed60209079944e1f4272048\"\n                        ],\n                        \"methods\": [\n                            \"eth_sendTransaction\",\n                            \"eth_signTransaction\",\n                            \"personal_sign\"\n                        ],\n                        \"events\": [\n                            \"accountsChanged\",\n                            \"chainChanged\"\n                        ]\n                    }\n                },\n                \"subscription_id\": \"67246cc1b98a3f0ca7e286c0874f278be6c7b9d8803c6396910d91676b7607f6\",\n                \"properties\": null,\n                \"expiry\": 1741955363\n            }\n        ]\n    },\n    \"id\": null\n}"
+								}
+							]
+						},
+						{
+							"name": "wc_ping_session",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"method\": \"wc_ping_session\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"with_pairing_topic\": true,\r\n\t\t\"topic\": \"31ad8ac1312e01ff7ff656ed5507eb9fd6f2f435668fd86331e00b33627bfc14\"\r\n\t}\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: Timeout",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"method\": \"wc_ping_session\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"topic\": \"{{session_topic}}\"\r\n\t}\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "196"
+										},
+										{
+											"key": "date",
+											"value": "Mon, 10 Mar 2025 05:25:29 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Request timeout error\",\"error_path\":\"sessions.ping\",\"error_trace\":\"sessions:78] ping:24]\",\"error_type\":\"SessionRequestError\",\"error_data\":\"Request timeout error\",\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "wc_delete_session",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n\t\"method\": \"wc_delete_session\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"topic\": \"{{session_topic}}\"\r\n\t}\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: Timeout",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"method\": \"wc_delete_session\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"with_pairing_topic\": false,\r\n\t\t\"topic\": \"3569914dd09a5cc4ac92dedab354f06ff5db17ef616233a8ba562cbea51269fd\"\r\n\t}\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "200"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 11 Mar 2025 05:28:52 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Request timeout error\",\"error_path\":\"sessions.delete\",\"error_trace\":\"sessions:67] delete:36]\",\"error_type\":\"SessionRequestError\",\"error_data\":\"Request timeout error\",\"id\":null}"
+								},
+								{
+									"name": "Error: sym_key not found",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n\t\"method\": \"wc_delete_session\",\r\n\t\"userpass\": \"{{userpass}}\",\r\n\t\"mmrpc\": \"2.0\",\r\n\t\"params\": {\r\n\t\t\"with_pairing_topic\": true,\r\n\t\t\"topic\": \"31ad8ac1312e01ff7ff656ed5507eb9fd6f2f435668fd86331e00b33627bfc14\"\r\n\t}\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "363"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 12 Mar 2025 03:06:08 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Internal Error: topic sym_key not found: 31ad8ac1312e01ff7ff656ed5507eb9fd6f2f435668fd86331e00b33627bfc14\",\"error_path\":\"sessions.lib\",\"error_trace\":\"sessions:69] lib:281]\",\"error_type\":\"SessionRequestError\",\"error_data\":\"Internal Error: topic sym_key not found: 31ad8ac1312e01ff7ff656ed5507eb9fd6f2f435668fd86331e00b33627bfc14\",\"id\":null}"
 								}
 							]
 						}
@@ -15295,11 +16980,219 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "Newman Tests",
+			"item": [
+				{
+					"name": "Activation",
+					"item": [
+						{
+							"name": "Legacy",
+							"item": [
+								{
+									"name": "electrum",
+									"request": {
+										"method": "GET",
+										"header": []
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "v2",
+							"item": []
+						}
+					]
+				},
+				{
+					"name": "wasm_rpc",
+					"item": [
+						{
+							"name": "logs",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://whiskey-charlie.battlefield.earth:18896/logs?limit=100",
+									"protocol": "http",
+									"host": [
+										"whiskey-charlie",
+										"battlefield",
+										"earth"
+									],
+									"port": "18896",
+									"path": [
+										"logs"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "100"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "status",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://whiskey-charlie.battlefield.earth:18896/status",
+									"protocol": "http",
+									"host": [
+										"whiskey-charlie",
+										"battlefield",
+										"earth"
+									],
+									"port": "18896",
+									"path": [
+										"status"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update_wasm_lib",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"action\": \"update_wasm_lib\",\n    \"wasm_lib_url\": \"https://sdk.devbuilds.komodo.earth/dev/kdf_cb89300-wasm.zip\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://whiskey-charlie.battlefield.earth:18896/admin",
+									"protocol": "http",
+									"host": [
+										"whiskey-charlie",
+										"battlefield",
+										"earth"
+									],
+									"port": "18896",
+									"path": [
+										"admin"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "restart_kdf",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"action\": \"restart_kdf\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://whiskey-charlie.battlefield.earth:18896/admin",
+									"protocol": "http",
+									"host": [
+										"whiskey-charlie",
+										"battlefield",
+										"earth"
+									],
+									"port": "18896",
+									"path": [
+										"admin"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "restart_kdf Copy",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"userpass\": \"{{userpass}}\",\n    \"method\": \"version\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://whiskey-charlie.battlefield.earth:18896/rpc",
+									"protocol": "http",
+									"host": [
+										"whiskey-charlie",
+										"battlefield",
+										"earth"
+									],
+									"port": "18896",
+									"path": [
+										"rpc"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "reload_kdf_page",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"action\": \"reload_kdf_page\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://whiskey-charlie.battlefield.earth:18896/admin",
+									"protocol": "http",
+									"host": [
+										"whiskey-charlie",
+										"battlefield",
+										"earth"
+									],
+									"port": "18896",
+									"path": [
+										"admin"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
 		}
 	],
 	"variable": [
 		{
 			"key": "userpass",
+			"value": ""
+		},
+		{
+			"key": "session_topic",
+			"value": ""
+		},
+		{
+			"key": "pairing_topic",
 			"value": ""
 		}
 	]
