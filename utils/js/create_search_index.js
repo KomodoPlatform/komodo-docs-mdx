@@ -1,3 +1,13 @@
+import * as fs from "fs";
+import { compile } from "@mdx-js/mdx";
+import { slugifyWithCounter } from "@sindresorhus/slugify";
+import { mdxAnnotations } from "mdx-annotations";
+import path from "path";
+import remarkGfm from "remark-gfm";
+import { visit } from "unist-util-visit";
+
+import { removedWords } from "./_removed_search_words.js";
+
 const listOfAllowedElementsToCheck = [
   "h1",
   "h2",
@@ -5,17 +15,13 @@ const listOfAllowedElementsToCheck = [
   "h4",
   "h5",
   "h6",
-  "a",
+  // "a",
   "p",
   "li",
+  "ul",
+  "pre",
+  "table",
 ];
-
-import { compile } from "@mdx-js/mdx";
-import * as fs from "fs";
-import { mdxAnnotations } from "mdx-annotations";
-import path from "path";
-import { visit } from "unist-util-visit";
-import { removedWords } from "./_removed_search_words.js";
 
 const jsonFile = JSON.parse(fs.readFileSync("./src/data/sidebar.json"));
 
@@ -34,6 +40,7 @@ const extractSidebarTitles = (jsonData, linksArray = []) => {
 };
 const sidebarData = extractSidebarTitles(jsonFile);
 const sidebarSearchData = {};
+const allMdxFileContentTree = {};
 sidebarData.forEach((data) => {
   // we're doing this so as to allow for key referencing without looping through
   // the entire list for every mdxPath where this sidebarSearchData is being used
@@ -101,14 +108,25 @@ const getStringContentFromElement = (elementTree, contentList = []) => {
 function elementTreeChecker(mdxFilePathToCompile) {
   return async (tree) => {
     let textContentOfElement = "";
+    let closestElementReference = null;
+    let slugify = slugifyWithCounter();
+    let documentTree = [];
+    const docPath = transformFilePath(mdxFilePathToCompile);
+
     if (tree)
       visit(tree, ["element"], (node) => {
         if (listOfAllowedElementsToCheck.includes(node.tagName)) {
-          // getStringContentFromElement(node.children);
+          // For searchPreview
+          if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(node.tagName)) {
+            visit(node, "text", (text) => {
+              closestElementReference = slugify(text.value);
+            });
+          }
+          // ...
+
           if (node.tagName === "h1") {
             // grab page title and merge with respective sidebar title for absolute pages
             const docsPageTitle = node.children[0].value;
-            const docPath = transformFilePath(mdxFilePathToCompile);
             const sidebarTitle = sidebarSearchData[docPath]?.title ?? "";
 
             mdxFileWordsResultsWithFilePaths[mdxFilePathToCompile] = {
@@ -120,15 +138,30 @@ function elementTreeChecker(mdxFilePathToCompile) {
               path: docPath,
             };
           }
+
           visit(node, "text", (text) => {
-            if (!!text.value.trim())
+            if (!!text.value.trim()) {
+              // For searchPreview
+              let lineData = {
+                text: text.value,
+                tagName: node.tagName,
+                path: docPath,
+                closestElementReference,
+              };
+              documentTree.push(lineData);
+              // ...
+
               textContentOfElement = textContentOfElement.concat(
                 " ",
                 text.value
               );
+            }
           });
         }
       });
+
+    allMdxFileContentTree[docPath] = documentTree;
+
     const finalText = textContentOfElement
       .toLocaleLowerCase()
       .trim()
@@ -158,7 +191,7 @@ function hasOnlyHyphens(str) {
 async function compileMdxFile(mdxFilePathToCompile) {
   const mdxFileResultString = fs.readFileSync(mdxFilePathToCompile, "utf8");
   return await compile(mdxFileResultString, {
-    remarkPlugins: [mdxAnnotations.remark],
+    remarkPlugins: [mdxAnnotations.remark, remarkGfm],
     rehypePlugins: [
       mdxAnnotations.rehype,
       () => elementTreeChecker(mdxFilePathToCompile),
@@ -168,7 +201,6 @@ async function compileMdxFile(mdxFilePathToCompile) {
 }
 
 const runSearchIndexingOnAllMdxFiles = async () => {
-  //     extractSidebarTitles(jsonFile);
   try {
     const mdxFiles = getMDXFiles("./src/pages");
     for (let index = 0; index < mdxFiles.length; index++) {
@@ -176,13 +208,17 @@ const runSearchIndexingOnAllMdxFiles = async () => {
       try {
         await compileMdxFile(file);
       } catch (error) {
-        throw new Error(`Processing file:${file}
-Error: ${error}`);
+        throw new Error(`Processing file:${file} 
+          ${error}`);
       }
     }
     fs.writeFileSync(
       "./utils/_searchIndex.json",
       JSON.stringify(mdxFileWordsResultsWithFilePaths)
+    );
+    fs.writeFileSync(
+      "./utils/_allMdxFileContentTree.json",
+      JSON.stringify(allMdxFileContentTree, null, 2)
     );
   } catch (error) {
     throw new Error(error);
