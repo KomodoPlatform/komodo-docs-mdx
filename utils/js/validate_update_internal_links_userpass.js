@@ -24,7 +24,11 @@ if (fs.existsSync(manualLinkFile)) {
 (async function () {
   try {
     let filepaths = [];
-    walkDir("./src/pages", (filepath) => filepaths.push(filepath));
+    walkDir("./src/pages", (filepath) => {
+      if (!filepath.toLowerCase().includes(".ds_store")) {
+        filepaths.push(filepath)
+      }
+    });
     await createFileSlugs(filepaths); // can comment on repeat runs, while fixing internal links and not changing headings in content
 
     let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
@@ -87,14 +91,7 @@ async function processFile(filePath, filepathSlugs) {
     .use(remarkGfm)
     .use(remarkMdx)
     .use(() => (tree) => {
-      //console.log("Processing: " + filePath)
-      const hasTitleAndDesc = tree.children.some(
-        (node) =>
-          node.type === "mdxjsEsm" && isValidTitleDescExports(node.value)
-      );
-      if (!hasTitleAndDesc) {
-        throw new Error("File doesn't have title/description: " + filePath);
-      }
+      hasValidTitleDescExportsImgImports(tree.children, filePath);
     })
     .use(() => (tree) => {
       visit(tree, "link", (node) => {
@@ -314,50 +311,74 @@ export function walkDir(dirPath, callback) {
   });
 }
 
-function isValidTitleDescExports(str) {
-  // console.log(str);
-  try {
-    const parsed = acorn.parse(str, {
-      sourceType: "module",
-      ecmaVersion: 2020,
-    });
+function hasValidTitleDescExportsImgImports(children, filePath) {
+  const expImpChildren = children.filter((node) => node.type === "mdxjsEsm");
+  let titleExportedCount = 0;
+  let descriptionExportedCount = 0;
+  let invalidImagePaths = [];
+  let imagesNotFound = []
 
-    let titleExported = false;
-    let descriptionExported = false;
-    for (const node of parsed.body) {
-      if (node.type === "ExportNamedDeclaration") {
-        if (node.declaration && node.declaration.declarations) {
-          for (const declaration of node.declaration.declarations) {
-            if (
-              declaration.id.name === "title" &&
-              declaration.init.type === "Literal"
-            ) {
-              titleExported = true;
-              // let numChars = declaration.init.value.length;
-              // if (numChars > 60) {
-              //   throw new Error(`Title: "${declaration.init.value}" has ${numChars} characters, which is greater than 60`)
-              // }
+  for (const node of expImpChildren) {
+    try {
+      const parsed = acorn.parse(node.value, {
+        sourceType: "module",
+        ecmaVersion: 2020,
+      });
+
+      for (const node of parsed.body) {
+        if (node.type === "ExportNamedDeclaration") {
+          if (node.declaration && node.declaration.declarations) {
+            for (const declaration of node.declaration.declarations) {
+              if (
+                declaration.id.name === "title" &&
+                declaration.init.type === "Literal"
+              ) {
+                titleExportedCount = titleExportedCount + 1;
+                // let numChars = declaration.init.value.length;
+                // if (numChars > 60) {
+                //   throw new Error(`Title: "${declaration.init.value}" has ${numChars} characters, which is greater than 60`)
+                // }
+              }
+              if (
+                declaration.id.name === "description" &&
+                declaration.init.type === "Literal"
+              ) {
+                descriptionExportedCount = descriptionExportedCount + 1;
+                // let numChars = declaration.init.value.length;
+                // if (numChars > 160 || numChars < 140) {
+                //   throw new Error(`Description: "${declaration.init.value}" has ${numChars} characters, which is not between 140 and 160`)
+                // }
+              }
             }
-            if (
-              declaration.id.name === "description" &&
-              declaration.init.type === "Literal"
-            ) {
-              descriptionExported = true;
-              // let numChars = declaration.init.value.length;
-              // if (numChars > 160 || numChars < 140) {
-              //   throw new Error(`Description: "${declaration.init.value}" has ${numChars} characters, which is not between 140 and 160`)
-              // }
+          }
+        } else if (node.type === "ImportDeclaration" && node.source.type === "Literal") {
+          const importImgPath = node.source.value
+          if (!importImgPath.startsWith("@/public/images/docs")) {
+            invalidImagePaths.push(importImgPath)
+          } else {
+            let imagePath = importImgPath.replace("@/public/images/docs", "src/images");
+            if (!fs.existsSync(imagePath)) {
+              imagesNotFound.push(imagePath)
             }
           }
         }
       }
+    } catch (e) {
+      console.log(`Error in file: ${filePath}`);
+      console.log(`Error in node: ${JSON.stringify(node, null, 2)}`);
+      throw new Error(e);
     }
+  }
 
-    return titleExported && descriptionExported;
-  } catch (e) {
-    throw new Error(e);
-    //console.log(e)
-    //return false; // Parsing error means the string is not valid JS
+  let errorString = `Processing file: ${filePath}
+  ${titleExportedCount !== 1 ? `Title exported ${titleExportedCount} times` : ""}
+  ${descriptionExportedCount !== 1 ? `Description exported ${descriptionExportedCount} times` : ""}
+  ${invalidImagePaths.length > 0 ? `Invalid image paths (must start with '@/public/images/docs'): \n${invalidImagePaths.join(",\n")}` : ""}
+  ${imagesNotFound.length > 0 ? `Images not found in filesystem: \n${imagesNotFound.join(",\n")}` : ""}
+  
+  `
+  if (titleExportedCount !== 1 || descriptionExportedCount !== 1 || invalidImagePaths.length > 0 || imagesNotFound.length > 0) {
+    throw new Error(errorString);
   }
 }
 

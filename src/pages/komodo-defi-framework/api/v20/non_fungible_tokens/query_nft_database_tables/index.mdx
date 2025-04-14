@@ -1,0 +1,151 @@
+export const title = "Komodo DeFi Framework Method: Non Fungible Tokens - Query NFT database tables";
+export const description =
+  "This document describes how to query the local NFT database tables.";
+
+# Query NFT database tables
+
+After using the [update\_nft](/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/#update-nft) method to initialise your local NFT database,
+the following tables are available in `DB/KOMODEFI.db`:
+
+*   AVAX\_nft\_list
+*   AVAX\_nft\_transfer\_history
+*   BNB\_nft\_list
+*   BNB\_nft\_transfer\_history
+*   ETH\_nft\_list
+*   ETH\_nft\_transfer\_history
+*   FTM\_nft\_list
+*   FTM\_nft\_transfer\_history
+*   MATIC\_nft\_list
+*   MATIC\_nft\_transfer\_history
+*   scanned\_nft\_blocks
+
+This SQLite database is located under the DB user data folder with each wallet having its own subfolder represented by a hexadecimal string.
+This string is shown in the runtime logs of the `kdf` binary as `Public key hash` when it starts up.
+
+```bash
+30 08:39:23, mm2:269] AtomicDEX API 2.1.0-beta_a81f2a101 DT 2024-07-26T23:24:52+03:00
+30 08:39:23, mm2_main::mm2::lp_native_dex:500] INFO Version: 2.1.0-beta_a81f2a101 DT 2024-07-26T23:24:52+03:00
+30 08:39:23, crypto::crypto_ctx:324] INFO Public key hash: 7d6cbdd91788df3b764247721fe12853ce36b03d
+```
+
+The default location of this folder for each operating system is:
+
+```bash
+- Linux: $HOME/.kdf/DB/{'{wallet identifying hex string}'}/MM2.db'
+- MacOS: $HOME/.kdf/DB/{'{wallet identifying hex string}'}/MM2.db'
+- Windows: %APPDATA%\kdf\DB\{'{wallet identifying hex string}'}\MM2.db'
+```
+
+<Note>
+  You can define a different location for the DB folder via the [`dbdir` configuration parameter](/komodo-defi-framework/setup/configure-mm2-json/) in your MM2.json file.
+  There is also a sqlite database named `MM2.db` which [can be queried for information related to swaps, transactions and other information](/komodo-defi-framework/tutorials/query-the-mm2-database/).
+</Note>
+
+There are a variety of methods to query sqlite databases. Examples below show how to do a sqlite query in Linux terminal, but first you might need to install sqlite with `sudo apt install sqlite3`.
+
+The tables and columns available to query in KOMODEFI.db are as follows:
+
+## NFT List tables
+
+The COIN\_nft\_list tables contain the NFTs that you own
+It has the following columns, though not all columns are populated for all NFTs:
+
+| ID | Name                   | Type         | Description                                                                    |
+| -- | ---------------------- | ------------ | ------------------------------------------------------------------------------ |
+| 0  | token\_address         | VARCHAR(256) | The address of the token contract.                                             |
+| 1  | token\_id              | VARCHAR(256) | The id of the token.                                                           |
+| 2  | chain                  | TEXT         | The coin network which the NFT is on.                                          |
+| 3  | amount                 | VARCHAR(256) | The amount of NFTs transfered in this transaction.                             |
+| 4  | block\_number          | INTEGER      | The block height of this transaction.                                          |
+| 5  | contract\_type         | TEXT         | The contract type. Either `ERC721` or `ERC1155`.                               |
+| 6  | possible\_spam         | INTEGER      | `1` indicates the NFT has been identified as spam. `0` indicates it has not.   |
+| 7  | possible\_phishing     | INTEGER      | `1` indicates the NFT has been identified as a scam. `0` indicates it has not. |
+| 8  | collection\_name       | TEXT         | The collection name which includes the token.                                  |
+| 9  | symbol                 | TEXT         | An arbitrary symbol for the NFT                                                |
+| 10 | token\_uri             | TEXT         | A link to the token's metadata.                                                |
+| 11 | token\_domain          | TEXT         | The domain the token metadata is hosted on.                                    |
+| 12 | metadata               | TEXT         | The token's metadata in JSON format.                                           |
+| 13 | last\_token\_uri\_sync | TEXT         | Date and time when the token uri was last syncronised.                         |
+| 14 | last\_metadata\_sync   | TEXT         | Date and time when the token metadata was last syncronised.                    |
+| 15 | raw\_image\_url        | TEXT         | The raw URL for the token image.                                               |
+| 16 | image\_url             | TEXT         | A link for the token's image (or other media).                                 |
+| 17 | image\_domain          | TEXT         | The domain the token image (or other media) is hosted on.                      |
+| 18 | token\_name            | TEXT         | The name of the token.                                                         |
+| 19 | description            | TEXT         | An arbitrary description of the NFT.                                           |
+| 20 | attributes             | TEXT         | Additional attribute data for the NFT in JSON format.                          |
+| 21 | animation\_url         | TEXT         | If NFT is animated, the URL of the animation.                                  |
+| 22 | animation\_domain      | TEXT         | If NFT is animated, the domain of the animation.                               |
+| 23 | external\_url          | TEXT         | Additional URL related to the NFT                                              |
+| 24 | external\_domain       | TEXT         | Domain of the additional URL related to the NFT                                |
+| 25 | image\_details         | TEXT         | Additional details about the NFT's image.                                      |
+| 26 | details\_json          | TEXT         | Additional information about the transaction in JSON format.                   |
+
+### Example COIN\_nft\_list table query
+
+> SELECT chain, token\_name, token\_address, token\_id, possible\_spam, possible\_phishing FROM MATIC\_nft\_list LIMIT 5;
+
+| chain   | token\_name            | token\_address                             | token\_id | possible\_spam | possible\_phishing |
+| ------- | ---------------------- | ------------------------------------------ | --------- | -------------- | ------------------ |
+| POLYGON | $2000 USDT Airdrop🎁   | 0xe7ee9dcf5f4b7f9254b348ba596c9fb9121f77e7 | 1         | 1              | 0                  |
+| POLYGON | $1000 USDC Voucher🎁   | 0xb092b5eb5c653e915880dfc1f606be2ffe6fae8c | 1         | 1              | 0                  |
+| POLYGON | 1000 BLUR Reward       | 0xeaa3c52052b809c8d8072187efc134def2dd5b13 | 0         | 1              | 0                  |
+| POLYGON | SHIB Voucher 66 of 100 | 0xc46e36339ebd8bed48b1bdb6bd815e4b72103949 | 0         | 1              | 0                  |
+| POLYGON | $1000 Rewards          | 0x6e0b84421388ad635f2a1167e39aff2dc742da2a | 0         | 1              | 0                  |
+
+The NFTs listed above are all spam, and will be ignored by the [get\_nft\_list](/komodo-defi-framework/api/v20/non_fungible_tokens/get_nft_list/) method.
+
+## NFT Transfer table
+
+The COIN\_nft\_transfer\_history tables contain the history of transfers of your NFTs, and have the following columns:
+
+| ID | Name               | Type         | Description                                                                    |
+| -- | ------------------ | ------------ | ------------------------------------------------------------------------------ |
+| 0  | transaction\_hash  | VARCHAR(256) | Hex string, representing the transaction.                                      |
+| 1  | log\_index         | INTEGER      | Simply a table index.                                                          |
+| 2  | chain              | TEXT         | The coin network which the NFT is on.                                          |
+| 3  | block\_number      | INTEGER      | The block height of this transaction.                                          |
+| 4  | block\_timestamp   | INTEGER      | The block time of this transaction.                                            |
+| 5  | contract\_type     | TEXT         | The contract type. Either `ERC721` or `ERC1155`.                               |
+| 6  | token\_address     | VARCHAR(256) | The address of the token contract.                                             |
+| 7  | token\_id          | VARCHAR(256) | The id of the token.                                                           |
+| 8  | status             | TEXT         | The transaction type: `Recieve` or `Send`                                      |
+| 9  | amount             | VARCHAR(256) | The amount of NFTs transfered in this transaction.                             |
+| 10 | possible\_spam     | INTEGER      | `1` indicates the NFT has been identified as spam. `0` indicates it has not.   |
+| 11 | possible\_phishing | INTEGER      | `1` indicates the NFT has been identified as a scam. `0` indicates it has not. |
+| 12 | token\_uri         | TEXT         | A link to the token's metadata.                                                |
+| 13 | token\_domain      | TEXT         | The domain the token metadata is hosted on.                                    |
+| 14 | collection\_name   | TEXT         | The collection name which includes the token.                                  |
+| 15 | image\_url         | TEXT         | A link for the token's image (or other media).                                 |
+| 16 | image\_domain      | TEXT         | The domain the token image (or other media) is hosted on.                      |
+| 17 | token\_name        | TEXT         | The name of the token.                                                         |
+| 18 | details\_json      | TEXT         | Additional information about the transaction in JSON format.                   |
+
+### Example COIN\_nft\_transfer\_history table query
+
+> SELECT transaction\_hash, token\_name, token\_address, token\_id,  FROM MATIC\_nft\_transfer\_history WHERE block\_timestamp > 1701519320;
+
+| transaction\_hash                                                  | token\_name          | token\_address                             | token\_id |
+| ------------------------------------------------------------------ | -------------------- | ------------------------------------------ | --------- |
+| 0x7b57303bcc2c68808b460490e984adcd18567a80660a18b7a151b62015247cda | $2000 USDT Airdrop🎁 | 0xe7ee9dcf5f4b7f9254b348ba596c9fb9121f77e7 | 1         |
+
+## NFT Last Scanned Block table
+
+The scanned\_nft\_blocks table contains the last block that was scanned for each chain.
+It has the following columns:
+
+| ID | Name                 | Type    | Description                                                            |
+| -- | -------------------- | ------- | ---------------------------------------------------------------------- |
+| 2  | chain                | TEXT    | The coin network which the NFT is on.                                  |
+| 1  | last\_scanned\_block | INTEGER | The block height when the last scan for NFTs was performed on a chain. |
+
+### Example scanned\_nft\_blocks table query
+
+> SELECT \* FROM scanned\_nft\_blocks;
+
+| chain | last\_scanned\_block |
+| ----- | -------------------- |
+| MATIC | 50651981             |
+| FTM   | 66512090             |
+| ETH   | 0                    |
+| BNB   | 0                    |
+| AVAX  | 0                    |

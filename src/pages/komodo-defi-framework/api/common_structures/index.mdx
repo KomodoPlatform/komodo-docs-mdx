@@ -120,6 +120,46 @@ Where the value indicates:
   ```
 </CollapsibleSection>
 
+### EventStreamConfig
+
+The `EventStreamConfig` object defines which events will be streamed to the client:
+
+| Parameter                      | Type   | Description                                                                            |
+| ------------------------------ | ------ | -------------------------------------------------------------------------------------- |
+| access\_control\_allow\_origin | string | Defines CORS whitelist. Use "\*" to allow fromi any origin.                            |
+| active\_events                 | object | Events to be streamed to the client, along with configuration defineing frequency etc. |
+| worker\_path                   | string | WASM only. Path to a custom `worker.js` file.                                          |
+
+Active events are defined as follows:
+
+*   NETWORK: Network status changes. Requires `stream_interval_seconds` configuration.
+*   HEARTBEAT: Allows clients to easily determine whether channels are functioning. Requires `stream_interval_seconds` configuration.
+*   COIN\_BALANCE: Balance changes. Does not require `stream_interval_seconds` configuration, as the event is triggered by the balance change.
+
+<Note>
+  The `COIN_BALANCE` event may not be available for all coins or tokens.
+</Note>
+
+An example of the event stream output can then be viewed in [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html)
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  "event_stream_configuration": {
+      "access_control_allow_origin": "*",
+      "active_events": {
+          "NETWORK": {
+              "stream_interval_seconds": 1.5,
+          },
+          "COIN_BALANCE": {},
+          "HEATBEAT": {
+              "stream_interval_seconds": 2.4,
+          }
+      },
+      "worker_path": "index.js"
+  }
+  ```
+</CollapsibleSection>
+
 ### NumericFormatsValue
 
 The `NumericFormatsValue` returns a price or amount in three different formats: `fraction`, `rational`, and `decimal`.
@@ -148,12 +188,13 @@ The `NumericFormatsValue` returns a price or amount in three different formats: 
 
 ### FeeInfo
 
-The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/withdraw/) requests:
+The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests:
 
 | Parameter  | Type             | Description                                                                                                                               |
 | ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`                                  |
+| type       | string           | Type of transaction fee. Possible values: `UtxoFixed`, `UtxoPerKbyte`, `UtxoPriority`, `EthGas`, `Qrc20Gas`, `CosmosGas`                  |
 | amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
+| priority   | string           | Used only when type is `UtxoPriority`. Possible values: 'Low', 'Normal', 'High'.                                                          |
 | gas\_price | string (numeric) | Used only when fee type is `Qrc20Gas` or `EthGas`; sets the gas price in `gwei` units.                                                    |
 | gas\_price | number (double)  | Used only when fee type is `CosmosGas`; sets the gas price.                                                                               |
 | gas        | number (integer) | Used only when fee type is `EthGas`; sets the gas limit for transaction                                                                   |
@@ -173,6 +214,13 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
   {
     "type": "UtxoPerKbyte",
     "amount": "0.0001"
+  }
+  ```
+
+  ```json
+  {
+    "type": "UtxoPriority",
+    "priority": "Low"
   }
   ```
 
@@ -392,6 +440,62 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
   {
     "type": "Utxo",
     "amount": "0.00001"
+  }
+  ```
+</CollapsibleSection>
+
+### FilterCriteria
+
+The 'FilterCriteria' object allows you to filter the results based on specific parameters.
+
+| Parameter       | Type   | Description                                    |
+| --------------- | ------ | ---------------------------------------------- |
+| status          | string | Status of the transactions (e.g., "completed") |
+| date\_from      | string | \`Start date in ISO 8601 format                |
+| date\_to        | string | End date in ISO 8601 format                    |
+| my\_coin        | string | Coin being used by you for the swap/trade.     |
+| other\_coin     | string | Coin you are trading against                   |
+| from\_timestamp | number | Start timestamp in UNIX format                 |
+| to\_timestamp   | number | End timestamp in UNIX format                   |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Example
+
+  ```json
+  {
+    "filter": {
+      "status": "completed",
+      "date_from": "2024-01-01T00:00:00Z",
+      "date_to": "2024-07-01T00:00:00Z",
+      "my_coin": "BTC",
+      "other_coin": "ETH",
+      "from_timestamp": 1672531200,
+      "to_timestamp": 1704067200
+    }
+  }
+  ```
+</CollapsibleSection>
+
+### PagingOptions
+
+The `PagingOptions` object includes options of page selection to consult when looking for recent swaps:
+
+| Parameter    | Type             | Description                                                                                                            |
+| ------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| from\_uuid   | string (or null) | Skips records until this UUID, excluding the record with this UUID. Convenient for infinite scrolling implementations. |
+| limit        | number           | Limits the number of returned swaps.                                                                                   |
+| page\_number | number           | Returns limit swaps from the selected page. This parameter is ignored if from\_uuid is set.                            |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example
+
+  ```json
+  {
+    "paging_options": {
+      "from_uuid": null,
+      "limit": 10,
+      "page_number": 1
+    }
   }
   ```
 </CollapsibleSection>

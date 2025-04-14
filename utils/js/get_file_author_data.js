@@ -2,52 +2,127 @@ import fs from 'fs';
 import https from 'https';
 import path from 'path';
 import { spawnSync } from 'child_process';
-import { get } from 'http';
 const authorsData = JSON.parse(fs.readFileSync("./authors.json", 'utf8'));
 const oldFileData = JSON.parse(fs.readFileSync("./utils/_fileData_old_documentation_mod.json", 'utf8'));
+import dotenv from 'dotenv';
+dotenv.config();
 
 const fileData = {};
 
 (async function () {
-    const contributorsInfoUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/contributors"
+    const allContributorsDataUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/contributors"
+
+    const latest100CommitsUrl = "https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?sha=dev&per_page=100"
+
+    const userDataUrl = (login) => `https://api.github.com/users/${login}`
 
     const options = {
         headers: {
-            'User-Agent': 'komodo-docs-mdx-ci'
+            'User-Agent': 'komodo-docs-mdx-ci',
+            'Accept': 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+            'Authorization': `Bearer ${process.env.LOCAL_GH_TOKEN ?? process.env.GH_TOKEN}`
         }
     };
 
     try {
-        const { response } = await httpsGet(contributorsInfoUrl, options)
-        const contributorData = JSON.parse(response)
-        contributorData.forEach(contributor => {
-            if (!authorsData[contributor.login]) {
-                authorsData[contributor.login] = {
-                    username: contributor.login,
-                    commit_emails: [],
-                    socials: {
-                        twitter: "",
-                        linkedin: ""
-                    }
-                }
-            }
-            authorsData[contributor.login].id = contributor.id
-            authorsData[contributor.login].avatar_url = contributor.avatar_url
-        });
-    } catch (error) {
-        console.error(error);
-    }
+        const { response: contributorsRes } = await httpsGet(allContributorsDataUrl, options)
+        const contributorData = JSON.parse(contributorsRes)
+        const { response: commitsRes } = await httpsGet(latest100CommitsUrl, options)
+        const commitData = JSON.parse(commitsRes)
 
-    for (const username in authorsData) {
-        const imageUrl = authorsData[username].avatar_url
-        const imgName = await downloadImage(imageUrl, username)
-        authorsData[username].image = imgName
+        const contributorLogins = new Set();
+        contributorData.forEach(contributor => contributorLogins.add(contributor.login))
+        commitData.forEach(commit => commit.author && contributorLogins.add(commit.author.login))
+        Object.values(authorsData).forEach(author => contributorLogins.add(author.username))
+        for (const contributorLogin of Array.from(contributorLogins)) {
+            const isMissingInContributorData = !Object.values(authorsData).find(author => author.username === contributorLogin) || !contributorData.find(contributor => contributor.login === contributorLogin)
+            console.log(contributorLogin)
+
+            const { response } = await httpsGet(`https://api.github.com/repos/komodoplatform/komodo-docs-mdx/commits?sha=dev&author=${contributorLogin}`, options)
+            const contributorCommits = JSON.parse(response)
+            const commit_emails = new Set();
+            contributorCommits.forEach(commit => {
+                if (commit.commit && commit.commit.author && commit.commit.author.email) {
+                    commit_emails.add(commit.commit.author.email);
+                }
+            });
+
+            authorsData[contributorLogin]?.commit_emails.forEach(email => commit_emails.add(email))
+
+
+            authorsData[contributorLogin] = authorsData[contributorLogin] ?? {}
+
+            //console.log(commit_emails)
+            console.log(contributorLogin)
+
+            authorsData[contributorLogin].username = contributorLogin
+            authorsData[contributorLogin].commit_emails = Array.from(commit_emails).sort()
+            const authorSocials = authorsData[contributorLogin].socials
+
+            const { response: userDataRes } = await httpsGet(userDataUrl(contributorLogin), options)
+            const userData = JSON.parse(userDataRes)
+            console.log(userData)
+
+            authorsData[contributorLogin].socials = {
+                ...authorSocials,
+                twitter: userData.twitter_username ?? authorSocials?.twitter ?? "",
+                linkedin: authorSocials?.linkedin ?? ""
+            }
+
+            authorsData[contributorLogin].id = userData.id
+            const imageUrl = userData.avatar_url
+            authorsData[contributorLogin].avatar_url = imageUrl
+            const imgName = await downloadImage(imageUrl, contributorLogin)
+            authorsData[contributorLogin].image = imgName
+        }
+    } catch (error) {
+        console.error(error)
+        throw new Error(error)
     }
 
     fs.writeFileSync("authors.json", JSON.stringify(authorsData, null, 4))
 
 
     walkDir("./src/pages", getAllFileData);
+
+    // Merge renamed paths data if available
+    try {
+        if (fs.existsSync("./utils/_renamedPathsData.json")) {
+            const renamedPathsData = JSON.parse(fs.readFileSync("./utils/_renamedPathsData.json", 'utf8'));
+
+            // Process each renamed path
+            for (const [newRoute, data] of Object.entries(renamedPathsData)) {
+                if (fileData[newRoute]) {
+                    // Merge contributors
+                    const existingContributors = fileData[newRoute].contributors || [];
+                    const oldContributors = data.contributors || [];
+
+                    // Combine and remove duplicates
+                    const allContributors = [...existingContributors, ...oldContributors];
+                    fileData[newRoute].contributors = allContributors.filter((contributor, index) =>
+                        index === allContributors.findIndex(c =>
+                            c.name === contributor.name && c.email === contributor.email
+                        )
+                    );
+
+                    // Update creation date if any date in the chain is earlier
+                    if (data.dateCreated && (!fileData[newRoute].dateCreated || new Date(data.dateCreated) < new Date(fileData[newRoute].dateCreated))) {
+                        fileData[newRoute].dateCreated = data.dateCreated;
+                    }
+
+                    // Store the rename history if not already present
+                    fileData[newRoute].previousPaths = [
+                        ...(fileData[newRoute].previousPaths || []),
+                        ...(data.previousRoutes || [])
+                    ].filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error merging renamed paths data:", error);
+    }
+
     fs.writeFileSync("./utils/_fileData.json", JSON.stringify(fileData, null, 2));
 })();
 

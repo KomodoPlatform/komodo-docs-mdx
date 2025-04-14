@@ -1,7 +1,7 @@
 export const constants = {
     "contentRepo": "https://github.com/KomodoPlatform/komodo-docs-mdx",
+    "docsPath": "/en/docs",
     "domain": "https://komodoplatform.com",
-    "basePath": "/en/docs",
     "pngLogo": "/assets/img/logo-dark.png",
     "supportEmail": "support@komodoplatform.com",
     "helloEmail": "hello@komodoplatform.com",

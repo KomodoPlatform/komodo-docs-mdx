@@ -6,29 +6,29 @@ export const description = "This guide describes a step-by-step process to recov
 If for any reason, you don't want to/can't recover a stuck/timed out/failed swap in Komodo mobile wallet and wants to use the CLI on a desktop, follow this guide.
 
 *   First, export the log file from your Komodo mobile wallet (Settings -> "Share log File") and transfer it to your Desktop.
-*   Follow the instructions in [this linked guide](/qa/extract-swap-data-komodo-wallet-log/) to extract the swap data from the log file into a format usable by `mm2`
+*   Follow the instructions in [this linked guide](/qa/extract-swap-data-komodo-wallet-log/) to extract the swap data from the log file into a format usable by `kdf`
 *   It should create two directories named "MAKER" and "TAKER" and files named `<uuid>.json` in the appropriate directory. `uuid` is the swap id from the Komodo mobile wallet app
 *   Find the file named after your stuck swap's id and save it in a accessible location. Also note if it was in the directory named "MAKER" or "TAKER"
 *   Follow the instructions in [this linked guide](/qa/komodefi-api-quickstart/) to download, configure and setup Komodo DeFi Framework on your desktop. When creating the file `MM2.json` as described in the guide, use the seed words from Komodo mobile wallet as the value for the key `"passphrase"`
-*   Once `mm2` is up and running, open a new terminal window and export the `rpc_password` as value to the environment variable named `userpass`.
+*   Once `kdf` is up and running, open a new terminal window and export the `rpc_password` as value to the environment variable named `userpass`.
 
 ```bash
 export userpass="<value of rpc_password from MM2.json here>"
 ```
 
-*   Stop `mm2` by issuing the `stop` command in the same terminal
+*   Stop `kdf` by issuing the `stop` command in the same terminal
 
 ```bash
 curl --url "http://127.0.0.1:7783" --data "{\"method\":\"stop\",\"userpass\":\"$userpass\"}"
 ```
 
-*   Navigate to the directory where `mm2` is located . You should find a directory named `DB`. Inside it, there should be a directory with a long hex (similar to `514fa660fa9976c87bb08e5636653ac75be9f606`) as its name. Navigate into it, then into "SWAPS", then "MY".
+*   Navigate to the directory where `kdf` is located . You should find a directory named `DB`. Inside it, there should be a directory with a long hex (similar to `514fa660fa9976c87bb08e5636653ac75be9f606`) as its name. Navigate into it, then into "SWAPS", then "MY".
     *   the directory structure should look similar to `DB/514fa660fa9976c87bb08e5636653ac75be9f606/SWAPS/MY`
 *   now, place the swap file in the above mentioned directory
-*   Now start `mm2` again using the command
+*   Now start `kdf` again using the command
 
 ```bash
-stdbuf -oL nohup ./mm2
+stdbuf -oL nohup ./kdf
 ```
 
 *   Enable the coins involved in the swap using the [electrum](/komodo-defi-framework/api/legacy/coin_activation/#electrum-method) command
@@ -56,10 +56,10 @@ curl --url "http://127.0.0.1:7783" --data "{\"userpass\":\"$userpass\",\"method\
 }
 ```
 
-*   Make sure the address and balance in the above response match the values shown in Komodo mobile wallet. If the address does not match, the `"passphrase"` (seed words) in `MM2.json` is incorrect. Stop `mm2`, delete the directory named `DB`, correct the passphrase and repeat all the steps from before. If the balance is `0`, either the electrum server's addresses you are using are incorrect or your connection might have an issue. Likely a firewall is blocking it.
+*   Make sure the address and balance in the above response match the values shown in Komodo mobile wallet. If the address does not match, the `"passphrase"` (seed words) in `MM2.json` is incorrect. Stop `kdf`, delete the directory named `DB`, correct the passphrase and repeat all the steps from before. If the balance is `0`, either the electrum server's addresses you are using are incorrect or your connection might have an issue. Likely a firewall is blocking it.
 
 <Note type="warning">
-  Don't delete the DB if you have been using the `mm2` on your desktop before
+  Don't delete the DB if you have been using the `kdf` on your desktop before
   opening this guide. It contains information on your past/ongoing/stuck swaps.
   Deleting it may cause you to lose access to your locked coins. Instead of
   deleting the entire DB, simply delete the directory inside the DB that

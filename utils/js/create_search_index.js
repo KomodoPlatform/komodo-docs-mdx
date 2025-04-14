@@ -138,7 +138,6 @@ function elementTreeChecker(mdxFilePathToCompile) {
               path: docPath,
             };
           }
-
           visit(node, "text", (text) => {
             if (!!text.value.trim()) {
               // For searchPreview
