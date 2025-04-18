@@ -1,12 +1,17 @@
 export const title = "Komodo DeFi Framework Method: Add Delegation";
 export const description =
-  "The add_delegation method initiates your node's staking of a compatible coin.";
+  "The experimental::staking::delegate method initiates your node's staking of a compatible coin.";
 
-# add\_delegation
+# Delegate
 
-The `add_delegation` method initiates your node's staking of a compatible coin. Currently QTUM and tQTUM (test tokens avalable at `https://testnet-faucet.qtum.info/`) have been integrated, but this functionality will be expanded to more coins in future.
+The `experimental::staking::delegate` method initiates your node's staking of a compatible coin. Currently QTUM and tQTUM (test tokens avalable at `https://testnet-faucet.qtum.info/`), along with Cosmos/Tendermint coins are supported.
 
-Note: Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended to consolidate your balance into a single UTXO before initiating delegated staking. After running `add_delegation`, you will need to broadcast the returned hex via [`send_raw_transaction`](/komodo-defi-framework/api/legacy/send_raw_transaction/) to complete the process. Staking will only work with legacy QTUM addresses (segwit addresses are not supported).
+After running `experimental::staking::delegate`, you will need to broadcast the returned hex via [`send_raw_transaction`](/komodo-defi-framework/api/legacy/send_raw_transaction/) to complete the process.
+
+<Note>
+  Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended to consolidate your balance into a single UTXO before initiating delegated staking.
+  Staking will only work with legacy QTUM addresses (segwit addresses are not supported).
+</Note>
 
 ## Arguments
 
@@ -18,14 +23,14 @@ Note: Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended t
 
 #### 📌 Examples
 
-#### Command
+#### QTUM Command (testnet)
 
-<CodeGroup title="" tag="POST" label="add_delegation" mm2MethodDecorate="true">
+<CodeGroup title="" tag="POST" label="experimental::staking::delegate" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
     "mmrpc": "2.0",
-    "method": "add_delegation",
+    "method": "experimental::staking::delegate",
     "params": {
       "coin": "tQTUM",
       "staking_details": {
@@ -70,8 +75,39 @@ Note: Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended t
     "id": 0
   }
   ```
+</CollapsibleSection>
 
-  #### Response (error - already delegating)
+#### Tendermint Command
+
+<CodeGroup title="" tag="POST" label="experimental::staking::delegate" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "experimental::staking::delegate",
+    "mmrpc": "2.0",
+    "params": {
+      "coin": "ATOM",
+      "staking_details": {
+        "type": "Cosmos",
+        "validator_address": "cosmosvaloper1c4k24jzduc365kywrsvf5ujz4ya6mwympnc4en",
+        "amount": "0.777"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  ```
+</CollapsibleSection>
+
+### Error responses
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  #### AlreadyDelegating
 
   ```json
   {
