@@ -75,6 +75,11 @@ After running `experimental::staking::delegate`, you will need to broadcast the 
     "id": 0
   }
   ```
+
+<Note>
+  To complete the transaction, the `tx_hex` value of the response needs to be broadcast using the [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) method.
+</Note>
+
 </CollapsibleSection>
 
 #### Tendermint Command
@@ -82,17 +87,17 @@ After running `experimental::staking::delegate`, you will need to broadcast the 
 <CodeGroup title="" tag="POST" label="experimental::staking::delegate" mm2MethodDecorate="true">
   ```json
   {
-    "userpass": "RPC_UserP@SSW0RD",
-    "method": "experimental::staking::delegate",
-    "mmrpc": "2.0",
-    "params": {
-      "coin": "ATOM",
-      "staking_details": {
-        "type": "Cosmos",
-        "validator_address": "cosmosvaloper1c4k24jzduc365kywrsvf5ujz4ya6mwympnc4en",
-        "amount": "0.777"
+      "userpass": "{{userpass}}",
+      "method":"experimental::staking::delegate",
+      "mmrpc":"2.0",
+      "params": {
+          "coin": "IRIS",
+          "staking_details": {
+              "type": "Cosmos",
+              "validator_address": "iva1qq93sapmdcx36uz64vvw5gzuevtxsc7lcfxsat",
+              "amount": "7.77"
+          }
       }
-    }
   }
   ```
 </CodeGroup>
@@ -101,23 +106,102 @@ After running `experimental::staking::delegate`, you will need to broadcast the 
   #### Response (success)
 
   ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "tx_hex": "0a99010a91010a232f636f736d6f732e7374616b696e672e763162657461312e4d736744656c6567617465126a0a2a696161316576323366633730306a7335643768767477303738357966617961617a7061776e3870687634122a69766131717139337361706d6463783336757a363476767735677a75657674787363376c6366787361741a100a057569726973120737373730303030189a96940e12670a4e0a460a1f2f636f736d6f732e63727970746f2e736563703235366b312e5075624b657912230a2103d7cfe014b2003325143ddbed524181505138fd5e1dd46e0f766961b9b00963c912040a02080112150a0f0a057569726973120631303031343310ecb80b1a405b59861c81ac7986c73ed67be059cd53fd06eb0a536b77f628c80d1152bed100554fbdab7f9d477eb991bea449415c68fa5e0390c9767ec55ab552888b3cd141",
+          "tx_hash": "AF6F47AC75758077BA9118AC06CEF086F8C5204FE0231543DE79B0830EB0F11E",
+          "from": [
+              "iaa1ev23fc700js5d7hvtw0785yfayaazpawn8phv4"
+          ],
+          "to": [
+              "iva1qq93sapmdcx36uz64vvw5gzuevtxsc7lcfxsat"
+          ],
+          "total_amount": "7.870143",
+          "spent_by_me": "7.870143",
+          "received_by_me": "0",
+          "my_balance_change": "-7.870143",
+          "block_height": 0,
+          "timestamp": 0,
+          "fee_details": {
+              "type": "Tendermint",
+              "coin": "IRIS",
+              "amount": "0.100143",
+              "gas_limit": 187500
+          },
+          "coin": "IRIS",
+          "internal_id": "af6f47ac75758077ba9118ac06cef086f8c5204fe0231543de79b0830eb0f11e",
+          "transaction_type": "StakingDelegation",
+          "memo": ""
+      },
+      "id": null
+  }
   ```
+
+<Note>
+  To complete the transaction, the `tx_hex` value of the response needs to be broadcast using the [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) method.
+</Note>
+
 </CollapsibleSection>
+
+
 
 ### Error responses
 
 <CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
-  #### AlreadyDelegating
+  #### AddressError
 
   ```json
   {
+      "mmrpc": "2.0",
+      "error": "invalid bech32: '0x64B8eB36e3D0C10a23b85defe7f973143DC8153B'",
+      "error_path": "tendermint_coin",
+      "error_trace": "tendermint_coin:2362]",
+      "error_type": "AddressError",
+      "error_data": "invalid bech32: '0x64B8eB36e3D0C10a23b85defe7f973143DC8153B'",
+      "id": null
+  }
+  ```
+
+ #### Transport (insufficient funds)
+  ```json
+  {
     "mmrpc": "2.0",
-    "error": "Already delegating to: qcyBHeSct7Wr4mAw18iuQ1zW5mMFYmtmBE",
-    "error_path": "qtum_delegation",
-    "error_trace": "qtum_delegation:222]",
-    "error_type": "AlreadyDelegating",
-    "error_data": "qcyBHeSct7Wr4mAw18iuQ1zW5mMFYmtmBE",
-    "id": 0
+    "error": "Transport error: Could not read gas_info. Error code: 6 Message: rpc error: code = Unknown desc = failed to execute message; message index: 0: failed to delegate; 1121450000uiris is smaller than 7777770000uiris: insufficient funds [cosmos/cosmos-sdk@v0.50.11-lsm/x/bank/keeper/keeper.go:139] with gas used: '76175': unknown request",
+    "error_path": "tendermint_coin",
+    "error_trace": "tendermint_coin:2399] tendermint_coin:1098]",
+    "error_type": "Transport",
+    "error_data": "Could not read gas_info. Error code: 6 Message: rpc error: code = Unknown desc = failed to execute message; message index: 0: failed to delegate; 1121450000uiris is smaller than 7777770000uiris: insufficient funds [cosmos/cosmos-sdk@v0.50.11-lsm/x/bank/keeper/keeper.go:139] with gas used: '76175': unknown request",
+    "id": null
+  }
+  ```
+
+
+ #### NoSuchCoin (coin not active, or not supported)
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "No such coin ATOM",
+    "error_path": "lp_coins",
+    "error_trace": "lp_coins:5228] lp_coins:5032]",
+    "error_type": "NoSuchCoin",
+    "error_data": {
+        "coin": "ATOM"
+    },
+    "id": null
+  }
+  ```
+
+ #### InvalidRequest (unsupported coin type)
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Error parsing request: unknown variant `UTXO`, expected `Qtum` or `Cosmos`",
+    "error_path": "dispatcher",
+    "error_trace": "dispatcher:122]",
+    "error_type": "InvalidRequest",
+    "error_data": "unknown variant `UTXO`, expected `Qtum` or `Cosmos`",
+    "id": null
   }
   ```
 </CollapsibleSection>
