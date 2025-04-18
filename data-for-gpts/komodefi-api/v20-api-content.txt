@@ -12149,13 +12149,16 @@ export const description =
 TODO: Add summary for other methods, along with detail for HD methods
 export const title = "Komodo DeFi Framework Method: Add Delegation";
 export const description =
-  "The add_delegation method initiates your node's staking of a compatible coin.";
+  "The experimental::staking::delegate method initiates your node's staking of a compatible coin.";
 
-# add\_delegation
+# Delegate
 
-The `add_delegation` method initiates your node's staking of a compatible coin. Currently QTUM and tQTUM (test tokens avalable at `https://testnet-faucet.qtum.info/`) have been integrated, but this functionality will be expanded to more coins in future.
+The `experimental::staking::delegate` method initiates your node's staking of a compatible coin. Currently QTUM and tQTUM (test tokens avalable at `https://testnet-faucet.qtum.info/`), along with Cosmos/Tendermint coins are supported.
 
-Note: Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended to consolidate your balance into a single UTXO before initiating delegated staking. After running `add_delegation`, you will need to broadcast the returned hex via [`send_raw_transaction`](/komodo-defi-framework/api/legacy/send_raw_transaction/) to complete the process. Staking will only work with legacy QTUM addresses (segwit addresses are not supported).
+After running `experimental::staking::delegate`, you will need to broadcast the returned hex via [`send_raw_transaction`](/komodo-defi-framework/api/legacy/send_raw_transaction/) to complete the process.
+
+Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended to consolidate your balance into a single UTXO before initiating delegated staking.
+Staking will only work with legacy QTUM addresses (segwit addresses are not supported).
 
 ## Arguments
 
@@ -12167,13 +12170,13 @@ Note: Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended t
 
 #### 📌 Examples
 
-#### Command
+#### QTUM Command (testnet)
 
 ```json
 {
   "userpass": "RPC_UserP@SSW0RD",
   "mmrpc": "2.0",
-  "method": "add_delegation",
+  "method": "experimental::staking::delegate",
   "params": {
     "coin": "tQTUM",
     "staking_details": {
@@ -12217,7 +12220,32 @@ Note: Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended t
 }
 ```
 
-#### Response (error - already delegating)
+#### Tendermint Command
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "experimental::staking::delegate",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ATOM",
+    "staking_details": {
+      "type": "Cosmos",
+      "validator_address": "cosmosvaloper1c4k24jzduc365kywrsvf5ujz4ya6mwympnc4en",
+      "amount": "0.777"
+    }
+  }
+}
+```
+
+#### Response (success)
+
+```json
+```
+
+### Error responses
+
+#### AlreadyDelegating
 
 ```json
 {
@@ -12230,13 +12258,20 @@ Note: Only UTXOs of 100 QTUM / tQTUM will be actively staked. It is recomended t
   "id": 0
 }
 ```
-export const title = "Komodo DeFi Framework Method: Get Staking Info";
+export const title = "Komodo DeFi Framework: Staking";
 export const description =
-  "The get_staking_infos method returns information about your node's staking.";
+  "Komodo DeFi Framework Method: Staking";
 
-# get\_staking\_infos
+# Staking
 
-The `get_staking_infos` method returns information about your node's staking. Currently QTUM and tQTUM (test tokens avalable at `https://testnet-faucet.qtum.info/`) have been integrated, but this functionality will be expanded to more coins in future.
+TODO: Add summary for other methods, along with detail for HD methods
+export const title = "Komodo DeFi Framework Method: Delegations";
+export const description =
+  "The experimental::staking::query::delegations method returns information about your node's staking.";
+
+# Delegations
+
+The `experimental::staking::query::delegations` method returns information about your node's staking. Currently QTUM and tQTUM (test tokens avalable at `https://testnet-faucet.qtum.info/`), along with Cosmos/Tendermint coins are supported.
 
 ## Arguments
 
@@ -12246,13 +12281,13 @@ The `get_staking_infos` method returns information about your node's staking. Cu
 
 #### 📌 Examples
 
-#### Command
+#### QTUM Command (testnet)
 
 ```json
 {
   "userpass": "RPC_UserP@SSW0RD",
   "mmrpc": "2.0",
-  "method": "get_staking_infos",
+  "method": "experimental::staking::query::delegations",
   "params": {
     "coin": "tQTUM"
   },
@@ -12295,22 +12330,38 @@ The `get_staking_infos` method returns information about your node's staking. Cu
   "id": 0
 }
 ```
-export const title = "Komodo DeFi Framework: Staking";
-export const description =
-  "Komodo DeFi Framework Method: Staking";
 
-# Staking
+#### Tendermint Command
 
-TODO: Add summary for other methods, along with detail for HD methods
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "experimental::staking::query::delegations",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ATOM",
+    "info_details": {
+      "type": "Cosmos",
+      "limit": 20,
+      "page_number": 1
+    }
+  }
+}
+```
+
+#### Response (success)
+
+```json
+```
 export const title = "Komodo DeFi Framework Method: Remove Delegation";
 export const description =
-  "The remove_delegation method stops your node's staking of a compatible coin.";
+  "The experimental::staking::undelegate method stops your node's staking of a compatible coin.";
 
-# remove\_delegation
+# Undelegate
 
-The `remove_delegation` method stops your node's staking of a compatible coin. Currently QTUM and tQTUM (test tokens avalable at `https://testnet-faucet.qtum.info/`) have been integrated, but this functionality will be expanded to more coins in future.
+The `experimental::staking::undelegate` method stops your node's staking of a compatible coin. Currently QTUM and tQTUM (test tokens avalable at `https://testnet-faucet.qtum.info/`) have been integrated, but this functionality will be expanded to more coins in future.
 
-Note: After running `remove_delegation`, you will need to broadcast the returned hex via [`send_raw_transaction`](/komodo-defi-framework/api/legacy/send_raw_transaction/) to complete the process.
+Note: After running `experimental::staking::undelegate`, you will need to broadcast the returned hex via [`send_raw_transaction`](/komodo-defi-framework/api/legacy/send_raw_transaction/) to complete the process.
 
 ## Arguments
 
@@ -12326,7 +12377,7 @@ Note: After running `remove_delegation`, you will need to broadcast the returned
 {
   "userpass": "RPC_UserP@SSW0RD",
   "mmrpc": "2.0",
-  "method": "remove_delegation",
+  "method": "experimental::staking::undelegate",
   "params": {
     "coin": "tQTUM"
   },
@@ -12364,6 +12415,29 @@ Note: After running `remove_delegation`, you will need to broadcast the returned
   },
   "id": 0
 }
+```
+
+#### Tendermint Command
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "experimental::staking::undelegate",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "ATOM",
+    "staking_details": {
+      "type": "Cosmos",
+      "validator_address": "cosmosvaloper1c4k24jzduc365kywrsvf5ujz4ya6mwympnc4en",
+      "amount": "0.777"
+    }
+  }
+}
+```
+
+#### Response (success)
+
+```json
 ```
 export const title = "Komodo DeFi Framework: Task managed wallet methods";
 export const description =
