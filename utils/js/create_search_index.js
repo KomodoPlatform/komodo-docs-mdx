@@ -1,3 +1,13 @@
+import * as fs from "fs";
+import { compile } from "@mdx-js/mdx";
+import { slugifyWithCounter } from "@sindresorhus/slugify";
+import { mdxAnnotations } from "mdx-annotations";
+import path from "path";
+import remarkGfm from "remark-gfm";
+import { visit } from "unist-util-visit";
+
+import { removedWords } from "./_removed_search_words.js";
+
 const listOfAllowedElementsToCheck = [
   "h1",
   "h2",
@@ -5,18 +15,13 @@ const listOfAllowedElementsToCheck = [
   "h4",
   "h5",
   "h6",
-  "a",
+  // "a",
   "p",
   "li",
+  "ul",
+  "pre",
+  "table",
 ];
-
-import { compile } from "@mdx-js/mdx";
-import { slugifyWithCounter } from "@sindresorhus/slugify";
-import * as fs from "fs";
-import { mdxAnnotations } from "mdx-annotations";
-import path from "path";
-import { visit } from "unist-util-visit";
-import { removedWords } from "./_removed_search_words.js";
 
 const jsonFile = JSON.parse(fs.readFileSync("./src/data/sidebar.json"));
 
@@ -185,7 +190,7 @@ function hasOnlyHyphens(str) {
 async function compileMdxFile(mdxFilePathToCompile) {
   const mdxFileResultString = fs.readFileSync(mdxFilePathToCompile, "utf8");
   return await compile(mdxFileResultString, {
-    remarkPlugins: [mdxAnnotations.remark],
+    remarkPlugins: [mdxAnnotations.remark, remarkGfm],
     rehypePlugins: [
       mdxAnnotations.rehype,
       () => elementTreeChecker(mdxFilePathToCompile),
@@ -202,8 +207,8 @@ const runSearchIndexingOnAllMdxFiles = async () => {
       try {
         await compileMdxFile(file);
       } catch (error) {
-        throw new Error(`Processing file:${file}
-  Error: ${error}`);
+        throw new Error(`Processing file:${file} 
+          ${error}`);
       }
     }
     fs.writeFileSync(
