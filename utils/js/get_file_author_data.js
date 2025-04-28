@@ -85,6 +85,44 @@ const fileData = {};
 
 
     walkDir("./src/pages", getAllFileData);
+
+    // Merge renamed paths data if available
+    try {
+        if (fs.existsSync("./utils/_renamedPathsData.json")) {
+            const renamedPathsData = JSON.parse(fs.readFileSync("./utils/_renamedPathsData.json", 'utf8'));
+
+            // Process each renamed path
+            for (const [newRoute, data] of Object.entries(renamedPathsData)) {
+                if (fileData[newRoute]) {
+                    // Merge contributors
+                    const existingContributors = fileData[newRoute].contributors || [];
+                    const oldContributors = data.contributors || [];
+
+                    // Combine and remove duplicates
+                    const allContributors = [...existingContributors, ...oldContributors];
+                    fileData[newRoute].contributors = allContributors.filter((contributor, index) =>
+                        index === allContributors.findIndex(c =>
+                            c.name === contributor.name && c.email === contributor.email
+                        )
+                    );
+
+                    // Update creation date if any date in the chain is earlier
+                    if (data.dateCreated && (!fileData[newRoute].dateCreated || new Date(data.dateCreated) < new Date(fileData[newRoute].dateCreated))) {
+                        fileData[newRoute].dateCreated = data.dateCreated;
+                    }
+
+                    // Store the rename history if not already present
+                    fileData[newRoute].previousPaths = [
+                        ...(fileData[newRoute].previousPaths || []),
+                        ...(data.previousRoutes || [])
+                    ].filter((value, index, self) => self.indexOf(value) === index); // Remove duplicates
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error merging renamed paths data:", error);
+    }
+
     fs.writeFileSync("./utils/_fileData.json", JSON.stringify(fileData, null, 2));
 })();
 
