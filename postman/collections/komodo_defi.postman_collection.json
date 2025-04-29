@@ -327,6 +327,48 @@
 											],
 											"cookie": [],
 											"body": "{\"error\":\"rpc:184] dispatcher_legacy:141] lp_commands_legacy:141] lp_coins:4462] utxo_standard:73] utxo_coin_builder:616] Internal error: manager:129] min_connected should be greater than 0\"}"
+										},
+										{
+											"name": "Error: UnexpectedDerivationMethod",
+											"originalRequest": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"electrum\",\r\n    \"coin\": \"KMD\",\r\n    \"servers\": [\r\n        {\r\n            \"url\": \"electrum1.cipig.net:10001\"\r\n            // \"protocol\": \"TCP\" // Accepted values: \"TCP\", \"SSL\", \"WS\", \"WSS\"\r\n            // \"disable_cert_verification\": false\r\n        },\r\n        {\r\n            \"url\": \"electrum2.cipig.net:10001\"\r\n        },\r\n        {\r\n            \"url\": \"electrum3.cipig.net:10001\"\r\n        }\r\n    ],\r\n    \"min_connected\": 1, // defaults to 1 when omitted\r\n    \"max_connected\": 3  // defaults to len(servers) when omitted\r\n    // \"mm2\": null, // Required only if: Not in Coin Config // Accepted values: 0, 1\r\n    // \"tx_history\": false,\r\n    // \"required_confirmations\": 1, // Default: Coin Config\r\n    // \"requires_notarization\": false, // Default: Coin Config\r\n    // \"address_format\": {\r\n    //     \"format\": \"standard\" // Accepted values: \"standard\", \"segwit\", \"cashaddress\"\r\n    // //    \"network\": \"bchtest\" // Required only if: \"format\": \"cashaddress\"\r\n    // }, // Default: Coin Config\r\n    // \"utxo_merge_params\": null,\r\n    // // \"utxo_merge_params\": {\r\n    // //     \"merge_at\":50\r\n    // //     // \"check_every\":10,\r\n    // //     // \"max_merge_at_once\":100\r\n    // //     },\r\n    // \"check_utxo_maturity\": false,\r\n    // \"priv_key_policy\": \"IguanaPrivKey\", // Accepted values: \"IguanaPrivKey\", \"Trezor\"\r\n    // \"gap_limit\": 20, // used only if: \"priv_key_policy\": \"Trezor\"\r\n    // \"scan_policy\": \"scan_if_new_wallet\" // Accepted values: \"do_not_scan\", \"scan_if_new_wallet\", \"scan\" // used only if: \"priv_key_policy\": \"Trezor\"\r\n}\r\n"
+												},
+												"url": {
+													"raw": "{{address}}",
+													"host": [
+														"{{address}}"
+													]
+												}
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "plain",
+											"header": [
+												{
+													"key": "access-control-allow-origin",
+													"value": "http://localhost:3000"
+												},
+												{
+													"key": "content-length",
+													"value": "198"
+												},
+												{
+													"key": "date",
+													"value": "Tue, 29 Apr 2025 06:28:37 GMT"
+												}
+											],
+											"cookie": [],
+											"body": "{\"error\":\"rpc:183] dispatcher_legacy:140] legacy:148] Deactivated coin due to error in balance querying: Ok(Err(utxo_common:2789] lp_coins:4401] UnexpectedDerivationMethod(ExpectedSingleAddress)))\"}"
 										}
 									]
 								},
@@ -14395,6 +14437,571 @@
 								}
 							},
 							"response": []
+						}
+					]
+				},
+				{
+					"name": "Streaming",
+					"item": [
+						{
+							"name": "stream::balance::enable",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\":\"stream::balance::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"coin\": \"MATIC\",\r\n        \"config\": {\r\n            \"stream_interval_seconds\":  15\r\n        },\r\n        \"client_id\": 1\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: CoinNotFound",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\":\"stream::balance::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"coin\": \"OSMO\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "127"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 05:28:36 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"CoinNotFound\",\"error_path\":\"balance\",\"error_trace\":\"balance:47]\",\"error_type\":\"CoinNotFound\",\"id\":null}"
+								},
+								{
+									"name": "Error: UnknownClient",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\":\"stream::balance::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"coin\": \"OSMO\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "156"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 05:31:11 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"UnknownClient\",\"error_path\":\"balance\",\"error_trace\":\"balance:99]\",\"error_type\":\"EnableError\",\"error_data\":\"UnknownClient\",\"id\":null}"
+								},
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\":\"stream::balance::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"coin\": \"OSMO\",\r\n        \"client_id\": 1\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "65"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 05:49:21 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"streamer_id\": \"BALANCE:OSMO\"\n    },\n    \"id\": null\n}"
+								},
+								{
+									"name": "Error: ClientAlreadyListening",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\":\"stream::balance::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"coin\": \"KMD\",\r\n        \"client_id\": 1\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "174"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 06:43:17 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"error\": \"ClientAlreadyListening\",\n    \"error_path\": \"balance\",\n    \"error_trace\": \"balance:99]\",\n    \"error_type\": \"EnableError\",\n    \"error_data\": \"ClientAlreadyListening\",\n    \"id\": null\n}"
+								},
+								{
+									"name": "Error: EnableError",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\":\"stream::balance::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"coin\": \"KMD\",\r\n        \"config\": {\r\n            \"stream_interval_seconds\":  15\r\n        },\r\n        \"client_id\": 1\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "212"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 07:07:09 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"Invalid config provided. No config needed\",\"error_path\":\"balance\",\"error_trace\":\"balance:60]\",\"error_type\":\"EnableError\",\"error_data\":\"Invalid config provided. No config needed\",\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "stream::heartbeat::enable",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::heartbeat::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"config\": {\r\n            \"stream_interval_seconds\":  15\r\n        },\r\n        \"always_send\": true\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::heartbeat::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"config\": {\r\n            \"stream_interval_seconds\":  15\r\n        },\r\n        \"always_send\": true\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "62"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 06:48:40 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"streamer_id\":\"HEARTBEAT\"},\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "stream::network::enable",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::network::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"config\": {\r\n            \"stream_interval_seconds\":  15\r\n        },\r\n        \"always_send\": true\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::network::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"config\": {\r\n            \"stream_interval_seconds\":  15\r\n        },\r\n        \"always_send\": true\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "60"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 06:47:28 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"streamer_id\":\"NETWORK\"},\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "stream::disable",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::disable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"streamer_id\": \"HEARTBEAT\"\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::disable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"streamer_id\": \"HEARTBEAT\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "55"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 06:55:04 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"result\":\"Success\"},\"id\":null}"
+								},
+								{
+									"name": "Error: StreamerNotFound",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::disable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"streamer_id\": \"PewPewDie\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "163"
+										},
+										{
+											"key": "date",
+											"value": "Tue, 29 Apr 2025 06:56:06 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"StreamerNotFound\",\"error_path\":\"disable\",\"error_trace\":\"disable:48]\",\"error_type\":\"DisableError\",\"error_data\":\"StreamerNotFound\",\"id\":null}"
+								}
+							]
 						}
 					]
 				},
