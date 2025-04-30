@@ -14879,6 +14879,222 @@
 							]
 						},
 						{
+							"name": "stream::fee_estimator::enable",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::fee_estimator::enable\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"MATIC\",\r\n        \"config\": {\r\n            \"estimate_every\": 33.4,\r\n            \"estimator_type\": \"Provider\"\r\n        }\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: ClientAlreadyListening",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::fee_estimator::enable\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"MATIC\",\r\n        \"config\": {\r\n            \"estimate_every\": 33.4,\r\n            \"estimator_type\": \"Provider\"\r\n        }\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "188"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 04:53:45 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"ClientAlreadyListening\",\"error_path\":\"fee_estimation\",\"error_trace\":\"fee_estimation:54]\",\"error_type\":\"EnableError\",\"error_data\":\"ClientAlreadyListening\",\"id\":null}"
+								},
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::fee_estimator::enable\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"MATIC\",\r\n        \"config\": {\r\n            \"estimate_every\": 33.4,\r\n            \"estimator_type\": \"Provider\"\r\n        }\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "73"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 04:59:42 GMT"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json",
+											"name": "Content-Type",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"mmrpc\": \"2.0\",\n    \"result\": {\n        \"streamer_id\": \"FEE_ESTIMATION:MATIC\"\n    },\n    \"id\": null\n}"
+								},
+								{
+									"name": "Error: CoinNotFound",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::fee_estimator::enable\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"WALLY\",\r\n        \"config\": {\r\n            \"estimate_every\": 33.4,\r\n            \"estimator_type\": \"Provider\"\r\n        }\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "141"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 05:04:44 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"CoinNotFound\",\"error_path\":\"fee_estimation\",\"error_trace\":\"fee_estimation:42]\",\"error_type\":\"CoinNotFound\",\"id\":null}"
+								},
+								{
+									"name": "Error: CoinNotSupported",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::fee_estimator::enable\",\r\n    \"mmrpc\": \"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"KMD\",\r\n        \"config\": {\r\n            \"estimate_every\": 33.4,\r\n            \"estimator_type\": \"Provider\"\r\n        }\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Not Implemented",
+									"code": 501,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "149"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 05:05:06 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"CoinNotSupported\",\"error_path\":\"fee_estimation\",\"error_trace\":\"fee_estimation:56]\",\"error_type\":\"CoinNotSupported\",\"id\":null}"
+								}
+							]
+						},
+						{
 							"name": "stream::disable",
 							"event": [
 								{
