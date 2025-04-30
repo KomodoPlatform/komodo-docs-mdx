@@ -3845,7 +3845,7 @@
 							},
 							"response": [
 								{
-									"name": "unban_pubkeys",
+									"name": "Success",
 									"originalRequest": {
 										"method": "POST",
 										"header": [
@@ -15457,6 +15457,262 @@
 									],
 									"cookie": [],
 									"body": "{\"mmrpc\":\"2.0\",\"error\":\"UnknownClient\",\"error_path\":\"orderbook\",\"error_trace\":\"orderbook:36]\",\"error_type\":\"EnableError\",\"error_data\":\"UnknownClient\",\"id\":null}"
+								}
+							]
+						},
+						{
+							"name": "stream::tx_history::enable",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::tx_history::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"KMD\"\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Error: CoinNotFound",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::tx_history::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"MATIC\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Not Found",
+									"code": 404,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "133"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 10:01:26 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"CoinNotFound\",\"error_path\":\"tx_history\",\"error_trace\":\"tx_history:42]\",\"error_type\":\"CoinNotFound\",\"id\":null}"
+								},
+								{
+									"name": "Error: UnknownClient",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::tx_history::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 13,\r\n        \"coin\": \"DOC\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "162"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 10:02:11 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"UnknownClient\",\"error_path\":\"tx_history\",\"error_trace\":\"tx_history:75]\",\"error_type\":\"EnableError\",\"error_data\":\"UnknownClient\",\"id\":null}"
+								},
+								{
+									"name": "Error: CoinNotSupported",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::tx_history::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"MATIC\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Not Implemented",
+									"code": 501,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "141"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 10:03:22 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"CoinNotSupported\",\"error_path\":\"tx_history\",\"error_trace\":\"tx_history:70]\",\"error_type\":\"CoinNotSupported\",\"id\":null}"
+								},
+								{
+									"name": "Error: ClientAlreadyListening",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::tx_history::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"DOC\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "180"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 10:07:25 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"ClientAlreadyListening\",\"error_path\":\"tx_history\",\"error_trace\":\"tx_history:75]\",\"error_type\":\"EnableError\",\"error_data\":\"ClientAlreadyListening\",\"id\":null}"
+								},
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::tx_history::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"coin\": \"KMD\"\r\n    }\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "67"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 10:07:46 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"streamer_id\":\"TX_HISTORY:KMD\"},\"id\":null}"
 								}
 							]
 						},
