@@ -15294,6 +15294,173 @@
 							]
 						},
 						{
+							"name": "stream::orderbook::enable",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::orderbook::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"base\": \"DOC\",\r\n        \"rel\": \"MARTY\"\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::orderbook::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"base\": \"DOC\",\r\n        \"rel\": \"MARTY\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "84"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 09:40:09 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"streamer_id\":\"ORDERBOOK_UPDATE/orbk/DOC:MARTY\"},\"id\":null}"
+								},
+								{
+									"name": "Error: ClientAlreadyListening",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::orderbook::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1,\r\n        \"base\": \"DOC\",\r\n        \"rel\": \"MARTY\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "178"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 09:40:41 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"ClientAlreadyListening\",\"error_path\":\"orderbook\",\"error_trace\":\"orderbook:36]\",\"error_type\":\"EnableError\",\"error_data\":\"ClientAlreadyListening\",\"id\":null}"
+								},
+								{
+									"name": "Error: UnknownClient",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::orderbook::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 13,\r\n        \"base\": \"DOC\",\r\n        \"rel\": \"MARTY\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "160"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 09:41:10 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"UnknownClient\",\"error_path\":\"orderbook\",\"error_trace\":\"orderbook:36]\",\"error_type\":\"EnableError\",\"error_data\":\"UnknownClient\",\"id\":null}"
+								}
+							]
+						},
+						{
 							"name": "stream::fee_estimator::enable",
 							"event": [
 								{
@@ -15630,6 +15797,48 @@
 									],
 									"cookie": [],
 									"body": "{\"mmrpc\":\"2.0\",\"error\":\"StreamerNotFound\",\"error_path\":\"disable\",\"error_trace\":\"disable:48]\",\"error_type\":\"DisableError\",\"error_data\":\"StreamerNotFound\",\"id\":null}"
+								},
+								{
+									"name": "Error: UnknownClient",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::disable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 31,\r\n        \"streamer_id\": \"SWAP_STATUS\"\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "157"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 09:28:43 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"UnknownClient\",\"error_path\":\"disable\",\"error_trace\":\"disable:48]\",\"error_type\":\"DisableError\",\"error_data\":\"UnknownClient\",\"id\":null}"
 								}
 							]
 						}
