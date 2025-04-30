@@ -1,0 +1,77 @@
+export const title = "Komodo DeFi Framework Method: Enable Order Status Streaming";
+export const description = "Using this method, you can enable the order status stream.";
+
+# order\_status\_enable
+
+Using this method, you can enable the order status stream.
+
+### Request Parameters
+
+| Parameter  | Type    | Description                                                                                                                      |
+| ---------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| client\_id | integer | This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1)) |
+
+### 📌 Examples
+
+#### Request
+
+<CodeGroup title="" tag="POST" label="order_status_enable" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "stream::order_status::enable",
+    "mmrpc": "2.0",
+    "params": {
+      "client_id": 1
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "streamer_id": "ORDER_STATUS"
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
+  #### UnknownClient
+
+  No client has an open connection using this `client_id`.
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "UnknownClient",
+    "error_path": "orders",
+    "error_trace": "orders:29]",
+    "error_type": "EnableError",
+    "error_data": "UnknownClient",
+    "id": null
+  }
+  ```
+
+  #### ClientAlreadyListening
+
+  The requested events are already being sent to the `client_id`.
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "ClientAlreadyListening",
+    "error_path": "orders",
+    "error_trace": "orders:29]",
+    "error_type": "EnableError",
+    "error_data": "ClientAlreadyListening",
+    "id": null
+  }
+  ```
+</CollapsibleSection>
