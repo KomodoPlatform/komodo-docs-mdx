@@ -7445,7 +7445,6 @@
 												{
 													"key": "Content-Type",
 													"value": "application/json",
-													"name": "Content-Type",
 													"description": "",
 													"type": "text"
 												}
@@ -7583,7 +7582,6 @@
 												{
 													"key": "Content-Type",
 													"value": "application/json",
-													"name": "Content-Type",
 													"description": "",
 													"type": "text"
 												}
@@ -14691,7 +14689,6 @@
 										{
 											"key": "Content-Type",
 											"value": "application/json",
-											"name": "Content-Type",
 											"description": "",
 											"type": "text"
 										}
@@ -15130,6 +15127,173 @@
 							]
 						},
 						{
+							"name": "stream::order_status::enable",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"// Strip JSON Comments\r",
+											"const rawData = pm.request.body.toString();\r",
+											"const strippedData = rawData.replace(/\\\\\"|\"(?:\\\\\"|[^\"])*\"|(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)/g, (m, g) => g ? \"\" : m)\r",
+											"\r",
+											"pm.request.body.update(strippedData);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::order_status::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1\r\n    }\r\n}"
+								},
+								"url": {
+									"raw": "{{address}}",
+									"host": [
+										"{{address}}"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Success",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::order_status::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "65"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 09:23:53 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"result\":{\"streamer_id\":\"ORDER_STATUS\"},\"id\":null}"
+								},
+								{
+									"name": "Error: UnknownClient",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::order_status::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 13\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "154"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 09:24:14 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"UnknownClient\",\"error_path\":\"orders\",\"error_trace\":\"orders:29]\",\"error_type\":\"EnableError\",\"error_data\":\"UnknownClient\",\"id\":null}"
+								},
+								{
+									"name": "Error: ClientAlreadyListening",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"userpass\": \"{{userpass}}\",\r\n    \"method\": \"stream::order_status::enable\",\r\n    \"mmrpc\":\"2.0\",\r\n    \"params\": {\r\n        \"client_id\": 1\r\n    }\r\n}"
+										},
+										"url": {
+											"raw": "{{address}}",
+											"host": [
+												"{{address}}"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "plain",
+									"header": [
+										{
+											"key": "access-control-allow-origin",
+											"value": "http://localhost:3000"
+										},
+										{
+											"key": "content-length",
+											"value": "172"
+										},
+										{
+											"key": "date",
+											"value": "Wed, 30 Apr 2025 09:24:35 GMT"
+										}
+									],
+									"cookie": [],
+									"body": "{\"mmrpc\":\"2.0\",\"error\":\"ClientAlreadyListening\",\"error_path\":\"orders\",\"error_trace\":\"orders:29]\",\"error_type\":\"EnableError\",\"error_data\":\"ClientAlreadyListening\",\"id\":null}"
+								}
+							]
+						},
+						{
 							"name": "stream::fee_estimator::enable",
 							"event": [
 								{
@@ -15251,7 +15415,6 @@
 										{
 											"key": "Content-Type",
 											"value": "application/json",
-											"name": "Content-Type",
 											"description": "",
 											"type": "text"
 										}
