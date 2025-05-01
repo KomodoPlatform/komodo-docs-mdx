@@ -203,10 +203,27 @@ Z coins need to build sync a local block cache and wallet database before they c
 
 #### Response
 
-| Structure | Type   | Description                                                                                                           |
+| Parameter               | Type    | Description                                                                                                                                                                   |
 | --------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
 | status    | string | A short indication of how the enabling is progressing.                                                                |
 | details   | object | Depending on the state of enabling progress, this will contain different information as shown in the responses below. |
+
+
+Possible `status` values while activation is in progress:
+
+*   `ActivatingCoin`: The first step of activation. It does not require any action from the user.
+*   `RequestingWalletBalance`: The first step of activation, while initial balances info is being requested. It does not require any action from the user.
+*   `Finishing`: Activation process completed
+*   `WaitingForTrezorToConnect`: Waiting for the user to plugin a Trezor device
+*   `FollowHwDeviceInstructions`: Waiting for the user to follow the instructions on the device
+
+Once complete, `status`  will be `Ok`, and the `details` object will have the following structure:
+
+| Parameter               | Type    | Description                                                                                                                                                                   |
+| --------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| current\_block          | integer | Block height of the coin being activated                                                                                                                                      |
+| ticker                  | string  | Ticker of the coin being activated. |
+| wallet_balance          | object  | A standard [WalletBalanceInfo](/komodo-defi-framework/api/common_structures/#wallet-balance-info) object. Note: the structure may vary based on the `get_balances` parameter value in the acttivation request.                                                                                                                                                                                                                                     |
 
 #### 📌 Examples
 
@@ -276,6 +293,33 @@ Z coins need to build sync a local block cache and wallet database before they c
   }
   ```
 
+  #### Response (Enabling complete)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "Ok",
+      "details": {
+        "ticker": "ZOMBIE",
+        "current_block": 269657,
+        "wallet_balance": {
+          "wallet_type": "Iguana",
+          "address": "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj",
+          "balance": {
+            "spendable": "29.99989008",
+            "unspendable": "0"
+          }
+        }
+      }
+    },
+    "id": null
+  }
+  ```
+
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  
   #### Response (CoinCreationError - no Zcash Params)
 
   ```json
@@ -321,29 +365,6 @@ Z coins need to build sync a local block cache and wallet database before they c
   }
   ```
 
-  #### Response (Enabling complete)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "status": "Ok",
-      "details": {
-        "ticker": "ZOMBIE",
-        "current_block": 269657,
-        "wallet_balance": {
-          "wallet_type": "Iguana",
-          "address": "zs1e3puxpnal8ljjrqlxv4jctlyndxnm5a3mj5rarjvp0qv72hmm9caduxk9asu9kyc6erfx4zsauj",
-          "balance": {
-            "spendable": "29.99989008",
-            "unspendable": "0"
-          }
-        }
-      }
-    },
-    "id": null
-  }
-  ```
 
   #### Response (no Zcash Params)
 
@@ -433,6 +454,10 @@ If you want to cancel the enabling process before it has completed, you can use 
   }
   ```
 
+</CollapsibleSection>
+
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
   #### Response (success - already finished)
 
   ```json
