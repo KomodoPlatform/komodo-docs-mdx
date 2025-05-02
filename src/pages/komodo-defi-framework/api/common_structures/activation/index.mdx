@@ -3,40 +3,6 @@ export const description = "The Komodo DeFi SDK uses a variety of activation met
 
 # Activation Structures
 
-### ActivationParams
-
-The `ActivationParams` object defines additional parameters used for activation. These params may vary depending on the coin type.
-
-| Parameter                    | Type    | Description                                                                                                                                                                                                                          |
-| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| required\_confirmations      | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                   |
-| requires\_notarization       | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file. |
-| priv\_key\_policy            | string  | Defaults to `ContextPrivKey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                                            |
-| min\_addresses\_number       | integer | HD wallets only. How many additional addreesses to generate at a minimum.                                                                                                                                                            |
-| scan\_policy                 | string  | HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the Komodo DeFi SDK.                                       |
-| gap\_limit                   | integer | HD wallets only. The max number of empty addresses in a row. If transactions were sent to an address outside the `gap_limit`, they will not be identified when scanning.                                                             |
-| zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing Zcash parameters. Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                                     |
-| scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                  |
-| scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                    |
-| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode) object.                                                                                         |
-
-<DevComment>
-  Is priv\_key\_policy still a thing?
-  Defaults to `ContextPrivKey`. Set as `Trezor` to activate in Trezor mode.
-</DevComment>
-
-<Note>
-  For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
-  first transaction to see all balance and history. This may take a long time on the first
-  activation, but subsequent activations will be much faster.
-  Using a smaller `scan_blocks_per_iteration` and larger `scan_interval_ms`,
-  will reduce the average CPU load during ZHTLC coin activation (at the cost of a
-  longer activation time). These optional fields are recommended when developing
-  for iOS, where a high CPU load may kill the activation process. Android &
-  desktop operating systems do not appear to have any problems with high CPU
-  load during ZHTLC coin activation.
-</Note>
-
 ### ActivationMode
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
@@ -73,6 +39,40 @@ Contains information about electrum & lightwallet\_d servers for coins being use
 <DevComment>
   `electrum` and `electrum_servers` are both used for the same purpose. This should be consolidated in the API.
 </DevComment>
+
+### ActivationParams
+
+The `ActivationParams` object defines additional parameters used for activation. These params may vary depending on the coin type.
+
+| Parameter                    | Type    | Description                                                                                                                                                                                                                          |
+| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| required\_confirmations      | integer | Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set.                                                                                                                                   |
+| requires\_notarization       | boolean | Optional, defaults to `false`. For [dPoW](https://komodoplatform.com/en/blog/dpow-demystified/) protected coins, a `true` value will wait for transactions to be notarised when doing swaps. Overrides value if set in `coins` file. |
+| priv\_key\_policy            | string  | Defaults to `ContextPrivKey`. Set as `Trezor` to activate in Trezor mode.                                                                                                                                                            |
+| min\_addresses\_number       | integer | HD wallets only. How many additional addreesses to generate at a minimum.                                                                                                                                                            |
+| scan\_policy                 | string  | HD wallets only. Whether or not to scan for new addresses. Select from `do_not_scan`, `scan_if_new_wallet` or `scan`. Note that `scan` will result in multple requests to the Komodo DeFi SDK.                                       |
+| gap\_limit                   | integer | HD wallets only. The max number of empty addresses in a row. If transactions were sent to an address outside the `gap_limit`, they will not be identified when scanning.                                                             |
+| zcash\_params\_path          | string  | ZHTLC coins only. Path to folder containing Zcash parameters. Optional, defaults to standard location as defined in [this guide](https://forum.komodoplatform.com/t/installing-zcash-params/603)                                     |
+| scan\_blocks\_per\_iteration | integer | ZHTLC coins only. Sets the number of scanned blocks per iteration during `BuildingWalletDb` state. Optional, default value is 1000.                                                                                                  |
+| scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                    |
+| mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode) object.                                                                                         |
+
+<DevComment>
+  Is priv\_key\_policy still a thing?
+  Defaults to `ContextPrivKey`. Set as `Trezor` to activate in Trezor mode.
+</DevComment>
+
+<Note>
+  For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
+  first transaction to see all balance and history. This may take a long time on the first
+  activation, but subsequent activations will be much faster.
+  Using a smaller `scan_blocks_per_iteration` and larger `scan_interval_ms`,
+  will reduce the average CPU load during ZHTLC coin activation (at the cost of a
+  longer activation time). These optional fields are recommended when developing
+  for iOS, where a high CPU load may kill the activation process. Android &
+  desktop operating systems do not appear to have any problems with high CPU
+  load during ZHTLC coin activation.
+</Note>
 
 ### ActivationServers
 
@@ -165,59 +165,7 @@ The `EvmNode` object includes the following items for a given coin or token:
 | Parameter    | Type    | Description                                                                                                         |
 | ------------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | url          | string  | URL of an RPC node                                                                                                  |
-| komodo\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team |
-
-#### v2.1.0 (current release)
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "url": "http://eth1.cipig.net:8555",
-      "komodo_proxy": false
-  }
-  ```
-</CollapsibleSection>
-
-<Note>
-  Prior to the v2.2.0 release, the `gui_auth` field was used to access RPC nodes run officially by the Komodo Platform team. This field was replaced with the `komodo_proxy` field in the v2.2.0 release.
-</Note>
-
-#### v2.2.0+
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "url": "https://nucleus-rpc.alpha.komodo.earth",
-      "komodo_proxy": true
-  }
-  ```
-</CollapsibleSection>
-
-### TendermintNode
-
-The `TendermintNode` object includes the following items for a given coin or token:
-
-| Parameter    | Type    | Description                                                                                                                                                  |
-| ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| url          | string  | URL of an RPC node                                                                                                                                           |
 | komodo\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run behind [komodo-defi-proxy](https://github.com/KomodoPlatform/komodo-defi-proxy) |
-
-#### v2.1.0 (current release)
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "url": "http://eth1.cipig.net:8555",
-      "komodo_proxy": false
-  }
-  ```
-</CollapsibleSection>
-
-<Note>
-  Prior to the v2.2.0 release, the `gui_auth` field was used to access RPC nodes run officially by the Komodo Platform team. This field was replaced with the `komodo_proxy` field in the v2.2.0 release.
-</Note>
-
-#### v2.2.0+
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
