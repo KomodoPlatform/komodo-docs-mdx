@@ -432,17 +432,6 @@ It is used for estimating the transaction fee rate (`feerate`) for different tra
 | max\_channel\_reserve\_sats             | boolean | Optional, defaults to `18446744073709551615`. The remote node will require us to keep a certain amount in direct payment to ourselves at all time, ensuring that we are able to be punished if we broadcast an old state. This allows us to limit the amount which we will have to keep to ourselves (and cannot use for [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)). |
 | min\_max\_accepted\_htlcs               | boolean | Optional, defaults to `0`. The remote node sets a limit on the maximum number of pending HTLCs to them at any given time. This allows us to set a minimum such value.                                                                                                                                                                                                                                |
 
-### FeeInfo
-
-The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests:
-
-| Parameter  | Type             | Description                                                                                                                               |
-| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
-| amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
-| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
-
 ### LightningActivationParams
 
 | Parameter        | Type    | Description                                                                                                                                                                                                                                   |
@@ -644,26 +633,6 @@ The `TokensRequest` object includes the following items for a given coin or toke
   ```
 </CollapsibleSection>
 
-### WalletBalanceInfo
-
-The `WalletBalanceInfo` object includes the following items in the activation response for a coin in HD mode:
-
-| Parameter    | Type   | Description                                                                                     |
-| ------------ | ------ | ----------------------------------------------------------------------------------------------- |
-| wallet\_type | string | In HD wallet mode, this will return `HD`. <DevComment> What are the other values? </DevComment> |
-| accounts     | object | A standard [WalletAccountInfo](/komodo-defi-framework/api/v20/#wallet-account-info) object.     |
-
-```json
-{
-    "wallet_balance": {
-        "wallet_type": "HD",
-        "accounts": [
-            ...
-        ]
-    }
-}
-```
-
 ### WithdrawFromInfo
 
 The `WithdrawFromInfo` response object includes the following items for HD Wallet [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests.
@@ -676,16 +645,6 @@ You can use either the `derivation_path` on its own, or the `account_id`, `chain
 | address\_id      | integer | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
 | chain            | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
-### FeeInfo
-
-The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests:
-
-| Parameter  | Type             | Description                                                                                                                               |
-| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee; possible values: `UtxoFixed`, `UtxoPerKbyte`, `EthGas`                                                           |
-| amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| gas\_price | string (numeric) | Used only when fee type is EthGas; sets the gas price in `gwei` units                                                                     |
-| gas        | number (integer) | Used only when fee type is EthGas; sets the gas limit for transaction                                                                     |
 
 ### ScanAddressesInfo
 
