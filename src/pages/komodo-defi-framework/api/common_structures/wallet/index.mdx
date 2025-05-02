@@ -3,6 +3,31 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 # Wallet Operations Structures
 
+### AccountAddressInfo
+
+The `AccountAddressInfo` object includes the following items for active addresses in the activation response for a coin in HD mode:
+
+| Parameter        | Type   | Description                                                                                                 |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
+| address          | string | The account address for a specific derivation path under the `account_index`.                               |
+| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. |
+| chain            | string | `External` or `Internal`, as defined in the activation request.                                             |
+| balance          | object | A standard [BalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#balance-info) object.         |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "address": "RXNtAyDSsY3DS3VxTpJegzoHU9bUX54j56",
+      "derivation_path": "m/44'/141'/0'/0/0",
+      "chain": "External",
+      "balance": {
+          "spendable": "7.64018255",
+          "unspendable": "0"
+      }
+  }
+  ```
+</CollapsibleSection>
+
 ### AddressDerivationPath
 
 The `AddressDerivationPath` object defines the account / change / address\_index of the [derivation path](https://medium.com/mycrypto/wtf-is-a-derivation-path-c3493ca2eb52) used for your wallet. Using different values for `account_id` or `address_id` parameters will result in a different address and private key for each combination. The `chain` parameter is used to specify if the change from a transaction. Set to `External` for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction.
@@ -21,6 +46,30 @@ The `AddressDerivationPath` object defines the account / change / address\_index
           "chain": "External",
           "address_id": 1
       }
+  }
+  ```
+</CollapsibleSection>
+
+## AddressFormat
+
+| Structure | Type          | Description                                                                                                                                                                                        |
+| --------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| format    | string (enum) | address format to which the input address should be converted. Possible values: `mixedcase` for ETH/ERC20 coins; `cashaddress` or `standard` for UTXO coins; `contract` or `wallet` for QTUM/QRC20 |
+| network   | string (enum) | Optional, only used for UTXO coins. Network prefix for `cashaddress` format. Possible values: `bitcoincash` for BCH mainnet; `bchtest` for BCH testnet; `bchreg` for BCH regtest                   |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example
+
+  ```json
+  {
+    "format": "mixedcase"
+  }
+  ```
+
+  ```json
+  {
+    "format": "cashaddress",
+    "network": "bitcoincash"
   }
   ```
 </CollapsibleSection>
@@ -61,30 +110,6 @@ The `AddressInfo` object includes the following items for a given address:
       },
       "pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
       "tickers": ["ASLP-SLP"]
-  }
-  ```
-</CollapsibleSection>
-
-## AddressFormat
-
-| Structure | Type          | Description                                                                                                                                                                                        |
-| --------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| format    | string (enum) | address format to which the input address should be converted. Possible values: `mixedcase` for ETH/ERC20 coins; `cashaddress` or `standard` for UTXO coins; `contract` or `wallet` for QTUM/QRC20 |
-| network   | string (enum) | Optional, only used for UTXO coins. Network prefix for `cashaddress` format. Possible values: `bitcoincash` for BCH mainnet; `bchtest` for BCH testnet; `bchreg` for BCH regtest                   |
-
-<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
-  #### Example
-
-  ```json
-  {
-    "format": "mixedcase"
-  }
-  ```
-
-  ```json
-  {
-    "format": "cashaddress",
-    "network": "bitcoincash"
   }
   ```
 </CollapsibleSection>
@@ -132,175 +157,16 @@ Where the value indicates:
   ```
 </CollapsibleSection>
 
-### RawTxInfo
+### ExtendedFeeInfo
 
-The `RawTxInfo` object includes the following items:
-
-| Parameter     | Type   | Description                                                                                                                                                                                                                  |
-| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_hex       | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
-| prev\_txns    | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
-| to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
-| value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
-| gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
-| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
-
-<DevComment>
-  TODO: Confirm units used in ETH/EVM transactions.
-</DevComment>
-
-<CollapsibleSection expandedText="Hide UTXO Example" collapsedText="Show UTXO Example">
-  ```json
-    {
-        "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
-        "prev_txns": [
-            ...
-        ]
-    }
-  ```
-</CollapsibleSection>
-
-<CollapsibleSection expandedText="Hide ETH/EVM Example" collapsedText="Show ETH/EVM Example">
-  ```json
-    {
-        "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
-        "value": "0.85",
-        "gas_limit": "21000",
-        "pay_for_gas": {
-            "tx_type": "Eip1559",
-            "max_fee_per_gas": "1234.567",
-            "max_priority_fee_per_gas": "1.2"
-        }
-    }
-  ```
-</CollapsibleSection>
-
-### HistoryTarget
-
-Used to specify a HD wallet `account_id` or `address_id` for [my\_tx\_history v2](/komodo-defi-framework/api/v20/wallet/tx/my_tx_history/) requests.
-
-| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                              |
-| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| type        | string  | Filters results by `account_id` or `address_id` part of the derivation path.                                                                                                                                                                                                                                             |
-| account\_id | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                                                              |
-| address\_id | integer | Only required when `type` is `address_id`. `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
-| chain       | string  | Only required when `type` is `address_id`. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  #### Example
-
-  ```json
-  {
-    "type": "account_id",
-    "account_id": 77
-  }
-  ```
-
-  ```json
-  {
-    "type": "address_id",
-    "account_id": 0,
-    "chain": "External", // Accepted values: "External" and "Internal"
-    "address_id": 1
-  }
-  ```
-</CollapsibleSection>
-
-### InputTxns
-
-The `InputTxns` object includes the following items:
-
-| Parameter        | Type    | Description                                                                                                                                         |
-| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_hash         | string  | The transaction id of an unspent transaction from the same wallet output.                                                                           |
-| index            | integer | The [output index](https://bitcoin.stackexchange.com/questions/100765/what-does-the-index-of-an-utxo-stand-for) of this unspent transaction output. |
-| script\_pub\_key | string  | The [scriptpubkey](https://learnmeabitcoin.com/technical/scriptPubKey) of this unspent transaction output.                                          |
-| amount           | float   | The value of this unspent transaction output.                                                                                                       |
-| amount           |         |                                                                                                                                                     |
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-    {
-        "tx_hash": "0d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb2",
-        "index": 1,
-        "script_pub_key": "001449e3b6b4684c4d4a914b29411af51843c59bfff0",
-        "amount": 0.00001000
-    }
-  ```
-</CollapsibleSection>
-
-### PayForGas
-
-The `PayForGas` object includes the following items:
-
-| Parameter                    | Type    | Description                                                                                                                                                                  |
-| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_type                     | string  | ETH/EVM coins and tokens only. Options are `Legacy` or `Eip1559`. The type of transaction values being configured.                                                           |
-| gas\_price                   | decimal | Only used if tx\_type is `Legacy`. Values are in Gwei. The maximium price per gas unit the user is willing to pay for the transaction.                                       |
-| max\_fee\_per\_gas           | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. The maximum amount to pay per unit of gas to get your transaction included in a block.                               |
-| max\_priority\_fee\_per\_gas | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. This is paid directly to the miner, and can be set by the user to attract minimal delay in transaction confirmation. |
-| min\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated minimum transaction wait time in mempool (in ms) for this priority level.                                            |
-| max\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated maximum transaction wait time in mempool (in ms) for this priority level.                                            |
-
-<Note>
-  [Eip1559](https://www.coinbase.com/en-au/blog/the-technical-benefits-of-eip-1559) allows users to save on gas fees. To use this feature for a coin/token, its entry in your `coins` file must include fields for `chain_id` and `max_eth_tx_type`. To allow eip-1559 transactions, `max_eth_tx_type` should be set to `2`. To find the `chain_id` for an \[EVM network([https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/](https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/))], refer to [chainlist.org](https://chainlist.org). There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `Provider` or `Simple`.
-
-  By default, `Simple` gas fee estimation suggests a fee based on fee history. If set `gas_fee_estimator` is set to `Provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
-
-  To set or view the current swap transaction fee policy, use the [get\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/wallet/fee_management/get_swap_transaction_fee_policy/) and [set\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/wallet/fee_management/set_swap_transaction_fee_policy/) methods.
-
-  For more information about EIP1559, refer to [https://www.blocknative.com/blog/eip-1559-fees](https://www.blocknative.com/blog/eip-1559-fees)
-</Note>
-
-<CollapsibleSection expandedText="Hide Legacy Example" collapsedText="Show Legacy Example">
-  ```json
-  {
-      "tx_type": "Legacy",
-      "gas_price": "1234.567"
-  }
-  ```
-</CollapsibleSection>
-
-<CollapsibleSection expandedText="Hide EIP1559 Example" collapsedText="Show EIP1559 Example">
-  ```json
-  {
-      "tx_type": "Eip1559",
-      "max_fee_per_gas": "1234.567",
-      "max_priority_fee_per_gas": "1.2"
-  }
-  ```
-</CollapsibleSection>
-
-### NewAddressInfo
-
-The `NewAddressInfo` response object includes the following items for request in HD mode:
-
-| Parameter        | Type   | Description                                                                                                                                                                                                                                                                   |
-| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| address          | string | The account address for a specific derivation path under the `account_index`.                                                                                                                                                                                                 |
-| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. If there are no more addresses with balances within the gap limit, the address index will increment.                                                              |
-| balance          | object | A standard [BalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#balance-info) object.                                                                                                                                                                           |
-| chain            | string | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-
-### WalletBalanceInfo
-
-The `WalletBalanceInfo` object includes the following items in the activation response for a coin in HD mode:
-
-| Parameter    | Type   | Description                                                                                                      |
-| ------------ | ------ | ---------------------------------------------------------------------------------------------------------------- |
-| wallet\_type | string | In HD wallet mode, this will return `HD`. <DevComment> What are the other values? </DevComment>                  |
-| accounts     | object | A standard [WalletAccountInfo](/komodo-defi-framework/api/common_structures/wallet/#wallet-account-info) object. |
-
-```json
-{
-    "wallet_balance": {
-        "wallet_type": "HD",
-        "accounts": [
-            ...
-        ]
-    }
-}
-```
+| Structure                | Type             | Description                                                                                                                                                   |
+| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                     | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas) |
+| amount                   | string (numeric) | fee amount (in decimal representation)                                                                                                                        |
+| amount\_rat              | rational         | fee amount (in rational representation)                                                                                                                       |
+| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                       |
+| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                       |
+| paid\_from\_trading\_vol | bool             | whether the fee is paid from trading volume and not use actual `coin` balance                                                                                 |
 
 ### FeeInfo
 
@@ -364,17 +230,156 @@ The `FeeInfo` response object includes the following items for [withdraw (v2)](/
   }
   ```
 </CollapsibleSection>
+### HistoryTarget
 
-### ExtendedFeeInfo
+Used to specify a HD wallet `account_id` or `address_id` for [my\_tx\_history v2](/komodo-defi-framework/api/v20/wallet/tx/my_tx_history/) requests.
 
-| Structure                | Type             | Description                                                                                                                                                   |
-| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                     | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas) |
-| amount                   | string (numeric) | fee amount (in decimal representation)                                                                                                                        |
-| amount\_rat              | rational         | fee amount (in rational representation)                                                                                                                       |
-| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                       |
-| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                       |
-| paid\_from\_trading\_vol | bool             | whether the fee is paid from trading volume and not use actual `coin` balance                                                                                 |
+| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                              |
+| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| type        | string  | Filters results by `account_id` or `address_id` part of the derivation path.                                                                                                                                                                                                                                             |
+| account\_id | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                                                              |
+| address\_id | integer | Only required when `type` is `address_id`. `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
+| chain       | string  | Only required when `type` is `address_id`. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  #### Example
+
+  ```json
+  {
+    "type": "account_id",
+    "account_id": 77
+  }
+  ```
+
+  ```json
+  {
+    "type": "address_id",
+    "account_id": 0,
+    "chain": "External", // Accepted values: "External" and "Internal"
+    "address_id": 1
+  }
+  ```
+</CollapsibleSection>
+
+### InputTxns
+
+The `InputTxns` object includes the following items:
+
+| Parameter        | Type    | Description                                                                                                                                         |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_hash         | string  | The transaction id of an unspent transaction from the same wallet output.                                                                           |
+| index            | integer | The [output index](https://bitcoin.stackexchange.com/questions/100765/what-does-the-index-of-an-utxo-stand-for) of this unspent transaction output. |
+| script\_pub\_key | string  | The [scriptpubkey](https://learnmeabitcoin.com/technical/scriptPubKey) of this unspent transaction output.                                          |
+| amount           | float   | The value of this unspent transaction output.                                                                                                       |
+| amount           |         |                                                                                                                                                     |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+    {
+        "tx_hash": "0d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb2",
+        "index": 1,
+        "script_pub_key": "001449e3b6b4684c4d4a914b29411af51843c59bfff0",
+        "amount": 0.00001000
+    }
+  ```
+</CollapsibleSection>
+
+### NewAddressInfo
+
+The `NewAddressInfo` response object includes the following items for request in HD mode:
+
+| Parameter        | Type   | Description                                                                                                                                                                                                                                                                   |
+| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| address          | string | The account address for a specific derivation path under the `account_index`.                                                                                                                                                                                                 |
+| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. If there are no more addresses with balances within the gap limit, the address index will increment.                                                              |
+| balance          | object | A standard [BalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#balance-info) object.                                                                                                                                                                           |
+| chain            | string | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
+
+### PayForGas
+
+The `PayForGas` object includes the following items:
+
+| Parameter                    | Type    | Description                                                                                                                                                                  |
+| ---------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_type                     | string  | ETH/EVM coins and tokens only. Options are `Legacy` or `Eip1559`. The type of transaction values being configured.                                                           |
+| gas\_price                   | decimal | Only used if tx\_type is `Legacy`. Values are in Gwei. The maximium price per gas unit the user is willing to pay for the transaction.                                       |
+| max\_fee\_per\_gas           | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. The maximum amount to pay per unit of gas to get your transaction included in a block.                               |
+| max\_priority\_fee\_per\_gas | decimal | Only used if tx\_type is `Eip1559`. Values are in Gwei. This is paid directly to the miner, and can be set by the user to attract minimal delay in transaction confirmation. |
+| min\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated minimum transaction wait time in mempool (in ms) for this priority level.                                            |
+| max\_wait\_time              | integer | Optional, only used if tx\_type is `Eip1559`. Estimated maximum transaction wait time in mempool (in ms) for this priority level.                                            |
+
+<Note>
+  [Eip1559](https://www.coinbase.com/en-au/blog/the-technical-benefits-of-eip-1559) allows users to save on gas fees. To use this feature for a coin/token, its entry in your `coins` file must include fields for `chain_id` and `max_eth_tx_type`. To allow eip-1559 transactions, `max_eth_tx_type` should be set to `2`. To find the `chain_id` for an \[EVM network([https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/](https://blog.thirdweb.com/evm-compatible-blockchains-and-ethereum-virtual-machine/))], refer to [chainlist.org](https://chainlist.org). There is also a new `gas_fee_estimator` parameter in the coins file, which can be set to `Provider` or `Simple`.
+
+  By default, `Simple` gas fee estimation suggests a fee based on fee history. If set `gas_fee_estimator` is set to `Provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/).
+
+  To set or view the current swap transaction fee policy, use the [get\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/wallet/fee_management/get_swap_transaction_fee_policy/) and [set\_swap\_transaction\_fee\_policy](/komodo-defi-framework/api/v20/wallet/fee_management/set_swap_transaction_fee_policy/) methods.
+
+  For more information about EIP1559, refer to [https://www.blocknative.com/blog/eip-1559-fees](https://www.blocknative.com/blog/eip-1559-fees)
+</Note>
+
+<CollapsibleSection expandedText="Hide Legacy Example" collapsedText="Show Legacy Example">
+  ```json
+  {
+      "tx_type": "Legacy",
+      "gas_price": "1234.567"
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide EIP1559 Example" collapsedText="Show EIP1559 Example">
+  ```json
+  {
+      "tx_type": "Eip1559",
+      "max_fee_per_gas": "1234.567",
+      "max_priority_fee_per_gas": "1.2"
+  }
+  ```
+</CollapsibleSection>
+
+### RawTxInfo
+
+The `RawTxInfo` object includes the following items:
+
+| Parameter     | Type   | Description                                                                                                                                                                                                                  |
+| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_hex       | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
+| prev\_txns    | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
+| to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
+| value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
+| gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
+| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
+
+<DevComment>
+  TODO: Confirm units used in ETH/EVM transactions.
+</DevComment>
+
+<CollapsibleSection expandedText="Hide UTXO Example" collapsedText="Show UTXO Example">
+  ```json
+    {
+        "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
+        "prev_txns": [
+            ...
+        ]
+    }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide ETH/EVM Example" collapsedText="Show ETH/EVM Example">
+  ```json
+    {
+        "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
+        "value": "0.85",
+        "gas_limit": "21000",
+        "pay_for_gas": {
+            "tx_type": "Eip1559",
+            "max_fee_per_gas": "1234.567",
+            "max_priority_fee_per_gas": "1.2"
+        }
+    }
+  ```
+</CollapsibleSection>
+
 
 ### TotalFeeInfo
 
@@ -451,18 +456,6 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
   ```
 </CollapsibleSection>
 
-### WithdrawFromInfo
-
-The `WithdrawFromInfo` response object includes the following items for HD Wallet [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests.
-You can use either the `derivation_path` on its own, or the `account_id`, `chain` and `address_id` together.
-
-| Parameter        | Type    | Description                                                                                                                                                                                                                                                                   |
-| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.                                                                                                                                                                   |
-| account\_id      | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.**                                                                                                                                 |
-| address\_id      | integer | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
-| chain            | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
-
 ### ScanAddressesInfo
 
 The `ScanAddressesInfo` response object includes the following items for request in HD mode:
@@ -502,30 +495,38 @@ The `WalletAccountInfo` object includes the following items in the activation re
 }
 ```
 
-### AccountAddressInfo
 
-The `AccountAddressInfo` object includes the following items for active addresses in the activation response for a coin in HD mode:
+### WalletBalanceInfo
 
-| Parameter        | Type   | Description                                                                                                 |
-| ---------------- | ------ | ----------------------------------------------------------------------------------------------------------- |
-| address          | string | The account address for a specific derivation path under the `account_index`.                               |
-| derivation\_path | string | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address. |
-| chain            | string | `External` or `Internal`, as defined in the activation request.                                             |
-| balance          | object | A standard [BalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#balance-info) object.         |
+The `WalletBalanceInfo` object includes the following items in the activation response for a coin in HD mode:
 
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "address": "RXNtAyDSsY3DS3VxTpJegzoHU9bUX54j56",
-      "derivation_path": "m/44'/141'/0'/0/0",
-      "chain": "External",
-      "balance": {
-          "spendable": "7.64018255",
-          "unspendable": "0"
-      }
-  }
-  ```
-</CollapsibleSection>
+| Parameter    | Type   | Description                                                                                                      |
+| ------------ | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| wallet\_type | string | In HD wallet mode, this will return `HD`. <DevComment> What are the other values? </DevComment>                  |
+| accounts     | object | A standard [WalletAccountInfo](/komodo-defi-framework/api/common_structures/wallet/#wallet-account-info) object. |
+
+```json
+{
+    "wallet_balance": {
+        "wallet_type": "HD",
+        "accounts": [
+            ...
+        ]
+    }
+}
+```
+
+### WithdrawFromInfo
+
+The `WithdrawFromInfo` response object includes the following items for HD Wallet [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests.
+You can use either the `derivation_path` on its own, or the `account_id`, `chain` and `address_id` together.
+
+| Parameter        | Type    | Description                                                                                                                                                                                                                                                                   |
+| ---------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the address.                                                                                                                                                                   |
+| account\_id      | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.**                                                                                                                                 |
+| address\_id      | integer | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
+| chain            | string  | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
 ## Error types
 
@@ -615,87 +616,5 @@ The specified `fee` is not valid.
   "error_type": "InvalidFeePolicy",
   "error_data": "Expected 'EthGas' fee type, found UtxoFixed",
   "id": 0
-}
-```
-
-#### NoSuchCoin
-
-The specified coin was not found or is not activated yet.
-
-| Structure | Type   | Description                                   |
-| --------- | ------ | --------------------------------------------- |
-| coin      | string | the not found `coin` specified in the Request |
-
-#### Transport
-
-The request was failed due to a network error.
-
-| Structure | Type   | Description                     |
-| --------- | ------ | ------------------------------- |
-| (none)    | string | the transport error description |
-
-#### InternalError
-
-The request was failed due to an Komodo DeFi API internal error.
-
-| Structure | Type   | Description                    |
-| --------- | ------ | ------------------------------ |
-| (none)    | string | the internal error description |
-
-## Error cases
-
-### Error - Coin not active
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "TTT-SLP",
-  "error_path": "my_tx_history_v2.lp_coins",
-  "error_trace": "my_tx_history_v2:389] lp_coins:2847]",
-  "error_type": "CoinIsNotActive",
-  "error_data": "TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Coin not compatible
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "TTT-SLP",
-  "error_path": "my_tx_history_v2",
-  "error_trace": "my_tx_history_v2:336]",
-  "error_type": "NotSupportedFor",
-  "error_data": "TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Coin enabled without tx\_history = true
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Storage is not initialized for TTT-SLP",
-  "error_path": "my_tx_history_v2",
-  "error_trace": "my_tx_history_v2:343]",
-  "error_type": "StorageIsNotInitialized",
-  "error_data": "Storage is not initialized for TTT-SLP",
-  "id": null
-}
-```
-
-### Error - Local database failed
-
-```json
-{
-  "mmrpc": "2.0",
-  "error": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
-  "error_path": "my_tx_history_v2.sql_tx_history_storage",
-  "error_trace": "my_tx_history_v2:351] sql_tx_history_storage:472]",
-  "error_type": "StorageError",
-  "error_data": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
-  "id": null
 }
 ```
