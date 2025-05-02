@@ -5,6 +5,15 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 The following structures are used in the Komodo DeFi SDK for non-fungible tokens (NFTs).
 
+### NftFilter
+
+The `NftFilter` object includes the following items for a given coin or token:
+
+| Parameter         | Type    | Description                                                                                                                    |
+| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| exclude\_spam     | boolean | Optional, defaults to `false`. If `true`, only tokens which have param `possible_spam:false` are included in the response.     |
+| exclude\_phishing | boolean | Optional, defaults to `false`. If `true`, only tokens which have param `possible_phishing:false` are included in the response. |
+
 ### NftInfoBasic
 
 The `NftInfoBasic` object includes the following items for a given token:
@@ -43,79 +52,6 @@ The `NftInfo` object includes the following items for a given token:
 | token\_uri             | string  | The URI to the metadata of the token. May be `null`.                                                                                                                  |
 | token\_domain          | string  | Token domain. May be `null`.                                                                                                                                          |
 | uri\_meta              | object  | A standard [NftMetadata](/komodo-defi-framework/api/common_structures/nfts/#nft-metadata) object.                                                                     |
-
-### NftFilter
-
-The `NftFilter` object includes the following items for a given coin or token:
-
-| Parameter         | Type    | Description                                                                                                                    |
-| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| exclude\_spam     | boolean | Optional, defaults to `false`. If `true`, only tokens which have param `possible_spam:false` are included in the response.     |
-| exclude\_phishing | boolean | Optional, defaults to `false`. If `true`, only tokens which have param `possible_phishing:false` are included in the response. |
-
-### NftTransfer
-
-The `NftTransfer` object includes the following items for each token transaction:
-
-| Parameter          | Type    | Description                                                                                                                                                           |
-| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| amount             | string  | Amount of tokens transferred.                                                                                                                                         |
-| block\_hash        | string  | May be `null`. Hash of block in which transfer occurred.                                                                                                              |
-| block\_number      | integer | Height of block in which transfer occurred.                                                                                                                           |
-| block\_timestamp   | integer | Block time in [unix epoch format](https://www.epochconverter.com/).                                                                                                   |
-| chain              | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
-| token\_uri         | string  | May be `null`. The URI to the metadata of the token.                                                                                                                  |
-| token\_domain      | string  | May be `null`. Extracted domain from the `token_uri`, if valid.                                                                                                       |
-| collection\_name   | string  | May be `null`. Name of collection which token belongs to.                                                                                                             |
-| image\_url         | string  | May be `null`. The URI to the token image.                                                                                                                            |
-| image\_domain      | string  | May be `null`. Extracted domain from the `image_url`, if valid.                                                                                                       |
-| token\_name        | string  | May be `null`. Name of the token.                                                                                                                                     |
-| contract\_type     | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                                 |
-| token\_address     | string  | Address of token transferred.                                                                                                                                         |
-| token\_id          | string  | Token ID.                                                                                                                                                             |
-| possible\_spam     | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
-| possible\_phishing | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
-| transaction\_hash  | string  | Transaction ID of the transfer.                                                                                                                                       |
-| transaction\_index | string  | May be `null`. Transaction index of the transfer.                                                                                                                     |
-| log\_index         | string  | Log index of the transfer.                                                                                                                                            |
-| value              | string  | May be `null`. Tranfer value.                                                                                                                                         |
-| transaction\_type  | string  | May be `null`. Transaction type. Possible values are `Single`.                                                                                                        |
-| from\_address      | string  | Address of previous owner which sent the token(s).                                                                                                                    |
-| to\_address        | string  | Address of new owner which received the token(s).                                                                                                                     |
-| status             | string  | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`.  |
-| verified           | integer | May be `null`. A deprecated field which will be removed in future.                                                                                                    |
-| operator           | string  | May be `null`.                                                                                                                                                        |
-| fee\_details       | object  | Optional. A standard [FeeInfo](/komodo-defi-framework/api/common_structures/wallet/#fee-info) object.                                                                 |
-| confirmations      | integer | The count of blocks produced since this transaction was confirmed.                                                                                                    |
-
-<DevComment>
-  `verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incormoprates this.
-  What are the other possible values for `transaction_type`?
-  What is `operator`?
-  What does `verified` mean?
-</DevComment>
-
-### NftTransferFilter
-
-The `NftTransferFilter` object includes the following items for a transfer of given coin or token:
-
-| Parameter         | Type    | Description                                                                                                                                             |
-| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| receive           | boolean | Optional, defaults to `false`. If `true`, only transfers where user received NFTs are included in the response.                                         |
-| send              | boolean | Optional, defaults to `false`. If `true`, only transfers where user sent NFTs are included in the response.                                             |
-| from\_date        | integer | Optional. A timestamp in [unix epoch format](https://www.epochconverter.com/). If `true`, filter includes transfers from this date onwards (inclusive). |
-| to\_date          | integer | Optional. A timestamp in [unix epoch format](https://www.epochconverter.com/). If `true`, filter includes transfers up to this date (inclusive).        |
-| exclude\_spam     | boolean | Optional, defaults to `false`. If `true`, only transfers which have param `possible_spam:false` are included in the response.                           |
-| exclude\_phishing | boolean | Optional, defaults to `false`. If `true`, only transfers which have param `possible_phishing:false` are included in the response.                       |
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "ticker": "MINDS-ERC20",
-      "required_confirmations": 4
-  }
-  ```
-</CollapsibleSection>
 
 ### NftMetadata
 
@@ -186,6 +122,93 @@ The `NftMetadata` object includes the following items for a given coin or token:
   ```
 </CollapsibleSection>
 
+### NftProvider
+
+The `NftProvider` object is used in the 'enable\_nft' RPC method. It defines the NFT providers that are avaialable and their configuration.
+
+| Parameter          | Type    | Description                                                                  |
+| ------------------ | ------- | ---------------------------------------------------------------------------- |
+| type               | string  | Specifies the type of the provider.                                          |
+| info               | object  | Additional information about the provider                                    |
+| info.url           | string  | URL of the provider's endpoint                                               |
+| info.komodo\_proxy | boolean | Optional. Indicates whether proxy authentication is enabled for the endpoint |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "type": "Moralis",
+      "info": {
+          "url": "https://moralis-proxy.komodo.earth",
+          "komodo_proxy": true
+      }
+  }
+  ```
+</CollapsibleSection>
+
+### NftTransfer
+
+The `NftTransfer` object includes the following items for each token transaction:
+
+| Parameter          | Type    | Description                                                                                                                                                           |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount             | string  | Amount of tokens transferred.                                                                                                                                         |
+| block\_hash        | string  | May be `null`. Hash of block in which transfer occurred.                                                                                                              |
+| block\_number      | integer | Height of block in which transfer occurred.                                                                                                                           |
+| block\_timestamp   | integer | Block time in [unix epoch format](https://www.epochconverter.com/).                                                                                                   |
+| chain              | string  | Chain name. One of `AVALANCHE`, `BSC`, `ETH`, `FANTOM`, or `POLYGON`.                                                                                                 |
+| token\_uri         | string  | May be `null`. The URI to the metadata of the token.                                                                                                                  |
+| token\_domain      | string  | May be `null`. Extracted domain from the `token_uri`, if valid.                                                                                                       |
+| collection\_name   | string  | May be `null`. Name of collection which token belongs to.                                                                                                             |
+| image\_url         | string  | May be `null`. The URI to the token image.                                                                                                                            |
+| image\_domain      | string  | May be `null`. Extracted domain from the `image_url`, if valid.                                                                                                       |
+| token\_name        | string  | May be `null`. Name of the token.                                                                                                                                     |
+| contract\_type     | string  | Contract type. `ERC721` or `ERC1155`.                                                                                                                                 |
+| token\_address     | string  | Address of token transferred.                                                                                                                                         |
+| token\_id          | string  | Token ID.                                                                                                                                                             |
+| possible\_spam     | boolean | If `true`, the contract address has [been identified](https://docs.moralis.io/web3-data-api/evm/nft-spam-detection) as associated with spam or suspicious activities. |
+| possible\_phishing | boolean | If `true`, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains.                    |
+| transaction\_hash  | string  | Transaction ID of the transfer.                                                                                                                                       |
+| transaction\_index | string  | May be `null`. Transaction index of the transfer.                                                                                                                     |
+| log\_index         | string  | Log index of the transfer.                                                                                                                                            |
+| value              | string  | May be `null`. Tranfer value.                                                                                                                                         |
+| transaction\_type  | string  | May be `null`. Transaction type. Possible values are `Single`.                                                                                                        |
+| from\_address      | string  | Address of previous owner which sent the token(s).                                                                                                                    |
+| to\_address        | string  | Address of new owner which received the token(s).                                                                                                                     |
+| status             | string  | Transfer status. Will be either `Send` or `Receive`. When the `from_address` and `to_address` are the same (i.e. sending to yourself), this value will be `Receive`.  |
+| verified           | integer | May be `null`. A deprecated field which will be removed in future.                                                                                                    |
+| operator           | string  | May be `null`.                                                                                                                                                        |
+| fee\_details       | object  | Optional. A standard [FeeInfo](/komodo-defi-framework/api/common_structures/wallet/#fee-info) object.                                                                 |
+| confirmations      | integer | The count of blocks produced since this transaction was confirmed.                                                                                                    |
+
+<DevComment>
+  `verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incormoprates this.
+  What are the other possible values for `transaction_type`?
+  What is `operator`?
+  What does `verified` mean?
+</DevComment>
+
+### NftTransferFilter
+
+The `NftTransferFilter` object includes the following items for a transfer of given coin or token:
+
+| Parameter         | Type    | Description                                                                                                                                             |
+| ----------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| receive           | boolean | Optional, defaults to `false`. If `true`, only transfers where user received NFTs are included in the response.                                         |
+| send              | boolean | Optional, defaults to `false`. If `true`, only transfers where user sent NFTs are included in the response.                                             |
+| from\_date        | integer | Optional. A timestamp in [unix epoch format](https://www.epochconverter.com/). If `true`, filter includes transfers from this date onwards (inclusive). |
+| to\_date          | integer | Optional. A timestamp in [unix epoch format](https://www.epochconverter.com/). If `true`, filter includes transfers up to this date (inclusive).        |
+| exclude\_spam     | boolean | Optional, defaults to `false`. If `true`, only transfers which have param `possible_spam:false` are included in the response.                           |
+| exclude\_phishing | boolean | Optional, defaults to `false`. If `true`, only transfers which have param `possible_phishing:false` are included in the response.                       |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "ticker": "MINDS-ERC20",
+      "required_confirmations": 4
+  }
+  ```
+</CollapsibleSection>
+
 ### WithdrawNftData
 
 The `WithdrawNftData` object is used for withdrawals of NFTs on ERC721 and ERC1155 contracts. It includes the following items for a given coin or token:
@@ -209,26 +232,3 @@ The `WithdrawNftData` object is used for withdrawals of NFTs on ERC721 and ERC11
   Due to this difference, the `amount` and `max` fields are only used the when
   the `type` value is `withdraw_erc1155`.
 </Note>
-
-### NftProvider
-
-The `NftProvider` object is used in the 'enable\_nft' RPC method. It defines the NFT providers that are avaialable and their configuration.
-
-| Parameter          | Type    | Description                                                                  |
-| ------------------ | ------- | ---------------------------------------------------------------------------- |
-| type               | string  | Specifies the type of the provider.                                          |
-| info               | object  | Additional information about the provider                                    |
-| info.url           | string  | URL of the provider's endpoint                                               |
-| info.komodo\_proxy | boolean | Optional. Indicates whether proxy authentication is enabled for the endpoint |
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "type": "Moralis",
-      "info": {
-          "url": "https://moralis-proxy.komodo.earth",
-          "komodo_proxy": true
-      }
-  }
-  ```
-</CollapsibleSection>
