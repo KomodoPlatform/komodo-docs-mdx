@@ -26447,6 +26447,96 @@ export const description =
 
 # Change Log
 
+## Komodo DeFi Framework v2.4.0-beta
+
+### 🧠 Core & Protocol
+
+*   [feat(experimental): introduce experimental namespace](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2372): Adds `experimental` namespace for APIs under active development.
+*   [improvement(protocol): zero DEX fees for KMD pairs](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2323): Enables zero-fee trading for TPU v2 swaps involving KMD pairs.
+*   [improvement(protocol): version fallback support](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2324): Adds swap version fallback for compatibility with legacy clients.
+*   [improvement(protocol): taker fee pre-burn output](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2112): Implements pre-burn address for collecting 25% of taker DEX fees.
+*   [improvement(protocol): improved timeout validation](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2283): Adds swap robustness by checking payment state before enforcing timeout.
+*   [improvement(protocol): add `is_success` field to legacy swaps](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2371): Makes swap success state more explicit in legacy RPC responses.
+*   [fix(protocol): fix memory leak in legacy swaps tracking](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2301)
+
+### 🛰️ Networking
+
+*   [improvement(p2p): add time sync validation](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2255): Validates system clock to avoid swap failures caused by time drift.
+*   [improvement(p2p): remove static seed IPs](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2407): Improves P2P bootstrapping and reliability.
+*   [improvement(orderbook): handle no peer responses in `best_orders`](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2318)
+
+### 📡 Event Streaming
+
+*   [feat(events): dynamic subscription model](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2172): Replaces static event config with API-driven subscriptions.
+
+### 💳 Wallet
+
+*   [feat(wallet): add mnemonic password change RPC](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2317)
+*   [feat(wallet): support non-BIP39 mnemonics](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2312)
+*   [improvement(wallet): enforce name validation and password strength](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2400): Adds wallet name restrictions, optional password strength checks, and changes wallet file extension to `.json`.
+*   [security(wallet): fix path traversal in wallet handling](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2400)
+*   [security(wallet): standardize Argon2 params for encryption](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2360)
+
+### 🌐 RPC
+
+*   [feat(rpc): dynamic port allocation support](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2342)
+
+### 🥩 Cosmos & Tendermint
+
+*   [feat(cosmos): staking support (delegation, undelegation, rewards, queries)](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2372)
+*   [feat(cosmos): delegation RPC](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2322)
+*   [feat(cosmos): undelegation RPC](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2330)
+*   [feat(cosmos): claim rewards RPCs](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2351), [#2373](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2373)
+*   [feat(cosmos): validator queries](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2310)
+*   [feat(cosmos): delegation status tracking](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2377)
+*   [fix(cosmos): improve tx query reliability](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2384)
+*   [fix(cosmos): support token transaction history](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2404)
+*   [fix(cosmos): handle IBC and HTLC events](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2385)
+
+### 🔐 Hardware Wallet
+
+*   [fix(hw-wallet): init context for UTXO withdrawals](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2333)
+
+### 🖼️ NFT
+
+*   [fix(nft): support HD wallets in `update_nft`](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2386)
+*   [fix(nft): fix `withdraw_nft` with HD wallets](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2424)
+
+### 🪙 UTXO / Bitcoin
+
+*   [fix(utxo): support taproot address parsing](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2423)
+
+### 🛡️ Security & Key Derivation
+
+*   [security(hash): validate hash sizes](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2279)
+*   [security(keys): enforce key material length](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2356)
+
+### 🧰 Dev Tools & Dependencies
+
+*   [chore(swapops): add default trait impls](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2354)
+*   [chore(deps): remove deprecated `instant` crate](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2391)
+*   [chore(deps): migrate to `timed-map` crate](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2247), [#2306](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2306), [#2308](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2308)
+*   [chore(libp2p): bump to k-0.52.12](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2326): Fixes iOS build compatibility.
+
+### 📈 Simple Maker Bot
+
+*   [chore(simple-maker-bot): replace Nomics with LiveCoinWatch](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2416)
+
+### 🧪 Qtum
+
+*   [style(qtum): use `validator_address` param](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2419): Standardizes delegation params with Cosmos.
+
+***
+
+### 🆕 New Contributors
+
+*   [@levoncrypto](https://github.com/levoncrypto) — [PR #2396](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2396)
+
+***
+
+**Full Changelog**: [Compare v2.3.0-beta...v2.4.0-beta](https://github.com/KomodoPlatform/komodo-defi-framework/compare/v2.3.0-beta...v2.4.0-beta)\
+**Release Binaries**: [v2.4.0-beta on GitHub Releases](https://github.com/KomodoPlatform/komodo-defi-framework/releases/tag/v2.4.0-beta)
+
 ## Komodo DeFi Framework v2.3.0-beta
 
 *   [feat(LRAPI): add 1inch classic swap rpc](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2222): Initial code to connect to 1inch Liquidity Routing API (LRAPI) provider and two new RPCs to use 1inch classic swap API. It also adds 'approve' and 'allowance' RPCs (for ERC20 tokens)
