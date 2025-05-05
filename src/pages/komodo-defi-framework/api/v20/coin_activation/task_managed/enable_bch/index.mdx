@@ -4,11 +4,11 @@ export const description =
 
 import trezorpin from "@/public/images/docs/api-images/trezor_pin.png";
 
-# task::enable\_bch
+# Task: BCH/SLP Activation
 
-## init {{label : 'task::enable_bch::init', tag : 'API-v2'}}
+## task::enable\_bch::init {{label : 'task::enable_bch::init', tag : 'API-v2'}}
 
-BCH and SLP tokens can be activated in a task managed manner using this method.
+Use this method for task managed activation of BCH and SLP tokens. Refer to the [task managed activation overview](/komodo-defi-framework/api/v20/coin_activation/task_managed/) for activation of other coin types.
 
 #### Arguments
 
@@ -38,7 +38,7 @@ BCH and SLP tokens can be activated in a task managed manner using this method.
 
 #### Activation in Trezor mode
 
-<CodeGroup title="" tag="POST" label="task::enable_bch::init" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_bch::init" tag="POST" label="task::enable_bch::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -114,7 +114,7 @@ BCH and SLP tokens can be activated in a task managed manner using this method.
   ```
 </CollapsibleSection>
 
-## status {{label : 'task::enable_bch::status', tag : 'API-v2'}}
+## task::enable\_bch::status {{label : 'task::enable_bch::status', tag : 'API-v2'}}
 
 After running the `task::enable_bch::init` method, we can query the status of activation to check its progress.
 The response will return the following:
@@ -132,7 +132,7 @@ The response will return the following:
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="task::enable_bch::status" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_bch::status" tag="POST" label="task::enable_bch::status" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -266,7 +266,7 @@ Possible Error Cases:
 *   `CoinCreationError` - Error during activation. E.g. incorrect or inactive electrum servers.
 *   `HwError` - **This is the most important error type.** Unlike other error types, `HwError` requires the GUI / User to check the details in `error_data` field to know which action is required. View the [HwError error type details](/komodo-defi-framework/api/v20/utils/task_init_trezor/#details-for-hw-error-error-type) for more info.
 
-## user\_action {{label : 'task::enable_bch::user_action', tag : 'API-v2'}}
+## task::enable\_bch::user\_action {{label : 'task::enable_bch::user_action', tag : 'API-v2'}}
 
 If the `task::enable_bch::status` returns `UserActionRequired`, we need to use the `task::enable_bch::user_action` method to enter our PIN
 
@@ -291,7 +291,7 @@ If the `task::enable_bch::status` returns `UserActionRequired`, we need to use t
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="task::enable_bch::user_action" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_bch::user_action" tag="POST" label="task::enable_bch::user_action" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -320,7 +320,7 @@ If the `task::enable_bch::status` returns `UserActionRequired`, we need to use t
   ```
 </CollapsibleSection>
 
-## cancel {{label : 'task::enable_bch::cancel', tag : 'API-v2'}}
+## task::enable\_bch::cancel {{label : 'task::enable_bch::cancel', tag : 'API-v2'}}
 
 If you want to cancel the enabling process before it has completed, you can use this method.
 
@@ -341,7 +341,7 @@ If you want to cancel the enabling process before it has completed, you can use 
 | error\_type  | string | An enumerated value for the returned error.                    |
 | error\_data  | string | The input task ID which resulted in the error.                 |
 
-<CodeGroup title="" tag="POST" label="task::enable_bch::cancel" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_bch::cancel" tag="POST" label="task::enable_bch::cancel" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",

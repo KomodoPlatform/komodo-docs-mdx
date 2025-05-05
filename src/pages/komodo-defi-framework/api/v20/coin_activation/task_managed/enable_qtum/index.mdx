@@ -4,11 +4,11 @@ export const description =
 
 import trezorpin from "@/public/images/docs/api-images/trezor_pin.png";
 
-# task::enable\_qtum
+# Task: QTUM Activation
 
-## init {{label : 'task::enable_qtum::init', tag : 'API-v2'}}
+## task::enable\_qtum::init {{label : 'task::enable_qtum::init', tag : 'API-v2'}}
 
-QTUM coins are activated using this method. For UTXO coins, refer to [task::enable\_utxo::init](/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_utxo/#init)
+Use this method for task managed activation of QTUM coins and tokens. Refer to the [task managed activation overview](/komodo-defi-framework/api/v20/coin_activation/task_managed/) for activation of other coin types.
 
 #### Arguments
 
@@ -39,7 +39,7 @@ QTUM coins are activated using this method. For UTXO coins, refer to [task::enab
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="task::enable_qtum::init" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_qtum::init" tag="POST" label="task::enable_qtum::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -87,7 +87,7 @@ QTUM coins are activated using this method. For UTXO coins, refer to [task::enab
   ```
 </CollapsibleSection>
 
-## status {{label : 'task::enable_qtum::status', tag : 'API-v2'}}
+## task::enable\_qtum::status {{label : 'task::enable_qtum::status', tag : 'API-v2'}}
 
 After running the `task::enable_qtum::init` method, we can query the status of activation to check its progress.
 The response will return the following:
@@ -105,7 +105,7 @@ The response will return the following:
 
 #### Request
 
-<CodeGroup title="" tag="POST" label="task::enable_qtum::status" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_qtum::status" tag="POST" label="task::enable_qtum::status" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -119,9 +119,9 @@ The response will return the following:
   ```
 </CodeGroup>
 
-The response formats for this method are the same as the [task::enable\_utxo::status](/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_utxo/#status) responses.
+The response formats for this method are the same as the [task managed activation](/komodo-defi-framework/api/v20/coin_activation/task_managed/) responses.
 
-## user\_action {{label : 'task::enable_qtum::user_action', tag : 'API-v2'}}
+## task::enable\_qtum::user\_action {{label : 'task::enable_qtum::user_action', tag : 'API-v2'}}
 
 If the `task::enable_qtum::status` returns `UserActionRequired`, we need to use the `task::enable_qtum::user_action` method to enter our PIN
 
@@ -146,7 +146,7 @@ If the `task::enable_qtum::status` returns `UserActionRequired`, we need to use 
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="task::enable_qtum::user_action" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_qtum::user_action" tag="POST" label="task::enable_qtum::user_action" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -198,3 +198,53 @@ If the `task::enable_qtum::status` returns `UserActionRequired`, we need to use 
   "id": null
 }
 ```
+
+## task::enable\_qtum::cancel {{label : 'task::enable_qtum::cancel', tag : 'API-v2'}}
+
+If you want to cancel the enabling process before it has completed, you can use this method.
+
+#### Arguments
+
+| Structure | Type    | Description                                                           |
+| --------- | ------- | --------------------------------------------------------------------- |
+| task\_id  | integer | The identifying number returned when initiating the enabling process. |
+
+#### Response
+
+| Structure    | Type   | Description                                                    |
+| ------------ | ------ | -------------------------------------------------------------- |
+| result       | string | Indicates task cancellation was succesful.                     |
+| error        | string | An error message to explain what went wrong.                   |
+| error\_path  | string | An indicator of the class or function which reurned the error. |
+| error\_trace | string | An indicator of where in the source code the error was thrown. |
+| error\_type  | string | An enumerated value for the returned error.                    |
+| error\_data  | string | The input task ID which resulted in the error.                 |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="task::enable_qtum::cancel" tag="POST" label="task::enable_qtum::cancel" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "task::enable_qtum::cancel",
+    "mmrpc": "2.0",
+    "params": {
+      "task_id": 3
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": "success",
+    "id": null
+  }
+  ```
+</CollapsibleSection>

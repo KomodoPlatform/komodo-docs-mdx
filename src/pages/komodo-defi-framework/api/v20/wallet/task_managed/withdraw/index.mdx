@@ -3,16 +3,16 @@ export const description = "The methods in this document allow withdrawal of coi
 
 # Withdraw Tasks
 
-## init {{label : 'task::withdraw::init', tag : 'API-v2'}}
+## task::withdraw::init {{label : 'task::withdraw::init', tag : 'API-v2'}}
 
-The `task::withdraw::init` method generates, signs, and returns a transaction that transfers the `amount` of `coin` to the address indicated in the `to` argument. The status of this method can be queried via the [withdraw\_status](/komodo-defi-framework/api/v20/wallet/task_managed/task_withdraw/#status) method.
+The `task::withdraw::init` method generates, signs, and returns a transaction that transfers the `amount` of `coin` to the address indicated in the `to` argument. The status of this method can be queried via the [task::withdraw::status](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/#task-withdraw-status) method.
 
 It will return the transaction hex (via `task::withdraw::status`), which then needs to be broadcast with the [sendrawtransaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) to complete the withdrawal. This method is uses the same input fields as the [standard v2 withdraw method](/komodo-defi-framework/api/v20/wallet/tx/withdraw/), with additional optional fields to specify the `from` address when using a hardware or HD wallet. There are two way to indicate which HD address to send funds from:
 
 *   Using `derivation_path` as a single input. E.g `m/44'/20'/0'/0/2`
 *   Using `account_id` (0), `chain` (External) & `address_id` (2) inputs. The bracketed values are the equavalent of the derivation path above.
 
-To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-framework/api/v20/wallet/task_managed/task_withdraw/#cancel) method.
+To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/#task-withdraw-cancel) method.
 
 <Note>
   When used for ZHTLC coins like ARRR or ZOMBIE, it may take some time to
@@ -47,7 +47,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
+<CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
     "mmrpc": "2.0",
@@ -65,7 +65,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 
 #### Command (max = true)
 
-<CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
+<CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
     "mmrpc": "2.0",
@@ -83,7 +83,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 
 #### Command (custom UtxoFixed fee)
 
-<CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
+<CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
     "mmrpc": "2.0",
@@ -105,7 +105,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 
 #### Command (custom UtxoPerKbyte fee)
 
-<CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
+<CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
     "mmrpc": "2.0",
@@ -127,7 +127,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 
 #### Command (HD wallet: derivation path option)
 
-<CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
+<CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -147,7 +147,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 
 #### Command (HD wallet: account\_id, chain & address\_id option)
 
-<CodeGroup title="" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
+<CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -181,7 +181,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
   ```
 </CollapsibleSection>
 
-## status  {{label : 'task::withdraw::status', tag : 'API-v2'}}
+## task::withdraw::status  {{label : 'task::withdraw::status', tag : 'API-v2'}}
 
 To get the status of your withdrawal transaction generation, use the `task::withdraw::status` method. Once ready, it will provide the raw hex used to broadcast your transaction with [sendrawtransaction](/komodo-defi-framework/api/legacy/send_raw_transaction/). The response returned is the same as what is returned from the [standard v2 withdraw method](/komodo-defi-framework/api/v20/wallet/tx/withdraw/#response)
 
@@ -217,7 +217,7 @@ To get the status of your withdrawal transaction generation, use the `task::with
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="task::withdraw::status" mm2MethodDecorate="true">
+<CodeGroup title="task::withdraw::status" tag="POST" label="task::withdraw::status" mm2MethodDecorate="true">
   ```json
   {
     "mmrpc": "2.0",
@@ -351,7 +351,7 @@ To get the status of your withdrawal transaction generation, use the `task::with
   ```
 </CollapsibleSection>
 
-## cancel {{label : 'task::withdraw::cancel', tag : 'API-v2'}}
+## task::withdraw::cancel {{label : 'task::withdraw::cancel', tag : 'API-v2'}}
 
 Use the `task::withdraw::cancel` method to cancel the withdrawal preparation task.
 
@@ -376,7 +376,7 @@ Use the `task::withdraw::cancel` method to cancel the withdrawal preparation tas
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="task::withdraw::cancel" mm2MethodDecorate="true">
+<CodeGroup title="task::withdraw::cancel" tag="POST" label="task::withdraw::cancel" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",

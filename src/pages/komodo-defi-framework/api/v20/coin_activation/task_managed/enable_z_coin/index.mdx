@@ -2,7 +2,24 @@ export const title = "Komodo DeFi Framework Method: ZHTLC Coin Activation";
 export const description =
   "The methods in this document allow activation of ZHTLC coins like ARRR & ZOMBIE.";
 
-# Initialize ZHTLC Coin Activation {{label : 'task::enable_z_coin::init', tag : 'API-v2'}}
+# Task: Z Coin Activation
+
+## task::enable\_z\_coin::init {{label : 'task::enable_z_coin::init', tag : 'API-v2'}}
+
+ZHTLC coins, like Pirate (ARRR) and the test coin ZOMBIE take a little longer to enable, and use a new two step method to enable. Activation can take a little while the first time, as we need to download some block cache data, and build a wallet database.
+Subsequent enabling will be faster, but still take a bit longer than other coins. The second step for activation is optional, but allows us to check the status of the activation process.
+
+Refer to the [task managed activation overview](/komodo-defi-framework/api/v20/coin_activation/task_managed/) for activation of other coin types.
+
+To withdraw ZHTLC coins, you need to use the [task::withdraw](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/#withdraw-tasks) methods:
+
+*   Generate a transaction with [task::withdraw::init](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/#task-withdraw-init)
+*   Query its status with [task::withdraw::status](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/#task-withdraw-status)
+*   Cancel generating the transaction with [task::withdraw::cancel](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/#task-withdraw-cancel)
+*   Broadcast the transaction with [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/#send-raw-transaction)
+
+ZHTLC coins are not compatible with the [v2 my\_tx\_history](/komodo-defi-framework/api/v20/wallet/tx/my_tx_history/) and [legacy my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/) methods.
+To get the transaction history for ZHTLC coins, you need to use the [z\_coin\_tx\_history](/komodo-defi-framework/api/v20/wallet/tx/zhtlc_tx_history/) method.
 
 <Note>
   To enable Z coins you also need to [install some Zcash
@@ -26,7 +43,7 @@ export const description =
 
 #### Enable Z coin without any optional parameters
 
-<CodeGroup title="Initialize ZHTLC Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -64,7 +81,7 @@ export const description =
 
 #### Sync from block 2528700, with custom `.zcash-params` path and scan params
 
-<CodeGroup title="Initialize ZHTLC Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -102,7 +119,7 @@ export const description =
 
 The Z coin lightwallet client only supports blocks that are post-sapling. The sapling activation height for Z coins can be found in the [coins file](https://github.com/KomodoPlatform/coins/blob/master/coins)
 
-<CodeGroup title="Initialize ZHTLC Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -143,7 +160,7 @@ The Z coin lightwallet client only supports blocks that are post-sapling. The sa
 
 <Note>[About proof of Keys Day](https://hackernoon.com/not-your-keys-not-your-bitcoin-jan3bitcoin-z6k3ktb)</Note>
 
-<CodeGroup title="Initialize ZHTLC Coin Activation" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::init" tag="POST" label="task::enable_z_coin::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -190,7 +207,7 @@ The Z coin lightwallet client only supports blocks that are post-sapling. The sa
   ```
 </CollapsibleSection>
 
-## Activation Status {{label : 'task::enable_z_coin::status', tag : 'API-v2'}}
+## task::enable\_z\_coin::status {{label : 'task::enable_z_coin::status', tag : 'API-v2'}}
 
 Z coins need to build sync a local block cache and wallet database before they can be used. Using `task_id` as an input, this method will return the current status of the activation process.
 
@@ -228,7 +245,7 @@ Once complete, `status`  will be `Ok`, and the `details` object will have the fo
 
 #### Status of Z coin activation
 
-<CodeGroup title="Activation Status" tag="POST" label="task::enable_z_coin::status" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::status" tag="POST" label="task::enable_z_coin::status" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -402,7 +419,57 @@ Once complete, `status`  will be `Ok`, and the `details` object will have the fo
   ```
 </CollapsibleSection>
 
-## Cancel Activation {{label : 'task::enable_z_coin::cancel', tag : 'API-v2'}}
+## task::enable\_z\_coin::user\_action   {{label : 'task::enable_z_coin::user_action', tag : 'API-v2'}}
+
+If the `task::enable_z_coin::status` returns `UserActionRequired`, we need to use the `task::enable_z_coin::user_action` method to enter our PIN
+
+#### Arguments
+
+| Parameter                 | Type            | Description                                                                                                                                                                                      |
+| ------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| task\_id                  | integer         | The identifying number returned when initiating the initialisation process.                                                                                                                      |
+| user\_action              | object          | Object containing the params below                                                                                                                                                               |
+| user\_action.action\_type | string          | Will be `TrezorPin` for this method                                                                                                                                                              |
+| user\_action.pin          | string (number) | When the Trezor device is displaying a grid of numbers for PIN entry, this param will contain your Trezor pin, as mapped through your keyboard numpad. See the image below for more information. |
+
+<OptimizedImage src={trezorpin} classNaming="w-full" alt="Trezor Pin" />
+
+#### Response
+
+| Parameter | Type   | Description                 |
+| --------- | ------ | --------------------------- |
+| result    | string | The outcome of the request. |
+
+<CodeGroup title="task::enable_z_coin::user_action" tag="POST" label="task::enable_z_coin::user_action" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "task::enable_z_coin::user_action",
+    "params": {
+      "task_id": 3,
+      "user_action": {
+        "action_type": "TrezorPin",
+        "pin": "862743"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": "success",
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+## task::enable\_z\_coin::cancel {{label : 'task::enable_z_coin::cancel', tag : 'API-v2'}}
 
 If you want to cancel the enabling process before it has completed, you can use this method.
 
@@ -427,7 +494,7 @@ If you want to cancel the enabling process before it has completed, you can use 
 
 #### Command
 
-<CodeGroup title="Cancel Activation" tag="POST" label="task::enable_z_coin::cancel" mm2MethodDecorate="true">
+<CodeGroup title="task::enable_z_coin::cancel" tag="POST" label="task::enable_z_coin::cancel" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
