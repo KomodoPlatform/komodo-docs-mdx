@@ -959,7 +959,7 @@ The `NftTransfer` object includes the following items for each token transaction
 | fee\_details       | object  | Optional. A standard [FeeInfo](/komodo-defi-framework/api/common_structures/#fee-info) object.                                                                        |
 | confirmations      | integer | The count of blocks produced since this transaction was confirmed.                                                                                                    |
 
-`verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incormoprates this.
+`verified` has no description. Related to [https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth](https://cointelegraph.com/news/nft-whale-pranksy-pranked-by-fake-banksy-for-97-7-eth)? Who verifies it? I can see there are ways to verify on opensea etc, I assume Moralis incorporates this.
 What are the other possible values for `transaction_type`?
 What is `operator`?
 What does `verified` mean?
@@ -1197,6 +1197,8 @@ Filter response to return the 10 best priced trades:
 | Structure | Type   | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
 | --------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Type      | string | There are two types from which to choose: `GoodTillCancelled` and `FillOrKill`. The `GoodTillCancelled` order is automatically converted to a `maker` order if the order is not matched in 30 seconds, and this `maker` order stays in the orderbook until explicitly cancelled. On the other hand, a `FillOrKill` order is cancelled if it is not matched within 30 seconds. The default type is `GoodTillCancelled` |
+
+If your order includes UTXO coins activated via electrum, and connection to its servers is lost, your order will automatically cancel and will need to be recreated once the connection is restored.
 
 `GoodTillCancelled` orders will remain on the orderbook until they are exhausted or explicitly cancelled.
 
@@ -9950,6 +9952,8 @@ To prevent a user from making trades in which the transaction fees may end up co
 | base\_orderbook\_ticker | string           | the ticker of the base currency if `orderbook_ticker` is configured for the base currency in `coins` file. If not defined, will return a null value. |
 | rel\_orderbook\_ticker  | string           | the ticker of the rel currency if `orderbook_ticker` is configured for the rel currency in `coins` file. If not defined, will return a null value.   |
 
+If your `setprice` order includes UTXO coins activated via electrum, and connection to its servers is lost, your order will automatically cancel and will need to be recreated once the connection is restored.
+
 #### 📌 Examples
 
 #### Command (with volume)
@@ -11803,8 +11807,10 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
 | requires\_notarization      | boolean          | Optional, defaults to `false`. If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.                                                                    |
 | rpc\_mode                   | string           | Optional, defaults to `Default`. Value can be `Metamask` only when the Komodo DeFi Framework is built targeting `wasm`.                                                                                                                                                                                                                      |
 | tx\_history                 | boolean          | Optional, defaults to `false`. If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                                                                                   |
-| nft\_req                    | object           | Optional, encapsulates the request parameters for NFT activation, including NFT provider configuration.                                                                                                                                                                                                                                      |
+| nft\_req                    | object           | Optional, encapsulates the request parameters for NFT activation, including NFT provider configuration. A standard [NftProvider](/komodo-defi-framework/api/common_structures/nfts/#nft-provider) object.                                                                                                                                    |
 | swap\_v2\_contracts         | object           | Optional, must be provided if "use\_trading\_proto\_v2" is true in [your configuration](/komodo-defi-framework/setup/configure-mm2-json/). A standard [SwapV2Contracts](/komodo-defi-framework/api/common_structures/activation/#tokens-request) object.                                                                                     |
+
+When running in HD mode, do not use the `nft_req` object paramater when activating your NFT network coins. Instead, use the [enable\_nft](/komodo-defi-framework/api/v20/non_fungible_tokens/enable_nft/) method after activating.
 
 ### Response Parameters
 
@@ -24947,7 +24953,7 @@ This method generates a raw transaction which should then be broadcast using [se
 | max                  | bool             | Optional. Withdraw the maximum available amount.                                                                                                |
 | fee                  | object           | Optional. A standard [FeeInfo](/komodo-defi-framework/api/v20/#fee-info) object.                                                                |
 | from                 | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/v20/#withdraw-from-info) object.                                      |
-| ibc\_source\_channel | string           | Tendermint IBC transfers only. The source channel for the [IBC](https://tutorials.cosmos.network/academy/3-ibc/1-what-is-ibc.html) transaction. |
+| ibc\_source\_channel | integer          | Tendermint IBC transfers only. The source channel for the [IBC](https://tutorials.cosmos.network/academy/3-ibc/1-what-is-ibc.html) transaction. |
 
 ### Response
 
@@ -25461,7 +25467,7 @@ Using the Cosmos [Ecosystem IBC protocol](https://everstake.one/blog/cosmos-ibc-
     "to": "osmo16drqvl3u8sukfsu4lm3qsk28jr3fahjac4rdw4",
     "amount": 0.1,
     "memo": "In the blackest of your moments, wait with no fear.",
-    "ibc_source_channel": "channel-141",
+    "ibc_source_channel": 141,
     "fee": {
       "type": "CosmosGas",
       "gas_price": 0.05,
@@ -27156,9 +27162,11 @@ When running the Komodo DeFi API via commandline with the `kdf` binary, some bas
 | https                        | boolean         | Optional. Only used with wss. Defaults to `false`, set to `true` to allow TLS/SSL enabled RPC (e.g. remote queries to a domain with a valid SSL certificate).                                                                                                                                                                                                                                                                         |
 | wss\_certs                   | object          | Optional. Contains fields for `server_priv_key` and `certificate` to allow RPC or P2P communications over TLS/SSL.                                                                                                                                                                                                                                                                                                                    |
 | event\_stream\_configuration | object          | Optional, a standard [EventStreamConfig](/komodo-defi-framework/api/common_structures/#event-stream-config) object. Configuration for subscribing to events.                                                                                                                                                                                                                                                                          |
-| use\_\trading\_\proto\_\v2   | boolean         | Optional, defaults to `false`. If `true`, the Komodo DeFi-API will use the upgraded v2 trading protocol introduced in Komodo DeFi Framework v2.1.0-beta.                                                                                                                                                                                                                                                                              |
+| use\_trading\_proto\_v2      | boolean         | Optional, defaults to `false`. If `true`, the Komodo DeFi-API will use the upgraded v2 trading protocol introduced in Komodo DeFi Framework v2.1.0-beta.                                                                                                                                                                                                                                                                              |
+| use\_watchers                | boolean         | Optional, defaults to `true`. If `true`, seed nodes may (in some cases) complete the final steps of a swap when a party goes offline.                                                                                                                                                                                                                                                                                                 |
+| is\_watcher                  | boolean         | Optional, defaults to `false`. If `true`, KDF will operate as a watcher seed nodes which may (in some cases) complete the final steps of a swap when a party goes offline.                                                                                                                                                                                                                                                            |
 | passphrase                   | string          | Optional. Your passphrase (mnemonic phrase) in plain text. This is the source of each of your coins private keys. [**KEEP IT SAFE!**](https://www.youtube.com/watch?v=WFpxVbTqhB8). For more secure, encrypted storage in a local database, use the `wallet_name` and `wallet_password` parameters below.                                                                                                                             |
-| wallet\_name                 | string          | Optional. An arbitrary name for the wallet. If no `passphrase` is provided, and the wallet has been used already, the `wallet_password` will be used to decrypt the local stored mnemonic phrase. If it has not been used before, a mnemonic will be generated and encrypted for local storage. The mnemonic phrase can be seen in plain text using the (/komodo-defi-framework/api/v20/get\_mnemonic)\[] method.                     |
+| wallet\_name                 | string          | Optional. An arbitrary name for the wallet. If no `passphrase` is provided, and the wallet has been used already, the `wallet_password` will be used to decrypt the local stored mnemonic phrase. If it has not been used before, a mnemonic will be generated and encrypted for local storage. The mnemonic phrase can be seen in plain text using the (get\_mnemonic)\[/komodo-defi-framework/api/v20/get\_mnemonic] method.        |
 | wallet\_password             | string          | Optional, required if using `wallet_name`. The password use to encrypt your wallet's mnemonic phrase for local storage, and decrypt the wallet when logging in.                                                                                                                                                                                                                                                                       |
 | 1inch\_api                   | string          | Optional, required if using [1inch integration methods](/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_create/). URL for 1inch API, e.g. "[https://api.1inch.dev](https://api.1inch.dev)"                                                                                                                                                                                                                              |
 
@@ -27225,7 +27233,7 @@ When running the Komodo DeFi API via commandline with the `kdf` binary, some bas
 {
   "gui": "DEVDOCS_CLI",
   "netid": 8762,
-  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd"
+  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
   "wallet_name": "Gringotts Retirement Fund",
   "wallet_password": "Q^wJZg~Ck3.tPW~asnM-WrL"
 }
@@ -27237,7 +27245,7 @@ When running the Komodo DeFi API via commandline with the `kdf` binary, some bas
 {
   "gui": "DEVDOCS_CLI",
   "netid": 8762,
-  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd"
+  "rpc_password": "Ent3r_Un1Qu3_Pa$$w0rd",
   "1inch_api": "https://api.1inch.dev"
 }
 ```
