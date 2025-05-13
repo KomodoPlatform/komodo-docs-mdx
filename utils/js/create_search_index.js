@@ -108,7 +108,7 @@ const getStringContentFromElement = (elementTree, contentList = []) => {
 function elementTreeChecker(mdxFilePathToCompile) {
   return async (tree) => {
     let textContentOfElement = "";
-    let closestElementReference = null;
+    let closestElementReference = "";
     let slugify = slugifyWithCounter();
     let documentTree = [];
     const docPath = transformFilePath(mdxFilePathToCompile);
