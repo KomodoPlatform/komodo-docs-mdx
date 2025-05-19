@@ -18,7 +18,7 @@ const listOfAllowedElementsToCheck = [
   // "a",
   "p",
   "li",
-  "ul",
+  // "ul", // enabling this means `ul` returns `li` content(text) causing duplicates
   "pre",
   "table",
 ];
