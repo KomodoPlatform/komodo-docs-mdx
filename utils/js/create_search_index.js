@@ -23,6 +23,20 @@ const listOfAllowedElementsToCheck = [
   "table",
 ];
 
+const textContentElementArrayToCheck = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "li",
+  "pre",
+  "code",
+  "td",
+];
+
 const jsonFile = JSON.parse(fs.readFileSync("./src/data/sidebar.json"));
 
 const extractSidebarTitles = (jsonData, linksArray = []) => {
@@ -105,6 +119,19 @@ const getStringContentFromElement = (elementTree, contentList = []) => {
   return contentList;
 };
 
+// Helper function to extract text from a node and its children
+function extractTextFromNode(node) {
+  if (node.type === "text") {
+    return node.value;
+  }
+
+  if (node.children) {
+    return node.children.map(extractTextFromNode).join(" ");
+  }
+
+  return "";
+}
+
 function elementTreeChecker(mdxFilePathToCompile) {
   return async (tree) => {
     let textContentOfElement = "";
@@ -138,12 +165,14 @@ function elementTreeChecker(mdxFilePathToCompile) {
               path: docPath,
             };
           }
-          visit(node, "text", (text) => {
-            if (!!text.value.trim()) {
+          visit(node, "element", (elementNode) => {
+            if (!textContentElementArrayToCheck.includes(node.tagName)) return;
+            const completeText = extractTextFromNode(elementNode);
+            if (!!completeText.trim()) {
               // For searchPreview
               let lineData = {
-                text: text.value,
-                tagName: node.tagName,
+                text: completeText,
+                tagName: elementNode.tagName,
                 path: docPath,
                 closestElementReference,
               };
@@ -152,9 +181,10 @@ function elementTreeChecker(mdxFilePathToCompile) {
 
               textContentOfElement = textContentOfElement.concat(
                 " ",
-                text.value
+                completeText
               );
             }
+            return visit.SKIP;
           });
         }
       });
