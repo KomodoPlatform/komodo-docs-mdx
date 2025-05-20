@@ -1,0 +1,66 @@
+export const title = "Komodo DeFi Framework Method: Change Mnemonic Password";
+export const description = "The change_mnemonic_password method allows a user to update the password used to encrypt a mnemonic phrase in their local database.";
+
+# change\_mnemonic\_password
+
+The `change_mnemonic_password` method allows a user to update the password used to encrypt a mnemonic phrase in their local database.
+
+<Note>
+  While this will change the password used to encrypt the mnemonic phrase in the local database, it will not update the `wallet_password` value in the MM2.json config file.
+  This will need to be updated manually, otherise you will see a log error `Error initializing wallet: Error generating or decrypting mnemonic: Error decrypting mnemonic: HMAC error: MAC tag mismatch` on next launch.
+</Note>
+
+## Arguments
+
+| Structure         | Type   | Description                                                          |
+| ----------------- | ------ | -------------------------------------------------------------------- |
+| current\_password | string | the active mnemonic password for your wallet                         |
+| new\_password     | string | the new password to use for encrypting your active mnemonic password |
+
+#### 📌 Examples
+
+#### Command
+
+<CodeGroup title="" tag="POST" label="change_mnemonic_password" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "method": "change_mnemonic_password",
+    "userpass": "RPC_UserP@SSW0RD",
+    "params": {
+      "current_password": "old_password123",
+      "new_password": "new_password456"
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": null,
+    "id": null
+  }
+  ```
+
+  #### Response (error - wrong password)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Wallets storage error: Error decrypting passphrase: Error decrypting mnemonic: HMAC error: MAC tag mismatch",
+      "error_path": "lp_wallet.mnemonic.decrypt",
+      "error_trace": "lp_wallet:551] lp_wallet:141] mnemonic:109] decrypt:56]",
+      "error_type": "WalletsStorageError",
+      "error_data": "Error decrypting passphrase: Error decrypting mnemonic: HMAC error: MAC tag mismatch",
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+<Note>
+  To view your mnemonic phrase in plain text, use [get\_mnemonic](/komodo-defi-framework/api/v20/utils/get_mnemonic/#get-mnemonic).
+</Note>
