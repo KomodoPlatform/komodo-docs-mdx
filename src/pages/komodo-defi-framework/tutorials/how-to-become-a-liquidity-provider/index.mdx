@@ -40,15 +40,15 @@ For example:
 ```bash
 mkdir -p ~/komodo-defi-framework/target/debug
 cd ~/komodo-defi-framework/target/debug
-wget https://github.com/KomodoPlatform/komodo-defi-framework/releases/download/beta-2.1.4315/mm2-9fe6e9402-Linux-Release.zip
-unzip mm2-9fe6e9402-Linux-Release.zip
+wget $(curl --silent https://api.github.com/repos/KomodoPlatform/komodo-defi-framework/releases | jq -r '.[0].assets[] | select(.name | endswith("Linux-Release.zip")).browser_download_url')
+unzip *Linux-Release.zip
 ```
 
 Then you can proceed to [download the coins configuration file](/komodo-defi-framework/tutorials/how-to-become-a-liquidity-provider/#step-2-download-the-coins-configuration-file).
 
 ##### Building from Source (Option 2)
 
-If you decide to build from source, please follow the [Build Komodo DeFi Framework API from source guide](/komodo-defi-framework/tutorials/how-to-compile-mm2-from-source/)
+If you decide to build from source, please follow the [Build Komodo DeFi Framework API from source guide](/komodo-defi-framework/tutorials/how-to-compile-kdf-from-source/)
 
 #### Step 2: Download the Coins Configuration File
 
@@ -187,7 +187,7 @@ We now have basic scripts to use the Komodo DeFi Framework API as a liquidity pr
   To start the Komodo DeFi Framework API:
 
   ```bash
-  stdbuf -oL nohup ./mm2
+  stdbuf -oL nohup ./kdf
   ```
 </Note>
 

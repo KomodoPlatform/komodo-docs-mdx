@@ -9,7 +9,7 @@ on:
 jobs:
   pre_job:
     # continue-on-error: true # Uncomment once integration is finished
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Map a step output to a job output
     outputs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
@@ -25,7 +25,7 @@ jobs:
   update_lint_get_data:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true' && startsWith(github.head_ref, 'lint-fix-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
         with:
@@ -42,7 +42,8 @@ jobs:
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
 
-      - name: Generate configs
+      - name: Generate API methods table
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         shell: bash
         run: ${GITHUB_WORKSPACE}/utils/gen_api_methods_table.py
 
@@ -91,9 +92,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          path: website-komodo-docs
+          path: website-komodoplatform.com
           ssh-key: ${{ secrets.DOCS_UI_SSH_PRIVATE_KEY }}
-          repository: KomodoPlatform/website-komodo-docs
+          repository: KomodoPlatform/website-komodoplatform.com
           ref: dev
           submodules: recursive
           fetch-depth: 0
@@ -102,7 +103,7 @@ jobs:
         env:
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
         with:
-          node-version: "18.9.0"
+          node-version: "18.20.4"
           cache: yarn
           cache-dependency-path: "**/yarn.lock"
 
@@ -117,19 +118,19 @@ jobs:
             # If source files changed but packages didn't, rebuild from a prior cache.
           restore-keys: nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
 
-      - name: Get updated content, Install deps, build, Add no-index headers before pubishing to cloudflare
+      - name: Get updated content, Install deps, build, Add no-index headers before publishing to cloudflare
         run: |
           pwd
           echo $GITHUB_WORKSPACE
           ls $GITHUB_WORKSPACE
-          cd $GITHUB_WORKSPACE/website-komodo-docs/utils
+          cd $GITHUB_WORKSPACE/website-komodoplatform.com/utils
           ./update_mdx_branch.sh ${{ steps.vars.outputs.BRANCH_NAME }}
           cd ..
           export CFP=yes
-          ./update-content.sh
-          rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json $GITHUB_WORKSPACE/website-komodo-docs/_fileData.json
-          rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json $GITHUB_WORKSPACE/website-komodo-docs/lib/data/searchIndex.json
           yarn install
+          ./update-content.sh
+          rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json $GITHUB_WORKSPACE/website-komodoplatform.com/src/data/docs/_fileData.json
+          rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json $GITHUB_WORKSPACE/website-komodoplatform.com/src/data/docs/searchIndex.json
           yarn export          
           echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
 
@@ -140,7 +141,7 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           projectName: komodo-docs
-          directory: ./website-komodo-docs/out
+          directory: ./website-komodoplatform.com/out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: "3"
           branch: ${{ steps.vars.outputs.BRANCH_NAME }}
@@ -179,16 +180,16 @@ jobs:
       - name: Generate Preview Images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: |
-          cd $GITHUB_WORKSPACE/website-komodo-docs/
+          cd $GITHUB_WORKSPACE/website-komodoplatform.com/
           git status
           yarn gen:previewImgs
-      # TODO: update previewImgTimeStamps.json from $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json to $GITHUB_WORKSPACE/website-komodo-docs/src/data/docs/previewImgTimeStamps.json
+
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/preview-images-original/ $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/public/preview-images/ $GITHUB_WORKSPACE/preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodo-docs/previewImgTimeStamps.json $GITHUB_WORKSPACE/preview-images/previewImgTimeStamps.json
+        run: mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/preview-images-original/ $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/public/preview-images/ $GITHUB_WORKSPACE/preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/src/data/docs/previewImgTimeStamps.json $GITHUB_WORKSPACE/preview-images/previewImgTimeStamps.json
 
       - name: Delete repo checked out UI repo
-        run: rm -rf $GITHUB_WORKSPACE/website-komodo-docs
+        run: rm -rf $GITHUB_WORKSPACE/website-komodoplatform.com
 
       # - name: Check if diff exists
       #   id: diff_check

@@ -111,6 +111,10 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 | --------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Type      | string | There are two types from which to choose: `GoodTillCancelled` and `FillOrKill`. The `GoodTillCancelled` order is automatically converted to a `maker` order if the order is not matched in 30 seconds, and this `maker` order stays in the orderbook until explicitly cancelled. On the other hand, a `FillOrKill` order is cancelled if it is not matched within 30 seconds. The default type is `GoodTillCancelled` |
 
+<Note>
+  If your order includes UTXO coins activated via electrum, and connection to its servers is lost, your order will automatically cancel and will need to be recreated once the connection is restored.
+</Note>
+
 <CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
   `GoodTillCancelled` orders will remain on the orderbook until they are exhausted or explicitly cancelled.
 
@@ -337,3 +341,45 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
       }
   ```
 </CollapsibleSection>
+
+### 1inchTokenInfo
+
+| Structure | Type           | Description                                                |
+| --------- | -------------- | ---------------------------------------------------------- |
+| address   | string         | Token contract address.                                    |
+| symbol    | string         | Token symbol.                                              |
+| name      | string         | Token name.                                                |
+| decimals  | numeric        | Number of digits after decimal point for the token amount. |
+| eip2612   | boolean        | Is Eip-2612 supported.                                     |
+| is\_fot   | boolean        | Is FoT token.                                              |
+| logo\_uri | string         | Token logo uri.                                            |
+| tags      | list of string | Token tags.                                                |
+
+### 1inchProtocolInfo
+
+| Structure            | Type    | Description                  |
+| -------------------- | ------- | ---------------------------- |
+| name                 | string  | Liquidity source name.       |
+| part                 | numeric | Protocol part.               |
+| from\_token\_address | string  | From-token contract address. |
+| to\_token\_address   | numeric | To-token contract address.   |
+
+### 1inchTxFields
+
+| Structure  | Type    | Description       |
+| ---------- | ------- | ----------------- |
+| from       | string  | From address      |
+| to         | string  | To address        |
+| data       | string  | Transaction data  |
+| value      | numeric | Transaction value |
+| gas\_price | float   | Gas price         |
+| gas        | numeric | Gas               |
+
+### 1inchProtocolImage
+
+| Structure  | Type   | Description                   |
+| ---------- | ------ | ----------------------------- |
+| id         | string | Protocol id.                  |
+| title      | string | Protocol title.               |
+| img        | string | Link to protocol image.       |
+| img\_color | string | Link to protocol image color. |

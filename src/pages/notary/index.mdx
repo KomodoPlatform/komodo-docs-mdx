@@ -2,7 +2,7 @@ export const title = "Setup Komodo Notary Node";
 export const description =
   "This guide serves to offer notary operators a reference for building a Komodo Notary Node server.";
 
-# Setup Komodo Notary Node
+# Setup Komodo Notary Node Season 8
 
 ## NN Repo Quick Reference
 
@@ -16,17 +16,17 @@ Beginning in season 7, the Komodo Notary Node network will allow running the old
 The steps for setting up your nodes are as follows:
 
 *   Secure your Server
-*   Install KMD and LTC Deamons, then launch them, import the private key linked to your "Main" elected pubkey, and let them sync. and let them sync (this may take a couple of days).
+*   Install KMD and LTC Deamons, then launch them, import the private key linked to your "Main" elected pubkey and let them sync (this may take a couple of days).
 *   Launch the other "Main" server chains, import the private key linked to your "Main" elected pubkey, and let them sync.
 *   Setup the 3rd Party docker containers, import the private key linked to your "3P" elected pubkey, and let them sync.
 *   Install and configure Iguana
 
-Some additional tips will be included at the end of the guide to help with node management and maintainence.
+Some additional tips will be included at the end of the guide to help with node management and maintenance.
 
 If you face problems, please join the `#notarynode` channel on the [Komodo Discord Server](https://komodoplatform.com/discord) for help.
 
 <Note>
-  We recommend the Notary Node Operators to check the Table at [https://github.com/KomodoPlatform/dPoW/tree/season-seven#dpow-asset-status](https://github.com/KomodoPlatform/dPoW/tree/season-seven#dpow-asset-status) for latest information on the repositories and branches/commits to use for installing chains. If there is contradicting information in this document, treat the information within the dPoW reopsitory as the point of truth. Using the **exact** repository and branch/tag listed is very important for the security of the network.
+  We recommend the Notary Node Operators to check the Table at [https://github.com/KomodoPlatform/dPoW/tree/update/s8-pubkeys#dpow-asset-status](https://github.com/KomodoPlatform/dPoW/tree/update/s8-pubkeys#dpow-asset-status) for latest information on the repositories and branches/commits to use for installing chains. If there is contradicting information in this document, treat the information within the dPoW reopsitory as the point of truth. Using the **exact** repository and branch/tag listed is very important for the security of the network.
 </Note>
 
 ## Minimum System Requirements
@@ -40,7 +40,7 @@ Notary nodes **must** be run on a dedicated server in a Tier 3 datacenter. Runni
 *   **Bandwidth**: 100 Mbps or higher
 *   **Location**: Within the region where you were elected.
 
-This guide assumes you are using Ubuntu 20.04 LTS. If using Debian 11, scroll to the bottom of this guide for notes on required dependencies and build scripts.
+This guide assumes you are using Ubuntu 22.04 LTS. If using Debian, scroll to the bottom of this guide for notes on required dependencies and build scripts.
 
 ***
 
@@ -88,7 +88,7 @@ It is recommended that you write down the randomly generated seed (24 words) in 
 
 <Note>
   In the examples below, I will use the username `dragonhound`. Please replace this with your own username.
-  Make sure to use a password manager like [KeePassXC](https://keepassxc.org/) to generate and store your sudo passwords an SSH keys, and backup your password database to a secure location so you dont lose access to your server if your desktop/laptop fails.
+  Make sure to use a password manager like [KeePassXC](https://keepassxc.org/) to generate and store your sudo passwords and SSH keys, and backup your password database to a secure location so you don't lose access to your server if your desktop/laptop fails.
 </Note>
 
 *   **Update the system**: `sudo apt-get update && sudo apt-get upgrade -y`
@@ -240,7 +240,7 @@ Iguana is the software used to perform notarizations, and needs to be installed 
     ```bash
     cd ~
     # Clone repository
-    git clone https://github.com/KomodoPlatform/dPoW -b season-seven
+    git clone https://github.com/KomodoPlatform/dPoW -b update/s8-pubkeys
     cd dPoW/iguana
 
     # Build Iguana
@@ -288,7 +288,7 @@ chmod 700 ~/dPoW/iguana/wp_7779
 ## Install KMD
 
 *   Go to home folder `cd ~`
-*   Clone repo: `git clone https://github.com/KomodoPlatform/komodo -b master`
+*   Clone repo: `git clone https://github.com/KomodoPlatform/komodo -b dev`
 *   Enter repo folder `cd komodo`
 *   Fetch Zcash params: `./zcutil/fetch-params.sh`
 *   Build Komodo: `./zcutil/build.sh -j$(nproc)`
@@ -306,8 +306,6 @@ chmod 700 ~/dPoW/iguana/wp_7779
     rpcuser=usernameChangeItToSomethingSecure
     rpcpassword=passwordChangeItToSomethingSecure
     txindex=1
-    addressindex=1
-    spentindex=1
     server=1
     daemon=1
     rpcworkqueue=256
@@ -521,7 +519,7 @@ This will return a JSON object with the address details. If the address is valid
 
 ## Komodo DeFi Framework Seed node setup (optional, but recommended)
 
-Simple scripts to setup and configure MM2 as a seednode on your 3P server are available at [https://github.com/smk762/nn\_mm2\_seed](https://github.com/smk762/nn_mm2_seed). The mm2 seed node will also need ports `38890` and `38900` opened on the 3p server.
+Simple scripts to setup and configure KDF as a seednode on your 3P server are available at [https://github.com/smk762/nn\_mm2\_seed](https://github.com/smk762/nn_mm2_seed). The kdf seed node will also need ports `38890` and `38900` opened on the 3p server.
 
 **This may be included in the 3P dockerised setup in the future.**
 
@@ -697,7 +695,8 @@ sudo ufw allow 7770 comment 'KMD Main P2P'
 sudo ufw allow 9333 comment 'LTC Main P2P'
 sudo ufw allow 20848 comment 'CCL Main P2P'
 sudo ufw allow 20931 comment 'CLC Main P2P'
-sudo ufw allow 23225 comment 'GLEEC Main P2P'
+sudo ufw allow 23225 comment 'GLEEC-OLD Main P2P'
+sudo ufw allow 23344 comment 'GLEEC Main P2P'
 sudo ufw allow 12985 comment 'ILN Main P2P'
 sudo ufw allow 10701 comment 'KOIN Main P2P'
 sudo ufw allow 8426 comment 'NINJA Main P2P'
@@ -708,14 +707,10 @@ sudo ufw allow 36789 comment 'THC Main P2P'
 sudo ufw allow 8770 comment 'KMD 3P P2P'
 sudo ufw allow 29404 comment 'TOKEL P2P'
 sudo ufw allow 33824 comment 'MCL P2P'
-sudo ufw allow 27485 comment 'VRSC P2P'
-sudo ufw allow 26001 comment 'AYA P2P'
 sudo ufw allow 57777 comment 'CHIPS P2P'
-sudo ufw allow 41878 comment 'EMC2 P2P'
-sudo ufw allow 41888 comment 'MIL P2P'
 # Iguana P2P ports
-sudo ufw allow 13348 comment 'Iguana Main P2P'
-sudo ufw allow 13345 comment 'Iguana 3P P2P'
+sudo ufw allow 13848 comment 'Iguana Main P2P'
+sudo ufw allow 13845 comment 'Iguana 3P P2P'
 # Komodo DeFi Framework P2P ports
 sudo ufw allow 38890 comment 'KomoDeFi P2P'
 sudo ufw allow 38900 comment 'KomoDeFi P2P'

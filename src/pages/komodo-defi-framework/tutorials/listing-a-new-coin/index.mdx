@@ -60,7 +60,7 @@ sendrawtransaction
 | txfee                  | integer | The default transaction fee (in satoshi). Komodo DeFi Framework uses this as the default transaction fee value when making atomic swap transactions. If set to `0`, Komodo DeFi Framework will use a dynamic fee based on output from `estimatesmartfee`.                                                                                                                                                                                                                                                                                                                               |
 | overwintered           | integer | Must be `1` if Overwinter upgrade was activated for the coin. Defaults to `0`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | taddr                  | integer | Optional. Is only relevant for coins that forked the Zcash protocol and have both transparent addresses and z-addresses. The value to be set for this key can be found from the file `src/chainparams.cpp` of the coin's source code and it is the first value present in both `base58Prefixes[PUBKEY_ADDRESS]` and `base58Prefixes[SCRIPT_ADDRESS]`. But it has to be converted to decimal from HEX. So if `base58Prefixes[PUBKEY_ADDRESS]` = `{0x1C,0xB8}` , the `taddr` is `0x1C` coverted to decimal. As 0x1C in HEX = 28 in decimal, the entry in the json would be `"taddr" : 28` |
-| force\_min\_relay\_fee | boolean | If `true` for coins with dynamic fees, when a new transaction is generated, Komodo DeFi Framework  will check whether the total fee set (`sat * tx size`) is lower than relay fee and will use the relay fee instead. Defaults to `false`                                                                                                                                                                                                                                                                                                                                               |
+| force\_min\_relay\_fee | boolean | If `true` for coins with dynamic fees, when a new transaction is generated, Komodo DeFi Framework  will check whether the total fee set (`sat * tx size`) is lower than relay fee and will use the relay fee instead. Defaults to `false`.                                                                                                                                                                                                                                                                                                                                              |
 | mtp\_block\_count      | integer | Optional. Number of blocks to be used for the calculation of `median time past`. Must be greater than `0`. Default value is `11`. While this parameter is applicable only in the case of KMD reward calculation for now, it will be used for calculating locktimes to be set for the atomic swap refund transactions.                                                                                                                                                                                                                                                                   |
 | estimate\_fee\_mode    | string  | Sets the fee mode for the `estimatesmartfee` call. Supported values are: `ECONOMICAL`,`CONSERVATIVE`, `UNSET`. Please note that some coins may not support some of these modes. Makes no effect for coins that do not have the `estimatesmartfee` RPC.                                                                                                                                                                                                                                                                                                                                  |
 | address\_format        | object  | Optional. Overwrites the address format from coins file, if set. A standard [AddressFormat](/komodo-defi-framework/api/common_structures/#address-format) object.                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -69,6 +69,7 @@ sendrawtransaction
 | version\_group\_id     | integer | Optional, used by Zcash (and its forks') transactions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | consensus\_branch\_id  | integer | Optional, used in Zcash (and its forks') transactions' signature hash calculation.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | mature\_confirmations  | integer | Number of blockchain confirmations required for coinbase output to be considered mature (spendable).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| gas\_fee\_estimator    | string  | Optional. Set as `provider` to source fee market information via [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/). Set to `simple` to source fee information from native nodes on the network. Refer to the [EVM fee mManagement](/komodo-defi-framework/api/v20/wallet/fee_management/) section for more information.                                                                                                                                                                                                                                   |
 
 ### UTXO coin example
 
@@ -125,13 +126,28 @@ The token's contract **must** have `approve` and `transferFrom` methods. Additio
 *   Protocol `"type"` field: `"ETH"` or `"ERC20"`
 *   Protocol `"protocol_data"` field (ERC20 only): `"platform"` - `"ETH"`, `"ETC"` or other Ethereum forks. `"contract_address"` - ERC20 token [checksummed](https://coincodex.com/article/2078/ethereum-address-checksum-explained/) smart contract address.
 
-| Parameter                                 | Type    | Description                                                                                                                                                                                                         |
-| ----------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| chain\_id                                 | integer | To find the EVM chain ID, see [Chainlist](https://chainlist.org/)                                                                                                                                                   |
-| protocol.type                             | string  | Platform / protocol - e.g `ETH` for Ethereum, `ERC20` for ERC20 tokens on the Ethereum network                                                                                                                      |
-| protocol.protocol\_data                   | object  | Required for tokens only.                                                                                                                                                                                           |
-| protocol.protocol\_data.platform          | string  | The parent coin of the token's platform - e.g `MATIC` for PLG20 tokens                                                                                                                                              |
-| protocol.protocol\_data.contract\_address | string  | **Must be mixed case** The indentifying hex string for the token's contract. Can be found on sites like [EthScan](https://etherscan.io/), [BscScan](https://bscscan.com/) & [PolygonScan](https://polygonscan.com/) |
+| Parameter                                 | Type    | Description                                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chain\_id                                 | integer | To find the EVM chain ID, see [Chainlist](https://chainlist.org/)                                                                                                                                                                                                                                                                       |
+| gas\_limit                                | object  | Optional, required for tokens only. Defines more precise gas prices for swap or transaction operations. Some tokens are called over proxy contracts which often require more gas, though users may be able to choose higher/lower values than the default where required. See the `Gas Limit Options` table below for more information. |
+| protocol.type                             | string  | Platform / protocol - e.g `ETH` for Ethereum, `ERC20` for ERC20 tokens on the Ethereum network                                                                                                                                                                                                                                          |
+| protocol.protocol\_data                   | object  | Required for tokens only.                                                                                                                                                                                                                                                                                                               |
+| protocol.protocol\_data.platform          | string  | The parent coin of the token's platform - e.g `MATIC` for PLG20 tokens                                                                                                                                                                                                                                                                  |
+| protocol.protocol\_data.contract\_address | string  | **Must be mixed case** The identifying hex string for the token's contract. Can be found on sites like [EthScan](https://etherscan.io/), [BscScan](https://bscscan.com/) & [PolygonScan](https://polygonscan.com/)                                                                                                                      |
+
+### Gas Limit Options
+
+| Parameter              | Type    | Description                                             |
+| ---------------------- | ------- | ------------------------------------------------------- |
+| eth\_send\_coins       | integer | Gas limit for sending coins.                            |
+| eth\_send\_erc20       | integer | Gas limit for sending ERC20 tokens.                     |
+| eth\_payment           | integer | Gas limit for swap payment tx with coins.               |
+| erc20\_payment         | integer | Gas limit for swap payment tx with ERC20 tokens.        |
+| eth\_receiver\_spend   | integer | Gas limit for swap receiver spend tx with coins.        |
+| erc20\_receiver\_spend | integer | Gas limit for swap receiver spend tx with ERC20 tokens. |
+| eth\_sender\_refund    | integer | Gas limit for swap refund tx with coins.                |
+| erc20\_sender\_refund  | integer | Gas limit for swap refund tx with with ERC20 tokens.    |
+| eth\_max\_trade\_gas   | integer | Gas limit for other operations.                         |
 
 ### ERC20 token example
 
@@ -152,6 +168,18 @@ The token's contract **must** have `approve` and `transferFrom` methods. Additio
         "platform": "ETH",
         "contract_address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
       }
+    },
+    "gas_fee_estimator": "provider",
+    "gas_limit": {
+      "eth_send_coins": 21000,
+      "eth_send_erc20": 65000,
+      "eth_payment": 75000,
+      "erc20_payment": 120000,
+      "eth_receiver_spend": 55000,
+      "erc20_receiver_spend": 130000,
+      "eth_sender_refund": 110000,
+      "erc20_sender_refund": 110000,
+      "eth_max_trade_gas": 150000
     }
   }
   ```
@@ -265,6 +293,12 @@ QTUM & QRC20 tokens are a special case which also support all fields of UTXO spe
   ]
   ```
 </CollapsibleSection>
+
+<Note>
+  The `disable_cert_verification` field is optional and defaults to `false`. If set to `true`, the SSL certificate verification will be disabled.
+  This can be used when the server has a self-signed certificate, but it is not recommended for production use.
+  **To avoid SSL certificate validation issues, it is highly recommended to use [EFF's Certbot](https://certbot.eff.org/) to generate SSL certificates for ElectrumX servers.**
+</Note>
 
 ## 5. Ethereum info file (Required for EVM-like platforms)
 
