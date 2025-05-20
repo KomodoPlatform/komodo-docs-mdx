@@ -119,7 +119,46 @@ The response will return the following:
   ```
 </CodeGroup>
 
-The response formats for this method are the same as the [task::enable\_utxo::status](/komodo-defi-framework/api/v20/coin_activation/task_managed/task_enable_utxo/#status) responses.
+#### Response (ready, successful, Iguana mode)
+
+| Parameter        | Type            | Description                                                                                                         |
+| ---------------- | --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| status           | string          | A short indication of how the requested process is progressing.                                                     |
+| details.result   | object          | Depending on the state of process progress, this will contain different information as detailed in the items below. |
+| .ticker          | string          | The ticker of the coin being activated                                                                              |
+| .current\_block  | integer         | The block height of the coin being activated                                                                        |
+| .wallet\_balance | object          | Information about the addresses of the coin being activated                                                         |
+| ..wallet\_type   | string          | In Trezor mode, this will return `HD`                                                                               |
+| ..address        | string          | One of the addresses in the account for the coin being activated                                                    |
+| ..balance        | object          | Contains the spendable and unspendable balance for this address                                                     |
+| ...spendable     | string(numeric) | Spendable balance for this address                                                                                  |
+| ...unspendable   | string(numeric) | Unspendable balance for this address (e.g. from unconfirmed incoming transactions)                                  |
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "status": "Ok",
+          "details": {
+              "ticker": "tQTUM",
+              "current_block": 4619066,
+              "wallet_balance": {
+                  "wallet_type": "Iguana",
+                  "address": "qcpVcxMBo9ZikpGiTaM8SFBV1W14QVmGzo",
+                  "balance": {
+                      "tQTUM": {
+                          "spendable": "0",
+                          "unspendable": "0"
+                      }
+                  }
+              }
+          }
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
 
 ## user\_action {{label : 'task::enable_qtum::user_action', tag : 'API-v2'}}
 
