@@ -3,6 +3,43 @@ export const description = "The Komodo DeFi SDK uses a variety of activation met
 
 # Activation Structures
 
+### ActivationMode
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  Defines the activation mode for QTUM, BCH, UTXO & ZHTLC coins.
+
+  | Parameter | Type   | Description                                                                                                                                           |
+  | --------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.                                        |
+  | rpc\_data | object | `Electrum` or `Light` mode only. A standard [ActivationRpcData](/komodo-defi-framework/api/common_structures/activation/#activation-rpc-data) object. |
+
+  ```json
+  {
+      "mode": {
+          "rpc": "Electrum",
+          "rpc_data": {
+              ...
+          }
+      },
+  }
+  ```
+</CollapsibleSection>
+
+### ActivationRpcData
+
+Contains information about electrum & lightwallet\_d servers for coins being used in `Electrum` or `Light` mode.
+
+| Parameter                 | Type              | Description                                                                                                                                                                                                                                                     |
+| ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| light\_wallet\_d\_servers | list              | ZHTLC only. A list of urls which are hosting lightwallet\_d servers for a coin.                                                                                                                                                                                 |
+| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                                        |
+| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                       |
+| sync\_params              | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling\_activation\_height), `height` (a specific block height) or `date` (a unix timestamp). |
+
+<DevComment>
+  `electrum` and `electrum_servers` are both used for the same purpose. This should be consolidated in the API.
+</DevComment>
+
 ### ActivationParams
 
 The `ActivationParams` object defines additional parameters used for activation. These params may vary depending on the coin type.
@@ -20,6 +57,11 @@ The `ActivationParams` object defines additional parameters used for activation.
 | scan\_interval\_ms           | integer | ZHTLC coins only. Sets the interval in milliseconds between iterations of `BuildingWalletDb` state. Optional, default value is 0.                                                                                                    |
 | mode                         | object  | QTUM, UTXO & ZHTLC coins only. A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode) object.                                                                                         |
 
+<DevComment>
+  Is priv\_key\_policy still a thing?
+  Defaults to `ContextPrivKey`. Set as `Trezor` to activate in Trezor mode.
+</DevComment>
+
 <Note>
   For ZHTLC coins, older wallets need to set the `sync_params` field to a date before its
   first transaction to see all balance and history. This may take a long time on the first
@@ -31,30 +73,6 @@ The `ActivationParams` object defines additional parameters used for activation.
   desktop operating systems do not appear to have any problems with high CPU
   load during ZHTLC coin activation.
 </Note>
-
-### ActivationMode
-
-Defines the activation mode for QTUM, BCH, UTXO & ZHTLC coins.
-
-| Parameter | Type   | Description                                                                                                                                           |
-| --------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| rpc       | string | `Native` if running a native blockchain node, `Electrum` if using electrum servers or `Light` for ZHTLC coins.                                        |
-| rpc\_data | object | `Electrum` or `Light` mode only. A standard [ActivationRpcData](/komodo-defi-framework/api/common_structures/activation/#activation-rpc-data) object. |
-
-### ActivationRpcData
-
-Contains information about electrum & lightwallet\_d servers for coins being used in `Electrum` or `Light` mode.
-
-| Parameter                 | Type              | Description                                                                                                                                                                                                                                                     |
-| ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| light\_wallet\_d\_servers | list              | ZHTLC only. A list of urls which are hosting lightwallet\_d servers for a coin.                                                                                                                                                                                 |
-| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                                        |
-| electrum                  | list of objects   | QTUM, BCH & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                       |
-| sync\_params              | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling\_activation\_height), `height` (a specific block height) or `date` (a unix timestamp). |
-
-<DevComment>
-  `electrum` and `electrum_servers` are both used for the same purpose. This should be consolidated in the API.
-</DevComment>
 
 ### ActivationServers
 
@@ -140,66 +158,14 @@ Contains information electrum servers for coins being used in `Electrum` or `Lig
 | network               | string | Either `mainnet` or \`testnet                                                                                          |
 | confirmation\_targets | object | A standard [ConfirmationTargets](/komodo-defi-framework/api/common_structures/lightning/#confirmation-targets) object. |
 
-### EvmNode
+### CoinNode
 
-The `EvmNode` object includes the following items for a given coin or token:
-
-| Parameter    | Type    | Description                                                                                                         |
-| ------------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| url          | string  | URL of an RPC node                                                                                                  |
-| komodo\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run officially by the Komodo Platform team |
-
-#### v2.1.0 (current release)
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "url": "http://eth1.cipig.net:8555",
-      "komodo_proxy": false
-  }
-  ```
-</CollapsibleSection>
-
-<Note>
-  Prior to the v2.2.0 release, the `gui_auth` field was used to access RPC nodes run officially by the Komodo Platform team. This field was replaced with the `komodo_proxy` field in the v2.2.0 release.
-</Note>
-
-#### v2.2.0+
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "url": "https://nucleus-rpc.alpha.komodo.earth",
-      "komodo_proxy": true
-  }
-  ```
-</CollapsibleSection>
-
-### TendermintNode
-
-The `TendermintNode` object includes the following items for a given coin or token:
+The `CoinNode` object includes the following items for a given coin or token:
 
 | Parameter    | Type    | Description                                                                                                                                                  |
 | ------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | url          | string  | URL of an RPC node                                                                                                                                           |
 | komodo\_auth | boolean | Optional, defaults to `false`. Must be set to `true` to access RPC nodes run behind [komodo-defi-proxy](https://github.com/KomodoPlatform/komodo-defi-proxy) |
-
-#### v2.1.0 (current release)
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "url": "http://eth1.cipig.net:8555",
-      "komodo_proxy": false
-  }
-  ```
-</CollapsibleSection>
-
-<Note>
-  Prior to the v2.2.0 release, the `gui_auth` field was used to access RPC nodes run officially by the Komodo Platform team. This field was replaced with the `komodo_proxy` field in the v2.2.0 release.
-</Note>
-
-#### v2.2.0+
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
