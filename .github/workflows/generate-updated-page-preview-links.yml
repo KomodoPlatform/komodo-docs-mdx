@@ -1,0 +1,93 @@
+name: Generate Documentation Preview Links
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - dev
+    paths:
+      - "src/pages/**/*.mdx" # Trigger only on changes to .mdx files in src/pages
+
+jobs:
+  generate-preview-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history to see changed files
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: src/pages/**/*.mdx # Only consider changes in .mdx files
+
+      - name: Generate preview links
+        id: generate-links
+        run: |
+          # Get PR number
+          PR_NUMBER=${{ github.event.pull_request.number }}
+
+          # Get branch name and sanitize for Cloudflare Pages format
+          # Replace slashes and special chars with hyphens
+          BRANCH_NAME="${{ github.head_ref }}"
+          SANITIZED_BRANCH=$(echo "$BRANCH_NAME" | sed 's/\//-/g' | sed 's/[^a-zA-Z0-9-]/-/g')
+
+          # Use sanitized branch name for Cloudflare Pages Base URL
+          PREVIEW_BASE="https://${SANITIZED_BRANCH}.komodo-docs.pages.dev/en/docs/"
+
+          # Generate markdown list of changed files with links
+          LINKS=""
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            # Extract the file path relative to src/pages
+            FILE_PATH=$(echo "$file" | sed 's|^src/pages/||' | sed 's|\.mdx$||')
+            
+            # Create markdown link with file name and URL
+            FILE_NAME=$(basename "$file" .mdx)
+            LINK_TEXT="- 📖 [\`$FILE_NAME\`](${PREVIEW_BASE}${FILE_PATH})"
+            LINKS="${LINKS}\n${LINK_TEXT}"
+            
+            echo "Processing file: $file -> $FILE_PATH"
+          done
+
+          # Create fancy banner for the comment
+          COMMENT="🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲
+                   🐲
+                   🐲  🔍 DOCUMENTATION PREVIEW LINKS AVAILABLE 
+                   🐲
+                   🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲
+                    
+            📚 **Preview the documentation changes in this PR:**
+                    
+            ${LINKS}
+                  
+            
+            > 🔗 Base preview URL: [${SANITIZED_BRANCH}.komodo-docs.pages.dev](https://${SANITIZED_BRANCH}.komodo-docs.pages.dev/en/docs/)
+            > 🔄 *Links update automatically with each new commit*
+            > 🌐 Using branch: \`${BRANCH_NAME}\`
+                    
+            🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲
+               👆👆👆 CLICK THE LINKS ABOVE TO PREVIEW DOCS 👆👆👆
+            🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲🐲"
+
+          echo "preview_links<<EOF" >> $GITHUB_ENV
+          echo -e "$COMMENT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Find existing comment
+        id: find-comment
+        uses: peter-evans/find-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: "DOCUMENTATION PREVIEW LINKS AVAILABLE"
+
+      - name: Create or update comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: ${{ env.preview_links }}
+          edit-mode: replace
