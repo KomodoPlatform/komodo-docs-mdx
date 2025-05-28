@@ -158,6 +158,100 @@ jobs:
               body: "Preview for merge commit: ${{ steps.vars.outputs.sha_short }}, available on cloudflare at: ${{ steps.cf_publish.outputs.url }}/en/docs/"
             })
 
+      - name: Update Preview Comment with Docs URLs Per Commit
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = context.issue.number;
+            const repo = context.repo.repo;
+            const owner = context.repo.owner;
+            const previewBase = "${{ steps.cf_publish.outputs.url }}/en/docs";
+
+            const { data: commits } = await github.rest.pulls.listCommits({
+            owner,
+            repo,
+            pull_number: prNumber
+            });
+
+            let allPreviews = [];
+
+
+            for (const commit of commits) {
+            const commitSha = commit.sha.substring(0, 7);
+            const commitMessage = commit.commit.message.split('\n')[0]; // Get first line only
+
+            const { data: comparison } = await github.rest.repos.compareCommits({
+              owner,
+              repo,
+              base: `${commit.parents[0].sha}`,
+              head: `${commit.sha}`
+            });
+
+            const docFiles = comparison.files
+            .filter(file => file.filename.startsWith('src/pages/') && file.filename.endsWith('.mdx'))
+            .map(file => file.filename);
+
+            if (docFiles.length === 0) continue;
+
+            const urls = docFiles.map(f => {
+            const path = f.replace(/^src\/pages\//, "").replace(/\.mdx$/, "");
+            const fileName = f.split('/').pop().replace('.mdx', '');
+            return `- [\`${fileName}\`](${previewBase}/${path})`;
+            }).join("\n");
+
+            allPreviews.push(`
+            <details><summary><strong>Commit:</strong> <a href="https://github.com/${owner}/${repo}/commit/${commit.sha}">${commitSha}</a> - ${commitMessage}</summary>
+
+            ${urls}
+
+            </details>`.trim());
+
+            }
+
+            if (allPreviews.length === 0) return;
+
+            const body = `
+            ## Documentation Preview Links (Per Commit)
+
+            **Preview URL:** [${previewBase}](${previewBase})
+
+            ${allPreviews.join("\n\n")}
+                  `.trim();
+
+            // Step 2: Check if an existing comment exists
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+            });
+
+            const marker = "<!-- DOC_PREVIEW_MARKER -->";
+            const existing = comments.find(
+              (comment) =>
+                comment.user.login === "github-actions[bot]" &&
+                comment.body.includes(marker)
+            );
+
+            const finalBody = `${marker}\n${body}`;
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: finalBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: finalBody,
+              });
+            }
+
       - name: Update package repos, Install libgconf-2-4, wget, Add Google Chrome repository, Install Google Chrome Stable, Clean up
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: |
