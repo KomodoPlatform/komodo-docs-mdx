@@ -6,21 +6,25 @@ export const description = "The methods in this document allow you to sign and v
 Cryptographically signed messages are a useful feature which can be used to [prove ownership of an address](https://www.coindesk.com/policy/2020/05/25/craig-wright-called-fraud-in-message-signed-with-bitcoin-addresses-he-claims-to-own/).
 
 If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the correct [`sign_message_prefix`](https://bitcoin.stackexchange.com/questions/77324/how-are-bitcoin-signed-messages-generated/77325#77325) parameter value for a coin, you can sign messages with the [Komodo DeFi Framework API](https://github.com/KomodoPlatform/komodo-defi-framework).
+For signing with a HD wallet, the [`coins`](https://github.com/KomodoPlatform/coins) file must also contain the coin's [derivation path](https://www.blockplate.com/blogs/blockplate/what-is-a-derivation-path) prefix.
 
 ```json
-{
-  "coin": "DOC",
-  "asset": "DOC",
-  "fname": "DOC (TESTCOIN)",
-  "sign_message_prefix": "Komodo Signed Message:\n",
-  "rpcport": 25435,
-  "txversion": 4,
-  "overwintered": 1,
-  "mm2": 1,
-  "protocol": {
-    "type": "UTXO"
+  {
+    "coin": "DGB",
+    "name": "digibyte",
+    "fname": "DigiByte",
+    "protocol": {
+      "type": "UTXO"
+    },
+    ...
+    "sign_message_prefix": "DigiByte Signed Message:\n",
+    "derivation_path": "m/44'/20'",
+    "trezor_coin": "DigiByte",
+    "links": {
+      "github": "https://github.com/digibyte/digibyte",
+      "homepage": "https://digibyte.io"
+    }
   }
-}
 ```
 
 ## Sign Message
@@ -70,7 +74,7 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
   ```
 </CollapsibleSection>
 
-#### Command (HD wallet)
+#### Command (HD wallet with derivation path)
 
 <CodeGroup title="" tag="POST" label="sign_message" mm2MethodDecorate="true">
   ```json
@@ -81,7 +85,9 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
     "params": {
       "coin": "KMD",
       "message": "Very little worth knowing is taught by fear.",
-      "derivation_path": "m/44'/141'/0'/0/1"
+      "address": {
+        "derivation_path": "m/84'/2'/0'/0/1"
+      }
     },
     "id": 2
   }
@@ -101,6 +107,49 @@ If your [`coins`](https://github.com/KomodoPlatform/coins) file contains the cor
   }
   ```
 </CollapsibleSection>
+
+#### Command (HD wallet with account and address id)
+
+<CodeGroup title="" tag="POST" label="sign_message" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "sign_message",
+    "params": {
+      "coin": "KMD",
+      "message": "Very little worth knowing is taught by fear.",
+      "address": {
+        "account_id": 0,
+        "chain": "External",
+        "address_id": 1
+      }
+    },
+    "id": 2
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (HD, success)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "signature": "H8Jk+O21IJ0ob3pchrBkJdlXeObrMAKuABlCtW4JySOUUfxg7K8Vl/H3E4gdtwXqhbCu7vv+NYoIhq/bmjtBlkc="
+      },
+      "id": 2
+  }
+  ```
+</CollapsibleSection>
+
+<Note>
+  For HD wallets, if the `address` parameter is not provided, the root derivation path will be used, for example `m/84'/2'/0'/0/0`.
+  The two examples above point to the same address. The derivation path follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` (or `m/84'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` for segwit coins).
+  The `account_id` and `address_id` are the indices of the account and address in the wallet, starting from 0.
+  The `chain` is either `External` or `Internal`, and expressed as an integer with `External` being 0 and `Internal` being 1.
+</Note>
 
 ### ⚠ Error types
 
