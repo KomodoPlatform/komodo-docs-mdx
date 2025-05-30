@@ -211,7 +211,8 @@ jobs:
             </details>`.trim();
 
             const marker = "<!-- DOC_PREVIEW_MARKER -->";
-            const header = `## Documentation Preview Links (Per Commit)\n\n**Preview URL:** [${previewBase}](${previewBase})\n`;
+            const note = "## Documentation Preview Links (Per Commit)"
+            const header = `${note}\n\n**Preview URL:** [${previewBase}](${previewBase})\n`;
 
             const { data: comments } = await github.rest.issues.listComments({
               owner,
@@ -228,7 +229,7 @@ jobs:
             if (existing) {
               const existingBody = existing.body;
               const updatedBody = `${marker}\n${header}\n\n${commitPreview}\n\n${existingBody
-                .replace(`${marker}\n${header}`, "")
+                .replaceAll(`${note}`, "")
                 .trim()}`;
               await github.rest.issues.updateComment({
                 owner,
