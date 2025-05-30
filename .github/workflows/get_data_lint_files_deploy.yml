@@ -167,17 +167,23 @@ jobs:
             const prNumber = context.issue.number;
             const repo = context.repo.repo;
             const owner = context.repo.owner;
-            const currentPreviewBase = "${{ steps.cf_publish.outputs.url }}/en/docs";
-            const currentCommitSha = "${{ steps.vars.outputs.sha_short }}";
-            const currentCommitMessage =
-              context.payload.head_commit?.message?.split("\n")[0] || "No message";
+            const previewBase = "${{ steps.cf_publish.outputs.url }}/en/docs";
 
-            // Get the current commit's changed doc files
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+
+            const commit = commits[commits.length - 1]; // Last commit only
+            const commitSha = commit.sha.substring(0, 7);
+            const commitMessage = commit.commit.message.split("\n")[0];
+
             const { data: comparison } = await github.rest.repos.compareCommits({
               owner,
               repo,
-              base: context.payload.before,
-              head: context.payload.after,
+              base: `${commit.parents[0].sha}`,
+              head: `${commit.sha}`,
             });
 
             const docFiles = comparison.files
@@ -187,81 +193,56 @@ jobs:
               )
               .map((file) => file.filename);
 
-            // If no doc files changed in this commit, exit early
             if (docFiles.length === 0) return;
 
-            // Generate URLs for current commit's doc files
-            const currentUrls = docFiles
+            const urls = docFiles
               .map((f) => {
                 const path = f.replace(/^src\/pages\//, "").replace(/\.mdx$/, "");
                 const fileName = path.split("/").join("-");
-                return `- [\`${fileName}\`](${currentPreviewBase}/${path})`;
+                return `- [\`${fileName}\`](${previewBase}/${path})`;
               })
               .join("\n");
 
-            const currentCommitPreview = `
-                  <details><summary><strong>Commit:</strong> <a href="https://github.com/${owner}/${repo}/commit/${{github.event.after}}">${currentCommitSha}</a> - ${currentCommitMessage}</summary>
+            const commitPreview = `
+            <details><summary><strong>Commit:</strong> <a href="https://github.com/${owner}/${repo}/commit/${commit.sha}">${commitSha}</a> - ${commitMessage}</summary>
 
-                  ${currentUrls}
+            ${urls}
 
-                  </details>`.trim();
+            </details>`.trim();
 
-            // Check for existing comment
+            const marker = "<!-- DOC_PREVIEW_MARKER -->";
+            const header = `## Documentation Preview Links (Per Commit)\n\n**Preview URL:** [${previewBase}](${previewBase})\n`;
+
             const { data: comments } = await github.rest.issues.listComments({
               owner,
               repo,
               issue_number: prNumber,
             });
 
-            const marker = "<!-- DOC_PREVIEW_MARKER -->";
             const existing = comments.find(
               (comment) =>
                 comment.user.login === "github-actions[bot]" &&
                 comment.body.includes(marker)
             );
 
-            let finalBody;
-
             if (existing) {
-              // Extract existing previews (everything after the header but before any new content)
-              const existingBody = existing.body.replace(marker, "").trim();
-              const headerMatch = existingBody.match(
-                /^## Documentation Preview Links \(Per Commit\)\s*\*\*Preview URL:\*\* \[.*?\]\(.*?\)\s*(.*)/s
-              );
-              const existingPreviews = headerMatch ? headerMatch[1].trim() : "";
-
-              // Append current commit to existing previews
-              const allPreviews = existingPreviews
-                ? `${existingPreviews}\n\n${currentCommitPreview}`
-                : currentCommitPreview;
-
-              finalBody = `${marker}
-            ## Documentation Preview Links (Per Commit)
-
-            **Preview URL:** [${currentPreviewBase}](${currentPreviewBase})
-
-            ${allPreviews}`.trim();
-
+              const existingBody = existing.body;
+              const updatedBody = `${marker}\n${header}\n\n${commitPreview}\n\n${existingBody
+                .replace(`${marker}\n${header}`, "")
+                .trim()}`;
               await github.rest.issues.updateComment({
                 owner,
                 repo,
                 comment_id: existing.id,
-                body: finalBody,
+                body: updatedBody,
               });
             } else {
-              // Create new comment with current commit
-              finalBody = `${marker}
-            ## Documentation Preview Links (Per Commit)
-
-            **Preview URL:** [${currentPreviewBase}](${currentPreviewBase})
-
-            ${currentCommitPreview}`.trim();
-
+              const body = `${marker}\n${header}\n\n${commitPreview}`;
               await github.rest.issues.createComment({
                 owner,
                 repo,
                 issue_number: prNumber,
-                body: finalBody,
+                body,
               });
             }
 
