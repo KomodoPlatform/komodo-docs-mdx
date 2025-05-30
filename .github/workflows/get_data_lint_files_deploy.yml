@@ -196,23 +196,25 @@ jobs:
             if (docFiles.length === 0) return;
 
             const urls = docFiles
-              .map((f) => {
-                const path = f.replace(/^src\/pages\//, "").replace(/\.mdx$/, "");
-                const fileName = path.split("/").join("-");
-                return `- [\`${fileName}\`](${previewBase}/${path})`;
+            .map((f) => {
+              const path = f.replace(/^src\/pages\//, "").replace(/\.mdx$/, "");
+              const fileName = path.split("/").join("-");
+              return `- [\`${fileName}\`](${previewBase}/${path})`;
               })
               .join("\n");
+              
+            const marker = "<!-- DOC_PREVIEW_MARKER -->";
+            const note = "## Documentation Preview Links (Per Commit)"
 
             const commitPreview = `
             <details><summary><strong>Commit:</strong> <a href="https://github.com/${owner}/${repo}/commit/${commit.sha}">${commitSha}</a> - ${commitMessage}</summary>
+
+            **Preview URL:** [${previewBase}](${previewBase})\n
 
             ${urls}
 
             </details>`.trim();
 
-            const marker = "<!-- DOC_PREVIEW_MARKER -->";
-            const note = "## Documentation Preview Links (Per Commit)"
-            const header = `${note}\n\n**Preview URL:** [${previewBase}](${previewBase})\n`;
 
             const { data: comments } = await github.rest.issues.listComments({
               owner,
@@ -228,7 +230,7 @@ jobs:
 
             if (existing) {
               const existingBody = existing.body;
-              const updatedBody = `${marker}\n${header}\n\n${commitPreview}\n\n${existingBody
+              const updatedBody = `${marker}\n${note}\n\n${commitPreview}\n\n${existingBody
                 .replaceAll(`${note}`, "")
                 .trim()}`;
               await github.rest.issues.updateComment({
@@ -238,7 +240,7 @@ jobs:
                 body: updatedBody,
               });
             } else {
-              const body = `${marker}\n${header}\n\n${commitPreview}`;
+              const body = `${marker}\n${note}\n\n${commitPreview}`;
               await github.rest.issues.createComment({
                 owner,
                 repo,
