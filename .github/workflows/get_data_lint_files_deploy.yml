@@ -196,8 +196,8 @@ jobs:
             if (docFiles.length === 0) return;
 
             const urls = docFiles
-            .map((f) => {
-              const path = f.replace(/^src\/pages\//, "").replace(/\.mdx$/, "");
+            .map((filePath) => {
+              const path = filePath.replace(/^src\/pages\//, "").replace(/\.mdx$/, "");
               const fileName = path.split("/").join("-");
               return `- [\`${fileName}\`](${previewBase}/${path})`;
               })
@@ -206,14 +206,7 @@ jobs:
             const marker = "<!-- DOC_PREVIEW_MARKER -->";
             const note = "## Documentation Preview Links (Per Commit)"
 
-            const commitPreview = `
-            <details><summary><strong>Commit:</strong> <a href="https://github.com/${owner}/${repo}/commit/${commit.sha}">${commitSha}</a> - ${commitMessage}</summary>
-
-            \n\n**Preview URL:** [${previewBase}](${previewBase})\n
-
-            ${urls}
-
-            </details>`.trim();
+            const commitPreview = `<details><summary><strong>Commit:</strong> <a href="https://github.com/${owner}/${repo}/commit/${commit.sha}">${commitSha}</a> - ${commitMessage}</summary>\n\n**Preview URL:** [${previewBase}](${previewBase})\n\n${urls}\n\n</details>`.trim();
 
 
             const { data: comments } = await github.rest.issues.listComments({
