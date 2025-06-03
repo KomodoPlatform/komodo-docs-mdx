@@ -3,46 +3,40 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 # Wallet Operations Structures
 
-### RawTxInfo
+### AddressPath
 
-The `RawTxInfo` object includes the following items:
+The `AddressPath` object includes the following items:
 
-| Parameter     | Type   | Description                                                                                                                                                                                                                  |
-| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| tx\_hex       | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
-| prev\_txns    | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
-| to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
-| value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
-| gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
-| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
+| Parameter        | Type    | Description                                                                                                                                                                                                     |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_id      | integer | The index of the account in the wallet, starting from `0`.                                                                                                                                                      |
+| chain            | integer | Optional, only used for HD wallets. The `chain` is either `External` or `Internal`, and expressed as an integer with `External` being 0 and `Internal` being 1.                                                 |
+| address\_id      | integer | Optional, only used for HD wallets. The index of the address in the account, starting from `0`.                                                                                                                 |
+| derivation\_path | string  | Optional, only used for HD wallets. The derivation path of the address, following the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` (or `m/84'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` for segwit coins). |
 
-<DevComment>
-  TODO: Confirm units used in ETH/EVM transactions.
-</DevComment>
+<Note>
+  If using the `derivation_path` parameter, the `account_id`, `chain` and `address_id` parameters are not required (and vice-versa).
+  If the `address` parameter is not provided for a HD wallet, the root derivation path will be used, for example `m/84'/2'/0'/0/0`.
+  The two examples above point to the same address. The derivation path follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` (or `m/84'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` for segwit coins).
+  The `coin_id` is defined in the [`coins`](https://github.com/KomodoPlatform/coins) file.
+  For more information about derivation paths, check out [this explanation](https://www.blockplate.com/blogs/blockplate/what-is-a-derivation-path).
+</Note>
 
-<CollapsibleSection expandedText="Hide UTXO Example" collapsedText="Show UTXO Example">
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
-    {
-        "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
-        "prev_txns": [
-            ...
-        ]
-    }
+  {
+      "account_id": 1,
+      "chain": "External",
+      "address_id": 3
+  }
   ```
 </CollapsibleSection>
 
-<CollapsibleSection expandedText="Hide ETH/EVM Example" collapsedText="Show ETH/EVM Example">
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
-    {
-        "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
-        "value": "0.85",
-        "gas_limit": "21000",
-        "pay_for_gas": {
-            "tx_type": "Eip1559",
-            "max_fee_per_gas": "1234.567",
-            "max_priority_fee_per_gas": "1.2"
-        }
-    }
+  {
+    "derivation_path": "m/44'/141'/1'/0/3"
+  }
   ```
 </CollapsibleSection>
 
@@ -110,5 +104,48 @@ The `PayForGas` object includes the following items:
       "max_fee_per_gas": "1234.567",
       "max_priority_fee_per_gas": "1.2"
   }
+  ```
+</CollapsibleSection>
+
+### RawTxInfo
+
+The `RawTxInfo` object includes the following items:
+
+| Parameter     | Type   | Description                                                                                                                                                                                                                  |
+| ------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| tx\_hex       | string | UTXO only. The raw unsigned hex of a proposed transaction.                                                                                                                                                                   |
+| prev\_txns    | list   | UTXO only. A list of standard [InputTxns objects](/komodo-defi-framework/api/common_structures/wallet/#input-txns).                                                                                                          |
+| to            | string | ETH/EVM only. A destination address to send the funds to.                                                                                                                                                                    |
+| value         | string | ETH/EVM only. The amount of funds to be sent as a string with a `0x` prefix, in [wei](https://ethereum.stackexchange.com/questions/253/the-ether-denominations-are-called-finney-szabo-and-wei-what-who-are-these-na) units. |
+| gas\_limit    | string | ETH/EVM only. The maximum gas to be used for sending the transaction, in [gwei](https://eth-converter.com/) units.                                                                                                           |
+| pay\_for\_gas | object | Optional, ETH/EVM only. Used for EIP-1559 fee policy config. A standard [PayForGas](/komodo-defi-framework/api/common_structures/wallet/#pay-for-gas) object.                                                                |
+
+<DevComment>
+  TODO: Confirm units used in ETH/EVM transactions.
+</DevComment>
+
+<CollapsibleSection expandedText="Hide UTXO Example" collapsedText="Show UTXO Example">
+  ```json
+    {
+        "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
+        "prev_txns": [
+            ...
+        ]
+    }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide ETH/EVM Example" collapsedText="Show ETH/EVM Example">
+  ```json
+    {
+        "to": "0x927DaFDDa16F1742BeFcBEAE6798090354B294A9",
+        "value": "0.85",
+        "gas_limit": "21000",
+        "pay_for_gas": {
+            "tx_type": "Eip1559",
+            "max_fee_per_gas": "1234.567",
+            "max_priority_fee_per_gas": "1.2"
+        }
+    }
   ```
 </CollapsibleSection>
