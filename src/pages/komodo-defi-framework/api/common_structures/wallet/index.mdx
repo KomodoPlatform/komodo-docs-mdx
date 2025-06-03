@@ -114,6 +114,43 @@ The `AddressInfo` object includes the following items for a given address:
   ```
 </CollapsibleSection>
 
+### AddressPath
+
+The `AddressPath` object includes the following items:
+
+| Parameter        | Type    | Description                                                                                                                                                                                                     |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_id      | integer | The index of the account in the wallet, starting from `0`.                                                                                                                                                      |
+| chain            | integer | Optional, only used for HD wallets. The `chain` is either `External` or `Internal`, and expressed as an integer with `External` being 0 and `Internal` being 1.                                                 |
+| address\_id      | integer | Optional, only used for HD wallets. The index of the address in the account, starting from `0`.                                                                                                                 |
+| derivation\_path | string  | Optional, only used for HD wallets. The derivation path of the address, following the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` (or `m/84'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` for segwit coins). |
+
+<Note>
+  If using the `derivation_path` parameter, the `account_id`, `chain` and `address_id` parameters are not required (and vice-versa).
+  If the `address` parameter is not provided for a HD wallet, the root derivation path will be used, for example `m/84'/2'/0'/0/0`.
+  The two examples above point to the same address. The derivation path follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` (or `m/84'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` for segwit coins).
+  The `coin_id` is defined in the [`coins`](https://github.com/KomodoPlatform/coins) file.
+  For more information about derivation paths, check out [this explanation](https://www.blockplate.com/blogs/blockplate/what-is-a-derivation-path).
+</Note>
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "account_id": 1,
+      "chain": "External",
+      "address_id": 3
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+    "derivation_path": "m/44'/141'/1'/0/3"
+  }
+  ```
+</CollapsibleSection>
+
 ### BalanceInfo
 
 The `BalanceInfo` object includes the following items for a given coin or token:
@@ -380,6 +417,20 @@ The `RawTxInfo` object includes the following items:
   ```
 </CollapsibleSection>
 
+### ScanAddressesInfo
+
+The `ScanAddressesInfo` response object includes the following items for request in HD mode:
+
+| Parameter        | Type    | Description                                                                                                                                   |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
+| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the account.                                   |
+| new\_addresses   | list    | A list of standard [NewAddressInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) objects.                           |
+
+<DevComment>
+  Confirm `new_addresses` array has the structure of `NewAddressInfo`.
+</DevComment>
+
 ### TotalFeeInfo
 
 | Structure                   | Type             | Description                                                                                                                                                   |
@@ -454,20 +505,6 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
   }
   ```
 </CollapsibleSection>
-
-### ScanAddressesInfo
-
-The `ScanAddressesInfo` response object includes the following items for request in HD mode:
-
-| Parameter        | Type    | Description                                                                                                                                   |
-| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| account\_index   | integer | `ACCOUNT_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path. **Please don't confuse with the global account.** |
-| derivation\_path | string  | The [BIP44 derivation path](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) of the account.                                   |
-| new\_addresses   | list    | A list of standard [NewAddressInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) objects.                           |
-
-<DevComment>
-  Confirm `new_addresses` array has the structure of `NewAddressInfo`.
-</DevComment>
 
 ### WalletAccountInfo
 
@@ -616,3 +653,13 @@ The specified `fee` is not valid.
   "id": 0
 }
 ```
+
+<CollapsibleSection expandedText="Hide EIP1559 Example" collapsedText="Show EIP1559 Example">
+  ```json
+  {
+      "tx_type": "Eip1559",
+      "max_fee_per_gas": "1234.567",
+      "max_priority_fee_per_gas": "1.2"
+  }
+  ```
+</CollapsibleSection>

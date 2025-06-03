@@ -14,20 +14,20 @@ The `buy` method issues a buy request and attempts to match an order from the or
 
 ## Arguments
 
-| Structure         | Type              | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ----------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| base              | string            | The name of the coin the user desires to receive                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| rel               | string            | The name of the coin the user desires to sell                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| price             | varies            | The price in `rel` the user is willing to pay per one unit of the `base` coin. Can be a numeric string, expressed using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) objects.                                                                                                                                                                                                                                                          |
-| volume            | varies            | The amount of coins the user is willing to receive of the `base` coin; the following values must be greater than or equal to the `min_trading_vol` of the corresponding coin: <ul><li>the argument `volume`</li><li>the product of the arguments `volume` and `price`</li></ul>. . Can be a numeric string, expressed using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) objects.                                                      |
-| min\_volume       | varies (optional) | The amount of `base` coin that will be used as `min_volume` of `GoodTillCancelled` order after conversion to maker; the following values must be greater than or equal to the `min_trading_vol` of the corresponding coin: <ul><li>the argument `min_volume`</li><li>the product of the arguments `min_volume` and `price`</li></ul>. . Can be a numeric string, expressed using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) objects. |
-| match\_by         | object            | Optional. A standard [MatchBy](/komodo-defi-framework/api/common_structures/orders/#match-by) object, to filter to include only matches by pubkey or uuid. *Important:* This condition is not applied after a `GoodTillCancelled` order is converted to a `maker` request.                                                                                                                                                                                                                                                                                            |
-| order\_type       | object            | Optional. A standard [OrderType](/komodo-defi-framework/api/common_structures/orders/#order-type) object.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| base\_confs       | number            | Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| base\_nota        | boolean           | Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| rel\_confs        | number            | Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| rel\_nota         | boolean           | Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| save\_in\_history | boolean           | Defaults to `true`. If set to `false` no order history will be saved (though order status will be temporarily stored while in progress). If `true`, each order's short record history is stored in a local SQLite database table, and when the order is cancelled or fully matched, it's history will be saved as a json file                                                                                                                                                                                                                                         |
+| Structure         | Type               | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ----------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| base              | string             | The name of the coin the user desires to receive                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| rel               | string             | The name of the coin the user desires to sell                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| price             | various            | The price in `rel` the user is willing to pay per one unit of the `base` coin. Can be a numeric string, expressed using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) objects.                                                                                                                                                                                                                                                   |
+| volume            | various            | The amount of coins the user is willing to receive of the `base` coin; the following values must be greater than or equal to the `min_trading_vol` of the corresponding coin: <ul><li>the argument `volume`</li><li>the product of the arguments `volume` and `price`</li></ul>. . Can be a numeric string, expressed using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) objects.                                               |
+| min\_volume       | various (optional) | The minimum amount of `base` coin to be purchased in any `GoodTillCancelled` orders after conversion to maker; the following values must be greater than or equal to the `min_trading_vol` of the corresponding coin: <ul><li>the argument `min_volume`</li><li>the product of the arguments `min_volume` and `price`</li></ul>. Can be a numeric string, expressed using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) objects. |
+| match\_by         | object             | Optional. A standard [MatchBy](/komodo-defi-framework/api/common_structures/orders/#match-by) object, to filter to include only matches by pubkey or uuid. *Important:* This condition is not applied after a `GoodTillCancelled` order is converted to a `maker` request.                                                                                                                                                                                                                                                                                     |
+| order\_type       | object             | Optional. A standard [OrderType](/komodo-defi-framework/api/common_structures/orders/#order-type) object.                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| base\_confs       | number             | Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| base\_nota        | boolean            | Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| rel\_confs        | number             | Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| rel\_nota         | boolean            | Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| save\_in\_history | boolean            | Defaults to `true`. If set to `false` no order history will be saved (though order status will be temporarily stored while in progress). If `true`, each order's short record history is stored in a local SQLite database table, and when the order is cancelled or fully matched, it's history will be saved as a json file                                                                                                                                                                                                                                  |
 
 ## Response
 
@@ -58,10 +58,10 @@ The `buy` method issues a buy request and attempts to match an order from the or
   {
     "userpass": "RPC_UserP@SSW0RD",
     "method": "buy",
-    "base": "HELLO",
-    "rel": "WORLD",
-    "volume": "1",
-    "price": "1"
+    "base": "DOC",
+    "rel": "MARTY",
+    "price": 1.1,
+    "volume": 2.4
   }
   ```
 </CodeGroup>
@@ -71,38 +71,79 @@ The `buy` method issues a buy request and attempts to match an order from the or
 <CodeGroup title="" tag="POST" label="buy" mm2MethodDecorate="true">
   ```json
   {
-    "userpass": "RPC_UserP@SSW0RD",
-    "method": "buy",
-    "base": "HELLO",
-    "rel": "WORLD",
-    "volume": [
-      [
-        1,
+    "result": {
+      "base": "DOC",
+      "rel": "MARTY",
+      "base_amount": "2.4",
+      "base_amount_rat": [
         [
-          1
+          1,
+          [
+            12
+          ]
+        ],
+        [
+          1,
+          [
+            5
+          ]
         ]
       ],
-      [
-        1,
+      "rel_amount": "2.64",
+      "rel_amount_rat": [
         [
-          1
-        ]
-      ]
-    ],
-    "price": [
-      [
-        1,
+          1,
+          [
+            66
+          ]
+        ],
         [
-          1
+          1,
+          [
+            25
+          ]
         ]
       ],
-      [
-        1,
+      "action": "Buy",
+      "uuid": "3d2286d1-1eef-487b-a07a-904f33034792",
+      "method": "request",
+      "sender_pubkey": "d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
+      "dest_pub_key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "match_by": {
+        "type": "Any"
+      },
+      "conf_settings": {
+        "base_confs": 1,
+        "base_nota": false,
+        "rel_confs": 1,
+        "rel_nota": false
+      },
+      "order_type": {
+        "type": "GoodTillCancelled"
+      },
+      "min_volume": "0.0001",
+      "min_volume_fraction": {
+        "numer": "1",
+        "denom": "10000"
+      },
+      "min_volume_rat": [
         [
-          1
+          1,
+          [
+            1
+          ]
+        ],
+        [
+          1,
+          [
+            10000
+          ]
         ]
-      ]
-    ]
+      ],
+      "base_orderbook_ticker": null,
+      "rel_orderbook_ticker": null
+    },
+    "userpass": "RPC_UserP@SSW0RD"
   }
   ```
 </CodeGroup>
