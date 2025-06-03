@@ -14,7 +14,7 @@ Used to specify a HD wallet `account_id` or `address_id` for [my\_tx\_history v2
 | address\_id | integer | Only required when `type` is `address_id`. `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
 | chain       | string  | Only required when `type` is `address_id`. `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+<CollapsibleSection expandedText="Hide Account ID Example" collapsedText="Show Account ID Example">
   #### Example
 
   ```json
@@ -23,7 +23,9 @@ Used to specify a HD wallet `account_id` or `address_id` for [my\_tx\_history v2
     "account_id": 77
   }
   ```
+</CollapsibleSection>
 
+<CollapsibleSection expandedText="Hide Address ID Example" collapsedText="Show Address ID Example">
   ```json
   {
     "type": "address_id",
@@ -33,6 +35,43 @@ Used to specify a HD wallet `account_id` or `address_id` for [my\_tx\_history v2
   }
   ```
 </CollapsibleSection>
+
+### AddressPath
+
+The `AddressPath` object includes the following items:
+
+| Parameter        | Type    | Description                                                                                                                                                                                                     |
+| ---------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_id      | integer | The index of the account in the wallet, starting from `0`.                                                                                                                                                      |
+| chain            | integer | Optional, only used for HD wallets. The `chain` is either `External` or `Internal`, and expressed as an integer with `External` being 0 and `Internal` being 1.                                                 |
+| address\_id      | integer | Optional, only used for HD wallets. The index of the address in the account, starting from `0`.                                                                                                                 |
+| derivation\_path | string  | Optional, only used for HD wallets. The derivation path of the address, following the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` (or `m/84'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` for segwit coins). |
+
+<CollapsibleSection expandedText="Hide Account/Chain/Address Example" collapsedText="Show Account/Chain/Address Example">
+  ```json
+  {
+      "account_id": 1,
+      "chain": "External",
+      "address_id": 3
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Derivation Path Example" collapsedText="Show Derivation Path Example">
+  ```json
+  {
+    "derivation_path": "m/44'/141'/1'/0/3"
+  }
+  ```
+</CollapsibleSection>
+
+<Note>
+  If using the `derivation_path` parameter, the `account_id`, `chain` and `address_id` parameters are not required (and vice-versa).
+  If the `address` parameter is not provided for a HD wallet, the root derivation path will be used, for example `m/84'/2'/0'/0/0`.
+  The two examples above point to the same address. The derivation path follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` (or `m/84'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` for segwit coins).
+  The `coin_id` is defined in the [`coins`](https://github.com/KomodoPlatform/coins) file.
+  For more information about derivation paths, check out [this explanation](https://www.blockplate.com/blogs/blockplate/what-is-a-derivation-path).
+</Note>
 
 ### InputTxns
 

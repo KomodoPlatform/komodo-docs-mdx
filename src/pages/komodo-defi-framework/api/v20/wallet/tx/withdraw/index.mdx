@@ -18,7 +18,7 @@ This method generates a raw transaction which should then be broadcast using [se
 | max                  | bool             | Optional. Withdraw the maximum available amount.                                                                                                |
 | fee                  | object           | Optional. A standard [FeeInfo](/komodo-defi-framework/api/common_structures/#fee-info) object.                                                  |
 | from                 | object           | HD wallets only. A standard [WithdrawFromInfo](/komodo-defi-framework/api/common_structures/wallet/#withdraw-from-info) object.                 |
-| ibc\_source\_channel | string           | Tendermint IBC transfers only. The source channel for the [IBC](https://tutorials.cosmos.network/academy/3-ibc/1-what-is-ibc.html) transaction. |
+| ibc\_source\_channel | integer          | Tendermint IBC transfers only. The source channel for the [IBC](https://tutorials.cosmos.network/academy/3-ibc/1-what-is-ibc.html) transaction. |
 
 ### Response
 
@@ -63,28 +63,37 @@ This method generates a raw transaction which should then be broadcast using [se
 
   ```json
   {
-    "mmrpc": "2.0",
-    "result": {
-      "block_height": 0,
-      "coin": "KMD",
-      "fee_details": {
-        "type": "Utxo",
-        "amount": "0.00001"
+      "mmrpc": "2.0",
+      "result": {
+          "tx_hex": "0400008085202f890152db2e550ca2d69eed487c95b6089b0f12e7a8937a89b8754c38a8c361560fca000000006a47304402200220239769f48c8bc96fbbcb66bcc0483f6234cb48ab823e13f0b791cdd501b902204f8b2dd875609e35f1677e39e403a18e9d2d98cd9916f51a62ac1edfc350cd47012102b3c168ed4acd96594288cee3114c77de51b6afe1ab6a866887a13a96ee80f33cffffffff0290a00b00000000001976a9145d904d4531f4c74f760a14ef057c866a06705dda88ac37040700000000001976a9145d904d4531f4c74f760a14ef057c866a06705dda88ac0609ed67000000000000000000000000000000",
+          "tx_hash": "aa456a6288292c4980637083871a6a4a1fb0a2242f6a30ae974069311691f37c",
+          "from": [
+              "RHound8PpyhVLfi56dC7MK3ZvvkAmB3bvQ"
+          ],
+          "to": [
+              "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh"
+          ],
+          "total_amount": "10",
+          "spent_by_me": "10",
+          "received_by_me": "0",
+          "my_balance_change": "-10",
+          "block_height": 0,
+          "timestamp": 1743589636,
+          "fee_details": {
+              "type": "Utxo",
+              "coin": "KMD",
+              "amount": "0.00001"
+          },
+          "coin": "KMD",
+          "internal_id": "",
+          "kmd_rewards": {
+              "amount": "0",
+              "claimed_by_me": true
+          },
+          "transaction_type": "StandardTransfer",
+          "memo": null
       },
-      "from": ["R9o9xTocqr6CeEDGDH6mEYpwLoMz6jNjMW"],
-      "my_balance_change": "-10.00001",
-      "received_by_me": "0.34417325",
-      "spent_by_me": "10.34418325",
-      "to": ["RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh"],
-      "total_amount": "10.34418325",
-      "tx_hash": "3a1c382c50a7d12e4675d12ed7e723ce9f0167693dd75fd772bae8524810e605",
-      "tx_hex": "0400008085202f890207a8e96978acfb8f0d002c3e4390142810dc6568b48f8cd6d8c71866ad8743c5010000006a47304402201960a7089f2d93480fff68ce0b7ca7bb7a32a52915753ac7ae780abd6162cb1d02202c9b11d442e5f72a532f44ceb10122898d486b1474a10eb981c60c5538b9c82d012102031d4256c4bc9f99ac88bf3dba21773132281f65f9bf23a59928bce08961e2f3ffffffff97f56bf3b0f815bb737b7867e71ddb8198bba3574bb75737ba9c389a4d08edc6000000006a473044022055199d80bd7e2d1b932e54f097c6a15fc4b148d21299dc50067c1da18045f0ed02201d26d85333df65e6daab40a07a0e8a671af9d9b9d92fdf7d7ef97bd868ca545a012102031d4256c4bc9f99ac88bf3dba21773132281f65f9bf23a59928bce08961e2f3ffffffff0200ca9a3b000000001976a91464ae8510aac9546d5e7704e31ce177451386455588acad2a0d02000000001976a91405aab5342166f8594baf17a7d9bef5d56744332788ac00000000000000000000000000000000000000",
-      "kmd_rewards": {
-        "amount": "0.0791809",
-        "claimed_by_my": true
-      }
-    },
-    "id": 0
+      "id": null
   }
   ```
 </CollapsibleSection>
@@ -577,7 +586,7 @@ Using the Cosmos [Ecosystem IBC protocol](https://everstake.one/blog/cosmos-ibc-
       "to": "osmo16drqvl3u8sukfsu4lm3qsk28jr3fahjac4rdw4",
       "amount": 0.1,
       "memo": "In the blackest of your moments, wait with no fear.",
-      "ibc_source_channel": "channel-141",
+      "ibc_source_channel": 141,
       "fee": {
         "type": "CosmosGas",
         "gas_price": 0.05,
