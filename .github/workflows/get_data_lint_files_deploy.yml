@@ -147,41 +147,6 @@ jobs:
           cache: yarn
           cache-dependency-path: "website-komodoplatform.com/yarn.lock"
 
-      - name: Install system dependencies for sharp
-        run: |
-          set -e
-          set -o pipefail
-          sudo apt-get update
-          sudo apt-get install -y \
-            libvips-dev \
-            libglib2.0-dev \
-            python3-dev \
-            make \
-            g++ \
-            --no-install-recommends
-
-      - name: Fix Sharp installation
-        working-directory: website-komodoplatform.com
-        env:
-          # Help sharp use system libvips and avoid GitHub rate limits
-          SHARP_IGNORE_GLOBAL_LIBVIPS: "0"
-          npm_config_sharp_binary_host: "https://npmjs.org/mirrors/sharp"
-          npm_config_sharp_libvips_binary_host: "https://npmjs.org/mirrors/sharp-libvips"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          set -o pipefail
-          # Clear any existing Sharp installations
-          rm -rf node_modules/sharp
-          yarn cache clean sharp || true
-          
-          # Install dependencies first
-          yarn install --frozen-lockfile --network-timeout 300000
-          
-          # Force reinstall Sharp with proper platform targeting
-          npm uninstall sharp || true
-          npm install --platform=linux --arch=x64 sharp --verbose
-
       - name: Restore cache
         uses: actions/cache@v4
         with:
@@ -196,10 +161,6 @@ jobs:
       - name: Get updated content, Install deps, build, Add no-index headers before publishing to cloudflare
         working-directory: website-komodoplatform.com
         env:
-          # Help sharp use system libvips and avoid GitHub rate limits
-          SHARP_IGNORE_GLOBAL_LIBVIPS: "0"
-          npm_config_sharp_binary_host: "https://npmjs.org/mirrors/sharp"
-          npm_config_sharp_libvips_binary_host: "https://npmjs.org/mirrors/sharp-libvips"
           # Use GitHub token for authenticated requests to avoid rate limits
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
