@@ -1,3 +1,13 @@
+import * as fs from "fs";
+import { compile } from "@mdx-js/mdx";
+import { slugifyWithCounter } from "@sindresorhus/slugify";
+import { mdxAnnotations } from "mdx-annotations";
+import path from "path";
+import remarkGfm from "remark-gfm";
+import { visit } from "unist-util-visit";
+
+import { removedWords } from "./_removed_search_words.js";
+
 const listOfAllowedElementsToCheck = [
   "h1",
   "h2",
@@ -5,18 +15,27 @@ const listOfAllowedElementsToCheck = [
   "h4",
   "h5",
   "h6",
-  "a",
+  // "a",
   "p",
   "li",
+  // "ul", // enabling this means `ul` returns `li` content(text) causing duplicates
+  "pre",
+  "table",
 ];
 
-import { compile } from "@mdx-js/mdx";
-import { slugifyWithCounter } from "@sindresorhus/slugify";
-import * as fs from "fs";
-import { mdxAnnotations } from "mdx-annotations";
-import path from "path";
-import { visit } from "unist-util-visit";
-import { removedWords } from "./_removed_search_words.js";
+const textContentElementArrayToCheck = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "li",
+  "pre",
+  "code",
+  "td",
+];
 
 const jsonFile = JSON.parse(fs.readFileSync("./src/data/sidebar.json"));
 
@@ -100,10 +119,23 @@ const getStringContentFromElement = (elementTree, contentList = []) => {
   return contentList;
 };
 
+// Helper function to extract text from a node and its children
+function extractTextFromNode(node) {
+  if (node.type === "text") {
+    return node.value;
+  }
+
+  if (node.children) {
+    return node.children.map(extractTextFromNode).join(" ");
+  }
+
+  return "";
+}
+
 function elementTreeChecker(mdxFilePathToCompile) {
   return async (tree) => {
     let textContentOfElement = "";
-    let closestElementReference = null;
+    let closestElementReference = "";
     let slugify = slugifyWithCounter();
     let documentTree = [];
     const docPath = transformFilePath(mdxFilePathToCompile);
@@ -133,12 +165,14 @@ function elementTreeChecker(mdxFilePathToCompile) {
               path: docPath,
             };
           }
-          visit(node, "text", (text) => {
-            if (!!text.value.trim()) {
+          visit(node, "element", (elementNode) => {
+            if (!textContentElementArrayToCheck.includes(node.tagName)) return;
+            const completeText = extractTextFromNode(elementNode);
+            if (!!completeText.trim()) {
               // For searchPreview
               let lineData = {
-                text: text.value,
-                tagName: node.tagName,
+                text: completeText,
+                tagName: elementNode.tagName,
                 path: docPath,
                 closestElementReference,
               };
@@ -147,9 +181,10 @@ function elementTreeChecker(mdxFilePathToCompile) {
 
               textContentOfElement = textContentOfElement.concat(
                 " ",
-                text.value
+                completeText
               );
             }
+            return visit.SKIP;
           });
         }
       });
@@ -185,7 +220,7 @@ function hasOnlyHyphens(str) {
 async function compileMdxFile(mdxFilePathToCompile) {
   const mdxFileResultString = fs.readFileSync(mdxFilePathToCompile, "utf8");
   return await compile(mdxFileResultString, {
-    remarkPlugins: [mdxAnnotations.remark],
+    remarkPlugins: [mdxAnnotations.remark, remarkGfm],
     rehypePlugins: [
       mdxAnnotations.rehype,
       () => elementTreeChecker(mdxFilePathToCompile),
@@ -202,8 +237,8 @@ const runSearchIndexingOnAllMdxFiles = async () => {
       try {
         await compileMdxFile(file);
       } catch (error) {
-        throw new Error(`Processing file:${file}
-  Error: ${error}`);
+        throw new Error(`Processing file:${file} 
+          ${error}`);
       }
     }
     fs.writeFileSync(
