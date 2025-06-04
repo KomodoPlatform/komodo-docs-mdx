@@ -87,7 +87,11 @@ jobs:
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
           lint_branch_name="lint-fix-patches/${BRANCH_NAME}"
           echo "lint_branch_name=$lint_branch_name" >> $GITHUB_OUTPUT
-          echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "sha_short=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+          else
+            echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
+          fi
 
       - name: Checkout code
         uses: actions/checkout@v3
@@ -155,7 +159,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: "Preview for merge commit: ${{ steps.vars.outputs.sha_short }}, available on cloudflare at: ${{ steps.cf_publish.outputs.url }}/en/docs/"
+              body: "Preview for commit: ${{ steps.vars.outputs.sha_short }}, available on cloudflare at: ${{ steps.cf_publish.outputs.url }}/en/docs/"
             })
 
       - name: Update Preview Comment with Docs URLs Per Commit
