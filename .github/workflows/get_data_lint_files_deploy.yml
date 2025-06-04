@@ -303,6 +303,9 @@ jobs:
 
       - name: Generate Preview Images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        # Allow this step to fail gracefully because preview image generation is non-critical
+        # and should not block the workflow. Errors here might occur due to missing dependencies
+        # or other transient issues, but they do not impact the main functionality.
         continue-on-error: true
         working-directory: website-komodoplatform.com
         env:
