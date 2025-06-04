@@ -27,8 +27,6 @@ jobs:
     if: needs.pre_job.outputs.should_skip != 'true' && startsWith(github.head_ref, 'lint-fix-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-22.04
     env:
-      # Set global yarn timeout to handle network issues
-      YARN_NETWORK_TIMEOUT: 300000
       # Use GitHub token for authenticated requests to avoid rate limits
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -173,7 +171,8 @@ jobs:
           
           # Update content
           export CFP=yes
-          
+
+          yarn install          
           ./update-content.sh
           
           # Sync data files
