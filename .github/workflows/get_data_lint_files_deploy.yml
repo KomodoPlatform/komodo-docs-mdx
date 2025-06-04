@@ -26,6 +26,11 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true' && startsWith(github.head_ref, 'lint-fix-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-22.04
+    env:
+      # Set global yarn timeout to handle network issues
+      YARN_NETWORK_TIMEOUT: 300000
+      # Use GitHub token for authenticated requests to avoid rate limits
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -140,21 +145,40 @@ jobs:
         with:
           node-version: "18.20.4"
           cache: yarn
-          cache-dependency-path: "**/yarn.lock"
+          cache-dependency-path: "website-komodoplatform.com/yarn.lock"
+
+      - name: Install system dependencies for sharp
+        run: |
+          set -e
+          set -o pipefail
+          sudo apt-get update
+          sudo apt-get install -y \
+            libvips-dev \
+            python3-dev \
+            make \
+            g++ \
+            --no-install-recommends
 
       - name: Restore cache
         uses: actions/cache@v4
         with:
           path: |
-            .next/cache
+            website-komodoplatform.com/.next/cache
           # Generate a new cache whenever packages or source files change.
           key:
-            nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+            nextjs-${{ hashFiles('website-komodoplatform.com/yarn.lock') }}-${{ hashFiles('website-komodoplatform.com/**.[jt]s', 'website-komodoplatform.com/**.[jt]sx') }}
             # If source files changed but packages didn't, rebuild from a prior cache.
-          restore-keys: nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+          restore-keys: nextjs-${{ hashFiles('website-komodoplatform.com/yarn.lock') }}-
 
       - name: Get updated content, Install deps, build, Add no-index headers before publishing to cloudflare
         working-directory: website-komodoplatform.com
+        env:
+          # Help sharp use system libvips and avoid GitHub rate limits
+          SHARP_IGNORE_GLOBAL_LIBVIPS: "0"
+          npm_config_sharp_binary_host: "https://npmjs.org/mirrors/sharp"
+          npm_config_sharp_libvips_binary_host: "https://npmjs.org/mirrors/sharp-libvips"
+          # Use GitHub token for authenticated requests to avoid rate limits
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           set -o pipefail
@@ -165,7 +189,19 @@ jobs:
           
           # Update content
           export CFP=yes
-          yarn install
+          
+          # Install with retry logic for sharp
+          for i in {1..3}; do
+            if yarn install --frozen-lockfile --network-timeout 300000; then
+              break
+            else
+              echo "Install attempt $i failed, retrying..."
+              sleep 10
+              # Clear cache and try again
+              yarn cache clean sharp || true
+            fi
+          done
+          
           ./update-content.sh
           
           # Sync data files
@@ -283,7 +319,6 @@ jobs:
         run: |
           set -e
           set -o pipefail
-          sudo apt-get update
           sudo apt-get install -yq libgconf-2-4
           sudo apt-get install -y wget --no-install-recommends
           wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg
