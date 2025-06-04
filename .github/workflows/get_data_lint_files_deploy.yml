@@ -264,18 +264,48 @@ jobs:
 
             if (existing) {
               const existingBody = existing.body;
-              let updatedBody = commentBody;
               const markerIndex = existingBody.indexOf(marker);
+              
               if (markerIndex !== -1) {
-                const cleanedBody = existingBody.substring(0, markerIndex).trim();
-                updatedBody = `${cleanedBody}\n\n${updatedBody}`;
+                // Get content before the marker (if any)
+                const contentBeforeMarker = existingBody.substring(0, markerIndex).trim();
+                
+                // Extract existing "Changed Documentation Files" section if it exists
+                const existingContentAfterMarker = existingBody.substring(markerIndex);
+                const changedFilesMatch = existingContentAfterMarker.match(/### Changed Documentation Files\n\n(.*?)(?=\n### |$)/s);
+                const existingChangedFiles = changedFilesMatch ? changedFilesMatch[1].trim() : '';
+                
+                // Build updated body
+                let updatedBody = commentBody;
+                
+                // If there are existing changed files and we have new changed files, append the existing ones
+                if (existingChangedFiles && docFiles.length > 0) {
+                  updatedBody += `\n\n${existingChangedFiles}`;
+                } else if (existingChangedFiles && docFiles.length === 0) {
+                  // If no new changed files but there are existing ones, add the section header and existing content
+                  updatedBody += `### Changed Documentation Files\n\n${existingChangedFiles}`;
+                }
+                
+                // Prepend any content that was before the marker
+                if (contentBeforeMarker) {
+                  updatedBody = `${contentBeforeMarker}\n\n${updatedBody}`;
+                }
+                
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                  body: updatedBody,
+                });
+              } else {
+                // Fallback: just replace the entire comment if marker not found
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                  body: commentBody,
+                });
               }
-              await github.rest.issues.updateComment({
-                owner,
-                repo,
-                comment_id: existing.id,
-                body: updatedBody,
-              });
             } else {
               await github.rest.issues.createComment({
                 owner,
