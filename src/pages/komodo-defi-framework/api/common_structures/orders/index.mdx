@@ -308,6 +308,71 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
   ```
 </CollapsibleSection>
 
+### OrderDataV1
+
+<DevComment>
+  Compare and confirm the differences between this object in v1 and v2 methods.
+</DevComment>
+
+| Structure                   | Type             | Description                                                                                                                                         |
+| --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                        | string           | The ticker of the coin                                                                                                                              |
+| address                     | string           | The address offering the trade                                                                                                                      |
+| price                       | string (decimal) | The price the user is willing to buy or sell per one unit of the coin from request                                                                  |
+| price\_rat                  | rational         | The price represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) object.                           |
+| price\_fraction             | object           | The price represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) object.                       |
+| maxvolume                   | string (decimal) | The maximum amount of `base` the offer provider is willing to sell                                                                                  |
+| max\_volume\_rat            | rational         | The max volume represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) object.                      |
+| max\_volume\_fraction       | object           | The max volume represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) object.                  |
+| min\_volume                 | string (decimal) | The minimum amount of `base` coin the offer provider is willing to sell                                                                             |
+| min\_volume\_rat            | rational         | The min volume represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) object.                      |
+| min\_volume\_fraction       | object           | The min volume represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) object.                  |
+| pubkey                      | string           | The pubkey of the offer provider                                                                                                                    |
+| age                         | number           | The age of the offer (in seconds)                                                                                                                   |
+| zcredits                    | number           | The zeroconf deposit amount (deprecated)                                                                                                            |
+| netid                       | number           | The id of the network on which the request is made                                                                                                  |
+| uuid                        | string           | The uuid of order                                                                                                                                   |
+| is\_mine                    | bool             | Whether the order is placed by me                                                                                                                   |
+| base\_max\_volume           | string (decimal) | The maximum amount of `base` coin the offer provider is willing to buy or sell                                                                      |
+| base\_max\_volume\_rat      | rational         | The `base_max_volume` represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) object.               |
+| base\_max\_volume\_fraction | object           | The `base_max_volume` represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) object.           |
+| base\_min\_volume           | string (decimal) | The minimum amount of `base` coin the offer provider is willing to buy or sell                                                                      |
+| base\_min\_volume\_rat      | rational         | The `base_min_volume` represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) object.               |
+| base\_min\_volume\_fraction | object           | The `base_min_volume` represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) object.           |
+| base\_confs                 | number           | The confirmations settings of `base` coin set by the offer provider                                                                                 |
+| base\_nota                  | bool             | The notarisation settings of `base` coin set by the offer provider                                                                                  |
+| rel\_max\_volume            | string (decimal) | The maximum amount of `rel` coin the offer provider is willing to buy or sell                                                                       |
+| rel\_max\_volume\_rat       | rational         | The `rel_max_volume` max volume represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) object.     |
+| rel\_max\_volume\_fraction  | object           | The `rel_max_volume` max volume represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) object. |
+| rel\_min\_volume            | string (decimal) | The minimum amount of `rel` coin the offer provider is willing to buy or sell                                                                       |
+| rel\_min\_volume\_rat       | rational         | The `rel_min_volume` represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value) object.                |
+| rel\_min\_volume\_fraction  | object           | The `rel_min_volume` represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value) object.            |
+| rel\_confs                  | number           | The confirmations settings of `rel` coin set by the offer provider                                                                                  |
+| rel\_nota                   | bool             | The notarisation settings of `rel` coin set by the offer provider                                                                                   |
+| original\_tickers           | list (string)    | Tickers included in response when `orderbook_ticker` is configured for the queried coin in `coins` file                                             |
+
+### OrderDataV2
+
+<DevComment>
+  Compare and confirm the differences between this object in v1 and v2 methods.
+</DevComment>
+
+| Structure               | Type   | Description                                                                                                                                                                                                                                                                                   |
+| ----------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                    | string | The ticker of the coin                                                                                                                                                                                                                                                                        |
+| address                 | object | A standard [OrderAddress](/komodo-defi-framework/api/common_structures/orders/#order-address) object.                                                                                                                                                                                         |
+| price                   | object | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the coin price.                                                                                                                                                     |
+| base\_min\_volume       | object | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the minimum base volume.                                                                                                                                            |
+| base\_max\_volume       | object | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the maximum base volume.                                                                                                                                            |
+| base\_max\_volume\_aggr | object | Orderbook (v2) only. A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the maximum aggregated base amount at the specified price. The sum of max base volumes of the current order and all orders with a worse price. |
+| rel\_min\_volume        | object | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the minimum rel volume.                                                                                                                                             |
+| rel\_max\_volume        | object | A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the maximum rel volume.                                                                                                                                             |
+| rel\_max\_volume\_aggr  | object | Orderbook (v2) only. A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value) object representing the maximum aggregated rel amount at the specified price. The sum of max rel volumes of the current order and all orders with a worse price.   |
+| pubkey                  | string | The pubkey of the offer provider                                                                                                                                                                                                                                                              |
+| uuid                    | string | The uuid of order                                                                                                                                                                                                                                                                             |
+| is\_mine                | bool   | Whether the order is placed by me                                                                                                                                                                                                                                                             |
+| conf\_settings          | object | A standard [ConfSettings](/komodo-defi-framework/api/common_structures/orders/#conf-settings) object.                                                                                                                                                                                         |
+
 ## OrderSummaryData
 
 | Structure     | Type             | Description                                                                       |
