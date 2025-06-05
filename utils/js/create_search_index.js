@@ -8,6 +8,7 @@ import { visit } from "unist-util-visit";
 
 import { removedWords } from "./_removed_search_words.js";
 
+
 const listOfAllowedElementsToCheck = [
   "h1",
   "h2",
