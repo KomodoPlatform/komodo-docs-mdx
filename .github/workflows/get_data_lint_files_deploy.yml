@@ -161,9 +161,16 @@ jobs:
         env:
           # Use GitHub token for authenticated requests to avoid rate limits
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Configure npm to use GitHub token for all GitHub requests
+          NPM_CONFIG_//npm.pkg.github.com/:_authToken: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           set -o pipefail
+          
+          # Configure git and npm to use GitHub token for better rate limits
+          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+          
           # Update MDX content branch
           cd utils
           ./update_mdx_branch.sh ${{ steps.vars.outputs.BRANCH_NAME }}
@@ -172,7 +179,23 @@ jobs:
           # Update content
           export CFP=yes
 
-          yarn install          
+          # Install dependencies with retry logic for Sharp
+          for i in {1..3}; do
+            echo "Attempt $i: Installing dependencies..."
+            if yarn install --network-timeout 300000; then
+              echo "Dependencies installed successfully on attempt $i"
+              break
+            else
+              echo "Installation failed on attempt $i"
+              if [ $i -eq 3 ]; then
+                echo "All installation attempts failed"
+                exit 1
+              fi
+              echo "Waiting 30 seconds before retry..."
+              sleep 30
+            fi
+          done
+          
           ./update-content.sh
           
           # Sync data files
