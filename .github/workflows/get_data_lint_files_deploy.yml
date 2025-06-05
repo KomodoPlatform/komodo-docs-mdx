@@ -26,71 +26,109 @@ jobs:
     needs: pre_job
     if: needs.pre_job.outputs.should_skip != 'true' && startsWith(github.head_ref, 'lint-fix-patches') == false && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-22.04
+    env:
+      # Use GitHub token for authenticated requests to avoid rate limits
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: "16"
+          node-version: "18.20.4"
 
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
 
       - name: Generate API methods table
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         shell: bash
-        run: ${GITHUB_WORKSPACE}/utils/gen_api_methods_table.py
+        run: |
+          set -e
+          set -o pipefail
+          ${GITHUB_WORKSPACE}/utils/gen_api_methods_table.py
 
       - name: Install dependencies
+        working-directory: utils/js
         shell: bash
-        run: cd utils/js && npm ci
+        run: |
+          set -e  
+          set -o pipefail
+          npm ci
 
       - name: Get file and Author data
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node utils/js/get_file_author_data.js
+        run: |
+          set -e
+          set -o pipefail
+          node utils/js/get_file_author_data.js
 
       - name: Validate and Update links
-        run: node utils/js/validate_update_internal_links_userpass.js
+        run: |
+          set -e
+          set -o pipefail
+          node utils/js/validate_update_internal_links_userpass.js
 
       - name: Check presence of file and dirs
-        run: node utils/js/file_presence_structure_checker.js
+        run: |
+          set -e
+          set -o pipefail
+          node utils/js/file_presence_structure_checker.js
 
       - name: Verify h1 is present in every file
-        run: node utils/js/h1_presence_format_checker.js
+        run: |
+          set -e
+          set -o pipefail
+          node utils/js/h1_presence_format_checker.js
 
       - name: Prepare data files for GPTs
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: node utils/js/create_data_for_gpts.js
+        run: |
+          set -e
+          set -o pipefail
+          node utils/js/create_data_for_gpts.js
 
       - name: Ensure change logs are updated
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: node utils/js/ensure_changelog_update.js
+        run: |
+          set -e
+          set -o pipefail
+          node utils/js/ensure_changelog_update.js
 
       - name: Generate Search Index
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: node utils/js/create_search_index.js
+        run: |
+          set -e
+          set -o pipefail
+          node utils/js/create_search_index.js
 
       - name: Set branch name, commit_sha, lint-fix branch name
         id: vars
         shell: bash
         run: |
+          set -e
+          set -o pipefail
           BRANCH_NAME="${{ github.head_ref || github.ref }}"
           BRANCH_NAME=${BRANCH_NAME#refs/heads/}
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_OUTPUT
           lint_branch_name="lint-fix-patches/${BRANCH_NAME}"
           echo "lint_branch_name=$lint_branch_name" >> $GITHUB_OUTPUT
-          echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "sha_short=$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+          else
+            echo "sha_short=$(echo ${GITHUB_SHA::7})" >> $GITHUB_OUTPUT
+          fi
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: website-komodoplatform.com
           ssh-key: ${{ secrets.DOCS_UI_SSH_PRIVATE_KEY }}
@@ -99,38 +137,72 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         env:
           PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
         with:
           node-version: "18.20.4"
           cache: yarn
-          cache-dependency-path: "**/yarn.lock"
+          cache-dependency-path: "website-komodoplatform.com/yarn.lock"
 
       - name: Restore cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
-            .next/cache
+            website-komodoplatform.com/.next/cache
           # Generate a new cache whenever packages or source files change.
           key:
-            nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+            nextjs-${{ hashFiles('website-komodoplatform.com/yarn.lock') }}-${{ hashFiles('website-komodoplatform.com/**.[jt]s', 'website-komodoplatform.com/**.[jt]sx') }}
             # If source files changed but packages didn't, rebuild from a prior cache.
-          restore-keys: nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+          restore-keys: nextjs-${{ hashFiles('website-komodoplatform.com/yarn.lock') }}-
 
       - name: Get updated content, Install deps, build, Add no-index headers before publishing to cloudflare
+        working-directory: website-komodoplatform.com
+        env:
+          # Use GitHub token for authenticated requests to avoid rate limits
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Configure npm to use GitHub token for all GitHub requests
+          NPM_CONFIG_//npm.pkg.github.com/:_authToken: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pwd
-          echo $GITHUB_WORKSPACE
-          ls $GITHUB_WORKSPACE
-          cd $GITHUB_WORKSPACE/website-komodoplatform.com/utils
+          set -e
+          set -o pipefail
+          
+          # Configure git and npm to use GitHub token for better rate limits
+          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          npm config set //npm.pkg.github.com/:_authToken ${{ secrets.GITHUB_TOKEN }}
+          
+          # Update MDX content branch
+          cd utils
           ./update_mdx_branch.sh ${{ steps.vars.outputs.BRANCH_NAME }}
           cd ..
+          
+          # Update content
           export CFP=yes
-          yarn install
+
+          # Install dependencies with retry logic for Sharp
+          for i in {1..3}; do
+            echo "Attempt $i: Installing dependencies..."
+            if yarn install --network-timeout 300000; then
+              echo "Dependencies installed successfully on attempt $i"
+              break
+            else
+              echo "Installation failed on attempt $i"
+              if [ $i -eq 3 ]; then
+                echo "All installation attempts failed"
+                exit 1
+              fi
+              echo "Waiting 30 seconds before retry..."
+              sleep 30
+            fi
+          done
+          
           ./update-content.sh
-          rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json $GITHUB_WORKSPACE/website-komodoplatform.com/src/data/docs/_fileData.json
-          rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json $GITHUB_WORKSPACE/website-komodoplatform.com/src/data/docs/searchIndex.json
+          
+          # Sync data files
+          rsync -avh --delete $GITHUB_WORKSPACE/utils/_fileData.json src/data/docs/_fileData.json
+          rsync -avh --delete $GITHUB_WORKSPACE/utils/_searchIndex.json src/data/docs/searchIndex.json
+          
+          # Export and add headers
           yarn export          
           echo -e "https://:project.pages.dev/*\n  X-Robots-Tag: noindex" > ./out/_headers
 
@@ -146,26 +218,134 @@ jobs:
           wranglerVersion: "3"
           branch: ${{ steps.vars.outputs.BRANCH_NAME }}
 
-      - name: Post CF preview url
-        uses: actions/github-script@v6
+      - name: Post Comprehensive Preview Comment
+        uses: actions/github-script@v7
         if: github.event_name == 'pull_request'
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: "Preview for merge commit: ${{ steps.vars.outputs.sha_short }}, available on cloudflare at: ${{ steps.cf_publish.outputs.url }}/en/docs/"
-            })
+            const prNumber = context.issue.number;
+            const repo = context.repo.repo;
+            const owner = context.repo.owner;
+            const previewBase = "${{ steps.cf_publish.outputs.url }}/en/docs";
+
+            const { data: commits } = await github.rest.pulls.listCommits({
+              owner,
+              repo,
+              pull_number: prNumber,
+            });
+
+            const commit = commits[commits.length - 1]; // Last commit only
+            const commitSha = commit.sha.substring(0, 7);
+            const commitMessage = commit.commit.message.split("\n")[0];
+
+            const { data: comparison } = await github.rest.repos.compareCommits({
+              owner,
+              repo,
+              base: `${commit.parents[0].sha}`,
+              head: `${commit.sha}`,
+            });
+
+            const docFiles = comparison.files
+              .filter(
+                (file) =>
+                  file.filename.startsWith("src/pages/") && file.filename.endsWith(".mdx")
+              )
+              .map((file) => file.filename);
+
+            const marker = "<!-- DOC_PREVIEW_MARKER -->";
+            const note = "## Documentation Preview Links"
+            
+            // Always include the basic preview URL
+            let commentBody = `${marker}\n${note}\n\n**Preview for commit: ${{ steps.vars.outputs.sha_short }}**\n**Base URL:** [${previewBase}](${previewBase})\n\n`;
+
+            // Add detailed file links if doc files were changed
+            if (docFiles.length > 0) {
+              const urls = docFiles
+                .map((filePath) => {
+                  const path = filePath.replace(/^src\/pages\//, "").replace(/\.mdx$/, "");
+                  return `- [\`${path}\`](${previewBase}/${path})`;
+                })
+                .join("\n");
+              
+              const commitPreview = `<details><summary><strong>Commit:</strong> <a href="https://github.com/${owner}/${repo}/commit/${commit.sha}">${commitSha}</a> - ${commitMessage}</summary>\n\n${urls}\n\n</details>`;
+              commentBody += `### Changed Documentation Files\n\n${commitPreview}`;
+            }
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+            });
+
+            const existing = comments.find(
+              (comment) =>
+                comment.user.login === "github-actions[bot]" &&
+                comment.body.includes(marker)
+            );
+
+            if (existing) {
+              const existingBody = existing.body;
+              const markerIndex = existingBody.indexOf(marker);
+              
+              if (markerIndex !== -1) {
+                // Get content before the marker (if any)
+                const contentBeforeMarker = existingBody.substring(0, markerIndex).trim();
+                
+                // Extract existing "Changed Documentation Files" section if it exists
+                const existingContentAfterMarker = existingBody.substring(markerIndex);
+                const changedFilesMatch = existingContentAfterMarker.match(/### Changed Documentation Files\n\n(.*?)(?=\n### |$)/s);
+                const existingChangedFiles = changedFilesMatch ? changedFilesMatch[1].trim() : '';
+                
+                // Build updated body
+                let updatedBody = commentBody;
+                
+                // If there are existing changed files and we have new changed files, append the existing ones
+                if (existingChangedFiles && docFiles.length > 0) {
+                  updatedBody += `\n\n${existingChangedFiles}`;
+                } else if (existingChangedFiles && docFiles.length === 0) {
+                  // If no new changed files but there are existing ones, add the section header and existing content
+                  updatedBody += `### Changed Documentation Files\n\n${existingChangedFiles}`;
+                }
+                
+                // Prepend any content that was before the marker
+                if (contentBeforeMarker) {
+                  updatedBody = `${contentBeforeMarker}\n\n${updatedBody}`;
+                }
+                
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                  body: updatedBody,
+                });
+              } else {
+                // Fallback: just replace the entire comment if marker not found
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                  body: commentBody,
+                });
+              }
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: commentBody,
+              });
+            }
 
       - name: Update package repos, Install libgconf-2-4, wget, Add Google Chrome repository, Install Google Chrome Stable, Clean up
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: |
-          sudo apt-get update
+          set -e
+          set -o pipefail
           sudo apt-get install -yq libgconf-2-4
           sudo apt-get install -y wget --no-install-recommends
-          wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google.list
+          wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable --no-install-recommends
           sudo rm -rf /var/lib/apt/lists/*
@@ -174,22 +354,52 @@ jobs:
       - name: Set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD and CF_PUBLISH_URL
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: |
+          set -e
+          set -o pipefail
           echo "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true" >> $GITHUB_ENV
           echo "CF_PUBLISH_URL=${{ steps.cf_publish.outputs.url }}" >> $GITHUB_ENV
 
       - name: Generate Preview Images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        # Allow this step to fail gracefully because preview image generation is non-critical
+        # and should not block the workflow. Errors here might occur due to missing dependencies
+        # or other transient issues, but they do not impact the main functionality.
+        continue-on-error: true
+        working-directory: website-komodoplatform.com
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
         run: |
-          cd $GITHUB_WORKSPACE/website-komodoplatform.com/
+          set -e
+          set -o pipefail
           git status
           yarn gen:previewImgs
 
       - name: Update mdx repo with preview images
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
-        run: mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/ && mkdir -p $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/preview-images-original/ $GITHUB_WORKSPACE/preview-images/original/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/public/preview-images/ $GITHUB_WORKSPACE/preview-images/optimized/ && rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/src/data/docs/previewImgTimeStamps.json $GITHUB_WORKSPACE/preview-images/previewImgTimeStamps.json
+        run: |
+          set -e
+          set -o pipefail
+          # Create preview image directories
+          mkdir -p $GITHUB_WORKSPACE/preview-images/optimized/
+          mkdir -p $GITHUB_WORKSPACE/preview-images/original/
+          
+          # Sync original preview images
+          rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/preview-images-original/ \
+            $GITHUB_WORKSPACE/preview-images/original/
+          
+          # Sync optimized preview images  
+          rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/public/preview-images/ \
+            $GITHUB_WORKSPACE/preview-images/optimized/
+          
+          # Sync timestamps
+          rsync -avh --delete $GITHUB_WORKSPACE/website-komodoplatform.com/src/data/docs/previewImgTimeStamps.json \
+            $GITHUB_WORKSPACE/preview-images/previewImgTimeStamps.json
 
-      - name: Delete repo checked out UI repo
-        run: rm -rf $GITHUB_WORKSPACE/website-komodoplatform.com
+      - name: Delete checked out UI repo
+        run: |
+          set -e
+          set -o pipefail
+          rm -rf $GITHUB_WORKSPACE/website-komodoplatform.com
 
       # - name: Check if diff exists
       #   id: diff_check
@@ -201,7 +411,7 @@ jobs:
       #     fi
 
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "[Bot] File and author data updated, validated and updated internal links, formatted md content, checked presence of file and dirs based on sidebar, checked presence of h1 in every file, update Komodo DeFi Framework methods table, adds/updates preview images when base is main"
