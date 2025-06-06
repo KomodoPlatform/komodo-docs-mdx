@@ -1,0 +1,134 @@
+export const title = "Komodo DeFi Framework Method: Enable Fee Estimator Streaming";
+export const description = "Using this method, you can enable the fee estimation stream.";
+
+# fee\_estimator\_enable
+
+Using this method, you can enable the fee estimation stream. For requesting fee estimates without streaming, use [get\_eth\_estimated\_fee\_per\_gas](/komodo-defi-framework/api/v20/wallet/fee_management/get_eth_estimated_fee_per_gas/).
+
+### Request Parameters
+
+| Parameter  | Type    | Description                                                                                                                      |
+| ---------- | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| client\_id | integer | This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1)) |
+| coin       | string  | The coin or token to enable the fee estimation stream for.                                                                       |
+
+### 📌 Examples
+
+#### Request
+
+<CodeGroup title="" tag="POST" label="fee_estimator_enable" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "stream::fee_estimator::enable",
+    "mmrpc": "2.0",
+    "params": {
+      "client_id": 1,
+      "coin": "MATIC",
+      "config": {
+        "estimate_every": 33.4,
+        "estimator_type": "Provider"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "streamer_id": "FEE_ESTIMATION:MATIC"
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+Here is an example of the stream data you should be able to see in [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1) at each estimate interval:
+
+`data: {"_type":"FEE_ESTIMATION:MATIC","message":{"base_fee":"0.000000281","low":{"max_priority_fee_per_gas":"30","max_fee_per_gas":"30.000000309","min_wait_time":null,"max_wait_time":null},"medium":{"max_priority_fee_per_gas":"32.633147189","max_fee_per_gas":"32.633147519","min_wait_time":null,"max_wait_time":null},"high":{"max_priority_fee_per_gas":"38.9999999","max_fee_per_gas":"39.000000251","min_wait_time":null,"max_wait_time":null},"source":"simple","base_fee_trend":"","priority_fee_trend":"","units":"Gwei"}}`
+
+<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
+  #### CoinNotFound
+
+  You need to activate the coin first.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "CoinNotFound",
+      "error_path": "fee_estimation",
+      "error_trace": "fee_estimation:42]",
+      "error_type": "CoinNotFound",
+      "id": null
+  }
+  ```
+
+  #### CoinNotSupported
+
+  Currently only EVM coins/tokens (e.g. BNB, ETH, MATIC, AVAX) support fee estimation.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "CoinNotSupported",
+      "error_path": "fee_estimation",
+      "error_trace": "fee_estimation:56]",
+      "error_type": "CoinNotSupported",
+      "id": null
+
+  }
+  ```
+
+  #### UnknownClient
+
+  No client has an open connection using this `client_id`.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "UnknownClient",
+      "error_path": "fee_estimation",
+      "error_trace": "fee_estimation:54]",
+      "error_type": "EnableError",
+      "error_data": "UnknownClient",
+      "id": null
+  }
+  ```
+
+  #### ClientAlreadyListening
+
+  The requested events are already being sent to the `client_id`.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "ClientAlreadyListening",
+      "error_path": "fee_estimation",
+      "error_trace": "fee_estimation:54]",
+      "error_type": "EnableError",
+      "error_data": "ClientAlreadyListening",
+      "id": null
+  }
+  ```
+
+  #### InvalidRequest
+
+  The requested events are already being sent to the `client_id`.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Error parsing request: unknown variant `Complex`, expected `Simple` or `Provider`",
+      "error_path": "dispatcher",
+      "error_trace": "dispatcher:122]",
+      "error_type": "InvalidRequest",
+      "error_data": "unknown variant `Complex`, expected `Simple` or `Provider`",
+      "id": null
+  }
+  ```
+</CollapsibleSection>
