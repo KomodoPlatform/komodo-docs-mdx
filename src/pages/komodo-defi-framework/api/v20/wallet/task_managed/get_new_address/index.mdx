@@ -10,7 +10,7 @@ import trezorpin from "@/public/images/docs/api-images/trezor_pin.png";
 A hierarchical-deterministic (HD) wallet generates a new key pair from a master key pair, allowing for multiple addresses to be generated from the same seed so that change from transactions go to a previously unused address, enhancing privacy and security.
 The hierarchical structure resembles that of a tree, with the master key “determining” the key pairs that follow it in the hierarchy. If you are running KDF in HD mode, and don't already have too many unused addresses, you can use the `get_new_address` method to generate a new address. The generated address will be shown in the task::account\_balance RPCs and at the next coin activation.
 
-#### Arguments
+#### Request Arguments
 
 | Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                                 |
 | ----------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -19,7 +19,7 @@ The hierarchical structure resembles that of a tree, with the master key “dete
 | chain       | string  | `Internal`, or `External`. Defaults to `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
 | gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided                                                                                                                                                                                       |
 
-#### Response
+#### Response Parameters
 
 | Parameter    | Type   | Description                                                                                                |
 | ------------ | ------ | ---------------------------------------------------------------------------------------------------------- |
@@ -73,7 +73,7 @@ Use the `task::get_new_address::status` method to check the status of a HD addre
 | task\_id             | integer | The identifying number returned when initiating the task.                                 |
 | forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
 
-#### Response
+#### Response Parameters
 
 | Parameter | Type             | Description                                                                                                                 |
 | --------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -119,7 +119,7 @@ Use the `task::get_new_address::status` method to check the status of a HD addre
 
 If the `task::get_new_address::status` returns `UserActionRequired`, we need to use the `task::get_new_address::user_action` method to enter our PIN
 
-#### Arguments
+#### Request Arguments
 
 | Parameter                 | Type            | Description                                                                                                                                                                                      |
 | ------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -130,7 +130,7 @@ If the `task::get_new_address::status` returns `UserActionRequired`, we need to 
 
 <OptimizedImage src={trezorpin} classNaming="w-full" alt="Trezor Pin" />
 
-#### Response
+#### Response Parameters
 
 | Parameter | Type   | Description                 |
 | --------- | ------ | --------------------------- |
@@ -169,13 +169,13 @@ If the `task::get_new_address::status` returns `UserActionRequired`, we need to 
 
 If you want to cancel the enabling process before it has completed, you can use this method.
 
-#### Arguments
+#### Request Arguments
 
 | Parameter | Type    | Description                                                           |
 | --------- | ------- | --------------------------------------------------------------------- |
 | task\_id  | integer | The identifying number returned when initiating the enabling process. |
 
-#### Response
+#### Response Parameters
 
 | Parameter    | Type   | Description                                                    |
 | ------------ | ------ | -------------------------------------------------------------- |

@@ -57,10 +57,10 @@ The `FractionalValue` object includes a [numerator and denominator](https://www.
 
 For requests which return many results, pagination offsets may be applied. \*\* Use either value, not both. \*\*
 
-| Parameter  | Type    | Description                                             |
-| ---------- | ------- | ------------------------------------------------------- |
-| PageNumber | integer | Optional, defaults to `1`. Offset for paginated results |
-| FromId     | integer | Optional. Ignores any results prior to this UUID        |
+| Parameter  | Type    | Required | Default | Description                                             |
+| ---------- | ------- | :------: | :-----: | ------------------------------------------------------- |
+| PageNumber | integer |    ✗     |   `1`   | Optional, defaults to `1`. Offset for paginated results |
+| FromId     | integer |    ✗     |    -    | Optional. Ignores any results prior to this UUID        |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   #### Example
@@ -101,10 +101,10 @@ The `numerator` and `denominator` are BigInteger numbers represented as a sign a
 
 You can optionally apply more detailed configuration to event streaming methods.
 
-| Parameter                 | Type    | Description                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| stream\_interval\_seconds | float   | Interval in seconds between streaming event update requests. Defaults to `10` for [stream::balance::enable](/komodo-defi-framework/api/v20/streaming/balance_enable/) and `5` for [stream::network::enable](/komodo-defi-framework/api/v20/streaming/network_enable/)/[stream::heartbeat::enable](/komodo-defi-framework/api/v20/streaming/heartbeat_enable/) |
-| always\_send              | boolean | [stream::network::enable](/komodo-defi-framework/api/v20/streaming/network_enable/) only. Optional, defaults to `false`. If `true`, network data will always be sent every `stream_interval_seconds`, even when there is no change. If `false`, network data will be sent regardless.                                                                         |
+| Parameter                 | Type    | Required | Default | Description                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | ------- | :------: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| stream\_interval\_seconds | float   |    ✗     |  `10`/`5`   | Interval in seconds between streaming event update requests. Defaults to `10` for [stream::balance::enable](/komodo-defi-framework/api/v20/streaming/balance_enable/) and `5` for [stream::network::enable](/komodo-defi-framework/api/v20/streaming/network_enable/)/[stream::heartbeat::enable](/komodo-defi-framework/api/v20/streaming/heartbeat_enable/) |
+| always\_send              | boolean |    ✗     | `false` | [stream::network::enable](/komodo-defi-framework/api/v20/streaming/network_enable/) only. Optional, defaults to `false`. If `true`, network data will always be sent every `stream_interval_seconds`, even when there is no change. If `false`, network data will be sent regardless.                                                                         |
 
 <CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
   #### Example
@@ -117,10 +117,10 @@ You can optionally apply more detailed configuration to event streaming methods.
 
   ### StreamingFeeConfig
 
-  | Parameter       | Type   | Description                                                                                                                                                                                                                                                                                                                                                                                                                   |
-  | --------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-  | estimate\_every | float  | Optional, defaults to `15`. Interval in seconds between fee estimate updates.                                                                                                                                                                                                                                                                                                                                                 |
-  | estimate\_type  | string | Optional, defaults to `Simple`. If set to `Provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/) Used in [get\_eth\_estimated\_fee\_per\_gas](/komodo-defi-framework/api/v20/streaming/fee_estimator/) only. |
+  | Parameter       | Type   | Required | Default  | Description                                                                                                                                                                                                                                                                                                                                                                                                                   |
+  | --------------- | ------ | :------: | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | estimate\_every | float  |    ✗     |   `15`   | Optional, defaults to `15`. Interval in seconds between fee estimate updates.                                                                                                                                                                                                                                                                                                                                                 |
+  | estimate\_type  | string |    ✗     | `Simple` | Optional, defaults to `Simple`. If set to `Provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/) Used in [get\_eth\_estimated\_fee\_per\_gas](/komodo-defi-framework/api/v20/streaming/fee_estimator/) only. |
 
   #### Example (stream::fee\_estimator::enable)
 
@@ -136,10 +136,10 @@ You can optionally apply more detailed configuration to event streaming methods.
 
 The `EventStreamConfig` object defines which events will be streamed to the client:
 
-| Parameter                      | Type   | Description                                                |
-| ------------------------------ | ------ | ---------------------------------------------------------- |
-| access\_control\_allow\_origin | string | Defines CORS whitelist. Use "\*" to allow from any origin. |
-| worker\_path                   | string | WASM only. Path to a custom `worker.js` file.              |
+| Parameter                      | Type   | Required | Default | Description                                                |
+| ------------------------------ | ------ | :------: | :-----: | ---------------------------------------------------------- |
+| access\_control\_allow\_origin | string |    ✗     |    -    | Defines CORS whitelist. Use "\*" to allow from any origin. |
+| worker\_path                   | string |    ✗     |    -    | WASM only. Path to a custom `worker.js` file.              |
 
 Configurable events, and how to enable them, is detailed in the [streaming methods doc](/komodo-defi-framework/api/v20/streaming/)
 
@@ -207,15 +207,15 @@ The `CLIENT_ID` value used in the url must match the `client_id` value used when
 
 The 'FilterCriteria' object allows you to filter the results based on specific parameters.
 
-| Parameter       | Type   | Description                                    |
-| --------------- | ------ | ---------------------------------------------- |
-| status          | string | Status of the transactions (e.g., "completed") |
-| date\_from      | string | \`Start date in ISO 8601 format                |
-| date\_to        | string | End date in ISO 8601 format                    |
-| my\_coin        | string | Coin being used by you for the swap/trade.     |
-| other\_coin     | string | Coin you are trading against                   |
-| from\_timestamp | number | Start timestamp in UNIX format                 |
-| to\_timestamp   | number | End timestamp in UNIX format                   |
+| Parameter       | Type   | Required | Default | Description                                    |
+| --------------- | ------ | :------: | :-----: | ---------------------------------------------- |
+| status          | string |    ✗     |    -    | Status of the transactions (e.g., "completed") |
+| date\_from      | string |    ✗     |    -    | \`Start date in ISO 8601 format                |
+| date\_to        | string |    ✗     |    -    | End date in ISO 8601 format                    |
+| my\_coin        | string |    ✗     |    -    | Coin being used by you for the swap/trade.     |
+| other\_coin     | string |    ✗     |    -    | Coin you are trading against                   |
+| from\_timestamp | number |    ✗     |    -    | Start timestamp in UNIX format                 |
+| to\_timestamp   | number |    ✗     |    -    | End timestamp in UNIX format                   |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   #### Example
@@ -239,11 +239,11 @@ The 'FilterCriteria' object allows you to filter the results based on specific p
 
 The `PagingOptions` object includes options of page selection to consult when looking for recent swaps:
 
-| Parameter    | Type             | Description                                                                                                            |
-| ------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| from\_uuid   | string (or null) | Skips records until this UUID, excluding the record with this UUID. Convenient for infinite scrolling implementations. |
-| limit        | number           | Limits the number of returned swaps.                                                                                   |
-| page\_number | number           | Returns limit swaps from the selected page. This parameter is ignored if from\_uuid is set.                            |
+| Parameter    | Type             | Required | Default | Description                                                                                                            |
+| ------------ | ---------------- | :------: | :-----: | ---------------------------------------------------------------------------------------------------------------------- |
+| from\_uuid   | string (or null) |    ✗     | `null`  | Skips records until this UUID, excluding the record with this UUID. Convenient for infinite scrolling implementations. |
+| limit        | number           |    ✗     |    -    | Limits the number of returned swaps.                                                                                   |
+| page\_number | number           |    ✗     |    -    | Returns limit swaps from the selected page. This parameter is ignored if from\_uuid is set.                            |
 
 <CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
   #### Example
