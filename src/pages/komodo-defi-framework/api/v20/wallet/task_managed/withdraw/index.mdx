@@ -21,27 +21,27 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 
 ### Request Arguments
 
-| Parameter             | Type             | Description                                                                                                                                                                                                                                                                                                                      |
-| --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                  | string           | The name of the coin the user desires to withdraw                                                                                                                                                                                                                                                                                |
-| to                    | string           | Coins are withdrawn to this address                                                                                                                                                                                                                                                                                              |
-| amount                | string (numeric) | The amount the user desires to withdraw, ignored when `max=true`                                                                                                                                                                                                                                                                 |
-| memo                  | string           | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.                                                                                                                                                                                                                                          |
-| from                  | string           | Optional, used only for transactions using a hardware wallet. For more information, see the [Trezor Integration guide](/komodo-defi-framework/api/v20/utils/task_init_trezor/)                                                                                                                                                   |
-| from.derivation\_path | string           | Optional, HD wallets only. Follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID`                                                                                                                                                                                                                                      |
-| from.account\_id      | integer          | Optional, HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                                                                                                                                                                                                             |
-| from.chain            | string           | Optional, HD wallets only. `Internal`, or `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
-| from.address\_id      | integer          | Optional, HD wallets only. Check the output from coin activation to find the ID of an address with balance.                                                                                                                                                                                                                      |
-| max                   | bool             | Optional. Withdraw the maximum available amount. Defaults to `false`                                                                                                                                                                                                                                                             |
-| fee                   | object           | Optional. Used only to set a custom fee, otherwise fee value will be derived from a deamon's `estimatefee` (or similar) RPC method                                                                                                                                                                                               |
-| fee.type              | string           | Type of transaction fee; possible values: `UtxoFixed` or `UtxoPerKbyte`                                                                                                                                                                                                                                                          |
-| fee.amount            | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte)                                                                                                                                                                                        |
+| Parameter             | Type             | Required | Default | Description                                                                                                                                                                                                                                                                                                                      |
+| --------------------- | ---------------- | :------: | :-----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin                  | string           |    ✓     |   `-`   | The name of the coin the user desires to withdraw                                                                                                                                                                                                                                                                                |
+| to                    | string           |    ✓     |   `-`   | Coins are withdrawn to this address                                                                                                                                                                                                                                                                                              |
+| amount                | string (numeric) |    ✗     |   `-`   | The amount the user desires to withdraw, ignored when `max=true`                                                                                                                                                                                                                                                                 |
+| memo                  | string           |    ✗     |   `-`   | Used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.                                                                                                                                                                                                                          |
+| from                  | string           |    ✗     |   `-`   | Used only for transactions using a hardware wallet. For more information, see the [Trezor Integration guide](/komodo-defi-framework/api/v20/utils/task_init_trezor/)                                                                                   |
+| from.derivation\_path | string           |    ✗     |   `-`   | HD wallets only. Follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID`                                                                                                                                                                                                                                      |
+| from.account\_id      | integer          |    ✗     |   `-`   | HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                                                                                                                                                                                                             |
+| from.chain            | string           |    ✗     |   `-`   | HD wallets only. `Internal`, or `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
+| from.address\_id      | integer          |    ✗     |   `-`   | HD wallets only. Check the output from coin activation to find the ID of an address with balance.                                                                                                                                                                                                                      |
+| max                   | bool             |    ✗     | `false` | Withdraw the maximum available amount.                                                                                                                                                                                                                                             |
+| fee                   | object           |    ✗     |   `-`   | Used only to set a custom fee, otherwise fee value will be derived from a deamon's `estimatefee` (or similar) RPC method                                                                                                                                                                               |
+| fee.type              | string           |    ✗     |   `-`   | Type of transaction fee; possible values: `UtxoFixed` or `UtxoPerKbyte`                                                                                                                                                                                                                                                          |
+| fee.amount            | string (numeric) |    ✗     |   `-`   | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte)                                                                                                                                                                                        |
 
 ### Response Parameters
 
-| Parameter | Type    | Description                                               |
-| --------- | ------- | --------------------------------------------------------- |
-| task\_id  | integer | An identifying number which is used to query task status. |
+| Parameter | Type    | Required | Description                                               |
+| --------- | ------- | :------: | --------------------------------------------------------- |
+| task\_id  | integer |    ✓     | An identifying number which is used to query task status. |
 
 #### 📌 Examples
 
@@ -187,31 +187,31 @@ To get the status of your withdrawal transaction generation, use the `task::with
 
 ### Request Arguments
 
-| Parameter            | Type    | Description                                                                              |
-| -------------------- | ------- | ---------------------------------------------------------------------------------------- |
-| task\_id             | integer | The identifying number returned when initiating the initialisation process.              |
-| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true` |
+| Parameter            | Type    | Required | Default | Description                                                                              |
+| -------------------- | ------- | :------: | :-----: | ---------------------------------------------------------------------------------------- |
+| task\_id             | integer |    ✓     |   `-`   | The identifying number returned when initiating the initialisation process.              |
+| forget\_if\_finished | boolean |    ✗     | `true`  | If `false`, will return final response for completed tasks. |
 
 ### Response Parameters
 
-| Parameter                            | Type                       | Description                                                                                                                                                                                             |
-| ------------------------------------ | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| status                               | string                     | A short indication of how the withdrawal is progressing.                                                                                                                                                |
-| details                              | object                     | Depending on the state of withdrawal progress, this will contain different information as shown in the responses below.                                                                                 |
-| details.to                           | array of strings           | Coins are withdrawn to these addresses; this may contain the `my_address` address, where change from UTXO coins is sent.                                                                                |
-| details.from                         | array of strings           | Coins are withdrawn from this address; the array contains a single element, but transactions may be sent from several addresses (UTXO coins)                                                            |
-| details.my\_balance\_change          | string (numeric)           | the expected balance of change in `my_address` after the transaction broadcasts                                                                                                                         |
-| details.received\_by\_me             | string (numeric)           | the amount of coins received by `my_address` after the transaction broadcasts; the value may be above zero when the transaction requires that the Komodo DeFi Framework API send change to `my_address` |
-| details.spent\_by\_me                | string (numeric)           | the amount of coins spent by `my_address`; this value differ from the request amount, as the transaction fee is added here                                                                              |
-| details.total\_amount                | string (numeric)           | the total amount of coins transferred                                                                                                                                                                   |
-| details.fee\_details                 | object                     | the fee details of the generated transaction; `fee_details.type` is "Utxo" for Z coins. `fee_details.coin` will be the same as `details.coin`, and `fee_details.amount` will be a numeric value.        |
-| details.tx\_hash                     | string                     | the hash of the generated transaction                                                                                                                                                                   |
-| details.tx\_hex                      | string                     | transaction bytes in hexadecimal format; use this value as input for the [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/)                                              |
-| details.coin                         | string                     | the name of the coin the user wants to withdraw                                                                                                                                                         |
-| details.transaction\_type            | string                     | Transaction type will be `StandardTransfer` for Z coin transactions.                                                                                                                                    |
-| details.kmd\_rewards                 | object (optional)          | If supported (e.g. when withdrawing `KMD`), an object containing information about accrued rewards.                                                                                                     |
-| details.kmd\_rewards.amount          | string (numeric, optional) | The amount of accrued rewards                                                                                                                                                                           |
-| details.kmd\_rewards.claimed\_by\_me | bool (optional)            | Whether or not the rewards been claimed by me.                                                                                                                                                          |
+| Parameter                            | Type                       | Required | Description                                                                                                                                                                                             |
+| ------------------------------------ | -------------------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| status                               | string                     |    ✓     | A short indication of how the withdrawal is progressing.                                                                                                                                                |
+| details                              | object                     |    ✓     | Depending on the state of withdrawal progress, this will contain different information as shown in the responses below.                                                                                 |
+| details.to                           | array of strings           |    ✓     | Coins are withdrawn to these addresses; this may contain the `my_address` address, where change from UTXO coins is sent.                                                                                |
+| details.from                         | array of strings           |    ✓     | Coins are withdrawn from this address; the array contains a single element, but transactions may be sent from several addresses (UTXO coins)                                                            |
+| details.my\_balance\_change          | string (numeric)           |    ✓     | the expected balance of change in `my_address` after the transaction broadcasts                                                                                                                         |
+| details.received\_by\_me             | string (numeric)           |    ✓     | the amount of coins received by `my_address` after the transaction broadcasts; the value may be above zero when the transaction requires that the Komodo DeFi Framework API send change to `my_address` |
+| details.spent\_by\_me                | string (numeric)           |    ✓     | the amount of coins spent by `my_address`; this value differ from the request amount, as the transaction fee is added here                                                                              |
+| details.total\_amount                | string (numeric)           |    ✓     | the total amount of coins transferred                                                                                                                                                                   |
+| details.fee\_details                 | object                     |    ✓     | the fee details of the generated transaction; `fee_details.type` is "Utxo" for Z coins. `fee_details.coin` will be the same as `details.coin`, and `fee_details.amount` will be a numeric value.        |
+| details.tx\_hash                     | string                     |    ✓     | the hash of the generated transaction                                                                                                                                                                   |
+| details.tx\_hex                      | string                     |    ✓     | transaction bytes in hexadecimal format; use this value as input for the [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/)                                              |
+| details.coin                         | string                     |    ✓     | the name of the coin the user wants to withdraw                                                                                                                                                         |
+| details.transaction\_type            | string                     |    ✓     | Transaction type will be `StandardTransfer` for Z coin transactions.                                                                                                                                    |
+| details.kmd\_rewards                 | object                     |    ✗     | If supported (e.g. when withdrawing `KMD`), an object containing information about accrued rewards.                                                                                                     |
+| details.kmd\_rewards.amount          | string (numeric)           |    ✗     | The amount of accrued rewards                                                                                                                                                                           |
+| details.kmd\_rewards.claimed\_by\_me | bool                       |    ✗     | Whether or not the rewards been claimed by me.                                                                                                                                                          |
 
 #### 📌 Examples
 
@@ -357,20 +357,20 @@ Use the `task::withdraw::cancel` method to cancel the withdrawal preparation tas
 
 ### Request Arguments
 
-| Parameter | Type    | Description                                                           |
-| --------- | ------- | --------------------------------------------------------------------- |
-| task\_id  | integer | The identifying number returned when initiating the withdraw process. |
+| Parameter | Type    | Required | Description                                                           |
+| --------- | ------- | :------: | --------------------------------------------------------------------- |
+| task\_id  | integer |    ✓     | The identifying number returned when initiating the withdraw process. |
 
 ### Response Parameters
 
-| Parameter    | Type   | Description                                                    |
-| ------------ | ------ | -------------------------------------------------------------- |
-| result       | string | Indicates task cancellation was succesful.                     |
-| error        | string | An error message to explain what went wrong.                   |
-| error\_path  | string | An indicator of the class or function which reurned the error. |
-| error\_trace | string | An indicator of where in the source code the error was thrown. |
-| error\_type  | string | An enumerated value for the returned error.                    |
-| error\_data  | string | The input task ID which resulted in the error.                 |
+| Parameter    | Type   | Required | Description                                                    |
+| ------------ | ------ | :------: | -------------------------------------------------------------- |
+| result       | string |    ✓     | Indicates task cancellation was succesful.                     |
+| error        | string |    ✗     | An error message to explain what went wrong.                   |
+| error\_path  | string |    ✗     | An indicator of the class or function which reurned the error. |
+| error\_trace | string |    ✗     | An indicator of where in the source code the error was thrown. |
+| error\_type  | string |    ✗     | An enumerated value for the returned error.                    |
+| error\_data  | string |    ✗     | The input task ID which resulted in the error.                 |
 
 #### 📌 Examples
 

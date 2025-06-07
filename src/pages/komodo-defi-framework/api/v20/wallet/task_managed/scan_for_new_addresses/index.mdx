@@ -7,17 +7,17 @@ export const description = "The methods in this document demonstrate how to scan
 
 ### Request Arguments
 
-| Parameter   | Type    | Description                                                                                                                           |
-| ----------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| coin        | string  | The ticker of the coin you want to scan addresses for                                                                                 |
-| account\_id | integer | Optional, HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                  |
-| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided |
+| Parameter   | Type    | Required | Default | Description                                                                                                                           |
+| ----------- | ------- | :------: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string  |    ✓     |   `-`   | The ticker of the coin you want to scan addresses for                                                                                 |
+| account\_id | integer |    ✗     |   `0`   | HD wallets only. Generally this will be `0` unless you have multiple accounts registered on your HD wallet                  |
+| gap\_limit  | integer |    ✗     |  `20`   | The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided |
 
 ### Response Parameters
 
-| Parameter | Type    | Description                                               |
-| --------- | ------- | --------------------------------------------------------- |
-| task\_id  | integer | An identifying number which is used to query task status. |
+| Parameter | Type    | Required | Description                                               |
+| --------- | ------- | :------: | --------------------------------------------------------- |
+| task\_id  | integer |    ✓     | An identifying number which is used to query task status. |
 
 #### 📌 Examples
 
@@ -58,17 +58,17 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
 
 ### Request Arguments
 
-| Parameter            | Type    | Description                                                                               |
-| -------------------- | ------- | ----------------------------------------------------------------------------------------- |
-| task\_id             | integer | The identifying number returned when initiating the task.                                 |
-| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
+| Parameter            | Type    | Required | Default | Description                                                                               |
+| -------------------- | ------- | :------: | :-----: | ----------------------------------------------------------------------------------------- |
+| task\_id             | integer |    ✓     |   `-`   | The identifying number returned when initiating the task.                                 |
+| forget\_if\_finished | boolean |    ✗     | `true`  | If `false`, will return final response for completed tasks. |
 
 ### Response Parameters
 
-| Parameter | Type             | Description                                                                                                                     |
-| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| status    | string           | Status of the task. `Ok`, `InProgress` or `Error`.                                                                              |
-| details   | string or object | Once complete, a standard [ScanAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#scan-addresses-info) object. |
+| Parameter | Type             | Required | Description                                                                                                                     |
+| --------- | ---------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------- |
+| status    | string           |    ✓     | Status of the task. `Ok`, `InProgress` or `Error`.                                                                              |
+| details   | string or object |    ✓     | Once complete, a standard [ScanAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#scan-addresses-info) object. |
 
 #### 📌 Examples
 

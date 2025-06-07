@@ -8,22 +8,22 @@ import trezorpin from "@/public/images/docs/api-images/trezor_pin.png";
 ## task::get\_new\_address::init  {{label : 'task::get_new_address::init', tag : 'API-v2'}}
 
 A hierarchical-deterministic (HD) wallet generates a new key pair from a master key pair, allowing for multiple addresses to be generated from the same seed so that change from transactions go to a previously unused address, enhancing privacy and security.
-The hierarchical structure resembles that of a tree, with the master key “determining” the key pairs that follow it in the hierarchy. If you are running KDF in HD mode, and don't already have too many unused addresses, you can use the `get_new_address` method to generate a new address. The generated address will be shown in the task::account\_balance RPCs and at the next coin activation.
+The hierarchical structure resembles that of a tree, with the master key "determining" the key pairs that follow it in the hierarchy. If you are running KDF in HD mode, and don't already have too many unused addresses, you can use the `get_new_address` method to generate a new address. The generated address will be shown in the task::account\_balance RPCs and at the next coin activation.
 
 ### Request Arguments
 
-| Parameter   | Type    | Description                                                                                                                                                                                                                                                                                                                 |
-| ----------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin        | string  | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                                                                    |
-| account\_id | integer | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                                                                      |
-| chain       | string  | `Internal`, or `External`. Defaults to `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
-| gap\_limit  | integer | Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided                                                                                                                                                                                       |
+| Parameter   | Type    | Required | Default    | Description                                                                                                                                                                                                                                                                                                                 |
+| ----------- | ------- | :------: | :--------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin        | string  |    ✓     |    `-`     | The ticker of the coin you want to get a new address for                                                                                                                                                                                                                                                                    |
+| account\_id | integer |    ✗     |    `0`     | Generally this will be `0` unless you have multiple accounts registered on your Trezor                                                                                                                                                                                                                                      |
+| chain       | string  |    ✗     | `External` | `Internal`, or `External`. External is used for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction. |
+| gap\_limit  | integer |    ✗     |    `20`    | The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided                                                                                                                                                                                       |
 
 ### Response Parameters
 
-| Parameter    | Type   | Description                                                                                                |
-| ------------ | ------ | ---------------------------------------------------------------------------------------------------------- |
-| new\_address | object | A standard [NewAddressInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) object. |
+| Parameter    | Type   | Required | Description                                                                                                |
+| ------------ | ------ | :------: | ---------------------------------------------------------------------------------------------------------- |
+| new\_address | object |    ✓     | A standard [NewAddressInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) object. |
 
 Some reasons you might not be able to get a new address are:
 
@@ -68,17 +68,17 @@ Some reasons you might not be able to get a new address are:
 
 Use the `task::get_new_address::status` method to check the status of a HD address creation task.
 
-| Parameter            | Type    | Description                                                                               |
-| -------------------- | ------- | ----------------------------------------------------------------------------------------- |
-| task\_id             | integer | The identifying number returned when initiating the task.                                 |
-| forget\_if\_finished | boolean | If `false`, will return final response for completed tasks. Optional, defaults to `true`. |
+| Parameter            | Type    | Required | Default | Description                                                                               |
+| -------------------- | ------- | :------: | :-----: | ----------------------------------------------------------------------------------------- |
+| task\_id             | integer |    ✓     |   `-`   | The identifying number returned when initiating the task.                                 |
+| forget\_if\_finished | boolean |    ✗     | `true`  | If `false`, will return final response for completed tasks. |
 
 ### Response Parameters
 
-| Parameter | Type             | Description                                                                                                                 |
-| --------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| status    | string           | Status of the task. `Ok`, `InProgress` or `Error`.                                                                          |
-| details   | string or object | Once complete, a standard [NewAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) object. |
+| Parameter | Type             | Required | Description                                                                                                                 |
+| --------- | ---------------- | :------: | --------------------------------------------------------------------------------------------------------------------------- |
+| status    | string           |    ✓     | Status of the task. `Ok`, `InProgress` or `Error`.                                                                          |
+| details   | string or object |    ✓     | Once complete, a standard [NewAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) object. |
 
 <CodeGroup title="task::get_new_address::status" tag="POST" label="task::get_new_address::status" mm2MethodDecorate="true">
   ```json
@@ -121,20 +121,20 @@ If the `task::get_new_address::status` returns `UserActionRequired`, we need to 
 
 ### Request Arguments
 
-| Parameter                 | Type            | Description                                                                                                                                                                                      |
-| ------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| task\_id                  | integer         | The identifying number returned when initiating the initialisation process.                                                                                                                      |
-| user\_action              | object          | Object containing the params below                                                                                                                                                               |
-| user\_action.action\_type | string          | Will be `TrezorPin` for this method                                                                                                                                                              |
-| user\_action.pin          | string (number) | When the Trezor device is displaying a grid of numbers for PIN entry, this param will contain your Trezor pin, as mapped through your keyboard numpad. See the image below for more information. |
+| Parameter                 | Type            | Required | Description                                                                                                                                                                                      |
+| ------------------------- | --------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| task\_id                  | integer         |    ✓     | The identifying number returned when initiating the initialisation process.                                                                                                                      |
+| user\_action              | object          |    ✓     | Object containing the params below                                                                                                                                                               |
+| user\_action.action\_type | string          |    ✓     | Will be `TrezorPin` for this method                                                                                                                                                              |
+| user\_action.pin          | string (number) |    ✓     | When the Trezor device is displaying a grid of numbers for PIN entry, this param will contain your Trezor pin, as mapped through your keyboard numpad. See the image below for more information. |
 
 <OptimizedImage src={trezorpin} classNaming="w-full" alt="Trezor Pin" />
 
 ### Response Parameters
 
-| Parameter | Type   | Description                 |
-| --------- | ------ | --------------------------- |
-| result    | string | The outcome of the request. |
+| Parameter | Type   | Required | Description                 |
+| --------- | ------ | :------: | --------------------------- |
+| result    | string |    ✓     | The outcome of the request. |
 
 <CodeGroup title="task::get_new_address::user_action" tag="POST" label="task::get_new_address::user_action" mm2MethodDecorate="true">
   ```json
@@ -171,20 +171,20 @@ If you want to cancel the enabling process before it has completed, you can use 
 
 ### Request Arguments
 
-| Parameter | Type    | Description                                                           |
-| --------- | ------- | --------------------------------------------------------------------- |
-| task\_id  | integer | The identifying number returned when initiating the enabling process. |
+| Parameter | Type    | Required | Description                                                           |
+| --------- | ------- | :------: | --------------------------------------------------------------------- |
+| task\_id  | integer |    ✓     | The identifying number returned when initiating the enabling process. |
 
 ### Response Parameters
 
-| Parameter    | Type   | Description                                                    |
-| ------------ | ------ | -------------------------------------------------------------- |
-| result       | string | Indicates task cancellation was succesful.                     |
-| error        | string | An error message to explain what went wrong.                   |
-| error\_path  | string | An indicator of the class or function which reurned the error. |
-| error\_trace | string | An indicator of where in the source code the error was thrown. |
-| error\_type  | string | An enumerated value for the returned error.                    |
-| error\_data  | string | The input task ID which resulted in the error.                 |
+| Parameter    | Type   | Required | Description                                                    |
+| ------------ | ------ | :------: | -------------------------------------------------------------- |
+| result       | string |    ✓     | Indicates task cancellation was succesful.                     |
+| error        | string |    ✗     | An error message to explain what went wrong.                   |
+| error\_path  | string |    ✗     | An indicator of the class or function which reurned the error. |
+| error\_trace | string |    ✗     | An indicator of where in the source code the error was thrown. |
+| error\_type  | string |    ✗     | An enumerated value for the returned error.                    |
+| error\_data  | string |    ✗     | The input task ID which resulted in the error.                 |
 
 <CodeGroup title="task::get_new_address::cancel" tag="POST" label="task::get_new_address::cancel" mm2MethodDecorate="true">
   ```json
