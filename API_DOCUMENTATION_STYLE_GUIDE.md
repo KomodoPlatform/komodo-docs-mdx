@@ -35,6 +35,34 @@ All Request Arguments tables must follow this format:
 4. **Default** - Default value or `-` for no default
 5. **Description** - Clear description with enum references where applicable
 
+## Parameter Naming Rules
+
+### Avoid Dot Notation
+
+**Never use dot notation** in parameter names. Instead, delegate to common structure objects:
+
+❌ **Incorrect:**
+```markdown
+| protocol.type                             | string  | ✓ | - | Token type |
+| protocol.protocol\_data                   | object  | ✓ | - | Protocol data |
+| protocol.protocol\_data.platform          | string  | ✓ | - | Platform name |
+| activation\_params.required\_confirmations | integer | ✗ | - | Confirmations |
+```
+
+✅ **Correct:**
+```markdown
+| protocol          | object | ✓ | - | A standard [TokenProtocol](/komodo-defi-framework/api/common_structures/#token-protocol) object |
+| activation\_params | object | ✗ | - | A standard [TokenActivationParams](/komodo-defi-framework/api/common_structures/#token-activation-params) object |
+```
+
+### Benefits of Common Structure Objects
+
+- **Eliminates dot notation** in parameter names
+- **Promotes reusability** across multiple methods  
+- **Improves maintainability** - changes apply everywhere
+- **Better OpenAPI compatibility** - clear object references
+- **Enhanced documentation consistency** - standardized structure definitions
+
 ### Optional Default Column Rules
 
 - **Include Default column** when parameters have actual default values
