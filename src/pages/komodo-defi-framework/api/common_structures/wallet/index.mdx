@@ -646,12 +646,39 @@ The specified `fee` is not valid.
 }
 ```
 
-<CollapsibleSection expandedText="Hide EIP1559 Example" collapsedText="Show EIP1559 Example">
+### AccruedRewards
+
+Used in [kmd_rewards_info](/komodo-defi-framework/api/legacy/kmd_rewards_info/) responses to represent either accrued reward amounts or the reason why rewards were not accrued.
+
+This is a union type that can have one of two structures:
+
+#### Accrued Variant
+
+| Structure | Type             | Description                   |
+| --------- | ---------------- | ----------------------------- |
+| Accrued   | string (numeric) | the amount of accrued rewards |
+
+#### NotAccruedReason Variant
+
+| Structure        | Type   | Description                            |
+| ---------------- | ------ | -------------------------------------- |
+| NotAccruedReason | string | the reason why rewards are not accrued |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  Example with accrued rewards:
   ```json
   {
-      "tx_type": "Eip1559",
-      "max_fee_per_gas": "1234.567",
-      "max_priority_fee_per_gas": "1.2"
+    "accrued_rewards": {
+      "Accrued": "0.00450984"
+    }
   }
   ```
-</CollapsibleSection>
+
+  Example with reason for no rewards:
+  ```json
+  {
+    "accrued_rewards": {
+      "NotAccruedReason": "UtxoAmountLessThanTen"
+    }
+  }
+  ```
