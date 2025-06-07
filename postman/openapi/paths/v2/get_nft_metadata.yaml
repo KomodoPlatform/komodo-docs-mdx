@@ -1,83 +1,214 @@
-openapi: 3.0.3
-info:
-  title: Get NFT Metadata
-  description: Get metadata for a specific NFT.
-  version: 1.0.0
-paths:
-  /get_nft_metadata:
-    post:
-      operationId: "get_nft_metadata"
-      summary: Get NFT metadata
-      tags:
-        - NonFungibleTokens
-      requestBody:
-        required: true
+/get_nft_metadata:
+  post:
+    operationId: get_nft_metadata
+    summary: Get NFT Metadata
+    description: |
+      Returns metadata for a specific NFT from the user's wallet.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/get_nft_metadata/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["get_nft_metadata"]
+                description: The method name
+                example: "get_nft_metadata"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - chain
+                  - token_address
+                  - token_id
+                properties:
+                  chain:
+                    type: string
+                    enum: ["AVALANCHE", "BSC", "ETH", "FANTOM", "POLYGON"]
+                    description: The token chain
+                    example: "BSC"
+                  token_address:
+                    type: string
+                    description: The token address
+                    example: "0xfd913a305d70a60aac4faac70c739563738e1f81"
+                  token_id:
+                    type: string
+                    description: Token ID
+                    example: "214300044414"
+                  protect_from_spam:
+                    type: boolean
+                    description: Optional, defaults to false. If true, any potential spam link found in collection name, token name, symbol will be replaced with 'URL redacted for user protection'
+                    default: false
+                    example: false
+    responses:
+      '200':
+        description: NFT metadata retrieved successfully
         content:
           application/json:
             schema:
               type: object
-              required:
-                - chain
-                - token_address
-                - token_id
               properties:
-                chain:
+                mmrpc:
                   type: string
-                  description: The token chain.
-                token_address:
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    amount:
+                      type: string
+                      description: The amount of this NFT the user owns (used by ERC1155)
+                      example: "1"
+                    block_number_minted:
+                      type: integer
+                      description: The block height when the NFT was minted. May be null
+                      example: 19645247
+                    block_number:
+                      type: integer
+                      description: The block height when the amount or owner changed
+                      example: 45776404
+                    chain:
+                      type: string
+                      enum: ["AVALANCHE", "BSC", "ETH", "FANTOM", "POLYGON"]
+                      description: Chain name
+                      example: "POLYGON"
+                    name:
+                      type: string
+                      description: May be null. An NFT collection name
+                      example: "OpenSea Collections"
+                    contract_type:
+                      type: string
+                      enum: ["ERC721", "ERC1155"]
+                      description: The type of NFT contract standard
+                      example: "ERC1155"
+                    last_token_uri_sync:
+                      type: string
+                      description: When the token_uri was last updated
+                      example: "2023-09-01T04:04:30.867Z"
+                    last_metadata_sync:
+                      type: string
+                      description: When the metadata was last updated
+                      example: "2023-09-01T04:35:01.128Z"
+                    metadata:
+                      type: string
+                      description: The metadata of the token. May be null
+                      example: '{"image":"https://i.seadn.io/gae/nY8wjVVQqDZBl-Bk3h9kwSqR1bXt16x_tESRAQmctEb0SCFCPtvtSsBtp98TFiUzP-LpMGt_kiqHDDOfkgbxOuWxkdH4aBNkmzrjZM0?w=500&amp;auto=format","name":"Doge Napoleon","description":null,"external_link":null,"animation_url":"https://openseauserdata.com/files/df71203f48e54d027bb2c47b2840cacb.mp4","traits":[]}'
+                    minter_address:
+                      type: string
+                      description: Minter address. May be null
+                      example: "ERC1155 tokens don't have a single minter"
+                    owner_of:
+                      type: string
+                      description: The wallet address of the owner of the NFT
+                      example: "0xab95d01bc8214e4d993043e8ca1b68db2c946498"
+                    possible_spam:
+                      type: boolean
+                      description: If true, the contract address has been identified as associated with spam or suspicious activities
+                      example: true
+                    possible_phishing:
+                      type: boolean
+                      description: If true, the token has been identified as associated with phishing, as at least one of domain fields is found in database with phishing domains
+                      example: false
+                    symbol:
+                      type: string
+                      description: May be null. The symbol of the NFT contract
+                      example: "OPENSTORE"
+                    token_address:
+                      type: string
+                      description: The address of the NFT contract
+                      example: "0x2953399124f0cbb46d2cbacd8a89cf0599974963"
+                    token_id:
+                      type: string
+                      description: The token ID of the NFT
+                      example: "110473361632261669912565539602449606788298723469812631769659886404530570536720"
+                    token_hash:
+                      type: string
+                      description: The token hash. May be null
+                      example: "af811b641bccbdc10c444ba4f3a2ffb5"
+                    token_uri:
+                      type: string
+                      description: The URI to the metadata of the token. May be null
+                      example: "https://api.opensea.io/api/v2/metadata/matic/0x2953399124F0cBB46d2CbACD8A89cF0599974963/0xf43db4f488f644b73a9442de4978fb7572b73d85000000000000110000002710"
+                    token_domain:
+                      type: string
+                      description: Token domain. May be null
+                      example: "api.opensea.io"
+                    uri_meta:
+                      $ref: ../../components/schemas/NFTs.yaml#/NftMetadata
+                      description: A standard NftMetadata object
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
                   type: string
-                  description: The token address.
-                token_id:
+                  example: "2.0"
+                error:
                   type: string
-                  description: Token ID.
-                protect_from_spam:
-                  type: boolean
-                  description: Redact spam links in NFT data.
-      responses:
-        '200':
-          description: NFT metadata
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  amount:
-                    type: string
-                  block_number_minted:
-                    type: integer
-                  block_number:
-                    type: integer
-                  chain:
-                    type: string
-                  name:
-                    type: string
-                  contract_type:
-                    type: string
-                  last_token_uri_sync:
-                    type: string
-                  last_metadata_sync:
-                    type: string
-                  metadata:
-                    type: string
-                  minter_address:
-                    type: string
-                  owner_of:
-                    type: string
-                  possible_spam:
-                    type: boolean
-                  possible_phishing:
-                    type: boolean
-                  symbol:
-                    type: string
-                  token_address:
-                    type: string
-                  token_id:
-                    type: string
-                  token_hash:
-                    type: string
-                  token_uri:
-                    type: string
-                  token_domain:
-                    type: string
-                  uri_meta:
-                    $ref: '../components/schemas/NftMetadata.yaml' 
+                  description: Error message describing what went wrong
+                  example: "Token: token_address 0xfd913a305d70a60aac4faac70c739563738e1f81, token_id 214300044414 was not found in wallet"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  example: "nft"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  example: "nft:123]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "TokenNotFoundInWallet"
+                error_data:
+                  type: object
+                  description: Additional error data
+                  properties:
+                    token_address:
+                      type: string
+                      example: "0xfd913a305d70a60aac4faac70c739563738e1f81"
+                    token_id:
+                      type: string
+                      example: "214300044414"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

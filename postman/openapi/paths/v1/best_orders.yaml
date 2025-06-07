@@ -1,0 +1,76 @@
+# OpenAPI path spec for best_orders (v1)
+/api/v1/best_orders:
+  post:
+    operationId: best_orders
+    summary: Komodo DeFi Framework Method: Best Orders
+    description: The best_orders method returns the best price orders that can fill the volume for all existing pairs with selected coin. The response of this method can contain coins that are not activated on the Komodo DeFi Framework API instance. Activation will be required to proceed with the trade.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/best_orders/index.mdx
+    parameters:
+      - name: coin
+        in: query
+        description: The ticker of the coin to get best orders
+        required: true
+        schema:
+          type: string
+      - name: action
+        in: query
+        description: Whether to buy or sell the selected coin
+        required: true
+        schema:
+          type: string
+          enum: [buy, sell]
+      - name: volume
+        in: query
+        description: The amount of coin user is willing to buy or sell
+        required: true
+        schema:
+          type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password
+              method:
+                type: string
+                enum: [best_orders]
+                description: Method name
+              coin:
+                type: string
+                description: The ticker of the coin to get best orders
+              action:
+                type: string
+                enum: [buy, sell]
+                description: Whether to buy or sell the selected coin
+              volume:
+                type: string
+                description: The amount of coin user is willing to buy or sell
+            required:
+              - userpass
+              - method
+              - coin
+              - action
+              - volume
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  additionalProperties:
+                    $ref: ../../components/schemas/OrderDataV1.yaml
+                  description: A map of standard OrderDataV1 objects (by ticker)
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Review if all parameter and response details are complete and correct. 

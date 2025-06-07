@@ -1,73 +1,170 @@
-openapi: 3.0.3
-info:
-  title: Enable BCH with Tokens
-  description: Enable BCH/tBCH along with multiple SLP tokens in a single command.
-  version: 1.0.0
-paths:
-  /enable_bch_with_tokens:
-    post:
-      summary: Enable BCH with SLP tokens
-      operationId: "enable_bch_with_tokens"
-      tags:
-        - Coin Activation
-      requestBody:
-        required: true
+/enable_bch_with_tokens:
+  post:
+    operationId: enable_bch_with_tokens
+    summary: Enable BCH with SLP Tokens
+    description: |
+      Enable BCH/tBCH along with multiple SLP tokens in a single command.
+      The Komodo DeFi Framework supports Bitcoin Cash SLP tokens.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/enable_bch_with_tokens/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["enable_bch_with_tokens"]
+                description: The method name
+                example: "enable_bch_with_tokens"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
+                type: object
+                required:
+                  - ticker
+                  - bchd_urls
+                  - mode
+                  - slp_tokens_requests
+                properties:
+                  ticker:
+                    type: string
+                    enum: ["BCH", "tBCH"]
+                    description: Ticker of the platform protocol coin
+                    example: "BCH"
+                  bchd_urls:
+                    type: array
+                    items:
+                      type: string
+                    description: A list of BCHD gRPC API server URLs, used for validation of SLP token transactions
+                    example: ["https://bchd.dragonhound.info"]
+                  mode:
+                    $ref: ../../components/schemas/Activation.yaml#/ActivationMode
+                    description: A standard ActivationMode object
+                  slp_tokens_requests:
+                    type: array
+                    items:
+                      $ref: ../../components/schemas/Activation.yaml#/TokensRequest
+                    description: A list of standard TokensRequest objects
+                  tx_history:
+                    type: boolean
+                    description: If true, spawns a background loop to store the local cache of address(es) transactions. Defaults to false
+                    default: false
+                    example: true
+                  address_format:
+                    $ref: ../../components/schemas/Activation.yaml#/AddressFormat
+                    description: Optional. Overwrites the address format from coins file, if set. A standard AddressFormat object
+                  allow_slp_unsafe_conf:
+                    type: boolean
+                    description: Optional, defaults to false. If true, allows bchd_urls to be empty. Warning - it is highly unsafe to do so as it may lead to invalid SLP transactions generation and tokens burning
+                    default: false
+                    example: false
+                  get_balances:
+                    type: boolean
+                    description: Optional, defaults to true. If false, coin and token balances will not be returned in the response, and the response will be returned more quickly
+                    default: true
+                    example: true
+                  required_confirmations:
+                    type: integer
+                    description: Optional, defaults to value in the coins file, or 3 if not set. Confirmations to wait for steps in swap
+                    example: 5
+                  requires_notarization:
+                    type: boolean
+                    description: Optional, defaults to true. Has no effect on BCH
+                    default: true
+                    example: false
+                  utxo_merge_params:
+                    $ref: ../../components/schemas/Activation.yaml#/UtxoMergeParams
+                    description: A standard UtxoMergeParams object. Used to reduce a wallet's UTXO count in cases where it is causing significantly slower RPC responses
+    responses:
+      '200':
+        description: BCH with tokens enabled successfully
         content:
           application/json:
             schema:
               type: object
               properties:
-                userpass:
-                  type: string
-                method:
-                  type: string
-                  enum: [enable_bch_with_tokens]
                 mmrpc:
                   type: string
-                params:
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
                   type: object
                   properties:
-                    ticker:
-                      type: string
-                    bchd_urls:
-                      type: array
-                      items:
-                        type: string
-                    mode:
-                      type: object
-                    tx_history:
-                      type: boolean
-                    slp_tokens_requests:
-                      type: array
-                      items:
-                        type: object
-                    address_format:
-                      type: object
-                    allow_slp_unsafe_conf:
-                      type: boolean
-                    get_balances:
-                      type: boolean
-                    required_confirmations:
+                    current_block:
                       type: integer
-                    requires_notarization:
-                      type: boolean
-                    utxo_merge_params:
+                      description: Block height of the coin being activated
+                      example: 1480481
+                    bch_addresses_infos:
                       type: object
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  mmrpc:
-                    type: string
-                  result:
-                    type: object
-                  id:
-                    type: string
-        '400':
-          description: Bad request
-        '500':
-          description: Internal server error 
+                      description: A standard AddressInfo object. Note - the structure may vary based on the value of the get_balances parameter
+                      additionalProperties:
+                        $ref: ../../components/schemas/Activation.yaml#/AddressInfo
+                    slp_addresses_infos:
+                      type: object
+                      description: A standard AddressInfo object. Note - the structure may vary based on the value of the get_balances parameter
+                      additionalProperties:
+                        $ref: ../../components/schemas/Activation.yaml#/AddressInfo
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

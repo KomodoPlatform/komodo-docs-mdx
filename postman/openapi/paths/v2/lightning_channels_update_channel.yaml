@@ -1,32 +1,127 @@
-post:
-  operationId: "lightning_channels_update_channel"
-  tags:
-    - Lightning Channels
-  summary: Update Lightning channel options
-  description: Updates channel options for a given channel.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            coin:
-              type: string
-              description: The ticker of the coin
-            uuid:
-              type: string
-              description: Unique channel identifier
-            channel_options:
-              type: object
-              description: Channel options object
-  responses:
-    '200':
-      description: Channel updated
+/lightning_channels_update_channel:
+  post:
+    operationId: lightning::channels::update_channel
+    summary: Update Channel
+    description: |
+      Updates channel options for a Lightning Network channel.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/channels/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
-              channel_options:
-                type: object 
+              method:
+                type: string
+                enum: ["lightning::channels::update_channel"]
+                description: The method name
+                example: "lightning::channels::update_channel"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 2
+              params:
+                type: object
+                required:
+                  - coin
+                  - uuid
+                  - channel_options
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin you would like to update channel configuration options for
+                    example: "tBTC-lightning"
+                  uuid:
+                    type: string
+                    description: Unique channel identifier
+                    example: "434681f8-95e5-484f-af49-fa80d8ae857b"
+                  channel_options:
+                    $ref: ../../components/schemas/Lightning.yaml#/LightningChannelOptions
+                    description: A standard LightningChannelOptions object
+    responses:
+      '200':
+        description: Channel updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    channel_options:
+                      $ref: ../../components/schemas/Lightning.yaml#/LightningChannelOptions
+                      description: Updated channel options
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 2
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "No such channel with uuid dc33b998-8589-44fd-a246-256a582e8942"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "update_channel"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "update_channel:61]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "NoSuchChannel"
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

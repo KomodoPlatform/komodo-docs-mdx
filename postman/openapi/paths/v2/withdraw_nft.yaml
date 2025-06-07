@@ -1,68 +1,174 @@
-openapi: 3.0.3
-info:
-  title: Withdraw NFT
-  description: Withdraw NFTs (ERC721 or ERC1155) from your wallet.
-  version: 1.0.0
-paths:
-  /withdraw_nft:
-    post:
-      operationId: "withdraw_nft"
-      summary: Withdraw NFT (ERC721 or ERC1155)
-      tags:
-        - NonFungibleTokens
-      requestBody:
-        required: true
+/withdraw_nft:
+  post:
+    operationId: withdraw_nft
+    summary: Withdraw NFTs
+    description: |
+      The withdraw_nft method will return signed raw transaction hex which must be broadcast using the send_raw_transaction method to complete the withdrawal.
+      
+      Note: To withdraw NFTs, you must activate the coin which holds the NFTs first.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/withdraw_nft/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["withdraw_nft"]
+                description: The method name
+                example: "withdraw_nft"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - type
+                  - withdraw_data
+                properties:
+                  type:
+                    type: string
+                    enum: ["withdraw_erc721", "withdraw_erc1155"]
+                    description: The contract type of the NFT to withdraw
+                    example: "withdraw_erc721"
+                  withdraw_data:
+                    $ref: ../../components/schemas/NFTs.yaml#/WithdrawNftData
+                    description: A standard WithdrawNftData object
+    responses:
+      '200':
+        description: NFT withdrawal transaction created successfully
         content:
           application/json:
             schema:
               type: object
-              required:
-                - type
-                - withdraw_data
               properties:
-                type:
+                mmrpc:
                   type: string
-                  enum: [withdraw_erc721, withdraw_erc1155]
-                  description: The contract type of the NFT to withdraw.
-                withdraw_data:
-                  $ref: '../components/schemas/WithdrawNftData.yaml'
-      responses:
-        '200':
-          description: Successful withdrawal
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  amount:
-                    type: string
-                  tx_hex:
-                    type: string
-                  tx_hash:
-                    type: string
-                  from:
-                    type: array
-                    items:
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    amount:
                       type: string
-                  to:
-                    type: array
-                    items:
+                      description: Amount of tokens to withdraw
+                      example: "1"
+                    tx_hex:
                       type: string
-                  contract_type:
-                    type: string
-                  token_address:
-                    type: string
-                  token_id:
-                    type: string
-                  fee_details:
-                    $ref: '../components/schemas/WithdrawFee.yaml'
-                  coin:
-                    type: string
-                  block_height:
-                    type: integer
-                  timestamp:
-                    type: integer
-                  internal_id:
-                    type: integer
-                  transaction_type:
-                    type: string 
+                      description: Raw hex of signed transaction. Use this with the send_raw_transaction RPC to broadcast the transaction
+                      example: "f8cb2a8509818733db8289929473a5299824cd955af6377b56f5762dc3ca4cc07880b86442842e0e000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c946498000000000000000000000000ab95d01bc8214e4d993043e8ca1b68db2c9464980000000000000000000000000000000000000000000000000000000000000001820136a0564b5c9c8309a3f8f6cc007ca957e4c411259026d68c2c34419158aff4d3ebf8a007afaa0590da01a2ce36c7edb5380f41235168f3633ed459b1fc8a750fecd38d"
+                    tx_hash:
+                      type: string
+                      description: Transaction ID of the withdrawal
+                      example: "bb030f618702715eb39035dccd218355f78ae5379ff6d0691f0f3c0db3c03789"
+                    from:
+                      type: array
+                      items:
+                        type: string
+                      description: List of source addresses
+                      example: ["0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"]
+                    to:
+                      type: array
+                      items:
+                        type: string
+                      description: List of destination addresses
+                      example: ["0xaB95D01Bc8214E4D993043E8Ca1B68dB2c946498"]
+                    contract_type:
+                      type: string
+                      enum: ["ERC721", "ERC1155"]
+                      description: Contract type
+                      example: "ERC721"
+                    token_address:
+                      type: string
+                      description: Token address
+                      example: "0x73a5299824cd955af6377b56f5762dc3ca4cc078"
+                    token_id:
+                      type: string
+                      description: Token ID
+                      example: "1"
+                    fee_details:
+                      $ref: ../../components/schemas/Wallet.yaml#/WithdrawFee
+                      description: A standard WithdrawFee object
+                    coin:
+                      type: string
+                      enum: ["AVALANCHE", "BSC", "ETH", "FANTOM", "POLYGON"]
+                      description: Coin name
+                      example: "MATIC"
+                    block_height:
+                      type: integer
+                      description: Block height of the transaction. If the value is 0, the transaction is unconfirmed
+                      example: 0
+                    timestamp:
+                      type: integer
+                      description: Timestamp of the block containing the withdrawal transaction in unix epoch format
+                      example: 1700732198
+                    internal_id:
+                      type: integer
+                      description: Used for internal transaction identification, for some coins it may be equal to transaction hash
+                      example: 0
+                    transaction_type:
+                      type: string
+                      enum: ["NftTransfer"]
+                      description: This will always be NftTransfer
+                      example: "NftTransfer"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

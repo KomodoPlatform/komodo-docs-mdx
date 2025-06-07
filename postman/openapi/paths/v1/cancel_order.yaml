@@ -1,0 +1,46 @@
+# OpenAPI path spec for cancel_order (v1)
+/api/v1/cancel_order:
+  post:
+    operationId: cancel_order
+    summary: Komodo DeFi Framework Method: Cancel Order
+    description: The cancel_order cancels the active order created by the Komodo DeFi Framework API node.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/cancel_order/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [cancel_order]
+                description: Method name (must be 'cancel_order').
+              uuid:
+                type: string
+                description: The uuid of the order the user desires to cancel.
+            required:
+              - userpass
+              - method
+              - uuid
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: string
+                  description: Indicates the status of operation.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

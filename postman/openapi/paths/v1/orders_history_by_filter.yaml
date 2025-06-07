@@ -1,0 +1,117 @@
+# OpenAPI path spec for orders_history_by_filter (v1)
+/api/v1/orders_history_by_filter:
+  post:
+    operationId: orders_history_by_filter
+    summary: Komodo DeFi Framework Method: Orders History by Filter
+    description: The orders_history_by_filter method returns all orders whether active or inactive that match the selected filters.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/orders_history_by_filter/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [orders_history_by_filter]
+                description: Method name (must be 'orders_history_by_filter').
+              order_type:
+                type: string
+                description: Return only orders that match the order_type (Maker or Taker).
+              initial_action:
+                type: string
+                description: Return only orders that match the initial_action (Sell or Buy).
+              base:
+                type: string
+                description: Return only orders that match the order.base = base condition.
+              rel:
+                type: string
+                description: Return only orders that match the order.rel = rel condition.
+              from_price:
+                type: number
+                description: Return only orders with price >= from_price.
+              to_price:
+                type: number
+                description: Return only orders with price <= to_price.
+              from_volume:
+                type: number
+                description: Return only orders with volume >= from_volume.
+              to_volume:
+                type: number
+                description: Return only orders with volume <= to_volume.
+              from_timestamp:
+                type: integer
+                description: Return only orders with created_at >= from_timestamp.
+              to_timestamp:
+                type: number
+                description: Return only orders with created_at <= to_timestamp.
+              was_taker:
+                type: boolean
+                description: Return only GoodTillCancelled orders that got converted from taker to maker.
+              status:
+                type: string
+                description: Return only orders that match the status.
+              include_details:
+                type: boolean
+                description: Whether to include complete order details in response.
+            required:
+              - userpass
+              - method
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    orders:
+                      type: array
+                      items:
+                        # TODO: Use $ref to OrderSummaryData schema if/when available in components/schemas
+                        type: object
+                      description: Array of order summary data.
+                    details:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            description: Type of the order (Maker or Taker).
+                          order:
+                            # TODO: Use $ref to OrderDataV1 schema if/when available in components/schemas
+                            type: object
+                            description: Complete order details.
+                      description: Array of complete order details for every order that matches the selected filters.
+                    found_records:
+                      type: integer
+                      description: Number of returned orders.
+                    warnings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          uuid:
+                            type: string
+                            description: UUID of the order that produced this warning.
+                          warning:
+                            type: string
+                            description: Warning message.
+                      description: Array containing warnings objects.
+                  required:
+                    - orders
+                    - found_records
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error 

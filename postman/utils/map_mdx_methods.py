@@ -89,8 +89,12 @@ def main():
         json.dump(results, f, indent=2)
     print(f"Wrote {len(results)} entries to {OUTPUT_FILE}")
     method_pages = build_method_pages(results)
+    # Sort the keys in method_pages for both 'v1' and 'v2'
+    method_pages_sorted = {
+        v: dict(sorted(method_pages[v].items())) for v in method_pages
+    }
     with open(METHOD_PAGES_FILE, 'w') as f:
-        json.dump(method_pages, f, indent=2)
+        json.dump(method_pages_sorted, f, indent=2)
     print(f"Wrote method-to-page mapping to {METHOD_PAGES_FILE}")
 
 if __name__ == "__main__":

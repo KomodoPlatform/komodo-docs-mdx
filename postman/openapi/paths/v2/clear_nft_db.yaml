@@ -1,0 +1,120 @@
+/clear_nft_db:
+  post:
+    operationId: clear_nft_db
+    summary: Clear NFT Database
+    description: |
+      This method will clear the NFT database data stored in the local database for selected (or all) networks.
+      
+      You can confirm the NFT database has been cleared by querying the KOMODEFI.db database file.
+      For more information, refer to the Query NFT Database Tables documentation.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/clear_nft_db/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["clear_nft_db"]
+                description: The method name
+                example: "clear_nft_db"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                properties:
+                  clear_all:
+                    type: boolean
+                    description: Defaults to false. If true all NFT data for all networks will be purged
+                    default: false
+                    example: true
+                  chains:
+                    type: array
+                    items:
+                      type: string
+                      enum: ["POLYGON", "FANTOM", "ETH", "BSC", "AVALANCHE"]
+                    description: Optional. List of networks to remove NFT data for
+                    example: ["POLYGON", "BSC"]
+    responses:
+      '200':
+        description: NFT database cleared successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: "null"
+                  description: Returns null on success
+                  example: null
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "InvalidRequest"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  enum:
+                    - "UnsupportedChainType"
+                    - "Nothing to clear was specified"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer

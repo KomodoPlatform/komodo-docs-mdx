@@ -1,0 +1,124 @@
+# OpenAPI path spec for orderbook (v1)
+/api/v1/orderbook:
+  post:
+    operationId: orderbook
+    summary: Komodo DeFi Framework Method: Orderbook
+    description: The orderbook method requests from the network the currently available orders for the specified trading pair.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/orderbook/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [orderbook]
+                description: Method name (must be 'orderbook').
+              base:
+                type: string
+                description: Base currency of a pair.
+              rel:
+                type: string
+                description: Related currency (quote currency).
+            required:
+              - userpass
+              - method
+              - base
+              - rel
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                asks:
+                  type: array
+                  items:
+                    # TODO: Use $ref to OrderDataV1 schema if/when available in components/schemas
+                    type: object
+                  description: Outstanding asks.
+                bids:
+                  type: array
+                  items:
+                    # TODO: Use $ref to OrderDataV1 schema if/when available in components/schemas
+                    type: object
+                  description: Outstanding bids.
+                numasks:
+                  type: integer
+                  description: Number of outstanding asks.
+                numbids:
+                  type: integer
+                  description: Number of outstanding bids.
+                base:
+                  type: string
+                  description: The name of the coin the user desires to receive.
+                rel:
+                  type: string
+                  description: The name of the coin the user will trade.
+                timestamp:
+                  type: integer
+                  description: Timestamp of the orderbook request.
+                netid:
+                  type: integer
+                  description: Network id.
+                total_asks_base_vol:
+                  type: string
+                  description: Base volumes sum of all asks.
+                total_asks_base_vol_rat:
+                  # TODO: Use $ref to RationalValue schema if/when available in components/schemas
+                  type: object
+                  description: Rational representation of total_asks_base_vol.
+                total_asks_base_vol_fraction:
+                  # TODO: Use $ref to FractionalValue schema if/when available in components/schemas
+                  type: object
+                  description: Fractional representation of total_asks_base_vol.
+                total_asks_rel_vol:
+                  type: string
+                  description: Rel volumes sum of all asks.
+                total_asks_rel_vol_rat:
+                  # TODO: Use $ref to RationalValue schema if/when available in components/schemas
+                  type: object
+                  description: Rational representation of total_asks_rel_vol.
+                total_asks_rel_vol_fraction:
+                  # TODO: Use $ref to FractionalValue schema if/when available in components/schemas
+                  type: object
+                  description: Fractional representation of total_asks_rel_vol.
+                total_bids_base_vol:
+                  type: string
+                  description: Base volumes sum of all bids.
+                total_bids_base_vol_rat:
+                  # TODO: Use $ref to RationalValue schema if/when available in components/schemas
+                  type: object
+                  description: Rational representation of total_bids_base_vol.
+                total_bids_base_vol_fraction:
+                  # TODO: Use $ref to FractionalValue schema if/when available in components/schemas
+                  type: object
+                  description: Fractional representation of total_bids_base_vol.
+                total_bids_rel_vol:
+                  type: string
+                  description: Rel volumes sum of all bids.
+                total_bids_rel_vol_rat:
+                  # TODO: Use $ref to RationalValue schema if/when available in components/schemas
+                  type: object
+                  description: Rational representation of total_bids_rel_vol.
+                total_bids_rel_vol_fraction:
+                  # TODO: Use $ref to FractionalValue schema if/when available in components/schemas
+                  type: object
+                  description: Fractional representation of total_bids_rel_vol.
+              required:
+                - asks
+                - bids
+                - base
+                - rel
+                - timestamp
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error 

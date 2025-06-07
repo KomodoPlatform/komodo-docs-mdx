@@ -1,0 +1,142 @@
+/update_nft:
+  post:
+    operationId: update_nft
+    summary: Update NFT
+    description: |
+      This method will scan selected networks to update NFT information stored in the local database.
+      To interact with your NFTs, you will first need to activate the coin for the network the NFT is on.
+      
+      See below for which coin to activate for each network:
+      
+      | Network   | Coin  |
+      |-----------|-------|
+      | AVALANCHE | AVAX  |
+      | BSC       | BNB   |
+      | ETH       | ETH   |
+      | FANTOM    | FTM   |
+      | POLYGON   | MATIC |
+      
+      These coins can be activated using the enable_eth_with_tokens method.
+      
+      Note: If there are no errors, this request will return an empty response.
+      When updating multiple networks, or wallets with numerous NFTs, this request may take a while to complete.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/non_fungible_tokens/update_nft/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["update_nft"]
+                description: The method name
+                example: "update_nft"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - chains
+                  - url
+                  - url_antispam
+                properties:
+                  chains:
+                    type: array
+                    items:
+                      type: string
+                      enum: ["POLYGON", "FANTOM", "ETH", "BSC", "AVALANCHE"]
+                    description: List of networks to scan for NFTs
+                    example: ["BSC", "POLYGON"]
+                  komodo_proxy:
+                    type: boolean
+                    description: Optional. Indicates whether authentication is required for accessing the proxy URLs
+                    example: false
+                  url:
+                    type: string
+                    description: URL link to the Moralis API proxy base url or equivalent (if komodo_proxy is set to true, will need to provide a new Komodo Proxy URL)
+                    example: "https://moralis-proxy.komodo.earth"
+                  url_antispam:
+                    type: string
+                    description: URL link to the Antispam API proxy base url or equivalent
+                    example: "https://nft.antispam.dragonhound.info"
+    responses:
+      '200':
+        description: NFT database updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: "null"
+                  description: Returns null on success
+                  example: null
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "TokenIsAlreadyActivated"
+                    - "TokenConfigIsNotFound"
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

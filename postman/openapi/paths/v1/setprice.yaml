@@ -1,0 +1,219 @@
+/setprice:
+  post:
+    operationId: setprice
+    summary: Set Price Order (Maker)
+    description: |
+      Places an order on the orderbook, and it relies on this node acting as a maker, also called a Bob node.
+      The setprice order is always considered a sell, for internal implementation convenience.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/legacy/setprice/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - userpass
+              - method
+              - base
+              - rel
+              - price
+            properties:
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              method:
+                type: string
+                enum: ["setprice"]
+                description: The method name
+                example: "setprice"
+              base:
+                type: string
+                description: The name of the coin the user desires to sell
+                example: "BASE"
+              rel:
+                type: string
+                description: The name of the coin the user desires to receive
+                example: "REL"
+              price:
+                oneOf:
+                  - type: string
+                    description: Price as decimal string
+                    example: "0.9"
+                  - type: number
+                    description: Price as number
+                    example: 0.9
+                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                  - type: object
+                    description: Price as fractional value
+                    properties:
+                      numer:
+                        type: string
+                        example: "2"
+                      denom:
+                        type: string
+                        example: "1"
+                description: The amount of rel coins the user wants to receive for each unit of the base coin spent
+              volume:
+                oneOf:
+                  - type: string
+                    description: Volume as decimal string
+                    example: "1"
+                  - type: number
+                    description: Volume as number
+                    example: 1
+                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                  - type: object
+                    description: Volume as fractional value
+                    properties:
+                      numer:
+                        type: string
+                        example: "3"
+                      denom:
+                        type: string
+                        example: "2"
+                description: The maximum amount of base coin available for sale in the order, ignored if max is true
+              min_volume:
+                oneOf:
+                  - type: string
+                    description: Min volume as decimal string
+                  - type: number
+                    description: Min volume as number
+                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                  - type: object
+                    description: Min volume as fractional value
+                    properties:
+                      numer:
+                        type: string
+                        example: "1"
+                      denom:
+                        type: string
+                        example: "1"
+                description: The minimum amount of base coin available for sale in the order; it must be less or equal than volume param
+              max:
+                type: boolean
+                description: Komodo DeFi Framework API will use the entire coin balance for the order, taking 0.001 coins into reserve to account for fees
+                example: true
+              cancel_previous:
+                type: boolean
+                description: Komodo DeFi Framework API will cancel all existing orders for the selected pair by default; set this value to false to prevent this behavior
+                default: true
+                example: true
+              base_confs:
+                type: integer
+                description: Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set
+                example: 2
+              base_nota:
+                type: boolean
+                description: Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set
+                example: true
+              rel_confs:
+                type: integer
+                description: Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set
+                example: 5
+              rel_nota:
+                type: boolean
+                description: Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set
+                example: false
+              save_in_history:
+                type: boolean
+                description: Defaults to true. If set to false no order history will be saved
+                default: true
+                example: true
+    responses:
+      '200':
+        description: Setprice order created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    base:
+                      type: string
+                      description: The base coin of the order
+                      example: "BASE"
+                    rel:
+                      type: string
+                      description: The rel coin of the order
+                      example: "REL"
+                    price:
+                      type: string
+                      description: The expected amount of rel coin to be received per 1 unit of base coin; decimal representation
+                      example: "1"
+                    price_rat:
+                      $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      description: The expected amount of rel coin to be received per 1 unit of base coin; rational representation
+                    max_base_vol:
+                      type: string
+                      description: The maximum volume of base coin available to trade; decimal representation
+                      example: "1"
+                    max_base_vol_rat:
+                      $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      description: The maximum volume of base coin available to trade; rational representation
+                    min_base_vol:
+                      type: string
+                      description: Komodo DeFi Framework API won't match with other orders that attempt to trade less than min_base_vol; decimal representation
+                      example: "0"
+                    min_base_vol_rat:
+                      $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      description: Komodo DeFi Framework API won't match with other orders that attempt to trade less than min_base_vol; rational representation
+                    created_at:
+                      type: integer
+                      description: Unix timestamp in milliseconds, indicating the order creation time
+                      example: 1559052299258
+                    updated_at:
+                      type: integer
+                      description: Unix timestamp in milliseconds, indicating the order update time
+                      example: 1559052299258
+                    matches:
+                      type: object
+                      description: Contains the map of ongoing matches with other orders, empty as the order was recently created
+                      example: {}
+                    started_swaps:
+                      type: array
+                      items:
+                        type: string
+                      description: UUIDs of swaps that were initiated by the order
+                      example: []
+                    uuid:
+                      type: string
+                      description: UUID of the created order
+                      example: "6a242691-6c05-474a-85c1-5b3f42278f41"
+                    conf_settings:
+                      $ref: ../../components/schemas/Orders.yaml#/ConfSettings
+                      description: A standard ConfSettings object
+                base_orderbook_ticker:
+                  type: string
+                  nullable: true
+                  description: The ticker of the base currency if orderbook_ticker is configured for the base currency in coins file
+                  example: null
+                rel_orderbook_ticker:
+                  type: string
+                  nullable: true
+                  description: The ticker of the rel currency if orderbook_ticker is configured for the rel currency in coins file
+                  example: null
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  example: "Rel coin REL is not found"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing the internal error 

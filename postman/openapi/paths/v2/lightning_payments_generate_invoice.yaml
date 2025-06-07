@@ -1,37 +1,140 @@
-post:
-  operationId: "lightning_payments_generate_invoice"
-  tags:
-    - Lightning Payments
-  summary: Generate a Lightning invoice
-  description: Generates an invoice to be paid by another node.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            coin:
-              type: string
-              description: Ticker of coin to generate invoice for
-            description:
-              type: string
-              description: Note for the invoice
-            amount_in_msat:
-              type: integer
-              description: Amount to be paid in millisatoshis
-            expiry:
-              type: integer
-              description: Optional. Seconds until the invoice expires
-  responses:
-    '200':
-      description: Invoice generated
+/lightning_payments_generate_invoice:
+  post:
+    operationId: lightning::payments::generate_invoice
+    summary: Generate Lightning Invoice
+    description: |
+      Generates an invoice to be paid by another Lightning Network node.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/payments/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
-              payment_hash:
+              method:
                 type: string
-              invoice:
-                type: string 
+                enum: ["lightning::payments::generate_invoice"]
+                description: The method name
+                example: "lightning::payments::generate_invoice"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 1
+              params:
+                type: object
+                required:
+                  - coin
+                  - description
+                  - amount_in_msat
+                properties:
+                  coin:
+                    type: string
+                    description: Ticker of coin to generate invoice for
+                    example: "tBTC-lightning"
+                  description:
+                    type: string
+                    description: A note to indicate the purpose of the invoice
+                    example: "For the burger on Tuesday"
+                  amount_in_msat:
+                    type: integer
+                    description: Amount to be paid, in millisatoshis (A thousandth of a satoshi; the same as 0.00000000001 bitcoin.)
+                    example: 10000
+                  expiry:
+                    type: integer
+                    description: Optional, defaults to 3600. Seconds until the invoice expires
+                    default: 3600
+                    example: 600
+    responses:
+      '200':
+        description: Invoice generated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    payment_hash:
+                      type: string
+                      description: The hexadecimal string which identifies the invoice
+                      example: "3ff39605f214a4b4159f9c4f44c94de3a273f300042ca18b7cb3d62f270a9ebc"
+                    invoice:
+                      type: string
+                      description: The Lightning invoice string to be paid
+                      example: "lntb100n1pj9aq73dpggehhygr5dpjjqcn4wfnk2u3qdahzq4r4v4ekgctenp4qf3dqylh55jd8m5x5hh0g5q82h9p86yghwhl2s0t826nlyp8zdgjzpp58leevp0jzjjtg9vln385fj2duw388ucqqsk2rzmuk0tz7fc2n67qsp5k33rvvq46xtuppl22ggcq5q7qqywyekcemhzazt4m6vulwsarcrq9qyysgqcqpcxqzjcrzjqwyx8nu2hygyvgc02cwdtvuxe0lcxz06qt3lpsldzcdr46my5epmjfgaasqqqvqqqqqqqqlgqqqqqqgq9qpwesnhre7xmdg6tajvp939vl72vxm8csecy6hfcah9fzgazd5eyzjskgtt7u9xshj7gq2vkejjcquem08tqfrc2pj78xa95teazzf0qq7pnyqj"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 1
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "Error parsing request: invalid type: string '56', expected u64"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "dispatcher"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "dispatcher:109]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "InvalidRequest"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  examples:
+                    - "invalid type: string '56', expected u64"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

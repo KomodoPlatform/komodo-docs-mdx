@@ -1,0 +1,59 @@
+# OpenAPI path spec for import_swaps (v1)
+/api/v1/import_swaps:
+  post:
+    operationId: import_swaps
+    summary: Komodo DeFi Framework Method: Import Swaps
+    description: The import_swaps method imports to the local database the swaps data that was exported from another Komodo DeFi Framework API instance.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/import_swaps/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [import_swaps]
+                description: Method name (must be 'import_swaps').
+              swaps:
+                type: array
+                items:
+                  # TODO: Use $ref to SwapStatus schema if available
+                  type: object
+                description: A map of standard SwapStatus objects.
+            required:
+              - userpass
+              - method
+              - swaps
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    imported:
+                      type: array
+                      items:
+                        type: string
+                      description: UUIDs of swaps that were successfully imported.
+                    skipped:
+                      type: object
+                      additionalProperties:
+                        type: string
+                      description: UUIDs of swaps that failed to import; includes error message.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

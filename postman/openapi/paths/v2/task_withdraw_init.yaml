@@ -1,0 +1,166 @@
+/task_withdraw_init:
+  post:
+    operationId: task::withdraw::init
+    summary: Initialize Withdraw Task
+    description: |
+      The task::withdraw::init method generates, signs, and returns a transaction that transfers the amount of coin to the address indicated in the to argument.
+      The status of this method can be queried via the task::withdraw::status method.
+      It will return the transaction hex (via task::withdraw::status), which then needs to be broadcast to complete the withdrawal.
+      When used for ZHTLC coins like ARRR or ZOMBIE, it may take some time to complete.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["task::withdraw::init"]
+                description: The method name
+                example: "task::withdraw::init"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
+                type: object
+                required:
+                  - coin
+                  - to
+                properties:
+                  coin:
+                    type: string
+                    description: The name of the coin the user desires to withdraw
+                    example: "COIN_NAME"
+                  to:
+                    type: string
+                    description: Coins are withdrawn to this address
+                    example: "RECIPIENT_ADDRESS"
+                  amount:
+                    type: string
+                    description: The amount the user desires to withdraw, ignored when max=true
+                    example: "AMOUNT"
+                  memo:
+                    type: string
+                    description: Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction
+                  from:
+                    type: object
+                    description: Optional, used only for transactions using a hardware wallet or HD wallets
+                    properties:
+                      derivation_path:
+                        type: string
+                        description: Optional, HD wallets only. Follows the format m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID
+                        pattern: "^m/44'/\\d+'/\\d+'/\\d+/\\d+$"
+                        example: "m/44'/20'/0'/0/2"
+                      account_id:
+                        type: integer
+                        description: Optional, HD wallets only. Generally this will be 0 unless you have multiple accounts registered on your HD wallet
+                        example: 0
+                      chain:
+                        type: string
+                        enum: ["Internal", "External"]
+                        description: Optional, HD wallets only. Internal or External. External is used for addresses that are intended to be visible outside of the wallet. Internal is used for change addresses
+                        example: "External"
+                      address_id:
+                        type: integer
+                        description: Optional, HD wallets only. Check the output from coin activation to find the ID of an address with balance
+                        example: 2
+                  max:
+                    type: boolean
+                    description: Optional. Withdraw the maximum available amount. Defaults to false
+                    default: false
+                    example: false
+                  fee:
+                    type: object
+                    description: Optional. Used only to set a custom fee, otherwise fee value will be derived from a daemon's estimatefee RPC method
+                    properties:
+                      type:
+                        type: string
+                        enum: ["UtxoFixed", "UtxoPerKbyte"]
+                        description: Type of transaction fee
+                        example: "UtxoFixed"
+                      amount:
+                        type: string
+                        description: Fee amount in coin units, used only when type is UtxoFixed (fixed amount not depending on tx size) or UtxoPerKbyte (amount per Kbyte)
+                        example: "0.001"
+    responses:
+      '200':
+        description: Task initialization successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    task_id:
+                      type: integer
+                      description: An identifying number which is used to query task status
+                      example: 0
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

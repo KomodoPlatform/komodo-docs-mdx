@@ -1,49 +1,122 @@
-openapi: 3.0.3
-info:
-  title: Get Token Allowance
-  description: Get the current allowance for a token (e.g., for ERC20 tokens).
-  version: 1.0.0
-paths:
-  /get_token_allowance:
-    post:
-      summary: Get token allowance
-      operationId: "get_token_allowance"
-      tags:
-        - Tokens
-      requestBody:
-        required: true
+/get_token_allowance:
+  post:
+    operationId: get_token_allowance
+    summary: Get Token Allowance
+    description: |
+      The get_token_allowance method returns token allowance for address.
+      
+      Refer to the 1inch Classic Swap documentation for more information.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20-dev/get_token_allowance/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["get_token_allowance"]
+                description: The method name
+                example: "get_token_allowance"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - coin
+                  - spender
+                properties:
+                  coin:
+                    type: string
+                    description: Token ticker
+                    example: "AAVE-PLG20"
+                  spender:
+                    type: string
+                    description: Smart contract address to query spendable coins amount granted prior approval
+                    example: "0x083C32B38e8050473f6999e22f670d1404235592"
+    responses:
+      '200':
+        description: Token allowance retrieved successfully
         content:
           application/json:
             schema:
               type: object
               properties:
-                userpass:
-                  type: string
-                method:
-                  type: string
-                  enum: [get_token_allowance]
                 mmrpc:
                   type: string
-                params:
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: string
+                  description: Amount of coins approved for spending via the smart contract (in coins units)
+                  example: "1.23"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Token config not activated or other errors
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  example: "No such coin USDT-ERC20"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  example: "tokens"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  example: "tokens:171]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "NoSuchCoin"
+                error_data:
                   type: object
+                  description: Additional error data
                   properties:
-                    tokenAddress:
+                    coin:
                       type: string
-                    owner:
-                      type: string
-                    spender:
-                      type: string
-      responses:
-        '200':
-          description: Allowance returned
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  allowance:
-                    type: string
-        '400':
-          description: Bad request
-        '500':
-          description: Internal server error 
+                      example: "USDT-ERC20"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

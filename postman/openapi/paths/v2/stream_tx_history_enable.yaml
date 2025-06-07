@@ -1,80 +1,134 @@
-post:
-  operationId: "stream_tx_history_enable"
-  tags:
-    - Streaming
-  summary: Enable transaction history events streaming for a specific coin
-  description: |
-    Enables transaction history events streaming for a specific coin to a specific client. Only compatible with UTXO, BCH/SLP, TENDERMINT, QTUM, ZHTLC coin types.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [stream::tx_history::enable]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              required:
-                - coin
-              properties:
-                coin:
-                  type: string
-                  description: Ticker of the coin to activate streaming for. The coin must be activated first.
-                client_id:
-                  type: integer
-                  description: Optional. Client ID for the stream. Defaults to 0.
-  responses:
-    '200':
-      description: Successful response with streamer_id
+/stream_tx_history_enable:
+  post:
+    operationId: stream::tx_history::enable
+    summary: Enable Transaction History Streaming
+    description: |
+      Using this method, you can enable transaction history events streaming for a specific coin.
+      This method is only compatible with the following coin types: UTXO, BCH/SLP, TENDERMINT, QTUM, ZHTLC.
+      For this stream to return data, the coin being queried must include the "tx_history": true parameter in its activation command.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/streaming/tx_history_enable/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
+              method:
+                type: string
+                enum: ["stream::tx_history::enable"]
+                description: The method name
+                example: "stream::tx_history::enable"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              result:
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
                 type: object
+                required:
+                  - coin
                 properties:
-                  streamer_id:
+                  coin:
                     type: string
-                    description: Identifier for the data stream.
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mmrpc:
-                type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              error_data:
-                type: string
-              id:
-                nullable: true 
+                    description: Ticker of the coin to activate streaming for. The coin must be activated first
+                    example: "DOC"
+                  client_id:
+                    type: integer
+                    description: Optional. In the case of a single client, this defaults to 0. This ID can be used to access data via http://localhost:7783/event-stream?id=1
+                    default: 0
+                    example: 1
+    responses:
+      '200':
+        description: Transaction history streaming enabled successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    streamer_id:
+                      type: string
+                      description: An identifier for the data stream. This can be used later to disable streaming for the event with stream::disable
+                      example: "TX_HISTORY:DOC"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "CoinNotFound"
+                    - "CoinNotSupported"
+                    - "UnknownClient"
+                    - "ClientAlreadyListening"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "tx_history"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "tx_history:42]"
+                    - "tx_history:70]"
+                    - "tx_history:75]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "CoinNotFound"
+                    - "CoinNotSupported"
+                    - "EnableError"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  examples:
+                    - "UnknownClient"
+                    - "ClientAlreadyListening"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

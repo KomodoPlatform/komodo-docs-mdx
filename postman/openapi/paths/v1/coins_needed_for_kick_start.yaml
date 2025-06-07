@@ -1,0 +1,44 @@
+# OpenAPI path spec for coins_needed_for_kick_start (v1)
+/api/v1/coins_needed_for_kick_start:
+  post:
+    operationId: coins_needed_for_kick_start
+    summary: Komodo DeFi Framework Method: Coins needed for kick Start
+    description: Returns the tickers of coins that should be activated ASAP after the Komodo DeFi Framework API is started to continue interrupted swaps.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/coins_needed_for_kick_start/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [coins_needed_for_kick_start]
+                description: Method name (must be 'coins_needed_for_kick_start').
+            required:
+              - userpass
+              - method
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: array
+                  items:
+                    type: string
+                  description: Tickers of coins that should be activated to kick-start swaps and orders.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

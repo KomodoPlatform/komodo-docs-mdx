@@ -1,29 +1,127 @@
-post:
-  operationId: "lightning_nodes_connect_to_node"
-  tags:
-    - Lightning Nodes
-  summary: Connect to a Lightning node
-  description: Connects to a lightning node using its address.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            coin:
-              type: string
-              description: The coin ticker
-            node_address:
-              type: string
-              description: Node address in format node_pubkey@ip:port
-  responses:
-    '200':
-      description: Connection result
+/lightning_nodes_connect_to_node:
+  post:
+    operationId: lightning::nodes::connect_to_node
+    summary: Connect to Node
+    description: |
+      Allows you to connect to a Lightning Network node.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/nodes/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
-              result:
-                type: string 
+              method:
+                type: string
+                enum: ["lightning::nodes::connect_to_node"]
+                description: The method name
+                example: "lightning::nodes::connect_to_node"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 1
+              params:
+                type: object
+                required:
+                  - coin
+                  - node_address
+                properties:
+                  coin:
+                    type: string
+                    description: The coin ticker you would like to connect to a node on
+                    example: "tBTC-lightning"
+                  node_address:
+                    type: string
+                    description: Lightning nodes addresses always have a format of node_pubkey@ip_address:port
+                    example: "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@203.132.94.196:9735"
+    responses:
+      '200':
+        description: Connection result (success or already connected)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: string
+                  description: Connection status message
+                  examples:
+                    - "Connected successfully to node : 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226@170.75.163.209:9735"
+                    - "Already connected to node : 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226@170.75.163.209:9735"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 1
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "Error parsing request: Could not parse node address from str rgjhk3"
+                    - "Error connecting to node: Timeout error: Failed to connect to node: 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "dispatcher"
+                    - "connect_to_node"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "dispatcher:109]"
+                    - "connect_to_node:78]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "InvalidRequest"
+                    - "ConnectionError"
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

@@ -1,106 +1,165 @@
-post:
-  operationId: "my_recent_swaps"
-  tags:
-    - Swaps and Orders
-  summary: Get recent atomic swaps executed by this node
-  description: |
-    Returns the data of the most recent atomic swaps executed by the Komodo DeFi Framework API node. All filters are combined using logical AND.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [my_recent_swaps]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              properties:
-                my_coin:
-                  type: string
-                  description: Optional. Coin being used by you for the swap/trade.
-                other_coin:
-                  type: string
-                  description: Optional. Coin you are trading against.
-                from_timestamp:
-                  type: integer
-                  description: Optional. Start timestamp in UNIX format.
-                to_timestamp:
-                  type: integer
-                  description: Optional. End timestamp in UNIX format.
-                from_uuid:
-                  type: string
-                  description: Optional. The UUID from which to start fetching results.
-                limit:
-                  type: integer
-                  description: Optional. The maximum number of results to return.
-                page_number:
-                  type: integer
-                  description: Optional. Offset for paginated results.
-  responses:
-    '200':
-      description: Successful response with recent swaps info
+/my_recent_swaps:
+  post:
+    operationId: my_recent_swaps
+    summary: Get My Recent Swaps
+    description: |
+      Returns the data of the most recent atomic swaps executed by the Komodo DeFi Framework API node.
+      All filters are combined using logical AND.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/swaps_and_orders/my_recent_swaps/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
-              result:
-                type: object
-                properties:
-                  swaps:
-                    type: array
-                    items:
-                      type: object
-                  from_uuid:
-                    type: string
-                  skipped:
-                    type: integer
-                  limit:
-                    type: integer
-                  total:
-                    type: integer
-                  page_number:
-                    type: integer
-                  total_pages:
-                    type: integer
-                  found_records:
-                    type: integer
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
+              method:
+                type: string
+                enum: ["my_recent_swaps"]
+                description: The method name
+                example: "my_recent_swaps"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              error_data:
-                type: object
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
               id:
-                nullable: true 
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
+                type: object
+                properties:
+                  my_coin:
+                    type: string
+                    description: Optional. Coin being used by you for the swap/trade
+                    example: "MARTY"
+                  other_coin:
+                    type: string
+                    description: Optional. Coin you are trading against
+                    example: "DOC"
+                  from_timestamp:
+                    type: integer
+                    description: Optional. Start timestamp in UNIX format
+                    example: 1672531200
+                  to_timestamp:
+                    type: integer
+                    description: Optional. End timestamp in UNIX format
+                    example: 1734067200
+                  from_uuid:
+                    type: string
+                    description: Optional. The UUID from which to start fetching results
+                    example: "0a3859ba-0e28-49de-b015-641c050a6409"
+                  limit:
+                    type: integer
+                    description: Optional. The maximum number of results to return
+                    example: 5
+                  page_number:
+                    type: integer
+                    description: Optional. Offset for paginated results
+                    example: 1
+    responses:
+      '200':
+        description: Recent swaps retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    swaps:
+                      type: array
+                      description: A list of standard SwapStatus objects
+                      items:
+                        $ref: ../../components/schemas/Swaps.yaml#/SwapStatus
+                    from_uuid:
+                      type: string
+                      nullable: true
+                      description: The from_uuid that was set in the request; this value is null if nothing was set
+                      example: "0a3859ba-0e28-49de-b015-641c050a6409"
+                    skipped:
+                      type: integer
+                      description: The number of skipped records (i.e. the position of from_uuid in the list + 1 or (page_number - 1) * limit)
+                      example: 0
+                    limit:
+                      type: integer
+                      description: The limit that was set in the request; note that the actual number of swaps can differ from the specified limit
+                      example: 5
+                    total:
+                      type: integer
+                      description: Total number of swaps available with the selected filters
+                      example: 10
+                    page_number:
+                      type: integer
+                      nullable: true
+                      description: The page_number that was set in the request; if both page_number and from_uuid are not set it defaults to 1; if from_uuid is present this value will be null
+                      example: 1
+                    total_pages:
+                      type: integer
+                      description: Total pages available with the selected filters and limit
+                      example: 2
+                    found_records:
+                      type: integer
+                      description: The number of returned swaps
+                      example: 5
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

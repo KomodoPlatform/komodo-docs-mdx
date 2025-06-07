@@ -1,70 +1,109 @@
-post:
-  operationId: "stop_simple_market_maker_bot"
-  tags:
-    - Swaps and Orders
-  summary: Stop the simple market maker bot
-  description: |
-    Tells the bot to finish placing orders at the end of the current loop (30 seconds minimum & 30 seconds by default).
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [stop_simple_market_maker_bot]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              description: No parameters required.
-  responses:
-    '200':
-      description: Successful response
+/stop_simple_market_maker_bot:
+  post:
+    operationId: stop_simple_market_maker_bot
+    summary: Stop Simple Market Maker Bot
+    description: |
+      The stop_simple_market_maker_bot method tells the bot to finish placing orders at the end of the current loop (30 seconds minimum & 30 seconds by default). At the end of the final loop, orders placed by the bot will be cancelled. Users should wait until the loop ends before exiting the Komodo DeFi Framework API, otherwise orders will not cancel, and will reappear on the orderbook next time Komodo DeFi Framework API starts.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/swaps_and_orders/stop_simple_market_maker_bot/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
+              method:
+                type: string
+                enum: ["stop_simple_market_maker_bot"]
+                description: The method name
+                example: "stop_simple_market_maker_bot"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              result:
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
                 type: object
-                properties:
-                  result:
-                    type: string
-                    description: Success message
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mmrpc:
-                type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              id:
-                nullable: true 
+                description: Empty parameters object
+                example: {}
+    responses:
+      '200':
+        description: Bot stopped successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Success confirmation
+                      example: "Success"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Bot already stopped
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  example: "The bot is already stopped"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  example: "simple_market_maker"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  example: "simple_market_maker:813]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "AlreadyStopped"
+                id:
+                  type: integer
+                  example: 0
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

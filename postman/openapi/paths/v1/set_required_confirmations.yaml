@@ -1,0 +1,76 @@
+/set_required_confirmations:
+  post:
+    operationId: set_required_confirmations
+    summary: Set Required Confirmations
+    description: |
+      Sets the number of confirmations for which Komodo DeFi Framework API must wait for the selected coin.
+      This setting is not persistent and must be reset in the coins file on restart.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/legacy/set_required_confirmations/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - coin
+              - confirmations
+              - userpass
+            properties:
+              method:
+                type: string
+                enum: ["set_required_confirmations"]
+                description: The method name
+                example: "set_required_confirmations"
+              coin:
+                type: string
+                description: The ticker of the selected coin
+                example: "DOC"
+              confirmations:
+                type: integer
+                description: The number of confirmations to require
+                example: 3
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+    responses:
+      '200':
+        description: Confirmations setting updated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    coin:
+                      type: string
+                      description: The coin selected in the request
+                      example: "ETOMIC"
+                    confirmations:
+                      type: integer
+                      description: The number of confirmations in the request
+                      example: 3
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing the internal error 

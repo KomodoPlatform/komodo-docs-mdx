@@ -1,0 +1,218 @@
+# OpenAPI path spec for buy (v1)
+/api/v1/buy:
+  post:
+    operationId: buy
+    summary: Komodo DeFi Framework Method: Buy
+    description: The buy method issues a buy request and attempts to match an order from the orderbook based on the provided arguments. Buy and sell methods always create the taker order first. See the MDX for full details and notes.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/buy/index.mdx
+    parameters:
+      - name: base
+        in: query
+        description: The name of the coin the user desires to receive
+        required: true
+        schema:
+          type: string
+      - name: rel
+        in: query
+        description: The name of the coin the user desires to sell
+        required: true
+        schema:
+          type: string
+      - name: price
+        in: query
+        description: The price in rel the user is willing to pay per one unit of the base coin. Can be a numeric string, RationalValue, or FractionalValue object.
+        required: true
+        schema:
+          oneOf:
+            - type: string
+            - $ref: ../../components/schemas/RationalValue.yaml
+            - $ref: ../../components/schemas/FractionalValue.yaml
+      - name: volume
+        in: query
+        description: The amount of coins the user is willing to receive of the base coin. Can be a numeric string, RationalValue, or FractionalValue object.
+        required: true
+        schema:
+          oneOf:
+            - type: string
+            - $ref: ../../components/schemas/RationalValue.yaml
+            - $ref: ../../components/schemas/FractionalValue.yaml
+      - name: min_volume
+        in: query
+        description: The minimum amount of base coin to be purchased in any GoodTillCancelled orders after conversion to maker. Optional.
+        required: false
+        schema:
+          oneOf:
+            - type: string
+            - $ref: ../../components/schemas/RationalValue.yaml
+            - $ref: ../../components/schemas/FractionalValue.yaml
+      - name: match_by
+        in: query
+        description: Optional. A standard MatchBy object, to filter to include only matches by pubkey or uuid.
+        required: false
+        schema:
+          $ref: ../../components/schemas/MatchBy.yaml
+      - name: order_type
+        in: query
+        description: Optional. A standard OrderType object.
+        required: false
+        schema:
+          $ref: ../../components/schemas/OrderType.yaml
+      - name: base_confs
+        in: query
+        description: Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set
+        required: false
+        schema:
+          type: number
+      - name: base_nota
+        in: query
+        description: Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set
+        required: false
+        schema:
+          type: boolean
+      - name: rel_confs
+        in: query
+        description: Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set
+        required: false
+        schema:
+          type: number
+      - name: rel_nota
+        in: query
+        description: Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set
+        required: false
+        schema:
+          type: boolean
+      - name: save_in_history
+        in: query
+        description: Defaults to true. If set to false no order history will be saved (though order status will be temporarily stored while in progress).
+        required: false
+        schema:
+          type: boolean
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password
+              method:
+                type: string
+                enum: [buy]
+                description: Method name
+              base:
+                type: string
+                description: The name of the coin the user desires to receive
+              rel:
+                type: string
+                description: The name of the coin the user desires to sell
+              price:
+                oneOf:
+                  - type: string
+                  - $ref: ../../components/schemas/RationalValue.yaml
+                  - $ref: ../../components/schemas/FractionalValue.yaml
+                description: The price in rel the user is willing to pay per one unit of the base coin
+              volume:
+                oneOf:
+                  - type: string
+                  - $ref: ../../components/schemas/RationalValue.yaml
+                  - $ref: ../../components/schemas/FractionalValue.yaml
+                description: The amount of coins the user is willing to receive of the base coin
+              min_volume:
+                oneOf:
+                  - type: string
+                  - $ref: ../../components/schemas/RationalValue.yaml
+                  - $ref: ../../components/schemas/FractionalValue.yaml
+                description: The minimum amount of base coin to be purchased in any GoodTillCancelled orders after conversion to maker. Optional.
+              match_by:
+                $ref: ../../components/schemas/MatchBy.yaml
+                description: Optional. A standard MatchBy object, to filter to include only matches by pubkey or uuid.
+              order_type:
+                $ref: ../../components/schemas/OrderType.yaml
+                description: Optional. A standard OrderType object.
+              base_confs:
+                type: number
+                description: Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set
+              base_nota:
+                type: boolean
+                description: Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set
+              rel_confs:
+                type: number
+                description: Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set
+              rel_nota:
+                type: boolean
+                description: Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set
+              save_in_history:
+                type: boolean
+                description: Defaults to true. If set to false no order history will be saved (though order status will be temporarily stored while in progress).
+            required:
+              - userpass
+              - method
+              - base
+              - rel
+              - price
+              - volume
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  description: The action of the request (Buy)
+                base:
+                  type: string
+                  description: The base currency of request
+                base_amount:
+                  type: string
+                  description: The resulting amount of base currency that is received if the order matches (in decimal representation)
+                base_amount_rat:
+                  $ref: ../../components/schemas/RationalValue.yaml
+                  description: The resulting amount of base currency that is received if the order matches, represented as a RationalValue object.
+                rel:
+                  type: string
+                  description: The rel currency of the request
+                rel_amount:
+                  type: string
+                  description: The maximum amount of rel coin that is spent in order to buy the base_amount (according to price, in decimal representation)
+                rel_amount_rat:
+                  $ref: ../../components/schemas/RationalValue.yaml
+                  description: The maximum amount of rel coin that is spent in order to buy the base_amount (according to price, as a RationalValue object)
+                method:
+                  type: string
+                  description: This field is used for internal P2P interactions; the value is always equal to "request"
+                dest_pub_key:
+                  type: string
+                  description: Reserved for future use. Allows the user to choose the P2P node that is eligible to match with the request.
+                sender_pubkey:
+                  type: string
+                  description: The public key of this node
+                uuid:
+                  type: string
+                  description: The request uuid
+                match_by:
+                  $ref: ../../components/schemas/MatchBy.yaml
+                  description: A standard MatchBy object, to filter to include only matches by pubkey or uuid.
+                conf_settings:
+                  $ref: ../../components/schemas/ConfSettings.yaml
+                  description: A standard ConfSettings object.
+                base_orderbook_ticker:
+                  type: string
+                  description: The ticker of the base currency if orderbook_ticker is configured for the base currency in coins file. If not defined, will return a null value.
+                rel_orderbook_ticker:
+                  type: string
+                  description: The ticker of the rel currency if orderbook_ticker is configured for the rel currency in coins file. If not defined, will return a null value.
+              required:
+                - action
+                - base
+                - rel
+                - method
+                - uuid
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Review if all parameter and response details are complete and correct. 

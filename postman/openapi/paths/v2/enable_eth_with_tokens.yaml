@@ -1,83 +1,232 @@
-openapi: 3.0.3
-info:
-  title: Enable ETH with Tokens
-  description: Enable ETH/EVM platform coin along with multiple ERC20 tokens in a single command.
-  version: 1.0.0
-paths:
-  /enable_eth_with_tokens:
-    post:
-      summary: Enable ETH with ERC20 tokens
-      operationId: "enable_eth_with_tokens"
-      tags:
-        - Coin Activation
-      requestBody:
-        required: true
+/enable_eth_with_tokens:
+  post:
+    operationId: enable_eth_with_tokens
+    summary: Enable ETH with Tokens
+    description: |
+      Enable a platform coin like ETH along with multiple ERC20 like tokens of the platform coin chain in a single command.
+      The Komodo DeFi Framework supports ETH(Ethereum) and many other EVM type platform coins like AVAX(Avalanche), BNB(Binance), FTM(Fantom), MATIC(Polygon), ONE(Harmony), ETH-ARB20(Arbitrum).
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/enable_eth_with_tokens/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["enable_eth_with_tokens"]
+                description: The method name
+                example: "enable_eth_with_tokens"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - ticker
+                  - swap_contract_address
+                  - nodes
+                  - erc20_tokens_requests
+                properties:
+                  ticker:
+                    type: string
+                    enum: ["ETH", "AVAX", "BNB", "FTM", "MATIC", "ONE", "ETH-ARB20"]
+                    description: Ticker of the platform protocol coin
+                    example: "ETH"
+                  mm2:
+                    type: integer
+                    enum: [0, 1]
+                    description: Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function
+                    example: 1
+                  swap_contract_address:
+                    type: string
+                    description: Address of etomic swap smart contract
+                    example: "0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80"
+                  fallback_swap_contract:
+                    type: string
+                    description: Address of backup etomic swap smart contract
+                    example: "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
+                  nodes:
+                    type: array
+                    items:
+                      $ref: ../../components/schemas/Activation.yaml#/CoinNode
+                    description: A list of standard CoinNode objects
+                  erc20_tokens_requests:
+                    type: array
+                    items:
+                      $ref: ../../components/schemas/Activation.yaml#/TokensRequest
+                    description: A list of standard TokensRequest objects
+                  gas_station_decimals:
+                    type: integer
+                    description: Optional, for ETH/ERC20 and other gas model chains. Defaults to 8. Defines the decimals used to denominate the gas station response to gwei units
+                    default: 8
+                    example: 8
+                  gas_station_policy:
+                    type: object
+                    properties:
+                      policy:
+                        type: string
+                        enum: ["MeanAverageFast", "Average"]
+                        description: Defines the method of gas price calculation from the station response
+                        default: "MeanAverageFast"
+                        example: "MeanAverageFast"
+                    description: Optional, for ETH/ERC20 and other gas model chains. Defaults to MeanAverageFast
+                  get_balances:
+                    type: boolean
+                    description: Optional, defaults to true. If false, coin and token balances will not be returned in the response, and the response will be returned more quickly
+                    default: true
+                    example: true
+                  priv_key_policy:
+                    type: string
+                    enum: ["ContextPrivKey", "Trezor", "Metamask"]
+                    description: Optional, defaults to ContextPrivKey. Value can be ContextPrivKey, Trezor when Komodo DeFi Framework is built for native platforms. Value can be ContextPrivKey, Trezor, Metamask when the Komodo DeFi Framework is built targeting wasm
+                    default: "ContextPrivKey"
+                    example: "ContextPrivKey"
+                  required_confirmations:
+                    type: integer
+                    description: Optional, defaults to 3. When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap
+                    default: 3
+                    example: 5
+                  requires_notarization:
+                    type: boolean
+                    description: Optional, defaults to false. If true, coins protected by Komodo Platform's dPoW security will wait for a notarization before progressing to the next atomic swap transactions step
+                    default: false
+                    example: false
+                  rpc_mode:
+                    type: string
+                    enum: ["Default", "Metamask"]
+                    description: Optional, defaults to Default. Value can be Metamask only when the Komodo DeFi Framework is built targeting wasm
+                    default: "Default"
+                    example: "Default"
+                  tx_history:
+                    type: boolean
+                    description: Optional, defaults to false. If true the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to true to use the my_tx_history method
+                    default: false
+                    example: true
+                  nft_req:
+                    $ref: ../../components/schemas/NFTs.yaml#/NftProvider
+                    description: Optional, encapsulates the request parameters for NFT activation, including NFT provider configuration. A standard NftProvider object
+                  swap_v2_contracts:
+                    $ref: ../../components/schemas/Activation.yaml#/SwapV2Contracts
+                    description: Optional, must be provided if use_trading_proto_v2 is true in your configuration. A standard SwapV2Contracts object
+    responses:
+      '200':
+        description: ETH with tokens enabled successfully
         content:
           application/json:
             schema:
               type: object
               properties:
-                userpass:
-                  type: string
-                method:
-                  type: string
-                  enum: [enable_eth_with_tokens]
                 mmrpc:
                   type: string
-                params:
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
                   type: object
                   properties:
-                    ticker:
-                      type: string
-                    mm2:
+                    current_block:
                       type: integer
-                    swap_contract_address:
-                      type: string
-                    fallback_swap_contract:
-                      type: string
-                    nodes:
-                      type: array
-                      items:
-                        type: object
-                    erc20_tokens_requests:
-                      type: array
-                      items:
-                        type: object
-                    gas_station_decimals:
-                      type: integer
-                    gas_station_policy:
+                      description: Block height of the coin being activated
+                      example: 20590537
+                    eth_addresses_infos:
                       type: object
-                    get_balances:
-                      type: boolean
-                    priv_key_policy:
-                      type: string
-                    required_confirmations:
-                      type: integer
-                    requires_notarization:
-                      type: boolean
-                    rpc_mode:
-                      type: string
-                    tx_history:
-                      type: boolean
-                    nft_req:
+                      description: A standard AddressInfo object. Note - the structure may vary based on the value of the get_balances parameter
+                      additionalProperties:
+                        $ref: ../../components/schemas/Activation.yaml#/AddressInfo
+                    erc20_addresses_infos:
                       type: object
-                    swap_v2_contracts:
+                      description: A standard AddressInfo object. Note - the structure may vary based on the value of the get_balances parameter
+                      additionalProperties:
+                        $ref: ../../components/schemas/Activation.yaml#/AddressInfo
+                    nfts_infos:
                       type: object
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  mmrpc:
-                    type: string
-                  result:
-                    type: object
-                  id:
-                    type: string
-        '400':
-          description: Bad request
-        '500':
-          description: Internal server error 
+                      description: A list of standard NftInfoBasic objects
+                      additionalProperties:
+                        $ref: ../../components/schemas/NFTs.yaml#/NftInfoBasic
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "ETH"
+                    - "Platform ETH config is not found"
+                    - "Platform coin ETH protocol parsing failed: invalid type: null, expected adjacently tagged enum CoinProtocol"
+                    - "Unexpected platform protocol QTUM for ETH"
+                    - "Token BTUSD-ERC20 config is not found"
+                    - "Error parsing request: unknown variant `Metamask`, expected `Default`"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "platform_coin_with_tokens"
+                    - "platform_coin_with_tokens.prelude"
+                    - "dispatcher"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "PlatformIsAlreadyActivated"
+                    - "PlatformConfigIsNotFound"
+                    - "CoinProtocolParseError"
+                    - "UnexpectedPlatformProtocol"
+                    - "TokenConfigIsNotFound"
+                    - "TokenProtocolParseError"
+                    - "UnexpectedTokenProtocol"
+                    - "InvalidRequest"
+                    - "Transport"
+                    - "InternalError"
+                    - "PlatformCoinCreationError"
+                    - "PrivKeyNotAllowed"
+                    - "UnexpectedDerivationMethod"
+                error_data:
+                  oneOf:
+                    - type: string
+                    - type: object
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

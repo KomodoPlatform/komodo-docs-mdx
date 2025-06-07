@@ -1,82 +1,148 @@
-post:
-  operationId: "max_maker_vol"
-  tags:
-    - Swaps and Orders
-  summary: Get the maximum maker volume for a coin
-  description: |
-    Returns the maximum volume of a coin which can be used to create a maker order (taking into account estimated fees).
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [max_maker_vol]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              required:
-                - coin
-              properties:
-                coin:
-                  type: string
-                  description: The ticker of the coin you want to query.
-  responses:
-    '200':
-      description: Successful response with maker volume info
+/max_maker_vol:
+  post:
+    operationId: max_maker_vol
+    summary: Max Maker Volume
+    description: |
+      Returns the maximum volume of a coin which can be used to create a maker order (taking into account estimated fees).
+      If the coin is not activated, a NoSuchCoin error will be returned.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/swaps_and_orders/max_maker_vol/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
+              method:
+                type: string
+                enum: ["max_maker_vol"]
+                description: The method name
+                example: "max_maker_vol"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              result:
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
                 type: object
+                required:
+                  - coin
                 properties:
                   coin:
                     type: string
-                  volume:
-                    type: object
-                  balance:
-                    type: object
-                  locked_by_swaps:
-                    type: object
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mmrpc:
-                type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              error_data:
-                type: object
-              id:
-                nullable: true 
+                    description: The ticker of the coin you want to query
+                    example: "DOC"
+    responses:
+      '200':
+        description: Maximum maker volume retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    coin:
+                      type: string
+                      description: The ticker of the coin you queried
+                      example: "MARTY"
+                    volume:
+                      $ref: ../../components/schemas/Common.yaml#/NumericFormatsValue
+                      description: A standard NumericFormatsValue object representing the tradable maker volume
+                    balance:
+                      $ref: ../../components/schemas/Common.yaml#/NumericFormatsValue
+                      description: A standard NumericFormatsValue object representing the tradable balance
+                    locked_by_swaps:
+                      $ref: ../../components/schemas/Common.yaml#/NumericFormatsValue
+                      description: A standard NumericFormatsValue object representing the volume of a coin's balance which is locked by swaps in progress
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "No such coin TIME"
+                    - "Not enough QTUM for swap: available 0, required at least 0.000728, locked by swaps None"
+                    - "Transport error: JsonRpcError"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "max_maker_vol_rpc.lp_coins"
+                    - "max_maker_vol_rpc.maker_swap.utxo_common"
+                    - "taker_swap.utxo_common"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "max_maker_vol_rpc:140] lp_coins:2894]"
+                    - "max_maker_vol_rpc:148] maker_swap:2203] utxo_common:3327] utxo_common:892]"
+                    - "taker_swap:1599] utxo_common:1990] utxo_common:166]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "NoSuchCoin"
+                    - "NotSufficientBalance"
+                    - "Transport"
+                error_data:
+                  oneOf:
+                    - type: object
+                      properties:
+                        coin:
+                          type: string
+                    - type: object
+                      properties:
+                        coin:
+                          type: string
+                        available:
+                          type: string
+                        required:
+                          type: string
+                    - type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

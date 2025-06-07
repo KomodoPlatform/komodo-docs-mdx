@@ -1,0 +1,52 @@
+# OpenAPI path spec for orderbook_depth (v1)
+/api/v1/orderbook_depth:
+  post:
+    operationId: orderbook_depth
+    summary: Komodo DeFi Framework Method: Orderbook Depth
+    description: The orderbook_depth method returns the number of asks and bids for the specified trading pairs.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/orderbook_depth/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [orderbook_depth]
+                description: Method name (must be 'orderbook_depth').
+              pairs:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: string
+                description: An array of trading pairs.
+            required:
+              - userpass
+              - method
+              - pairs
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: array
+                  items:
+                    # TODO: Use $ref to PairDepth schema if/when available in components/schemas
+                    type: object
+                  description: An array of pair depth objects.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error 

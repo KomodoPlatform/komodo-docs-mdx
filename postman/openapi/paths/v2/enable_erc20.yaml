@@ -1,54 +1,150 @@
-openapi: 3.0.3
-info:
-  title: Enable ERC20
-  description: Activate additional ERC20 tokens of an EVM platform coin.
-  version: 1.0.0
-paths:
-  /enable_erc20:
-    post:
-      summary: Enable ERC20 token
-      operationId: "enable_erc20"
-      tags:
-        - Coin Activation
-      requestBody:
-        required: true
+/enable_erc20:
+  post:
+    operationId: enable_erc20
+    summary: Enable ERC20 Token
+    description: |
+      Allows you to activate additional ERC20 like tokens of a EVM type platform coin.
+      Before using this method, you first need to use the enable_eth_with_tokens method.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/enable_erc20/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["enable_erc20"]
+                description: The method name
+                example: "enable_erc20"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
+                type: object
+                required:
+                  - ticker
+                properties:
+                  ticker:
+                    type: string
+                    description: Ticker of the ERC20 like token coin
+                    example: "BAT-ERC20"
+                  activation_params:
+                    type: object
+                    description: Optional. Additional activation parameters
+                    properties:
+                      required_confirmations:
+                        type: integer
+                        description: Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set
+                        example: 3
+    responses:
+      '200':
+        description: ERC20 token enabled successfully
         content:
           application/json:
             schema:
               type: object
               properties:
-                userpass:
-                  type: string
-                method:
-                  type: string
-                  enum: [enable_erc20]
                 mmrpc:
                   type: string
-                params:
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
                   type: object
                   properties:
-                    ticker:
-                      type: string
-                    activation_params:
+                    balances:
                       type: object
-                      properties:
-                        required_confirmations:
-                          type: integer
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  mmrpc:
-                    type: string
-                  result:
-                    type: object
-                  id:
-                    type: string
-        '400':
-          description: Bad request
-        '500':
-          description: Internal server error 
+                      description: Object containing balance information for addresses
+                      additionalProperties:
+                        type: object
+                        properties:
+                          spendable:
+                            type: string
+                            description: Spendable balance amount
+                            example: "0"
+                          unspendable:
+                            type: string
+                            description: Unspendable balance amount
+                            example: "0"
+                    platform_coin:
+                      type: string
+                      description: The platform coin ticker
+                      example: "ETH"
+                    token_contract_address:
+                      type: string
+                      description: The smart contract address of the token
+                      example: "0x0d8775f648430679a709e98d2b0cb6250d2887ef"
+                    required_confirmations:
+                      type: integer
+                      description: Number of confirmations required for transactions
+                      example: 3
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "Platform coin ETH is not activated"
+                    - "Token BAT-ERC20 is already activated"
+                    - "Token BATT-ERC20 config is not found"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum: 
+                    - "PlatformCoinIsNotActivated"
+                    - "TokenIsAlreadyActivated"
+                    - "TokenConfigIsNotFound"
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

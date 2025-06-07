@@ -1,0 +1,44 @@
+# OpenAPI path spec for get_relay_mesh (v1)
+/api/v1/get_relay_mesh:
+  post:
+    operationId: get_relay_mesh
+    summary: Komodo DeFi Framework Method: Get Relay Mesh
+    description: The get_relay_mesh method returns a list of peerIDs included in our local relay mesh.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/get_relay_mesh/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [get_relay_mesh]
+                description: Method name (must be 'get_relay_mesh').
+            required:
+              - userpass
+              - method
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: array
+                  items:
+                    type: string
+                  description: PeerIDs within your local relay mesh.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

@@ -1,0 +1,83 @@
+# OpenAPI path spec for unban_pubkeys (v1)
+/api/v1/unban_pubkeys:
+  post:
+    operationId: unban_pubkeys
+    summary: Komodo DeFi Framework Method: Unban Pubkeys
+    description: The unban_pubkeys method will remove all currently banned pubkeys from your ban list, or specific pubkeys from a user defined list.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/unban_pubkeys/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [unban_pubkeys]
+                description: Method name (must be 'unban_pubkeys').
+              unban_by:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    description: '"All" to unban all pubkeys, or "Few" to provide a list of pubkeys to unban.'
+                    enum: [All, Few]
+                  data:
+                    type: array
+                    items:
+                      type: string
+                    description: 'A list of pubkeys to unban. Only required when type is "Few".'
+                required:
+                  - type
+                description: Unban criteria.
+            required:
+              - userpass
+              - method
+              - unban_by
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    still_banned:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          reason:
+                            type: string
+                      description: List of pubkeys which remain banned, with reason and type.
+                    unbanned:
+                      type: object
+                      additionalProperties:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                          reason:
+                            type: string
+                      description: List of pubkeys which were unbanned, with reason and type.
+                    were_not_banned:
+                      type: array
+                      items:
+                        type: string
+                      description: List of pubkeys which were not banned but requested to be unbanned.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

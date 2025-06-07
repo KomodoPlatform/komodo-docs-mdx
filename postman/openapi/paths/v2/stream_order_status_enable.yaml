@@ -1,77 +1,121 @@
-post:
-  operationId: "stream_order_status_enable"
-  tags:
-    - Streaming
-  summary: Enable order status streaming
-  description: |
-    Enables the order status stream to a specific client.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [stream::order_status::enable]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              required:
-                - client_id
-              properties:
-                client_id:
-                  type: integer
-                  description: Client ID for the stream.
-  responses:
-    '200':
-      description: Successful response with streamer_id
+/stream_order_status_enable:
+  post:
+    operationId: stream::order_status::enable
+    summary: Enable Order Status Streaming
+    description: |
+      Using this method, you can enable the order status stream for monitoring order events and status changes in real-time.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/streaming/order_status_enable/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
+              method:
+                type: string
+                enum: ["stream::order_status::enable"]
+                description: The method name
+                example: "stream::order_status::enable"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              result:
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
                 type: object
+                required:
+                  - client_id
                 properties:
-                  streamer_id:
-                    type: string
-                    description: Identifier for the data stream.
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mmrpc:
-                type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              error_data:
-                type: string
-              id:
-                nullable: true 
+                  client_id:
+                    type: integer
+                    description: This ID can be used to access data (e.g. via http://localhost:7783/event-stream?id=1)
+                    example: 1
+    responses:
+      '200':
+        description: Order status streaming enabled successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    streamer_id:
+                      type: string
+                      description: An identifier for the data stream
+                      example: "ORDER_STATUS"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "UnknownClient"
+                    - "ClientAlreadyListening"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "orders"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "orders:29]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "EnableError"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  examples:
+                    - "UnknownClient"
+                    - "ClientAlreadyListening"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

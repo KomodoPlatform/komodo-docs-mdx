@@ -1,0 +1,107 @@
+/remove_node_from_version_stat:
+  post:
+    operationId: remove_node_from_version_stat
+    summary: Remove Node from Version Stat
+    description: |
+      The remove_node_from_version_stat method removes a Node (by name) from the local database which tracks which version of KDF it is running.
+      The name parameter is an arbitrary identifying string, such as "seed_alpha" or "dragonhound_DEV".
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/utils/remove_node_from_version_stat/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["remove_node_from_version_stat"]
+                description: The method name
+                example: "remove_node_from_version_stat"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - name
+                properties:
+                  name:
+                    type: string
+                    description: The name assigned to the node to be removed (arbitrary identifying string)
+                    example: "dragonhound_DEV"
+    responses:
+      '200':
+        description: Node removed from version stat collection successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: string
+                  description: Success confirmation
+                  example: "success"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

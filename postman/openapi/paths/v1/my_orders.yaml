@@ -1,0 +1,56 @@
+# OpenAPI path spec for my_orders (v1)
+/api/v1/my_orders:
+  post:
+    operationId: my_orders
+    summary: Komodo DeFi Framework Method: My Orders
+    description: The my_orders method returns the data of all active orders created by the Komodo DeFi Framework API node.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/my_orders/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [my_orders]
+                description: Method name (must be 'my_orders').
+            required:
+              - userpass
+              - method
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    maker_orders:
+                      type: object
+                      additionalProperties:
+                        # TODO: Use $ref to Order schema if/when available in components/schemas
+                        type: object
+                      description: Orders that are currently active in market-maker mode.
+                    taker_orders:
+                      type: object
+                      additionalProperties:
+                        # TODO: Use $ref to Order schema if/when available in components/schemas
+                        type: object
+                      description: Orders that are currently active in market-taker mode.
+                  required:
+                    - maker_orders
+                    - taker_orders
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error 

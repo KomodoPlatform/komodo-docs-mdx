@@ -1,29 +1,130 @@
-post:
-  operationId: "lightning_payments_get_payment_details"
-  tags:
-    - Lightning Payments
-  summary: Get Lightning payment details
-  description: Returns details about a lightning payment from a given payment_hash.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            coin:
-              type: string
-              description: Ticker of the coin
-            payment_hash:
-              type: string
-              description: Payment hash to query
-  responses:
-    '200':
-      description: Payment details
+/lightning_payments_get_payment_details:
+  post:
+    operationId: lightning::payments::get_payment_details
+    summary: Get Lightning Payment Details
+    description: |
+      Returns details about a lightning payment from a given payment_hash.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/payments/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
-              payment_details:
-                type: object 
+              method:
+                type: string
+                enum: ["lightning::payments::get_payment_details"]
+                description: The method name
+                example: "lightning::payments::get_payment_details"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 1
+              params:
+                type: object
+                required:
+                  - coin
+                  - payment_hash
+                properties:
+                  coin:
+                    type: string
+                    description: Ticker of the coin to query
+                    example: "tBTC-lightning"
+                  payment_hash:
+                    type: string
+                    description: The hexadecimal string which identifies an invoice. The payment_hash is returned from a lightning::payments::send_payment request if the payment was sent by us, or from a lightning::payments::generate_invoice request if the payment is received (or will be received) by us
+                    example: "414f9b3524fc4e48c99f2723952732d8bc2eba1b35ce3bf2a70f5144b40f599e"
+    responses:
+      '200':
+        description: Payment details retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    payment_details:
+                      $ref: ../../components/schemas/Lightning.yaml#/LightningPaymentDetails
+                      description: Detailed information about the payment
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 1
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "Payment with hash: 414f9b3524fc4e48c99f2723952732d8bc2eba1b35ce3bf2a70f5144b40f599e is not found"
+                    - "Error parsing request: invalid value: string '', expected a hash string"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "get_payment_details"
+                    - "dispatcher"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "get_payment_details:75]"
+                    - "dispatcher:109]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "NoSuchPayment"
+                    - "InvalidRequest"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  examples:
+                    - "414f9b3524fc4e48c99f2723952732d8bc2eba1b35ce3bf2a70f5144b40f599e"
+                    - "invalid value: string '', expected a hash string"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer

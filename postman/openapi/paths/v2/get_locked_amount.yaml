@@ -1,78 +1,128 @@
-post:
-  operationId: "get_locked_amount"
-  tags:
-    - Swaps and Orders
-  summary: Get the amount of a coin currently locked by a swap
-  description: |
-    Returns the amount of a coin which is currently locked by a swap in progress.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [get_locked_amount]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              required:
-                - coin
-              properties:
-                coin:
-                  type: string
-                  description: The ticker of the coin you want to query.
-  responses:
-    '200':
-      description: Successful response with locked amount info
+/get_locked_amount:
+  post:
+    operationId: get_locked_amount
+    summary: Get Locked Amount
+    description: |
+      The get_locked_amount method returns the amount of a coin which is currently locked by a swap which is in progress. 
+      If the coin is not activated, a NoSuchCoin error will be returned.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/swaps_and_orders/get_locked_amount/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
+              method:
+                type: string
+                enum: ["get_locked_amount"]
+                description: The method name
+                example: "get_locked_amount"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              result:
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 42
+              params:
                 type: object
+                required:
+                  - coin
                 properties:
                   coin:
                     type: string
-                  locked_amount:
-                    type: object
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mmrpc:
-                type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              error_data:
-                type: object
-              id:
-                nullable: true 
+                    description: The ticker of the coin you want to query
+                    example: "DOC"
+    responses:
+      '200':
+        description: Locked amount retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    coin:
+                      type: string
+                      description: The ticker of the coin you queried
+                      example: "DOC"
+                    locked_amount:
+                      $ref: ../../components/schemas/Common.yaml#/NumericFormatsValue
+                      description: An object containing the locked amount in decimal, fraction and rational formats
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 42
+      '400':
+        description: Bad request - Coin not found or other errors
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "No such coin: TIME"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "lp_swap.lp_coins"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "lp_swap:486] lp_coins:2894]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "NoSuchCoin"
+                error_data:
+                  type: object
+                  description: Additional error data with coin details
+                  properties:
+                    coin:
+                      type: string
+                      example: "TIME"
+                id:
+                  type: integer
+                  example: 42
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

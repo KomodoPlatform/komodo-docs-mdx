@@ -1,0 +1,58 @@
+/version:
+  post:
+    operationId: version
+    summary: Get API Version
+    description: |
+      Returns the Komodo DeFi Framework API version.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/legacy/version/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+            properties:
+              method:
+                type: string
+                enum: ["version"]
+                description: The method name
+                example: "version"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+    responses:
+      '200':
+        description: Version retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: string
+                  description: The Komodo DeFi Framework API version
+                  example: "2.0.996_mm2_3bb412578_Linux"
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing the internal error 

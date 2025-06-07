@@ -1,37 +1,142 @@
-post:
-  operationId: "lightning_channels_list_open_channels_by_filter"
-  tags:
-    - Lightning Channels
-  summary: List open Lightning channels by filter
-  description: Returns a list of open channels filtered by the provided filter object.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            coin:
-              type: string
-              description: The ticker of the coin
-            filter:
-              type: object
-              description: Optional. Filter object
-            paging_options:
-              type: object
-              description: Optional. Pagination options
-            limit:
-              type: integer
-              description: Optional. Max number of results
-  responses:
-    '200':
-      description: List of open channels
+/lightning_channels_list_open_channels_by_filter:
+  post:
+    operationId: lightning::channels::list_open_channels_by_filter
+    summary: List Open Channels by Filter
+    description: |
+      Returns a list of open Lightning Network channels filtered by the provided filter object.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/channels/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
-              open_channels:
-                type: array
-                items:
-                  type: object 
+              method:
+                type: string
+                enum: ["lightning::channels::list_open_channels_by_filter"]
+                description: The method name
+                example: "lightning::channels::list_open_channels_by_filter"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 55
+              params:
+                type: object
+                required:
+                  - coin
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin you would like to view open channels for
+                    example: "tBTC-lightning"
+                  filter:
+                    $ref: ../../components/schemas/Lightning.yaml#/LightningOpenChannelsFilter
+                    description: A standard LightningOpenChannelsFilter object
+                  paging_options:
+                    $ref: ../../components/schemas/Common.yaml#/Pagination
+                    description: Optional. A standard Pagination object
+                  limit:
+                    type: integer
+                    description: Optional, defaults to 10. Maximum number of results to return
+                    default: 10
+                    example: 10
+    responses:
+      '200':
+        description: Open channels retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    open_channels:
+                      type: array
+                      items:
+                        $ref: ../../components/schemas/Lightning.yaml#/LightningOpenChannelDetails
+                      description: List of open channel details
+                    limit:
+                      type: integer
+                      description: The limit that was set in the request
+                      example: 10
+                    skipped:
+                      type: integer
+                      description: Number of skipped records
+                      example: 0
+                    total:
+                      type: integer
+                      description: Total number of channels available with the selected filters
+                      example: 1
+                    total_pages:
+                      type: integer
+                      description: Total pages available with the selected filters and limit
+                      example: 1
+                    paging_options:
+                      $ref: ../../components/schemas/Common.yaml#/PagingOptions
+                      description: The paging options used
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 55
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

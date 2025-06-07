@@ -1,0 +1,175 @@
+/task_enable_tendermint_init:
+  post:
+    operationId: task::enable_tendermint::init
+    summary: Initialize Tendermint Activation Task
+    description: |
+      Use this method for task managed activation of Tendermint coins & tokens.
+      Refer to the task managed activation overview for activation of other coin types.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_tendermint/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["task::enable_tendermint::init"]
+                description: The method name
+                example: "task::enable_tendermint::init"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - ticker
+                properties:
+                  ticker:
+                    type: string
+                    enum: ["ATOM", "IRIS", "OSMOSIS"]
+                    description: Ticker of the platform protocol coin
+                    example: "IRIS"
+                  mm2:
+                    type: integer
+                    enum: [0, 1]
+                    description: Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function
+                    example: 1
+                  tokens_params:
+                    type: array
+                    items:
+                      $ref: ../../components/schemas/Activation.yaml#/TokensRequest
+                    description: A list of standard TokensRequest objects
+                    example:
+                      - ticker: "ATOM-IBC_IRIS"
+                  nodes:
+                    type: array
+                    items:
+                      $ref: ../../components/schemas/Activation.yaml#/CoinNode
+                    description: A list of CoinNode objects
+                  priv_key_policy:
+                    type: string
+                    enum: ["ContextPrivKey", "Trezor", "Metamask"]
+                    description: Optional, defaults to ContextPrivKey. Private key policy to use
+                    default: "ContextPrivKey"
+                    example: "ContextPrivKey"
+                  tx_history:
+                    type: boolean
+                    description: Optional, defaults to false. If true the Komodo DeFi Framework API will preload transaction history as a background process
+                    default: false
+                    example: false
+                  required_confirmations:
+                    type: integer
+                    description: Optional, defaults to 3. When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during atomic swap transaction steps
+                    default: 3
+                    example: 3
+                  requires_notarization:
+                    type: boolean
+                    description: Optional, defaults to false. If true, coins protected by Komodo Platform's dPoW security will wait for a notarization before progressing to the next atomic swap transaction step
+                    default: false
+                    example: false
+                  get_balances:
+                    type: boolean
+                    description: Optional, defaults to true. If false, coin and token balances will not be returned in the response, and the response will be returned more quickly
+                    default: true
+                    example: true
+    responses:
+      '200':
+        description: Task initialization successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    task_id:
+                      type: integer
+                      description: An identifying number which is used to query task status
+                      example: 2
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "Platform WALDO config is not found"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "platform_coin_with_tokens.prelude"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "platform_coin_with_tokens:302] prelude:79]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "CoinProtocolParseError"
+                    - "InternalError"
+                    - "PlatformCoinCreationError"
+                    - "PlatformConfigIsNotFound"
+                    - "PlatformIsAlreadyActivated"
+                    - "PrivKeyNotAllowed"
+                    - "TokenConfigIsNotFound"
+                    - "TokenProtocolParseError"
+                    - "Transport"
+                    - "UnexpectedDerivationMethod"
+                    - "UnexpectedPlatformProtocol"
+                    - "UnexpectedTokenProtocol"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  examples:
+                    - "WALDO"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

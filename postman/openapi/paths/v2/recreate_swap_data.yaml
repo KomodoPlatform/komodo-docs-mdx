@@ -1,76 +1,110 @@
-post:
-  operationId: "recreate_swap_data"
-  tags:
-    - Swaps and Orders
-  summary: Recreate lost swap data
-  description: |
-    Helps recover lost swap data due to storage errors or hardware failure, and can aid with refunding failed swaps.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [recreate_swap_data]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              required:
-                - swap
-              properties:
-                swap:
-                  type: object
-                  description: Swap data from other side of trade.
-  responses:
-    '200':
-      description: Successful response with recreated swap data
+/recreate_swap_data:
+  post:
+    operationId: recreate_swap_data
+    summary: Recreate Swap Data
+    description: |
+      The recreate_swap_data can assist in the event of local stored swap data being lost due to storage errors related to low disk space or hardware failure, and if required, aid with the refunding of failed swaps.
+      To source the opposite side of the trade, please contact the Komodo Support team on Discord. You will need to provide details about the trade you are trying to recover.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/swaps_and_orders/recreate_swap_data/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
+              method:
+                type: string
+                enum: ["recreate_swap_data"]
+                description: The method name
+                example: "recreate_swap_data"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              result:
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
                 type: object
+                required:
+                  - swap
                 properties:
                   swap:
-                    type: object
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mmrpc:
-                type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              error_data:
-                type: object
-              id:
-                nullable: true 
+                    $ref: ../../components/schemas/Swaps.yaml#/SwapStatusData
+                    description: Swap data from other side of trade. For example to recreate a Maker's swap data, the input would be the corresponding Taker's swap data
+    responses:
+      '200':
+        description: Swap data recreated successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    swap:
+                      $ref: ../../components/schemas/Swaps.yaml#/SwapStatusData
+                      description: Opposite side's swap data. For example if a Taker's swap data is input, the response would be the corresponding Maker's swap data
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

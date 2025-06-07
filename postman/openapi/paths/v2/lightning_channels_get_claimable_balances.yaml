@@ -1,26 +1,114 @@
-post:
-  operationId: "lightning_channels_get_claimable_balances"
-  tags:
-    - Lightning Channels
-  summary: Get claimable Lightning channel balances
-  description: Returns a list of claimable balances for a coin.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          properties:
-            coin:
-              type: string
-              description: The ticker of the coin
-            include_open_channels_balances:
-              type: boolean
-              description: Optional. Include balances from open channels
-  responses:
-    '200':
-      description: Claimable balances
+/lightning_channels_get_claimable_balances:
+  post:
+    operationId: lightning::channels::get_claimable_balances
+    summary: Get Claimable Balances
+    description: |
+      Returns a list of claimable balances for a Lightning Network coin.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/channels/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
-            type: object 
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["lightning::channels::get_claimable_balances"]
+                description: The method name
+                example: "lightning::channels::get_claimable_balances"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 762
+              params:
+                type: object
+                required:
+                  - coin
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin you would like to view claimable balances for
+                    example: "tBTC-lightning"
+                  include_open_channels_balances:
+                    type: boolean
+                    description: Optional, defaults to false. If true, includes balances from open channels
+                    default: false
+                    example: true
+    responses:
+      '200':
+        description: Claimable balances retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: array
+                  items:
+                    $ref: ../../components/schemas/Lightning.yaml#/LightningClaimableBalance
+                  description: List of claimable balances
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 762
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

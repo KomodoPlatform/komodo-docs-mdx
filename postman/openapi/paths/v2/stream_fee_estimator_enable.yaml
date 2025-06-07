@@ -1,84 +1,152 @@
-post:
-  operationId: "stream_fee_estimator_enable"
-  tags:
-    - Streaming
-  summary: Enable fee estimator streaming for a coin
-  description: |
-    Enables the fee estimation stream for a coin or token to a specific client.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [stream::fee_estimator::enable]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              required:
-                - client_id
-                - coin
-              properties:
-                client_id:
-                  type: integer
-                  description: Client ID for the stream.
-                coin:
-                  type: string
-                  description: The coin or token to enable the fee estimation stream for.
-                config:
-                  type: object
-                  description: Optional. Fee estimator config object.
-  responses:
-    '200':
-      description: Successful response with streamer_id
+/stream_fee_estimator_enable:
+  post:
+    operationId: stream::fee_estimator::enable
+    summary: Enable Fee Estimator Streaming
+    description: |
+      Using this method, you can enable the fee estimation stream. 
+      For requesting fee estimates without streaming, use get_eth_estimated_fee_per_gas.
+      Currently only EVM coins/tokens (e.g. BNB, ETH, MATIC, AVAX) support fee estimation.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/streaming/fee_estimator/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
+              method:
+                type: string
+                enum: ["stream::fee_estimator::enable"]
+                description: The method name
+                example: "stream::fee_estimator::enable"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              result:
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
                 type: object
+                required:
+                  - client_id
+                  - coin
                 properties:
-                  streamer_id:
+                  client_id:
+                    type: integer
+                    description: This ID can be used to access data (e.g. via http://localhost:7783/event-stream?id=1)
+                    example: 1
+                  coin:
                     type: string
-                    description: Identifier for the data stream.
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mmrpc:
-                type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              error_data:
-                type: string
-              id:
-                nullable: true 
+                    description: The coin or token to enable the fee estimation stream for
+                    example: "MATIC"
+                  config:
+                    type: object
+                    description: Optional configuration for fee estimation
+                    properties:
+                      estimate_every:
+                        type: number
+                        description: Time interval for estimates in seconds
+                        example: 33.4
+                      estimator_type:
+                        type: string
+                        enum: ["Simple", "Provider"]
+                        description: Type of estimator to use
+                        example: "Provider"
+    responses:
+      '200':
+        description: Fee estimator streaming enabled successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    streamer_id:
+                      type: string
+                      description: An identifier for the data stream
+                      example: "FEE_ESTIMATION:MATIC"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "CoinNotFound"
+                    - "CoinNotSupported"
+                    - "UnknownClient"
+                    - "ClientAlreadyListening"
+                    - "Error parsing request: unknown variant `Complex`, expected `Simple` or `Provider`"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "fee_estimation"
+                    - "dispatcher"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "fee_estimation:42]"
+                    - "fee_estimation:56]"
+                    - "fee_estimation:54]"
+                    - "dispatcher:122]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "CoinNotFound"
+                    - "CoinNotSupported"
+                    - "EnableError"
+                    - "InvalidRequest"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  examples:
+                    - "UnknownClient"
+                    - "ClientAlreadyListening"
+                    - "unknown variant `Complex`, expected `Simple` or `Provider`"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

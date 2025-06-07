@@ -1,92 +1,137 @@
-post:
-  operationId: "best_orders"
-  tags:
-    - Swaps and Orders
-  summary: Get the best priced trades available on the orderbook
-  description: |
-    Returns the best priced trades available on the orderbook. Can request by volume or by number of results.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          type: object
-          required:
-            - userpass
-            - method
-            - mmrpc
-            - params
-          properties:
-            userpass:
-              type: string
-              description: The API key for authentication.
-            method:
-              type: string
-              enum: [best_orders]
-              description: The RPC method name.
-            mmrpc:
-              type: string
-              enum: ["2.0"]
-              description: The MMRPC version.
-            params:
-              type: object
-              required:
-                - coin
-                - action
-                - request_by
-              properties:
-                coin:
-                  type: string
-                  description: The ticker of the coin to get best orders.
-                action:
-                  type: string
-                  enum: [buy, sell]
-                  description: Whether to buy or sell the selected coin.
-                exclude_mine:
-                  type: boolean
-                  description: Defaults to false. If true, the user's orders will be excluded from the response.
-                request_by:
-                  type: object
-                  description: A RequestBy object specifying type (number or volume) and value.
-  responses:
-    '200':
-      description: Successful response with best orders info
+/best_orders:
+  post:
+    operationId: best_orders
+    summary: Get Best Orders
+    description: |
+      Returns the best priced trades available on the orderbook.
+      There are two options for the request: either by volume or by number.
+      The response can contain coins that are not activated on the Komodo DeFi Framework API instance.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/swaps_and_orders/best_orders/index.mdx
+    requestBody:
+      required: true
       content:
         application/json:
           schema:
             type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
             properties:
+              method:
+                type: string
+                enum: ["best_orders"]
+                description: The method name
+                example: "best_orders"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
               mmrpc:
                 type: string
-              result:
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
                 type: object
+                required:
+                  - coin
+                  - action
+                  - request_by
                 properties:
-                  orders:
-                    type: object
-                  original_tickers:
-                    type: array
-                    items:
-                      type: string
-              id:
-                nullable: true
-    '400':
-      description: Error response
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              mmrpc:
-                type: string
-              error:
-                type: string
-              error_path:
-                type: string
-              error_trace:
-                type: string
-              error_type:
-                type: string
-              error_data:
-                type: object
-              id:
-                nullable: true 
+                  coin:
+                    type: string
+                    description: The ticker of the coin to get best orders
+                    example: "DGB"
+                  action:
+                    type: string
+                    enum: ["buy", "sell"]
+                    description: Whether to buy or sell the selected coin
+                    example: "buy"
+                  exclude_mine:
+                    type: boolean
+                    description: Defaults to false. If true, the users orders will be excluded from the response
+                    default: false
+                    example: false
+                  request_by:
+                    $ref: ../../components/schemas/Orders.yaml#/RequestBy
+                    description: A standard RequestBy object
+    responses:
+      '200':
+        description: Best orders retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    orders:
+                      type: object
+                      description: The ticker -> array of standard OrderData objects map
+                      additionalProperties:
+                        type: array
+                        items:
+                          $ref: ../../components/schemas/Orders.yaml#/OrderData
+                    original_tickers:
+                      type: array
+                      items:
+                        type: string
+                      description: Tickers included in response when orderbook_ticker is configured for the queried coin in coins file
+                      example: ["DGB"]
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 
