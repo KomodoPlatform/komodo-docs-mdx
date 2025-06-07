@@ -1,0 +1,75 @@
+/validateaddress:
+  post:
+    operationId: validateaddress
+    summary: Validate Address
+    description: |
+      Checks if an input string is a valid address of the specified coin.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/legacy/validateaddress/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - coin
+              - address
+              - userpass
+            properties:
+              method:
+                type: string
+                enum: ["validateaddress"]
+                description: The method name
+                example: "validateaddress"
+              coin:
+                type: string
+                description: The coin to validate address for
+                example: "DOC"
+              address:
+                type: string
+                description: The input string to validate
+                example: "RRnMcSeKiLrNdbp91qNVQwwXx5azD4S4CD"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+    responses:
+      '200':
+        description: Address validation completed
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    is_valid:
+                      type: boolean
+                      description: Whether input string is a valid coin address
+                      example: true
+                    reason:
+                      type: string
+                      description: Only present if not valid. The reason why input string is not a valid address
+                      example: "utxo:415] Checksum verification failed"
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing the internal error 

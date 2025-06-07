@@ -1,0 +1,144 @@
+/add_delegation:
+  post:
+    operationId: add_delegation
+    summary: Add Delegation
+    description: |
+      The add_delegation method initiates your node's staking of a compatible coin.
+      Currently QTUM and tQTUM have been integrated, but this functionality will be expanded to more coins in future.
+      Note: Only UTXOs of 100 QTUM / tQTUM will be actively staked. After running add_delegation, you will need to broadcast the returned hex via send_raw_transaction to complete the process.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/wallet/staking/add_delegation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["add_delegation"]
+                description: The method name
+                example: "add_delegation"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
+                type: object
+                required:
+                  - coin
+                  - staking_details
+                properties:
+                  coin:
+                    type: string
+                    enum: ["QTUM", "tQTUM"]
+                    description: The coin being staked
+                    example: "tQTUM"
+                  staking_details:
+                    type: object
+                    required:
+                      - type
+                      - address
+                    properties:
+                      type:
+                        type: string
+                        enum: ["Qtum"]
+                        description: The protocol being staked
+                        example: "Qtum"
+                      address:
+                        type: string
+                        description: The delegated staker address (must be legacy QTUM address, not segwit)
+                        example: "qcyBHeSct7Wr4mAw18iuQ1zW5mMFYmtmBE"
+    responses:
+      '200':
+        description: Delegation transaction created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  allOf:
+                    - $ref: ../../components/schemas/Wallet.yaml#/TransactionDetails
+                    - type: object
+                      properties:
+                        transaction_type:
+                          type: string
+                          enum: ["StakingDelegation"]
+                          description: Type of transaction
+                          example: "StakingDelegation"
+                  description: Transaction details for the delegation transaction
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Already delegating or other errors
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "Already delegating to: qcyBHeSct7Wr4mAw18iuQ1zW5mMFYmtmBE"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "qtum_delegation"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "qtum_delegation:222]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "AlreadyDelegating"
+                error_data:
+                  type: string
+                  description: The address already being delegated to
+                  example: "qcyBHeSct7Wr4mAw18iuQ1zW5mMFYmtmBE"
+                id:
+                  type: integer
+                  example: 0
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

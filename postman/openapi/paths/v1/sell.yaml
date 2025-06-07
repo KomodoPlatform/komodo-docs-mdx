@@ -1,0 +1,256 @@
+/sell:
+  post:
+    operationId: sell
+    summary: Sell Order
+    description: |
+      Issues a sell request and attempts to match an order from the orderbook based on the provided arguments.
+      Buy and sell methods always create the taker order first. A taker order must pay a dexfee during the swap.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/legacy/sell/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - userpass
+              - method
+              - base
+              - rel
+              - price
+              - volume
+            properties:
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              method:
+                type: string
+                enum: ["sell"]
+                description: The method name
+                example: "sell"
+              base:
+                type: string
+                description: The name of the coin the user desires to sell
+                example: "DOC"
+              rel:
+                type: string
+                description: The name of the coin the user desires to receive
+                example: "MARTY"
+              price:
+                oneOf:
+                  - type: string
+                    description: Price as decimal string
+                    example: "1.1"
+                  - type: number
+                    description: Price as number
+                    example: 1.1
+                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                  - type: object
+                    description: Price as fractional value
+                    properties:
+                      numer:
+                        type: string
+                        example: "2"
+                      denom:
+                        type: string
+                        example: "1"
+                description: The amount of rel coins the user wants to receive for each unit of the base coin spent
+              volume:
+                oneOf:
+                  - type: string
+                    description: Volume as decimal string
+                    example: "2.4"
+                  - type: number
+                    description: Volume as number
+                    example: 2.4
+                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                  - type: object
+                    description: Volume as fractional value
+                    properties:
+                      numer:
+                        type: string
+                        example: "3"
+                      denom:
+                        type: string
+                        example: "2"
+                description: The maximum amount of base coin available for sale in the order, ignored if max is true
+              min_volume:
+                oneOf:
+                  - type: string
+                    description: Min volume as decimal string
+                  - type: number
+                    description: Min volume as number
+                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                  - type: object
+                    description: Min volume as fractional value
+                    properties:
+                      numer:
+                        type: string
+                      denom:
+                        type: string
+                description: The amount of base coin that will be used as min_volume of GoodTillCancelled order after conversion to maker
+              match_by:
+                type: object
+                description: Optional. A standard MatchBy object, to filter to include only matches by pubkey or uuid
+                oneOf:
+                  - type: object
+                    description: Match any orders
+                    properties:
+                      type:
+                        type: string
+                        enum: ["Any"]
+                        example: "Any"
+                  - type: object
+                    description: Match by specific pubkeys
+                    properties:
+                      type:
+                        type: string
+                        enum: ["Pubkeys"]
+                        example: "Pubkeys"
+                      data:
+                        type: array
+                        items:
+                          type: string
+                        example: ["1ab7edc96abaefb358b52c583048eaaeb8ea42609d096d6cddfafa02fa510c6a"]
+                  - type: object
+                    description: Match by specific order UUIDs
+                    properties:
+                      type:
+                        type: string
+                        enum: ["Orders"]
+                        example: "Orders"
+                      data:
+                        type: array
+                        items:
+                          type: string
+                        example: ["d14452bb-e82d-44a0-86b0-10d4cdcb8b24"]
+              order_type:
+                type: object
+                description: Optional. A standard OrderType object
+                oneOf:
+                  - type: object
+                    description: Good Till Cancelled order
+                    properties:
+                      type:
+                        type: string
+                        enum: ["GoodTillCancelled"]
+                        example: "GoodTillCancelled"
+                  - type: object
+                    description: Fill Or Kill order
+                    properties:
+                      type:
+                        type: string
+                        enum: ["FillOrKill"]
+                        example: "FillOrKill"
+              base_confs:
+                type: integer
+                description: Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set
+                example: 2
+              base_nota:
+                type: boolean
+                description: Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set
+                example: true
+              rel_confs:
+                type: integer
+                description: Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set
+                example: 5
+              rel_nota:
+                type: boolean
+                description: Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set
+                example: false
+              save_in_history:
+                type: boolean
+                description: Defaults to true. If set to false no order history will be saved
+                default: true
+                example: true
+    responses:
+      '200':
+        description: Sell order created successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    action:
+                      type: string
+                      description: The action of the request (Sell)
+                      example: "Sell"
+                    base:
+                      type: string
+                      description: The base currency of the request
+                      example: "BASE"
+                    base_amount:
+                      type: string
+                      description: The resulting amount of base currency that is sold if the order matches, represented as a decimal value
+                      example: "1"
+                    base_amount_rat:
+                      $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      description: The resulting amount of base currency that is sold if the order matches, as a rational value
+                    rel:
+                      type: string
+                      description: The rel currency of the request
+                      example: "REL"
+                    rel_amount:
+                      type: string
+                      description: The minimum amount of rel coin that must be received in order to sell the base_amount of base
+                      example: "1"
+                    rel_amount_rat:
+                      $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      description: The minimum amount of rel coin that must be received as a rational value
+                    method:
+                      type: string
+                      description: This field is used for internal P2P interactions; the value is always equal to "request"
+                      example: "request"
+                    dest_pub_key:
+                      type: string
+                      description: Reserved for future use. The dest_pub_key allows the user to choose the P2P node that is eligible to match with the request
+                      example: "0000000000000000000000000000000000000000000000000000000000000000"
+                    sender_pubkey:
+                      type: string
+                      description: The public key of our node
+                      example: "c213230771ebff769c58ade63e8debac1b75062ead66796c8d793594005f3920"
+                    uuid:
+                      type: string
+                      description: The request uuid
+                      example: "d14452bb-e82d-44a0-86b0-10d4cdcb8b24"
+                    match_by:
+                      type: object
+                      description: A standard MatchBy object, to filter to include only matches by pubkey or uuid
+                    conf_settings:
+                      $ref: ../../components/schemas/Orders.yaml#/ConfSettings
+                      description: A standard ConfSettings object
+                    base_orderbook_ticker:
+                      type: string
+                      nullable: true
+                      description: The ticker of the base currency if orderbook_ticker is configured for the base currency in coins file
+                      example: null
+                    rel_orderbook_ticker:
+                      type: string
+                      nullable: true
+                      description: The ticker of the rel currency if orderbook_ticker is configured for the rel currency in coins file
+                      example: null
+      '400':
+        description: Bad request - Invalid parameters or insufficient balance
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  example: "rpc:278] utxo:884] BASE balance 12.88892991 is too low, required 21.15"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  description: Error message describing the internal error 

@@ -1,0 +1,108 @@
+/task_enable_utxo_cancel:
+  post:
+    operationId: task::enable_utxo::cancel
+    summary: Cancel UTXO Coin Activation Task
+    description: |
+      Cancel a running UTXO coin activation task.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_utxo/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["task::enable_utxo::cancel"]
+                description: The method name
+                example: "task::enable_utxo::cancel"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
+                type: object
+                required:
+                  - task_id
+                properties:
+                  task_id:
+                    type: integer
+                    description: The identifying number returned when initiating the activation process
+                    example: 1
+    responses:
+      '200':
+        description: Task cancelled successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: string
+                  description: Returns with value 'success' when successful
+                  example: "success"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Invalid parameters or task not found
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Used for debugging. A reference to the function in code base which returned the error
+                error_trace:
+                  type: string
+                  description: Used for debugging. A trace of lines of code which led to the returned error
+                error_type:
+                  type: string
+                  description: An enumerated error identifier to indicate the category of error
+                error_data:
+                  type: string
+                  description: Additional context for the error type
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

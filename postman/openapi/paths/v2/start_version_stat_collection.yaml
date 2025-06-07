@@ -1,0 +1,116 @@
+/start_version_stat_collection:
+  post:
+    operationId: start_version_stat_collection
+    summary: Start Version Stat Collection
+    description: |
+      The start_version_stat_collection method initiates storing version statistics for nodes previously registered via the add_node_to_version_stat method.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/utils/start_version_stat_collection/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["start_version_stat_collection"]
+                description: The method name
+                example: "start_version_stat_collection"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - interval
+                properties:
+                  interval:
+                    type: integer
+                    description: Polling rate (in seconds) to check node versions
+                    example: 600
+    responses:
+      '200':
+        description: Version stat collection started successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: string
+                  description: Success confirmation
+                  example: "success"
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Database or other errors
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "Database error: UNIQUE constraint failed: nodes.peer_id"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "lp_stats"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "lp_stats:124]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "DatabaseError"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  examples:
+                    - "UNIQUE constraint failed: nodes.peer_id"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

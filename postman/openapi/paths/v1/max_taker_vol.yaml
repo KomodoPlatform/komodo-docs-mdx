@@ -1,0 +1,52 @@
+# OpenAPI path spec for max_taker_vol (v1)
+/api/v1/max_taker_vol:
+  post:
+    operationId: max_taker_vol
+    summary: Komodo DeFi Framework Method: Max Taker Vol
+    description: The max_taker_vol method returns the maximum available volume for buy/sell methods for selected coin.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/max_taker_vol/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [max_taker_vol]
+                description: Method name (must be 'max_taker_vol').
+              coin:
+                type: string
+                description: The name of the coin to retrieve the max available taker volume.
+            required:
+              - userpass
+              - method
+              - coin
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                      description: Denominator of the max available taker volume (FractionalValue).
+                    numer:
+                      type: string
+                      description: Numerator of the max available taker volume (FractionalValue).
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to FractionalValue schema if/when available in components/schemas 

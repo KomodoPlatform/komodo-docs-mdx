@@ -1,0 +1,69 @@
+# OpenAPI path spec for kmd_rewards_info (v1)
+/api/v1/kmd_rewards_info:
+  post:
+    operationId: kmd_rewards_info
+    summary: Komodo DeFi Framework Method: KMD Rewards Info
+    description: The kmd_rewards_info method returns information about the active user rewards that can be claimed by an address's unspent outputs.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/kmd_rewards_info/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [kmd_rewards_info]
+                description: Method name (must be 'kmd_rewards_info').
+            required:
+              - userpass
+              - method
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      tx_hash:
+                        type: string
+                        description: The hash of the transaction.
+                      height:
+                        type: integer
+                        description: The height of the block in which the transaction was included (optional).
+                      output_index:
+                        type: integer
+                        description: The zero-based index of the output in the transaction's list of outputs.
+                      amount:
+                        type: string
+                        description: The transaction output's value.
+                      locktime:
+                        type: integer
+                        description: The transaction output's locktime.
+                      accrued_rewards:
+                        type: object
+                        description: The amount of accrued rewards if they exist or the reason for their non existence.
+                      accrue_start_at:
+                        type: integer
+                        description: The rewards start to accrue at this time for the given transaction (optional).
+                      accrue_stop_at:
+                        type: integer
+                        description: The rewards stop to accrue at this time for the given transaction (optional).
+                  description: The rewards info for each unspent output.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

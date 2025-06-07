@@ -1,0 +1,46 @@
+# OpenAPI path spec for get_directly_connected_peers (v1)
+/api/v1/get_directly_connected_peers:
+  post:
+    operationId: get_directly_connected_peers
+    summary: Komodo DeFi Framework Method: Get Peers Info
+    description: The get_directly_connected_peers method returns an array of peers (with their multiaddresses) currently connected to the requesting node.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/get_directly_connected_peers/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [get_directly_connected_peers]
+                description: Method name (must be 'get_directly_connected_peers').
+            required:
+              - userpass
+              - method
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: string
+                  description: All connected peers with their multiaddresses.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

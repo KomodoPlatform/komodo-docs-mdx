@@ -1,0 +1,50 @@
+# OpenAPI path spec for convert_utxo_address (v1)
+/api/v1/convert_utxo_address:
+  post:
+    operationId: convert_utxo_address
+    summary: Komodo DeFi Framework Method: Convert utxo Address
+    description: The convert_utxo_address method takes a UTXO address as input, and returns the equivalent address for another UTXO coin.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/convert_utxo_address/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [convert_utxo_address]
+                description: Method name (must be 'convert_utxo_address').
+              address:
+                type: string
+                description: Input UTXO address.
+              to_coin:
+                type: string
+                description: Input address to convert from.
+            required:
+              - userpass
+              - method
+              - address
+              - to_coin
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: string
+                  description: Converted address.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

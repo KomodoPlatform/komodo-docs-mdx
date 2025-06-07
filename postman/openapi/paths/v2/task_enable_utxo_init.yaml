@@ -1,0 +1,164 @@
+/task_enable_utxo_init:
+  post:
+    operationId: task::enable_utxo::init
+    summary: Initialize UTXO Coin Activation Task
+    description: |
+      Task managed activation of UTXO coins like KMD, LTC, BTC & DOGE.
+      This method initializes the activation process which can be monitored via status calls.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_utxo/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["task::enable_utxo::init"]
+                description: The method name
+                example: "task::enable_utxo::init"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
+                type: object
+                required:
+                  - ticker
+                  - activation_params
+                properties:
+                  ticker:
+                    type: string
+                    description: The ticker of the coin you want to enable
+                    example: "KMD"
+                  activation_params:
+                    type: object
+                    required:
+                      - mode
+                    properties:
+                      priv_key_policy:
+                        type: string
+                        enum: ["ContextPrivKey", "Trezor"]
+                        description: Defaults to ContextPrivKey. Set as Trezor to activate in Trezor mode
+                        default: "ContextPrivKey"
+                        example: "Trezor"
+                      min_addresses_number:
+                        type: integer
+                        description: How many additional addresses to generate at a minimum
+                        example: 3
+                      scan_policy:
+                        type: string
+                        enum: ["do_not_scan", "scan_if_new_wallet", "scan"]
+                        description: Whether or not to scan for new addresses
+                        example: "scan_if_new_wallet"
+                      gap_limit:
+                        type: integer
+                        description: The max number of empty addresses in a row
+                        example: 20
+                      mode:
+                        type: object
+                        description: An object containing RPC type and data parameters
+                        required:
+                          - rpc
+                        properties:
+                          rpc:
+                            type: string
+                            enum: ["Native", "Electrum"]
+                            description: UTXO RPC mode. Native for blockchain node, Electrum for electrum RPCs
+                            example: "Electrum"
+                          rpc_data:
+                            type: object
+                            description: An object containing electrum server information (required for Electrum mode)
+                            properties:
+                              servers:
+                                type: array
+                                description: A list of electrum server URLs
+                                items:
+                                  type: object
+                                  properties:
+                                    url:
+                                      type: string
+                                      description: The url and port of a coins electrum server
+                                      example: "electrum2.cipig.net:10001"
+                                    ws_url:
+                                      type: string
+                                      description: Optional. Used to define electrum server url/port for websocket connections
+                                      example: "electrum3.cipig.net:30001"
+                                    protocol:
+                                      type: string
+                                      enum: ["TCP", "SSL"]
+                                      description: Defines electrum server protocol. Defaults to TCP
+                                      default: "TCP"
+                                      example: "SSL"
+                                    disable_cert_verification:
+                                      type: boolean
+                                      description: Optional. For SSL electrum connections, this will allow expired certificates
+                                      example: false
+    responses:
+      '200':
+        description: UTXO activation task initialized successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    task_id:
+                      type: integer
+                      description: An identifying number which is used to query task status
+                      example: 1
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

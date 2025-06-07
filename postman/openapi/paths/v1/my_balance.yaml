@@ -1,0 +1,57 @@
+# OpenAPI path spec for my_balance (v1)
+/api/v1/my_balance:
+  post:
+    operationId: my_balance
+    summary: Komodo DeFi Framework Method: My Balance
+    description: The my_balance method returns the current balance of the specified coin.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/my_balance/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [my_balance]
+                description: Method name (must be 'my_balance').
+              coin:
+                type: string
+                description: The name of the coin to retrieve the balance.
+            required:
+              - userpass
+              - method
+              - coin
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                address:
+                  type: string
+                  description: The address that holds the coins.
+                balance:
+                  type: string
+                  description: The number of coins in the address; does not include unspendable_balance.
+                unspendable_balance:
+                  type: string
+                  description: The coin balance that is unspendable at the moment (e.g. if the address has immature UTXOs).
+                coin:
+                  type: string
+                  description: The name of the coin.
+              required:
+                - address
+                - balance
+                - unspendable_balance
+                - coin
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error 

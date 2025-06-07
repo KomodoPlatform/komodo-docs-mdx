@@ -1,0 +1,116 @@
+/task_account_balance_init:
+  post:
+    operationId: task::account_balance::init
+    summary: Initialize Account Balance Task
+    description: |
+      Use the task::account_balance::init method to initialise an account balance request.
+      If you have enabled a coin with task managed activation and are using HD Mode, your funds may be spread across a range of addresses under a specified account index.
+      This method will return the combined balance of your account, detailing the balance for each active account address.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/wallet/task_managed/account_balance/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["task::account_balance::init"]
+                description: The method name
+                example: "task::account_balance::init"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - coin
+                  - account_index
+                properties:
+                  coin:
+                    type: string
+                    description: Ticker of activated coin you want to see addresses and balance for
+                    example: "COIN_NAME"
+                  account_index:
+                    type: integer
+                    description: For GUIs, this will be zero. In CLI you can use other values if you know what you are doing
+                    example: 0
+    responses:
+      '200':
+        description: Task initialization successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    task_id:
+                      type: integer
+                      description: An identifying number which is used to query task status
+                      example: 6
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

@@ -1,0 +1,70 @@
+# OpenAPI path spec for min_trading_vol (v1)
+/api/v1/min_trading_vol:
+  post:
+    operationId: min_trading_vol
+    summary: Komodo DeFi Framework Method: Min Trading Vol
+    description: The min_trading_vol method returns the minimum required volume for buy/sell/setprice methods for the selected coin.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/min_trading_vol/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [min_trading_vol]
+                description: Method name (must be 'min_trading_vol').
+              coin:
+                type: string
+                description: The name of the coin to retrieve the minimum trading volume.
+            required:
+              - userpass
+              - method
+              - coin
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    coin:
+                      type: string
+                      description: The coin ticker from the request.
+                    min_trading_vol:
+                      type: string
+                      description: The minimum trading volume threshold in decimal representation.
+                    min_trading_vol_rat:
+                      $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      description: The minimum trading volume threshold represented as a standard RationalValue object.
+                    min_trading_vol_fraction:
+                      # TODO: Use $ref to FractionalValue schema if/when available in components/schemas
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                          description: Denominator of the minimum trading volume (FractionalValue).
+                        numer:
+                          type: string
+                          description: Numerator of the minimum trading volume (FractionalValue).
+                      description: The minimum trading volume threshold represented as a standard FractionalValue object.
+                  required:
+                    - coin
+                    - min_trading_vol
+                    - min_trading_vol_rat
+                    - min_trading_vol_fraction
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error 

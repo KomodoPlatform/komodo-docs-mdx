@@ -1,0 +1,120 @@
+/task_scan_for_new_addresses_init:
+  post:
+    operationId: task::scan_for_new_addresses::init
+    summary: Initialize Scan for New Addresses Task
+    description: |
+      Use the task::scan_for_new_addresses::init method to scan for HD addresses on Komodo DeFi Framework.
+      This method will scan for funded addresses in HD wallets.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/wallet/task_managed/scan_for_new_addresses/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["task::scan_for_new_addresses::init"]
+                description: The method name
+                example: "task::scan_for_new_addresses::init"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - coin
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin you want to scan addresses for
+                    example: "DGB"
+                  account_id:
+                    type: integer
+                    description: Optional, HD wallets only. Generally this will be 0 unless you have multiple accounts registered on your HD wallet
+                    default: 0
+                    example: 0
+                  gap_limit:
+                    type: integer
+                    description: Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided
+                    default: 20
+                    example: 20
+    responses:
+      '200':
+        description: Task initialization successful
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    task_id:
+                      type: integer
+                      description: An identifying number which is used to query task status
+                      example: 3
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

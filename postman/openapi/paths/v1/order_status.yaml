@@ -1,0 +1,61 @@
+# OpenAPI path spec for order_status (v1)
+/api/v1/order_status:
+  post:
+    operationId: order_status
+    summary: Komodo DeFi Framework Method: Order Status
+    description: The order_status method returns the data of the order with the selected uuid created by the Komodo DeFi Framework API node.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/order_status/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [order_status]
+                description: Method name (must be 'order_status').
+              uuid:
+                type: string
+                description: UUID of order to display.
+            required:
+              - userpass
+              - method
+              - uuid
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: Type of the order (Maker or Taker).
+                    order:
+                      # TODO: Use $ref to OrderStatusData schema if/when available in components/schemas
+                      type: object
+                      description: Order status data object.
+                    base_orderbook_ticker:
+                      type: string
+                      description: The orderbook ticker for base coin.
+                    rel_orderbook_ticker:
+                      type: string
+                      description: The orderbook ticker for rel coin.
+                  required:
+                    - type
+                    - order
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error 

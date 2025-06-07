@@ -1,0 +1,70 @@
+# OpenAPI path spec for get_trade_fee (v1)
+/api/v1/get_trade_fee:
+  post:
+    operationId: get_trade_fee
+    summary: Komodo DeFi Framework Method: Get Trade Fee
+    description: The get_trade_fee method returns the approximate amount of the miner fee that is paid per swap transaction.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/get_trade_fee/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [get_trade_fee]
+                description: Method name (must be 'get_trade_fee').
+              coin:
+                type: string
+                description: The name of the coin for the requested trade fee.
+            required:
+              - userpass
+              - method
+              - coin
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    coin:
+                      type: string
+                      description: The fee is paid from the user's balance of this coin. This coin name may differ from the requested coin.
+                    amount:
+                      type: string
+                      description: The approximate fee amount to be paid per swap transaction in decimal representation.
+                    amount_rat:
+                      $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      description: The approximate fee amount to be paid per swap transaction, represented as a standard RationalValue object.
+                    amount_fraction:
+                      # TODO: Use $ref to FractionalValue schema if/when available in components/schemas
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                          description: Denominator of the amount (FractionalValue).
+                        numer:
+                          type: string
+                          description: Numerator of the amount (FractionalValue).
+                      description: The approximate fee amount to be paid per swap transaction, represented as a standard FractionalValue object.
+                  required:
+                    - coin
+                    - amount
+                    - amount_rat
+                    - amount_fraction
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error 

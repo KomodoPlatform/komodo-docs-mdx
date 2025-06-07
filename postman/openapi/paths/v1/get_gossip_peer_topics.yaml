@@ -1,0 +1,46 @@
+# OpenAPI path spec for get_gossip_peer_topics (v1)
+/api/v1/get_gossip_peer_topics:
+  post:
+    operationId: get_gossip_peer_topics
+    summary: Komodo DeFi Framework Method: Get Gossip Peer Topics
+    description: The get_gossip_peer_topics method returns a map of peerIDs to an array of the topics to which they are subscribed.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/get_gossip_peer_topics/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [get_gossip_peer_topics]
+                description: Method name (must be 'get_gossip_peer_topics').
+            required:
+              - userpass
+              - method
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: string
+                  description: Topics subscribed to by PeerIDs.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 

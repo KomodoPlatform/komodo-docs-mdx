@@ -1,0 +1,172 @@
+/task_enable_eth_status:
+  post:
+    operationId: task::enable_eth::status
+    summary: Get ETH Activation Task Status
+    description: |
+      Query the status of ETH/EVM activation to check its progress.
+      Returns result of the task (success or error), progress status, and required user action.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_eth/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["task::enable_eth::status"]
+                description: The method name
+                example: "task::enable_eth::status"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+              params:
+                type: object
+                required:
+                  - task_id
+                properties:
+                  task_id:
+                    type: integer
+                    description: The identifying number returned when initiating the initialisation process
+                    example: 1
+                  forget_if_finished:
+                    type: boolean
+                    description: If false, will return final response for completed tasks. Optional, defaults to true
+                    default: true
+                    example: false
+    responses:
+      '200':
+        description: Task status retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  oneOf:
+                    - type: object
+                      properties:
+                        status:
+                          type: string
+                          enum: ["Ok"]
+                          description: Task completed successfully
+                          example: "Ok"
+                        details:
+                          type: object
+                          properties:
+                            current_block:
+                              type: integer
+                              description: Block height of the coin being activated
+                              example: 70970530
+                            ticker:
+                              type: string
+                              description: Ticker of the coin being activated
+                              example: "MATIC"
+                            wallet_balance:
+                              $ref: ../../components/schemas/Wallet.yaml#/WalletBalanceInfo
+                              description: A standard WalletBalanceInfo object. Note - the structure may vary based on the get_balances parameter value in the activation request
+                            nfts_infos:
+                              type: object
+                              description: NFT information if applicable
+                    - type: object
+                      properties:
+                        status:
+                          type: string
+                          enum: ["InProgress"]
+                          description: Task is in progress
+                          example: "InProgress"
+                        details:
+                          type: string
+                          enum: ["ActivatingCoin", "RequestingWalletBalance", "Finishing", "WaitingForTrezorToConnect", "FollowHwDeviceInstructions"]
+                          description: Current state of the activation process
+                          example: "RequestingWalletBalance"
+                    - type: object
+                      properties:
+                        status:
+                          type: string
+                          enum: ["Error"]
+                          description: Task failed with error
+                          example: "Error"
+                        details:
+                          type: object
+                          properties:
+                            error:
+                              type: string
+                              description: Error message
+                            error_path:
+                              type: string
+                              description: Used for debugging. A reference to the function in code base which returned the error
+                            error_trace:
+                              type: string
+                              description: Used for debugging. A trace of lines of code which led to the returned error
+                            error_type:
+                              type: string
+                              enum: ["TaskTimedOut", "CoinCreationError", "HwError"]
+                              description: An enumerated error identifier to indicate the category of error
+                            error_data:
+                              type: string
+                              description: Additional context for the error type
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                error_trace:
+                  type: string
+                  description: Error trace information
+                error_type:
+                  type: string
+                  description: Type of error
+                error_data:
+                  type: string
+                  description: Additional error data
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

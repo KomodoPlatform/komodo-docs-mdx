@@ -1,0 +1,91 @@
+{
+  "info": {
+    "_postman_id": "generated-approve-token-collection",
+    "name": "approve_token",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "approve_token - required params",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mmrpc\": \"2.0\",\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"approve_token\",\n  \"params\": {\n    \"coin\": \"USDT-ERC20\",\n    \"spender\": \"0x1234567890123456789\",\n    \"amount\": 1.23\n  }\n}"
+        },
+        "url": {
+          "raw": "{{mm2host}}",
+          "host": ["{{mm2host}}"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"mmrpc\": \"2.0\",\n  \"result\": \"0x1234567890abcdef01234567890abcdef0\",\n  \"id\": \"null\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "approve_token - token config not activated (edge case)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mmrpc\": \"2.0\",\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"approve_token\",\n  \"params\": {\n    \"coin\": \"USDT-ERC20\",\n    \"spender\": \"0x1234567890123456789\",\n    \"amount\": 1.23\n  }\n}"
+        },
+        "url": {
+          "raw": "{{mm2host}}",
+          "host": ["{{mm2host}}"]
+        }
+      },
+      "response": [
+        {
+          "name": "Error: Token config not activated",
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"mmrpc\": \"2.0\",\n  \"error\": \"No such coin USDT-ERC20\",\n  \"error_path\": \"tokens\",\n  \"error_trace\": \"tokens:171]\",\n  \"error_type\": \"NoSuchCoin\",\n  \"error_data\": {\n    \"coin\": \"USDT-ERC20\"\n  },\n  \"id\": null\n}"
+        }
+      ]
+    },
+    {
+      "name": "approve_token - insufficient funds (edge case)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mmrpc\": \"2.0\",\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"approve_token\",\n  \"params\": {\n    \"coin\": \"USDT-ERC20\",\n    \"spender\": \"0x1234567890123456789\",\n    \"amount\": 99999999\n  }\n}"
+        },
+        "url": {
+          "raw": "{{mm2host}}",
+          "host": ["{{mm2host}}"]
+        }
+      },
+      "response": [
+        {
+          "name": "Error: Insufficient funds",
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"mmrpc\": \"2.0\",\n  \"error\": \"Transaction error mm2src/coins/eth.rs:4834] eth:4720] Transport(\\\"request MethodCall(MethodCall { jsonrpc: Some(V2), method: \\\"eth_estimateGas\\\", params: Array([Object({\\\"from\\\": String(\\\"0x083c32b38e8050473f6999e22f670d1404235592\\\"), \\\"to\\\": String(\\\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\\\"), \\\"gasPrice\\\": String(\\\"0x6fc23a56a\\\"), \\\"value\\\": String(\\\"0x0\\\"), \\\"data\\\": String(\\\"0x095ea7b3000000000000000000000000083c32b38e8050473f6999e22f670d14042355920000000000000000000000000000000000000000000000001111d67bb1bb0000\\\")})]), id: Num(1) }) failed: Invalid response: Server: 'https://electrum3.cipig.net:18755/', error: RPC error: Error { code: ServerError(-32000), message: \\\"insufficient funds for transfer\\\", data: None }\\\")\",\n  \"error_path\": \"tokens\",\n  \"error_trace\": \"tokens:161]\",\n  \"error_type\": \"TransactionError\",\n  \"error_data\": \"mm2src/coins/eth.rs:4834] eth:4720] Transport(\\\"request MethodCall(MethodCall { jsonrpc: Some(V2), method: \\\"eth_estimateGas\\\", params: Array([Object({\\\"from\\\": String(\\\"0x083c32b38e8050473f6999e22f670d1404235592\\\"), \\\"to\\\": String(\\\"0xd6df932a45c0f255f85145f286ea0b292b21c90b\\\"), \\\"gasPrice\\\": String(\\\"0x6fc23a56a\\\"), \\\"value\\\": String(\\\"0x0\\\"), \\\"data\\\": String(\\\"0x095ea7b3000000000000000000000000083c32b38e8050473f6999e22f670d14042355920000000000000000000000000000000000000000000000001111d67bb1bb0000\\\")})]), id: Num(1) }) failed: Invalid response: Server: 'https://electrum3.cipig.net:18755/', error: RPC error: Error { code: ServerError(-32000), message: \\\"insufficient funds for transfer\\\", data: None }\\\")\",\n  \"id\": null\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "mm2host", "value": "http://127.0.0.1:7783", "type": "string" },
+    { "key": "userpass", "value": "your_userpass_here", "type": "string" }
+  ]
+} 

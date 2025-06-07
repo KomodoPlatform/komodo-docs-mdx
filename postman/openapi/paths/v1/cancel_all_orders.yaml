@@ -1,0 +1,55 @@
+# OpenAPI path spec for cancel_all_orders (v1)
+/api/v1/cancel_all_orders:
+  post:
+    operationId: cancel_all_orders
+    summary: Komodo DeFi Framework Method: Cancel all Orders
+    description: The cancel_all_orders cancels the active orders created by the Komodo DeFi Framework API node by specified condition.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/cancel_all_orders/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [cancel_all_orders]
+                description: Method name (must be 'cancel_all_orders').
+              cancel_by:
+                description: A standard CancelBy object. Orders matching this filter are cancelled.
+            required:
+              - userpass
+              - method
+              - cancel_by
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: object
+                  properties:
+                    cancelled:
+                      type: array
+                      items:
+                        type: string
+                      description: UUIDs of cancelled orders.
+                    currently_matching:
+                      type: array
+                      items:
+                        type: string
+                      description: UUIDs of the orders being matched with other orders; not cancelled even if they fit cancel condition.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas for CancelBy if/when available in components/schemas 

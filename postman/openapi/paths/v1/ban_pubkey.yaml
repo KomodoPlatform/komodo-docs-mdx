@@ -1,0 +1,63 @@
+# OpenAPI path spec for ban_pubkey (v1)
+/api/v1/ban_pubkey:
+  post:
+    operationId: ban_pubkey
+    summary: Komodo DeFi Framework Method: Ban Pubkey
+    description: The ban_pubkey method bans the selected pubkey ignoring its order matching messages and preventing its orders from displaying in the orderbook.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/ban_pubkey/index.mdx
+    parameters:
+      - name: pubkey
+        in: query
+        description: The pubkey to ban (use secp256k1 pubkey without prefix)
+        required: true
+        schema:
+          type: string
+      - name: reason
+        in: query
+        description: The reason of banning
+        required: true
+        schema:
+          type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password
+              method:
+                type: string
+                enum: [ban_pubkey]
+                description: Method name
+              pubkey:
+                type: string
+                description: The pubkey to ban (use secp256k1 pubkey without prefix)
+              reason:
+                type: string
+                description: The reason of banning
+            required:
+              - userpass
+              - method
+              - pubkey
+              - reason
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: string
+                  description: Whether the ban was successful
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Review if all parameter and response details are complete and correct.
+    # TODO: Use $ref to schemas if/when available in components/schemas 

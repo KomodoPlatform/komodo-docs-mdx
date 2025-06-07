@@ -1,0 +1,135 @@
+/sign_message:
+  post:
+    operationId: sign_message
+    summary: Sign Message
+    description: |
+      The sign_message method allows one to prove ownership of a specific wallet address. A unique digital signature is provided for the message being signed. This signature, along with the original message and the wallet address, can then be verified, confirming that the message originated from the owner of the address and has not been altered.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/utils/message_signing/sign_message/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - method
+              - userpass
+              - mmrpc
+              - params
+            properties:
+              method:
+                type: string
+                enum: ["sign_message"]
+                description: The method name
+                example: "sign_message"
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: "RPC_UserP@SSW0RD"
+              mmrpc:
+                type: string
+                enum: ["2.0"]
+                description: The JSON-RPC version
+                example: "2.0"
+              id:
+                type: integer
+                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
+                example: 0
+              params:
+                type: object
+                required:
+                  - coin
+                  - message
+                properties:
+                  coin:
+                    type: string
+                    description: The coin to sign a message with
+                    example: "DOC"
+                  message:
+                    type: string
+                    description: The message you want to sign
+                    example: "Between subtle shading and the absence of light lies the nuance illusion"
+                  address:
+                    $ref: ../../components/schemas/Wallet.yaml#/AddressPath
+                    description: Optional, HD wallets only. The path to the address for signing the message. If not provided, the account_id, chain and address_id will default to 0
+    responses:
+      '200':
+        description: Message signed successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  description: The JSON-RPC version (should be '2.0')
+                  example: "2.0"
+                result:
+                  type: object
+                  properties:
+                    signature:
+                      type: string
+                      description: The signature generated for the message
+                      example: "H43eTmJxBKEPiHkrCe/8NsRidkKCIkXDxLyp30Ez/RwoApGdg89Hlvj9mTMSPGp8om5297zvdL8EVx3IdIe2swY="
+                id:
+                  type: integer
+                  description: Identifies a response to allow matching it with a request
+                  example: 0
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing what went wrong
+                  examples:
+                    - "sign_message_prefix is not set in coin config"
+                    - "Internal error: No such coin: SHEKEL"
+                error_path:
+                  type: string
+                  description: Path where the error occurred
+                  examples:
+                    - "eth"
+                    - "lp_coins"
+                error_trace:
+                  type: string
+                  description: Error trace information
+                  examples:
+                    - "eth:2332]"
+                    - "lp_coins:5122] lp_coins:5034]"
+                error_type:
+                  type: string
+                  description: Type of error
+                  enum:
+                    - "PrefixNotFound"
+                    - "CoinIsNotFound"
+                    - "SigningError"
+                    - "InvalidRequest"
+                    - "InternalError"
+                error_data:
+                  type: string
+                  description: Additional error data
+                  example: "No such coin: SHEKEL"
+                id:
+                  type: integer
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  example: "2.0"
+                error:
+                  type: string
+                  description: Error message describing the internal error
+                id:
+                  type: integer 

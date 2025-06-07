@@ -1,0 +1,42 @@
+# OpenAPI path spec for get_my_peer_id (v1)
+/api/v1/get_my_peer_id:
+  post:
+    operationId: get_my_peer_id
+    summary: Komodo DeFi Framework Method: Get My Peer ID
+    description: The get_my_peer_id method returns your unique identifying Peer ID on the network.
+    x-mdx-doc-path: ../../../../src/pages/komodo-defi-framework/api/legacy/get_my_peer_id/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: RPC authentication password.
+              method:
+                type: string
+                enum: [get_my_peer_id]
+                description: Method name (must be 'get_my_peer_id').
+            required:
+              - userpass
+              - method
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                result:
+                  type: string
+                  description: The PeerID of your node on the network.
+              required:
+                - result
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error
+    # TODO: Use $ref to schemas if/when available in components/schemas 
