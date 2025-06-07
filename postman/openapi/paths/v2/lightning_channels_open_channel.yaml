@@ -1,0 +1,43 @@
+post:
+  operationId: "lightning_channels_open_channel"
+  tags:
+    - Lightning Channels
+  summary: Open a new Lightning channel
+  description: Opens a new channel with a remote node.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            coin:
+              type: string
+              description: The ticker of the coin
+            node_address:
+              type: string
+              description: Node address in format node_pubkey@ip:port
+            amount:
+              type: object
+              description: Amount object (Exact or Max)
+            push_msat:
+              type: integer
+              description: Optional. Amount to push to the counterparty in millisatoshis
+            channel_options:
+              type: object
+              description: Optional. Channel options
+            channel_configs:
+              type: object
+              description: Optional. Channel configs
+  responses:
+    '200':
+      description: Channel opened
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              uuid:
+                type: string
+              node_address:
+                type: string 

@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: Withdraw NFT
+  description: Withdraw NFTs (ERC721 or ERC1155) from your wallet.
+  version: 1.0.0
+paths:
+  /withdraw_nft:
+    post:
+      operationId: "withdraw_nft"
+      summary: Withdraw NFT (ERC721 or ERC1155)
+      tags:
+        - NonFungibleTokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - withdraw_data
+              properties:
+                type:
+                  type: string
+                  enum: [withdraw_erc721, withdraw_erc1155]
+                  description: The contract type of the NFT to withdraw.
+                withdraw_data:
+                  $ref: '../components/schemas/WithdrawNftData.yaml'
+      responses:
+        '200':
+          description: Successful withdrawal
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:
+                    type: string
+                  tx_hex:
+                    type: string
+                  tx_hash:
+                    type: string
+                  from:
+                    type: array
+                    items:
+                      type: string
+                  to:
+                    type: array
+                    items:
+                      type: string
+                  contract_type:
+                    type: string
+                  token_address:
+                    type: string
+                  token_id:
+                    type: string
+                  fee_details:
+                    $ref: '../components/schemas/WithdrawFee.yaml'
+                  coin:
+                    type: string
+                  block_height:
+                    type: integer
+                  timestamp:
+                    type: integer
+                  internal_id:
+                    type: integer
+                  transaction_type:
+                    type: string 

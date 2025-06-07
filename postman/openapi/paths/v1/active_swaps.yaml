@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: Legacy: active_swaps
+  description: |
+    @legacy
+    The `active_swaps` method returns all the swaps that are currently running on the Komodo DeFi Framework API node.
+    Deprecated in favor of v2. Does not include v2 swap statuses in responses (only returns uuids for these).
+paths:
+  /v1/active_swaps:
+    post:
+      summary: List currently active swaps (legacy)
+      description: |
+        Returns all swaps currently running on the node. Optionally includes swap statuses if `include_status` is true.
+      tags:
+        - Legacy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userpass:
+                  type: string
+                  description: The API key for authentication.
+                method:
+                  type: string
+                  enum: [active_swaps]
+                  default: active_swaps
+                include_status:
+                  type: boolean
+                  description: Whether to include swap statuses in response.
+                  default: false
+      responses:
+        '200':
+          description: List of active swap UUIDs and (optionally) statuses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      uuids:
+                        type: array
+                        items:
+                          type: string
+                        description: List of currently active swap UUIDs.
+                      statuses:
+                        type: object
+                        additionalProperties:
+                          type: object
+                        description: Map of swap statuses by UUID (if include_status is true).
+              examples:
+                uuids_only:
+                  summary: Only UUIDs
+                  value:
+                    result:
+                      uuids: ["015c13bc-da79-43e1-a6d4-4ac8b3099b34", "7592a07a-2805-4050-8ab8-984480e812f0"]
+                      statuses: null
+                with_statuses:
+                  summary: With statuses
+                  value:
+                    result:
+                      uuids: ["44798382-8c63-4047-b5d8-70a60fa2546b"]
+                      statuses:
+                        "44798382-8c63-4047-b5d8-70a60fa2546b": {"type": "Taker", "uuid": "44798382-8c63-4047-b5d8-70a60fa2546b", "events": [...], "maker_amount": "2.4", "taker_amount": "2.4"} 

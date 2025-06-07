@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  title: Enable ETH with Tokens
+  description: Enable ETH/EVM platform coin along with multiple ERC20 tokens in a single command.
+  version: 1.0.0
+paths:
+  /enable_eth_with_tokens:
+    post:
+      summary: Enable ETH with ERC20 tokens
+      operationId: "enable_eth_with_tokens"
+      tags:
+        - Coin Activation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userpass:
+                  type: string
+                method:
+                  type: string
+                  enum: [enable_eth_with_tokens]
+                mmrpc:
+                  type: string
+                params:
+                  type: object
+                  properties:
+                    ticker:
+                      type: string
+                    mm2:
+                      type: integer
+                    swap_contract_address:
+                      type: string
+                    fallback_swap_contract:
+                      type: string
+                    nodes:
+                      type: array
+                      items:
+                        type: object
+                    erc20_tokens_requests:
+                      type: array
+                      items:
+                        type: object
+                    gas_station_decimals:
+                      type: integer
+                    gas_station_policy:
+                      type: object
+                    get_balances:
+                      type: boolean
+                    priv_key_policy:
+                      type: string
+                    required_confirmations:
+                      type: integer
+                    requires_notarization:
+                      type: boolean
+                    rpc_mode:
+                      type: string
+                    tx_history:
+                      type: boolean
+                    nft_req:
+                      type: object
+                    swap_v2_contracts:
+                      type: object
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mmrpc:
+                    type: string
+                  result:
+                    type: object
+                  id:
+                    type: string
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error 

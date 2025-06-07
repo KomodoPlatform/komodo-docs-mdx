@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Add Node to Version Stat
+  description: Adds a node's name, IP address, and PeerID to a local database to track which version of KDF it is running.
+  version: 1.0.0
+paths:
+  /utils/add_node_to_version_stat:
+    post:
+      operationId: "utils_add_node_to_version_stat"
+      summary: Add node to version stat
+      tags:
+        - utils
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name assigned to the node
+                address:
+                  type: string
+                  description: The IP address of the node
+                peer_id:
+                  type: string
+                  description: The node's unique Peer ID
+              required:
+                - name
+                - address
+                - peer_id
+      responses:
+        '200':
+          description: Node added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_type:
+                    type: string 

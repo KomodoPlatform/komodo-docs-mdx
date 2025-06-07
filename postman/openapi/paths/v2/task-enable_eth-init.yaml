@@ -1,0 +1,90 @@
+post:
+  tags:
+  - ETH/EVM Activation
+  summary: Task managed activation of ETH/EVM coins and tokens
+  operationId: task::enable_eth::init
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            userpass:
+              type: string
+            mmrpc:
+              type: string
+              example: '2.0'
+            method:
+              type: string
+              example: task::enable_eth::init
+            params:
+              type: object
+              properties:
+                ticker:
+                  type: string
+                mm2:
+                  type: integer
+                swap_contract_address:
+                  type: string
+                fallback_swap_contract:
+                  type: string
+                nodes:
+                  type: array
+                  items:
+                    $ref: ../components/schemas/Activation.yaml#/CoinNode
+                erc20_tokens_requests:
+                  type: array
+                  items:
+                    $ref: ../components/schemas/Activation.yaml#/TokensRequest
+                gas_station_url:
+                  type: string
+                gas_station_decimals:
+                  type: integer
+                gas_station_policy:
+                  type: object
+                  properties:
+                    policy:
+                      type: string
+                get_balances:
+                  type: boolean
+                priv_key_policy:
+                  type: string
+                required_confirmations:
+                  type: integer
+                requires_notarization:
+                  type: boolean
+                rpc_mode:
+                  type: string
+                tx_history:
+                  type: boolean
+                nft_req:
+                  type: object
+                min_addresses_number:
+                  type: integer
+                scan_policy:
+                  type: string
+                gap_limit:
+                  type: integer
+                path_to_address:
+                  $ref: ../components/schemas/Wallet.yaml#/AddressDerivationPath
+                swap_v2_contracts:
+                  $ref: ../components/schemas/Activation.yaml#/SwapV2Contracts
+  responses:
+    '200':
+      description: Task started
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  task_id:
+                    type: integer
+              id:
+                type: string
+  x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_eth/index.mdx

@@ -1,0 +1,106 @@
+post:
+  operationId: "my_recent_swaps"
+  tags:
+    - Swaps and Orders
+  summary: Get recent atomic swaps executed by this node
+  description: |
+    Returns the data of the most recent atomic swaps executed by the Komodo DeFi Framework API node. All filters are combined using logical AND.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [my_recent_swaps]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              properties:
+                my_coin:
+                  type: string
+                  description: Optional. Coin being used by you for the swap/trade.
+                other_coin:
+                  type: string
+                  description: Optional. Coin you are trading against.
+                from_timestamp:
+                  type: integer
+                  description: Optional. Start timestamp in UNIX format.
+                to_timestamp:
+                  type: integer
+                  description: Optional. End timestamp in UNIX format.
+                from_uuid:
+                  type: string
+                  description: Optional. The UUID from which to start fetching results.
+                limit:
+                  type: integer
+                  description: Optional. The maximum number of results to return.
+                page_number:
+                  type: integer
+                  description: Optional. Offset for paginated results.
+  responses:
+    '200':
+      description: Successful response with recent swaps info
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
+                properties:
+                  swaps:
+                    type: array
+                    items:
+                      type: object
+                  from_uuid:
+                    type: string
+                  skipped:
+                    type: integer
+                  limit:
+                    type: integer
+                  total:
+                    type: integer
+                  page_number:
+                    type: integer
+                  total_pages:
+                    type: integer
+                  found_records:
+                    type: integer
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: object
+              id:
+                nullable: true 

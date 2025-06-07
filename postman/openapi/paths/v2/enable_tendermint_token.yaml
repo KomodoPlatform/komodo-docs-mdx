@@ -1,0 +1,54 @@
+openapi: 3.0.3
+info:
+  title: Enable Tendermint Token
+  description: Activate additional Tendermint assets.
+  version: 1.0.0
+paths:
+  /enable_tendermint_token:
+    post:
+      summary: Enable Tendermint token
+      operationId: "enable_tendermint_token"
+      tags:
+        - Coin Activation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userpass:
+                  type: string
+                method:
+                  type: string
+                  enum: [enable_tendermint_token]
+                mmrpc:
+                  type: string
+                params:
+                  type: object
+                  properties:
+                    ticker:
+                      type: string
+                    activation_params:
+                      type: object
+                      properties:
+                        required_confirmations:
+                          type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mmrpc:
+                    type: string
+                  result:
+                    type: object
+                  id:
+                    type: string
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error 

@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: Peer Connection Healthcheck
+  description: Checks if a peer is connected to the KDF network.
+  version: 1.0.0
+paths:
+  /utils/peer_connection_healthcheck:
+    post:
+      operationId: "utils_peer_connection_healthcheck"
+      summary: Peer connection healthcheck
+      tags:
+        - utils
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                peer_address:
+                  type: string
+                  description: The peer address to check
+              required:
+                - peer_address
+      responses:
+        '200':
+          description: Peer connection status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_type:
+                    type: string 

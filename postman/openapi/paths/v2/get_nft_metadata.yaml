@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  title: Get NFT Metadata
+  description: Get metadata for a specific NFT.
+  version: 1.0.0
+paths:
+  /get_nft_metadata:
+    post:
+      operationId: "get_nft_metadata"
+      summary: Get NFT metadata
+      tags:
+        - NonFungibleTokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - chain
+                - token_address
+                - token_id
+              properties:
+                chain:
+                  type: string
+                  description: The token chain.
+                token_address:
+                  type: string
+                  description: The token address.
+                token_id:
+                  type: string
+                  description: Token ID.
+                protect_from_spam:
+                  type: boolean
+                  description: Redact spam links in NFT data.
+      responses:
+        '200':
+          description: NFT metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  amount:
+                    type: string
+                  block_number_minted:
+                    type: integer
+                  block_number:
+                    type: integer
+                  chain:
+                    type: string
+                  name:
+                    type: string
+                  contract_type:
+                    type: string
+                  last_token_uri_sync:
+                    type: string
+                  last_metadata_sync:
+                    type: string
+                  metadata:
+                    type: string
+                  minter_address:
+                    type: string
+                  owner_of:
+                    type: string
+                  possible_spam:
+                    type: boolean
+                  possible_phishing:
+                    type: boolean
+                  symbol:
+                    type: string
+                  token_address:
+                    type: string
+                  token_id:
+                    type: string
+                  token_hash:
+                    type: string
+                  token_uri:
+                    type: string
+                  token_domain:
+                    type: string
+                  uri_meta:
+                    $ref: '../components/schemas/NftMetadata.yaml' 

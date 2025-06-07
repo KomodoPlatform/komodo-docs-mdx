@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info:
+  title: Get NFT List
+  description: Get a list of NFTs owned by the user.
+  version: 1.0.0
+paths:
+  /get_nft_list:
+    post:
+      operationId: "get_nft_list"
+      summary: Get a list of NFTs
+      tags:
+        - NonFungibleTokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - chains
+              properties:
+                chains:
+                  type: array
+                  items:
+                    type: string
+                  description: List of networks to scan for NFTs.
+                max:
+                  type: boolean
+                  description: Return all NFTs without pagination.
+                limit:
+                  type: integer
+                  description: Number of NFTs per page.
+                page_number:
+                  type: integer
+                  description: Page offset for items in response.
+                protect_from_spam:
+                  type: boolean
+                  description: Redact spam links in NFT data.
+                filters:
+                  $ref: '../components/schemas/NftFilter.yaml'
+      responses:
+        '200':
+          description: List of NFTs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nfts:
+                    type: array
+                    items:
+                      $ref: '../components/schemas/NftInfo.yaml'
+                  skipped:
+                    type: integer
+                  total:
+                    type: integer 

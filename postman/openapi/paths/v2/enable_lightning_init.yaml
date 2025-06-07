@@ -1,0 +1,29 @@
+post:
+  operationId: "enable_lightning_init"
+  tags:
+    - Lightning Activation
+  summary: Initialize Lightning node
+  description: Requests a task to run a lightning node for a given coin.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            ticker:
+              type: string
+              description: Ticker of coin to activate
+            activation_params:
+              $ref: '../components/schemas/Lightning.yaml#/components/schemas/LightningActivationParams'
+  responses:
+    '200':
+      description: Task started
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              task_id:
+                type: integer
+                description: Task ID to check status 

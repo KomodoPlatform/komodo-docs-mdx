@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: Sign Raw Transaction
+  description: Sign a raw transaction with the wallet.
+  version: 1.0.0
+paths:
+  /wallet/tx/sign_raw_transaction:
+    post:
+      operationId: "wallet_tx_sign_raw_transaction"
+      summary: Sign raw transaction
+      tags:
+        - Wallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                raw:
+                  type: string
+                  description: Raw transaction hex to sign
+      responses:
+        '200':
+          description: Signed transaction
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  signed:
+                    type: string
+                    description: Signed transaction hex
+      security:
+        - userpass: [] 

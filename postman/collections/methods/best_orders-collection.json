@@ -1,0 +1,143 @@
+{
+  "info": {
+    "_postman_id": "generated-best-orders-collection",
+    "name": "best_orders",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "best_orders - request_by number",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"best_orders\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"coin\": \"DGB\",\n    \"action\": \"buy\",\n    \"request_by\": {\n      \"type\": \"number\",\n      \"value\": 100\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{mm2host}}",
+          "host": ["{{mm2host}}"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success (by number)",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"mmrpc\": \"2.0\",\n  \"result\": {\n    \"orders\": {\n      \"LTC-segwit\": [/* ... order data ... */],\n      \"MATIC\": [/* ... order data ... */]\n    },\n    \"original_tickers\": [\"LTC-segwit\", \"MATIC\"]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "best_orders - request_by volume",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"best_orders\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"coin\": \"DGB\",\n    \"action\": \"sell\",\n    \"request_by\": {\n      \"type\": \"volume\",\n      \"value\": 10.5\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{mm2host}}",
+          "host": ["{{mm2host}}"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success (by volume)",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"mmrpc\": \"2.0\",\n  \"result\": {\n    \"orders\": {\n      \"LTC-segwit\": [/* ... order data ... */]\n    },\n    \"original_tickers\": [\"LTC-segwit\"]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "best_orders - exclude_mine true",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"best_orders\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"coin\": \"DGB\",\n    \"action\": \"buy\",\n    \"exclude_mine\": true,\n    \"request_by\": {\n      \"type\": \"number\",\n      \"value\": 5\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{mm2host}}",
+          "host": ["{{mm2host}}"]
+        }
+      },
+      "response": [
+        {
+          "name": "Success (exclude_mine)",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"mmrpc\": \"2.0\",\n  \"result\": {\n    \"orders\": {\n      \"LTC-segwit\": [/* ... order data ... */]\n    },\n    \"original_tickers\": [\"LTC-segwit\"]\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "best_orders - missing params (edge case)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"best_orders\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {}\n}"
+        },
+        "url": {
+          "raw": "{{mm2host}}",
+          "host": ["{{mm2host}}"]
+        }
+      },
+      "response": [
+        {
+          "name": "Error: Missing required params",
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"mmrpc\": \"2.0\",\n  \"error\": \"Missing required parameter: coin\",\n  \"id\": null\n}"
+        }
+      ]
+    },
+    {
+      "name": "best_orders - coin not activated (edge case)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userpass\": \"{{userpass}}\",\n  \"method\": \"best_orders\",\n  \"mmrpc\": \"2.0\",\n  \"params\": {\n    \"coin\": \"FAKECOIN\",\n    \"action\": \"buy\",\n    \"request_by\": {\n      \"type\": \"number\",\n      \"value\": 1\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{mm2host}}",
+          "host": ["{{mm2host}}"]
+        }
+      },
+      "response": [
+        {
+          "name": "Error: Coin not activated",
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"mmrpc\": \"2.0\",\n  \"error\": \"Coin FAKECOIN is not activated\",\n  \"id\": null\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "mm2host", "value": "http://127.0.0.1:7783", "type": "string" },
+    { "key": "userpass", "value": "your_userpass_here", "type": "string" }
+  ]
+} 

@@ -1,0 +1,37 @@
+post:
+  operationId: "lightning_payments_list_payments_by_filter"
+  tags:
+    - Lightning Payments
+  summary: List Lightning payments by filter
+  description: Returns a list of payments (sent and/or received) for a coin which match the given filter.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            coin:
+              type: string
+              description: Ticker of the coin
+            filter:
+              type: object
+              description: Optional. LightningPaymentFilter object
+            paging_options:
+              type: object
+              description: Optional. Pagination options
+            limit:
+              type: integer
+              description: Optional. Max number of results
+  responses:
+    '200':
+      description: List of payments
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              payments:
+                type: array
+                items:
+                  type: object 

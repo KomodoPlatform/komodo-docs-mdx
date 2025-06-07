@@ -1,0 +1,52 @@
+openapi: 3.0.3
+info:
+  title: Verify Message
+  description: Verify the authenticity of a signed message for any supported coin.
+  version: 1.0.0
+paths:
+  /utils/message_signing_verify_message:
+    post:
+      operationId: "utils_message_signing_verify_message"
+      summary: Verify message
+      tags:
+        - utils
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                coin:
+                  type: string
+                  description: The coin to verify a message for
+                message:
+                  type: string
+                  description: The message input via the sign_message method
+                signature:
+                  type: string
+                  description: The signature generated for the message
+                address:
+                  type: string
+                  description: The address used to sign the message
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_valid:
+                    type: boolean
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_type:
+                    type: string 

@@ -1,0 +1,67 @@
+SwapEvent:
+  type: object
+  description: A swap event, with a type and optional contextual data. See Maker Events and Taker Events for more info.
+  properties:
+    type:
+      type: string
+      description: The event type. See Maker Events and Taker Events for all possible values.
+    data:
+      oneOf:
+        - type: object
+        - type: string
+        - type: 'null'
+      description: Contextual information related to the event, or null.
+SwapEvents:
+  type: object
+  description: A timestamped swap event.
+  properties:
+    timestamp:
+      type: integer
+      description: Timestamp for the SwapEvent in UNIX format.
+    event:
+      $ref: '#/SwapEvent'
+      description: The swap event object.
+SwapStatus:
+  type: object
+  description: Status and details of a swap, including all events and metadata.
+  properties:
+    type:
+      type: string
+      description: 'Maker' or 'Taker'. Indicates if the user created the order (maker), or matched with an existing order (taker).
+    uuid:
+      type: string
+      description: A unique identifier for the swap.
+    events:
+      type: array
+      items:
+        $ref: '#/SwapEvents'
+      description: A list of swap events.
+    maker_coin:
+      type: string
+      description: The coin being sent by the maker and received by the taker.
+    taker_coin:
+      type: string
+      description: The coin being sent by the taker and received by the maker.
+    maker_amount:
+      type: string
+      description: The amount of maker_coin being traded.
+    taker_amount:
+      type: string
+      description: The amount of taker_coin being traded.
+    gui:
+      type: string
+      nullable: true
+      description: An identifier for the GUI used to initiate the swap, as defined in your MM2.json file. May be null if not defined.
+    mm_version:
+      type: string
+      description: The release version and/or commit hash of the Komodo DeFi SDK used to initiate the swap.
+    success_events:
+      type: array
+      items:
+        type: string
+      description: A list of possible swap event types for a successful swap.
+    error_events:
+      type: array
+      items:
+        type: string
+      description: A list of possible swap event types which may appear in a failed swap. 

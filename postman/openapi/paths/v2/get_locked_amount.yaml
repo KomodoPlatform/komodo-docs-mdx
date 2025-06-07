@@ -1,0 +1,78 @@
+post:
+  operationId: "get_locked_amount"
+  tags:
+    - Swaps and Orders
+  summary: Get the amount of a coin currently locked by a swap
+  description: |
+    Returns the amount of a coin which is currently locked by a swap in progress.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [get_locked_amount]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              required:
+                - coin
+              properties:
+                coin:
+                  type: string
+                  description: The ticker of the coin you want to query.
+  responses:
+    '200':
+      description: Successful response with locked amount info
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  coin:
+                    type: string
+                  locked_amount:
+                    type: object
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: object
+              id:
+                nullable: true 

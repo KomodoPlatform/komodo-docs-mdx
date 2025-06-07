@@ -1,0 +1,80 @@
+post:
+  operationId: "stream_tx_history_enable"
+  tags:
+    - Streaming
+  summary: Enable transaction history events streaming for a specific coin
+  description: |
+    Enables transaction history events streaming for a specific coin to a specific client. Only compatible with UTXO, BCH/SLP, TENDERMINT, QTUM, ZHTLC coin types.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [stream::tx_history::enable]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              required:
+                - coin
+              properties:
+                coin:
+                  type: string
+                  description: Ticker of the coin to activate streaming for. The coin must be activated first.
+                client_id:
+                  type: integer
+                  description: Optional. Client ID for the stream. Defaults to 0.
+  responses:
+    '200':
+      description: Successful response with streamer_id
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  streamer_id:
+                    type: string
+                    description: Identifier for the data stream.
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: string
+              id:
+                nullable: true 

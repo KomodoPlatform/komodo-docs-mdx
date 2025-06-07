@@ -1,0 +1,76 @@
+post:
+  operationId: "recreate_swap_data"
+  tags:
+    - Swaps and Orders
+  summary: Recreate lost swap data
+  description: |
+    Helps recover lost swap data due to storage errors or hardware failure, and can aid with refunding failed swaps.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [recreate_swap_data]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              required:
+                - swap
+              properties:
+                swap:
+                  type: object
+                  description: Swap data from other side of trade.
+  responses:
+    '200':
+      description: Successful response with recreated swap data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  swap:
+                    type: object
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: object
+              id:
+                nullable: true 

@@ -1,0 +1,106 @@
+post:
+  operationId: "orderbook"
+  tags:
+    - Swaps and Orders
+  summary: Get orderbook for a trading pair
+  description: |
+    Requests from the network the currently available orders for the specified trading pair.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [orderbook]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              required:
+                - base
+                - rel
+              properties:
+                base:
+                  type: string
+                  description: Base currency of a pair.
+                rel:
+                  type: string
+                  description: Related currency, also known as the "quote currency".
+  responses:
+    '200':
+      description: Successful response with orderbook info
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  base:
+                    type: string
+                  rel:
+                    type: string
+                  numasks:
+                    type: integer
+                  numbids:
+                    type: integer
+                  netid:
+                    type: integer
+                  asks:
+                    type: array
+                    items:
+                      type: object
+                  bids:
+                    type: array
+                    items:
+                      type: object
+                  timestamp:
+                    type: integer
+                  total_asks_base_vol:
+                    type: object
+                  total_asks_rel_vol:
+                    type: object
+                  total_bids_base_vol:
+                    type: object
+                  total_bids_rel_vol:
+                    type: object
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: object
+              id:
+                nullable: true 

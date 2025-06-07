@@ -1,0 +1,81 @@
+post:
+  operationId: "stream_disable"
+  tags:
+    - Streaming
+  summary: Disable specific streaming events
+  description: |
+    Disables specific streaming events for a client and streamer_id.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [stream::disable]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              required:
+                - client_id
+                - streamer_id
+              properties:
+                client_id:
+                  type: integer
+                  description: Client ID for the stream.
+                streamer_id:
+                  type: string
+                  description: Identifier for the data stream to disable.
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    description: Success message
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: string
+              id:
+                nullable: true 

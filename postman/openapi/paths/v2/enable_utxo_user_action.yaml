@@ -1,0 +1,32 @@
+post:
+  summary: Submit user action (e.g. Trezor PIN) for UTXO activation
+  operationId: "enable_utxo_user_action"
+  tags: [UTXO Activation]
+  security:
+    - userpass: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/Activation.yaml#/EnableUtxoUserActionRequestBody'
+        examples:
+          example:
+            value:
+              task_id: 1
+              user_action:
+                action_type: TrezorPin
+                pin: '862743'
+  responses:
+    '200':
+      description: User action submitted
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/Activation.yaml#/EnableUtxoUserActionResponse'
+          examples:
+            example:
+              value:
+                mmrpc: '2.0'
+                result: success
+                id: null 

@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: 1inch v6.0 Classic Swap Liquidity Sources
+  description: Get available liquidity sources for 1inch v6.0 classic swaps.
+  version: 1.0.0
+paths:
+  /one_inch_v6_0_classic_swap_liquidity_sources:
+    post:
+      summary: Get 1inch v6.0 classic swap liquidity sources
+      operationId: "one_inch_v6_0_classic_swap_liquidity_sources"
+      tags:
+        - 1inch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userpass:
+                  type: string
+                method:
+                  type: string
+                  enum: [one_inch_v6_0_classic_swap_liquidity_sources]
+                mmrpc:
+                  type: string
+                params:
+                  type: object
+                  properties:
+                    chainId:
+                      type: integer
+      responses:
+        '200':
+          description: List of liquidity sources
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sources:
+                    type: array
+                    items:
+                      type: object
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error 

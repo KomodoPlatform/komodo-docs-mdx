@@ -1,0 +1,49 @@
+openapi: 3.0.3
+info:
+  title: Get Token Allowance
+  description: Get the current allowance for a token (e.g., for ERC20 tokens).
+  version: 1.0.0
+paths:
+  /get_token_allowance:
+    post:
+      summary: Get token allowance
+      operationId: "get_token_allowance"
+      tags:
+        - Tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userpass:
+                  type: string
+                method:
+                  type: string
+                  enum: [get_token_allowance]
+                mmrpc:
+                  type: string
+                params:
+                  type: object
+                  properties:
+                    tokenAddress:
+                      type: string
+                    owner:
+                      type: string
+                    spender:
+                      type: string
+      responses:
+        '200':
+          description: Allowance returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowance:
+                    type: string
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error 

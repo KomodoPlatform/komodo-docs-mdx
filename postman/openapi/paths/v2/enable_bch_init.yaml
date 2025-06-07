@@ -1,0 +1,69 @@
+post:
+  tags:
+    - BCH Activation
+  summary: Task managed activation of BCH and SLP tokens
+  operationId: "enableBchInit"
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            mmrpc:
+              type: string
+              example: "2.0"
+            method:
+              type: string
+              example: "task::enable_bch::init"
+            params:
+              type: object
+              properties:
+                ticker:
+                  type: string
+                  description: Ticker of the platform protocol coin. Options: BCH or tBCH
+                bchd_urls:
+                  type: array
+                  items:
+                    type: string
+                  description: List of BCHD gRPC API server URLs.
+                mode:
+                  $ref: '../components/schemas/Activation.yaml#/ActivationMode'
+                tx_history:
+                  type: boolean
+                slp_tokens_requests:
+                  type: array
+                  items:
+                    $ref: '../components/schemas/Activation.yaml#/TokensRequest'
+                address_format:
+                  $ref: '../components/schemas/Wallet.yaml#/AddressFormat'
+                allow_slp_unsafe_conf:
+                  type: boolean
+                get_balances:
+                  type: boolean
+                required_confirmations:
+                  type: integer
+                requires_notarization:
+                  type: boolean
+                utxo_merge_params:
+                  $ref: '../components/schemas/Activation.yaml#/UtxoMergeParams'
+  responses:
+    '200':
+      description: Task started
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  task_id:
+                    type: integer
+              id:
+                type: string 

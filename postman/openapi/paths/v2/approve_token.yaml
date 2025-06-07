@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: Approve Token
+  description: Approve a token for spending by a smart contract (e.g., for ERC20 tokens).
+  version: 1.0.0
+paths:
+  /approve_token:
+    post:
+      summary: Approve a token for spending
+      operationId: "approve_token"
+      tags:
+        - Tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userpass:
+                  type: string
+                method:
+                  type: string
+                  enum: [approve_token]
+                mmrpc:
+                  type: string
+                params:
+                  type: object
+                  properties:
+                    tokenAddress:
+                      type: string
+                    spender:
+                      type: string
+                    amount:
+                      type: string
+      responses:
+        '200':
+          description: Token approved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tx:
+                    type: object
+                  status:
+                    type: string
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error 

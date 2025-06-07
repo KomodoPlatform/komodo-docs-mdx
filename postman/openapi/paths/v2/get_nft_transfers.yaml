@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info:
+  title: Get NFT Transfers
+  description: Get a list of NFT transfers involving the user.
+  version: 1.0.0
+paths:
+  /get_nft_transfers:
+    post:
+      operationId: "get_nft_transfers"
+      summary: Get a list of NFT transfers
+      tags:
+        - NonFungibleTokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - chains
+              properties:
+                chains:
+                  type: array
+                  items:
+                    type: string
+                  description: List of chains to scan for NFTs.
+                max:
+                  type: boolean
+                  description: Return all NFT transfers without pagination.
+                limit:
+                  type: integer
+                  description: Number of NFT transfers per page.
+                page_number:
+                  type: integer
+                  description: Page offset for items in response.
+                protect_from_spam:
+                  type: boolean
+                  description: Redact spam links in NFT data.
+                filters:
+                  $ref: '../components/schemas/NftTransferFilter.yaml'
+      responses:
+        '200':
+          description: List of NFT transfers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transfer_history:
+                    type: array
+                    items:
+                      $ref: '../components/schemas/NftTransfer.yaml'
+                  total:
+                    type: integer
+                  skipped:
+                    type: integer 

@@ -1,0 +1,77 @@
+post:
+  operationId: "stream_order_status_enable"
+  tags:
+    - Streaming
+  summary: Enable order status streaming
+  description: |
+    Enables the order status stream to a specific client.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [stream::order_status::enable]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              required:
+                - client_id
+              properties:
+                client_id:
+                  type: integer
+                  description: Client ID for the stream.
+  responses:
+    '200':
+      description: Successful response with streamer_id
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  streamer_id:
+                    type: string
+                    description: Identifier for the data stream.
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: string
+              id:
+                nullable: true 

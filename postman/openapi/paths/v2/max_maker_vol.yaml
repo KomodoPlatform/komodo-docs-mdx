@@ -1,0 +1,82 @@
+post:
+  operationId: "max_maker_vol"
+  tags:
+    - Swaps and Orders
+  summary: Get the maximum maker volume for a coin
+  description: |
+    Returns the maximum volume of a coin which can be used to create a maker order (taking into account estimated fees).
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [max_maker_vol]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              required:
+                - coin
+              properties:
+                coin:
+                  type: string
+                  description: The ticker of the coin you want to query.
+  responses:
+    '200':
+      description: Successful response with maker volume info
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  coin:
+                    type: string
+                  volume:
+                    type: object
+                  balance:
+                    type: object
+                  locked_by_swaps:
+                    type: object
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: object
+              id:
+                nullable: true 

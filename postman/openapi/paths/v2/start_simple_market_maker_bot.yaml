@@ -1,0 +1,81 @@
+post:
+  operationId: "start_simple_market_maker_bot"
+  tags:
+    - Swaps and Orders
+  summary: Start the simple market maker bot
+  description: |
+    Starts the simple market maker bot with the provided configuration and price service URLs.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [start_simple_market_maker_bot]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              properties:
+                price_urls:
+                  type: array
+                  items:
+                    type: string
+                  description: Optional. List of URLs serving price data in JSON format.
+                bot_refresh_rate:
+                  type: number
+                  description: Optional. Bot loop interval in seconds.
+                cfg:
+                  type: object
+                  description: Configuration parameters for the pairs to trade.
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    description: Success message
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              id:
+                nullable: true 

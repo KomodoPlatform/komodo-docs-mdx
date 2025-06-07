@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: Trezor Initialisation (Status)
+  description: Query the status of Trezor device initialisation.
+  version: 1.0.0
+paths:
+  /utils/task_init_trezor_status:
+    post:
+      operationId: "utils_task_init_trezor_status"
+      summary: Query Trezor initialisation status
+      tags:
+        - utils
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task_id:
+                  type: integer
+                  description: The identifying number returned when initiating the initialisation process.
+                forget_if_finished:
+                  type: boolean
+                  description: Optional. If false, will return final response for completed tasks. Defaults to true.
+              required:
+                - task_id
+      responses:
+        '200':
+          description: Status response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  details:
+                    type: object
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_type:
+                    type: string 

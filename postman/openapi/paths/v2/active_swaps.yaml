@@ -1,0 +1,76 @@
+post:
+  operationId: "active_swaps"
+  tags:
+    - Swaps and Orders
+  summary: Get all currently running swaps
+  description: |
+    Returns all the swaps that are currently running on the Komodo DeFi Framework API node.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [active_swaps]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              properties:
+                include_status:
+                  type: boolean
+                  description: Optional. Whether to include swap statuses in response. Defaults to false.
+  responses:
+    '200':
+      description: Successful response with active swaps info
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: object
+                properties:
+                  uuids:
+                    type: array
+                    items:
+                      type: string
+                  statuses:
+                    type: object
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: object
+              id:
+                nullable: true 

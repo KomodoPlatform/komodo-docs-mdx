@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: 1inch v6.0 Classic Swap Quote
+  description: Get a quote for a swap using the 1inch v6.0 classic aggregator.
+  version: 1.0.0
+paths:
+  /one_inch_v6_0_classic_swap_quote:
+    post:
+      summary: Get a 1inch v6.0 classic swap quote
+      operationId: "one_inch_v6_0_classic_swap_quote"
+      tags:
+        - 1inch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userpass:
+                  type: string
+                method:
+                  type: string
+                  enum: [one_inch_v6_0_classic_swap_quote]
+                mmrpc:
+                  type: string
+                params:
+                  type: object
+                  properties:
+                    fromTokenAddress:
+                      type: string
+                    toTokenAddress:
+                      type: string
+                    amount:
+                      type: string
+      responses:
+        '200':
+          description: Quote returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  toTokenAmount:
+                    type: string
+                  fromTokenAmount:
+                    type: string
+                  estimatedGas:
+                    type: integer
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error 

@@ -1,0 +1,92 @@
+post:
+  operationId: "best_orders"
+  tags:
+    - Swaps and Orders
+  summary: Get the best priced trades available on the orderbook
+  description: |
+    Returns the best priced trades available on the orderbook. Can request by volume or by number of results.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - userpass
+            - method
+            - mmrpc
+            - params
+          properties:
+            userpass:
+              type: string
+              description: The API key for authentication.
+            method:
+              type: string
+              enum: [best_orders]
+              description: The RPC method name.
+            mmrpc:
+              type: string
+              enum: ["2.0"]
+              description: The MMRPC version.
+            params:
+              type: object
+              required:
+                - coin
+                - action
+                - request_by
+              properties:
+                coin:
+                  type: string
+                  description: The ticker of the coin to get best orders.
+                action:
+                  type: string
+                  enum: [buy, sell]
+                  description: Whether to buy or sell the selected coin.
+                exclude_mine:
+                  type: boolean
+                  description: Defaults to false. If true, the user's orders will be excluded from the response.
+                request_by:
+                  type: object
+                  description: A RequestBy object specifying type (number or volume) and value.
+  responses:
+    '200':
+      description: Successful response with best orders info
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              result:
+                type: object
+                properties:
+                  orders:
+                    type: object
+                  original_tickers:
+                    type: array
+                    items:
+                      type: string
+              id:
+                nullable: true
+    '400':
+      description: Error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              mmrpc:
+                type: string
+              error:
+                type: string
+              error_path:
+                type: string
+              error_trace:
+                type: string
+              error_type:
+                type: string
+              error_data:
+                type: object
+              id:
+                nullable: true 

@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: Remove Node from Version Stat
+  description: Removes a node (by name) from the local database tracking KDF version.
+  version: 1.0.0
+paths:
+  /utils/remove_node_from_version_stat:
+    post:
+      operationId: "utils_remove_node_from_version_stat"
+      summary: Remove node from version stat
+      tags:
+        - utils
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name assigned to the node
+              required:
+                - name
+      responses:
+        '200':
+          description: Node removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_type:
+                    type: string 

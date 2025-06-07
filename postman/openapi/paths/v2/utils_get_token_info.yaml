@@ -1,0 +1,65 @@
+openapi: 3.0.3
+info:
+  title: Get Token Info
+  description: Returns the ticker and decimals values for a token given a platform and contract.
+  version: 1.0.0
+paths:
+  /utils/get_token_info:
+    post:
+      operationId: "utils_get_token_info"
+      summary: Get token info
+      tags:
+        - utils
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                protocol:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      description: Token type (e.g. ERC20)
+                    protocol_data:
+                      type: object
+                      properties:
+                        platform:
+                          type: string
+                          description: The parent coin of the token's platform
+                        contract_address:
+                          type: string
+                          description: The identifying hex string for the token's contract
+              required:
+                - type
+                - protocol_data
+      responses:
+        '200':
+          description: Token info returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  info:
+                    type: object
+                    properties:
+                      symbol:
+                        type: string
+                      decimals:
+                        type: integer
+        '400':
+          description: Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  error_type:
+                    type: string 

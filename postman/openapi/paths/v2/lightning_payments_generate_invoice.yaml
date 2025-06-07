@@ -1,0 +1,37 @@
+post:
+  operationId: "lightning_payments_generate_invoice"
+  tags:
+    - Lightning Payments
+  summary: Generate a Lightning invoice
+  description: Generates an invoice to be paid by another node.
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            coin:
+              type: string
+              description: Ticker of coin to generate invoice for
+            description:
+              type: string
+              description: Note for the invoice
+            amount_in_msat:
+              type: integer
+              description: Amount to be paid in millisatoshis
+            expiry:
+              type: integer
+              description: Optional. Seconds until the invoice expires
+  responses:
+    '200':
+      description: Invoice generated
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              payment_hash:
+                type: string
+              invoice:
+                type: string 
