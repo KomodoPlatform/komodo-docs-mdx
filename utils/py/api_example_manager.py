@@ -48,6 +48,7 @@ class APIExampleManager:
         # Generation templates for different method types
         self.generation_templates = {
             'activation': self._get_activation_templates(),
+            'task_operation': self._get_task_operation_templates(),
             'trading': self._get_trading_templates(),
             'wallet': self._get_wallet_templates(),
             'utility': self._get_utility_templates()
@@ -253,55 +254,73 @@ class APIExampleManager:
         if 'method' in json_data:
             method_name = json_data['method']
             if method_name and method_name.strip() and not method_name.strip() in [':', '::', '']:
-                return method_name
+                # Convert filesystem-safe hyphen format back to proper :: format
+                normalized_method = self._convert_filesystem_to_proper_format(method_name)
+                return normalized_method
         
         # Fallback to mapping context
         if method_context.get('method_name'):
-            return method_context['method_name']
+            return self._convert_filesystem_to_proper_format(method_context['method_name'])
         
         # Try to extract from YAML method name
         if method_context.get('yaml_method'):
-            return method_context['yaml_method']
+            return self._convert_filesystem_to_proper_format(method_context['yaml_method'])
         
         return None
     
+    def _convert_filesystem_to_proper_format(self, method_name: str) -> str:
+        """Convert filesystem-safe hyphen format back to proper :: format."""
+        if not method_name:
+            return method_name
+            
+        # Only convert if it looks like a filesystem-safe substitution
+        # Examples:
+        # "task-enable_utxo-init" -> "task::enable_utxo::init"
+        # "stream-balance-enable" -> "stream::balance::enable"
+        # "lightning-channels-open_channel" -> "lightning::channels::open_channel"
+        
+        # Don't convert if it already has :: (already in proper format)
+        if '::' in method_name:
+            return method_name
+            
+        # Don't convert simple single-word methods or methods without clear structure
+        if '-' not in method_name:
+            return method_name
+            
+        # Convert specific patterns we know are filesystem substitutions
+        if (method_name.startswith('task-') or 
+            method_name.startswith('stream-') or 
+            'lightning-' in method_name or
+            method_name.count('-') >= 2):  # Methods with multiple parts
+            return method_name.replace('-', '::')
+        
+        # For other cases, leave as-is to be safe
+        return method_name
+    
+    def _determine_operation(self, method_name: str) -> str:
+        """Determine the operation type from method name."""
+        # Simplified: always use 'default' folder for consistent 1:1 method:folder mapping
+        # This eliminates operation parsing complexity and duplicate folder issues
+        return 'default'
+    
     def _determine_operation_from_context(self, method_name: str, method_context: Dict[str, Any]) -> str:
         """Determine operation using method name and mapping context."""
-        # First try the standard method name parsing
-        if '::' in method_name:
-            parts = method_name.split('::')
-            if len(parts) >= 3:
-                return parts[-1]  # Last part is usually the operation
-        
-        # Use mapping context operations if available
-        if method_context.get('operations'):
-            operations = method_context['operations']
-            if operations and len(operations) > 0:
-                # Return the first operation as default
-                return operations[0]
-        
+        # Simplified: always use 'default' folder for consistent 1:1 method:folder mapping
         return 'default'
     
     def _determine_operation_from_mapping(self, method_name: str, mapping: Any) -> str:
         """Determine operation from mapping data."""
-        # Check if mapping has operations
-        if hasattr(mapping, 'operations') and mapping.operations:
-            return mapping.operations[0] if mapping.operations else 'default'
-        
-        # Fallback to method name parsing
-        return self._determine_operation(method_name)
-    
-    def _determine_operation(self, method_name: str) -> str:
-        """Determine the operation type from method name."""
-        if not method_name:
-            return 'default'
-            
-        if '::' in method_name:
-            parts = method_name.split('::')
-            if len(parts) >= 3:
-                return parts[-1]  # Last part is usually the operation
-                
+        # Simplified: always use 'default' folder for consistent 1:1 method:folder mapping
         return 'default'
+    
+    def _normalize_method_name(self, method_name: str) -> str:
+        """Normalize method name to consistent format for operation determination."""
+        if not method_name:
+            return method_name
+            
+        # Method names should already be in proper :: format at this point
+        # This method now just ensures consistency
+        return method_name
     
     def _generate_description(self, json_data: Dict[str, Any], example_type: str) -> str:
         """Generate a descriptive name for the example (requests only)."""
@@ -343,26 +362,25 @@ class APIExampleManager:
     
     def generate_additional_examples(self, method_name: str, operation: str, base_examples: List[ExtractedExample], version: str) -> List[ExtractedExample]:
         """Generate additional test cases based on existing examples."""
-        generated = []
-        
-        # Determine method category
-        category = self._categorize_method(method_name)
-        templates = self.generation_templates.get(category, {})
-        
-        if not templates:
-            return generated
-            
-        # Generate variations based on category
-        for template_name, template_data in templates.items():
-            if self._should_apply_template(method_name, operation, template_name):
-                new_example = self._apply_template(method_name, operation, template_data, base_examples, version)
-                if new_example:
-                    generated.append(new_example)
-                    
-        return generated
+        # Temporarily disabled to prevent generating incorrect examples
+        # TODO: Re-enable after template system is properly tested and validated
+        return []
     
     def _categorize_method(self, method_name: str) -> str:
         """Categorize method for template selection."""
+        # Handle task-based methods by their operation
+        if '::' in method_name and method_name.startswith('task::'):
+            parts = method_name.split('::')
+            if len(parts) >= 3:
+                operation = parts[-1]  # Last part is the operation
+                if operation in ['init']:
+                    return 'activation'
+                elif operation in ['cancel', 'status']:
+                    return 'task_operation'
+                elif operation in ['user_action']:
+                    return 'task_operation'
+        
+        # Handle non-task methods
         if 'enable' in method_name or 'activation' in method_name:
             return 'activation'
         elif any(keyword in method_name for keyword in ['buy', 'sell', 'trade', 'order', 'swap']):
@@ -374,9 +392,24 @@ class APIExampleManager:
     
     def _should_apply_template(self, method_name: str, operation: str, template_name: str) -> bool:
         """Determine if a template should be applied to a method."""
-        # Logic to determine template applicability
-        # This would be method-specific
-        return True
+        # Get method category
+        category = self._categorize_method(method_name)
+        
+        # For task operations (cancel, status, user_action), only apply task_operation template
+        if category == 'task_operation':
+            return template_name == 'task_operation'
+        
+        # For activation methods, apply activation templates
+        elif category == 'activation':
+            return template_name in ['electrum_mode', 'native_mode']
+        
+        # For other categories, apply their respective templates
+        elif category == 'trading':
+            return template_name == 'basic_trade'
+        elif category in ['wallet', 'utility']:
+            return template_name == 'basic_request'
+        
+        return False
     
     def _apply_template(self, method_name: str, operation: str, template_data: Dict[str, Any], base_examples: List[ExtractedExample], version: str) -> Optional[ExtractedExample]:
         """Apply a template to generate a new example."""
@@ -384,9 +417,11 @@ class APIExampleManager:
             # Create a new example based on template
             new_content = copy.deepcopy(template_data['content'])
             
-            # Customize for specific method
+            # Customize for specific method - ensure canonical format
             if 'method' in new_content:
-                new_content['method'] = method_name
+                # Convert method name to canonical format for generated examples
+                canonical_method_name = self._convert_filesystem_to_proper_format(method_name)
+                new_content['method'] = canonical_method_name
                 
             # Apply variations based on base examples
             if base_examples:
@@ -427,78 +462,57 @@ class APIExampleManager:
         """Save extracted examples to JSON files in the standardized structure."""
         saved_count = 0
         
-        # Group examples by version, method, and operation
-        grouped = self._group_examples_by_version(examples)
+        # Group examples by version and method (no operation subfolder)
+        grouped = self._group_examples_by_version_simple(examples)
         
         for version, version_examples in grouped.items():
-            for method_name, operations in version_examples.items():
-                for operation, operation_examples in operations.items():
-                    # Create directory structure
-                    method_dir = method_name.replace('::', '-')
-                    output_dir = Path(self.output_base) / version / method_dir / operation
-                    output_dir.mkdir(parents=True, exist_ok=True)
+            for method_name, method_examples in version_examples.items():
+                # Create directory structure - no operation subfolder
+                method_dir = method_name.replace('::', '-')
+                output_dir = Path(self.output_base) / version / method_dir
+                output_dir.mkdir(parents=True, exist_ok=True)
+                
+                # Save each example type
+                request_count = 1
+                response_count = 1
+                
+                for example in method_examples:
+                    if example.example_type == 'request':
+                        filename = f"{method_dir}-example-{request_count}-{example.description}-request.json"
+                        request_count += 1
+                    else:
+                        filename = f"{method_dir}-example-{response_count}-{example.description}-response.json"
+                        response_count += 1
                     
-                    # Save each example type
-                    request_count = 1
-                    response_count = 1
+                    filepath = output_dir / filename
                     
-                    for example in operation_examples:
-                        if example.example_type == 'request':
-                            filename = f"{method_dir}-{operation}-example-{request_count}-{example.description}-request.json"
-                            request_count += 1
-                        else:
-                            filename = f"{method_dir}-{operation}-example-{response_count}-{example.description}-response.json"
-                            response_count += 1
+                    try:
+                        with open(filepath, 'w', encoding='utf-8') as f:
+                            json.dump(example.content, f, indent=2, ensure_ascii=False)
                         
-                        filepath = output_dir / filename
+                        if self.verbose:
+                            print(f"💾 Saved: {filepath}")
+                        saved_count += 1
                         
-                        try:
-                            with open(filepath, 'w', encoding='utf-8') as f:
-                                json.dump(example.content, f, indent=2, ensure_ascii=False)
-                            
-                            if self.verbose:
-                                print(f"💾 Saved: {filepath}")
-                            saved_count += 1
-                            
-                        except Exception as e:
-                            print(f"❌ Error saving {filepath}: {e}")
+                    except Exception as e:
+                        print(f"❌ Error saving {filepath}: {e}")
         
         return saved_count
     
-    def _group_examples_by_version(self, examples: List[ExtractedExample]) -> Dict[str, Dict[str, Dict[str, List[ExtractedExample]]]]:
-        """Group examples by version, method, and operation."""
+    def _group_examples_by_version_simple(self, examples: List[ExtractedExample]) -> Dict[str, Dict[str, List[ExtractedExample]]]:
+        """Group examples by version and method only (no operation subfolder)."""
         grouped = {}
         
         for example in examples:
             version = example.version
             method = example.method_name
-            operation = example.operation
             
             if version not in grouped:
                 grouped[version] = {}
             if method not in grouped[version]:
-                grouped[version][method] = {}
-            if operation not in grouped[version][method]:
-                grouped[version][method][operation] = []
+                grouped[version][method] = []
                 
-            grouped[version][method][operation].append(example)
-            
-        return grouped
-    
-    def _group_examples(self, examples: List[ExtractedExample]) -> Dict[str, Dict[str, List[ExtractedExample]]]:
-        """Group examples by method and operation (legacy method)."""
-        grouped = {}
-        
-        for example in examples:
-            method = example.method_name
-            operation = example.operation
-            
-            if method not in grouped:
-                grouped[method] = {}
-            if operation not in grouped[method]:
-                grouped[method][operation] = []
-                
-            grouped[method][operation].append(example)
+            grouped[version][method].append(example)
             
         return grouped
     
@@ -616,7 +630,7 @@ class APIExampleManager:
     def _get_wallet_templates(self) -> Dict[str, Dict[str, Any]]:
         """Get templates for wallet methods."""
         return {
-            'basic_wallet': {
+            'basic_request': {
                 'type': 'request',
                 'description': 'basic_request',
                 'content': {
@@ -631,7 +645,7 @@ class APIExampleManager:
     def _get_utility_templates(self) -> Dict[str, Dict[str, Any]]:
         """Get templates for utility methods."""
         return {
-            'basic_utility': {
+            'basic_request': {
                 'type': 'request',
                 'description': 'basic_request',
                 'content': {
@@ -639,6 +653,23 @@ class APIExampleManager:
                     "mmrpc": "2.0",
                     "method": "placeholder",
                     "params": {}
+                }
+            }
+        }
+    
+    def _get_task_operation_templates(self) -> Dict[str, Dict[str, Any]]:
+        """Get templates for task operation methods (cancel, status, user_action)."""
+        return {
+            'task_operation': {
+                'type': 'request',
+                'description': 'task_operation',
+                'content': {
+                    "userpass": "RPC_UserP@SSW0RD",
+                    "mmrpc": "2.0",
+                    "method": "placeholder",
+                    "params": {
+                        "task_id": 1
+                    }
                 }
             }
         }
@@ -667,6 +698,88 @@ class APIExampleManager:
             return False
             
         return True
+    
+    def consolidate_to_flat_structure(self, dry_run: bool = True) -> Dict[str, int]:
+        """Consolidate all operation subfolders into flat method folders."""
+        import shutil
+        from collections import defaultdict
+        
+        consolidation_stats = defaultdict(int)
+        base_path = Path(self.output_base)
+        
+        if not base_path.exists():
+            if self.verbose:
+                print(f"Output base path does not exist: {base_path}")
+            return dict(consolidation_stats)
+        
+        for version_dir in base_path.iterdir():
+            if not version_dir.is_dir() or version_dir.name not in ['v1', 'v2']:
+                continue
+                
+            if self.verbose:
+                print(f"\n🔍 Flattening {version_dir.name} folder structure...")
+            
+            for method_dir in version_dir.iterdir():
+                if not method_dir.is_dir():
+                    continue
+                    
+                # Get all operation subfolders for this method
+                operation_folders = [op for op in method_dir.iterdir() if op.is_dir()]
+                
+                if not operation_folders:
+                    continue
+                
+                if self.verbose:
+                    print(f"  📁 Method: {method_dir.name}")
+                    print(f"     Subfolders found: {[op.name for op in operation_folders]}")
+                
+                # Move all files from subfolders to method folder directly
+                for operation_folder in operation_folders:
+                    files_to_move = list(operation_folder.glob('*.json'))
+                    
+                    if self.verbose:
+                        print(f"     🔄 Moving {len(files_to_move)} files from {operation_folder.name}/ to method folder")
+                    
+                    for file_path in files_to_move:
+                        # Update filename to remove operation part
+                        old_filename = file_path.name
+                        # Remove operation from filename: method-operation-example-N-desc.json -> method-example-N-desc.json
+                        method_name = method_dir.name
+                        if old_filename.startswith(f"{method_name}-{operation_folder.name}-"):
+                            new_filename = old_filename.replace(f"-{operation_folder.name}-", "-")
+                        else:
+                            new_filename = old_filename
+                        
+                        new_path = method_dir / new_filename
+                        
+                        # Avoid overwriting existing files
+                        counter = 1
+                        original_new_path = new_path
+                        while new_path.exists():
+                            stem = original_new_path.stem
+                            suffix = original_new_path.suffix
+                            new_path = method_dir / f"{stem}-{counter}{suffix}"
+                            counter += 1
+                        
+                        if not dry_run:
+                            shutil.move(str(file_path), str(new_path))
+                        
+                        if self.verbose:
+                            action = "Would move" if dry_run else "Moved"
+                            print(f"       📄 {action}: {old_filename} → {new_path.name}")
+                        
+                        consolidation_stats['files_moved'] += 1
+                    
+                    # Remove empty operation folder
+                    if not dry_run and not any(operation_folder.iterdir()):
+                        operation_folder.rmdir()
+                        if self.verbose:
+                            print(f"     🗑️  Removed empty folder: {operation_folder.name}/")
+                        consolidation_stats['folders_removed'] += 1
+                    elif dry_run:
+                        consolidation_stats['folders_to_remove'] += 1
+        
+        return dict(consolidation_stats)
 
 
 def main():
@@ -678,6 +791,10 @@ def main():
                        help='Only extract existing examples, do not generate new ones')
     parser.add_argument('--generate-only', action='store_true',
                        help='Only generate examples, do not extract from MDX')
+    parser.add_argument('--consolidate', action='store_true',
+                       help='Flatten folder structure by moving all files to method folders directly (removes operation subfolders)')
+    parser.add_argument('--dry-run', action='store_true',
+                       help='Show what would be done without making changes (use with --consolidate)')
     parser.add_argument('--method', type=str,
                        help='Process only a specific method')
     parser.add_argument('--versions', nargs='+', choices=['v1', 'v2'], default=['v1', 'v2'],
@@ -693,6 +810,22 @@ def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     
     manager = APIExampleManager(verbose=args.verbose)
+    
+    # Handle consolidation command
+    if args.consolidate:
+        print("🔄 Consolidating duplicate operation folders...")
+        stats = manager.consolidate_to_flat_structure(dry_run=args.dry_run)
+        
+        if args.dry_run:
+            print(f"\n📊 Consolidation Preview:")
+            print(f"  📄 Files to move: {stats.get('files_moved', 0)}")
+            print(f"  🗑️  Folders to remove: {stats.get('folders_to_remove', 0)}")
+            print(f"\n💡 Run without --dry-run to apply changes")
+        else:
+            print(f"\n✅ Consolidation Complete:")
+            print(f"  📄 Files moved: {stats.get('files_moved', 0)}")
+            print(f"  🗑️  Folders removed: {stats.get('folders_removed', 0)}")
+        return
     
     print("🚀 Starting API Example Management via Mapping System...")
     print(f"📋 Processing versions: {', '.join(args.versions)}")
