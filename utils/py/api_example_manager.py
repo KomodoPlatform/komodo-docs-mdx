@@ -130,7 +130,7 @@ class APIExampleManager:
                 'version': version
             }
             
-            # Find all CodeGroup blocks
+            # Find all CodeGroup blocks (REQUESTS ONLY)
             codegroup_pattern = r'<CodeGroup[^>]*>(.*?)</CodeGroup>'
             codegroups = re.findall(codegroup_pattern, content, re.DOTALL)
             
@@ -139,13 +139,16 @@ class APIExampleManager:
                 json_examples = self._extract_json_from_codegroup_mapped(block, method_context)
                 examples.extend(json_examples)
                 
-            # Find CollapsibleSection response examples
-            collapsible_pattern = r'<CollapsibleSection[^>]*>(.*?)</CollapsibleSection>'
-            collapsible_sections = re.findall(collapsible_pattern, content, re.DOTALL)
+            # REMOVED: CollapsibleSection extraction since responses are not needed
+            # CollapsibleSection contains responses, but we only want requests from CodeGroup
             
-            for section in collapsible_sections:
-                json_examples = self._extract_json_from_collapsible_mapped(section, method_context)
-                examples.extend(json_examples)
+            # Deduplicate examples based on content before returning
+            if examples:
+                unique_examples = self._deduplicate_examples(examples)
+                if self.verbose and len(examples) != len(unique_examples):
+                    removed_count = len(examples) - len(unique_examples)
+                    print(f"  🔄 Deduplicated {method_name}: removed {removed_count} duplicate examples during extraction")
+                examples = unique_examples
                 
         except Exception as e:
             if self.verbose:
@@ -198,53 +201,6 @@ class APIExampleManager:
             except json.JSONDecodeError as e:
                 if self.verbose:
                     print(f"JSON parse error in {method_context['mdx_path']}: {e}")
-                    
-        return examples
-    
-    def _extract_json_from_collapsible_mapped(self, section: str, method_context: Dict[str, Any]) -> List[ExtractedExample]:
-        """Extract JSON examples from CollapsibleSection using mapping context."""
-        examples = []
-        
-        # Find JSON code blocks in collapsible sections
-        json_pattern = r'```json\s*\n(.*?)```'
-        json_blocks = re.findall(json_pattern, section, re.DOTALL)
-        
-        for json_content in json_blocks:
-            try:
-                parsed_json = json.loads(json_content.strip())
-                
-                # Only extract requests (must have 'method' field)
-                if 'method' not in parsed_json:
-                    continue
-                    
-                example_type = 'request'
-                
-                # Use mapping context to determine method name
-                method_name = self._resolve_method_name_from_context(parsed_json, method_context)
-                
-                # Skip if we can't determine a valid method name
-                if not method_name or not self._is_valid_method_name(method_name):
-                    if self.verbose:
-                        print(f"Skipping invalid method name: {method_name} in {method_context['mdx_path']}")
-                    continue
-                    
-                description = self._generate_description(parsed_json, example_type)
-                operation = self._determine_operation_from_context(method_name, method_context)
-                
-                example = ExtractedExample(
-                    method_name=method_name,
-                    operation=operation,
-                    example_type=example_type,
-                    content=parsed_json,
-                    description=description,
-                    source_file=method_context['mdx_path'],
-                    version=method_context['version']
-                )
-                examples.append(example)
-                    
-            except json.JSONDecodeError as e:
-                if self.verbose:
-                    print(f"JSON parse error in collapsible section {method_context['mdx_path']}: {e}")
                     
         return examples
     
@@ -362,9 +318,41 @@ class APIExampleManager:
     
     def generate_additional_examples(self, method_name: str, operation: str, base_examples: List[ExtractedExample], version: str) -> List[ExtractedExample]:
         """Generate additional test cases based on existing examples."""
-        # Temporarily disabled to prevent generating incorrect examples
-        # TODO: Re-enable after template system is properly tested and validated
-        return []
+        # DISABLED: Prevent generation of duplicate examples
+        # This method was creating multiple identical examples which caused massive duplication.
+        # For now, only return unique examples to avoid duplicates.
+        # TODO: Re-enable after implementing proper template-based variation system
+        
+        if not base_examples:
+            return []
+        
+        # Only keep unique examples based on content
+        unique_examples = self._deduplicate_examples(base_examples)
+        
+        if self.verbose and len(base_examples) != len(unique_examples):
+            removed_count = len(base_examples) - len(unique_examples)
+            print(f"  🔄 Deduplicated {method_name}: removed {removed_count} duplicate examples")
+        
+        return []  # Return empty to prevent additional generation
+    
+    def _deduplicate_examples(self, examples: List[ExtractedExample]) -> List[ExtractedExample]:
+        """Remove duplicate examples based on content hash."""
+        seen_hashes = set()
+        unique_examples = []
+        
+        for example in examples:
+            import json
+            import hashlib
+            
+            # Create content hash for deduplication
+            content_str = json.dumps(example.content, sort_keys=True, ensure_ascii=False)
+            content_hash = hashlib.sha256(content_str.encode('utf-8')).hexdigest()
+            
+            if content_hash not in seen_hashes:
+                seen_hashes.add(content_hash)
+                unique_examples.append(example)
+        
+        return unique_examples
     
     def _categorize_method(self, method_name: str) -> str:
         """Categorize method for template selection."""
@@ -472,24 +460,44 @@ class APIExampleManager:
                 output_dir = Path(self.output_base) / version / method_dir
                 output_dir.mkdir(parents=True, exist_ok=True)
                 
-                # Save each example type
-                request_count = 1
-                response_count = 1
+                # Track saved files to prevent overwriting identical content
+                saved_hashes = set()
+                example_counter = 1
                 
                 for example in method_examples:
-                    if example.example_type == 'request':
-                        filename = f"{method_dir}-example-{request_count}-{example.description}-request.json"
-                        request_count += 1
-                    else:
-                        filename = f"{method_dir}-example-{response_count}-{example.description}-response.json"
-                        response_count += 1
+                    # Calculate content hash for uniqueness
+                    import json
+                    import hashlib
+                    content_str = json.dumps(example.content, sort_keys=True, ensure_ascii=False)
+                    content_hash = hashlib.sha256(content_str.encode('utf-8')).hexdigest()[:8]
                     
+                    # Skip if we've already saved this exact content
+                    if content_hash in saved_hashes:
+                        if self.verbose:
+                            print(f"  ⏭️  Skipping duplicate content for {method_name} (hash: {content_hash})")
+                        continue
+                    
+                    # Generate filename with descriptive name
+                    if example.example_type == 'request':
+                        filename = f"{method_dir}-{example.description}-request.json"
+                    else:
+                        filename = f"{method_dir}-{example.description}-response.json"
+                    
+                    # Ensure filename uniqueness if description is not unique
                     filepath = output_dir / filename
+                    counter = 1
+                    original_filepath = filepath
+                    while filepath.exists():
+                        stem = original_filepath.stem
+                        suffix = original_filepath.suffix
+                        filepath = output_dir / f"{stem}-{counter}{suffix}"
+                        counter += 1
                     
                     try:
                         with open(filepath, 'w', encoding='utf-8') as f:
                             json.dump(example.content, f, indent=2, ensure_ascii=False)
                         
+                        saved_hashes.add(content_hash)
                         if self.verbose:
                             print(f"💾 Saved: {filepath}")
                         saved_count += 1
