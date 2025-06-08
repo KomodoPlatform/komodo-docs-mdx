@@ -6,6 +6,17 @@
  </a>
 </p>
 
+## Document Version
+
+**Last Updated:** December 2024  
+**Recent Changes:**
+- Integrated API Documentation table standards (Request Arguments format)
+- Added MDX example standards and best practices
+- Consolidated multiple style documents into unified guide
+- Updated KDF API Method Documentation Standard with table formatting requirements
+
+---
+
 Great documentation is critical for guiding those who will use our tech stack. It should be clear, easy to read, and as detailed as required while avoiding unnecessary verbosity. This way, developers can quickly understand how to use and what to expect from our products.
 
 From a user's perspective:
@@ -30,6 +41,136 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 - Where a method or parameter is deprecated, this should be communicated in the method heading or request parameters table.
 - Separate sections of content with subheadings to make scanning and finding the information they need easier. Two line breaks should be used before and one line break after each subheading.
 
+### MDX Example Standards
+
+To ensure consistency and prevent duplication across JSON examples:
+
+#### ✅ Example Best Practices
+
+1. **One Unique Example Per Use Case**
+   - Each example should demonstrate a **distinct use case or parameter variation**
+   - Avoid creating multiple examples with identical content
+   - If examples are identical, consolidate into a single representative example
+
+2. **Meaningful Example Names**
+   Use descriptive names that reflect the actual content:
+
+   ✅ **Good:**
+   ```markdown
+   ##### BTC Electrum Activation Request
+   ##### ETH Native Mode Request
+   ##### Trezor PIN Entry Request
+   ```
+
+   ❌ **Bad:**
+   ```markdown
+   ##### Example 1 Request
+   ##### Example 2 Request
+   ##### Example 3 Request
+   ```
+
+3. **Content-Based Variation**
+   Only create multiple examples when they demonstrate:
+   - **Different parameter values** (different coins, networks, etc.)
+   - **Different activation modes** (electrum vs native)
+   - **Different hardware wallet flows** (Trezor PIN entry vs confirmation)
+   - **Different error scenarios**
+
+4. **Example Structure**
+   ```markdown
+   ##### [Descriptive Name] Request
+
+   Brief description of what this example demonstrates.
+
+   <CodeGroup title="[Descriptive Name] Request" tag="POST" label="method_name" mm2MethodDecorate="true">
+     ```json
+     {
+       // JSON example here
+     }
+     ```
+   </CodeGroup>
+
+   <CollapsibleSection expandedText="Hide [Descriptive Name] Response" collapsedText="Show [Descriptive Name] Response">
+     ##### [Descriptive Name] Response
+
+     ```json
+     {
+       // Expected response
+     }
+     ```
+   </CollapsibleSection>
+   ```
+
+#### ❌ Anti-Patterns to Avoid
+
+1. **Identical Content with Different Numbers**
+   ```markdown
+   ❌ ##### Example 1: task_operation Request
+   ❌ ##### Example 2: task_operation Request
+   ❌ ##### Example 3: task_operation Request
+   ```
+   All with identical JSON content.
+
+2. **Meaningless Variations**
+   ```markdown
+   ❌ ##### BTC activation (task_id: 1) Request
+   ❌ ##### BTC activation (task_id: 2) Request
+   ❌ ##### BTC activation (task_id: 3) Request
+   ```
+   Unless the task_id difference is semantically meaningful.
+
+3. **Numbered Examples Without Purpose**
+   Only use numbered examples when there's a logical sequence or distinct variations.
+
+#### Content Validation Guidelines
+
+1. **Consolidation Over Multiplication**
+   - Prefer **one comprehensive example** over multiple identical ones
+   - Use **inline comments** to explain variations
+   - Create **separate examples** only for distinct scenarios
+
+2. **Semantic Example Names**
+   - `btc_electrum_activation` ✅
+   - `eth_native_mode` ✅ 
+   - `trezor_pin_entry` ✅
+   - `basic_request` ❌ (too generic)
+
+3. **Parameter Documentation**
+   Instead of multiple examples, document parameter variations:
+
+   ```markdown
+   ##### Coin Activation Request
+
+   This example shows basic coin activation. Key parameters:
+   - `ticker`: Can be "BTC", "ETH", "KMD", etc.
+   - `mode`: "Electrum" or "Native"
+   - `servers`: Required for Electrum mode
+
+   <CodeGroup title="Coin Activation Request" tag="POST" label="task::enable_utxo::init" mm2MethodDecorate="true">
+     ```json
+     {
+       "method": "task::enable_utxo::init",
+       "params": {
+         "ticker": "BTC",  // ← Can be any supported coin
+         "activation_params": {
+           "mode": {
+             "rpc": "Electrum",  // ← Or "Native"
+             "rpc_data": {
+               "servers": [...]  // ← Required for Electrum
+             }
+           }
+         }
+       }
+     }
+     ```
+   </CodeGroup>
+   ```
+
+4. **Quality Over Quantity**
+   - One clear, well-documented example is better than ten identical ones
+   - Each example should serve a clear, distinct purpose
+   - Review existing examples before adding new ones to avoid duplication
+
 ## KDF API Method Documentation Standard
 
 All Komodo DeFi Framework API method documentation should follow this standardized format for consistency and clarity:
@@ -48,9 +189,9 @@ Brief explanation of the method, its purpose, and any important usage notes.
 
 ### Request Arguments
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| param1    | type | Description |
+| Parameter | Type | Required | Default | Description |
+|-----------|------|:--------:|:-------:|-------------|
+| param1    | type |    ✓     |   `-`   | Description |
 
 ### Response Parameters  
 
@@ -86,6 +227,92 @@ Brief explanation of the method, its purpose, and any important usage notes.
 </CollapsibleSection>
 ```
 
+### Request Arguments Table Format
+
+#### Standard Table Structure
+
+All Request Arguments tables must follow this format with proper column alignment and symbols:
+
+```markdown
+### Request Arguments
+
+| Parameter | Type | Required | Default | Description |
+| --------- | ---- | :------: | :-----: | ----------- |
+| param1    | type |    ✓     |   `-`   | description |
+| param2    | type |    ✗     | `value` | description |
+```
+
+#### Required Columns
+
+1. **Parameter** - Parameter name (use escaped underscores: `param\_name`)
+2. **Type** - Data type (string, number, bool, object, etc.)
+3. **Required** - Required/Optional indicator (see symbols below)
+4. **Default** - Default value or `-` for no default
+5. **Description** - Clear description with enum references where applicable
+
+#### Column Alignment Standards
+
+- **Parameter, Type, Description**: Left-aligned (default)
+- **Required**: Center-aligned using `:------:`
+- **Default**: Center-aligned using `:-----:`
+
+Example with correct alignment:
+```markdown
+| Parameter | Type   | Required | Default | Description |
+| --------- | ------ | :------: | :-----: | ----------- |
+| coin      | string |    ✓     |   `-`   | description |
+```
+
+#### Required/Optional Symbols
+
+- **✓** - Required parameter
+- **✗** - Optional parameter  
+- **-** - Not applicable (for methods with no parameters)
+
+Always use symbols with consistent spacing (5 spaces before/after for center alignment).
+
+#### Default Value Formatting
+
+1. **No default**: Use `-`
+2. **String defaults**: Use backticks - `` `"value"` ``
+3. **Boolean defaults**: Use backticks - `` `true` `` or `` `false` ``
+4. **Numeric defaults**: Use backticks - `` `10` `` or `` `0.5` ``
+5. **Special values**: Use backticks - `` `null` ``
+
+#### Parameter Naming Rules
+
+**Avoid dot notation** in parameter names. Instead, delegate to common structure objects:
+
+❌ **Incorrect:**
+```markdown
+| protocol.type             | string | ✓ | - | Token type |
+| protocol.protocol\_data   | object | ✓ | - | Protocol data |
+```
+
+✅ **Correct:**
+```markdown
+| protocol | object | ✓ | - | A standard [TokenProtocol](/komodo-defi-framework/api/common_structures/#token-protocol) object |
+```
+
+#### Optional Default Column Rules
+
+- **Include Default column** when parameters have actual default values
+- **Omit Default column** when all parameters are required with no defaults
+- **Use Required column only** for methods with no parameters: `| (none) | | - | |`
+
+#### Enum System and Cross-References
+
+When referencing enums in parameter descriptions:
+
+```markdown
+| swap_method | string | ✓ | - | A standard [SwapMethod](/komodo-defi-framework/api/common_structures/#swap-method-enum) enum. The name of the method whose preimage is requested. |
+```
+
+Link format rules:
+- Use kebab-case for anchor links: `#swap-method-enum`
+- Always include full path: `/komodo-defi-framework/api/common_structures/`
+- Escape underscores in method names: `trade\_preimage`
+
 ### Key Requirements
 
 1. **Page Title**: Must match the exported `title` constant exactly
@@ -98,6 +325,7 @@ Brief explanation of the method, its purpose, and any important usage notes.
    - H5: Individual example names (`##### [Example Name] Request/Response`)
 4. **Consistent Naming**: Request and response sections must use matching names (e.g., "HD Wallet Account Request" → "HD Wallet Account Response")
 5. **CollapsibleSection Text**: Must match the example names (e.g., `"Show HD Wallet Account Response"`, `"Hide HD Wallet Account Response"`)
+6. **Table Format**: All Request Arguments tables must use the standardized format with Required/Default columns and proper alignment
 
 ### Benefits
 
@@ -105,6 +333,9 @@ Brief explanation of the method, its purpose, and any important usage notes.
 - **Clear hierarchy**: Easy to understand document structure  
 - **Scalable**: Works for single-method and multi-method pages
 - **User-friendly**: Predictable layout improves user experience
+- **Machine-readable**: Proper table format enables OpenAPI generation
+- **Standardized defaults**: Consistent format for automation
+- **Cross-reference system**: Links between methods and common structures
 
 ## General
 
