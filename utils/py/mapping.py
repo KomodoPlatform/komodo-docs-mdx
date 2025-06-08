@@ -69,7 +69,7 @@ class MethodMapper:
     def _normalize_method_name(self, method_name: str) -> List[str]:
         """
         Generate possible variations of a method name to handle naming convention mismatches.
-        Only converts between :: and - while preserving underscores.
+        Handles conversions between :: and -, and various method patterns.
         
         Args:
             method_name: The original method name
@@ -83,11 +83,55 @@ class MethodMapper:
         if '::' in method_name:
             dash_version = method_name.replace('::', '-')
             variations.append(dash_version)
+            
+            # Also try without the final operation for methods that might have duplicated operations
+            parts = method_name.split('::')
+            if len(parts) > 2:
+                # Check for duplicated final operation
+                if parts[-1] == parts[-2]:
+                    # Remove the duplicated operation
+                    without_duplicate = '::'.join(parts[:-1])
+                    variations.append(without_duplicate)
+                    variations.append(without_duplicate.replace('::', '-'))
+                
+                # For lightning and stream methods, try without the final operation
+                if method_name.startswith(('lightning::', 'stream::')):
+                    base_method = '::'.join(parts[:-1])
+                    variations.append(base_method)
+                    variations.append(base_method.replace('::', '-'))
         
         # Convert - to :: (YAML format to method format)
         elif '-' in method_name:
             colon_version = method_name.replace('-', '::')
             variations.append(colon_version)
+        
+        # Handle special cases for method name patterns
+        for variation in list(variations):  # Create a copy to iterate over
+            # Lightning method variations
+            if 'lightning' in variation:
+                # Try with different separators
+                if 'lightning-' in variation:
+                    variations.append(variation.replace('lightning-', 'lightning::'))
+                elif 'lightning::' in variation:
+                    variations.append(variation.replace('lightning::', 'lightning-'))
+            
+            # Stream method variations  
+            if 'stream' in variation:
+                # Try with different separators
+                if 'stream-' in variation:
+                    variations.append(variation.replace('stream-', 'stream::'))
+                elif 'stream::' in variation:
+                    variations.append(variation.replace('stream::', 'stream-'))
+            
+            # Task method variations
+            if 'task' in variation:
+                # Try with different enable patterns
+                if 'task-enable-' in variation:
+                    enable_variant = variation.replace('task-enable-', 'task::enable_')
+                    variations.append(enable_variant)
+                elif 'task::enable_' in variation:
+                    enable_variant = variation.replace('task::enable_', 'task-enable-')
+                    variations.append(enable_variant)
         
         return list(set(variations))  # Remove duplicates
     
@@ -215,6 +259,8 @@ class MethodMapper:
         Structure:
         - Task methods: task-enable-utxo/init/, task-enable-utxo/status/, etc.
         - Non-task methods: my_balance/default/, orderbook/default/, etc.
+        - Lightning methods: lightning-channels-close_channel/default/, etc.
+        - Stream methods: stream-balance-enable/enable/, etc.
         
         Returns dict with v1 and v2 mappings: {method: (examples_path, count)}
         """
@@ -238,9 +284,16 @@ class MethodMapper:
                 # Handle special naming conventions
                 if method_name_base == "task::enable::z::coin":
                     method_name_base = "task::enable_z_coin"
-                elif "::enable::" in method_name_base:
+                elif method_name_base.startswith("task::enable::"):
                     # Convert task::enable::xyz to task::enable_xyz
                     method_name_base = method_name_base.replace("::enable::", "::enable_")
+                elif method_name_base.startswith("stream::") and method_name_base.endswith("::enable"):
+                    # Convert stream::balance::enable to stream::balance::enable (keep as is)
+                    pass
+                elif method_name_base.startswith("lightning::"):
+                    # Handle lightning methods - they may have the operation in the directory name
+                    # e.g., lightning-channels-close_channel -> lightning::channels::close_channel
+                    pass
                 
                 # Look for operation subdirectories (init, status, cancel, user-action, default)
                 for operation_dir in os.listdir(method_path):
@@ -255,12 +308,25 @@ class MethodMapper:
                     if example_count > 0:
                         # Create the full method name for the operation
                         if operation_dir == 'default':
-                            # For non-task methods using default operation
+                            # For non-task methods using default operation, use the base name as-is
                             full_method_name = method_name_base
                         else:
-                            # For task methods with specific operations
+                            # For specific operations, we need to be smarter about avoiding duplication
                             operation_name = operation_dir.replace('-', '_')  # user-action -> user_action
-                            full_method_name = f"{method_name_base}::{operation_name}"
+                            
+                            # Check if the operation is already in the method name
+                            if method_name_base.endswith(f"::{operation_name}"):
+                                # Already contains the operation, don't duplicate
+                                full_method_name = method_name_base
+                            elif method_name_base.startswith("stream::") and operation_name == "enable" and method_name_base.endswith("::enable"):
+                                # Stream methods that end with ::enable and have enable operation
+                                full_method_name = method_name_base
+                            elif method_name_base.startswith("lightning::") and operation_name in method_name_base:
+                                # Lightning methods where operation is already in the base name
+                                full_method_name = method_name_base
+                            else:
+                                # Standard case: append operation to method base
+                                full_method_name = f"{method_name_base}::{operation_name}"
                         
                         relative_path = os.path.relpath(operation_path, '.')
                         method_examples[version][full_method_name] = (relative_path, example_count)
@@ -724,6 +790,75 @@ class MethodMapper:
         except Exception as e:
             print(f"Error generating focused spec: {e}")
             return False
+
+    def debug_method_matching(self, method_name: str, version: str = "v2") -> None:
+        """
+        Debug method name matching issues by showing all attempted variations.
+        
+        Args:
+            method_name: The method name to debug
+            version: The API version to check against
+        """
+        print(f"\n🔍 Debugging method matching for: {method_name}")
+        
+        # Get mappings
+        mdx_mappings = self.scan_mdx_files()
+        yaml_mappings = self.scan_yaml_files()
+        example_mappings = self.scan_json_examples()
+        
+        variations = self._normalize_method_name(method_name)
+        print(f"📝 Generated variations:")
+        for i, variation in enumerate(variations, 1):
+            print(f"  {i}. {variation}")
+        
+        # Check MDX mappings
+        print(f"\n📄 MDX mapping check:")
+        mdx_match = self._find_best_match(method_name, mdx_mappings[version])
+        if mdx_match:
+            print(f"  ✅ Found: {mdx_match}")
+        else:
+            print(f"  ❌ Not found in MDX mappings")
+            # Show similar methods
+            similar_mdx = [m for m in mdx_mappings[version].keys() 
+                          if any(part in m for part in method_name.split('::'))][:5]
+            if similar_mdx:
+                print(f"  🔍 Similar MDX methods:")
+                for similar in similar_mdx:
+                    print(f"    - {similar}")
+        
+        # Check YAML mappings
+        print(f"\n📋 YAML mapping check:")
+        yaml_match = self._find_best_match(method_name, yaml_mappings[version])
+        if yaml_match:
+            print(f"  ✅ Found: {yaml_match}")
+        else:
+            print(f"  ❌ Not found in YAML mappings")
+            # Show similar methods
+            similar_yaml = [m for m in yaml_mappings[version].keys() 
+                           if any(part in m for part in method_name.split('::'))][:5]
+            if similar_yaml:
+                print(f"  🔍 Similar YAML methods:")
+                for similar in similar_yaml:
+                    print(f"    - {similar}")
+        
+        # Check example mappings
+        print(f"\n🧪 Example mapping check:")
+        example_data = self._find_best_match(method_name, {k: v for k, v in example_mappings[version].items()})
+        if example_data:
+            path, count = example_data
+            print(f"  ✅ Found: {path} ({count} examples)")
+        else:
+            print(f"  ❌ Not found in example mappings")
+            # Show similar methods
+            similar_examples = [m for m in example_mappings[version].keys() 
+                               if any(part in m for part in method_name.split('::'))][:5]
+            if similar_examples:
+                print(f"  🔍 Similar example methods:")
+                for similar in similar_examples:
+                    count = example_mappings[version][similar][1]
+                    print(f"    - {similar} ({count} examples)")
+        
+        print(f"\n" + "="*60)
 
 
 def main():
