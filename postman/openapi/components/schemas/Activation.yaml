@@ -439,4 +439,31 @@ UtxoMergeParams:
       description: How frequently (in blocks) the wallet UTXO count is evaluated.
     max_merge_at_once:
       type: integer
-      description: The maximum number of UTXOs to inlude as inputs for a merge transaction. 
+      description: The maximum number of UTXOs to inlude as inputs for a merge transaction.
+
+TokenActivationParams:
+  type: object
+  description: Standard token activation parameters
+  properties:
+    required_confirmations:
+      type: integer
+      description: Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set
+      minimum: 1
+      example: 3
+
+TendermintActivationParams:
+  type: object
+  description: Tendermint-specific activation parameters
+  properties:
+    required_confirmations:
+      type: integer
+      description: Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set
+      minimum: 1
+      example: 3
+    rpc_urls:
+      type: array
+      description: Optional. List of RPC URLs for the Tendermint network
+      items:
+        type: string
+        format: uri
+      example: ["https://rpc.cosmos.network:443"] 

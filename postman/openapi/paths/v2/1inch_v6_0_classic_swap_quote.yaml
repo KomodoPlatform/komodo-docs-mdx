@@ -1,0 +1,236 @@
+/1inch_v6_0_classic_swap_quote:
+  post:
+    operationId: 1inch_v6_0_classic_swap_quote
+    summary: 1inch v6.0 Classic Swap Quote
+    description: |
+      Returns best quote from 1inch classic swap API version 6.0.
+      
+      Note: To use this method, you need to set the 1inch_api url in your MM2.json file
+      and set your 1inch API key as an environment variable called ONE_INCH_API_TEST_AUTH.
+      This feature is experimental and requires building KDF from source on the dev branch.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_quote/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["1inch_v6_0_classic_swap_quote"]
+                    description: The method name
+                    example: "1inch_v6_0_classic_swap_quote"
+                  params:
+                    type: object
+                    required:
+                      - base
+                      - rel
+                      - amount
+                    properties:
+                      base:
+                        $ref: '../../../components/schemas/Common.yaml#/CoinTicker'
+                        description: Base coin name
+                        example: "ETH"
+                      rel:
+                        $ref: '../../../components/schemas/Common.yaml#/CoinTicker'
+                        description: Rel coin name (must be from the same EVM chain as the base coin)
+                        example: "USDC-ERC20"
+                      amount:
+                        $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                        description: Swap amount (in coins units)
+                        example: "0.1"
+                      fee:
+                        type: number
+                        description: Partner fee, percentage of src token amount will be sent to referrer address
+                        minimum: 0
+                        maximum: 3
+                        default: 0
+                        example: 0
+                      protocols:
+                        type: string
+                        description: Specify liquidity sources (by default - all used)
+                        example: "WETH,CURVE,BALANCER"
+                      gas_price:
+                        $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                        description: Network price per gas, in Gwei
+                      complexity_level:
+                        type: integer
+                        description: Maximum number of token-connectors to be used in a transaction
+                        minimum: 0
+                        maximum: 3
+                        default: 2
+                        example: 3
+                      parts:
+                        type: integer
+                        description: Limit maximum number of parts each main route parts can be split into
+                        maximum: 100
+                        default: 20
+                        example: 100
+                      main_route_parts:
+                        type: integer
+                        description: Limit maximum number of main route parts
+                        maximum: 50
+                        default: 20
+                        example: 50
+                      gas_limit:
+                        type: integer
+                        description: Maximum amount of gas for a swap
+                        maximum: 11500000
+                        default: 11500000
+                        example: 11500000
+                      include_tokens_info:
+                        type: boolean
+                        description: Return fromToken and toToken info in response
+                        default: true
+                      include_protocols:
+                        type: boolean
+                        description: Return used swap protocols in response
+                        default: true
+                      include_gas:
+                        type: boolean
+                        description: Include estimated gas in return value
+                        default: true
+                      connector_tokens:
+                        type: string
+                        description: Token-connectors specification
+    responses:
+      '200':
+        description: Successfully retrieved quote from 1inch
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        dst_amount:
+                          type: object
+                          description: Destination token amount
+                          properties:
+                            amount:
+                              $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                              description: Amount as string
+                            amount_fraction:
+                              type: object
+                              description: Fraction representation
+                              properties:
+                                numer:
+                                  $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                denom:
+                                  $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                            amount_rat:
+                              type: array
+                              description: Rational number representation
+                        src_token:
+                          type: object
+                          description: Source (base) token information
+                          properties:
+                            address:
+                              type: string
+                              description: Token contract address
+                            symbol:
+                              type: string
+                              description: Token symbol
+                            name:
+                              type: string
+                              description: Token name
+                            decimals:
+                              type: integer
+                              description: Token decimals
+                            eip2612:
+                              type: boolean
+                              description: EIP-2612 support
+                            isFoT:
+                              type: boolean
+                              description: Is FoT token
+                            logoURI:
+                              type: string
+                              format: uri
+                              description: Token logo URI
+                            tags:
+                              type: array
+                              items:
+                                type: string
+                              description: Token tags
+                        dst_token:
+                          type: object
+                          description: Destination (rel) token information
+                          properties:
+                            address:
+                              type: string
+                              description: Token contract address
+                            symbol:
+                              type: string
+                              description: Token symbol
+                            name:
+                              type: string
+                              description: Token name
+                            decimals:
+                              type: integer
+                              description: Token decimals
+                            eip2612:
+                              type: boolean
+                              description: EIP-2612 support
+                            isFoT:
+                              type: boolean
+                              description: Is FoT token
+                            logoURI:
+                              type: string
+                              format: uri
+                              description: Token logo URI
+                            tags:
+                              type: array
+                              items:
+                                type: string
+                              description: Token tags
+                        protocols:
+                          type: array
+                          description: Liquidity sources used to route trade
+                          items:
+                            type: array
+                            items:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  name:
+                                    type: string
+                                    description: Protocol name
+                                  part:
+                                    type: integer
+                                    description: Percentage of trade through this protocol
+                                  fromTokenAddress:
+                                    type: string
+                                    description: From token address
+                                  toTokenAddress:
+                                    type: string
+                                    description: To token address
+                        gas:
+                          type: integer
+                          description: Estimated gas
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      enum:
+                        - "InvalidParam"
+                        - "OneInchError"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

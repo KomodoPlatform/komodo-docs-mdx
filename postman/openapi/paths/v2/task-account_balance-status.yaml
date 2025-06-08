@@ -1,0 +1,130 @@
+/task::account_balance::status:
+  post:
+    operationId: task_account_balance_status
+    summary: Account Balance Task Status
+    description: |
+      View the status/response of an account balance request.
+      Returns the combined balance of your account, detailing the balance for each active account address.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/wallet/task_managed/account_balance/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::account_balance::status"]
+                    description: The method name
+                    example: "task::account_balance::status"
+                  params:
+                    type: object
+                    required:
+                      - task_id
+                    properties:
+                      task_id:
+                        type: integer
+                        description: The identifying number returned when initiating the task
+                        example: 3
+                      forget_if_finished:
+                        type: boolean
+                        description: If false, will return final response for completed tasks
+                        default: true
+                        example: false
+    responses:
+      '200':
+        description: Successfully retrieved account balance task status
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                          description: Status of the task
+                          enum: ["Ok", "InProgress", "Error"]
+                          example: "Ok"
+                        details:
+                          type: object
+                          description: Account balance details
+                          properties:
+                            account_index:
+                              type: integer
+                              description: The account index
+                              example: 0
+                            derivation_path:
+                              type: string
+                              description: The derivation path for the account
+                              example: "m/44'/20'/0'"
+                            total_balance:
+                              type: object
+                              description: Total balance for the account, keyed by coin ticker
+                              additionalProperties:
+                                type: object
+                                properties:
+                                  spendable:
+                                    $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                    description: Spendable balance amount
+                                  unspendable:
+                                    $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                    description: Unspendable balance amount
+                            addresses:
+                              type: array
+                              description: List of addresses for the account
+                              items:
+                                type: object
+                                properties:
+                                  address:
+                                    type: string
+                                    description: The address string
+                                    example: "DJdsr4Mhqm1afkbxwBJfwH6236xNh5kJZU"
+                                  derivation_path:
+                                    type: string
+                                    description: The derivation path for the address
+                                    example: "m/44'/20'/0'/0/0"
+                                  chain:
+                                    type: string
+                                    enum: ["External", "Internal"]
+                                    description: The chain type
+                                    example: "External"
+                                  balance:
+                                    type: object
+                                    description: Balance for the address, keyed by coin ticker
+                                    additionalProperties:
+                                      type: object
+                                      properties:
+                                        spendable:
+                                          $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                          description: Spendable balance amount
+                                        unspendable:
+                                          $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                          description: Unspendable balance amount
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "TaskNotFound"
+                        - "InvalidParam"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

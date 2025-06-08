@@ -1,0 +1,89 @@
+/task::init_trezor::user_action:
+  post:
+    operationId: task_init_trezor_user_action
+    summary: Trezor Initialization User Action
+    description: |
+      Handle user action required during Trezor hardware wallet initialization task.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/utils/task_init_trezor/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::init_trezor::user_action"]
+                    description: The method name
+                    example: "task::init_trezor::user_action"
+                  params:
+                    type: object
+                    required:
+                      - task_id
+                      - user_action
+                    properties:
+                      task_id:
+                        type: integer
+                        description: The identifying number returned when initiating the task
+                        example: 1
+                      user_action:
+                        type: object
+                        description: User action to perform
+                        properties:
+                          action_type:
+                            type: string
+                            description: Type of user action
+                            enum: ["Confirm", "Cancel", "EnterPin", "EnterPassphrase"]
+                            example: "Confirm"
+                          pin:
+                            type: string
+                            description: PIN for Trezor device (when action_type is EnterPin)
+                            example: "123456"
+                          passphrase:
+                            type: string
+                            description: Passphrase for Trezor device (when action_type is EnterPassphrase)
+                          additional_data:
+                            type: object
+                            description: Additional data for the action
+                            additionalProperties: true
+    responses:
+      '200':
+        description: Successfully processed user action
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Result of the user action
+                      enum: ["success"]
+                      example: "success"
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "TaskNotFound"
+                        - "InvalidParam"
+                        - "InvalidUserAction"
+                        - "TrezorError"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 
