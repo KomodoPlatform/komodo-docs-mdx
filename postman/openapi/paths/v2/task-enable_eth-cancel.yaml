@@ -1,0 +1,69 @@
+/task-enable_eth-cancel:
+  post:
+    operationId: task-enable_eth-cancel
+    summary: Cancel ETH Enable Task
+    description: |
+      Cancels an active ETH coin activation task that is currently in progress.
+      This stops the asynchronous ETH activation process.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::enable_eth::cancel"]
+                    description: The method name
+                    example: "task::enable_eth::cancel"
+                  params:
+                    type: object
+                    required:
+                      - task_id
+                    properties:
+                      task_id:
+                        type: integer
+                        description: The identifying number returned when initiating the enabling process
+                        example: 3
+    responses:
+      '200':
+        description: Task cancelled successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Indicates task cancellation was successful
+                      example: "success"
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: An enumerated value for the returned error
+                      enum:
+                        - "TaskFinished"
+                        - "NoSuchTask"
+                    error_data:
+                      type: integer
+                      description: The input task ID which resulted in the error
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

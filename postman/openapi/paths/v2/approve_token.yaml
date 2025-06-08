@@ -12,110 +12,69 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["approve_token"]
-                description: The method name
-                example: "approve_token"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-              params:
-                type: object
-                required:
-                  - coin
-                  - spender
-                  - amount
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  coin:
+                  method:
                     type: string
-                    description: Token ticker
-                    example: "USDT-ERC20"
-                  spender:
-                    type: string
-                    description: Address of smart contract to approve for spending
-                    example: "0x1234567890123456789"
-                  amount:
-                    type: number
-                    description: Approved amount to spend (in coins units)
-                    example: 1.23
+                    enum: ["approve_token"]
+                    description: The method name
+                    example: "approve_token"
+                  params:
+                    type: object
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: Token ticker
+                      spender:
+                        type: string
+                        pattern: "^0x[a-fA-F0-9]{40}$"
+                        description: Address of smart contract to approve for spending
+                        example: "0x1234567890123456789012345678901234567890"
+                      amount:
+                        $ref: ../../../components/schemas/Common.yaml#/AmountString
+                        description: Approved amount to spend (in coins units)
+                    required:
+                      - coin
+                      - spender
+                      - amount
     responses:
       '200':
         description: Token approval successful
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: string
-                  description: Approval transaction id
-                  example: "0x1234567890abcdef01234567890abcdef0"
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: string
+                      pattern: "^0x[a-fA-F0-9]{64}$"
+                      description: Approval transaction id
+                      example: "0x1234567890abcdef01234567890abcdef01234567890abcdef01234567890abcdef"
       '400':
         description: Bad request
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                error_trace:
-                  type: string
-                  description: Error trace information
-                error_type:
-                  type: string
-                  description: Type of error
-                  enum:
-                    - "NoSuchCoin"
-                    - "TransactionError"
-                error_data:
-                  type: object
-                  description: Additional error data
-                id:
-                  type: integer
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "NoSuchCoin"
+                        - "TransactionError"
+                    error_data:
+                      type: object
+                      description: Additional error data
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

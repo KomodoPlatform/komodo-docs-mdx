@@ -11,156 +11,98 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["get_eth_estimated_fee_per_gas"]
-                description: The method name
-                example: "get_eth_estimated_fee_per_gas"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-              params:
-                type: object
-                required:
-                  - coin
-                  - estimator_type
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  coin:
+                  method:
                     type: string
-                    description: Ticker of the coin/asset for which we want to start the gas fee estimator
-                    example: "ETH"
-                  estimator_type:
-                    type: string
-                    enum: ["Simple", "Provider"]
-                    description: Simple or Provider. If set to Provider, users must set the gas_api setting in their MM2.json file to source recommended fee values from third party providers
-                    example: "Simple"
+                    enum: ["get_eth_estimated_fee_per_gas"]
+                    description: The method name
+                    example: "get_eth_estimated_fee_per_gas"
+                  params:
+                    type: object
+                    required:
+                      - coin
+                      - estimator_type
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: Ticker of the coin/asset for which we want to start the gas fee estimator
+                      estimator_type:
+                        type: string
+                        enum: ["Simple", "Provider"]
+                        description: Simple or Provider. If set to Provider, users must set the gas_api setting in their MM2.json file to source recommended fee values from third party providers
+                        example: "Simple"
     responses:
       '200':
         description: Fee estimation retrieved successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: object
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
                   properties:
-                    base_fee:
-                      type: string
-                      description: The base fee per gas in Gwei
-                      example: "10.890879158"
-                    low:
-                      $ref: ../../components/schemas/Wallet.yaml#/FeeEstimate
-                      description: Low priority fee estimate
-                    medium:
-                      $ref: ../../components/schemas/Wallet.yaml#/FeeEstimate
-                      description: Medium priority fee estimate
-                    high:
-                      $ref: ../../components/schemas/Wallet.yaml#/FeeEstimate
-                      description: High priority fee estimate
-                    source:
-                      type: string
-                      description: The source of the fee estimation
-                      enum: ["simple", "blocknative", "infura"]
-                      example: "simple"
-                    base_fee_trend:
-                      type: string
-                      description: The trend direction of the base fee
-                      example: ""
-                    priority_fee_trend:
-                      type: string
-                      description: The trend direction of the priority fee
-                      example: ""
-                    units:
-                      type: string
-                      description: The unit of measurement for the fees
-                      example: "Gwei"
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+                    result:
+                      type: object
+                      properties:
+                        base_fee:
+                          $ref: ../../components/schemas/Common.yaml#/AmountString
+                          description: The base fee per gas in Gwei
+                          example: "10.890879158"
+                        low:
+                          $ref: ../../components/schemas/Wallet.yaml#/FeeEstimate
+                          description: Low priority fee estimate
+                        medium:
+                          $ref: ../../components/schemas/Wallet.yaml#/FeeEstimate
+                          description: Medium priority fee estimate
+                        high:
+                          $ref: ../../components/schemas/Wallet.yaml#/FeeEstimate
+                          description: High priority fee estimate
+                        source:
+                          type: string
+                          description: The source of the fee estimation
+                          enum: ["simple", "blocknative", "infura"]
+                          example: "simple"
+                        base_fee_trend:
+                          type: string
+                          description: The trend direction of the base fee
+                          example: ""
+                        priority_fee_trend:
+                          type: string
+                          description: The trend direction of the priority fee
+                          example: ""
+                        units:
+                          type: string
+                          description: The unit of measurement for the fees
+                          example: "Gwei"
+                      required:
+                        - base_fee
+                        - low
+                        - medium
+                        - high
+                        - source
+                        - units
       '400':
         description: Bad request - Various error conditions
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  examples:
-                    - "Error parsing request: missing field `estimator_type`"
-                    - "No such coin DOGE"
-                    - "Gas fee estimation not supported for this coin"
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                  examples:
-                    - "dispatcher"
-                    - "get_estimated_fees.lp_coins"
-                    - "get_estimated_fees"
-                error_trace:
-                  type: string
-                  description: Error trace information
-                  examples:
-                    - "dispatcher:122]"
-                    - "get_estimated_fees:244] lp_coins:4767]"
-                    - "get_estimated_fees:206]"
-                error_type:
-                  type: string
-                  description: Type of error
-                  enum:
-                    - "InvalidRequest"
-                    - "NoSuchCoin"
-                    - "CoinNotSupported"
-                error_data:
-                  oneOf:
-                    - type: string
-                      description: Missing field or other validation error
-                      example: "missing field `estimator_type`"
-                    - type: object
-                      description: Coin details for NoSuchCoin error
-                      properties:
-                        coin:
-                          type: string
-                          example: "DOGE"
-                id:
-                  type: integer
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "InvalidRequest"
+                        - "NoSuchCoin"
+                        - "CoinNotSupported"
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

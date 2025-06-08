@@ -1,0 +1,96 @@
+/lightning-channels-list_closed_channels_by_filter:
+  post:
+    operationId: lightning-channels-list_closed_channels_by_filter
+    summary: List Closed Channels by Filter
+    description: |
+      Returns a list of closed Lightning Network channels filtered by the provided filter object.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/channels/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["lightning::channels::list_closed_channels_by_filter"]
+                    description: The method name
+                    example: "lightning::channels::list_closed_channels_by_filter"
+                  params:
+                    type: object
+                    required:
+                      - coin
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: The ticker of the coin you would like to view closed channels for
+                      filter:
+                        $ref: ../../components/schemas/Lightning.yaml#/LightningClosedChannelsFilter
+                        description: A standard LightningClosedChannelsFilter object
+                      paging_options:
+                        $ref: ../../components/schemas/Common.yaml#/Pagination
+                        description: Optional. A standard Pagination object
+                      limit:
+                        type: integer
+                        minimum: 1
+                        description: Optional, defaults to 10. Maximum number of results to return
+                        default: 10
+                        example: 10
+    responses:
+      '200':
+        description: Closed channels retrieved successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        closed_channels:
+                          type: array
+                          items:
+                            $ref: ../../components/schemas/Lightning.yaml#/LightningClosedChannelDetails
+                          description: List of closed channel details
+                        limit:
+                          type: integer
+                          description: The limit that was set in the request
+                          example: 10
+                        skipped:
+                          type: integer
+                          description: Number of skipped records
+                          example: 0
+                        total:
+                          type: integer
+                          description: Total number of channels available with the selected filters
+                          example: 1
+                        total_pages:
+                          type: integer
+                          description: Total pages available with the selected filters and limit
+                          example: 1
+                        paging_options:
+                          $ref: ../../components/schemas/Common.yaml#/PagingOptions
+                          description: The paging options used
+                      required:
+                        - closed_channels
+                        - limit
+                        - skipped
+                        - total
+                        - total_pages
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

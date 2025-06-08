@@ -1,0 +1,102 @@
+/task-enable_utxo-status:
+  post:
+    operationId: task-enable_utxo-status
+    summary: Get UTXO Enable Task Status
+    description: |
+      Retrieves the current status of an active UTXO coin activation task.
+      This monitors the progress of asynchronous UTXO activation processes.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::enable_utxo::status"]
+                    description: The method name
+                    example: "task::enable_utxo::status"
+                  params:
+                    type: object
+                    required:
+                      - task_id
+                    properties:
+                      task_id:
+                        type: integer
+                        description: The identifying number returned when initiating the activation process
+                        example: 1
+                      forget_if_finished:
+                        type: boolean
+                        description: If false, will return final response for completed tasks. Optional, defaults to true
+                        default: true
+                        example: false
+    responses:
+      '200':
+        description: Task status retrieved successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                          description: A short indication of how the enabling is progressing
+                          enum:
+                            - "ActivatingCoin"
+                            - "RequestingWalletBalance" 
+                            - "Finishing"
+                            - "WaitingForTrezorToConnect"
+                            - "FollowHwDeviceInstructions"
+                            - "Ok"
+                          example: "Ok"
+                        details:
+                          oneOf:
+                            - type: object
+                              description: Successful completion details
+                              properties:
+                                ticker:
+                                  $ref: ../../components/schemas/Common.yaml#/CoinTicker
+                                  description: Ticker of the coin being activated
+                                current_block:
+                                  type: integer
+                                  description: Block height of the coin being activated
+                                  example: 4230457
+                                wallet_balance:
+                                  $ref: ../../components/schemas/Wallet.yaml#/WalletBalanceInfo
+                                  description: A standard WalletBalanceInfo object
+                              required:
+                                - ticker
+                                - current_block
+                                - wallet_balance
+                            - type: object
+                              description: Progress status details
+                              properties:
+                                progress_status:
+                                  type: string
+                                  description: Detailed progress information
+                              required:
+                                - progress_status
+                      required:
+                        - status
+                        - details
+      '400':
+        description: Bad request - Invalid parameters or task not found
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

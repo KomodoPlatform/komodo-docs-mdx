@@ -10,97 +10,47 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["peer_connection_healthcheck"]
-                description: The method name
-                example: "peer_connection_healthcheck"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-              params:
-                type: object
-                required:
-                  - peer_address
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  peer_address:
+                  method:
                     type: string
-                    description: The peer address to check connection for
-                    example: "12D3KooWCcjBQ3kG3BzjVwuZqGDL2YxXik6SCDv2YAHj4E54NiAy"
+                    enum: ["peer_connection_healthcheck"]
+                    description: The method name
+                    example: "peer_connection_healthcheck"
+                  params:
+                    type: object
+                    properties:
+                      peer_address:
+                        type: string
+                        description: The peer address to check connection for
+                        example: "12D3KooWCcjBQ3kG3BzjVwuZqGDL2YxXik6SCDv2YAHj4E54NiAy"
+                    required:
+                      - peer_address
     responses:
       '200':
         description: Peer connection healthcheck completed
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: boolean
-                  description: True if peer found connected to network, false otherwise
-                  example: true
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: boolean
+                      description: True if peer found connected to network, false otherwise
+                      example: true
       '400':
         description: Bad request - Various error conditions
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                error_trace:
-                  type: string
-                  description: Error trace information
-                error_type:
-                  type: string
-                  description: Type of error
-                error_data:
-                  type: string
-                  description: Additional error data
-                id:
-                  type: integer
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

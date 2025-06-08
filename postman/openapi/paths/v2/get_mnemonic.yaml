@@ -10,162 +10,117 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["get_mnemonic"]
-                description: The method name
-                example: "get_mnemonic"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-                example: 0
-              params:
-                type: object
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  format:
+                  method:
                     type: string
-                    enum: ["encrypted", "plaintext"]
-                    description: Either encrypted or plaintext. Defaults to encrypted
-                    default: "encrypted"
-                    example: "encrypted"
-                  password:
-                    type: string
-                    description: The password to decrypt your stored mnemonic phrase. Only required if plaintext format is requested
-                    example: "Q^wJZg~Ck3.tPW~asnM-WrL"
+                    enum: ["get_mnemonic"]
+                    description: The method name
+                    example: "get_mnemonic"
+                  params:
+                    type: object
+                    properties:
+                      format:
+                        type: string
+                        enum: ["encrypted", "plaintext"]
+                        description: Either encrypted or plaintext. Defaults to encrypted
+                        default: "encrypted"
+                        example: "encrypted"
+                      password:
+                        type: string
+                        description: The password to decrypt your stored mnemonic phrase. Only required if plaintext format is requested
+                        example: "Q^wJZg~Ck3.tPW~asnM-WrL"
     responses:
       '200':
         description: Mnemonic retrieved successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  anyOf:
-                    - type: object
-                      properties:
-                        format:
-                          type: string
-                          description: Format type
-                          example: "encrypted"
-                        encrypted_mnemonic_data:
-                          type: object
-                          description: For encrypted requests, the encrypted format and ciphertext for the mnemonic seed phrase
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      anyOf:
+                        - type: object
                           properties:
-                            encryption_algorithm:
+                            format:
                               type: string
-                              example: "AES256CBC"
-                            key_derivation_details:
+                              description: Format type
+                              example: "encrypted"
+                            encrypted_mnemonic_data:
                               type: object
+                              description: For encrypted requests, the encrypted format and ciphertext for the mnemonic seed phrase
                               properties:
-                                Argon2:
+                                encryption_algorithm:
+                                  type: string
+                                  example: "AES256CBC"
+                                key_derivation_details:
                                   type: object
                                   properties:
-                                    params:
+                                    Argon2:
                                       type: object
                                       properties:
-                                        algorithm:
+                                        params:
+                                          type: object
+                                          properties:
+                                            algorithm:
+                                              type: string
+                                              example: "Argon2id"
+                                            version:
+                                              type: string
+                                              example: "0x13"
+                                            m_cost:
+                                              type: integer
+                                              example: 65536
+                                            t_cost:
+                                              type: integer
+                                              example: 2
+                                            p_cost:
+                                              type: integer
+                                              example: 1
+                                        salt_aes:
                                           type: string
-                                          example: "Argon2id"
-                                        version:
+                                          example: "CqkfcntVxFJNXqOKPHaG8w"
+                                        salt_hmac:
                                           type: string
-                                          example: "0x13"
-                                        m_cost:
-                                          type: integer
-                                          example: 65536
-                                        t_cost:
-                                          type: integer
-                                          example: 2
-                                        p_cost:
-                                          type: integer
-                                          example: 1
-                                    salt_aes:
-                                      type: string
-                                      example: "CqkfcntVxFJNXqOKPHaG8w"
-                                    salt_hmac:
-                                      type: string
-                                      example: "i63qgwjc+3oWMuHWC2XSJA"
-                            iv:
+                                          example: "i63qgwjc+3oWMuHWC2XSJA"
+                                iv:
+                                  type: string
+                                  example: "mNjmbZLJqgLzulKFBDBuPA=="
+                                ciphertext:
+                                  type: string
+                                  example: "tP2vF0hRhllW00pGvYiKysBI0vl3acLj+aoocBViTTByXCpjpkLuaMWqe0Vs02cb1wvgPsVqZkE4MPg4sCQxbd18iS7Er6+BbVY3HQ2LSig="
+                                tag:
+                                  type: string
+                                  example: "TwWXhIFQl1TSdR4cJpbkK2oNXd9zIEhJmO6pML1uc2E="
+                          required:
+                            - format
+                            - encrypted_mnemonic_data
+                        - type: object
+                          properties:
+                            format:
                               type: string
-                              example: "mNjmbZLJqgLzulKFBDBuPA=="
-                            ciphertext:
+                              description: Format type
+                              example: "plaintext"
+                            mnemonic:
                               type: string
-                              example: "tP2vF0hRhllW00pGvYiKysBI0vl3acLj+aoocBViTTByXCpjpkLuaMWqe0Vs02cb1wvgPsVqZkE4MPg4sCQxbd18iS7Er6+BbVY3HQ2LSig="
-                            tag:
-                              type: string
-                              example: "TwWXhIFQl1TSdR4cJpbkK2oNXd9zIEhJmO6pML1uc2E="
-                    - type: object
-                      properties:
-                        format:
-                          type: string
-                          description: Format type
-                          example: "plaintext"
-                        mnemonic:
-                          type: string
-                          description: For plaintext requests, the decrypted mnemonic seed phrase
-                          example: "unique spy ugly child cup sad capital invest essay lunch doctor know"
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+                              description: For plaintext requests, the decrypted mnemonic seed phrase
+                              example: "unique spy ugly child cup sad capital invest essay lunch doctor know"
+                          required:
+                            - format
+                            - mnemonic
       '400':
         description: Bad request
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                error_trace:
-                  type: string
-                  description: Error trace information
-                error_type:
-                  type: string
-                  description: Type of error
-                error_data:
-                  type: string
-                  description: Additional error data
-                id:
-                  type: integer
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

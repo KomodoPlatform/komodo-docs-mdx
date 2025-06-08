@@ -1,0 +1,115 @@
+/task-enable_bch-init:
+  post:
+    operationId: task-enable_bch-init
+    summary: Initialize BCH Enable Task
+    description: |
+      Initializes a task to activate BCH coin with SLP token support.
+      This starts an asynchronous BCH coin activation process.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::enable_bch::init"]
+                    description: The method name
+                    example: "task::enable_bch::init"
+                  params:
+                    type: object
+                    properties:
+                      ticker:
+                        type: string
+                        enum: ["BCH", "tBCH"]
+                        description: Ticker of the platform protocol coin
+                        example: "BCH"
+                      activation_params:
+                        type: object
+                        properties:
+                          bchd_urls:
+                            type: array
+                            items:
+                              $ref: ../../../components/schemas/Common.yaml#/UrlString
+                            description: A list of BCHD gRPC API server URLs, used for validation of SLP token transactions
+                            example: ["https://bchd.dragonhound.info"]
+                          mode:
+                            $ref: ../../components/schemas/Activation.yaml#/ActivationMode
+                            description: A standard ActivationMode object
+                          tx_history:
+                            type: boolean
+                            description: If true, spawns a background loop to store the local cache of address(es) transactions. Defaults to false
+                            default: false
+                            example: true
+                          slp_tokens_requests:
+                            type: array
+                            items:
+                              $ref: ../../components/schemas/Activation.yaml#/TokensRequest
+                            description: A list of standard TokensRequest objects
+                          address_format:
+                            $ref: ../../components/schemas/Wallet.yaml#/AddressFormat
+                            description: Optional. Overwrites the address format from coins file, if set. A standard AddressFormat object
+                          allow_slp_unsafe_conf:
+                            type: boolean
+                            description: Optional, defaults to false. If true, allows bchd_urls to be empty. Warning - it is highly unsafe to do so as it may lead to invalid SLP transactions generation and tokens burning
+                            default: false
+                            example: false
+                          get_balances:
+                            type: boolean
+                            description: Optional, defaults to true. If false, coin and token balances will not be returned in the response, and the response will be returned more quickly
+                            default: true
+                            example: true
+                          required_confirmations:
+                            type: integer
+                            description: Optional, defaults to value in the coins file, or 3 if not set. Confirmations to wait for steps in swap
+                            default: 3
+                            example: 5
+                          requires_notarization:
+                            type: boolean
+                            description: Optional, defaults to true. Has no effect on BCH
+                            default: true
+                            example: false
+                          utxo_merge_params:
+                            $ref: ../../components/schemas/Activation.yaml#/UtxoMergeParams
+                            description: A standard UtxoMergeParams object. Used to reduce a wallet's UTXO count in cases where it is causing significantly slower RPC responses
+                        required:
+                          - bchd_urls
+                          - mode
+                    required:
+                      - ticker
+                      - activation_params
+    responses:
+      '200':
+        description: Task initialization successful
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        task_id:
+                          type: integer
+                          description: An identifying number which is used to query task status
+                          example: 1
+                      required:
+                        - task_id
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

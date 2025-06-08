@@ -10,100 +10,63 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["active_swaps"]
-                description: The method name
-                example: "active_swaps"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-                example: 42
-              params:
-                type: object
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  include_status:
-                    type: boolean
-                    description: Optional, defaults to false. Whether to include swap statuses in response
-                    default: false
-                    example: false
+                  method:
+                    type: string
+                    enum: ["active_swaps"]
+                    description: The method name
+                    example: "active_swaps"
+                  params:
+                    type: object
+                    properties:
+                      include_status:
+                        type: boolean
+                        description: Optional, defaults to false. Whether to include swap statuses in response
+                        default: false
+                        example: false
     responses:
       '200':
         description: Active swaps retrieved successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: object
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
                   properties:
-                    uuids:
-                      type: array
-                      items:
-                        type: string
-                      description: A list of currently active swap UUIDs
-                      example: 
-                        - "015c13bc-da79-43e1-a6d4-4ac8b3099b34"
-                        - "7592a07a-2805-4050-8ab8-984480e812f0"
-                        - "82cbad96-ea9f-40fb-9225-07496323e35d"
-                        - "177f7fa5-c9f3-4673-a2fa-28451a123e61"
-                    statuses:
+                    result:
                       type: object
-                      description: Only visible if include_status request parameter is true. A map of standard SwapStatus objects, delineated by the related UUID
-                      additionalProperties:
-                        $ref: ../../components/schemas/Swaps.yaml#/SwapStatus
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
-                  example: 42
+                      properties:
+                        uuids:
+                          type: array
+                          items:
+                            type: string
+                            format: uuid
+                          description: A list of currently active swap UUIDs
+                          example: 
+                            - "015c13bc-da79-43e1-a6d4-4ac8b3099b34"
+                            - "7592a07a-2805-4050-8ab8-984480e812f0"
+                            - "82cbad96-ea9f-40fb-9225-07496323e35d"
+                            - "177f7fa5-c9f3-4673-a2fa-28451a123e61"
+                        statuses:
+                          type: object
+                          description: Only visible if include_status request parameter is true. A map of standard SwapStatus objects, delineated by the related UUID
+                          additionalProperties:
+                            $ref: ../../components/schemas/Swaps.yaml#/SwapStatus
+                      required:
+                        - uuids
       '400':
         description: Bad request - Invalid parameters
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                id:
-                  type: integer
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

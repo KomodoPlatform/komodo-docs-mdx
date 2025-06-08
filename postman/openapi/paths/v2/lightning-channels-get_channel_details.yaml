@@ -1,0 +1,82 @@
+/lightning-channels-get_channel_details:
+  post:
+    operationId: lightning-channels-get_channel_details
+    summary: Get Lightning Channel Details
+    description: |
+      Returns detailed information about a specific Lightning Network channel.
+      Lightning methods are currently only available using the native Komodo DeFi Framework.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/channels/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["lightning::channels::get_channel_details"]
+                    description: The method name
+                    example: "lightning::channels::get_channel_details"
+                  params:
+                    type: object
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: The ticker of the coin you would like to view channel details for
+                      uuid:
+                        type: string
+                        format: uuid
+                        description: Unique channel identifier
+                        example: "2b50e274-c173-4fa1-95f3-97f9f82ace92"
+                    required:
+                      - coin
+                      - uuid
+    responses:
+      '200':
+        description: Channel details retrieved successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        status:
+                          type: string
+                          enum: ["Open", "Closed"]
+                          description: Channel status
+                          example: "Open"
+                        details:
+                          oneOf:
+                            - $ref: ../../components/schemas/Lightning.yaml#/LightningOpenChannelDetails
+                            - $ref: ../../components/schemas/Lightning.yaml#/LightningClosedChannelDetails
+                          description: Channel details that vary based on channel status
+                      required:
+                        - status
+                        - details
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "InvalidRequest"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

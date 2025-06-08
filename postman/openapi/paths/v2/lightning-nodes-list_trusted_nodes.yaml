@@ -1,0 +1,65 @@
+/lightning-nodes-list_trusted_nodes:
+  post:
+    operationId: lightning-nodes-list_trusted_nodes
+    summary: List Trusted Lightning Nodes
+    description: |
+      Returns a list of trusted Lightning Network nodes.
+      Lightning methods are currently only available using the native Komodo DeFi Framework.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/nodes/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["lightning::nodes::list_trusted_nodes"]
+                    description: The method name
+                    example: "lightning::nodes::list_trusted_nodes"
+                  params:
+                    type: object
+                    required:
+                      - coin
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: The coin ticker you would like to view your trusted nodes for
+    responses:
+      '200':
+        description: Trusted nodes retrieved successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        trusted_nodes:
+                          type: array
+                          items:
+                            type: string
+                            pattern: "^[0-9a-fA-F]{66}$"
+                            description: Lightning node public key (66-character hex)
+                          description: List of trusted node IDs
+                          example: ["038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9"]
+                      required:
+                        - trusted_nodes
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

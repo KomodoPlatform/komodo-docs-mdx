@@ -11,297 +11,250 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["trade_preimage"]
-                description: The method name
-                example: "trade_preimage"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-                example: 0
-              params:
-                type: object
-                required:
-                  - base
-                  - rel
-                  - swap_method
-                  - price
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  base:
+                  method:
                     type: string
-                    description: The base currency of the request
-                    example: "BTC"
-                  rel:
-                    type: string
-                    description: The rel currency of the request  
-                    example: "DOC"
-                  swap_method:
-                    type: string
-                    enum: ["buy", "sell", "setprice"]
-                    description: The name of the method whose preimage is requested
-                    example: "setprice"
-                  price:
-                    oneOf:
-                      - type: string
-                      - type: number
-                      - $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                    description: The price in rel the user is willing to pay per one unit of the base coin
-                    example: "1"
-                  volume:
-                    oneOf:
-                      - type: string
-                      - type: number
-                      - $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                    description: The amount the user is willing to trade; ignored if max = true and swap_method = setprice, otherwise it must be set
-                    example: "0.1"
-                  max:
-                    type: boolean
-                    description: Whether to return the maximum available volume for setprice method; must not be set or false if swap_method is buy or sell
-                    example: false
+                    enum: ["trade_preimage"]
+                    description: The method name
+                    example: "trade_preimage"
+                  params:
+                    type: object
+                    required:
+                      - base
+                      - rel
+                      - swap_method
+                      - price
+                    properties:
+                      base:
+                        $ref: ../../components/schemas/Common.yaml#/CoinTicker
+                        description: The base currency of the request
+                      rel:
+                        $ref: ../../components/schemas/Common.yaml#/CoinTicker
+                        description: The rel currency of the request
+                      swap_method:
+                        type: string
+                        enum: ["buy", "sell", "setprice"]
+                        description: The name of the method whose preimage is requested
+                        example: "setprice"
+                      price:
+                        oneOf:
+                          - $ref: ../../components/schemas/Common.yaml#/AmountString
+                          - type: number
+                          - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                        description: The price in rel the user is willing to pay per one unit of the base coin
+                        example: "1"
+                      volume:
+                        oneOf:
+                          - $ref: ../../components/schemas/Common.yaml#/AmountString
+                          - type: number
+                          - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                        description: The amount the user is willing to trade; ignored if max = true and swap_method = setprice, otherwise it must be set
+                        example: "0.1"
+                      max:
+                        type: boolean
+                        description: Whether to return the maximum available volume for setprice method; must not be set or false if swap_method is buy or sell
+                        example: false
     responses:
       '200':
         description: Trade preimage calculated successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: object
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
                   properties:
-                    base_coin_fee:
+                    result:
                       type: object
-                      description: A standard ExtendedFeeInfo object. The approximate miner fee paid per the whole swap concerning the base coin
                       properties:
-                        coin:
-                          type: string
-                          description: The coin for which the fee is calculated
-                          example: "KMD"
-                        amount:
-                          type: string
-                          description: The fee amount in decimal representation
-                          example: "0.00001"
-                        amount_fraction:
+                        base_coin_fee:
                           type: object
-                          description: The fee amount as a fraction
+                          description: A standard ExtendedFeeInfo object. The approximate miner fee paid per the whole swap concerning the base coin
+                          properties:
+                            coin:
+                              $ref: ../../components/schemas/Common.yaml#/CoinTicker
+                              description: The coin for which the fee is calculated
+                            amount:
+                              $ref: ../../components/schemas/Common.yaml#/AmountString
+                              description: The fee amount in decimal representation
+                            amount_fraction:
+                              type: object
+                              description: The fee amount as a fraction
+                              properties:
+                                numer:
+                                  type: string
+                                  example: "1"
+                                denom:
+                                  type: string
+                                  example: "100000"
+                              required:
+                                - numer
+                                - denom
+                            amount_rat:
+                              $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                              description: The fee amount as a rational value
+                            paid_from_trading_vol:
+                              type: boolean
+                              description: Whether the fee is paid from trading volume
+                              example: false
+                          required:
+                            - coin
+                            - amount
+                            - amount_fraction
+                            - amount_rat
+                            - paid_from_trading_vol
+                        rel_coin_fee:
+                          type: object
+                          description: A standard ExtendedFeeInfo object. The approximate miner fee paid per the whole swap concerning the rel coin
+                          properties:
+                            coin:
+                              $ref: ../../components/schemas/Common.yaml#/CoinTicker
+                              description: The coin for which the fee is calculated
+                            amount:
+                              $ref: ../../components/schemas/Common.yaml#/AmountString
+                              description: The fee amount in decimal representation
+                            amount_fraction:
+                              type: object
+                              description: The fee amount as a fraction
+                              properties:
+                                numer:
+                                  type: string
+                                  example: "15391"
+                                denom:
+                                  type: string
+                                  example: "50000000"
+                              required:
+                                - numer
+                                - denom
+                            amount_rat:
+                              $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                              description: The fee amount as a rational value
+                            paid_from_trading_vol:
+                              type: boolean
+                              description: Whether the fee is paid from trading volume
+                              example: true
+                          required:
+                            - coin
+                            - amount
+                            - amount_fraction
+                            - amount_rat
+                            - paid_from_trading_vol
+                        volume:
+                          $ref: ../../components/schemas/Common.yaml#/AmountString
+                          description: Optional. The max available volume that can be traded (in decimal representation); empty if the max argument is missing or false
+                        volume_rat:
+                          $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                          description: Optional. The max available volume that can be traded as a rational value
+                        volume_fraction:
+                          type: object
+                          description: Optional. The max available volume that can be traded as a fractional value
                           properties:
                             numer:
                               type: string
-                              example: "1"
+                              example: "14230858589"
                             denom:
                               type: string
-                              example: "100000"
-                        amount_rat:
-                          $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                        paid_from_trading_vol:
-                          type: boolean
-                          description: Whether the fee is paid from trading volume
-                          example: false
-                    rel_coin_fee:
-                      type: object
-                      description: A standard ExtendedFeeInfo object. The approximate miner fee paid per the whole swap concerning the rel coin
-                      properties:
-                        coin:
-                          type: string
-                          description: The coin for which the fee is calculated
-                          example: "DGB"
-                        amount:
-                          type: string
-                          description: The fee amount in decimal representation
-                          example: "0.00030782"
-                        amount_fraction:
+                              example: "12500000"
+                          required:
+                            - numer
+                            - denom
+                        taker_fee:
                           type: object
-                          description: The fee amount as a fraction
+                          description: A standard ExtendedFeeInfo object. The dex fee to be paid by Taker; empty if swap_method is setprice
                           properties:
-                            numer:
-                              type: string
-                              example: "15391"
-                            denom:
-                              type: string
-                              example: "50000000"
-                        amount_rat:
-                          $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                        paid_from_trading_vol:
-                          type: boolean
-                          description: Whether the fee is paid from trading volume
-                          example: true
-                    volume:
-                      type: string
-                      description: Optional. The max available volume that can be traded (in decimal representation); empty if the max argument is missing or false
-                      example: "1138.46868712"
-                    volume_rat:
-                      $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                      description: Optional. The max available volume that can be traded as a rational value
-                    volume_fraction:
-                      type: object
-                      description: Optional. The max available volume that can be traded as a fractional value
-                      properties:
-                        numer:
-                          type: string
-                          example: "14230858589"
-                        denom:
-                          type: string
-                          example: "12500000"
-                    taker_fee:
-                      type: object
-                      description: A standard ExtendedFeeInfo object. The dex fee to be paid by Taker; empty if swap_method is setprice
-                      properties:
-                        coin:
-                          type: string
-                          example: "DOC"
-                        amount:
-                          type: string
-                          example: "0.00012870012870012872"
-                        amount_fraction:
+                            coin:
+                              $ref: ../../components/schemas/Common.yaml#/CoinTicker
+                              description: The coin for which the fee is calculated
+                            amount:
+                              $ref: ../../components/schemas/Common.yaml#/AmountString
+                              description: The fee amount in decimal representation
+                            amount_fraction:
+                              type: object
+                              description: The fee amount as a fraction
+                              properties:
+                                numer:
+                                  type: string
+                                  example: "1"
+                                denom:
+                                  type: string
+                                  example: "7770"
+                              required:
+                                - numer
+                                - denom
+                            amount_rat:
+                              $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                              description: The fee amount as a rational value
+                            paid_from_trading_vol:
+                              type: boolean
+                              description: Whether the fee is paid from trading volume
+                              example: false
+                          required:
+                            - coin
+                            - amount
+                            - amount_fraction
+                            - amount_rat
+                            - paid_from_trading_vol
+                        fee_to_send_taker_fee:
                           type: object
+                          description: A standard ExtendedFeeInfo object. The approximate miner fee paid to send the dex fee; empty if swap_method is setprice
                           properties:
-                            numer:
-                              type: string
-                              example: "1"
-                            denom:
-                              type: string
-                              example: "7770"
-                        amount_rat:
-                          $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                        paid_from_trading_vol:
-                          type: boolean
-                          example: false
-                    fee_to_send_taker_fee:
-                      type: object
-                      description: A standard ExtendedFeeInfo object. The approximate miner fee paid to send the dex fee; empty if swap_method is setprice
-                      properties:
-                        coin:
-                          type: string
-                          example: "DOC"
-                        amount:
-                          type: string
-                          example: "0.0001"
-                        amount_fraction:
-                          type: object
-                          properties:
-                            numer:
-                              type: string
-                              example: "1"
-                            denom:
-                              type: string
-                              example: "10000"
-                        amount_rat:
-                          $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                        paid_from_trading_vol:
-                          type: boolean
-                          example: false
-                    total_fees:
-                      type: array
-                      description: A standard TotalFeeInfo object array. Each element is a sum of fees required to be paid from user's balance
-                      items:
-                        type: object
-                        properties:
-                          coin:
-                            type: string
-                            example: "DOC"
-                          amount:
-                            type: string
-                            example: "0.001307001287001287001287001287001287001287001287001287001287001287001287001287001287001287001287001287"
-                          amount_fraction:
-                            type: object
-                            properties:
-                              numer:
-                                type: string
-                                example: "50777"
-                              denom:
-                                type: string
-                                example: "38850000"
-                          amount_rat:
-                            $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                          required_balance:
-                            type: string
-                            example: "0.001307001287001287001287001287001287001287001287001287001287001287001287001287001287001287001287001287"
-                          required_balance_fraction:
-                            type: object
-                            properties:
-                              numer:
-                                type: string
-                                example: "50777"
-                              denom:
-                                type: string
-                                example: "38850000"
-                          required_balance_rat:
-                            $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
-                  example: 0
+                            coin:
+                              $ref: ../../components/schemas/Common.yaml#/CoinTicker
+                              description: The coin for which the fee is calculated
+                            amount:
+                              $ref: ../../components/schemas/Common.yaml#/AmountString
+                              description: The fee amount in decimal representation
+                            amount_fraction:
+                              type: object
+                              description: The fee amount as a fraction
+                              properties:
+                                numer:
+                                  type: string
+                                  example: "1"
+                                denom:
+                                  type: string
+                                  example: "10000"
+                              required:
+                                - numer
+                                - denom
+                            amount_rat:
+                              $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                              description: The fee amount as a rational value
+                            paid_from_trading_vol:
+                              type: boolean
+                              description: Whether the fee is paid from trading volume
+                              example: false
+                          required:
+                            - coin
+                            - amount
+                            - amount_fraction
+                            - amount_rat
+                            - paid_from_trading_vol
+                      required:
+                        - base_coin_fee
+                        - rel_coin_fee
       '400':
-        description: Bad request - Various error conditions including NotSufficientBalance, VolumeTooLow, etc.
+        description: Bad request
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                error_trace:
-                  type: string
-                  description: Error trace information
-                error_type:
-                  type: string
-                  description: Type of error
-                  enum:
-                    - "NotSufficientBalance"
-                    - "NotSufficientBaseCoinBalance" 
-                    - "VolumeTooLow"
-                    - "NoSuchCoin"
-                    - "CoinIsWalletOnly"
-                    - "BaseEqualRel"
-                    - "InvalidParam"
-                    - "PriceTooLow"
-                    - "Transport"
-                    - "InternalError"
-                error_data:
-                  type: object
-                  description: Additional error context specific to error type
-                id:
-                  type: integer
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "InvalidParam"
+                        - "CoinNotFound"
+                        - "TransportError"
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

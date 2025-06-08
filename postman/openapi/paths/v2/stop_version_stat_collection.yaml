@@ -10,97 +10,50 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["stop_version_stat_collection"]
-                description: The method name
-                example: "stop_version_stat_collection"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-              params:
-                type: object
-                description: Empty parameters object
-                example: {}
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["stop_version_stat_collection"]
+                    description: The method name
+                    example: "stop_version_stat_collection"
+                  params:
+                    type: object
+                    description: Empty parameters object
+                    example: {}
     responses:
       '200':
         description: Version stat collection stopped successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: string
-                  description: Success confirmation
-                  example: "success"
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Success confirmation
+                      example: "success"
       '400':
         description: Bad request - Stats collection not running
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  examples:
-                    - "start_version_stat_collection is not running"
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                  examples:
-                    - "lp_stats"
-                error_trace:
-                  type: string
-                  description: Error trace information
-                  examples:
-                    - "lp_stats:395]"
-                error_type:
-                  type: string
-                  description: Type of error
-                  enum:
-                    - "NotRunning"
-                id:
-                  type: integer
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "NotRunning"
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

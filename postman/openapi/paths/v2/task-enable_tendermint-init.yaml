@@ -1,0 +1,125 @@
+/task-enable_tendermint-init:
+  post:
+    operationId: task-enable_tendermint-init
+    summary: Initialize Tendermint Enable Task
+    description: |
+      Initializes a task to activate Tendermint-based blockchain coins.
+      This starts an asynchronous Tendermint coin activation process.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::enable_tendermint::init"]
+                    description: The method name
+                    example: "task::enable_tendermint::init"
+                  params:
+                    type: object
+                    required:
+                      - ticker
+                    properties:
+                      ticker:
+                        type: string
+                        enum: ["ATOM", "IRIS", "OSMOSIS"]
+                        description: Ticker of the platform protocol coin
+                        example: "IRIS"
+                      mm2:
+                        type: integer
+                        enum: [0, 1]
+                        description: Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function
+                        example: 1
+                      tokens_params:
+                        type: array
+                        items:
+                          $ref: ../../components/schemas/Activation.yaml#/TokensRequest
+                        description: A list of standard TokensRequest objects
+                        example:
+                          - ticker: "ATOM-IBC_IRIS"
+                      nodes:
+                        type: array
+                        items:
+                          $ref: ../../components/schemas/Activation.yaml#/CoinNode
+                        description: A list of CoinNode objects
+                      priv_key_policy:
+                        type: string
+                        enum: ["ContextPrivKey", "Trezor", "Metamask"]
+                        description: Optional, defaults to ContextPrivKey. Private key policy to use
+                        default: "ContextPrivKey"
+                        example: "ContextPrivKey"
+                      tx_history:
+                        type: boolean
+                        description: Optional, defaults to false. If true the Komodo DeFi Framework API will preload transaction history as a background process
+                        default: false
+                        example: false
+                      required_confirmations:
+                        type: integer
+                        description: Optional, defaults to 3. When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during atomic swap transaction steps
+                        default: 3
+                        example: 3
+                      requires_notarization:
+                        type: boolean
+                        description: Optional, defaults to false. If true, coins protected by Komodo Platform's dPoW security will wait for a notarization before progressing to the next atomic swap transaction step
+                        default: false
+                        example: false
+                      get_balances:
+                        type: boolean
+                        description: Optional, defaults to true. If false, coin and token balances will not be returned in the response, and the response will be returned more quickly
+                        default: true
+                        example: true
+    responses:
+      '200':
+        description: Task initialization successful
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        task_id:
+                          type: integer
+                          description: An identifying number which is used to query task status
+                          example: 2
+                      required:
+                        - task_id
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "CoinProtocolParseError"
+                        - "InternalError"
+                        - "PlatformCoinCreationError"
+                        - "PlatformConfigIsNotFound"
+                        - "PlatformIsAlreadyActivated"
+                        - "PrivKeyNotAllowed"
+                        - "TokenConfigIsNotFound"
+                        - "TokenProtocolParseError"
+                        - "Transport"
+                        - "UnexpectedDerivationMethod"
+                        - "UnexpectedPlatformProtocol"
+                        - "UnexpectedTokenProtocol"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

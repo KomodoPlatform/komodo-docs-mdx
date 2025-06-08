@@ -1,0 +1,73 @@
+/lightning-nodes-connect_to_node:
+  post:
+    operationId: lightning-nodes-connect_to_node
+    summary: Connect to Lightning Node
+    description: |
+      Connects to a Lightning Network node at the specified address.
+      Lightning methods are currently only available using the native Komodo DeFi Framework.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/nodes/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["lightning::nodes::connect_to_node"]
+                    description: The method name
+                    example: "lightning::nodes::connect_to_node"
+                  params:
+                    type: object
+                    required:
+                      - coin
+                      - node_address
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: The coin ticker you would like to connect to a node on
+                      node_address:
+                        type: string
+                        pattern: "^[0-9a-fA-F]{66}@[0-9a-fA-F.:]+:[0-9]+$"
+                        description: Lightning nodes addresses always have a format of node_pubkey@ip_address:port
+                        example: "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@203.132.94.196:9735"
+    responses:
+      '200':
+        description: Connection result (success or already connected)
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Connection status message
+                      examples:
+                        - "Connected successfully to node : 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226@170.75.163.209:9735"
+                        - "Already connected to node : 035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226@170.75.163.209:9735"
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "InvalidRequest"
+                        - "ConnectionError"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

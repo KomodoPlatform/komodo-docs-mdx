@@ -10,98 +10,47 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["get_swap_transaction_fee_policy"]
-                description: The method name
-                example: "get_swap_transaction_fee_policy"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-              params:
-                type: object
-                required:
-                  - coin
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  coin:
+                  method:
                     type: string
-                    description: Ticker of the supported ETH/EVM coin/asset for which we want to view the fee policy for
-                    example: "ETH"
+                    enum: ["get_swap_transaction_fee_policy"]
+                    description: The method name
+                    example: "get_swap_transaction_fee_policy"
+                  params:
+                    type: object
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: Ticker of the supported ETH/EVM coin/asset for which we want to view the fee policy for
+                    required:
+                      - coin
     responses:
       '200':
         description: Fee policy retrieved successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: string
-                  description: Current fee policy setting
-                  enum: ["Low", "Medium", "High", "Internal"]
-                  example: "High"
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Current fee policy setting
+                      enum: ["Low", "Medium", "High", "Internal"]
+                      example: "High"
       '400':
         description: Bad request
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                error_trace:
-                  type: string
-                  description: Error trace information
-                error_type:
-                  type: string
-                  description: Type of error
-                error_data:
-                  type: string
-                  description: Additional error data
-                id:
-                  type: integer
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

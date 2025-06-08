@@ -1,0 +1,57 @@
+/task-enable_utxo-cancel:
+  post:
+    operationId: task-enable_utxo-cancel
+    summary: Cancel UTXO Enable Task
+    description: |
+      Cancels an active UTXO coin activation task that is currently in progress.
+      This stops the asynchronous UTXO activation process.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::enable_utxo::cancel"]
+                    description: The method name
+                    example: "task::enable_utxo::cancel"
+                  params:
+                    type: object
+                    required:
+                      - task_id
+                    properties:
+                      task_id:
+                        type: integer
+                        description: The identifying number returned when initiating the activation process
+                        example: 1
+    responses:
+      '200':
+        description: Task cancelled successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Returns with value 'success' when successful
+                      example: "success"
+      '400':
+        description: Bad request - Invalid parameters or task not found
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

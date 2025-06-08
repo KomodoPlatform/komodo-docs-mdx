@@ -1,0 +1,77 @@
+/task-create_new_account-init:
+  post:
+    operationId: task-create_new_account-init
+    summary: Initialize Create New Account Task
+    description: |
+      Initializes a task to create a new blockchain account for HD wallet operations.
+      This starts an asynchronous task for account creation processes.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::create_new_account::init"]
+                    description: The method name
+                    example: "task::create_new_account::init"
+                  params:
+                    type: object
+                    required:
+                      - coin
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: Ticker of coin you would like to initialise a HD account for
+                      account_id:
+                        type: integer
+                        minimum: 0
+                        description: Optional. If not defined, will increment to the next unused account id in the wallet
+                        example: 77
+                      scan:
+                        type: boolean
+                        description: Optional. If true, will scan the account for funded addresses. Defaults to true
+                        default: true
+                        example: true
+                      gap_limit:
+                        type: integer
+                        minimum: 1
+                        description: Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation, or 20 if no value was provided
+                        default: 20
+                        example: 20
+    responses:
+      '200':
+        description: Task initialization successful
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        task_id:
+                          type: integer
+                          description: An identifying number which is used to query task status
+                          example: 6
+                      required:
+                        - task_id
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

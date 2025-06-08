@@ -13,103 +13,54 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["get_enabled_coins"]
-                description: The method name
-                example: "get_enabled_coins"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-                example: 0
-              params:
-                type: object
-                description: Empty parameters object
-                example: {}
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["get_enabled_coins"]
+                    description: The method name
+                    example: "get_enabled_coins"
+                  params:
+                    type: object
+                    description: Empty parameters object
+                    example: {}
     responses:
       '200':
         description: Enabled coins retrieved successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: object
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
                   properties:
-                    coins:
-                      type: array
-                      description: A list of key value pairs for activated tickers
-                      items:
-                        type: object
-                        properties:
-                          ticker:
-                            type: string
-                            description: The ticker of an activated coin
-                            example: "ETH"
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
-                  example: 0
+                    result:
+                      type: object
+                      properties:
+                        coins:
+                          type: array
+                          description: A list of key value pairs for activated tickers
+                          items:
+                            type: object
+                            properties:
+                              ticker:
+                                $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                                description: The ticker of an activated coin
+                            required:
+                              - ticker
+                      required:
+                        - coins
       '400':
         description: Bad request
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                error_trace:
-                  type: string
-                  description: Error trace information
-                error_type:
-                  type: string
-                  description: Type of error
-                error_data:
-                  type: string
-                  description: Additional error data
-                id:
-                  type: integer
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

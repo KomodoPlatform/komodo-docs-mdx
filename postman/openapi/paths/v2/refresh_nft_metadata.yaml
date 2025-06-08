@@ -12,140 +12,83 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["refresh_nft_metadata"]
-                description: The method name
-                example: "refresh_nft_metadata"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-              params:
-                type: object
-                required:
-                  - chain
-                  - token_address
-                  - token_id
-                  - url
-                  - url_antispam
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  chain:
+                  method:
                     type: string
-                    enum: ["POLYGON", "FANTOM", "ETH", "BSC", "AVALANCHE"]
-                    description: Chains which holds the NFT you would like to updated metadata for
-                    example: "POLYGON"
-                  token_address:
-                    type: string
-                    description: Token address
-                    example: "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff"
-                  token_id:
-                    type: string
-                    description: Token ID
-                    example: "5"
-                  komodo_proxy:
-                    type: boolean
-                    description: Optional. Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false)
-                    example: false
-                  url:
-                    type: string
-                    description: URL link to the Moralis API proxy base url or equivalent (if komodo_proxy is set to true, will need to provide a new Komodo Proxy URL)
-                    example: "https://moralis-proxy.komodo.earth"
-                  url_antispam:
-                    type: string
-                    description: URL link to the Antispam API proxy base url or equivalent
-                    example: "https://nft.antispam.dragonhound.info"
+                    enum: ["refresh_nft_metadata"]
+                    description: The method name
+                    example: "refresh_nft_metadata"
+                  params:
+                    type: object
+                    required:
+                      - chain
+                      - token_address
+                      - token_id
+                      - url
+                      - url_antispam
+                    properties:
+                      chain:
+                        type: string
+                        enum: ["POLYGON", "FANTOM", "ETH", "BSC", "AVALANCHE"]
+                        description: Chains which holds the NFT you would like to updated metadata for
+                        example: "POLYGON"
+                      token_address:
+                        type: string
+                        pattern: "^0x[a-fA-F0-9]{40}$"
+                        description: Token address
+                        example: "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff"
+                      token_id:
+                        type: string
+                        description: Token ID
+                        example: "5"
+                      komodo_proxy:
+                        type: boolean
+                        description: Optional. Indicates whether authentication is required for accessing the proxy URLs (true if authentication is necessary, otherwise false)
+                        example: false
+                      url:
+                        type: string
+                        format: uri
+                        description: URL link to the Moralis API proxy base url or equivalent (if komodo_proxy is set to true, will need to provide a new Komodo Proxy URL)
+                        example: "https://moralis-proxy.komodo.earth"
+                      url_antispam:
+                        type: string
+                        format: uri
+                        description: URL link to the Antispam API proxy base url or equivalent
+                        example: "https://nft.antispam.dragonhound.info"
     responses:
       '200':
         description: NFT metadata refreshed successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: "null"
-                  description: Returns null on success
-                  example: null
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: "null"
+                      description: Returns null on success
+                      example: null
       '400':
         description: Bad request
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  example: "Token: token_address 0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff, token_id 5 was not found in wallet"
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                  example: "nft"
-                error_trace:
-                  type: string
-                  description: Error trace information
-                  example: "nft:504]"
-                error_type:
-                  type: string
-                  description: Type of error
-                  enum:
-                    - "GetNftInfoError"
-                error_data:
-                  type: object
-                  description: Additional error data
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
                   properties:
                     error_type:
                       type: string
-                      enum: ["TokenNotFoundInWallet"]
-                    error_data:
-                      type: object
-                      properties:
-                        token_address:
-                          type: string
-                          example: "0x48c75fbf0452fa8ff2928ddf46b0fe7629cca2ff"
-                        token_id:
-                          type: string
-                          example: "5"
-                id:
-                  type: integer
+                      description: Type of error
+                      enum:
+                        - "GetNftInfoError"
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

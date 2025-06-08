@@ -1,0 +1,71 @@
+/task-scan_for_new_addresses-init:
+  post:
+    operationId: task-scan_for_new_addresses-init
+    summary: Initialize Scan for New Addresses Task
+    description: |
+      Initializes a task to scan for new addresses in HD wallet operations.
+      This starts an asynchronous address scanning process.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::scan_for_new_addresses::init"]
+                    description: The method name
+                    example: "task::scan_for_new_addresses::init"
+                  params:
+                    type: object
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: The ticker of the coin you want to scan addresses for
+                      account_id:
+                        type: integer
+                        description: Optional, HD wallets only. Generally this will be 0 unless you have multiple accounts registered on your HD wallet
+                        default: 0
+                        example: 0
+                      gap_limit:
+                        type: integer
+                        description: Optional. The maximum number of empty addresses in a row. Defaults to the value provided on activation or 20 if no value was provided
+                        default: 20
+                        example: 20
+                    required:
+                      - coin
+    responses:
+      '200':
+        description: Task initialization successful
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        task_id:
+                          type: integer
+                          description: An identifying number which is used to query task status
+                          example: 3
+                      required:
+                        - task_id
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

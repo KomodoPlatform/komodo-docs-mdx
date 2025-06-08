@@ -10,137 +10,106 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["orderbook"]
-                description: The method name
-                example: "orderbook"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-                example: 42
-              params:
-                type: object
-                required:
-                  - base
-                  - rel
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  base:
+                  method:
                     type: string
-                    description: Base currency of a pair
-                    example: "DGB"
-                  rel:
-                    type: string
-                    description: Related currency, also known as the "quote currency"
-                    example: "DASH"
+                    enum: ["orderbook"]
+                    description: The method name
+                    example: "orderbook"
+                  params:
+                    type: object
+                    properties:
+                      base:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: Base currency of a pair
+                      rel:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: Related currency, also known as the "quote currency"
+                    required:
+                      - base
+                      - rel
     responses:
       '200':
         description: Orderbook retrieved successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: object
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
                   properties:
-                    base:
-                      type: string
-                      description: The name of the coin the user desires to receive
-                      example: "DGB"
-                    rel:
-                      type: string
-                      description: The name of the coin the user will trade
-                      example: "DASH"
-                    numasks:
-                      type: integer
-                      description: The number of outstanding asks
-                      example: 1
-                    numbids:
-                      type: integer
-                      description: The number of outstanding bids
-                      example: 1
-                    netid:
-                      type: integer
-                      description: The id of the network on which the request is made
-                      example: 7777
-                    asks:
-                      type: array
-                      description: An array of standard OrderDataV2 objects containing outstanding asks
-                      items:
-                        $ref: ../../components/schemas/Orders.yaml#/OrderDataV2
-                    bids:
-                      type: array
-                      description: An array of standard OrderDataV2 objects containing outstanding bids
-                      items:
-                        $ref: ../../components/schemas/Orders.yaml#/OrderDataV2
-                    timestamp:
-                      type: integer
-                      description: A UNIX timestamp representing when the orderbook was requested
-                      example: 1743589636
-                    total_asks_base_vol:
-                      $ref: ../../components/schemas/Orders.yaml#/NumericFormatsValue
-                      description: A standard NumericFormatsValue object representing total asks base volume
-                    total_asks_rel_vol:
-                      $ref: ../../components/schemas/Orders.yaml#/NumericFormatsValue
-                      description: A standard NumericFormatsValue object representing total asks rel volume
-                    total_bids_base_vol:
-                      $ref: ../../components/schemas/Orders.yaml#/NumericFormatsValue
-                      description: A standard NumericFormatsValue object representing total bids base volume
-                    total_bids_rel_vol:
-                      $ref: ../../components/schemas/Orders.yaml#/NumericFormatsValue
-                      description: A standard NumericFormatsValue object representing total bids rel volume
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
-                  example: 42
+                    result:
+                      type: object
+                      properties:
+                        base:
+                          $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                          description: The name of the coin the user desires to receive
+                        rel:
+                          $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                          description: The name of the coin the user will trade
+                        numasks:
+                          type: integer
+                          description: The number of outstanding asks
+                          example: 1
+                        numbids:
+                          type: integer
+                          description: The number of outstanding bids
+                          example: 1
+                        netid:
+                          type: integer
+                          description: The id of the network on which the request is made
+                          example: 7777
+                        asks:
+                          type: array
+                          description: An array of standard OrderDataV2 objects containing outstanding asks
+                          items:
+                            $ref: ../../components/schemas/Orders.yaml#/OrderDataV2
+                        bids:
+                          type: array
+                          description: An array of standard OrderDataV2 objects containing outstanding bids
+                          items:
+                            $ref: ../../components/schemas/Orders.yaml#/OrderDataV2
+                        timestamp:
+                          type: integer
+                          description: A UNIX timestamp representing when the orderbook was requested
+                          example: 1743589636
+                        total_asks_base_vol:
+                          $ref: ../../components/schemas/Orders.yaml#/NumericFormatsValue
+                          description: A standard NumericFormatsValue object representing total asks base volume
+                        total_asks_rel_vol:
+                          $ref: ../../components/schemas/Orders.yaml#/NumericFormatsValue
+                          description: A standard NumericFormatsValue object representing total asks rel volume
+                        total_bids_base_vol:
+                          $ref: ../../components/schemas/Orders.yaml#/NumericFormatsValue
+                          description: A standard NumericFormatsValue object representing total bids base volume
+                        total_bids_rel_vol:
+                          $ref: ../../components/schemas/Orders.yaml#/NumericFormatsValue
+                          description: A standard NumericFormatsValue object representing total bids rel volume
+                      required:
+                        - base
+                        - rel
+                        - numasks
+                        - numbids
+                        - netid
+                        - asks
+                        - bids
+                        - timestamp
+                        - total_asks_base_vol
+                        - total_asks_rel_vol
+                        - total_bids_base_vol
+                        - total_bids_rel_vol
       '400':
         description: Bad request - Invalid parameters
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                id:
-                  type: integer
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

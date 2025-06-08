@@ -1,0 +1,137 @@
+/task-enable_eth-status:
+  post:
+    operationId: task-enable_eth-status
+    summary: Get ETH Enable Task Status
+    description: |
+      Retrieves the current status of an active ETH coin activation task.
+      This monitors the progress of asynchronous ETH activation processes.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["task::enable_eth::status"]
+                    description: The method name
+                    example: "task::enable_eth::status"
+                  params:
+                    type: object
+                    required:
+                      - task_id
+                    properties:
+                      task_id:
+                        type: integer
+                        description: The identifying number returned when initiating the initialisation process
+                        example: 1
+                      forget_if_finished:
+                        type: boolean
+                        description: If false, will return final response for completed tasks. Optional, defaults to true
+                        default: true
+                        example: false
+    responses:
+      '200':
+        description: Task status retrieved successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      oneOf:
+                        - type: object
+                          properties:
+                            status:
+                              type: string
+                              enum: ["Ok"]
+                              description: Task completed successfully
+                              example: "Ok"
+                            details:
+                              type: object
+                              properties:
+                                current_block:
+                                  type: integer
+                                  description: Block height of the coin being activated
+                                  example: 70970530
+                                ticker:
+                                  $ref: ../../components/schemas/Common.yaml#/CoinTicker
+                                  description: Ticker of the coin being activated
+                                wallet_balance:
+                                  $ref: ../../components/schemas/Wallet.yaml#/WalletBalanceInfo
+                                  description: A standard WalletBalanceInfo object. Note - the structure may vary based on the get_balances parameter value in the activation request
+                                nfts_infos:
+                                  type: object
+                                  description: NFT information if applicable
+                              required:
+                                - current_block
+                                - ticker
+                                - wallet_balance
+                          required:
+                            - status
+                            - details
+                        - type: object
+                          properties:
+                            status:
+                              type: string
+                              enum: ["InProgress"]
+                              description: Task is in progress
+                              example: "InProgress"
+                            details:
+                              type: string
+                              enum: ["ActivatingCoin", "RequestingWalletBalance", "Finishing", "WaitingForTrezorToConnect", "FollowHwDeviceInstructions"]
+                              description: Current state of the activation process
+                              example: "RequestingWalletBalance"
+                          required:
+                            - status
+                            - details
+                        - type: object
+                          properties:
+                            status:
+                              type: string
+                              enum: ["Error"]
+                              description: Task failed with error
+                              example: "Error"
+                            details:
+                              type: object
+                              properties:
+                                error:
+                                  type: string
+                                  description: Error message
+                                error_path:
+                                  type: string
+                                  description: Used for debugging. A reference to the function in code base which returned the error
+                                error_trace:
+                                  type: string
+                                  description: Used for debugging. A trace of lines of code which led to the returned error
+                                error_type:
+                                  type: string
+                                  enum: ["TaskTimedOut", "CoinCreationError", "HwError"]
+                                  description: An enumerated error identifier to indicate the category of error
+                                error_data:
+                                  type: string
+                                  description: Additional context for the error type
+                              required:
+                                - error
+                                - error_type
+                          required:
+                            - status
+                            - details
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

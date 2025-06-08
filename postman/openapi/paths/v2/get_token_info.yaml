@@ -13,141 +13,103 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["get_token_info"]
-                description: The method name
-                example: "get_token_info"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-              params:
-                type: object
-                required:
-                  - protocol
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  protocol:
+                  method:
+                    type: string
+                    enum: ["get_token_info"]
+                    description: The method name
+                    example: "get_token_info"
+                  params:
                     type: object
-                    required:
-                      - type
-                      - protocol_data
                     properties:
-                      type:
-                        type: string
-                        description: Token type - e.g ERC20 for tokens on the Ethereum network
-                        example: "ERC20"
-                      protocol_data:
+                      protocol:
                         type: object
-                        description: Required for tokens only
-                        required:
-                          - platform
-                          - contract_address
                         properties:
-                          platform:
+                          type:
                             type: string
-                            description: The parent coin of the token's platform - e.g MATIC for PLG20 tokens
-                            example: "AVAX"
-                          contract_address:
-                            type: string
-                            description: Must be mixed case. The identifying hex string for the token's contract
-                            example: "0x4f3c5C53279536fFcfe8bCafb78E612E933D53c6"
+                            description: Token type - e.g ERC20 for tokens on the Ethereum network
+                            example: "ERC20"
+                          protocol_data:
+                            type: object
+                            description: Required for tokens only
+                            properties:
+                              platform:
+                                $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                                description: The parent coin of the token's platform - e.g MATIC for PLG20 tokens
+                              contract_address:
+                                type: string
+                                pattern: "^0x[a-fA-F0-9]{40}$"
+                                description: Must be mixed case. The identifying hex string for the token's contract (40-character hex with 0x prefix)
+                                example: "0x4f3c5C53279536fFcfe8bCafb78E612E933D53c6"
+                            required:
+                              - platform
+                              - contract_address
+                        required:
+                          - type
+                          - protocol_data
+                    required:
+                      - protocol
     responses:
       '200':
         description: Token info retrieved successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: object
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
                   properties:
-                    type:
-                      type: string
-                      description: Token type - e.g PLG20 for tokens on the Polygon network
-                      example: "ERC20"
-                    info:
+                    result:
                       type: object
                       properties:
-                        symbol:
+                        type:
                           type: string
-                          description: The ticker of the token linked to the contract address and network requested
-                          example: "PNIC"
-                        decimals:
-                          type: integer
-                          description: Defines the number of digits after the decimal point that should be used to display the orderbook amounts, balance, and the value of inputs to be used in the case of order creation or a withdraw transaction
-                          example: 18
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+                          description: Token type - e.g PLG20 for tokens on the Polygon network
+                          example: "ERC20"
+                        info:
+                          type: object
+                          properties:
+                            symbol:
+                              type: string
+                              description: The ticker of the token linked to the contract address and network requested
+                              example: "PNIC"
+                            decimals:
+                              type: integer
+                              description: Defines the number of digits after the decimal point that should be used to display the orderbook amounts, balance, and the value of inputs to be used in the case of order creation or a withdraw transaction
+                              example: 18
+                          required:
+                            - symbol
+                            - decimals
+                      required:
+                        - type
+                        - info
       '400':
         description: Bad request - Protocol parent coin not active or other errors
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  example: "No such coin AVAX"
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                  example: "tokens.lp_coins"
-                error_trace:
-                  type: string
-                  description: Error trace information
-                  example: "tokens:68] lp_coins:4744]"
-                error_type:
-                  type: string
-                  description: Type of error
-                  enum:
-                    - "NoSuchCoin"
-                error_data:
-                  type: object
-                  description: Additional error data
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
                   properties:
-                    coin:
+                    error_type:
                       type: string
-                      example: "AVAX"
-                id:
-                  type: integer
+                      description: Type of error
+                      enum:
+                        - "NoSuchCoin"
+                    error_data:
+                      type: object
+                      description: Additional error data with coin details
+                      properties:
+                        coin:
+                          $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                          description: The platform coin that was not found
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

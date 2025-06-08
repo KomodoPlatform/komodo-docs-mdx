@@ -1,0 +1,88 @@
+/lightning-channels-open_channel:
+  post:
+    operationId: lightning-channels-open_channel
+    summary: Open Lightning Network Channel
+    description: |
+      Opens a new Lightning Network channel with a remote node.
+      Lightning methods are currently only available using the native Komodo DeFi Framework.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/lightning/channels/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["lightning::channels::open_channel"]
+                    description: The method name
+                    example: "lightning::channels::open_channel"
+                  params:
+                    type: object
+                    properties:
+                      coin:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                        description: The ticker of the coin you would like to open a channel for
+                      node_address:
+                        type: string
+                        description: Lightning node addresses always have a format of node_pubkey@ip_address:port
+                        pattern: "^[0-9a-fA-F]{66}@.*:[0-9]+$"
+                        example: "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@203.132.94.196:9735"
+                      amount:
+                        $ref: ../../components/schemas/Lightning.yaml#/LightningChannelAmount
+                        description: A standard LightningChannelAmount object
+                      push_msat:
+                        type: integer
+                        description: Optional. The amount in millisatoshi to push to the counterparty while opening, to create inbound liquidity for the channel
+                        example: 0
+                      channel_options:
+                        $ref: ../../components/schemas/Lightning.yaml#/LightningChannelOptions
+                        description: Optional. A standard LightningChannelOptions object
+                      channel_configs:
+                        $ref: ../../components/schemas/Lightning.yaml#/LightningChannelConfig
+                        description: Optional. A standard LightningChannelConfig object
+                    required:
+                      - coin
+                      - node_address
+                      - amount
+    responses:
+      '200':
+        description: Channel opening initiated successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        uuid:
+                          type: string
+                          format: uuid
+                          description: Unique channel identifier
+                          example: "434681f8-95e5-484f-af49-fa80d8ae857b"
+                        node_address:
+                          type: string
+                          pattern: "^[0-9a-fA-F]{66}@.*:[0-9]+$"
+                          description: The node address that the channel was opened with
+                          example: "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@233.112.95.142:9735"
+                      required:
+                        - uuid
+                        - node_address
+      '400':
+        description: Bad request - Invalid parameters
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

@@ -10,142 +10,84 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["enable_nft"]
-                description: The method name
-                example: "enable_nft"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-              params:
-                type: object
-                required:
-                  - ticker
-                  - activation_params
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  ticker:
+                  method:
                     type: string
-                    description: The ticker of the NFT network, with NFT_ as a prefix
-                    pattern: "^NFT_.*"
-                    example: "NFT_MATIC"
-                  activation_params:
+                    enum: ["enable_nft"]
+                    description: The method name
+                    example: "enable_nft"
+                  params:
                     type: object
-                    required:
-                      - provider
                     properties:
-                      provider:
-                        $ref: ../../components/schemas/NFTs.yaml#/NftProvider
-                        description: A standard NftProvider object
+                      ticker:
+                        type: string
+                        description: The ticker of the NFT network, with NFT_ as a prefix
+                        pattern: "^NFT_.*"
+                        example: "NFT_MATIC"
+                      activation_params:
+                        type: object
+                        properties:
+                          provider:
+                            $ref: ../../components/schemas/NFTs.yaml#/NftProvider
+                            description: A standard NftProvider object
+                        required:
+                          - provider
+                    required:
+                      - ticker
+                      - activation_params
     responses:
       '200':
         description: NFT enabled successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: object
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
                   properties:
-                    nfts:
+                    result:
                       type: object
-                      additionalProperties:
-                        $ref: ../../components/schemas/NFTs.yaml#/NftInfo
-                      description: A mapping of NFT identifiers to their information
-                      example:
-                        "0xc28a19e9a663d966cf99532bdb1229df1b0e344b,1":
-                          token_address: "0xc28a19e9a663d966cf99532bdb1229df1b0e344b"
-                          token_id: "1"
-                          chain: "POLYGON"
-                          contract_type: "ERC1155"
-                          amount: "1"
-                    platform_coin:
-                      type: string
-                      description: The underlying platform coin
-                      example: "MATIC"
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
+                      properties:
+                        nfts:
+                          type: object
+                          additionalProperties:
+                            $ref: ../../components/schemas/NFTs.yaml#/NftInfo
+                          description: A mapping of NFT identifiers to their information
+                        platform_coin:
+                          $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                          description: The underlying platform coin
+                      required:
+                        - nfts
+                        - platform_coin
       '400':
         description: Bad request - Various error conditions
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  examples:
-                    - "Platform coin MATIC is not activated"
-                    - "Token NFT_MATIC is already activated"
-                    - "Token NFT_TESTTT config is not found"
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                  examples:
-                    - "token.lp_coins"
-                    - "token"
-                    - "token.prelude"
-                error_trace:
-                  type: string
-                  description: Error trace information
-                  examples:
-                    - "token:126] lp_coins:2797]"
-                    - "token:119]"
-                    - "token:122] prelude:79]"
-                error_type:
-                  type: string
-                  description: Type of error
-                  enum:
-                    - "PlatformCoinIsNotActivated"
-                    - "TokenIsAlreadyActivated"
-                    - "TokenConfigIsNotFound"
-                error_data:
-                  type: string
-                  description: Additional error data with coin/token details
-                  examples:
-                    - "MATIC"
-                    - "NFT_MATIC"
-                    - "NFT_TESTTT"
-                id:
-                  type: integer
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum:
+                        - "PlatformCoinIsNotActivated"
+                        - "TokenIsAlreadyActivated"
+                        - "TokenConfigIsNotFound"
+                    error_data:
+                      type: string
+                      description: Additional error data with coin/token details
+                      examples:
+                        - "MATIC"
+                        - "NFT_MATIC"
+                        - "NFT_TESTTT"
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 
