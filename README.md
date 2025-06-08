@@ -2,16 +2,16 @@
 
 Content for the Komodo Developer Docs lives in this repo in `.mdx` format. This repository is then used as a submodule to build and deploy the Komodo Developer Docs website.
 
-## Adding new content
+## Getting Started
 
-- Read the [Style guide](STYLE_GUIDE.md) to learn the basic standards of writing Komodo Documentation content. This guide also contains a list of components and how they should be used.
-- Read the [Contribution guide](CONTRIBUTION_GUIDE.md) for details about submitting a pull request.
-- Make sure each new page created is added to the [sidebar file](https://github.com/KomodoPlatform/komodo-docs-mdx/blob/main/src/data/sidebar.json)
-- Be mindful of the [Code of Conduct](CODE_OF_CONDUCT.md) when contributing to this repository. We value all contributors and believe that our community is stronger when everyone feels safe, respected, and valued.
+- **[Style Guide](STYLE_GUIDE.md)** - Complete documentation standards including KDF API methods, table formats, and example best practices
+- **[Contribution Guide](CONTRIBUTION_GUIDE.md)** - Pull request submission process
+- **[Sidebar Configuration](https://github.com/KomodoPlatform/komodo-docs-mdx/blob/main/src/data/sidebar.json)** - Add new pages to site navigation
+- **[Code of Conduct](CODE_OF_CONDUCT.md)** - Community guidelines
 
 ## JSON Example Structure
 
-API method examples are organized using a simplified **1:1 method:folder** structure for maximum clarity and ease of management:
+API method examples are organized using a simplified **1:1 method:folder** structure aligned with our MDX example standards:
 
 ### Structure Convention
 
@@ -19,16 +19,16 @@ API method examples are organized using a simplified **1:1 method:folder** struc
 postman/json/kdf/
 ├── v1/                                    # Legacy API examples
 └── v2/                                    # Current API examples
-    ├── task-enable_utxo-init/             # Task-based methods (with operation in name)
-    │   ├── task-enable_utxo-init-example-1-electrum_mode-request.json
-    │   ├── task-enable_utxo-init-example-2-native_mode-request.json
-    │   └── task-enable_utxo-init-example-3-kmd_electrum_activation-request.json
+    ├── task-enable_utxo-init/             # Task-based methods
+    │   ├── task-enable_utxo-init-btc_electrum_activation-request.json
+    │   ├── task-enable_utxo-init-eth_native_mode-request.json
+    │   └── task-enable_utxo-init-kmd_with_rewards-request.json
     ├── my_balance/                        # Simple methods
-    │   ├── my_balance-example-1-basic_request-request.json
-    │   └── my_balance-example-2-coin_operation-request.json
+    │   ├── my_balance-single_coin_check-request.json
+    │   └── my_balance-portfolio_overview-request.json
     └── orderbook/                         # Trading methods
-        ├── orderbook-example-1-basic_request-request.json
-        └── orderbook-example-2-btc_kmd_trade-request.json
+        ├── orderbook-btc_kmd_pair-request.json
+        └── orderbook-high_volume_filter-request.json
 ```
 
 ### Naming Conventions
@@ -38,38 +38,31 @@ postman/json/kdf/
 - Convert filesystem-safe hyphens back to API format: `task-enable_utxo-init` → `task::enable_utxo::init`
 
 **Example Files:**
-- Format: `{method-name}-example-{number}-{description}-{type}.json`
+- Format: `{method-name}-{semantic_description}-{type}.json`
+- Use **semantic descriptions** that reflect actual use cases (not generic numbers)
 - Types: `request`, `response`
 - Examples: 
-  - `task-enable_utxo-init-example-1-electrum_mode-request.json`
-  - `my_balance-example-1-basic_request-request.json`
-  - `orderbook-example-2-btc_kmd_trade-request.json`
+  - `task-enable_utxo-init-btc_electrum_activation-request.json`
+  - `my_balance-single_coin_check-request.json`
+  - `orderbook-btc_kmd_pair-request.json`
 
 ### Rationale
 
-This simplified structure provides:
+This structure provides:
 
-1. **Simplicity**: One method = one folder, no confusing operation subfolders
-2. **Consistency**: All methods follow the same flat `method/` pattern
-3. **Clarity**: Method name is clearly visible in both folder and file names
-4. **Maintainability**: No duplicate operations or complex folder hierarchies
-5. **Automation**: Scanning and tooling work with predictable flat structure
-6. **Integration**: Compatible with Postman, Newman, and other API testing tools
+1. **Semantic Clarity**: Example names reflect actual use cases, not arbitrary numbers
+2. **MDX Alignment**: Matches the descriptive naming standards in our Style Guide
+3. **Maintainability**: Easy to identify what each example demonstrates
+4. **Consistency**: One method = one folder, predictable structure
+5. **Tool Compatibility**: Works with Postman, Newman, and automation scripts
 
 ### Adding Examples
 
 When adding new JSON examples:
 
-1. Create the method directory using kebab-case naming (preserve underscores, replace `::` with `-`)
-2. Add request/response files directly in the method folder with descriptive names
-3. Use the format: `{method-name}-example-{number}-{description}-{type}.json`
-4. Run the mapping script to update the unified documentation: `python utils/py/api_example_manager.py`
+1. **Follow semantic naming**: Use descriptive names that reflect the use case
+2. **Avoid numbered examples**: Use `btc_electrum_activation` not `example-1`
+3. **Check for duplicates**: Review existing examples before adding new ones
+4. **Align with MDX**: Ensure JSON examples match the examples in MDX documentation
 
-### API Example Manager
-
-The `utils/py/api_example_manager.py` script helps manage the JSON examples:
-
-- **Extract examples**: Automatically extracts examples from MDX documentation
-- **Generate variations**: Creates additional test cases for comprehensive coverage
-- **Flatten structure**: Use `--consolidate` to move files from old operation subfolders to the new flat structure
-- **Maintain consistency**: Ensures all examples follow the naming conventions
+Refer to the **[Style Guide MDX Example Standards](STYLE_GUIDE.md#mdx-example-standards)** for complete guidelines on creating meaningful, non-duplicate examples.

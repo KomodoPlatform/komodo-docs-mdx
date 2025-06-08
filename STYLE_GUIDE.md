@@ -1,11 +1,5 @@
 # Style Guide
 
-<p align="center">
- <a href="https://xkcd.com/">
-  <img src="https://user-images.githubusercontent.com/35845239/236310324-01dfb2b4-eba4-4e47-bd1b-b66689056de8.png" />
- </a>
-</p>
-
 ## Document Version
 
 **Last Updated:** December 2024  
@@ -17,17 +11,14 @@
 
 ---
 
-Great documentation is critical for guiding those who will use our tech stack. It should be clear, easy to read, and as detailed as required while avoiding unnecessary verbosity. This way, developers can quickly understand how to use and what to expect from our products.
+Great documentation is critical for guiding those who will use our tech stack. It should be clear, easy to read, and as detailed as required while avoiding unnecessary verbosity.
 
 From a user's perspective:
-
 - If they can't find information about a feature in the documentation, it means that **the feature doesn't exist**.
 - If there is information about a feature, but it's wrong or confusing, it means that **the feature is broken**.
 - If the documentation is hard to read, it means that **the feature is hard to use**.
 
-Be mindful of any feedback you receive from users, and let it guide you to improve the documentation. The eyes of the uninitiated are the best tool for identifying areas in need of enhancement. Though existing documentation may not yet conform to this standard, all new documentation should be written following the guidelines below, and existing documentation updated to match when time permits.
-
-**These guidelines are currently a work in progress.** Please also refer to https://alistapart.com/article/the-ten-essentials-for-good-api-documentation/ as a good foundation.
+These guidelines are currently a work in progress. All new documentation should follow the guidelines below, and existing documentation should be updated to match when time permits.
 
 ## Structure
 
@@ -37,305 +28,9 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
   - Where a request includes optional parameters which will result in different response structures, the file should contain a code block for each possible request variation, followed by a code block for the response of each example.
   - Below the request/response examples, include code blocks for each potential error response, along with details on what causes the error and how it might be resolved.
 - In some cases, it may be appropriate to group related methods together in a single `index.mdx` file. For example, the `index.mdx` file within the `task_init_trezor` folder contains documentation for all methods for initialisation and authentication with a Trezor hardware wallet.
-- Where common structures exist in the request or response of mulitple methods, these should be documented in the `index.mdx` file in the base folder for a section (e.g. [src/pages/komodo-defi-framework/api/v20/index.mdx](src/pages/komodo-defi-framework/api/v20/index.mdx)), and linked to from request/response parameter tables where required.
+- Where common structures exist in the request or response of multiple methods, these should be documented in the `index.mdx` file in the base folder for a section (e.g. [src/pages/komodo-defi-framework/api/v20/index.mdx](src/pages/komodo-defi-framework/api/v20/index.mdx)), and linked to from request/response parameter tables where required.
 - Where a method or parameter is deprecated, this should be communicated in the method heading or request parameters table.
 - Separate sections of content with subheadings to make scanning and finding the information they need easier. Two line breaks should be used before and one line break after each subheading.
-
-### MDX Example Standards
-
-To ensure consistency and prevent duplication across JSON examples:
-
-#### ✅ Example Best Practices
-
-1. **One Unique Example Per Use Case**
-   - Each example should demonstrate a **distinct use case or parameter variation**
-   - Avoid creating multiple examples with identical content
-   - If examples are identical, consolidate into a single representative example
-
-2. **Meaningful Example Names**
-   Use descriptive names that reflect the actual content:
-
-   ✅ **Good:**
-   ```markdown
-   ##### BTC Electrum Activation Request
-   ##### ETH Native Mode Request
-   ##### Trezor PIN Entry Request
-   ```
-
-   ❌ **Bad:**
-   ```markdown
-   ##### Example 1 Request
-   ##### Example 2 Request
-   ##### Example 3 Request
-   ```
-
-3. **Content-Based Variation**
-   Only create multiple examples when they demonstrate:
-   - **Different parameter values** (different coins, networks, etc.)
-   - **Different activation modes** (electrum vs native)
-   - **Different hardware wallet flows** (Trezor PIN entry vs confirmation)
-   - **Different error scenarios**
-
-4. **Example Structure**
-   ```markdown
-   ##### [Descriptive Name] Request
-
-   Brief description of what this example demonstrates.
-
-   <CodeGroup title="[Descriptive Name] Request" tag="POST" label="method_name" mm2MethodDecorate="true">
-     ```json
-     {
-       // JSON example here
-     }
-     ```
-   </CodeGroup>
-
-   <CollapsibleSection expandedText="Hide [Descriptive Name] Response" collapsedText="Show [Descriptive Name] Response">
-     ##### [Descriptive Name] Response
-
-     ```json
-     {
-       // Expected response
-     }
-     ```
-   </CollapsibleSection>
-   ```
-
-#### ❌ Anti-Patterns to Avoid
-
-1. **Identical Content with Different Numbers**
-   ```markdown
-   ❌ ##### Example 1: task_operation Request
-   ❌ ##### Example 2: task_operation Request
-   ❌ ##### Example 3: task_operation Request
-   ```
-   All with identical JSON content.
-
-2. **Meaningless Variations**
-   ```markdown
-   ❌ ##### BTC activation (task_id: 1) Request
-   ❌ ##### BTC activation (task_id: 2) Request
-   ❌ ##### BTC activation (task_id: 3) Request
-   ```
-   Unless the task_id difference is semantically meaningful.
-
-3. **Numbered Examples Without Purpose**
-   Only use numbered examples when there's a logical sequence or distinct variations.
-
-#### Content Validation Guidelines
-
-1. **Consolidation Over Multiplication**
-   - Prefer **one comprehensive example** over multiple identical ones
-   - Use **inline comments** to explain variations
-   - Create **separate examples** only for distinct scenarios
-
-2. **Semantic Example Names**
-   - `btc_electrum_activation` ✅
-   - `eth_native_mode` ✅ 
-   - `trezor_pin_entry` ✅
-   - `basic_request` ❌ (too generic)
-
-3. **Parameter Documentation**
-   Instead of multiple examples, document parameter variations:
-
-   ```markdown
-   ##### Coin Activation Request
-
-   This example shows basic coin activation. Key parameters:
-   - `ticker`: Can be "BTC", "ETH", "KMD", etc.
-   - `mode`: "Electrum" or "Native"
-   - `servers`: Required for Electrum mode
-
-   <CodeGroup title="Coin Activation Request" tag="POST" label="task::enable_utxo::init" mm2MethodDecorate="true">
-     ```json
-     {
-       "method": "task::enable_utxo::init",
-       "params": {
-         "ticker": "BTC",  // ← Can be any supported coin
-         "activation_params": {
-           "mode": {
-             "rpc": "Electrum",  // ← Or "Native"
-             "rpc_data": {
-               "servers": [...]  // ← Required for Electrum
-             }
-           }
-         }
-       }
-     }
-     ```
-   </CodeGroup>
-   ```
-
-4. **Quality Over Quantity**
-   - One clear, well-documented example is better than ten identical ones
-   - Each example should serve a clear, distinct purpose
-   - Review existing examples before adding new ones to avoid duplication
-
-## KDF API Method Documentation Standard
-
-All Komodo DeFi Framework API method documentation should follow this standardized format for consistency and clarity:
-
-### Page Structure
-
-```mdx
-export const title = "Komodo DeFi Framework Method: [Method Name]";
-export const description = "Brief description of what the method does.";
-
-# Komodo DeFi Framework Method: [Method Name]
-
-## method\_name {{label : 'method_name', tag : 'API-v2'}}
-
-Brief explanation of the method, its purpose, and any important usage notes.
-
-### Request Arguments
-
-| Parameter | Type | Required | Default | Description |
-|-----------|------|:--------:|:-------:|-------------|
-| param1    | type |    ✓     |   `-`   | Description |
-
-### Response Parameters  
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| param1    | type | Description |
-
-#### 📌 Examples
-
-##### [Example Name] Request
-
-<CodeGroup title="[Example Name] Request" tag="POST" label="method_name" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "RPC_UserP@SSW0RD",
-    "mmrpc": "2.0", 
-    "method": "method_name",
-    "params": {
-      // request parameters
-    }
-  }
-  ```
-</CodeGroup>
-
-<CollapsibleSection expandedText="Hide [Example Name] Response" collapsedText="Show [Example Name] Response">
-  ##### [Example Name] Response
-
-  ```json
-  {
-    // response data
-  }
-  ```
-</CollapsibleSection>
-```
-
-### Request Arguments Table Format
-
-#### Standard Table Structure
-
-All Request Arguments tables must follow this format with proper column alignment and symbols:
-
-```markdown
-### Request Arguments
-
-| Parameter | Type | Required | Default | Description |
-| --------- | ---- | :------: | :-----: | ----------- |
-| param1    | type |    ✓     |   `-`   | description |
-| param2    | type |    ✗     | `value` | description |
-```
-
-#### Required Columns
-
-1. **Parameter** - Parameter name (use escaped underscores: `param\_name`)
-2. **Type** - Data type (string, number, bool, object, etc.)
-3. **Required** - Required/Optional indicator (see symbols below)
-4. **Default** - Default value or `-` for no default
-5. **Description** - Clear description with enum references where applicable
-
-#### Column Alignment Standards
-
-- **Parameter, Type, Description**: Left-aligned (default)
-- **Required**: Center-aligned using `:------:`
-- **Default**: Center-aligned using `:-----:`
-
-Example with correct alignment:
-```markdown
-| Parameter | Type   | Required | Default | Description |
-| --------- | ------ | :------: | :-----: | ----------- |
-| coin      | string |    ✓     |   `-`   | description |
-```
-
-#### Required/Optional Symbols
-
-- **✓** - Required parameter
-- **✗** - Optional parameter  
-- **-** - Not applicable (for methods with no parameters)
-
-Always use symbols with consistent spacing (5 spaces before/after for center alignment).
-
-#### Default Value Formatting
-
-1. **No default**: Use `-`
-2. **String defaults**: Use backticks - `` `"value"` ``
-3. **Boolean defaults**: Use backticks - `` `true` `` or `` `false` ``
-4. **Numeric defaults**: Use backticks - `` `10` `` or `` `0.5` ``
-5. **Special values**: Use backticks - `` `null` ``
-
-#### Parameter Naming Rules
-
-**Avoid dot notation** in parameter names. Instead, delegate to common structure objects:
-
-❌ **Incorrect:**
-```markdown
-| protocol.type             | string | ✓ | - | Token type |
-| protocol.protocol\_data   | object | ✓ | - | Protocol data |
-```
-
-✅ **Correct:**
-```markdown
-| protocol | object | ✓ | - | A standard [TokenProtocol](/komodo-defi-framework/api/common_structures/#token-protocol) object |
-```
-
-#### Optional Default Column Rules
-
-- **Include Default column** when parameters have actual default values
-- **Omit Default column** when all parameters are required with no defaults
-- **Use Required column only** for methods with no parameters: `| (none) | | - | |`
-
-#### Enum System and Cross-References
-
-When referencing enums in parameter descriptions:
-
-```markdown
-| swap_method | string | ✓ | - | A standard [SwapMethod](/komodo-defi-framework/api/common_structures/#swap-method-enum) enum. The name of the method whose preimage is requested. |
-```
-
-Link format rules:
-- Use kebab-case for anchor links: `#swap-method-enum`
-- Always include full path: `/komodo-defi-framework/api/common_structures/`
-- Escape underscores in method names: `trade\_preimage`
-
-### Key Requirements
-
-1. **Page Title**: Must match the exported `title` constant exactly
-2. **Method Heading**: Use H2 with the method name and `{{label : 'method_name', tag : 'API-v2'}}` metadata
-3. **Section Hierarchy**: 
-   - H1: Page title 
-   - H2: Method name
-   - H3: Request/Response parameter tables
-   - H4: Examples section header (`#### 📌 Examples`)
-   - H5: Individual example names (`##### [Example Name] Request/Response`)
-4. **Consistent Naming**: Request and response sections must use matching names (e.g., "HD Wallet Account Request" → "HD Wallet Account Response")
-5. **CollapsibleSection Text**: Must match the example names (e.g., `"Show HD Wallet Account Response"`, `"Hide HD Wallet Account Response"`)
-6. **Table Format**: All Request Arguments tables must use the standardized format with Required/Default columns and proper alignment
-
-### Benefits
-
-- **Consistent navigation**: API index links can point to `#method-name` (the H2 heading)
-- **Clear hierarchy**: Easy to understand document structure  
-- **Scalable**: Works for single-method and multi-method pages
-- **User-friendly**: Predictable layout improves user experience
-- **Machine-readable**: Proper table format enables OpenAPI generation
-- **Standardized defaults**: Consistent format for automation
-- **Cross-reference system**: Links between methods and common structures
 
 ## General
 
@@ -399,368 +94,75 @@ Read the [Contribution guide](CONTRIBUTION_GUIDE.md) first.
 
 Pages are heavily [**MDX**](https://mdxjs.com/) ("markdown extension") based, which allows us to use JSX in markdown content. You can have imported components (JSX) within your content and more. Read more about MDX here [https://mdxjs.com/docs/what-is-mdx/](https://mdxjs.com/docs/what-is-mdx/).
 
-### Adding a Title and Description
-
-Titles and descriptions are mandatory on every documentation page and must be added at the top level. To add a title use this syntax: `export const title = "Documentation page title";`. To add a description use: `export const description = "documentation page description";`
-
-### Subsections and headings
-
-Though it is good to separate each method into its own document, sometimes it is necessary to group methods together.
-In such a case, we can define the `title`, `label` and/or `tag` properties alongside a section header and within a `CodeGroup` tag so that anchor links are generated in a consistent manner.
-
-- The `label` property should be the exact same as the RPC method.
-- The `title` property should be blank, unless the section heading is not the same as the `label` property. In that case, the `title` property should be the (human readable) section heading.
-- for methods with a `task::xxxx::` or `lightning::xxxx::` prefix, the `label` property should be the full RPC method name, and the title should be the truncated RPC method without the prefix (only the last bit, after the last set of `::`), or a human readable title as above (recommended).
-
-For example, with a human readable section heading:
-
-```
-## Transaction History
-...
-### my_tx_history with pagination {{label : 'my_tx_history', tag : 'POST'}}
-<CodeGroup title="Transaction History" tag="POST" label="my_tx_history" mm2MethodDecorate="true">
-...
-</CodeGroup>
-```
-
-For example, with a `task::xxxx::` prefix:
-
-```
-# Trezor Initialisation
-...
-## init {{label : 'task::init_trezor::init', tag : 'POST'}}
-...
-<CodeGroup title="init" tag="POST" label="task::init_trezor::init" mm2MethodDecorate="true">
-...
-</CodeGroup>
-```
-
-For example, when method and title are the same:
-
-```
-## get_balance {{label : 'get_balance', tag : 'POST'}}
-...
-<CodeGroup title="" tag="POST" label="get_balance" mm2MethodDecorate="true">
-...
-</CodeGroup>
-```
-
-### Components
-
-We've got a few **MDX** components we use across the Docs. Below is a walkthrough of how to start writing and using the components that make up the Docs.
-
-IMPORTANT: Always use double quotes inside mdx tags.
-
-Example:
-
-Correct:
-
-```
-<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
-```
-
-Wrong:
-
-```
-<CollapsibleSection expandedText='Hide Examples' collapsedText='Show Examples'>
-```
-
-MDX supports standard markdown by default [CommonMark](https://commonmark.org/). However, this project also has [GFM](https://github.github.com/gfm/) installed.
-
-> Many of the components mentioned here are simplified and possibly do more than **explicitly pointed out**.
-
-### CodeGroup
-
-The `CodeGroup` acts as a wrapper around code blocks. It allows us to have tabbed content (or not, if it's a single block) with properties such as **title, tags, labels and more**. An example would look something like this:
-
-````mdx
-<CodeGroup title="Code Sample" tag="post" label="/kmd/jwt/post" >
-
-```ts
-// ...
-```
-````
-
-```python
-
-// ...
-
-```
-
-```php
-
-// ...
-
-```
-
-</CodeGroup>
-```
-
-And rendered as:
-
-![Code group UI](style-guide-images/code-group-sample.png)
-
-<!-- If you have a single block of code, you can use the `CodeGroup` without wrapping it around the block by using `mdx-annotations`.
-
-```mdx
-```ts {{title: "Single Block", tag: "post", label: "/kmd/jwt/post"}}
-// ...
-```
-```
-
-And you'll still have it rendered correctly:
-
-![Single code block UI](style-guide-images/single-code-block.png) -->
-
-It is important to **note that**, "**Komodo DeFi Framework methods**" should be wrapped with `CodeGroup` tags, using the **method name** as the **label value**, and the **tag value** set to **POST**, an additional **mm2MethodDecorate property** with the value **"true"**. This will generate code blocks for:
-
-- **JSON**: The pure request body.
-- **Python3**: Using the requests library.
-- **Bash**: Using curl.
-- **Javascript**: using fetch.
-- **PHP**: Using curl.
-- **GO**: Using net/http. (need to confirm this is correct)
-- **Ruby**: Using net/http.
-
-You only need to include the `json` data, and the additional **mm2MethodDecorate property** populates for various languages automatically.
-
-A working code sample would look like this:
-
-````mdx
-<CodeGroup title="Generate Invoice" tag="POST" label="generate_invoice" mm2MethodDecorate="true">
-
-```json
-{
-  "userpass": "RPC_UserP@SSW0RD",
-  "mmrpc": "2.0",
-  "method": "lightning::payments::generate_invoice",
-  "params": {
-    "coin": "tBTC-TEST-lightning",
-    "description": "test invoice"
-  },
-  "id": 56
-}
-```
-````
-
-</CodeGroup>
-```
-
-Rendered as:
-
-![mm2MethodDecoratorUI](style-guide-images/mm2MethodDecoratorUI.png)
+## Components
 
 ### Note
 
-Use `Note` tags to **highlight important information**. `Note`s can be one of three states:
-
-- **info** (Default)
-- **warning**
-- **error**
+The `Note` component displays an info/warning/error styled message with predefined icons and colors:
 
 ```mdx
 <Note type="info">
-  Komodo Platform is an open-source, decentralized blockchain project committed
-  to privacy and security. It offers flexibility for developers with support for
-  multiple programming languages and a modular architecture.
+  Information message here.
 </Note>
-```
 
-```mdx
 <Note type="warning">
-  Komodo Platform is an open-source, decentralized blockchain project committed
-  to privacy and security. It offers flexibility for developers with support for
-  multiple programming languages and a modular architecture.
+  Warning message here.
 </Note>
-```
 
-```mdx
 <Note type="error">
-  Komodo Platform is an open-source, decentralized blockchain project committed
-  to privacy and security. It offers flexibility for developers with support for
-  multiple programming languages and a modular architecture.
+  Error message here.
 </Note>
 ```
-
-Rendered as:
-
-![Note-info](style-guide-images/notes-info-UI.png)
-
-![Note-warning](style-guide-images/notes-warning-UI.png)
-
-![Note-error](style-guide-images/notes-error-UI.png)
 
 ### CollapsibleSection
 
-This renders a button with a specified text based on its state (expanded or collapsed).
-
-You'll mostly use this for API, Commands, etc. Responses, which should be wrapped with the `CollapsibleSection` tags, for example:
+This renders a button with a specified text based on its state (expanded or collapsed). You'll mostly use this for API responses:
 
 ````mdx
-#### Response (ready, successful)
-
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
-
-    ```json
-    {
-       "mmrpc": "2.0",
-       "result": "success",
-       "id": null
-    }
-    ```
-
-</CollapsibleSection>
-````
-
-The `CollapsibleSection` tags should also wrap all error responses (as a group), with the `expandedText` and `collapsedText` values set to '**Show Error Responses**' and '**Hide Error Responses' respectively**.
-
-Headers like `#### Response (ready, successful)` should be outside the `CollapsibleSection` tags
-
-A working code would look like this:
-
-````mdx
-<CollapsibleSection expandedText='Hide code' collapsedText='Show code'>
 
 ```json
 {
-  "sad_story": "What did the robot say to the dead robot? Rust-in-peace",
-  "category": "programming",
-  "rating": 8.5,
-  "source": "unknown",
-  "date": "2078-05-16"
+   "mmrpc": "2.0",
+   "result": "success",
+   "id": null
 }
 ```
 
 </CollapsibleSection>
 ````
 
-Rendered as:
-
-![collapsible Section UI](style-guide-images/collapsible-section-UI.png)
-
 ### Images
 
-Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component. To render an image in the `src/image` folder, you'd have to import the image using the following syntax:
+Images should be added to the related subfolder within the `src/images` folder, and rendered using the `OptimizedImage` component:
 
 ```jsx
 import komodefiManiq from "@/public/images/docs/komodefi-maniq.webp";
-```
 
-Now you can render the image using the `OptimizedImage` component, for example:
-
-```jsx
 <OptimizedImage title="Komodo DeFi Framework" src={komodefiManiq} alt="Komodo DeFi Framework" classNaming="w-full" />
 ```
 
-![Komodo DeFi Framework](style-guide-images/komodefi-maniq.png)
-
-<!-- [You can read more about the magic behind OptimizedImage](https://github.com/Niels-IO/next-image-export-optimizer#readme) -->
-
 ### Heading
 
-The `Heading` component (defaults to `h2`) functions exactly like the **native heading** tags with the exception that it takes a prop that allows us to have it labelled and tagged. It also takes an `anchor` prop (defaults to `true`) that makes it possible to link that section to another section on the page by passing it an `id` prop. If `anchor = true` and no `id` is passed, it links to itself.
-
-To use this component, you need to have it imported: `import { Heading } from "@/components/mdx/Heading";`
-
-Then render it:
-
-```mdx
-<Heading label="get_all_tokens" tag="API-v2" anchor={false}>
-  How to get your tokens
-</Heading>
-```
-
-To save time, you can use the `Heading` component without importing it. And this can be done by using the native **heading tag** but **with annotations** matching the props you'd otherwise pass to the `Heading` component. Depending on the `props`, this renders the same output in the browser.
-
-Here's how:
+The `Heading` component functions like native heading tags but can be labelled and tagged:
 
 ```mdx
 ## How to get your tokens {{label : 'get_all_tokens', tag : 'API-v2'}}
 ```
 
-Rendered as:
-
-![heading tag UI](style-guide-images/heading-tag-UI.png)
-
-### TaggedSection
-
-`TaggedSection`s are used to **tag && label** a section. Just like the `Heading` component. The heading component uses the `TaggedSection` component under the hood.
-
-To use this component, you need to have it imported: `import { TaggedSection } from "@/components/mdx/Heading";`
-
-However, it is often used for tagging/labelling headings (`h2 || h1`). If you happen to find a use for it in a non-heading section, feel free to use it.
-
-Here's how to use it:
-
-```mdx
-<TaggedSection tag={"Post"} label={"kmd/token/token_id"} />
-```
-
-Rendered as:
-
-![Tagged section](style-guide-images/tagged-section-UI.png)
-
 ### Tag
 
-`Tag`s are used for tagging a `CRUD` operation. To use it, import it with the syntax `import { Tag } from "@/components/mdx/Tag";`.
-This component takes 4 types of children as follows
+`Tag`s are used for tagging CRUD operations:
 
-- C - **post**
-- R - **get**
-- U - **put**
-- D - **delete**
-
-A working code would look like this:
-
-```
+```mdx
 <Tag>post</Tag>
 <Tag>get</Tag>
 <Tag>put</Tag>
 <Tag>delete</Tag>
 ```
 
-Rendered as:
+## Navigation
 
-![Tag component](style-guide-images/crude-tag-ui.png)
-
-## ToCForIndex
-
-This component can be included in the root index.mdx files in any of the directories that hold a specific category of docs. This component will populate a list with the table of contents for the section.
-
-Rendered as:
-
-![TocForIndex component](style-guide-images/toc-for-index.png)
-
-## Navbar (Top)
-
-Top navbar's navigation data/dropdown list is manually populated. This file can be found at [src/data/navbar.json](src/data/navbar.json). If you're working on a very important new page, which links to a whole new category or an index, this is where to add them.
-
-![Navbar top](style-guide-images/navbar-top-UI.png)
-
-## Sidebar (Left)
-
-Left sidebar's navigation data is manually populated. This file can be found at [src/data/sidebar.json](src/data/sidebar.json). If you're working on a new page, this is where to link them.
-
-Along with `titleLink`, an empty links array is expected:
-
-```json
-"titleLink": "/qa/komodefi-api-quickstart/",
-"links": []
-```
-
-![Sidebar left](style-guide-images/sidebar-left-UI.png)
-
-## Sidebar (Right)
-
-![Sidebar right](style-guide-images/sidebar-right-UI.png)
-
-The right sidebar is automatically populated based on the **Heading hierarchy** of the current page.
-
-## Conclusion
-
-As much as we can, we try to make every file as readable as possible, so you won't be needing help figuring out **how to do/use {A || B}**.
-We encourage you to do the same when you're contributing and you just might get a medal of binary from the community.
-
-Thats it! You've completed the KMD-Docs contribution boot camp!
-
-Have fun!
+- **Top navbar**: Navigation data is in [src/data/navbar.json](src/data/navbar.json)
+- **Left sidebar**: Navigation data is in [src/data/sidebar.json](src/data/sidebar.json). New pages should be added here.
+- **Right sidebar**: Automatically populated based on the heading hierarchy of the current page.
