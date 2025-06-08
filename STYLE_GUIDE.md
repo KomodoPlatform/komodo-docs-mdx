@@ -30,6 +30,82 @@ Be mindful of any feedback you receive from users, and let it guide you to impro
 - Where a method or parameter is deprecated, this should be communicated in the method heading or request parameters table.
 - Separate sections of content with subheadings to make scanning and finding the information they need easier. Two line breaks should be used before and one line break after each subheading.
 
+## KDF API Method Documentation Standard
+
+All Komodo DeFi Framework API method documentation should follow this standardized format for consistency and clarity:
+
+### Page Structure
+
+```mdx
+export const title = "Komodo DeFi Framework Method: [Method Name]";
+export const description = "Brief description of what the method does.";
+
+# Komodo DeFi Framework Method: [Method Name]
+
+## method\_name {{label : 'method_name', tag : 'API-v2'}}
+
+Brief explanation of the method, its purpose, and any important usage notes.
+
+### Request Arguments
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| param1    | type | Description |
+
+### Response Parameters  
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| param1    | type | Description |
+
+#### 📌 Examples
+
+##### [Example Name] Request
+
+<CodeGroup title="[Example Name] Request" tag="POST" label="method_name" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0", 
+    "method": "method_name",
+    "params": {
+      // request parameters
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide [Example Name] Response" collapsedText="Show [Example Name] Response">
+  ##### [Example Name] Response
+
+  ```json
+  {
+    // response data
+  }
+  ```
+</CollapsibleSection>
+```
+
+### Key Requirements
+
+1. **Page Title**: Must match the exported `title` constant exactly
+2. **Method Heading**: Use H2 with the method name and `{{label : 'method_name', tag : 'API-v2'}}` metadata
+3. **Section Hierarchy**: 
+   - H1: Page title 
+   - H2: Method name
+   - H3: Request/Response parameter tables
+   - H4: Examples section header (`#### 📌 Examples`)
+   - H5: Individual example names (`##### [Example Name] Request/Response`)
+4. **Consistent Naming**: Request and response sections must use matching names (e.g., "HD Wallet Account Request" → "HD Wallet Account Response")
+5. **CollapsibleSection Text**: Must match the example names (e.g., `"Show HD Wallet Account Response"`, `"Hide HD Wallet Account Response"`)
+
+### Benefits
+
+- **Consistent navigation**: API index links can point to `#method-name` (the H2 heading)
+- **Clear hierarchy**: Easy to understand document structure  
+- **Scalable**: Works for single-method and multi-method pages
+- **User-friendly**: Predictable layout improves user experience
+
 ## General
 
 - Use [American English spelling](https://www.thefreedictionary.com/American-English-vs-British-English-Spelling.htm)
