@@ -12,67 +12,70 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - coin
-              - servers
-              - userpass
-            properties:
-              coin:
-                type: string
-                description: Ticker of coin to activate
-                example: "LTC"
-              servers:
-                type: array
-                description: A list of standard ActivationServers objects
-                items:
-                  $ref: ../../components/schemas/Activation.yaml#/ActivationServers
-              mm2:
-                type: integer
-                description: |
-                  Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. 
-                  Accepted values are 0 or 1
-                enum: [0, 1]
-                example: 1
-              min_connected:
-                type: integer
-                description: Optional, defaults to 1. Minimum number of electrum servers to maintain an active connection to
-                default: 1
-                minimum: 1
-                example: 1
-              max_connected:
-                type: integer
-                description: |
-                  Optional. Maximum number of electrum servers to maintain an active connection to. 
-                  If not set, defaults to all servers in activation request
-                minimum: 1
-                example: 2
-              required_confirmations:
-                type: integer
-                description: |
-                  Optional, defaults to 3. Number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap
-                default: 3
-                example: 3
-              requires_notarization:
-                type: boolean
-                description: |
-                  Optional, defaults to false. If true, coins protected by Komodo Platform's dPoW security will wait for a notarization before progressing to the next atomic swap transactions step
-                default: false
-                example: false
-              swap_contract_address:
-                type: string
-                description: QRC20 only. Address of etomic swap smart contract
-                example: "0x2f754733acd6d753731c00fee32cb484551cc15d"
-              fallback_swap_contract:
-                type: string
-                description: QRC20 only. Address of backup etomic swap smart contract
-                example: "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
-              utxo_merge_params:
-                $ref: ../../components/schemas/Activation.yaml#/UtxoMergeParams
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [electrum]
+                    description: Method name
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: Ticker of coin to activate
+                  servers:
+                    type: array
+                    description: A list of standard ActivationServers objects
+                    items:
+                      $ref: ../../components/schemas/Activation.yaml#/ActivationServers
+                  mm2:
+                    type: integer
+                    description: |
+                      Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. 
+                      Accepted values are 0 or 1
+                    enum: [0, 1]
+                    example: 1
+                  min_connected:
+                    type: integer
+                    description: Optional, defaults to 1. Minimum number of electrum servers to maintain an active connection to
+                    default: 1
+                    minimum: 1
+                    example: 1
+                  max_connected:
+                    type: integer
+                    description: |
+                      Optional. Maximum number of electrum servers to maintain an active connection to. 
+                      If not set, defaults to all servers in activation request
+                    minimum: 1
+                    example: 2
+                  required_confirmations:
+                    type: integer
+                    description: |
+                      Optional, defaults to 3. Number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap
+                    default: 3
+                    minimum: 1
+                    example: 3
+                  requires_notarization:
+                    type: boolean
+                    description: |
+                      Optional, defaults to false. If true, coins protected by Komodo Platform's dPoW security will wait for a notarization before progressing to the next atomic swap transactions step
+                    default: false
+                    example: false
+                  swap_contract_address:
+                    type: string
+                    pattern: "^0x[a-fA-F0-9]{40}$"
+                    description: QRC20 only. Address of etomic swap smart contract
+                    example: "0x2f754733acd6d753731c00fee32cb484551cc15d"
+                  fallback_swap_contract:
+                    type: string
+                    pattern: "^0x[a-fA-F0-9]{40}$"
+                    description: QRC20 only. Address of backup etomic swap smart contract
+                    example: "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
+                  utxo_merge_params:
+                    $ref: ../../components/schemas/Activation.yaml#/UtxoMergeParams
+                required:
+                  - coin
+                  - servers
     responses:
       '200':
         description: Coin activation successful
@@ -86,24 +89,23 @@
                   description: The address of the user's coin wallet, based on the user's passphrase
                   example: "Lh2zFS66gP5qF1bRxoCXT6bMw8YShjoRry"
                 balance:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The amount of coin the user holds in their wallet; does not include unspendable_balance
-                  example: "7.62"
                 unspendable_balance:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The coin balance that is unspendable at the moment (e.g. if the address has immature UTXOs)
-                  example: "0"
                 coin:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                   description: The ticker of the enabled coin
-                  example: "LTC"
                 required_confirmations:
                   type: integer
                   description: The number of transaction confirmations for which the Komodo DeFi Framework API must wait during the atomic swap process
+                  minimum: 1
                   example: 3
                 mature_confirmations:
                   type: integer
                   description: The number of coinbase transaction confirmations required to become mature; UTXO coins only
+                  minimum: 1
                   example: 100
                 requires_notarization:
                   type: boolean
@@ -118,20 +120,10 @@
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  example: "lp_coins:943] lp_coins:693] mm2 param is not set neither in coins config nor enable request, assuming that coin is not supported"
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                  example: "rpc:184] dispatcher_legacy:141] lp_commands_legacy:141] lp_coins:4462] utxo_standard:73] utxo_coin_builder:616] Internal error: manager:129] min_connected should be greater than 0" 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

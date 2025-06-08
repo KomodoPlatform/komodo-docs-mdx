@@ -10,23 +10,25 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              method:
-                type: string
-                enum: [my_swap_status]
-                description: Method name (must be 'my_swap_status').
-              params:
-                type: object
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
                 properties:
-                  uuid:
+                  method:
                     type: string
-                    description: The uuid of swap, typically received from the buy/sell call.
+                    enum: [my_swap_status]
+                    description: Method name (must be 'my_swap_status').
+                  params:
+                    type: object
+                    properties:
+                      uuid:
+                        type: string
+                        format: uuid
+                        description: The uuid of swap, typically received from the buy/sell call.
+                    required:
+                      - uuid
                 required:
-                  - uuid
-            required:
-              - method
-              - params
+                  - params
     responses:
       '200':
         description: Success
@@ -41,8 +43,7 @@
                     events:
                       type: array
                       items:
-                        # TODO: Use $ref to SwapEvent schema if/when available in components/schemas
-                        type: object
+                        $ref: ../../components/schemas/Swaps.yaml#/SwapEvent
                       description: Events which occurred for a swap.
                     success_events:
                       type: array
@@ -56,9 +57,11 @@
                       description: A list of events that fell into an error swap state.
                     type:
                       type: string
+                      enum: ["Maker", "Taker"]
                       description: Whether the node acted as a market Maker or Taker.
                     uuid:
                       type: string
+                      format: uuid
                       description: Swap uuid.
                     gui:
                       type: string
@@ -67,22 +70,22 @@
                       type: string
                       description: Komodo DeFi Framework API version.
                     maker_coin:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: Ticker of maker coin.
                     taker_coin:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: Ticker of taker coin.
                     maker_amount:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: The amount of coins to be swapped by maker.
                     taker_amount:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: The amount of coins to be swapped by taker.
                     maker_coin_usd_price:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: The USD price of the maker coin at time of trade (if available).
                     taker_coin_usd_price:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: The USD price of the taker coin at time of trade (if available).
                     my_info:
                       type: object
@@ -92,6 +95,7 @@
                       description: Whether the swap can be recovered using the recover_funds_of_swap API command.
                     my_order_uuid:
                       type: string
+                      format: uuid
                       description: The uuid of order that matched to start the swap.
                     is_finished:
                       type: boolean
@@ -113,5 +117,13 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
-        description: Internal server error 
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

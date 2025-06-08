@@ -11,20 +11,20 @@
         description: The name of the coin the user desires to receive
         required: true
         schema:
-          type: string
+          $ref: ../../../components/schemas/Common.yaml#/CoinTicker
       - name: rel
         in: query
         description: The name of the coin the user desires to sell
         required: true
         schema:
-          type: string
+          $ref: ../../../components/schemas/Common.yaml#/CoinTicker
       - name: price
         in: query
         description: The price in rel the user is willing to pay per one unit of the base coin. Can be a numeric string, RationalValue, or FractionalValue object.
         required: true
         schema:
           oneOf:
-            - type: string
+            - $ref: ../../../components/schemas/Common.yaml#/AmountString
             - $ref: ../../components/schemas/RationalValue.yaml
             - $ref: ../../components/schemas/FractionalValue.yaml
       - name: volume
@@ -33,7 +33,7 @@
         required: true
         schema:
           oneOf:
-            - type: string
+            - $ref: ../../../components/schemas/Common.yaml#/AmountString
             - $ref: ../../components/schemas/RationalValue.yaml
             - $ref: ../../components/schemas/FractionalValue.yaml
       - name: min_volume
@@ -42,7 +42,7 @@
         required: false
         schema:
           oneOf:
-            - type: string
+            - $ref: ../../../components/schemas/Common.yaml#/AmountString
             - $ref: ../../components/schemas/RationalValue.yaml
             - $ref: ../../components/schemas/FractionalValue.yaml
       - name: match_by
@@ -91,67 +91,64 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password
-              method:
-                type: string
-                enum: [buy]
-                description: Method name
-              base:
-                type: string
-                description: The name of the coin the user desires to receive
-              rel:
-                type: string
-                description: The name of the coin the user desires to sell
-              price:
-                oneOf:
-                  - type: string
-                  - $ref: ../../components/schemas/RationalValue.yaml
-                  - $ref: ../../components/schemas/FractionalValue.yaml
-                description: The price in rel the user is willing to pay per one unit of the base coin
-              volume:
-                oneOf:
-                  - type: string
-                  - $ref: ../../components/schemas/RationalValue.yaml
-                  - $ref: ../../components/schemas/FractionalValue.yaml
-                description: The amount of coins the user is willing to receive of the base coin
-              min_volume:
-                oneOf:
-                  - type: string
-                  - $ref: ../../components/schemas/RationalValue.yaml
-                  - $ref: ../../components/schemas/FractionalValue.yaml
-                description: The minimum amount of base coin to be purchased in any GoodTillCancelled orders after conversion to maker. Optional.
-              match_by:
-                $ref: ../../components/schemas/MatchBy.yaml
-                description: Optional. A standard MatchBy object, to filter to include only matches by pubkey or uuid.
-              order_type:
-                $ref: ../../components/schemas/OrderType.yaml
-                description: Optional. A standard OrderType object.
-              base_confs:
-                type: number
-                description: Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set
-              base_nota:
-                type: boolean
-                description: Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set
-              rel_confs:
-                type: number
-                description: Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set
-              rel_nota:
-                type: boolean
-                description: Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set
-              save_in_history:
-                type: boolean
-                description: Defaults to true. If set to false no order history will be saved (though order status will be temporarily stored while in progress).
-            required:
-              - userpass
-              - method
-              - base
-              - rel
-              - price
-              - volume
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [buy]
+                    description: Method name
+                  base:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The name of the coin the user desires to receive
+                  rel:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The name of the coin the user desires to sell
+                  price:
+                    oneOf:
+                      - $ref: ../../../components/schemas/Common.yaml#/AmountString
+                      - $ref: ../../components/schemas/RationalValue.yaml
+                      - $ref: ../../components/schemas/FractionalValue.yaml
+                    description: The price in rel the user is willing to pay per one unit of the base coin
+                  volume:
+                    oneOf:
+                      - $ref: ../../../components/schemas/Common.yaml#/AmountString
+                      - $ref: ../../components/schemas/RationalValue.yaml
+                      - $ref: ../../components/schemas/FractionalValue.yaml
+                    description: The amount of coins the user is willing to receive of the base coin
+                  min_volume:
+                    oneOf:
+                      - $ref: ../../../components/schemas/Common.yaml#/AmountString
+                      - $ref: ../../components/schemas/RationalValue.yaml
+                      - $ref: ../../components/schemas/FractionalValue.yaml
+                    description: The minimum amount of base coin to be purchased in any GoodTillCancelled orders after conversion to maker. Optional.
+                  match_by:
+                    $ref: ../../components/schemas/MatchBy.yaml
+                    description: Optional. A standard MatchBy object, to filter to include only matches by pubkey or uuid.
+                  order_type:
+                    $ref: ../../components/schemas/OrderType.yaml
+                    description: Optional. A standard OrderType object.
+                  base_confs:
+                    type: number
+                    description: Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set
+                  base_nota:
+                    type: boolean
+                    description: Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set
+                  rel_confs:
+                    type: number
+                    description: Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set
+                  rel_nota:
+                    type: boolean
+                    description: Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set
+                  save_in_history:
+                    type: boolean
+                    description: Defaults to true. If set to false no order history will be saved (though order status will be temporarily stored while in progress).
+                required:
+                  - base
+                  - rel
+                  - price
+                  - volume
     responses:
       '200':
         description: Success

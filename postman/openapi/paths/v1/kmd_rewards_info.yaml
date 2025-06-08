@@ -10,18 +10,14 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [kmd_rewards_info]
-                description: Method name (must be 'kmd_rewards_info').
-            required:
-              - userpass
-              - method
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [kmd_rewards_info]
+                    description: Method name (must be 'kmd_rewards_info').
     responses:
       '200':
         description: Success
@@ -37,33 +33,53 @@
                     properties:
                       tx_hash:
                         type: string
+                        pattern: "^[a-fA-F0-9]{64}$"
                         description: The hash of the transaction.
                       height:
                         type: integer
+                        minimum: 0
                         description: The height of the block in which the transaction was included (optional).
                       output_index:
                         type: integer
+                        minimum: 0
                         description: The zero-based index of the output in the transaction's list of outputs.
                       amount:
-                        type: string
+                        $ref: ../../../components/schemas/Common.yaml#/AmountString
                         description: The transaction output's value.
                       locktime:
                         type: integer
+                        minimum: 0
                         description: The transaction output's locktime.
                       accrued_rewards:
                         type: object
                         description: The amount of accrued rewards if they exist or the reason for their non existence.
                       accrue_start_at:
                         type: integer
+                        minimum: 0
                         description: The rewards start to accrue at this time for the given transaction (optional).
                       accrue_stop_at:
                         type: integer
+                        minimum: 0
                         description: The rewards stop to accrue at this time for the given transaction (optional).
+                    required:
+                      - tx_hash
+                      - output_index
+                      - amount
+                      - locktime
+                      - accrued_rewards
                   description: The rewards info for each unspent output.
               required:
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas if/when available in components/schemas 

@@ -11,30 +11,26 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - coin
-              - confirmations
-              - userpass
-            properties:
-              method:
-                type: string
-                enum: ["set_required_confirmations"]
-                description: The method name
-                example: "set_required_confirmations"
-              coin:
-                type: string
-                description: The ticker of the selected coin
-                example: "DOC"
-              confirmations:
-                type: integer
-                description: The number of confirmations to require
-                example: 3
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["set_required_confirmations"]
+                    description: The method name
+                    example: "set_required_confirmations"
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The ticker of the selected coin
+                  confirmations:
+                    type: integer
+                    minimum: 0
+                    description: The number of confirmations to require
+                    example: 3
+                required:
+                  - coin
+                  - confirmations
     responses:
       '200':
         description: Confirmations setting updated successfully
@@ -47,30 +43,26 @@
                   type: object
                   properties:
                     coin:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: The coin selected in the request
-                      example: "ETOMIC"
                     confirmations:
                       type: integer
                       description: The number of confirmations in the request
                       example: 3
+                  required:
+                    - coin
+                    - confirmations
+              required:
+                - result
       '400':
         description: Bad request - Invalid parameters
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

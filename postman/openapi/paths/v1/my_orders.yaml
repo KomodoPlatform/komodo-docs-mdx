@@ -10,18 +10,14 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [my_orders]
-                description: Method name (must be 'my_orders').
-            required:
-              - userpass
-              - method
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [my_orders]
+                    description: Method name (must be 'my_orders').
     responses:
       '200':
         description: Success
@@ -36,14 +32,12 @@
                     maker_orders:
                       type: object
                       additionalProperties:
-                        # TODO: Use $ref to Order schema if/when available in components/schemas
-                        type: object
+                        $ref: ../../components/schemas/Orders.yaml#/OrderDataV1
                       description: Orders that are currently active in market-maker mode.
                     taker_orders:
                       type: object
                       additionalProperties:
-                        # TODO: Use $ref to Order schema if/when available in components/schemas
-                        type: object
+                        $ref: ../../components/schemas/Orders.yaml#/OrderDataV1
                       description: Orders that are currently active in market-taker mode.
                   required:
                     - maker_orders
@@ -52,5 +46,13 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
-        description: Internal server error 
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

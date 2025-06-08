@@ -12,6 +12,7 @@
         required: true
         schema:
           type: string
+          pattern: "^[0-9a-fA-F]{66}$"
       - name: reason
         in: query
         description: The reason of banning
@@ -22,26 +23,24 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password
-              method:
-                type: string
-                enum: [ban_pubkey]
-                description: Method name
-              pubkey:
-                type: string
-                description: The pubkey to ban (use secp256k1 pubkey without prefix)
-              reason:
-                type: string
-                description: The reason of banning
-            required:
-              - userpass
-              - method
-              - pubkey
-              - reason
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [ban_pubkey]
+                    description: Method name
+                  pubkey:
+                    type: string
+                    pattern: "^[0-9a-fA-F]{66}$"
+                    description: The pubkey to ban (use secp256k1 pubkey without prefix)
+                  reason:
+                    type: string
+                    description: The reason of banning
+                required:
+                  - pubkey
+                  - reason
     responses:
       '200':
         description: Success

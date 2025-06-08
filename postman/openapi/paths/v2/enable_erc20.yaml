@@ -11,140 +11,89 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-              - mmrpc
-              - params
-            properties:
-              method:
-                type: string
-                enum: ["enable_erc20"]
-                description: The method name
-                example: "enable_erc20"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              mmrpc:
-                type: string
-                enum: ["2.0"]
-                description: The JSON-RPC version
-                example: "2.0"
-              id:
-                type: integer
-                description: Optional. Identifies a request to allow matching it with a response. Defaults to null
-                example: 0
-              params:
-                type: object
-                required:
-                  - ticker
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
                 properties:
-                  ticker:
+                  method:
                     type: string
-                    description: Ticker of the ERC20 like token coin
-                    example: "BAT-ERC20"
-                  activation_params:
+                    enum: ["enable_erc20"]
+                    description: The method name
+                    example: "enable_erc20"
+                  params:
                     type: object
-                    description: Optional. Additional activation parameters
+                    required:
+                      - ticker
                     properties:
-                      required_confirmations:
-                        type: integer
-                        description: Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set
-                        example: 3
+                      ticker:
+                        $ref: '../../../components/schemas/Common.yaml#/CoinTicker'
+                        description: Ticker of the ERC20 like token coin
+                      activation_params:
+                        type: object
+                        description: Optional. Additional activation parameters
+                        properties:
+                          required_confirmations:
+                            type: integer
+                            description: Optional. Confirmations to wait for steps in swap. Defaults to value in the coins file if not set
+                            minimum: 1
+                            example: 3
     responses:
       '200':
         description: ERC20 token enabled successfully
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  description: The JSON-RPC version (should be '2.0')
-                  example: "2.0"
-                result:
-                  type: object
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
                   properties:
-                    balances:
+                    result:
                       type: object
-                      description: Object containing balance information for addresses
-                      additionalProperties:
-                        type: object
-                        properties:
-                          spendable:
-                            type: string
-                            description: Spendable balance amount
-                            example: "0"
-                          unspendable:
-                            type: string
-                            description: Unspendable balance amount
-                            example: "0"
-                    platform_coin:
-                      type: string
-                      description: The platform coin ticker
-                      example: "ETH"
-                    token_contract_address:
-                      type: string
-                      description: The smart contract address of the token
-                      example: "0x0d8775f648430679a709e98d2b0cb6250d2887ef"
-                    required_confirmations:
-                      type: integer
-                      description: Number of confirmations required for transactions
-                      example: 3
-                id:
-                  type: integer
-                  description: Identifies a response to allow matching it with a request
-                  example: 0
+                      properties:
+                        balances:
+                          type: object
+                          description: Object containing balance information for addresses
+                          additionalProperties:
+                            type: object
+                            properties:
+                              spendable:
+                                $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                description: Spendable balance amount
+                              unspendable:
+                                $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                description: Unspendable balance amount
+                        platform_coin:
+                          $ref: '../../../components/schemas/Common.yaml#/CoinTicker'
+                          description: The platform coin ticker
+                        token_contract_address:
+                          type: string
+                          pattern: "^0x[a-fA-F0-9]{40}$"
+                          description: The smart contract address of the token
+                          example: "0x0d8775f648430679a709e98d2b0cb6250d2887ef"
+                        required_confirmations:
+                          type: integer
+                          description: Number of confirmations required for transactions
+                          minimum: 1
+                          example: 3
       '400':
         description: Bad request - Various error conditions
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  examples:
-                    - "Platform coin ETH is not activated"
-                    - "Token BAT-ERC20 is already activated"
-                    - "Token BATT-ERC20 config is not found"
-                error_path:
-                  type: string
-                  description: Path where the error occurred
-                error_trace:
-                  type: string
-                  description: Error trace information
-                error_type:
-                  type: string
-                  description: Type of error
-                  enum: 
-                    - "PlatformCoinIsNotActivated"
-                    - "TokenIsAlreadyActivated"
-                    - "TokenConfigIsNotFound"
-                error_data:
-                  type: string
-                  description: Additional error data
-                id:
-                  type: integer
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum: 
+                        - "PlatformCoinIsNotActivated"
+                        - "TokenIsAlreadyActivated"
+                        - "TokenConfigIsNotFound"
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                mmrpc:
-                  type: string
-                  example: "2.0"
-                error:
-                  type: string
-                  description: Error message describing the internal error
-                id:
-                  type: integer 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

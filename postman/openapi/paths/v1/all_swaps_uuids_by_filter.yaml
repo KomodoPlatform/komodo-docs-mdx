@@ -11,13 +11,13 @@
         description: Return only swaps that match the swap.my_coin = request.my_coin condition
         required: false
         schema:
-          type: string
+          $ref: ../../../components/schemas/Common.yaml#/CoinTicker
       - name: other_coin
         in: query
         description: Return only swaps that match the swap.other_coin = request.other_coin condition
         required: false
         schema:
-          type: string
+          $ref: ../../../components/schemas/Common.yaml#/CoinTicker
       - name: from_timestamp
         in: query
         description: Return only swaps that match the swap.started_at >= request.from_timestamp condition (timestamp in seconds)
@@ -34,30 +34,26 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password
-              method:
-                type: string
-                enum: [all_swaps_uuids_by_filter]
-                description: Method name
-              my_coin:
-                type: string
-                description: Return only swaps that match the swap.my_coin = request.my_coin condition
-              other_coin:
-                type: string
-                description: Return only swaps that match the swap.other_coin = request.other_coin condition
-              from_timestamp:
-                type: number
-                description: Return only swaps that match the swap.started_at >= request.from_timestamp condition (timestamp in seconds)
-              to_timestamp:
-                type: number
-                description: Return only swaps that match the swap.started_at < request.to_timestamp condition (timestamp in seconds)
-            required:
-              - userpass
-              - method
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [all_swaps_uuids_by_filter]
+                    description: Method name
+                  my_coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: Return only swaps that match the swap.my_coin = request.my_coin condition
+                  other_coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: Return only swaps that match the swap.other_coin = request.other_coin condition
+                  from_timestamp:
+                    type: number
+                    description: Return only swaps that match the swap.started_at >= request.from_timestamp condition (timestamp in seconds)
+                  to_timestamp:
+                    type: number
+                    description: Return only swaps that match the swap.started_at < request.to_timestamp condition (timestamp in seconds)
     responses:
       '200':
         description: Success
@@ -73,12 +69,13 @@
                       type: array
                       items:
                         type: string
+                        format: uuid
                       description: UUIDs of swaps that match the selected filters
                     my_coin:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: my_coin that was set in request
                     other_coin:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: other_coin that was set in request
                     from_timestamp:
                       type: number
@@ -93,6 +90,14 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Review if all parameter and response details are complete and correct. 

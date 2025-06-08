@@ -10,21 +10,19 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [cancel_all_orders]
-                description: Method name (must be 'cancel_all_orders').
-              cancel_by:
-                description: A standard CancelBy object. Orders matching this filter are cancelled.
-            required:
-              - userpass
-              - method
-              - cancel_by
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [cancel_all_orders]
+                    description: Method name (must be 'cancel_all_orders').
+                  cancel_by:
+                    $ref: ../../components/schemas/Orders.yaml#/CancelBy
+                    description: A standard CancelBy object. Orders matching this filter are cancelled.
+                required:
+                  - cancel_by
     responses:
       '200':
         description: Success
@@ -40,16 +38,26 @@
                       type: array
                       items:
                         type: string
+                        format: uuid
                       description: UUIDs of cancelled orders.
                     currently_matching:
                       type: array
                       items:
                         type: string
+                        format: uuid
                       description: UUIDs of the orders being matched with other orders; not cancelled even if they fit cancel condition.
               required:
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas for CancelBy if/when available in components/schemas 

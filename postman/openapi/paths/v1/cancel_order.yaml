@@ -10,22 +10,20 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [cancel_order]
-                description: Method name (must be 'cancel_order').
-              uuid:
-                type: string
-                description: The uuid of the order the user desires to cancel.
-            required:
-              - userpass
-              - method
-              - uuid
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [cancel_order]
+                    description: Method name (must be 'cancel_order').
+                  uuid:
+                    type: string
+                    format: uuid
+                    description: The uuid of the order the user desires to cancel.
+                required:
+                  - uuid
     responses:
       '200':
         description: Success
@@ -41,6 +39,14 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas if/when available in components/schemas 

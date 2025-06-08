@@ -10,20 +10,15 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - userpass
-            properties:
-              method:
-                type: string
-                enum: ["version"]
-                description: The method name
-                example: "version"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["version"]
+                    description: The method name
+                    example: "version"
     responses:
       '200':
         description: Version retrieved successfully
@@ -36,23 +31,17 @@
                   type: string
                   description: The Komodo DeFi Framework API version
                   example: "2.0.996_mm2_3bb412578_Linux"
+              required:
+                - result
       '400':
         description: Bad request - Invalid parameters
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

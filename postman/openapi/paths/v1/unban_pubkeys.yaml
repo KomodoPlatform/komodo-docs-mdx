@@ -10,34 +10,32 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [unban_pubkeys]
-                description: Method name (must be 'unban_pubkeys').
-              unban_by:
-                type: object
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
                 properties:
-                  type:
+                  method:
                     type: string
-                    description: '"All" to unban all pubkeys, or "Few" to provide a list of pubkeys to unban.'
-                    enum: [All, Few]
-                  data:
-                    type: array
-                    items:
-                      type: string
-                    description: 'A list of pubkeys to unban. Only required when type is "Few".'
+                    enum: [unban_pubkeys]
+                    description: Method name (must be 'unban_pubkeys').
+                  unban_by:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: '"All" to unban all pubkeys, or "Few" to provide a list of pubkeys to unban.'
+                        enum: [All, Few]
+                      data:
+                        type: array
+                        items:
+                          type: string
+                          pattern: "^[0-9a-fA-F]{66}$"
+                        description: 'A list of pubkeys to unban. Only required when type is "Few".'
+                    required:
+                      - type
+                    description: Unban criteria.
                 required:
-                  - type
-                description: Unban criteria.
-            required:
-              - userpass
-              - method
-              - unban_by
+                  - unban_by
     responses:
       '200':
         description: Success
@@ -56,8 +54,11 @@
                         properties:
                           type:
                             type: string
+                            enum: ["Manual", "FailedSwap"]
                           reason:
                             type: string
+                        required:
+                          - type
                       description: List of pubkeys which remain banned, with reason and type.
                     unbanned:
                       type: object
@@ -66,18 +67,34 @@
                         properties:
                           type:
                             type: string
+                            enum: ["Manual", "FailedSwap"]
                           reason:
                             type: string
+                        required:
+                          - type
                       description: List of pubkeys which were unbanned, with reason and type.
                     were_not_banned:
                       type: array
                       items:
                         type: string
+                        pattern: "^[0-9a-fA-F]{66}$"
                       description: List of pubkeys which were not banned but requested to be unbanned.
+                  required:
+                    - still_banned
+                    - unbanned
+                    - were_not_banned
               required:
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas if/when available in components/schemas 

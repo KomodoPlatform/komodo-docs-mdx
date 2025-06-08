@@ -10,22 +10,20 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [order_status]
-                description: Method name (must be 'order_status').
-              uuid:
-                type: string
-                description: UUID of order to display.
-            required:
-              - userpass
-              - method
-              - uuid
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [order_status]
+                    description: Method name (must be 'order_status').
+                  uuid:
+                    type: string
+                    format: uuid
+                    description: UUID of order to display.
+                required:
+                  - uuid
     responses:
       '200':
         description: Success
@@ -39,16 +37,16 @@
                   properties:
                     type:
                       type: string
+                      enum: ["Maker", "Taker"]
                       description: Type of the order (Maker or Taker).
                     order:
-                      # TODO: Use $ref to OrderStatusData schema if/when available in components/schemas
-                      type: object
+                      $ref: ../../components/schemas/Orders.yaml#/OrderStatusData
                       description: Order status data object.
                     base_orderbook_ticker:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: The orderbook ticker for base coin.
                     rel_orderbook_ticker:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: The orderbook ticker for rel coin.
                   required:
                     - type
@@ -57,5 +55,13 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
-        description: Internal server error 
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

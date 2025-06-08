@@ -10,26 +10,23 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [convert_utxo_address]
-                description: Method name (must be 'convert_utxo_address').
-              address:
-                type: string
-                description: Input UTXO address.
-              to_coin:
-                type: string
-                description: Input address to convert from.
-            required:
-              - userpass
-              - method
-              - address
-              - to_coin
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [convert_utxo_address]
+                    description: Method name (must be 'convert_utxo_address').
+                  address:
+                    type: string
+                    description: Input UTXO address.
+                  to_coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: Input address to convert from.
+                required:
+                  - address
+                  - to_coin
     responses:
       '200':
         description: Success
@@ -45,6 +42,14 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas if/when available in components/schemas 

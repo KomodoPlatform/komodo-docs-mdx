@@ -11,85 +11,87 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - coin
-              - userpass
-            properties:
-              coin:
-                type: string
-                description: The name of the coin the user desires to enable
-                example: "ETH"
-              urls:
-                type: array
-                description: Required for ETH/ERC20 and other gas model chains. URLs of RPC nodes to which the user desires to connect
-                items:
-                  type: string
-                  format: uri
-                example: ["http://eth1.cipig.net:18555", "http://eth2.cipig.net:18555"]
-              swap_contract_address:
-                type: string
-                description: Required for QRC20 only. Address of etomic swap smart contract
-                example: "0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80"
-              fallback_swap_contract:
-                type: string
-                description: Required for QRC20 only. Address of backup etomic swap smart contract
-                example: "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
-              gas_station_decimals:
-                type: integer
-                description: |
-                  Optional for ETH/ERC20 and other gas model chains. Defines the decimals used to denominate the gas station response to gwei units. 
-                  For example, the ETH gas station uses 8 decimals, which means that "average": 860 is equal to 86 gwei. 
-                  While the Matic gas station uses 9 decimals, so 860 would mean 860 gwei exactly. Defaults to 8
-                default: 8
-                example: 8
-              gas_station_policy:
-                type: object
-                description: Optional for ETH/ERC20 and other gas model chains. Defines the method of gas price calculation from the station response
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
                 properties:
-                  policy:
+                  method:
                     type: string
+                    enum: [enable]
+                    description: Method name
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The name of the coin the user desires to enable
+                  urls:
+                    type: array
+                    description: Required for ETH/ERC20 and other gas model chains. URLs of RPC nodes to which the user desires to connect
+                    items:
+                      $ref: ../../../components/schemas/Common.yaml#/UrlString
+                    example: ["http://eth1.cipig.net:18555", "http://eth2.cipig.net:18555"]
+                  swap_contract_address:
+                    type: string
+                    pattern: "^0x[a-fA-F0-9]{40}$"
+                    description: Required for QRC20 only. Address of etomic swap smart contract
+                    example: "0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80"
+                  fallback_swap_contract:
+                    type: string
+                    pattern: "^0x[a-fA-F0-9]{40}$"
+                    description: Required for QRC20 only. Address of backup etomic swap smart contract
+                    example: "0x8500AFc0bc5214728082163326C2FF0C73f4a871"
+                  gas_station_decimals:
+                    type: integer
                     description: |
-                      Defines the method of gas price calculation from the station response. 
-                      "MeanAverageFast" will use the mean between average and fast fields. 
-                      "Average" will return a simple average value. Defaults to "MeanAverageFast"
-                    enum: ["MeanAverageFast", "Average"]
-                    default: "MeanAverageFast"
-                    example: "MeanAverageFast"
-              gas_station_url:
-                type: string
-                description: Optional for ETH/ERC20 and other gas model chains. URL of the gas station API
-                format: uri
-                example: "https://ethgasstation.info/json/ethgasAPI.json"
-              mm2:
-                type: integer
-                description: |
-                  Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. 
-                  Accepted values are 0 or 1
-                enum: [0, 1]
-                example: 1
-              tx_history:
-                type: boolean
-                description: |
-                  If true the Komodo DeFi Framework API will preload transaction history as a background process. 
-                  Must be set to true to use the my_tx_history method
-                example: false
-              required_confirmations:
-                type: integer
-                description: |
-                  Optional, defaults to 3. Number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap
-                default: 3
-                example: 3
-              requires_notarization:
-                type: boolean
-                description: |
-                  Optional, defaults to false. If true, coins protected by Komodo Platform's dPoW security will wait for a notarization before progressing to the next atomic swap transactions step
-                default: false
-                example: false
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
+                      Optional for ETH/ERC20 and other gas model chains. Defines the decimals used to denominate the gas station response to gwei units. 
+                      For example, the ETH gas station uses 8 decimals, which means that "average": 860 is equal to 86 gwei. 
+                      While the Matic gas station uses 9 decimals, so 860 would mean 860 gwei exactly. Defaults to 8
+                    default: 8
+                    minimum: 0
+                    maximum: 18
+                    example: 8
+                  gas_station_policy:
+                    type: object
+                    description: Optional for ETH/ERC20 and other gas model chains. Defines the method of gas price calculation from the station response
+                    properties:
+                      policy:
+                        type: string
+                        description: |
+                          Defines the method of gas price calculation from the station response. 
+                          "MeanAverageFast" will use the mean between average and fast fields. 
+                          "Average" will return a simple average value. Defaults to "MeanAverageFast"
+                        enum: ["MeanAverageFast", "Average"]
+                        default: "MeanAverageFast"
+                        example: "MeanAverageFast"
+                  gas_station_url:
+                    $ref: ../../../components/schemas/Common.yaml#/UrlString
+                    description: Optional for ETH/ERC20 and other gas model chains. URL of the gas station API
+                  mm2:
+                    type: integer
+                    description: |
+                      Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. 
+                      Accepted values are 0 or 1
+                    enum: [0, 1]
+                    example: 1
+                  tx_history:
+                    type: boolean
+                    description: |
+                      If true the Komodo DeFi Framework API will preload transaction history as a background process. 
+                      Must be set to true to use the my_tx_history method
+                    example: false
+                  required_confirmations:
+                    type: integer
+                    description: |
+                      Optional, defaults to 3. Number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap
+                    default: 3
+                    minimum: 1
+                    example: 3
+                  requires_notarization:
+                    type: boolean
+                    description: |
+                      Optional, defaults to false. If true, coins protected by Komodo Platform's dPoW security will wait for a notarization before progressing to the next atomic swap transactions step
+                    default: false
+                    example: false
+                required:
+                  - coin
     responses:
       '200':
         description: Coin activation successful
@@ -103,20 +105,18 @@
                   description: The address of the user's coin wallet, based on the user's passphrase
                   example: "0x3c7aad7b693e94f13b61d4be4abaeaf802b2e3b5"
                 balance:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The amount of coin the user holds in their wallet; does not include unspendable_balance
-                  example: "50"
                 unspendable_balance:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The coin balance that is unspendable at the moment (e.g. if the address has immature UTXOs)
-                  example: "0"
                 coin:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                   description: The ticker of enabled coin
-                  example: "ETH"
                 required_confirmations:
                   type: integer
                   description: Komodo DeFi Framework API will wait for the this number of coin's transaction confirmations during the swap
+                  minimum: 1
                   example: 1
                 requires_notarization:
                   type: boolean
@@ -125,6 +125,7 @@
                 mature_confirmations:
                   type: integer
                   description: The number of coinbase transaction confirmations required to become mature; UTXO coins only
+                  minimum: 1
                   example: 100
                 result:
                   type: string
@@ -135,19 +136,10 @@
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  example: "lp_coins:943] lp_coins:693] mm2 param is not set neither in coins config nor enable request, assuming that coin is not supported"
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

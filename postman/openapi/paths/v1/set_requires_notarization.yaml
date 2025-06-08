@@ -11,30 +11,25 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - coin
-              - requires_notarization
-              - userpass
-            properties:
-              method:
-                type: string
-                enum: ["set_requires_notarization"]
-                description: The method name
-                example: "set_requires_notarization"
-              coin:
-                type: string
-                description: The ticker of the selected coin
-                example: "DOC"
-              requires_notarization:
-                type: boolean
-                description: Whether the node should wait for dPoW notarization of atomic swap transactions
-                example: true
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["set_requires_notarization"]
+                    description: The method name
+                    example: "set_requires_notarization"
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The ticker of the selected coin
+                  requires_notarization:
+                    type: boolean
+                    description: Whether the node should wait for dPoW notarization of atomic swap transactions
+                    example: true
+                required:
+                  - coin
+                  - requires_notarization
     responses:
       '200':
         description: Notarization setting updated successfully
@@ -47,30 +42,26 @@
                   type: object
                   properties:
                     coin:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: The coin selected in the request
-                      example: "ETOMIC"
                     requires_notarization:
                       type: boolean
                       description: Whether the node must wait for a dPoW notarization of the atomic swap transactions
                       example: true
+                  required:
+                    - coin
+                    - requires_notarization
+              required:
+                - result
       '400':
         description: Bad request - Invalid parameters
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

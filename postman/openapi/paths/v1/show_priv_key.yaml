@@ -11,25 +11,20 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - coin
-              - userpass
-            properties:
-              method:
-                type: string
-                enum: ["show_priv_key"]
-                description: The method name
-                example: "show_priv_key"
-              coin:
-                type: string
-                description: The name of the coin of the private key to show
-                example: "HELLOWORLD"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["show_priv_key"]
+                    description: The method name
+                    example: "show_priv_key"
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The name of the coin of the private key to show
+                required:
+                  - coin
     responses:
       '200':
         description: Private key retrieved successfully
@@ -39,30 +34,24 @@
               type: object
               properties:
                 coin:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                   description: The name of the coin
-                  example: "HELLOWORLD"
                 priv_key:
                   type: string
                   description: The private key of the coin
                   example: "UvCjJf4dKSs2vFGVtCnUTAhR5FTZGdg43DDRa9s7s5DV1sSDX14g"
+              required:
+                - coin
+                - priv_key
       '400':
         description: Bad request - Invalid parameters
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

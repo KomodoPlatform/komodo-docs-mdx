@@ -10,18 +10,14 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [coins_needed_for_kick_start]
-                description: Method name (must be 'coins_needed_for_kick_start').
-            required:
-              - userpass
-              - method
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [coins_needed_for_kick_start]
+                    description: Method name (must be 'coins_needed_for_kick_start').
     responses:
       '200':
         description: Success
@@ -33,12 +29,20 @@
                 result:
                   type: array
                   items:
-                    type: string
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                   description: Tickers of coins that should be activated to kick-start swaps and orders.
               required:
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas if/when available in components/schemas 

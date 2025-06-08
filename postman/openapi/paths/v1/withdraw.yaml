@@ -11,94 +11,36 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - coin
-              - to
-              - userpass
-            properties:
-              method:
-                type: string
-                enum: ["withdraw"]
-                description: The method name
-                example: "withdraw"
-              coin:
-                type: string
-                description: The name of the coin the user desires to withdraw
-                example: "KMD"
-              to:
-                type: string
-                description: Coins are withdrawn to this address
-                example: "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh"
-              amount:
-                type: string
-                description: The amount the user desires to withdraw, ignored when max=true
-                example: "10"
-              max:
-                type: boolean
-                description: Withdraw the maximum available amount
-                example: false
-              fee:
-                type: object
-                description: Optional. A standard FeeInfo object for specifying transaction fees
-                oneOf:
-                  - type: object
-                    description: UTXO Fixed Fee
-                    properties:
-                      type:
-                        type: string
-                        enum: ["UtxoFixed"]
-                        example: "UtxoFixed"
-                      amount:
-                        type: string
-                        description: Fixed fee amount
-                        example: "0.1"
-                  - type: object
-                    description: UTXO Per Kbyte Fee
-                    properties:
-                      type:
-                        type: string
-                        enum: ["UtxoPerKbyte"]
-                        example: "UtxoPerKbyte"
-                      amount:
-                        type: string
-                        description: Fee per kilobyte
-                        example: "1"
-                  - type: object
-                    description: Ethereum Gas Fee
-                    properties:
-                      type:
-                        type: string
-                        enum: ["EthGas"]
-                        example: "EthGas"
-                      gas_price:
-                        type: string
-                        description: Gas price in gwei
-                        example: "3.5"
-                      gas:
-                        type: integer
-                        description: Gas limit
-                        example: 55000
-                  - type: object
-                    description: QRC20 Gas Fee
-                    properties:
-                      type:
-                        type: string
-                        enum: ["Qrc20Gas"]
-                        example: "Qrc20Gas"
-                      gas_limit:
-                        type: integer
-                        description: Gas limit for QRC20 transaction
-                        example: 250000
-                      gas_price:
-                        type: integer
-                        description: Gas price for QRC20 transaction
-                        example: 40
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["withdraw"]
+                    description: The method name
+                    example: "withdraw"
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The name of the coin the user desires to withdraw
+                  to:
+                    type: string
+                    description: Coins are withdrawn to this address
+                    example: "RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh"
+                  amount:
+                    $ref: ../../../components/schemas/Common.yaml#/AmountString
+                    description: The amount the user desires to withdraw, ignored when max=true
+                    example: "10"
+                  max:
+                    type: boolean
+                    description: Withdraw the maximum available amount
+                    example: false
+                  fee:
+                    $ref: ../../components/schemas/Fees.yaml#/FeeInfo
+                    description: Optional. A standard FeeInfo object for specifying transaction fees
+                required:
+                  - coin
+                  - to
     responses:
       '200':
         description: Withdrawal transaction generated successfully
@@ -120,104 +62,45 @@
                   description: Coins are withdrawn to this address; this may contain the my_address address, where change from UTXO coins is sent
                   example: ["RJTYiYeJ8eVvJ53n2YbrVmxWNNMVZjDGLh"]
                 my_balance_change:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The expected balance of change in my_address after the transaction broadcasts
                   example: "-10.00001"
                 received_by_me:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The amount of coins received by my_address after the transaction broadcasts
                   example: "0.34417325"
                 spent_by_me:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The amount of coins spent by my_address; this value differ from the request amount, as the transaction fee is added here
                   example: "10.34418325"
                 total_amount:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The total amount of coins transferred
                   example: "10.34418325"
                 fee_details:
-                  type: object
+                  $ref: ../../components/schemas/Fees.yaml#/FeeDetails
                   description: The fee details of the generated transaction; this value differs for utxo and ETH/ERC20 coins
-                  oneOf:
-                    - type: object
-                      description: UTXO fee details
-                      properties:
-                        type:
-                          type: string
-                          enum: ["Utxo"]
-                          example: "Utxo"
-                        amount:
-                          type: string
-                          description: Fee amount
-                          example: "0.00001"
-                    - type: object
-                      description: Ethereum fee details
-                      properties:
-                        type:
-                          type: string
-                          enum: ["Eth"]
-                          example: "Eth"
-                        coin:
-                          type: string
-                          description: Fee coin (usually ETH)
-                          example: "ETH"
-                        gas:
-                          type: integer
-                          description: Gas used
-                          example: 21000
-                        gas_price:
-                          type: string
-                          description: Gas price
-                          example: "0.000000001"
-                        total_fee:
-                          type: string
-                          description: Total fee amount
-                          example: "0.000021"
-                    - type: object
-                      description: QRC20 fee details
-                      properties:
-                        type:
-                          type: string
-                          enum: ["Qrc20"]
-                          example: "Qrc20"
-                        coin:
-                          type: string
-                          description: Platform coin (usually QTUM)
-                          example: "tQTUM"
-                        miner_fee:
-                          type: string
-                          description: Miner fee
-                          example: "0.00000447"
-                        gas_limit:
-                          type: integer
-                          description: Gas limit
-                          example: 100000
-                        gas_price:
-                          type: integer
-                          description: Gas price
-                          example: 40
-                        total_gas_fee:
-                          type: string
-                          description: Total gas fee
-                          example: "0.04"
                 tx_hash:
                   type: string
+                  pattern: "^[a-fA-F0-9]{64}$"
                   description: The hash of the generated transaction
                   example: "3a1c382c50a7d12e4675d12ed7e723ce9f0167693dd75fd772bae8524810e605"
                 tx_hex:
                   type: string
+                  pattern: "^[0-9a-fA-F]+$"
                   description: Transaction bytes in hexadecimal format; use this value as input for the send_raw_transaction method
                   example: "0400008085202f890207a8e96978acfb8f0d002c3e4390142810dc6568b48f8cd6d8c71866ad8743c5010000006a47304402201960a7089f2d93480fff68ce0b7ca7bb7a32a52915753ac7ae780abd6162cb1d02202c9b11d442e5f72a532f44ceb10122898d486b1474a10eb981c60c5538b9c82d012102031d4256c4bc9f99ac88bf3dba21773132281f65f9bf23a59928bce08961e2f3ffffffff97f56bf3b0f815bb737b7867e71ddb8198bba3574bb75737ba9c389a4d08edc6000000006a473044022055199d80bd7e2d1b932e54f097c6a15fc4b148d21299dc50067c1da18045f0ed02201d26d85333df65e6daab40a07a0e8a671af9d9b9d92fdf7d7ef97bd868ca545a012102031d4256c4bc9f99ac88bf3dba21773132281f65f9bf23a59928bce08961e2f3ffffffff0200ca9a3b000000001976a91464ae8510aac9546d5e7704e31ce177451386455588acad2a0d02000000001976a91405aab5342166f8594baf17a7d9bef5d56744332788ac00000000000000000000000000000000000000"
                 coin:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                   description: The name of the coin the user wants to withdraw
-                  example: "KMD"
                 block_height:
                   type: integer
+                  minimum: 0
                   description: Block height when transaction was created
                   example: 0
                 timestamp:
                   type: integer
+                  minimum: 0
                   description: Unix timestamp when transaction was created
                   example: 1566472936
                 kmd_rewards:
@@ -225,31 +108,38 @@
                   description: Optional. An object containing information about accrued rewards; always exists if the coin is KMD
                   properties:
                     amount:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: The amount of accrued rewards
                       example: "0.0791809"
                     claimed_by_me:
                       type: boolean
                       description: Whether the rewards been claimed by me
                       example: true
+                  required:
+                    - amount
+                    - claimed_by_me
+              required:
+                - from
+                - to
+                - my_balance_change
+                - received_by_me
+                - spent_by_me
+                - total_amount
+                - fee_details
+                - tx_hash
+                - tx_hex
+                - coin
+                - block_height
+                - timestamp
       '400':
         description: Bad request - Invalid parameters
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  example: "utxo:1295] Unsupported input fee type"
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

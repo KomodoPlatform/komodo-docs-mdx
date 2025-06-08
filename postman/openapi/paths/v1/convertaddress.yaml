@@ -10,29 +10,27 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [convertaddress]
-                description: Method name (must be 'convertaddress').
-              coin:
-                type: string
-                description: The name of the coin address context.
-              from:
-                type: string
-                description: Input address.
-              to_address_format:
-                description: A standard AddressFormat object specifying the target address format.
-            required:
-              - userpass
-              - method
-              - coin
-              - from
-              - to_address_format
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [convertaddress]
+                    description: Method name (must be 'convertaddress').
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The name of the coin address context.
+                  from:
+                    type: string
+                    description: Input address.
+                  to_address_format:
+                    $ref: ../../components/schemas/Wallet.yaml#/AddressFormat
+                    description: A standard AddressFormat object specifying the target address format.
+                required:
+                  - coin
+                  - from
+                  - to_address_format
     responses:
       '200':
         description: Success
@@ -53,6 +51,14 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas for AddressFormat if/when available in components/schemas 

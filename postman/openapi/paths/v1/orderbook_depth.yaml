@@ -10,26 +10,25 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [orderbook_depth]
-                description: Method name (must be 'orderbook_depth').
-              pairs:
-                type: array
-                items:
-                  type: array
-                  items:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
                     type: string
-                description: An array of trading pairs.
-            required:
-              - userpass
-              - method
-              - pairs
+                    enum: [orderbook_depth]
+                    description: Method name (must be 'orderbook_depth').
+                  pairs:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                      minItems: 2
+                      maxItems: 2
+                    description: An array of trading pairs (each pair is an array of 2 coin tickers).
+                required:
+                  - pairs
     responses:
       '200':
         description: Success
@@ -41,12 +40,19 @@
                 result:
                   type: array
                   items:
-                    # TODO: Use $ref to PairDepth schema if/when available in components/schemas
-                    type: object
+                    $ref: ../../components/schemas/Orders.yaml#/PairDepth
                   description: An array of pair depth objects.
               required:
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
-        description: Internal server error 
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

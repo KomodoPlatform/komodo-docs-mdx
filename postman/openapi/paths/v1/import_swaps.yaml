@@ -10,25 +10,21 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [import_swaps]
-                description: Method name (must be 'import_swaps').
-              swaps:
-                type: array
-                items:
-                  # TODO: Use $ref to SwapStatus schema if available
-                  type: object
-                description: A map of standard SwapStatus objects.
-            required:
-              - userpass
-              - method
-              - swaps
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [import_swaps]
+                    description: Method name (must be 'import_swaps').
+                  swaps:
+                    type: array
+                    items:
+                      $ref: ../../components/schemas/Swaps.yaml#/SwapStatus
+                    description: A map of standard SwapStatus objects.
+                required:
+                  - swaps
     responses:
       '200':
         description: Success
@@ -44,16 +40,28 @@
                       type: array
                       items:
                         type: string
+                        format: uuid
                       description: UUIDs of swaps that were successfully imported.
                     skipped:
                       type: object
                       additionalProperties:
                         type: string
                       description: UUIDs of swaps that failed to import; includes error message.
+                  required:
+                    - imported
+                    - skipped
               required:
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas if/when available in components/schemas 

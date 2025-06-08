@@ -10,22 +10,19 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [get_trade_fee]
-                description: Method name (must be 'get_trade_fee').
-              coin:
-                type: string
-                description: The name of the coin for the requested trade fee.
-            required:
-              - userpass
-              - method
-              - coin
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [get_trade_fee]
+                    description: Method name (must be 'get_trade_fee').
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The name of the coin for the requested trade fee.
+                required:
+                  - coin
     responses:
       '200':
         description: Success
@@ -38,16 +35,15 @@
                   type: object
                   properties:
                     coin:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: The fee is paid from the user's balance of this coin. This coin name may differ from the requested coin.
                     amount:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: The approximate fee amount to be paid per swap transaction in decimal representation.
                     amount_rat:
                       $ref: ../../components/schemas/Orders.yaml#/RationalValue
                       description: The approximate fee amount to be paid per swap transaction, represented as a standard RationalValue object.
                     amount_fraction:
-                      # TODO: Use $ref to FractionalValue schema if/when available in components/schemas
                       type: object
                       properties:
                         denom:
@@ -56,6 +52,9 @@
                         numer:
                           type: string
                           description: Numerator of the amount (FractionalValue).
+                      required:
+                        - denom
+                        - numer
                       description: The approximate fee amount to be paid per swap transaction, represented as a standard FractionalValue object.
                   required:
                     - coin
@@ -66,5 +65,13 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
-        description: Internal server error 
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

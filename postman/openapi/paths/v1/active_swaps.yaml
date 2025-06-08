@@ -16,21 +16,17 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password
-              method:
-                type: string
-                enum: [active_swaps]
-                description: Method name
-              include_status:
-                type: boolean
-                description: Optional, defaults to false. Whether to include swap statuses in response.
-            required:
-              - userpass
-              - method
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [active_swaps]
+                    description: Method name
+                  include_status:
+                    type: boolean
+                    description: Optional, defaults to false. Whether to include swap statuses in response.
     responses:
       '200':
         description: Success
@@ -46,17 +42,26 @@
                       type: array
                       items:
                         type: string
+                        format: uuid
                       description: A list of currently active swap UUIDs.
                     statuses:
                       type: object
                       additionalProperties:
-                        $ref: ../../components/schemas/SwapStatus.yaml
+                        $ref: ../../components/schemas/Swaps.yaml#/SwapStatus
                       description: Only visible if include_status request parameter is true. A map of standard SwapStatus objects, delineated by the related UUID.
               required:
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas if/when available in components/schemas 
     # TODO: Review if all parameter and response details are complete and correct. 

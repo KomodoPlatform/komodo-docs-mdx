@@ -10,39 +10,40 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [my_recent_swaps]
-                description: Method name (must be 'my_recent_swaps').
-              limit:
-                type: number
-                description: Limits the number of returned swaps. The default is 10.
-              from_uuid:
-                type: string
-                description: Komodo DeFi Framework API will skip records until this uuid, skipping the from_uuid as well.
-              page_number:
-                type: number
-                description: Komodo DeFi Framework API will return limit swaps from the selected page. Ignored if from_uuid is set.
-              my_coin:
-                type: string
-                description: Return only swaps that match the swap.my_coin = request.my_coin condition.
-              other_coin:
-                type: string
-                description: Return only swaps that match the swap.other_coin = request.other_coin condition.
-              from_timestamp:
-                type: number
-                description: Return only swaps that match the swap.started_at >= request.from_timestamp condition.
-              to_timestamp:
-                type: number
-                description: Return only swaps that match the swap.started_at < request.to_timestamp condition.
-            required:
-              - userpass
-              - method
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [my_recent_swaps]
+                    description: Method name (must be 'my_recent_swaps').
+                  limit:
+                    type: number
+                    minimum: 1
+                    description: Limits the number of returned swaps. The default is 10.
+                  from_uuid:
+                    type: string
+                    format: uuid
+                    description: Komodo DeFi Framework API will skip records until this uuid, skipping the from_uuid as well.
+                  page_number:
+                    type: number
+                    minimum: 1
+                    description: Komodo DeFi Framework API will return limit swaps from the selected page. Ignored if from_uuid is set.
+                  my_coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: Return only swaps that match the swap.my_coin = request.my_coin condition.
+                  other_coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: Return only swaps that match the swap.other_coin = request.other_coin condition.
+                  from_timestamp:
+                    type: number
+                    minimum: 0
+                    description: Return only swaps that match the swap.started_at >= request.from_timestamp condition.
+                  to_timestamp:
+                    type: number
+                    minimum: 0
+                    description: Return only swaps that match the swap.started_at < request.to_timestamp condition.
     responses:
       '200':
         description: Success
@@ -57,11 +58,12 @@
                     swaps:
                       type: array
                       items:
-                        # TODO: Use $ref to SwapStatus schema if/when available in components/schemas
-                        type: object
+                        $ref: ../../components/schemas/Swaps.yaml#/SwapStatus
                       description: A list of standard SwapStatus objects.
                     from_uuid:
                       type: string
+                      format: uuid
+                      nullable: true
                       description: The from_uuid that was set in the request; this value is null if nothing was set.
                     skipped:
                       type: number
@@ -94,5 +96,13 @@
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
-        description: Internal server error 
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

@@ -10,100 +10,94 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - userpass
-              - method
-              - uuid
-            properties:
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
-              method:
-                type: string
-                enum: ["update_maker_order"]
-                description: The method name
-                example: "update_maker_order"
-              uuid:
-                type: string
-                description: The UUID of the order the user desires to update
-                example: "6a242691-6c05-474a-85c1-5b3f42278f41"
-              new_price:
-                oneOf:
-                  - type: string
-                    description: New price as decimal string
-                    example: "0.9"
-                  - type: number
-                    description: New price as number
-                    example: 0.9
-                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                  - type: object
-                    description: New price as fractional value
-                    properties:
-                      numer:
-                        type: string
-                        example: "2"
-                      denom:
-                        type: string
-                        example: "1"
-                description: The price in rel the user is willing to receive per one unit of the base coin
-              volume_delta:
-                oneOf:
-                  - type: string
-                    description: Volume delta as decimal string
-                    example: "1"
-                  - type: number
-                    description: Volume delta as number
-                    example: 1
-                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                  - type: object
-                    description: Volume delta as fractional value
-                    properties:
-                      numer:
-                        type: string
-                        example: "3"
-                      denom:
-                        type: string
-                        example: "2"
-                description: Volume added to or subtracted from the max_base_vol of the order to be updated, resulting in the new volume
-              min_volume:
-                oneOf:
-                  - type: string
-                    description: Min volume as decimal string
-                  - type: number
-                    description: Min volume as number
-                  - $ref: ../../components/schemas/Orders.yaml#/RationalValue
-                  - type: object
-                    description: Min volume as fractional value
-                    properties:
-                      numer:
-                        type: string
-                        example: "1"
-                      denom:
-                        type: string
-                        example: "1"
-                description: The minimum amount of base coin available for the order; it must be less or equal than the new volume
-              max:
-                type: boolean
-                description: Komodo DeFi Framework API will use the entire coin balance for the order, taking 0.001 coins into reserve to account for fees
-                example: true
-              base_confs:
-                type: integer
-                description: Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set
-                example: 2
-              base_nota:
-                type: boolean
-                description: Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set
-                example: true
-              rel_confs:
-                type: integer
-                description: Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set
-                example: 5
-              rel_nota:
-                type: boolean
-                description: Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set
-                example: false
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["update_maker_order"]
+                    description: The method name
+                    example: "update_maker_order"
+                  uuid:
+                    type: string
+                    format: uuid
+                    description: The UUID of the order the user desires to update
+                    example: "6a242691-6c05-474a-85c1-5b3f42278f41"
+                  new_price:
+                    oneOf:
+                      - $ref: ../../../components/schemas/Common.yaml#/AmountString
+                      - type: number
+                        description: New price as number
+                        example: 0.9
+                      - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      - type: object
+                        description: New price as fractional value
+                        properties:
+                          numer:
+                            type: string
+                            example: "2"
+                          denom:
+                            type: string
+                            example: "1"
+                    description: The price in rel the user is willing to receive per one unit of the base coin
+                  volume_delta:
+                    oneOf:
+                      - $ref: ../../../components/schemas/Common.yaml#/AmountString
+                      - type: number
+                        description: Volume delta as number
+                        example: 1
+                      - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      - type: object
+                        description: Volume delta as fractional value
+                        properties:
+                          numer:
+                            type: string
+                            example: "3"
+                          denom:
+                            type: string
+                            example: "2"
+                    description: Volume added to or subtracted from the max_base_vol of the order to be updated, resulting in the new volume
+                  min_volume:
+                    oneOf:
+                      - $ref: ../../../components/schemas/Common.yaml#/AmountString
+                      - type: number
+                        description: Min volume as number
+                      - $ref: ../../components/schemas/Orders.yaml#/RationalValue
+                      - type: object
+                        description: Min volume as fractional value
+                        properties:
+                          numer:
+                            type: string
+                            example: "1"
+                          denom:
+                            type: string
+                            example: "1"
+                    description: The minimum amount of base coin available for the order; it must be less or equal than the new volume
+                  max:
+                    type: boolean
+                    description: Komodo DeFi Framework API will use the entire coin balance for the order, taking 0.001 coins into reserve to account for fees
+                    example: true
+                  base_confs:
+                    type: integer
+                    minimum: 0
+                    description: Number of required blockchain confirmations for base coin atomic swap transaction; default to base coin configuration if not set
+                    example: 2
+                  base_nota:
+                    type: boolean
+                    description: Whether dPoW notarization is required for base coin atomic swap transaction; default to base coin configuration if not set
+                    example: true
+                  rel_confs:
+                    type: integer
+                    minimum: 0
+                    description: Number of required blockchain confirmations for rel coin atomic swap transaction; default to rel coin configuration if not set
+                    example: 5
+                  rel_nota:
+                    type: boolean
+                    description: Whether dPoW notarization is required for rel coin atomic swap transaction; default to rel coin configuration if not set
+                    example: false
+                required:
+                  - uuid
     responses:
       '200':
         description: Maker order updated successfully
@@ -116,40 +110,37 @@
                   type: object
                   properties:
                     base:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: The base coin of the order
-                      example: "BASE"
                     rel:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                       description: The rel coin of the order
-                      example: "REL"
                     price:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: The expected amount of rel coin to be received per 1 unit of base coin; decimal representation
-                      example: "1"
                     price_rat:
                       $ref: ../../components/schemas/Orders.yaml#/RationalValue
                       description: The expected amount of rel coin to be received per 1 unit of base coin; rational representation
                     max_base_vol:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: The maximum volume of base coin available to trade; decimal representation
-                      example: "1"
                     max_base_vol_rat:
                       $ref: ../../components/schemas/Orders.yaml#/RationalValue
                       description: The maximum volume of base coin available to trade; rational representation
                     min_base_vol:
-                      type: string
+                      $ref: ../../../components/schemas/Common.yaml#/AmountString
                       description: Komodo DeFi Framework API won't match with other orders that attempt to trade less than min_base_vol; decimal representation
-                      example: "0"
                     min_base_vol_rat:
                       $ref: ../../components/schemas/Orders.yaml#/RationalValue
                       description: Komodo DeFi Framework API won't match with other orders that attempt to trade less than min_base_vol; rational representation
                     created_at:
                       type: integer
+                      minimum: 0
                       description: Unix timestamp in milliseconds, indicating the order creation time
                       example: 1559052299258
                     updated_at:
                       type: integer
+                      minimum: 0
                       description: Unix timestamp in milliseconds, indicating the order update time
                       example: 1619736650000
                     matches:
@@ -160,33 +151,42 @@
                       type: array
                       items:
                         type: string
+                        format: uuid
                       description: UUIDs of swaps that were initiated by the order
                       example: []
                     uuid:
                       type: string
+                      format: uuid
                       description: UUID of the updated order
                       example: "6a242691-6c05-474a-85c1-5b3f42278f41"
                     conf_settings:
                       $ref: ../../components/schemas/Orders.yaml#/ConfSettings
                       description: A standard ConfSettings object
+                  required:
+                    - base
+                    - rel
+                    - price
+                    - price_rat
+                    - max_base_vol
+                    - max_base_vol_rat
+                    - min_base_vol
+                    - min_base_vol_rat
+                    - created_at
+                    - updated_at
+                    - matches
+                    - started_swaps
+                    - uuid
+              required:
+                - result
       '400':
         description: Bad request - Invalid parameters or order not found
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
-                  example: "There is no order with UUID 6a242691-6c05-474a-85c1-5b3f42278f41"
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

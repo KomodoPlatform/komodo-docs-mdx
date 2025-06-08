@@ -10,18 +10,14 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [list_banned_pubkeys]
-                description: Method name (must be 'list_banned_pubkeys').
-            required:
-              - userpass
-              - method
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [list_banned_pubkeys]
+                    description: Method name (must be 'list_banned_pubkeys').
     responses:
       '200':
         description: Success
@@ -37,9 +33,11 @@
                     properties:
                       type:
                         type: string
+                        enum: ["Manual", "FailedSwap"]
                         description: The type of the ban; possible values: Manual or FailedSwap.
                       caused_by_swap:
                         type: string
+                        format: uuid
                         description: The uuid of the swap that triggered the ban; present only for the FailedSwap type.
                       caused_by_event:
                         type: object
@@ -47,11 +45,21 @@
                       reason:
                         type: string
                         description: The reason for the Manual ban.
+                    required:
+                      - type
                   description: The list of pubkeys banned by current node.
               required:
                 - result
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
     # TODO: Use $ref to schemas if/when available in components/schemas 

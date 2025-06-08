@@ -10,22 +10,19 @@
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              userpass:
-                type: string
-                description: RPC authentication password.
-              method:
-                type: string
-                enum: [my_balance]
-                description: Method name (must be 'my_balance').
-              coin:
-                type: string
-                description: The name of the coin to retrieve the balance.
-            required:
-              - userpass
-              - method
-              - coin
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: [my_balance]
+                    description: Method name (must be 'my_balance').
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The name of the coin to retrieve the balance.
+                required:
+                  - coin
     responses:
       '200':
         description: Success
@@ -38,13 +35,13 @@
                   type: string
                   description: The address that holds the coins.
                 balance:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The number of coins in the address; does not include unspendable_balance.
                 unspendable_balance:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/AmountString
                   description: The coin balance that is unspendable at the moment (e.g. if the address has immature UTXOs).
                 coin:
-                  type: string
+                  $ref: ../../../components/schemas/Common.yaml#/CoinTicker
                   description: The name of the coin.
               required:
                 - address
@@ -53,5 +50,13 @@
                 - coin
       '400':
         description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
-        description: Internal server error 
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

@@ -10,30 +10,25 @@
       content:
         application/json:
           schema:
-            type: object
-            required:
-              - method
-              - coin
-              - address
-              - userpass
-            properties:
-              method:
-                type: string
-                enum: ["validateaddress"]
-                description: The method name
-                example: "validateaddress"
-              coin:
-                type: string
-                description: The coin to validate address for
-                example: "DOC"
-              address:
-                type: string
-                description: The input string to validate
-                example: "RRnMcSeKiLrNdbp91qNVQwwXx5azD4S4CD"
-              userpass:
-                type: string
-                description: RPC password for authentication
-                example: "RPC_UserP@SSW0RD"
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV1Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["validateaddress"]
+                    description: The method name
+                    example: "validateaddress"
+                  coin:
+                    $ref: ../../../components/schemas/Common.yaml#/CoinTicker
+                    description: The coin to validate address for
+                  address:
+                    type: string
+                    description: The input string to validate
+                    example: "RRnMcSeKiLrNdbp91qNVQwwXx5azD4S4CD"
+                required:
+                  - coin
+                  - address
     responses:
       '200':
         description: Address validation completed
@@ -53,23 +48,19 @@
                       type: string
                       description: Only present if not valid. The reason why input string is not a valid address
                       example: "utxo:415] Checksum verification failed"
+                  required:
+                    - is_valid
+              required:
+                - result
       '400':
         description: Bad request - Invalid parameters
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing what went wrong
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
       '500':
         description: Internal server error
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                error:
-                  type: string
-                  description: Error message describing the internal error 
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 
