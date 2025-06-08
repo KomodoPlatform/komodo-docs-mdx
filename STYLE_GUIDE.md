@@ -60,23 +60,35 @@ These guidelines are currently a work in progress. All new documentation should 
 
 ## Tables
 
-- Include a reference table listing all **request** parameters, their type, a description, and whether it is required or optional.
-- Include a reference table listing all **response** parameters, their type, a description, and whether it is part of the standard response or only returned when using a specific request parameter value.
-- Optional parameters should be listed at the bottom of the parameter table.
-- Optional parameters should be identified at the start of the parameter's description, along with the default value (if applicable).
-- Where specific parameters only apply for a specific action, this should be identified at the start of the parameter's description.
-- Where a group of parameters are nested within a common structure, this should be given its own table, and linked to from the main parameter table.
-- Common structure objects should be listed alphabetically in the file which contains them. This can be the same file as the parent method, unless the structure is used by multiple methods in different files - in that case, it should be listed in the root folder for the method group (e.g. legacy, v20, v20-dev).
+### Request Parameter Tables
 
-For example:
+- Include a reference table listing all **request** parameters with the following 5 columns: Parameter, Type, Required, Default, Description
+- Parameters should be listed alphabetically within their groupings (required parameters first, then optional parameters)
+- The Required column should contain "✓" for required parameters and "✗" for optional parameters (centered alignment)
+- The Default column should contain the default value for optional parameters, or "-" for required parameters or optional parameters without defaults (centered alignment)
+- Where specific parameters only apply for a specific action, this should be identified at the start of the parameter's description
+- Where a group of parameters are nested within a common structure, this should be given its own table, and linked to from the main parameter table
 
-| Parameter | Type    | Description                                                                                   |
-| --------- | ------- | --------------------------------------------------------------------------------------------- |
-| coin      | string  | The name of the coin the user desires to activate.                                            |
-| fee       | object  | Optional. A standard [FeeInfo](/komodo-defi-framework/api/common_structures/#FeeInfo) object. |
-| amount    | float   | Required, unless `max` is `true`. The amount of balance to send.                              |
-| max       | boolean | Optional, defaults to `false`. Send whole balance.                                            |
-| memo      | string  | Optional, used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.       |
+### Response Parameter Tables
+
+- Include a reference table listing all **response** parameters with Parameter, Type, and Description columns
+- Parameters should be listed alphabetically
+- Where a group of parameters are nested within a common structure, this should be given its own table, and linked to from the main parameter table
+
+### Common Structures
+
+- Enums and common structures should be used or created wherever possible. Dot notation is to be avoided.
+- Common structure objects should be listed alphabetically in the file which contains them. Links to all methods which use the structure should be listed under its table.
+
+### Request Parameter Table Example:
+
+| Parameter | Type    | Required | Default | Description                                                                                   |
+| --------- | ------- | :------: | :-----: | --------------------------------------------------------------------------------------------- |
+| coin      | string  | ✓        | -       | The name of the coin the user desires to activate.                                            |
+| amount    | float   | ✗*       | -       | The amount of balance to send. Required unless `max` is `true`.                               |
+| fee       | object  | ✗        | -       | A standard [FeeInfo](/komodo-defi-framework/api/common_structures/#FeeInfo) object.           |
+| max       | boolean | ✗        | `false` | Send whole balance.                                                                           |
+| memo      | string  | ✗        | -       | Used for ZHTLC and Tendermint coins only. Attaches a memo to the transaction.                |
 
 ## Variables
 
