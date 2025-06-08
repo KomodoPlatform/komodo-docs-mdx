@@ -24,9 +24,11 @@ These guidelines are currently a work in progress. All new documentation should 
 
 - Generally, individual API methods should be placed in their own `index.mdx` file, within a folder named after the method.
   - The `index.mdx` file should contain a heading with the method name and a description of the method.
+  - After the main heading (`#`), include a method subheading (`##`) with the actual method name.
   - Each file should contain a code block with at least one example of how to make a complete request, including all required parameters.
   - Where a request includes optional parameters which will result in different response structures, the file should contain a code block for each possible request variation, followed by a code block for the response of each example.
   - Below the request/response examples, include code blocks for each potential error response, along with details on what causes the error and how it might be resolved.
+  - CollapsibleSection text should match the CodeGroup title for consistency (e.g., if CodeGroup title is "Method Name", CollapsibleSection should be "Hide/Show Method Name Response").
 - In some cases, it may be appropriate to group related methods together in a single `index.mdx` file. For example, the `index.mdx` file within the `task_init_trezor` folder contains documentation for all methods for initialisation and authentication with a Trezor hardware wallet.
 - Where common structures exist in the request or response of multiple methods, these should be documented in the `index.mdx` file in the base folder for a section (e.g. [src/pages/komodo-defi-framework/api/v20/index.mdx](src/pages/komodo-defi-framework/api/v20/index.mdx)), and linked to from request/response parameter tables where required.
 - Where a method or parameter is deprecated, this should be communicated in the method heading or request parameters table.
@@ -130,7 +132,7 @@ The `Note` component displays an info/warning/error styled message with predefin
 
 This renders a button with a specified text based on its state (expanded or collapsed). You'll mostly use this for API responses:
 
-````mdx
+```mdx
 <CollapsibleSection expandedText='Hide Response' collapsedText='Show Response'>
 
 ```json
@@ -142,7 +144,7 @@ This renders a button with a specified text based on its state (expanded or coll
 ```
 
 </CollapsibleSection>
-````
+```
 
 ### Images
 

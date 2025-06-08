@@ -1,7 +1,9 @@
 export const title = "Komodo DeFi Framework Method: My Recent Swaps V2";
 export const description = "The my_recent_swaps method returns the data of the most recent atomic swaps executed by the Komodo DeFi Framework API node.";
 
-# my\_recent\_swaps
+# My Recent Swaps V2 {{label : 'my_recent_swaps', tag : 'API-v2'}}
+
+## my_recent_swaps
 
 **my\_recent\_swaps (from\_uuid page\_number=1 limit=10 my\_coin other\_coin from\_timestamp to\_timestamp)**
 
@@ -9,34 +11,34 @@ The `my_recent_swaps` method returns the data of the most recent atomic swaps ex
 
 ### Request Arguments
 
-| Parameter       | Type    | Required | Description                                   |
-| --------------- | ------- | :------: | --------------------------------------------- |
-| my\_coin        | string  |     ✗    | Coin being used by you for the swap/trade.    |
-| other\_coin     | string  |     ✗    | Coin you are trading against                  |
-| from\_timestamp | integer |     ✗    | Start timestamp in UNIX format                |
-| to\_timestamp   | integer |     ✗    | End timestamp in UNIX format                  |
-| from\_uuid      | string  |     ✗    | The UUID from which to start fetching results |
-| limit           | integer |     ✗    | The maximum number fo results to return       |
-| page\_number    | integer |     ✗    | Offset for paginated results                  |
+| Parameter       | Type    | Required | Default | Description                                   |
+| --------------- | ------- | :------: | :-----: | --------------------------------------------- |
+| from\_timestamp | integer | ✗        | -       | Start timestamp in UNIX format                |
+| from\_uuid      | string  | ✗        | -       | The UUID from which to start fetching results |
+| limit           | integer | ✗        | `10`    | The maximum number of results to return       |
+| my\_coin        | string  | ✗        | -       | Coin being used by you for the swap/trade.    |
+| other\_coin     | string  | ✗        | -       | Coin you are trading against                  |
+| page\_number    | integer | ✗        | `1`     | Offset for paginated results                  |
+| to\_timestamp   | integer | ✗        | -       | End timestamp in UNIX format                  |
 
 ### Response Parameters
 
-| Parameter      | Type             | Required | Description                                                                                                                                                                                            |
-| -------------- | ---------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| swaps          | array of objects |     ✓    | A list of standard [SwapStatus](/komodo-defi-framework/api/common_structures/swaps/#swap-status) objects                                                                                               |
-| from\_uuid     | string           |     ✓    | the from\_uuid that was set in the request; this value is null if nothing was set                                                                                                                      |
-| skipped        | integer          |     ✓    | the number of skipped records (i.e. the position of `from_uuid` in the list + 1 or `(page_number - 1) * limit`; the value is 0 if `from_uuid` or `page_number` were not set or `page_number` is 1)     |
-| limit          | integer          |     ✓    | the limit that was set in the request; note that the actual number of swaps can differ from the specified limit (e.g. on the last page)                                                                |
-| total          | integer          |     ✓    | total number of swaps available with the selected filters                                                                                                                                              |
-| page\_number   | integer          |     ✓    | the page\_number that was set in the request; if both `page_number` and `from_uuid` are not set in request it will default to `1`; if `from_uuid` is present in request this value will be always null |
-| total\_pages   | integer          |     ✓    | total pages available with the selected filters and limit                                                                                                                                              |
-| found\_records | integer          |     ✓    | the number of returned swaps                                                                                                                                                                           |
+| Parameter      | Type             | Description                                                                                                                                                                                            |
+| -------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| found\_records | integer          | the number of returned swaps                                                                                                                                                                           |
+| from\_uuid     | string           | the from\_uuid that was set in the request; this value is null if nothing was set                                                                                                                      |
+| limit          | integer          | the limit that was set in the request; note that the actual number of swaps can differ from the specified limit (e.g. on the last page)                                                                |
+| page\_number   | integer          | the page\_number that was set in the request; if both `page_number` and `from_uuid` are not set in request it will default to `1`; if `from_uuid` is present in request this value will be always null |
+| skipped        | integer          | the number of skipped records (i.e. the position of `from_uuid` in the list + 1 or `(page_number - 1) * limit`; the value is 0 if `from_uuid` or `page_number` were not set or `page_number` is 1)     |
+| swaps          | array of objects | A list of standard [SwapStatus](/komodo-defi-framework/api/common_structures/swaps/#swap-status) objects                                                                                               |
+| total          | integer          | total number of swaps available with the selected filters                                                                                                                                              |
+| total\_pages   | integer          | total pages available with the selected filters and limit                                                                                                                                              |
 
 #### 📌 Example
 
 #### Command
 
-<CodeGroup title="" tag="POST" label="my_recent_swaps" mm2MethodDecorate="true">
+<CodeGroup title="My Recent Swaps" tag="POST" label="my_recent_swaps" mm2MethodDecorate="true">
   ```json
   {
     "mmrpc": "2.0",
@@ -55,7 +57,7 @@ The `my_recent_swaps` method returns the data of the most recent atomic swaps ex
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+<CollapsibleSection expandedText="Hide My Recent Swaps Response" collapsedText="Show My Recent Swaps Response">
   #### Response (success)
 
   ```json
