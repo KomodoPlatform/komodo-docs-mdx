@@ -22,6 +22,8 @@ class MethodMapping:
     method: str
     mdx_path: Optional[str] = None
     yaml_path: Optional[str] = None
+    examples_path: Optional[str] = None
+    example_count: int = 0
     
     @property
     def has_mdx(self) -> bool:
@@ -30,6 +32,10 @@ class MethodMapping:
     @property
     def has_yaml(self) -> bool:
         return self.yaml_path is not None
+    
+    @property
+    def has_examples(self) -> bool:
+        return self.example_count > 0
     
     @property
     def is_complete(self) -> bool:
@@ -53,6 +59,10 @@ class MethodMapper:
         self.yaml_dirs = {
             'v1': '../../postman/openapi/paths/v1',
             'v2': '../../postman/openapi/paths/v2',
+        }
+        self.json_dirs = {
+            'v1': '../../postman/json/kdf/v1',
+            'v2': '../../postman/json/kdf/v2',
         }
         self.main_openapi_file = '../../postman/openapi/openapi.yaml'
         
@@ -198,6 +208,65 @@ class MethodMapper:
         
         return method_yaml
 
+    def scan_json_examples(self) -> Dict[str, Dict[str, Tuple[str, int]]]:
+        """
+        Scan JSON example files using standardized method/operation/ structure.
+        
+        Structure:
+        - Task methods: task-enable-utxo/init/, task-enable-utxo/status/, etc.
+        - Non-task methods: my_balance/default/, orderbook/default/, etc.
+        
+        Returns dict with v1 and v2 mappings: {method: (examples_path, count)}
+        """
+        method_examples = {"v1": {}, "v2": {}}
+        
+        for version, base_dir in self.json_dirs.items():
+            if not os.path.exists(base_dir):
+                if self.verbose:
+                    print(f"Warning: Examples directory {base_dir} does not exist")
+                continue
+            
+            # Look for method directories (e.g., task-enable-utxo, my_balance)
+            for method_dir in os.listdir(base_dir):
+                method_path = os.path.join(base_dir, method_dir)
+                if not os.path.isdir(method_path):
+                    continue
+                
+                # Convert method directory name to proper method name format
+                method_name_base = method_dir.replace('-', '::')
+                
+                # Handle special naming conventions
+                if method_name_base == "task::enable::z::coin":
+                    method_name_base = "task::enable_z_coin"
+                elif "::enable::" in method_name_base:
+                    # Convert task::enable::xyz to task::enable_xyz
+                    method_name_base = method_name_base.replace("::enable::", "::enable_")
+                
+                # Look for operation subdirectories (init, status, cancel, user-action, default)
+                for operation_dir in os.listdir(method_path):
+                    operation_path = os.path.join(method_path, operation_dir)
+                    if not os.path.isdir(operation_path):
+                        continue
+                    
+                    # Count JSON files in this operation directory
+                    json_files = [f for f in os.listdir(operation_path) if f.endswith('.json')]
+                    example_count = len(json_files)
+                    
+                    if example_count > 0:
+                        # Create the full method name for the operation
+                        if operation_dir == 'default':
+                            # For non-task methods using default operation
+                            full_method_name = method_name_base
+                        else:
+                            # For task methods with specific operations
+                            operation_name = operation_dir.replace('-', '_')  # user-action -> user_action
+                            full_method_name = f"{method_name_base}::{operation_name}"
+                        
+                        relative_path = os.path.relpath(operation_path, '.')
+                        method_examples[version][full_method_name] = (relative_path, example_count)
+        
+        return method_examples
+
     def update_main_openapi_spec(self, dry_run: bool = False) -> bool:
         """
         Update the main OpenAPI specification file with discovered paths.
@@ -302,7 +371,7 @@ class MethodMapper:
 
     def create_unified_mapping(self) -> Dict[str, Dict[str, MethodMapping]]:
         """
-        Create unified mapping combining MDX and YAML mappings with name normalization.
+        Create unified mapping combining MDX, YAML, and JSON example mappings with name normalization.
         Returns dict with v1 and v2 mappings: {method: MethodMapping}
         """
         print("Scanning MDX files...")
@@ -311,23 +380,36 @@ class MethodMapper:
         print("Scanning YAML files...")
         yaml_mappings = self.scan_yaml_files()
         
+        print("Scanning JSON examples...")
+        example_mappings = self.scan_json_examples()
+        
         unified = {"v1": {}, "v2": {}}
         
-        # Get all methods from both sources
+        # Get all methods from all sources
         for version in ["v1", "v2"]:
             all_methods = set()
             all_methods.update(mdx_mappings[version].keys())
             all_methods.update(yaml_mappings[version].keys())
+            all_methods.update(example_mappings[version].keys())
             
             # Create MethodMapping objects for each method
             for method in all_methods:
                 mdx_path = self._find_best_match(method, mdx_mappings[version])
                 yaml_path = self._find_best_match(method, yaml_mappings[version])
                 
+                # Find example data
+                examples_path = None
+                example_count = 0
+                example_data = self._find_best_match(method, {k: v for k, v in example_mappings[version].items()})
+                if example_data:
+                    examples_path, example_count = example_data
+                
                 unified[version][method] = MethodMapping(
                     method=method,
                     mdx_path=mdx_path,
-                    yaml_path=yaml_path
+                    yaml_path=yaml_path,
+                    examples_path=examples_path,
+                    example_count=example_count
                 )
         
         return unified
@@ -347,9 +429,12 @@ class MethodMapper:
                     'method': mapping.method,
                     'mdx_path': mapping.mdx_path,
                     'yaml_path': mapping.yaml_path,
+                    'examples_path': mapping.examples_path,
                     'has_mdx': mapping.has_mdx,
                     'has_yaml': mapping.has_yaml,
-                    'is_complete': mapping.is_complete
+                    'has_examples': mapping.has_examples,
+                    'is_complete': mapping.is_complete,
+                    'example_count': mapping.example_count
                 }
         
         # Add metadata
@@ -378,7 +463,9 @@ class MethodMapper:
                     unified[version][method] = MethodMapping(
                         method=data['method'],
                         mdx_path=data['mdx_path'],
-                        yaml_path=data['yaml_path']
+                        yaml_path=data['yaml_path'],
+                        examples_path=data.get('examples_path'),
+                        example_count=data.get('example_count', 0)
                     )
         
         return unified
@@ -491,6 +578,7 @@ class MethodMapper:
             mdx_only = [m for m in mappings if m.has_mdx and not m.has_yaml]
             yaml_only = [m for m in mappings if m.has_yaml and not m.has_mdx]
             missing_both = [m for m in mappings if not m.has_mdx and not m.has_yaml]
+            with_examples = [m for m in mappings if m.has_examples]
             
             print(f"\n{version.upper()} Coverage:")
             print(f"  ✓ Complete (both MDX & YAML): {len(with_both)}")
@@ -498,21 +586,29 @@ class MethodMapper:
             print(f"  ⚠ YAML only (missing MDX): {len(yaml_only)}")
             print(f"  ✗ Missing both: {len(missing_both)}")
             
+            # Example coverage stats
+            total_examples = sum(m.example_count for m in mappings)
+            coverage_pct = (len(with_examples) / len(mappings) * 100) if mappings else 0
+            print(f"  🧪 With examples: {len(with_examples)}/{len(mappings)} ({coverage_pct:.1f}%) - {total_examples} total examples")
+            
             # List missing items if any
             if mdx_only:
                 print(f"\n  Methods missing YAML ({version}):")
                 for mapping in sorted(mdx_only, key=lambda x: x.method):
-                    print(f"    - {mapping.method}")
+                    examples_info = f" [{mapping.example_count} examples]" if mapping.has_examples else ""
+                    print(f"    - {mapping.method}{examples_info}")
             
             if yaml_only:
                 print(f"\n  Methods missing MDX ({version}):")
                 for mapping in sorted(yaml_only, key=lambda x: x.method):
-                    print(f"    - {mapping.method}")
+                    examples_info = f" [{mapping.example_count} examples]" if mapping.has_examples else ""
+                    print(f"    - {mapping.method}{examples_info}")
             
             if missing_both:
                 print(f"\n  Methods missing both MDX & YAML ({version}):")
                 for mapping in sorted(missing_both, key=lambda x: x.method):
-                    print(f"    - {mapping.method}")
+                    examples_info = f" [{mapping.example_count} examples]" if mapping.has_examples else ""
+                    print(f"    - {mapping.method}{examples_info}")
         
         print(f"\n{'='*60}")
 
@@ -681,9 +777,6 @@ def main():
             elif args.dry_run:
                 if not args.quiet:
                     print("🔍 Dry run completed - no files were modified")
-            else:
-                if not args.quiet:
-                    print("✅ OpenAPI specification is already up to date")
         except Exception as e:
             print(f"❌ Error updating OpenAPI specification: {e}")
             return 1
