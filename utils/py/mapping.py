@@ -99,8 +99,6 @@ class MethodMapper:
         variations = self._normalize_method_name(method_name)
         for variation in variations:
             if variation in mapping_dict:
-                if self.verbose and variation != method_name:
-                    print(f"    [MATCH] Found '{method_name}' as '{variation}'")
                 return mapping_dict[variation]
         
         return None
@@ -218,7 +216,7 @@ class MethodMapper:
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     has_yaml_str = "✓ has yaml" if mapping.has_yaml else "✗ no yaml"
                     has_mdx_str = "✓ has mdx" if mapping.has_mdx else "✗ no mdx"
-                    print(f"[{timestamp}] {method:<40} [{has_yaml_str}] [{has_mdx_str}]")
+                    print(f"[{timestamp}] {method:<60} [{has_yaml_str}] [{has_mdx_str}]")
                 
                 unified[version][method] = mapping
         
