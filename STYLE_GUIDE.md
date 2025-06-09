@@ -11,6 +11,13 @@
 
 ---
 
+
+# MDX File Requirements
+
+- All MDX files, especially `index.mdx` files, must begin with `export const title = ...` and `export const description = ...` at the very top of the file. These are required for build and navigation. Never remove these fields.
+- All anchor links and section slugs (e.g., for enums) must use kebab-case (lowercase, hyphen-separated).
+- All enum section headings must use Bluebook title case, no spaces, and end with 'Enum' (e.g., EthPrivKeyActivationPolicyEnum). Anchor links must match this format.
+
 Great documentation is critical for guiding those who will use our tech stack. It should be clear, easy to read, and as detailed as required while avoiding unnecessary verbosity.
 
 From a user's perspective:
@@ -28,6 +35,7 @@ These guidelines are currently a work in progress. All new documentation should 
   - Each file should contain a code block with at least one example of how to make a complete request, including all required parameters.
   - Where a request includes optional parameters which will result in different response structures, the file should contain a code block for each possible request variation, followed by a code block for the response of each example.
   - Below the request/response examples, include code blocks for each potential error response, along with details on what causes the error and how it might be resolved.
+  - Each request should be in a CodeGroup. Its response should be in a CollapsibleSection. There should only be one response per Collapsible section, but there may be multiple responses to a request. 
   - CollapsibleSection text should match the CodeGroup title for consistency (e.g., if CodeGroup title is "Method Name", CollapsibleSection should be "Hide/Show Method Name Response").
 - In some cases, it may be appropriate to group related methods together in a single `index.mdx` file. For example, the `index.mdx` file within the `task_init_trezor` folder contains documentation for all methods for initialisation and authentication with a Trezor hardware wallet.
 - Where common structures exist in the request or response of multiple methods, these should be documented in the `index.mdx` file in the base folder for a section (e.g. [src/pages/komodo-defi-framework/api/v20/index.mdx](src/pages/komodo-defi-framework/api/v20/index.mdx)), and linked to from request/response parameter tables where required.
@@ -53,10 +61,12 @@ These guidelines are currently a work in progress. All new documentation should 
 
 ## Syntax
 
-- Use `#` for page headings.
-- Use `##` for subheadings.
-- Use `###` for request/response parameter tables.
-- Use `####` for request/response examples.
+- Use `#` for page headings. These MUST match the text in `const title = ` at the top of the page. For KDF Methods, it should follow the format `Komodo DeFi Framework Method: stream::orderbook::enable`.
+- Use `##` for subheadings. These are generally method names. This line should also include label/tag like `{{label : 'method_name', tag : 'API-v2'}}`.
+- **IMPORTANT**: Method headings MUST use the complete API method name exactly as it appears in the request (e.g., `stream::orderbook::enable` not just `orderbook_enable`).
+- Use `###` for request/response parameter table titles.
+- Use `####` for request/response examples (like #### 📌 Examples and #### ⚠️ Error Responses)
+
 - Use mdx comments like this: `{/* comment comment */}` . Markdown comments like `<!--- comment comment--->` doesn't work. Alternatively, you can use the `<DevComment>` component tags.
 - No markdown/mdx comments in tables' rows
 
@@ -65,11 +75,14 @@ These guidelines are currently a work in progress. All new documentation should 
 ### Request Parameter Tables
 
 - Include a reference table listing all **request** parameters with the following 5 columns: Parameter, Type, Required, Default, Description
+- **IMPORTANT**: If there are no optional parameters (all parameters are required), you can use a 4-column format: Parameter, Type, Required, Description (omitting the Default column)
 - Parameters should be listed alphabetically within their groupings (required parameters first, then optional parameters)
 - The Required column should contain "✓" for required parameters and "✗" for optional parameters (centered alignment)
-- The Default column should contain the default value for optional parameters, or "-" for required parameters or optional parameters without defaults (centered alignment)
+- The Default column should contain the default value for optional parameters, or "-" for required parameters or optional parameters without defaults (centered alignment). All default values in parameter tables must be wrapped in backticks (e.g., `10`, `false`).
+- If no default values are defined for any parameter, omit the Default column entirely. If any parameter has a default value, the Default column must be present and all default values must be wrapped in backticks (e.g., `10`, `false`).
 - Where specific parameters only apply for a specific action, this should be identified at the start of the parameter's description
 - Where a group of parameters are nested within a common structure, this should be given its own table, and linked to from the main parameter table
+- Optional boolean parameters must always have a default value specified in the request parameter table, and it must be wrapped in backticks (e.g., `false`).
 
 ### Response Parameter Tables
 
@@ -144,7 +157,6 @@ This renders a button with a specified text based on its state (expanded or coll
 ```
 
 </CollapsibleSection>
-```
 
 ### Images
 
@@ -166,17 +178,23 @@ The `Heading` component functions like native heading tags but can be labelled a
 
 ### Tag
 
-`Tag`s are used for tagging CRUD operations:
+The `Tag` component is primarily used to display API versioning and deprecation status in documentation. Tags help users quickly identify the version of an API method or if a method is deprecated. You may also use tags for CRUD operations or to highlight statuses in tables and documentation.
+
+**API versioning and deprecation examples:**
 
 ```mdx
-<Tag>post</Tag>
-<Tag>get</Tag>
-<Tag>put</Tag>
-<Tag>delete</Tag>
+<Tag type="api-version">API-v2</Tag>
+<Tag type="deprecated">Deprecated</Tag>
 ```
 
-## Navigation
+## New Rule: Use of Common Objects and Enums
 
-- **Top navbar**: Navigation data is in [src/data/navbar.json](src/data/navbar.json)
-- **Left sidebar**: Navigation data is in [src/data/sidebar.json](src/data/sidebar.json). New pages should be added here.
-- **Right sidebar**: Automatically populated based on the heading hierarchy of the current page.
+- Look for opportunities to use or create common objects and enums.
+- Use enums for parameters or response values that have a fixed set of possible values (e.g., network, contract_type, status, etc.).
+- Reference or define these enums in parameter/response tables and documentation where appropriate.
+
+## Sidebar and Method Heading Naming Rules
+
+- In `sidebar.json`, the `title` value for each method link must be the **exact API method name** (e.g., `lightning::payments::send_payment`), not a humanized or prettified version. The only exception is when the link does not point to a method (e.g., overview or non-method pages).
+- The same rule applies to the `## MethodName` heading in each method MDX file: it must match the exact API method name.
+- This is a strict requirement for all new and existing documentation.

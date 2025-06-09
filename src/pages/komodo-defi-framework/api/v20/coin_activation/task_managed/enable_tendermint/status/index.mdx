@@ -1,0 +1,73 @@
+export const title = "task::enable_tendermint::status";
+export const description = "Query the status of Tendermint activation task.";
+
+# task::enable_tendermint::status
+
+## task::enable_tendermint::status {{label : 'task::enable_tendermint::status', tag : 'API-v2'}}
+
+After running the `task::enable_tendermint::init` method, you can query the status of activation to check its progress. The response will return the following:
+
+* Result of the task (success or error)
+* Progress status (what state the task is in)
+* Required user action (what user should do before the task can continue)
+
+### Request Arguments
+
+| Parameter            | Type    | Required | Default | Description                                                                 |
+| -------------------- | ------- | :------: | :-----: | --------------------------------------------------------------------------- |
+| task_id              | integer |     ✓    |    -    | The identifying number returned when initiating the initialisation process. |
+| forget_if_finished   | boolean |     ✗    |  true   | If false, will return final response for completed tasks.                   |
+
+#### Command
+
+<CodeGroup title="Tendermint Activation Status" tag="POST" label="task::enable_tendermint::status" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "task::enable_tendermint::status",
+    "params": {
+      "task_id": 0,
+      "forget_if_finished": false
+    }
+  }
+  ```
+</CodeGroup>
+
+### Response Parameters
+
+| Parameter        | Type             | Description                                                                                                                                                                   |
+| ---------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| current_block    | integer          | Block height of the coin being activated                                                                                                                                      |
+| ticker           | string           | Ticker of the platform protocol coin, as input in the request.                                                                                                                |
+| address          | string           | An address for the activated coin                                                                                                                                             |
+| balance          | object           | Only returned when `get_balances` is `true`. A standard [BalanceInfos](/komodo-defi-framework/api/common_structures/wallet/#balance-info) object.                             |
+| tokens_balances  | array of objects | Only returned when `get_balances` is `true`. A list of standard [AddressInfo](/komodo-defi-framework/api/common_structures/wallet/#address-info) objects, one for each token. |
+| tokens_tickers   | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                                                       |
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "Ok",
+      "details": {
+        "ticker": "IRIS",
+        "address": "iaa1p8t6fh9tuq5c9mmnlhuuwuy4hw70cmpdcs8sc6",
+        "current_block": 29775307,
+        "balance": {
+          "spendable": "0",
+          "unspendable": "0"
+        },
+        "tokens_balances": {
+          "ATOM-IBC_IRIS": {
+            "spendable": "0",
+            "unspendable": "0"
+          }
+        }
+      }
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection> 

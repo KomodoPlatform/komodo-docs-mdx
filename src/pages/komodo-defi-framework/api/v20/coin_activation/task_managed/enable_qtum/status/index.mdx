@@ -1,0 +1,37 @@
+export const title = "task::enable_qtum::status";
+export const description = "Query the status of QTUM activation task.";
+
+# task::enable_qtum::status
+
+## task::enable_qtum::status {{label : 'task::enable_qtum::status', tag : 'API-v2'}}
+
+After running the `task::enable_qtum::init` method, you can query the status of activation to check its progress. The response will return the following:
+
+* Result of the task (success or error)
+* Progress status (what state the task is in)
+* Required user action (what user should do before the task can continue)
+
+### Request Arguments
+
+| Parameter            | Type    | Required | Default | Description                                                                 |
+| -------------------- | ------- | :------: | :-----: | --------------------------------------------------------------------------- |
+| task_id              | integer |     ✓    |    -    | The identifying number returned when initiating the initialisation process. |
+| forget_if_finished   | boolean |     ✗    |  true   | If false, will return final response for completed tasks.                   |
+
+#### Request
+
+<CodeGroup title="QTUM Activation Status" tag="POST" label="task::enable_qtum::status" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "task::enable_qtum::status",
+    "params": {
+      "task_id": 0,
+      "forget_if_finished": false
+    }
+  }
+  ```
+</CodeGroup>
+
+The response formats for this method are the same as the [task managed activation](/komodo-defi-framework/api/v20/coin_activation/task_managed/) responses. 

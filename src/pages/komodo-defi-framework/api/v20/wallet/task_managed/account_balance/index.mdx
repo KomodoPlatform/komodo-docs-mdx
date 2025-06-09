@@ -11,22 +11,22 @@ Use the `task::account_balance::init` method to initialise an account balance re
 
 ### Request Arguments
 
-| Parameter      | Type   | Required | Description                                                                                                                                     |
-| -------------- | ------ | :------: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin           | string |     ✓    | Ticker of activated coin you want to see addresses and balance for                                                                              |
-| account\_index | string |     ✓    | For GUIs, this will be zero. In CLI you can use other values if you [know what you are doing](https://learnmeabitcoin.com/technical/hd-wallets) |
+| Parameter      | Type    | Required | Default | Description                                                                                                                                     |
+| -------------- | ------- | :------: | :-----: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| account\_index | integer |     ✓    |    -    | For GUIs, this will be zero. In CLI you can use other values if you [know what you are doing](https://learnmeabitcoin.com/technical/hd-wallets) |
+| coin           | string  |     ✓    |    -    | Ticker of activated coin you want to see addresses and balance for                                                                              |
 
 ### Response Parameters
 
-| Parameter | Type    | Required | Description                                               |
-| --------- | ------- | :------: | --------------------------------------------------------- |
-| task\_id  | integer |     ✓    | An identifying number which is used to query task status. |
+| Parameter | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| task\_id  | integer | An identifying number which is used to query task status. |
 
 #### 📌 Examples
 
 #### Command
 
-<CodeGroup title="task::account_balance::init" tag="POST" label="task::account_balance::init" mm2MethodDecorate="true">
+<CodeGroup title="Account Balance Init" tag="POST" label="task::account_balance::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -40,7 +40,7 @@ Use the `task::account_balance::init` method to initialise an account balance re
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+<CollapsibleSection expandedText="Hide Account Balance Init Response" collapsedText="Show Account Balance Init Response">
   #### Response (ready, successful)
 
   ```json
@@ -62,22 +62,22 @@ Use the `task::account_balance::status` method to view the status / response of 
 
 | Parameter            | Type    | Required | Default | Description                                                 |
 | -------------------- | ------- | :------: | :-----: | ----------------------------------------------------------- |
-| task\_id             | integer |     ✓    |   `-`   | The identifying number returned when initiating the task.   |
 | forget\_if\_finished | boolean |     ✗    |  `true` | If `false`, will return final response for completed tasks. |
+| task\_id             | integer |     ✓    |    -    | The identifying number returned when initiating the task.   |
 
 ### Response Parameters
 
-| Parameter       | Type    | Required | Description                                                                                                                                                                                                          |
-| --------------- | ------- | :------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| current\_block  | integer |     ✓    | Block height of the coin being activated                                                                                                                                                                             |
-| ticker          | string  |     ✓    | Ticker of the coin being activated.                                                                                                                                                                                  |
-| wallet\_balance | object  |     ✓    | A standard [WalletBalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#wallet-balance-info) object. Note: the structure may vary based on the `get_balances` parameter value in the activation request. |
+| Parameter       | Type    | Description                                                                                                                                                                                                          |
+| --------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| current\_block  | integer | Block height of the coin being activated                                                                                                                                                                             |
+| ticker          | string  | Ticker of the coin being activated.                                                                                                                                                                                  |
+| wallet\_balance | object  | A standard [WalletBalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#wallet-balance-info) object. Note: the structure may vary based on the `get_balances` parameter value in the activation request. |
 
 #### 📌 Examples
 
 #### Command
 
-<CodeGroup title="task::account_balance::status" tag="POST" label="task::account_balance::status" mm2MethodDecorate="true">
+<CodeGroup title="Account Balance Status" tag="POST" label="task::account_balance::status" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -91,7 +91,7 @@ Use the `task::account_balance::status` method to view the status / response of 
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+<CollapsibleSection expandedText="Hide Account Balance Status Response" collapsedText="Show Account Balance Status Response">
   #### Response (ready, successful)
 
   ```json
@@ -156,26 +156,26 @@ Use the `task::account_balance::cancel` method to cancel an account balance requ
 
 ### Request Arguments
 
-| Parameter | Type    | Required | Description                                               |
-| --------- | ------- | :------: | --------------------------------------------------------- |
-| task\_id  | integer |     ✓    | The identifying number returned when initiating the task. |
+| Parameter | Type    | Required | Default | Description                                               |
+| --------- | ------- | :------: | :-----: | --------------------------------------------------------- |
+| task\_id  | integer |     ✓    |    -    | The identifying number returned when initiating the task. |
 
 ### Response Parameters
 
-| Parameter    | Type   | Required | Description                                                                            |
-| ------------ | ------ | :------: | -------------------------------------------------------------------------------------- |
-| result       | string |     ✓    | Returns with value `success` when successful, otherwise returns the error values below |
-| error        | string |     ✗    | Description of the error                                                               |
-| error\_path  | string |     ✗    | Used for debugging. A reference to the function in code base which returned the error  |
-| error\_trace | string |     ✗    | Used for debugging. A trace of lines of code which led to the returned error           |
-| error\_type  | string |     ✗    | An enumerated error identifier to indicate the category of error                       |
-| error\_data  | string |     ✗    | Additonal context for the error type                                                   |
+| Parameter    | Type   | Description                                                                            |
+| ------------ | ------ | -------------------------------------------------------------------------------------- |
+| error        | string | Description of the error                                                               |
+| error\_data  | string | Additonal context for the error type                                                   |
+| error\_path  | string | Used for debugging. A reference to the function in code base which returned the error  |
+| error\_trace | string | Used for debugging. A trace of lines of code which led to the returned error           |
+| error\_type  | string | An enumerated error identifier to indicate the category of error                       |
+| result       | string | Returns with value `success` when successful, otherwise returns the error values below |
 
 #### 📌 Examples
 
 #### Command
 
-<CodeGroup title="task::account_balance::cancel" tag="POST" label="task::account_balance::cancel" mm2MethodDecorate="true">
+<CodeGroup title="Account Balance Cancel" tag="POST" label="task::account_balance::cancel" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -196,20 +196,6 @@ Use the `task::account_balance::cancel` method to cancel an account balance requ
   {
     "mmrpc": "2.0",
     "result": "success",
-    "id": null
-  }
-  ```
-
-  #### Response (error, task already finished)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "error": "Task is finished already",
-    "error_path": "init_account_balance.manager",
-    "error_trace": "init_account_balance:113] manager:104]",
-    "error_type": "TaskFinished",
-    "error_data": 2,
     "id": null
   }
   ```

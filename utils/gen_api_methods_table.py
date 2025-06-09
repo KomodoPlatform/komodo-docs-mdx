@@ -15,17 +15,24 @@ def gen_api_methods_table():
     methods_list = []
     for file in komodefi_files:
         with open(file, 'r') as f:
+            current_method = None
             for line in f.readlines():
                 doc_path = file.replace(f'{root_path}/src/pages', '').replace('/index.mdx', '')
                 doc_split = doc_path.split('/')
                 if len(doc_split) > 3:
                     section = doc_split[3]
                     if section in methods_dict:
-                        if 'CodeGroup' in line and "label" in line:
-                            method = line.split('label="')[1].split('"')[0]
-                            hash_link = line.split('title="')[1].split('"')[0].replace(" ", "-").lower()
-                            if hash_link == "":
-                                hash_link = method.replace("_", "-").split("::")[-1].lower()
+                        # Track the most recent method heading
+                        if line.strip().startswith('## '):
+                            # Extract method name from heading, e.g. ## active_swaps {{label : 'active_swaps', tag : 'API-v2'}}
+                            heading = line.strip()[3:]
+                            # Only take up to the first space or curly brace
+                            method_name = heading.split(' ')[0].split('{')[0].strip()
+                            current_method = method_name
+                        # When CodeGroup is found, use the most recent method heading
+                        if 'CodeGroup' in line and current_method:
+                            method = current_method
+                            hash_link = method.replace("_", "-").lower()
                             link = f"[{method}]({doc_path}/#{hash_link})"
                             methods_dict[section].append({
                                 "link": link,

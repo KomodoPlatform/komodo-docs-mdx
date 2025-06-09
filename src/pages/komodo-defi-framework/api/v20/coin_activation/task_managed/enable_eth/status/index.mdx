@@ -1,0 +1,103 @@
+export const title = "task::enable_eth::status";
+export const description = "Query the status of ETH/EVM activation task.";
+
+# task::enable_eth::status
+
+## task::enable_eth::status {{label : 'task::enable_eth::status', tag : 'API-v2'}}
+
+After running the `task::enable_eth::init` method, you can query the status of activation to check its progress. The response will return the following:
+
+* Result of the task (success or error)
+* Progress status (what state the task is in)
+* Required user action (what user should do before the task can continue)
+
+### Request Arguments
+
+| Parameter            | Type    | Required | Default | Description                                                                 |
+| -------------------- | ------- | :------: | :-----: | --------------------------------------------------------------------------- |
+| task_id              | integer |     ✓    |    -    | The identifying number returned when initiating the initialisation process. |
+| forget_if_finished   | boolean |     ✗    |  true   | If false, will return final response for completed tasks.                   |
+
+#### Command
+
+<CodeGroup title="ETH/EVM Activation Status" tag="POST" label="task::enable_eth::status" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "task::enable_eth::status",
+    "params": {
+      "task_id": 1,
+      "forget_if_finished": false
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Response (ready, successful, HD mode)
+
+| Parameter       | Type    | Description                                                                                                                                                                                                           |
+| --------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| current_block   | integer | Block height of the coin being activated                                                                                                                                                                              |
+| ticker          | string  | Ticker of the coin being activated.                                                                                                                                                                                   |
+| wallet_balance  | object  | A standard [WalletBalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#wallet-balance-info) object. Note: the structure may vary based on the `get_balances` parameter value in the activation request. |
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "status": "Ok",
+      "details": {
+        "current_block": 70970530,
+        "ticker": "MATIC",
+        "wallet_balance": {
+          "wallet_type": "HD",
+          "accounts": [
+            {
+              "account_index": 0,
+              "derivation_path": "m/44'/60'/0'",
+              "total_balance": {
+                "AAVE-PLG20": {
+                  "spendable": "0.0275928341263563",
+                  "unspendable": "0"
+                },
+                "PGX-PLG20": {
+                  "spendable": "237.729414631067",
+                  "unspendable": "0"
+                },
+                "MATIC": {
+                  "spendable": "66.36490013618242918",
+                  "unspendable": "0"
+                }
+              },
+              "addresses": [
+                {
+                  "address": "0xC11b6070c84A1E6Fc62B2A2aCf70831545d5eDD4",
+                  "derivation_path": "m/44'/60'/0'/0/0",
+                  "chain": "External",
+                  "balance": {
+                    "PGX-PLG20": {
+                      "spendable": "237.729414631067",
+                      "unspendable": "0"
+                    },
+                    "AAVE-PLG20": {
+                      "spendable": "0.0275928341263563",
+                      "unspendable": "0"
+                    },
+                    "MATIC": {
+                      "spendable": "65.36490013618242918",
+                      "unspendable": "0"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection> 

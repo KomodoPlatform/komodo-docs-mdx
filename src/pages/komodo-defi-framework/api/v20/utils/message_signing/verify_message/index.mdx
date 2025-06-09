@@ -1,28 +1,30 @@
 export const title = "Komodo DeFi Framework Method: Verify Message";
 export const description = "The method in this document allows you to verify messages for all coins supported by Komodo DeFi Framework.";
 
-# Verify Message
+# Komodo DeFi Framework Method: Verify Message
 
-The `verify_Message` method allows one to confirm the authenticity of a signed message. By using the original message, the wallet's address, and the signature, the verification process can confirm that the message was created by the owner and that it has not been altered.
+## verify\_message {{label : 'verify_message', tag : 'API-v2'}}
+
+The `verify_message` method allows you to confirm the authenticity of a signed message. By using the original message, the wallet's address, and the signature, the verification process can confirm that the message was created by the owner and that it has not been altered.
 
 ### Request Arguments
 
-| Parameter | Type   | Description                                          |
-| --------- | ------ | ---------------------------------------------------- |
-| coin      | string | The coin to sign a message with                      |
-| message   | string | The message input via the `sign_message` method sign |
-| signature | string | The signature generated for the message              |
-| address   | string | The address used to sign the message                 |
+| Parameter | Type   | Required | Default | Description                                      |
+| --------- | ------ | :------: | :-----: | ------------------------------------------------ |
+| address   | string |     ✓    |    -    | The address used to sign the message.            |
+| coin      | string |     ✓    |    -    | The coin to verify the message with.             |
+| message   | string |     ✓    |    -    | The message input via the `sign_message` method. |
+| signature | string |     ✓    |    -    | The signature generated for the message.         |
 
 ### Response Parameters
 
-| Parameter | Type    | Description                                                 |
-| --------- | ------- | ----------------------------------------------------------- |
-| is\_valid | boolean | `true` is message signature is valid; `false` if it is not. |
+| Parameter | Type    | Description                                                     |
+| --------- | ------- | --------------------------------------------------------------- |
+| is\_valid | boolean | `true` if the message signature is valid; `false` if it is not. |
 
-## Command
+#### 📌 Example
 
-<CodeGroup title="" tag="POST" label="verify_message" mm2MethodDecorate="true">
+<CodeGroup title="Verify Message" tag="POST" label="verify_message" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -44,11 +46,11 @@ The `verify_Message` method allows one to confirm the authenticity of a signed m
 
   ```json
   {
-    "mmrpc": "2.0",
-    "result": {
-      "is_valid": true
-    },
-    "id": 0
+      "mmrpc": "2.0",
+      "result": {
+          "is_valid": true
+      },
+      "id": 0
   }
   ```
 
@@ -56,22 +58,22 @@ The `verify_Message` method allows one to confirm the authenticity of a signed m
 
   ```json
   {
-    "mmrpc": "2.0",
-    "result": {
-      "is_valid": false
-    },
-    "id": 0
+      "mmrpc": "2.0",
+      "result": {
+          "is_valid": false
+      },
+      "id": 0
   }
   ```
 </CollapsibleSection>
 
-## ⚠ Error types
+#### ⚠️ Error Responses
 
-**PrefixNotFound:** sign\_message\_prefix is not set in coin config
-**CoinIsNotFound:** Specified coin is not found
-**InvalidRequest:** Message verification is not supported by the given coin type
-**InternalError:** An internal error occured during the verification process
-**SignatureDecodingError:** Given signature could not be decoded
+**PrefixNotFound:** `sign_message_prefix` is not set in coin config\
+**CoinIsNotFound:** Specified coin is not found\
+**InvalidRequest:** Message verification is not supported by the given coin type\
+**InternalError:** An internal error occurred during the verification process\
+**SignatureDecodingError:** Given signature could not be decoded\
 **AddressDecodingError:** Given address could not be decoded
 
 <CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">

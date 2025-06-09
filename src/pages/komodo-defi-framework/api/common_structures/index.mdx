@@ -9,150 +9,6 @@ The objects are in the request or response of multiple Komodo DeFi SDK methods h
 
 Structures which are used in more than one section are listed below:
 
-## Common Enums
-
-### SwapMethodEnum
-
-Used in [trade\_preimage](/komodo-defi-framework/api/legacy/trade_preimage/) method to specify the swap operation type:
-
-| Value      | Description                                                  |
-| ---------- | ------------------------------------------------------------ |
-| `buy`      | Create a buy order (taker wants to receive the base coin)    |
-| `sell`     | Create a sell order (taker wants to sell the base coin)      |
-| `setprice` | Create a maker order (provide liquidity at a specific price) |
-
-### ActionEnum
-
-Used in [best\_orders](/komodo-defi-framework/api/legacy/best_orders/) and other trading methods:
-
-| Value  | Description                            |
-| ------ | -------------------------------------- |
-| `buy`  | Find orders to buy the specified coin  |
-| `sell` | Find orders to sell the specified coin |
-
-### OrderTypeEnum
-
-Used in [orders\_history\_by\_filter](/komodo-defi-framework/api/legacy/orders_history_by_filter/) to filter by order role:
-
-| Value   | Description                                      |
-| ------- | ------------------------------------------------ |
-| `Maker` | Orders that provide liquidity to the orderbook   |
-| `Taker` | Orders that consume liquidity from the orderbook |
-
-### OrderStatusEnum
-
-Used in [orders\_history\_by\_filter](/komodo-defi-framework/api/legacy/orders_history_by_filter/) to filter by order status:
-
-**Active Order Statuses:**
-
-| Value     | Order Type  | Description                  |
-| --------- | ----------- | ---------------------------- |
-| `Created` | Maker/Taker | Order has been created       |
-| `Updated` | Maker       | Maker order has been updated |
-
-**Inactive Order Statuses:**
-
-| Value                  | Order Type  | Description                          |
-| ---------------------- | ----------- | ------------------------------------ |
-| `Fulfilled`            | Maker/Taker | Order has been completely filled     |
-| `Insufficient Balance` | Maker       | Insufficient funds to complete order |
-| `Cancelled`            | Maker/Taker | Order has been manually cancelled    |
-| `Timed Out`            | Taker       | Taker order expired before matching  |
-
-### UnbanTypeEnum
-
-Used in [unban\_pubkeys](/komodo-defi-framework/api/legacy/unban_pubkeys/) method:
-
-| Value | Description                        |
-| ----- | ---------------------------------- |
-| `All` | Unban all currently banned pubkeys |
-| `Few` | Unban specific pubkeys from a list |
-
-### BanTypeEnum
-
-Used in [list\_banned\_pubkeys](/komodo-defi-framework/api/legacy/list_banned_pubkeys/) response to indicate the type of ban:
-
-| Value        | Description                                                   |
-| ------------ | ------------------------------------------------------------- |
-| `Manual`     | Pubkey was manually banned by the user                        |
-| `FailedSwap` | Pubkey was automatically banned due to a failed swap protocol |
-
-### MetricTypeEnum
-
-Used in [metrics](/komodo-defi-framework/api/legacy/metrics/) response to indicate the type of metric measurement:
-
-| Value       | Description                                                                   |
-| ----------- | ----------------------------------------------------------------------------- |
-| `counter`   | A monotonically increasing metric that tracks cumulative events or quantities |
-| `gauge`     | A metric that represents a single numerical value that can go up or down      |
-| `histogram` | A metric that samples observations and counts them in configurable buckets    |
-
-### CancelByTypeEnum
-
-Used in [cancel\_all\_orders](/komodo-defi-framework/api/legacy/cancel_all_orders/) method to specify which orders to cancel:
-
-| Value  | Description                                                  |
-| ------ | ------------------------------------------------------------ |
-| `All`  | Cancel all active orders created by the node                 |
-| `Pair` | Cancel all orders for a specific trading pair (base/rel)     |
-| `Coin` | Cancel all orders involving a specific coin (as base or rel) |
-
-### ChannelStatusEnum
-
-Used in Lightning Network [get\_channel\_details](/komodo-defi-framework/api/v20/lightning/channels/#get-channel-details) response to indicate channel status:
-
-| Value     | Description                                                    |
-| --------- | -------------------------------------------------------------- |
-| `Open`    | Channel is currently open and available for transactions       |
-| `Closed`  | Channel has been closed (either cooperatively or force-closed) |
-| `Pending` | Channel is in the process of opening or closing                |
-
-### ChannelTypeEnum
-
-Used in Lightning Network channel filter methods for [list\_open\_channels\_by\_filter](/komodo-defi-framework/api/v20/lightning/channels/#list-open-channels-by-filter) and [list\_closed\_channels\_by\_filter](/komodo-defi-framework/api/v20/lightning/channels/#list-closed-channels-by-filter):
-
-| Value      | Description                                                    |
-| ---------- | -------------------------------------------------------------- |
-| `Inbound`  | Channel where the counterparty opened the channel to your node |
-| `Outbound` | Channel where your node opened the channel to the counterparty |
-
-### EstimatorTypeEnum
-
-Used in [get\_eth\_estimated\_fee\_per\_gas](/komodo-defi-framework/api/v20/wallet/fee_management/get_eth_estimated_fee_per_gas/#get-eth-estimated-fee-per-gas) to specify gas estimation strategies:
-
-| Value          | Description                                                               |
-| -------------- | ------------------------------------------------------------------------- |
-| `Conservative` | Use conservative gas estimation for slower but more reliable confirmation |
-| `Standard`     | Use standard gas estimation for normal transaction speed                  |
-| `Fast`         | Use fast gas estimation for quicker transaction confirmation              |
-| `Fastest`      | Use fastest gas estimation for immediate transaction processing           |
-
-## TokenProtocol
-
-Standard object structure used in token information methods like [get\_token\_info](/komodo-defi-framework/api/v20/utils/get_token_info/#get-token-info).
-
-| Parameter      | Type   | Required | Description                                                 |
-| -------------- | ------ | :------: | ----------------------------------------------------------- |
-| type           | string |     ✓    | Token type - e.g `ERC20` for tokens on the Ethereum network |
-| protocol\_data | object |     ✓    | Protocol-specific data object                               |
-
-### TokenProtocolData
-
-Sub-object of [TokenProtocol](/komodo-defi-framework/api/common_structures/#token-protocol) containing platform-specific token information.
-
-| Parameter         | Type   | Required | Description                                                                                                                                                                                                        |
-| ----------------- | ------ | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| platform          | string |     ✓    | The parent coin of the token's platform - e.g `MATIC` for PLG20 tokens                                                                                                                                             |
-| contract\_address | string |     ✓    | **Must be mixed case** The identifying hex string for the token's contract. Can be found on sites like [EthScan](https://etherscan.io/), [BscScan](https://bscscan.com/) & [PolygonScan](https://polygonscan.com/) |
-
-## TokenActivationParams
-
-Standard object structure used in token activation methods for specifying activation parameters.
-
-| Parameter               | Type    | Required | Default | Description                                                                          |
-| ----------------------- | ------- | :------: | :-----: | ------------------------------------------------------------------------------------ |
-| required\_confirmations | integer |     ✗    |   `-`   | Confirmations to wait for steps in swap. Defaults to value in coins file if not set. |
-
 ### NumericFormatsValue
 
 The `NumericFormatsValue` returns a price or amount in three different formats: `fraction`, `rational`, and `decimal`.
@@ -428,3 +284,27 @@ The request was failed due to an Komodo DeFi API internal error.
 | Parameter | Type   | Required | Description                    |
 | --------- | ------ | :------: | ------------------------------ |
 | (none)    | string |     ✓    | the internal error description |
+
+### NftNetworkEnum
+
+| Value     | Description         |
+| --------- | ------------------- |
+| POLYGON   | Polygon network     |
+| FANTOM    | Fantom network      |
+| ETH       | Ethereum network    |
+| BSC       | Binance Smart Chain |
+| AVALANCHE | Avalanche network   |
+
+### NftContractType Enum
+
+| Value   | Description                |
+| ------- | -------------------------- |
+| ERC721  | ERC-721 NFT contract type  |
+| ERC1155 | ERC-1155 NFT contract type |
+
+### NftStatusEnum (for NFT transfers)
+
+| Value   | Description      |
+| ------- | ---------------- |
+| Receive | NFT was received |
+| Send    | NFT was sent     |

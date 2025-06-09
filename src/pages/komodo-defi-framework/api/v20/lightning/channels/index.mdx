@@ -1,7 +1,7 @@
 export const title = "Komodo DeFi Framework Method: Lightning Network Channels";
 export const description = "The methods in this document allow management of Lightning Network Channels on Komodo DeFi Framework.";
 
-# Lightning Network Channels
+# Komodo DeFi Framework Method: Lightning Network Channels
 
 <Note>
   Lightning methods are currently only available using the native Komodo DeFi Framework. WASM support should be available in late 2023.
@@ -11,20 +11,20 @@ export const description = "The methods in this document allow management of Lig
 
 The `lightning::channels::open_channel` method opens a new channel with a remote node.
 
-### Request Parameters
+### Request Arguments
 
-| Parameter        | Type    | Required | Default | Description                                                                                                                                                                                                                                                                                                                                                                 |
-| ---------------- | ------- | :------: | :-----: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin             | string  |     ✓    |    -    | The ticker of the coin you would like to open a channel for.                                                                                                                                                                                                                                                                                                                |
-| node\_address    | string  |     ✓    |    -    | Lightning node addresses always have a format of `node_pubkey`@`ip_address`:`port`.                                                                                                                                                                                                                                                                                         |
-| amount           | object  |     ✓    |    -    | A standard [LightningChannelAmount](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-amount) object.                                                                                                                                                                                                                                               |
-| push\_msat       | integer |     ✗    |   `0`   | The amount in millisatoshi to push to the counterparty while openning, to create inbound liquidity for the channel. Using the `push_msat` parameter avoids having to send funds in a separate request later. Please note that the funds given using push\_msat is given unconditionally, meaning that there is no proof of payment in a preimage as with paying an invoice. |
-| channel\_options | object  |     ✗    |    -    | A standard [LightningChannelOptions](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options) object.                                                                                                                                                                                                                                             |
-| channel\_configs | object  |     ✗    |    -    | A standard [LightningChannelConfig](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-config) object.                                                                                                                                                                                                                                               |
+| Parameter        | Type    | Required | Default | Description                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------- | ------- | :------: | :-----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| coin             | string  |     ✓    |   `-`   | The ticker of the coin you would like to open a channel for.                                                                                                                                                                                                                                                                                                               |
+| node\_address    | string  |     ✓    |   `-`   | Lightning node addresses always have a format of `node_pubkey`@`ip_address`:`port`.                                                                                                                                                                                                                                                                                        |
+| amount           | object  |     ✓    |   `-`   | A standard [LightningChannelAmount](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-amount) object.                                                                                                                                                                                                                                              |
+| push\_msat       | integer |     ✗    |   `0`   | The amount in millisatoshi to push to the counterparty while opening, to create inbound liquidity for the channel. Using the `push_msat` parameter avoids having to send funds in a separate request later. Please note that the funds given using push\_msat is given unconditionally, meaning that there is no proof of payment in a preimage as with paying an invoice. |
+| channel\_options | object  |     ✗    |   `-`   | A standard [LightningChannelOptions](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options) object.                                                                                                                                                                                                                                            |
+| channel\_configs | object  |     ✗    |   `-`   | A standard [LightningChannelConfig](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-config) object.                                                                                                                                                                                                                                              |
 
 #### 📌 Example using an exact amount
 
-<CodeGroup title="" tag="POST" label="open_channel" mm2MethodDecorate="true">
+<CodeGroup title="Open Channel (Exact Amount)" tag="POST" label="open_channel" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -43,24 +43,24 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+<CollapsibleSection expandedText="Hide Open Channel (Exact Amount) Response" collapsedText="Show Open Channel (Exact Amount) Response">
   #### Response
 
   ```json
   {
-  	"mmrpc": "2.0",
-  	"result": {
-  		"uuid": "434681f8-95e5-484f-af49-fa80d8ae857b",
-  		"node_address": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@233.112.95.142:9735"
-  	},
-  	"id": 22
+      "mmrpc": "2.0",
+      "result": {
+          "uuid": "434681f8-95e5-484f-af49-fa80d8ae857b",
+          "node_address": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@233.112.95.142:9735"
+      },
+      "id": 22
   }
   ```
 </CollapsibleSection>
 
 #### 📌 Example using max available with channel options and configs
 
-<CodeGroup title="" tag="POST" label="open_channel" mm2MethodDecorate="true">
+<CodeGroup title="Open Channel (Max Amount with Options)" tag="POST" label="open_channel" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -95,17 +95,17 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+<CollapsibleSection expandedText="Hide Open Channel (Max Amount with Options) Response" collapsedText="Show Open Channel (Max Amount with Options) Response">
   #### Response
 
   ```json
   {
-  	"mmrpc": "2.0",
-  	"result": {
-  		"uuid": "2b50e274-c173-4fa1-95f3-97f9f82ace92",
-  		"node_address": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@203.132.94.196:9735"
-  	},
-  	"id": null
+      "mmrpc": "2.0",
+      "result": {
+          "uuid": "2b50e274-c173-4fa1-95f3-97f9f82ace92",
+          "node_address": "038863cf8ab91046230f561cd5b386cbff8309fa02e3f0c3ed161a3aeb64a643b9@203.132.94.196:9735"
+      },
+      "id": null
   }
   ```
 </CollapsibleSection>
@@ -114,7 +114,7 @@ The `lightning::channels::open_channel` method opens a new channel with a remote
 
 The `lightning::channels::close_channel` method closes a channel with a remote node.
 
-### Request Parameters
+### Request Arguments
 
 | Parameter    | Type    | Required | Default | Description                                                   |
 | ------------ | ------- | :------: | :-----: | ------------------------------------------------------------- |
@@ -129,7 +129,7 @@ The `lightning::channels::close_channel` method closes a channel with a remote n
 
 #### 📌 Example to force closing a channel
 
-<CodeGroup title="" tag="POST" label="close_channel" mm2MethodDecorate="true">
+<CodeGroup title="Close Channel" tag="POST" label="close_channel" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -166,8 +166,10 @@ The `lightning::channels::close_channel` method closes a channel with a remote n
   </DevComment>
 </CollapsibleSection>
 
-<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
-  #### InvalidRequest Error
+<CollapsibleSection expandedText="Hide Close Channel Error Responses" collapsedText="Show Close Channel Error Responses">
+  #### ⚠️ Error Responses
+
+  ##### InvalidRequest Error
 
   ```json
   {
@@ -181,7 +183,7 @@ The `lightning::channels::close_channel` method closes a channel with a remote n
   }
   ```
 
-  #### NoSuchChannel Error
+  ##### NoSuchChannel Error
 
   ```json
   {

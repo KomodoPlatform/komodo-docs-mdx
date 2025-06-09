@@ -1,9 +1,9 @@
 export const title = "Komodo DeFi Framework Method: Best Orders";
 export const description = "The best_orders method returns the best priced trades available on the orderbook.";
 
-# Best Orders {{label : 'best_orders', tag : 'API-v2'}}
+# Komodo DeFi Framework Method: Best Orders
 
-## best_orders
+## best\_orders {{label : 'best_orders', tag : 'API-v2'}}
 
 The `best_orders` method returns the best priced trades available on the orderbook. There are two options for the request, either `volume` or `number`.
 If request is made by `volume`, the returned results will show the best prices for trades that can fill the requested volume.
@@ -17,19 +17,19 @@ For coins with segwit, they may appear twice in the output (once for each addres
 
 ### Request Arguments
 
-| Parameter     | Type   | Required | Default | Description                                                                                                                           |
-| ------------- | ------ | :------: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------- |
-| action        | string | ✓        | -       | A standard [ActionEnum](/komodo-defi-framework/api/common_structures/#action-enum) enum. Whether to `buy` or `sell` the selected coin |
-| coin          | string | ✓        | -       | The ticker of the coin to get best orders                                                                                             |
-| request\_by   | object | ✓        | -       | A standard [RequestBy](/komodo-defi-framework/api/common_structures/orders/#request-by) object.                                       |
-| exclude\_mine | bool   | ✗        | `false` | If `true`, the users orders will be excluded from the response.                                                  |
+| Parameter     | Type   | Required | Default | Description                                                                                                                                  |
+| ------------- | ------ | :------: | :-----: | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| action        | string |     ✓    |   `-`   | A standard [ActionEnum](/komodo-defi-framework/api/common_structures/enums/#action-enum) enum. Whether to `buy` or `sell` the selected coin. |
+| coin          | string |     ✓    |   `-`   | The ticker of the coin to get best orders.                                                                                                   |
+| exclude\_mine | bool   |     ✗    | `false` | If `true`, the users orders will be excluded from the response.                                                                              |
+| request\_by   | object |     ✓    |   `-`   | A standard [RequestBy](/komodo-defi-framework/api/common_structures/orders/#request-by) object.                                              |
 
 ### Response Parameters
 
-| Parameter         | Type          | Description                                                                                                                |
-| ----------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| orders            | object (map)  | the `ticker -> array of standard [OrderData](/komodo-defi-framework/api/common_structures/orders/#order-data) objects` map |
-| original\_tickers | list (string) | Tickers included in response when `orderbook_ticker` is configured for the queried coin in `coins` file                    |
+| Parameter         | Type          | Description                                                                                                                 |
+| ----------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| orders            | object (map)  | The `ticker -> array of standard [OrderData](/komodo-defi-framework/api/common_structures/orders/#order-data) objects` map. |
+| original\_tickers | list (string) | Tickers included in response when `orderbook_ticker` is configured for the queried coin in `coins` file.                    |
 
 #### 📌 Examples
 
@@ -883,8 +883,17 @@ For coins with segwit, they may appear twice in the output (once for each addres
 #### Error Responses
 
 <CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
-  *   `InvalidRequest` - Invalid type (`number` value must be integer)
-  *   `InvalidRequest` - Invalid type (type must be either `volume` or `number`, action mut be either `buy` or `sell`)
-  *   `CoinIsWalletOnly` - Wallet only coins can not be traded.
-  *   `P2PError` - There is a connection problem.
+  #### ⚠️ Error Responses
+
+  ##### InvalidRequest
+
+  Returned if the request type or action is invalid (e.g., `number` value must be integer, or type/action is not allowed).
+
+  ##### CoinIsWalletOnly
+
+  Returned if the coin is wallet only and cannot be traded.
+
+  ##### P2PError
+
+  Returned if there is a connection problem.
 </CollapsibleSection>

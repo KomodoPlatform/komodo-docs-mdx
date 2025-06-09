@@ -103,16 +103,6 @@ async function processFile(filePath, filepathSlugs) {
       });
     })
     .use(() => (tree) => {
-      visit(tree, "link", async (node) => {
-        //Process external links
-        const isExternalURL = /^https?:\/\//;
-        if (isExternalURL.test(node.url)) {
-          await processExternalLink(node.url, filePath);
-          return node.url;
-        }
-      });
-    })
-    .use(() => (tree) => {
       visit(tree, (node, nodeIndex, parentNode) => {
         // if (!filePath.includes("src/pages/komodo-defi-framework")) {
         //   return SKIP;
@@ -234,6 +224,30 @@ function processInternalLink(link, currFilePath, filepathSlugs) {
     //let slugify = slugifyWithCounter();
     slug = slugify(correctUrlSplit[1]);
     correctUrl = correctUrlSplit[0] + "#" + slug;
+  }
+
+  // Enforce that main API index links point to method headings, not subsections
+  if (currFilePath === "src/pages/komodo-defi-framework/api/index.mdx" && 
+      hash && 
+      (correctUrl.includes("/api/v20/") || correctUrl.includes("/api/v20-dev/") || correctUrl.includes("/api/legacy/"))) {
+    
+    // Extract expected method name from the file path
+    const pathParts = correctUrl.split("/");
+    const methodFileName = pathParts[pathParts.length - 2]; // Get the folder name (method name)
+    const expectedSlug = slugify(methodFileName);
+    
+    // Check if the link points to the main method heading
+    if (slug !== expectedSlug) {
+      throw new Error(
+        `API index link validation failed in ${currFilePath}:
+        Link: ${link}
+        Expected to link to main method heading: #${expectedSlug}
+        But found: #${slug}
+        
+        Links in the main API index should point to the main method heading (## ${methodFileName}) 
+        rather than subsections like examples or parameter tables.`
+      );
+    }
   }
 
   if (!Object.hasOwn(filepathSlugs, internalLinkFile)) {

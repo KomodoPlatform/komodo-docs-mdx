@@ -4,7 +4,7 @@ export const description =
 
 import trezorpin from "@/public/images/docs/api-images/trezor_pin.png";
 
-# Task: Tendermint Activation
+# Komodo DeFi Framework Method: Tendermint Coin Activation Tasks
 
 ## task::enable\_tendermint::init {{label : 'task::enable_tendermint::init', tag : 'API-v2'}}
 
@@ -12,17 +12,17 @@ Use this method for task managed activation of Tendermint coins & tokens. Refer 
 
 ### Request Arguments
 
-| Parameter               | Type             | Required |       Default      | Description                                                                                                                                                                                                                                |
-| ----------------------- | ---------------- | :------: | :----------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ticker                  | string           |     ✓    |          -         | Ticker of the platform protocol coin.  Options: `ATOM`, `IRIS`, `OSMOSIS`                                                                                                                                                                  |
-| mm2                     | integer          |     ✗    |          -         | Required if not set in `coins` file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are `0` or `1`                                                                                 |
-| tokens\_params          | array of objects |     ✗    |          -         | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                       |
-| nodes                   | array of objects |     ✓    |          -         | A list of [CoinNode objects](/komodo-defi-framework/api/common_structures/activation/#coin-node).                                                                                                                                          |
-| priv\_key\_policy       | string           |     ✗    | `"ContextPrivKey"` | Value can be `ContextPrivKey`,`Trezor` when Komodo DeFi Framework is built for native platforms. value can be `ContextPrivKey`, `Trezor`, `Metamask` when the Komodo DeFi Framework is built targeting `wasm`                              |
-| tx\_history             | boolean          |     ✗    |       `false`      | If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method                |
-| required\_confirmations | integer          |     ✗    |         `3`        | When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap                                                                                   |
-| requires\_notarization  | boolean          |     ✗    |       `false`      | If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
-| get\_balances           | boolean          |     ✗    |       `true`       | If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                  |
+| Parameter               | Type             | Required |     Default    | Description                                                                                                                                                                                                                              |
+| ----------------------- | ---------------- | :------: | :------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker                  | string           |     ✓    |        -       | Ticker of the platform protocol coin.                                                                                                                                                                                                    |
+| nodes                   | array of objects |     ✓    |        -       | A list of [CoinNode objects](/komodo-defi-framework/api/common_structures/activation/#coin-node).                                                                                                                                        |
+| mm2                     | integer          |     ✗    |        -       | Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are 0 or 1.                                                                                    |
+| priv\_key\_policy       | string           |     ✗    | ContextPrivKey | Value can be [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum).                                                                                                         |
+| required\_confirmations | integer          |     ✗    |        3       | When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap.                                                                                |
+| requires\_notarization  | boolean          |     ✗    |      false     | If true, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
+| tokens\_params          | array of objects |     ✗    |        -       | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                     |
+| tx\_history             | boolean          |     ✗    |      false     | If true the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to true to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method.                 |
+| get\_balances           | boolean          |     ✗    |      true      | If false, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                  |
 
 ### Response Parameters
 
@@ -34,7 +34,7 @@ Use this method for task managed activation of Tendermint coins & tokens. Refer 
 
 #### Activation in Trezor mode
 
-<CodeGroup title="task::enable_tendermint::init" tag="POST" label="task::enable_tendermint::init" mm2MethodDecorate="true">
+<CodeGroup title="Tendermint Activation (Trezor mode)" tag="POST" label="task::enable_tendermint::init" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -92,11 +92,11 @@ The response will return the following:
 | Parameter            | Type    | Required | Default | Description                                                                 |
 | -------------------- | ------- | :------: | :-----: | --------------------------------------------------------------------------- |
 | task\_id             | integer |     ✓    |    -    | The identifying number returned when initiating the initialisation process. |
-| forget\_if\_finished | boolean |     ✗    |  `true` | If `false`, will return final response for completed tasks.                 |
+| forget\_if\_finished | boolean |     ✗    |   true  | If false, will return final response for completed tasks.                   |
 
 #### Command
 
-<CodeGroup title="task::enable_tendermint::status" tag="POST" label="task::enable_tendermint::status" mm2MethodDecorate="true">
+<CodeGroup title="Tendermint Activation Status" tag="POST" label="task::enable_tendermint::status" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -120,7 +120,6 @@ The response will return the following:
 | balance          | object           | Only returned when `get_balances` is `true`. A standard [BalanceInfos](/komodo-defi-framework/api/common_structures/wallet/#balance-info) object.                             |
 | tokens\_balances | array of objects | Only returned when `get_balances` is `true`. A list of standard [AddressInfo](/komodo-defi-framework/api/common_structures/wallet/#address-info) objects, one for each token. |
 | tokens\_tickers  | array            | Only returned when `get_balances` is `false`. A list of each token which was activated.                                                                                       |
-|                  |                  |                                                                                                                                                                               |
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   ```json

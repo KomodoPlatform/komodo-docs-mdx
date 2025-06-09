@@ -1,5 +1,14 @@
 # Komodo Documentation Repository Rules
 
+# Enum Naming Consistency
+- All enum section headings must use Bluebook title case, no spaces, and end with 'Enum' (e.g., EthPrivKeyActivationPolicyEnum). Anchor links must match this format.
+
+# Kebab-Case Anchor and Slug Requirement
+- All anchor links and section slugs (e.g., for enums) must use kebab-case (lowercase, hyphen-separated).
+
+# Sidebar Navigation Requirements
+- Whenever a documentation page is created, moved, or deleted, the corresponding entry in `sidebar.json` must be added, updated, or removed to match.
+
 ## Style Guide Context
 Always follow the style guide located at STYLE_GUIDE.md in the root of this repository.
 
@@ -8,11 +17,16 @@ Key style guide requirements:
 - Use Bluebook title case for headings and products
 - Use sentence case for menu items, tabs, buttons, links
 - Use 4-space indent in code blocks
-- Use `#` for page headings, `##` for subheadings, `###` for request/response parameter tables, `####` for request/response examples
+- Use `#` for page headings. These MUST match the text in `const title = ` at the top of the page. For KDF Methods, it should follow the format `Komodo DeFi Framework Method: stream::orderbook::enable`.
+- Use `##` for subheadings. These are generally method names. This line should also include label/tag like `{{label : 'method_name', tag : 'API-v2'}}`.
+- Use `###` for request argument/response parameter table titles.
+- Use `####` for request/response examples (like #### 📌 Examples and #### ⚠️ Error Responses)
+- Each request should be in a codeGroup. Its response should be in a CollapsibleSection. There should only be one response per Collapsible section. 
 - Use absolute links for internal docs starting from /pages folder
 - For KDF API methods, userpass should always be `RPC_UserP@SSW0RD`
 - Request parameter tables must have 5 columns: Parameter, Type, Required, Default, Description
-- Parameters should be listed alphabetically within their groupings (required parameters first, then optional parameters)
+- **OPTIMIZATION**: If there are no optional parameters (all parameters are required), use a 4-column format: Parameter, Type, Required, Description (omitting the Default column)
+- Parameters should be listed alphabetically within their groupings (required first, then optional)
 - Required column should contain "✓" for required parameters and "✗" for optional parameters (centered alignment)
 - Default column should contain the default value for optional parameters, or "-" for required/no default parameters (centered alignment)
 - Response parameter tables have 3 columns: Parameter, Type, Description (alphabetically ordered)
@@ -36,3 +50,19 @@ Key style guide requirements:
 - Tag (for CRUD operations)
 
 Before making any documentation changes, YOU MUST ALWAYS reference STYLE_GUIDE.md for complete requirements. 
+
+# Enum and Common Object Rule
+Always look for opportunities to use or create common objects and enums in documentation and code. Use enums for parameters or response values with a fixed set of possible values.
+
+# Documentation Formatting Rules
+- Default values in parameter tables must be wrapped in backticks (e.g., `10`, `false`).
+- If no default values are defined for any parameter, omit the Default column entirely. If any parameter has a default value, the Default column must be present and all default values must be wrapped in backticks (e.g., `10`, `false`).
+- Optional boolean parameters must always have a default value specified in the request parameter table, and it must be wrapped in backticks (e.g., `false`).
+
+# MDX File Requirements
+- All MDX files, especially `index.mdx` files, must begin with `export const title = ...` and `export const description = ...` at the very top of the file. Never remove these fields.
+
+# Sidebar and Method Heading Naming Rules
+- In sidebar.json, the `title` value for each method link must be the **exact API method name** (e.g., `lightning::payments::send_payment`), not a humanized or prettified version. The only exception is when the link does not point to a method (e.g., overview or non-method pages).
+- The same rule applies to the `## MethodName` heading in each method MDX file: it must match the exact API method name.
+- This is a strict requirement for all new and existing documentation.

@@ -1,0 +1,67 @@
+export const title = "Generate Invoice";
+export const description = "Generate a Lightning Network invoice using the Komodo DeFi Framework.";
+
+# Generate Invoice
+
+## Generate Invoice {{label : 'lightning::payments::generate_invoice', tag : 'API-v2'}}
+
+The `lightning::payments::generate_invoice` method generates an invoice to be paid by another node.
+
+### Request Arguments
+
+| Parameter        | Type    | Required | Default | Description                                                                                                                                                |
+| ---------------- | ------- | :------: | :-----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| amount_in_msat | integer |     ✓    |   `-`   | Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter) (a thousandth of a satoshi; the same as 0.00000000001 bitcoin). |
+| coin             | string  |     ✓    |   `-`   | Ticker of coin to generate invoice for.                                                                                                                    |
+| description      | string  |     ✓    |   `-`   | A note to indicate the purpose of the invoice.                                                                                                             |
+| expiry           | integer |     ✗    |  `3600` | Seconds until the invoice expires.                                                                                                                         |
+
+#### 📌 Example
+
+<CodeGroup title="Generate Invoice" tag="POST" label="lightning::payments::generate_invoice" mm2MethodDecorate="true">
+  ```json
+  {
+    "method": "lightning::payments::generate_invoice",
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "params": {
+      "coin": "tBTC-lightning",
+      "description": "For the burger on Tuesday",
+      "amount_in_msat": 10000,
+      "expiry": 600
+    },
+    "id": 1
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+   "mmrpc": "2.0",
+   "result": {
+    "payment_hash": "3ff39605f214a4b4159f9c4f44c94de3a273f300042ca18b7cb3d62f270a9ebc",
+    "invoice": "lntb100n1pj9aq73dpggehhygr5dpjjqcn4wfnk2u3qdahzq4r4ekgctenp4qf3dqylh55jd8m5x5hh0g5q82h9p86yghwhl2s0t826nlyp8zdgjzpp58leevp0jzjjtg9vln385fj2duw388ucqqsk2rzmuk0tz7fc2n67qsp5k33rvvq46xtuppl22ggcq5q7qqywyekcemhzazt4m6vulwsarcrq9qyysgqcqpcxqzjcrzjqwyx8nu2hygyvgc02cwdtvuxe0lcxz06qt3lpsldzcdr46my5epmjfgaasqqqvqqqqqqqqlgqqqqqqgq9qpwesnhre7xmdg6tajvp939vl72vxm8csecy6hfcah9fzgazd5eyzjskgtt7u9xshj7gq2vkejjcquem08tqfrc2pj78xa95teazzf0qq7pnyqj"
+   },
+   "id": 1
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ### InvalidRequest (invalid paramater value)
+
+  ```json
+  {
+   "mmrpc": "2.0",
+   "error": "Error parsing request: invalid type: string '56', expected u64",
+   "error_path": "dispatcher",
+   "error_trace": "dispatcher:109]",
+   "error_type": "InvalidRequest",
+   "error_data": "invalid type: string '56', expected u64",
+   "id": 762
+  }
+  ```
+</CollapsibleSection> 

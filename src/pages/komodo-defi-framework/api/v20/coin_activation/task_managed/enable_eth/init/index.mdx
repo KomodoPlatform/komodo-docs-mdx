@@ -1,0 +1,123 @@
+export const title = "task::enable_eth::init";
+export const description = "Task managed activation of ETH/EVM coins and tokens.";
+
+# task::enable_eth::init
+
+## task::enable_eth::init {{label : 'task::enable_eth::init', tag : 'API-v2'}}
+
+Use this method for task managed activation of ETH/EVM coins & tokens. Refer to the [task managed activation overview](/komodo-defi-framework/api/v20/coin_activation/task_managed/) for activation of other coin types.
+
+### Request Arguments
+
+| Parameter                   | Type             | Required |      Default      | Description                                                                                                                                                                                                                                       |
+| --------------------------- | ---------------- | :------: | :---------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker                      | string           |     ✓    |         -         | Ticker of the EVM platform coin you want to enable.                                                                                                                                                                                               |
+| swap_contract_address       | string           |     ✓    |         -         | Address of etomic swap smart contract.                                                                                                                                                                                                            |
+| nodes                       | array of objects |     ✓    |         -         | A list of standard [CoinNode](/komodo-defi-framework/api/common_structures/activation/#coin-node) objects.                                                                                                                                        |
+| mm2                         | integer          |     ✗    |         -         | Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are 0 or 1.                                                                                             |
+| fallback_swap_contract      | string           |     ✗    |         -         | Address of backup etomic swap smart contract.                                                                                                                                                                                                     |
+| erc20_tokens_requests       | array of objects |     ✗    |         -         | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                              |
+| gas_station_url             | string           |     ✗    |         -         | A url for gas station api.                                                                                                                                                                                                                        |
+| gas_station_decimals        | integer          |     ✗    |         8         | For ETH/ERC20 and other gas model chains. Defines the decimals used to denominate the gas station response to gwei units.                                                                                                                         |
+| gas_station_policy.policy   | string           |     ✗    | `MeanAverageFast` | For ETH/ERC20 and other gas model chains. Defines the method of gas price calculation from the station response. Value can be [GasStationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#gas-station-policy-enum).                |
+| get_balances                | boolean          |     ✗    |        true       | If false, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                           |
+| priv_key_policy             | string           |     ✗    |   ContextPrivKey  | Value can be [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum).                                                                                                                  |
+| required_confirmations      | integer          |     ✗    |         3         | When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap.                                                                                         |
+| requires_notarization       | boolean          |     ✗    |       false       | If true, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step.          |
+| rpc_mode                    | string           |     ✗    |      Default      | Value can be [EthRpcModeEnum](/komodo-defi-framework/api/common_structures/enums/#eth-rpc-mode-enum).                                                                                                                                             |
+| tx_history                  | boolean          |     ✗    |       false       | If true the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to true to use the [my_tx_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method.                          |
+| nft_req                     | object           |     ✗    |         -         | Non-HD only. Encapsulates the request parameters for NFT activation, including NFT provider configuration.                                                                                                                                        |
+| min_addresses_number        | integer          |     ✗    |         -         | HD wallets only. How many additional addresses to generate at a minimum.                                                                                                                                                                          |
+| scan_policy                 | string           |     ✗    |         -         | HD wallets only. Whether or not to scan for new addresses. See [ScanPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#scan-policy-enum).                                                                                            |
+| gap_limit                   | integer          |     ✗    |         -         | HD wallets only. The max number of empty addresses in a row. If transactions were sent to an address outside the gap_limit, they will not be identified when scanning.                                                                           |
+| path_to_address             | object           |     ✗    |         -         | HD wallets only. A standard [AddressDerivationPath](/komodo-defi-framework/api/common_structures/wallet/#address-derivation-path) object.                                                                                                         |
+| swap_v2_contracts           | object           |     ✗    |         -         | Must be provided if "use_trading_proto_v2" is true in [your configuration](/komodo-defi-framework/setup/configure-mm2-json/). A standard [SwapV2Contracts](/komodo-defi-framework/api/common_structures/activation/#swap-v2-contracts) object. |
+
+### Response Parameters
+
+| Parameter | Type   | Description                                                                                                           |
+| --------- | ------ | --------------------------------------------------------------------------------------------------------------------- |
+| status    | string | A short indication of how the enabling is progressing.                                                                |
+| details   | object | Depending on the state of enabling progress, this will contain different information as shown in the responses below. |
+
+Possible `status` values while activation is in progress:
+
+*   `ActivatingCoin`: The first step of activation. It does not require any action from the user.
+*   `RequestingWalletBalance`: The first step of activation, while initial balances info is being requested. It does not require any action from the user.
+*   `Finishing`: Activation process completed
+*   `WaitingForTrezorToConnect`: Waiting for the user to plugin a Trezor device
+*   `FollowHwDeviceInstructions`: Waiting for the user to follow the instructions on the device
+
+Once complete, `status`  will be `Ok`, and the `details` object will have the following structure:
+
+### Response Parameters
+
+| Parameter | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| task_id   | integer | An identifying number which is used to query task status. |
+
+#### 📌 Examples
+
+#### Activation in Trezor mode
+
+<CodeGroup title="ETH/EVM Activation (Trezor mode)" tag="POST" label="task::enable_eth::init" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "task::enable_eth::init",
+    "params": {
+      "ticker": "MATIC",
+      "gas_station_url": "https://gasstation-mainnet.matic.network/",
+      "swap_contract_address": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+      "fallback_swap_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+      "swap_v2_contracts": {
+        "taker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+        "maker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE",
+        "nft_maker_swap_v2_contract": "0x9130b257D37A52E52F21054c4DA3450c72f595CE"
+      },
+      "nodes": [
+        {
+          "url": "https://polygon-rpc.com"
+        },
+        {
+          "url": "https://poly-rpc.gateway.pokt.network"
+        }
+      ],
+      "erc20_tokens_requests": [
+        {
+          "ticker": "PGX-PLG20",
+          "required_confirmations": 4
+        },
+        {
+          "ticker": "AAVE-PLG20",
+          "required_confirmations": 4
+        }
+      ],
+      "required_confirmations": 5,
+      "path_to_address": {
+        "account_id": 0,
+        "chain": "External",
+        "address_id": 1
+      },
+      "gap_limit": 20,
+      "scan_policy": "scan_if_new_wallet",
+      "min_addresses_number": 3
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "task_id": 1
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection> 
