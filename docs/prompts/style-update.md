@@ -1,2 +1,6 @@
+## Global
 Please scan the files in @api and its subfolders (recursively) to identify files in need of update to comply with the style guide standards.
 Use this to create an "style update progress" document, to track progress to 100% compliance. After creating this document, proceed with updating files that were identified as non-compliant in batches of 5. 
+
+## Single file
+Please scan @filename and update to ensure it complies with the style guide standards.
