@@ -4,10 +4,10 @@ Content for the Komodo Developer Docs lives in this repo in `.mdx` format. This 
 
 ## Getting Started
 
-- **[Style Guide](STYLE_GUIDE.md)** - Complete documentation standards including KDF API methods, table formats, and example best practices
-- **[Contribution Guide](CONTRIBUTION_GUIDE.md)** - Pull request submission process
+- **[Style Guide](docs/STYLE_GUIDE.md)** - Complete documentation standards including KDF API methods, table formats, and example best practices
+- **[Contribution Guide](docs/CONTRIBUTION_GUIDE.md)** - Pull request submission process
 - **[Sidebar Configuration](https://github.com/KomodoPlatform/komodo-docs-mdx/blob/main/src/data/sidebar.json)** - Add new pages to site navigation
-- **[Code of Conduct](CODE_OF_CONDUCT.md)** - Community guidelines
+- **[Code of Conduct](docs/CODE_OF_CONDUCT.md)** - Community guidelines
 
 ## JSON Example Structure
 

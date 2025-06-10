@@ -18,5 +18,9 @@ const oldRedirectURLs = Object.keys(redirectMap);
 const missingRedirectURLs = relevantOldDocsURLs.filter(
   (item) => !oldRedirectURLs.includes(item)
 );
-console.log("#### missingRedirectURLs ####");
-console.log(JSON.stringify(missingRedirectURLs, null, 2));
+if (missingRedirectURLs.length > 0) {
+  console.log("#### missingRedirectURLs ####");
+  console.log(JSON.stringify(missingRedirectURLs, null, 2));
+} else {
+  console.log("No missing redirects found");
+}
