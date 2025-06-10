@@ -11,6 +11,7 @@ import { removedWords } from "./_removed_search_words.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '../../');
 const pagesDir = path.resolve(__dirname, '../../src/pages');
 const dataDir = path.resolve(__dirname, '../../src/data');
 
@@ -247,8 +248,8 @@ const runSearchIndexingOnAllMdxFiles = async () => {
           ${error}`);
       }
     }
-    fs.writeFileSync(path.resolve(__dirname, '../../utils/_searchIndex.json'), JSON.stringify(mdxFileWordsResultsWithFilePaths));
-    fs.writeFileSync(path.resolve(__dirname, '../../utils/_allMdxFileContentTree.json'), JSON.stringify(allMdxFileContentTree));
+    fs.writeFileSync(path.join(projectRoot, '_searchIndex.json'), JSON.stringify(mdxFileWordsResultsWithFilePaths));
+    fs.writeFileSync(path.join(projectRoot, '_allMdxFileContentTree.json'), JSON.stringify(allMdxFileContentTree));
   } catch (error) {
     throw new Error(error);
   }

@@ -5,10 +5,11 @@ import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '../../');
 const pagesDir = path.resolve(__dirname, '../../src/pages');
 const dataDir = path.resolve(__dirname, './data');
 const imgDir = path.resolve(__dirname, '../../src/images');
-const authorsData = JSON.parse(fs.readFileSync(path.join(dataDir, 'authors.json'), 'utf8'));
+const authorsData = JSON.parse(fs.readFileSync(path.join(projectRoot, 'authors.json'), 'utf8'));
 const oldFileData = JSON.parse(fs.readFileSync(path.join(dataDir, '_fileData_old_documentation_mod.json'), 'utf8'));
 import dotenv from 'dotenv';
 dotenv.config();
@@ -99,7 +100,7 @@ const fileData = {};
         throw new Error(error)
     }
 
-    fs.writeFileSync(path.join(dataDir, 'authors.json'), JSON.stringify(authorsData, null, 4))
+    fs.writeFileSync(path.join(projectRoot, 'authors.json'), JSON.stringify(authorsData, null, 4))
 
 
     walkDir(pagesDir, getAllFileData);
