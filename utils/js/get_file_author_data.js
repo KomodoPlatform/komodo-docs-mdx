@@ -22,17 +22,29 @@ const fileData = {};
 
     const userDataUrl = (login) => `https://api.github.com/users/${login}`
 
+    // Robust GitHub token selection
+    const GITHUB_TOKEN =
+        process.env.LOCAL_GH_TOKEN ||
+        process.env.GH_TOKEN ||
+        process.env.GITHUB_TOKEN;
+
+    if (!GITHUB_TOKEN) {
+        throw new Error('No GitHub token found in environment variables. Please set LOCAL_GH_TOKEN, GH_TOKEN, or GITHUB_TOKEN.');
+    }
+
     const options = {
         headers: {
             'User-Agent': 'komodo-docs-mdx-ci',
             'Accept': 'application/vnd.github+json',
             'X-GitHub-Api-Version': '2022-11-28',
-            'Authorization': `Bearer ${process.env.LOCAL_GH_TOKEN ?? process.env.GH_TOKEN}`
+            'Authorization': `Bearer ${GITHUB_TOKEN}`
         }
     };
+    console.log(GITHUB_TOKEN)
 
     try {
         const { response: contributorsRes } = await httpsGet(allContributorsDataUrl, options)
+        console.log(contributorsRes)
         const contributorData = JSON.parse(contributorsRes)
         const { response: commitsRes } = await httpsGet(latest100CommitsUrl, options)
         const commitData = JSON.parse(commitsRes)
