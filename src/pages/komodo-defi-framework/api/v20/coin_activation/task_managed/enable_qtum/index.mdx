@@ -1,239 +1,26 @@
-export const title = "Komodo DeFi Framework: QTUM Activation Tasks";
-export const description =
-  "The methods in this document allow activation of QTUM.";
+export const title = "Komodo DeFi Framework Method: QTUM Coin Activation Tasks";
+export const description = "Overview of task managed activation methods for QTUM ecosystem coins.";
 
-import trezorpin from "@/public/images/docs/api-images/trezor_pin.png";
+# Komodo DeFi Framework Method: QTUM Coin Activation Tasks
 
-# Komodo DeFi Framework Method: QTUM Activation Tasks
+## task::enable\_qtum {{label : 'task::enable_qtum', tag : 'API-v2'}}
 
-## task::enable\_qtum::init {{label : 'task::enable_qtum::init', tag : 'API-v2'}}
+This section provides an overview of the task managed activation methods for QTUM ecosystem coins. Each method is now documented in its own dedicated page:
 
-Use this method for task managed activation of QTUM coins and tokens. Refer to the [task managed activation overview](/komodo-defi-framework/api/v20/coin_activation/task_managed/) for activation of other coin types.
+### Task Enable QTUM Init
 
-### Request Arguments
+See [task::enable\_qtum::init](/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_qtum/init/) for initializing QTUM coin activation.
 
-| Parameter          | Type   | Required |     Default    | Description                                                                                                                                                                                |
-| ------------------ | ------ | :------: | :------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| ticker             | string |     ✓    |        -       | Ticker of the QTUM-based coin you want to enable.                                                                                                                                          |
-| activation\_params | object |     ✓    |        -       | A standard [ActivationParams](/komodo-defi-framework/api/common_structures/activation/#activation-params) object containing activation configuration parameters for QTUM coins and tokens. |
-| priv\_key\_policy  | string |     ✗    | ContextPrivKey | Value can be [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum).                                                           |
+### Task Enable QTUM Status
 
-### Response Parameters
+See [task::enable\_qtum::status](/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_qtum/status/) for checking the status of QTUM coin activation.
 
-| Parameter | Type    | Description                                               |
-| --------- | ------- | --------------------------------------------------------- |
-| task\_id  | integer | An identifying number which is used to query task status. |
+### Task Enable QTUM User Action
 
-#### 📌 Examples
+See [task::enable\_qtum::user\_action](/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_qtum/user_action/) for providing user action (e.g., Trezor PIN) during activation.
 
-#### Command
+### Task Enable QTUM Cancel
 
-<CodeGroup title="QTUM Activation (Trezor mode)" tag="POST" label="task::enable_qtum::init" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "RPC_UserP@SSW0RD",
-    "mmrpc": "2.0",
-    "method": "task::enable_qtum::init",
-    "params": {
-      "ticker": "QTUM",
-      "activation_params": {
-        "mode": {
-          "rpc": "Electrum",
-          "rpc_data": {
-            "servers": [
-              {
-                "url": "electrum2.cipig.net:10050"
-              },
-              {
-                "url": "electrum3.cipig.net:20050",
-                "ws_url": "electrum3.cipig.net:30050",
-                "protocol": "SSL"
-              }
-            ]
-          }
-        },
-        "scan_policy": "scan_if_new_wallet",
-        "priv_key_policy": "Trezor",
-        "min_addresses_number": 3,
-        "gap_limit": 20
-      }
-    }
-  }
-  ```
-</CodeGroup>
+See [task::enable\_qtum::cancel](/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_qtum/cancel/) for cancelling QTUM coin activation.
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": {
-      "task_id": 1
-    },
-    "id": null
-  }
-  ```
-</CollapsibleSection>
-
-## task::enable\_qtum::status {{label : 'task::enable_qtum::status', tag : 'API-v2'}}
-
-After running the `task::enable_qtum::init` method, we can query the status of activation to check its progress.
-The response will return the following:
-
-*   Result of the task (success or error)
-*   Progress status (what state the task is in)
-*   Required user action (what user should do before the task can continue)
-
-### Request Arguments
-
-| Parameter            | Type    | Required | Default | Description                                                                 |
-| -------------------- | ------- | :------: | :-----: | --------------------------------------------------------------------------- |
-| task\_id             | integer |     ✓    |    -    | The identifying number returned when initiating the initialisation process. |
-| forget\_if\_finished | boolean |     ✗    |   true  | If false, will return final response for completed tasks.                   |
-
-#### Request
-
-<CodeGroup title="QTUM Activation Status" tag="POST" label="task::enable_qtum::status" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "RPC_UserP@SSW0RD",
-    "mmrpc": "2.0",
-    "method": "task::enable_qtum::status",
-    "params": {
-      "task_id": 0,
-      "forget_if_finished": false
-    }
-  }
-  ```
-</CodeGroup>
-
-The response formats for this method are the same as the [task managed activation](/komodo-defi-framework/api/v20/coin_activation/task_managed/) responses.
-
-## task::enable\_qtum::user\_action {{label : 'task::enable_qtum::user_action', tag : 'API-v2'}}
-
-If the `task::enable_qtum::status` returns `UserActionRequired`, we need to use the `task::enable_qtum::user_action` method to enter our PIN
-
-### Request Arguments
-
-| Parameter                 | Type            | Required | Description                                                                                                                                                                                      |
-| ------------------------- | --------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| task\_id                  | integer         |     ✓    | The identifying number returned when initiating the initialisation process.                                                                                                                      |
-| user\_action              | object          |     ✓    | Object containing the params below                                                                                                                                                               |
-| user\_action.action\_type | string          |     ✓    | Will be `TrezorPin` for this method                                                                                                                                                              |
-| user\_action.pin          | string (number) |     ✓    | When the Trezor device is displaying a grid of numbers for PIN entry, this param will contain your Trezor pin, as mapped through your keyboard numpad. See the image below for more information. |
-
-<OptimizedImage src={trezorpin} classNaming="w-full" alt="Trezor Pin" />
-
-### Response Parameters
-
-| Parameter | Type   | Description                 |
-| --------- | ------ | --------------------------- |
-| result    | string | The outcome of the request. |
-
-#### 📌 Examples
-
-#### Command
-
-<CodeGroup title="task::enable_qtum::user_action" tag="POST" label="task::enable_qtum::user_action" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "RPC_UserP@SSW0RD",
-    "mmrpc": "2.0",
-    "method": "task::enable_qtum::user_action",
-    "params": {
-      "task_id": 0,
-      "user_action": {
-        "action_type": "TrezorPin",
-        "pin": "862743"
-      }
-    }
-  }
-  ```
-</CodeGroup>
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (success)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": "success",
-    "id": null
-  }
-  ```
-</CollapsibleSection>
-
-## Error Cases
-
-`CoinCreationError`: Returned when a coin is not supported.
-
-```json
-{
-  "mmrpc": "2.0",
-  "result": {
-    "status": "Error",
-    "details": {
-      "error": "Error on platform coin QTUM creation: Coin doesn't support Trezor hardware wallet. Please consider adding the 'trezor_coin' field to the coins config",
-      "error_path": "lib.init_qtum_activation.utxo_coin_builder",
-      "error_trace": "lib:103] init_qtum_activation:71] utxo_coin_builder:234]",
-      "error_type": "CoinCreationError",
-      "error_data": {
-        "ticker": "QTUM",
-        "error": "Coin doesn't support Trezor hardware wallet. Please consider adding the 'trezor_coin' field to the coins config"
-      }
-    }
-  },
-  "id": null
-}
-```
-
-## task::enable\_qtum::cancel {{label : 'task::enable_qtum::cancel', tag : 'API-v2'}}
-
-If you want to cancel the enabling process before it has completed, you can use this method.
-
-### Request Arguments
-
-| Parameter | Type    | Required | Description                                                           |
-| --------- | ------- | :------: | --------------------------------------------------------------------- |
-| task\_id  | integer |     ✓    | The identifying number returned when initiating the enabling process. |
-
-### Response Parameters
-
-| Parameter    | Type   | Description                                                    |
-| ------------ | ------ | -------------------------------------------------------------- |
-| result       | string | Indicates task cancellation was succesful.                     |
-| error        | string | An error message to explain what went wrong.                   |
-| error\_path  | string | An indicator of the class or function which reurned the error. |
-| error\_trace | string | An indicator of where in the source code the error was thrown. |
-| error\_type  | string | An enumerated value for the returned error.                    |
-| error\_data  | string | The input task ID which resulted in the error.                 |
-
-#### 📌 Examples
-
-#### Command
-
-<CodeGroup title="task::enable_qtum::cancel" tag="POST" label="task::enable_qtum::cancel" mm2MethodDecorate="true">
-  ```json
-  {
-    "userpass": "RPC_UserP@SSW0RD",
-    "method": "task::enable_qtum::cancel",
-    "mmrpc": "2.0",
-    "params": {
-      "task_id": 3
-    }
-  }
-  ```
-</CodeGroup>
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (success)
-
-  ```json
-  {
-    "mmrpc": "2.0",
-    "result": "success",
-    "id": null
-  }
-  ```
-</CollapsibleSection>
+<TocForIndex />

@@ -15,6 +15,13 @@ import remarkGfm from "remark-gfm";
 import remarkMdx from "remark-mdx";
 import slugify, { slugifyWithCounter } from "@sindresorhus/slugify";
 import { toString } from "mdast-util-to-string";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const pagesDir = path.resolve(__dirname, '../../src/pages');
+const dataDir = path.resolve(__dirname, './data');
+const projectRoot = path.resolve(__dirname, '../../');
 
 const manualLinkFile = "links-to-manually-check";
 if (fs.existsSync(manualLinkFile)) {
@@ -24,14 +31,14 @@ if (fs.existsSync(manualLinkFile)) {
 (async function () {
   try {
     let filepaths = [];
-    walkDir("./src/pages", (filepath) => {
+    walkDir(pagesDir, (filepath) => {
       if (!filepath.toLowerCase().includes(".ds_store")) {
         filepaths.push(filepath)
       }
     });
     await createFileSlugs(filepaths); // can comment on repeat runs, while fixing internal links and not changing headings in content
 
-    let filepathSlugs = JSON.parse(fs.readFileSync("filepathSlugs.json"));
+    let filepathSlugs = JSON.parse(fs.readFileSync(path.join(dataDir, "filepathSlugs.json")));
     for (let index = 0; index < filepaths.length; index++) {
       const filePath = filepaths[index];
       await processFile(filePath, filepathSlugs);
@@ -71,7 +78,7 @@ async function createFileSlugs(filepaths) {
   }
 
   fs.writeFileSync(
-    "filepathSlugs.json",
+    path.join(dataDir, "filepathSlugs.json"),
     JSON.stringify(filepathSlugs, null, 2)
   );
 }
@@ -160,7 +167,7 @@ function processInternalLink(link, currFilePath, filepathSlugs) {
     return link;
   }
 
-  let filePath = "src/pages";
+  let filePath = pagesDir;
   let strippedPath = link.split("#")[0]; // strips hash
   if (strippedPath.endsWith("/")) {
     strippedPath = strippedPath.slice(0, -1);
@@ -234,7 +241,21 @@ function processInternalLink(link, currFilePath, filepathSlugs) {
     // Extract expected method name from the file path
     const pathParts = correctUrl.split("/");
     const methodFileName = pathParts[pathParts.length - 2]; // Get the folder name (method name)
-    const expectedSlug = slugify(methodFileName);
+    const fileContent = fs.readFileSync(internalLinkFile, 'utf-8');
+    const lines = fileContent.split('\n');
+    let methodHeading = null;
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('## ')) {
+        // Extract the heading text before any {{label ...}}
+        methodHeading = trimmed.slice(3).split('{{')[0].trim();
+        break;
+      }
+    }
+    if (!methodHeading) {
+      throw new Error(`Could not find main method heading (## ...) in file: ${internalLinkFile}`);
+    }
+    const expectedSlug = slugify(methodHeading);
     
     // Check if the link points to the main method heading
     if (slug !== expectedSlug) {
@@ -244,7 +265,7 @@ function processInternalLink(link, currFilePath, filepathSlugs) {
         Expected to link to main method heading: #${expectedSlug}
         But found: #${slug}
         
-        Links in the main API index should point to the main method heading (## ${methodFileName}) 
+        Links in the main API index should point to the main method heading (## ${methodHeading}) 
         rather than subsections like examples or parameter tables.`
       );
     }
@@ -370,9 +391,12 @@ function hasValidTitleDescExportsImgImports(children, filePath) {
           if (!importImgPath.startsWith("@/public/images/docs")) {
             invalidImagePaths.push(importImgPath)
           } else {
-            let imagePath = importImgPath.replace("@/public/images/docs", "src/images");
-            if (!fs.existsSync(imagePath)) {
-              imagesNotFound.push(imagePath)
+            let imagePath = importImgPath.startsWith("@/public/images/docs")
+                ? importImgPath.replace("@/public/images/docs", "src/images")
+                : importImgPath;
+            const absImagePath = path.resolve(projectRoot, imagePath);
+            if (!fs.existsSync(absImagePath)) {
+              imagesNotFound.push(absImagePath)
             }
           }
         }

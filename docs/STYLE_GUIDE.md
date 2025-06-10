@@ -198,3 +198,32 @@ The `Tag` component is primarily used to display API versioning and deprecation 
 - In `sidebar.json`, the `title` value for each method link must be the **exact API method name** (e.g., `lightning::payments::send_payment`), not a humanized or prettified version. The only exception is when the link does not point to a method (e.g., overview or non-method pages).
 - The same rule applies to the `## MethodName` heading in each method MDX file: it must match the exact API method name.
 - This is a strict requirement for all new and existing documentation.
+
+## Overview Page Heading Hierarchy
+
+- Use `#` for the page title (matches `export const title = ...`).
+- Use `##` for the main group or overview section (e.g., `## Withdraw Tasks`).
+- Use `###` for each sub-method or sub-section under that group (e.g., `### Task Withdraw Init`).
+- This ensures a clear, consistent hierarchy and improves navigation and anchor generation.
+
+**Example Structure:**
+
+```mdx
+# Komodo DeFi Framework Method: task::withdraw
+
+## Withdraw Tasks
+
+Overview of all withdraw task-managed methods. See below for details and cross-links to related wallet and transaction documentation.
+
+### Task Withdraw Init
+See [task::withdraw::init](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/init/) for preparing a withdrawal transaction.
+
+### Task Withdraw Status
+See [task::withdraw::status](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/status/) for checking the status of a withdrawal transaction.
+
+### Task Withdraw User Action
+See [task::withdraw::user_action](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/user_action/) for providing user action (e.g., Trezor PIN) during withdrawal.
+
+### Task Withdraw Cancel
+See [task::withdraw::cancel](/komodo-defi-framework/api/v20/wallet/task_managed/withdraw/cancel/) for cancelling a withdrawal transaction preparation.
+```

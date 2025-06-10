@@ -2,8 +2,14 @@ import fs from 'fs';
 import https from 'https';
 import path from 'path';
 import { spawnSync } from 'child_process';
-const authorsData = JSON.parse(fs.readFileSync("./authors.json", 'utf8'));
-const oldFileData = JSON.parse(fs.readFileSync("./utils/_fileData_old_documentation_mod.json", 'utf8'));
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const pagesDir = path.resolve(__dirname, '../../src/pages');
+const dataDir = path.resolve(__dirname, './data');
+const imgDir = path.resolve(__dirname, '../../src/images');
+const authorsData = JSON.parse(fs.readFileSync(path.join(dataDir, 'authors.json'), 'utf8'));
+const oldFileData = JSON.parse(fs.readFileSync(path.join(dataDir, '_fileData_old_documentation_mod.json'), 'utf8'));
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -81,15 +87,15 @@ const fileData = {};
         throw new Error(error)
     }
 
-    fs.writeFileSync("authors.json", JSON.stringify(authorsData, null, 4))
+    fs.writeFileSync(path.join(dataDir, 'authors.json'), JSON.stringify(authorsData, null, 4))
 
 
-    walkDir("./src/pages", getAllFileData);
+    walkDir(pagesDir, getAllFileData);
 
     // Merge renamed paths data if available
     try {
-        if (fs.existsSync("./utils/_renamedPathsData.json")) {
-            const renamedPathsData = JSON.parse(fs.readFileSync("./utils/_renamedPathsData.json", 'utf8'));
+        if (fs.existsSync(path.join(dataDir, '_renamedPathsData.json'))) {
+            const renamedPathsData = JSON.parse(fs.readFileSync(path.join(dataDir, '_renamedPathsData.json'), 'utf8'));
 
             // Process each renamed path
             for (const [newRoute, data] of Object.entries(renamedPathsData)) {
@@ -123,7 +129,7 @@ const fileData = {};
         console.error("Error merging renamed paths data:", error);
     }
 
-    fs.writeFileSync("./utils/_fileData.json", JSON.stringify(fileData, null, 2));
+    fs.writeFileSync(path.join(dataDir, '_fileData.json'), JSON.stringify(fileData, null, 2));
 })();
 
 function walkDir(dirPath, callback) {
@@ -170,14 +176,14 @@ async function downloadImage(url, username) {
         let filename;
         https.get(url, options, (response) => {
             const fileExt = response.headers["content-type"].split("/")[1]
-            filename = `./src/images/authors/${username}.${fileExt}`
+            filename = path.join(imgDir, 'authors', `${username}.${fileExt}`)
             const file = fs.createWriteStream(filename);
 
             response.pipe(file);
             file.on('finish', () => {
                 file.close();
                 console.log('Image downloaded successfully: ' + filename);
-                resolve(`${username}.${fileExt}`)
+                resolve(path.basename(filename))
             });
         }).on('error', (error) => {
             fs.unlink(filename);

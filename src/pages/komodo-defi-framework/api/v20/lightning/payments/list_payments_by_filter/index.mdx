@@ -1,33 +1,40 @@
-export const title = "List Payments by Filter";
-export const description = "List Lightning Network payments by filter using the Komodo DeFi Framework.";
+export const title = "Komodo DeFi Framework Method: lightning::payments::list_payments_by_filter";
+export const description = "List Lightning Network payments by filter using the Komodo DeFi Framework API.";
 
-# List Payments by Filter
+# Komodo DeFi Framework Method: lightning::payments::list\_payments\_by\_filter
 
-## List Payments by Filter {{label : 'lightning::payments::list_payments_by_filter', tag : 'API-v2'}}
+## lightning::payments::list\_payments\_by\_filter {{label : 'lightning::payments::list_payments_by_filter', tag : 'API-v2'}}
 
-The `lightning::payments::list_payments_by_filter` method returns a list of payments (sent and/or received) for a coin which match the given filter.
+Returns a list of Lightning Network payments filtered by the provided filter object.
 
 ### Request Arguments
 
-| Parameter       | Type    | Required | Default | Description                                                                                                                   |
-| --------------- | ------- | :------: | :-----: | ----------------------------------------------------------------------------------------------------------------------------- |
-| coin            | string  |     ✓    |   `-`   | Ticker of the coin to query.                                                                                                  |
-| filter          | object  |     ✗    |   `-`   | A standard [LightningPaymentFilter](/komodo-defi-framework/api/common_structures/lightning/#lightning-payment-filter) object. |
-| paging_options | object  |     ✗    |   `-`   | A standard [Pagination](/komodo-defi-framework/api/common_structures/#pagination) object.                                     |
-| limit           | integer |     ✗    |   `10`  | Maximum number of results to return.                                                                                          |
+| Parameter       | Type    | Required | Description                                |
+| --------------- | ------- | :------: | ------------------------------------------ |
+| coin            | string  |     ✓    | The ticker of the coin for the payments.   |
+| filter          | object  |     ✗    | A standard LightningPaymentsFilter object. |
+| paging\_options | object  |     ✗    | A standard Pagination object.              |
+| limit           | integer |     ✗    | Maximum number of results to return.       |
 
-#### 📌 Example without filter
+### Response Parameters
 
-<CodeGroup title="List Payments by Filter" tag="POST" label="lightning::payments::list_payments_by_filter" mm2MethodDecorate="true">
+| Parameter | Type  | Description                |
+| --------- | ----- | -------------------------- |
+| result    | array | List of filtered payments. |
+| id        | int   | Request identifier.        |
+
+#### 📌 Example
+
+<CodeGroup title="lightning::payments::list_payments_by_filter" tag="POST" label="lightning::payments::list_payments_by_filter" mm2MethodDecorate="true">
   ```json
   {
-    "method": "lightning::payments::list_payments_by_filter",
     "userpass": "RPC_UserP@SSW0RD",
     "mmrpc": "2.0",
+    "method": "lightning::payments::list_payments_by_filter",
     "params": {
       "coin": "tBTC-lightning"
     },
-    "id": 1
+    "id": 104
   }
   ```
 </CodeGroup>
@@ -37,58 +44,9 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
 
   ```json
   {
-   "mmrpc": "2.0",
-   "result": {
-    "payments": [{
-     "payment_hash": "59175643db24fc79c77da073994d596444b6909fb2d452bde662ae386115c758",
-     "payment_type": {
-      "type": "Inbound Payment"
-     },
-     "description": "For the burger on Tuesday",
-     "amount_in_msat": 10000,
-     "status": "pending",
-     "created_at": 1683917593,
-     "last_updated": 1683917593
-    }, {
-     "payment_hash": "3ff39605f214a4b4159f9c4f44c94de3a273f300042ca18b7cb3d62f270a9ebc",
-     "payment_type": {
-      "type": "Outbound Payment"
-     },
-     "description": "A 1:24 scale model of a 1981 DeLorean DMC-12",
-     "amount_in_msat": 88000,
-     "status": "succeeded",
-     "created_at": 1683815625,
-     "last_updated": 1683815721
-    }, {
-     "payment_hash": "c4f44c94214a4b4159f9273f30de3a3ff39605f18b7c27b3d62f0a9ebc",
-     "payment_type": {
-      "type": "Outbound Payment"
-     },
-     "description": "Grays Sports Almanac, 1950-2000",
-     "amount_in_msat": 1000000000,
-     "status": "succeeded",
-     "created_at": 1683714225,
-     "last_updated": 1683805721
-    }, {
-     "payment_hash": "c4f44c94214a4b4159f9273f30de3a3ff39605f18b7c27b3d62f0a9ebc",
-     "payment_type": {
-      "type": "Outbound Payment"
-     },
-     "description": "ACME shrink ray",
-     "amount_in_msat": 4000012,
-     "status": "succeeded",
-     "created_at": 1683814625,
-     "last_updated": 1683815321
-    }],
-    "limit": 10,
-    "skipped": 0,
-    "total": 6,
-    "total_pages": 1,
-    "paging_options": {
-     "PageNumber": 1
-    }
-   },
-   "id": 1
+      "mmrpc": "2.0",
+      "result": [ /* ... payments ... */ ],
+      "id": 104
   }
   ```
 </CollapsibleSection>
@@ -259,4 +217,4 @@ The `lightning::payments::list_payments_by_filter` method returns a list of paym
    "id": 1
   }
   ```
-</CollapsibleSection> 
+</CollapsibleSection>

@@ -1,18 +1,25 @@
-export const title = "Get Payment Details";
-export const description = "Get details about a Lightning Network payment using the Komodo DeFi Framework.";
+export const title = "Komodo DeFi Framework Method: lightning::payments::get_payment_details";
+export const description = "Get details of a Lightning Network payment using the Komodo DeFi Framework API.";
 
-# Get Payment Details
+# Komodo DeFi Framework Method: lightning::payments::get\_payment\_details
 
-## Get Payment Details {{label : 'lightning::payments::get_payment_details', tag : 'API-v2'}}
+## lightning::payments::get\_payment\_details {{label : 'lightning::payments::get_payment_details', tag : 'API-v2'}}
 
-The `lightning::payments::get_payment_details` method returns details about a lightning payment from a given `payment_hash`.
+Returns details for a specific Lightning Network payment.
 
 ### Request Arguments
 
-| Parameter     | Type   | Required | Description                                                                                                                                                                                                                                                                             |
-| ------------- | ------ | :------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin          | string |     ✓    | Ticker of the coin to query.                                                                                                                                                                                                                                                            |
-| payment_hash | string |     ✓    | The hexadecimal string which identifies an invoice. The payment_hash is returned from a `lightning::payments::send_payment` request if the payment was sent by you, or from a `lightning::payments::generate_invoice` request if the payment is received (or will be received) by you. |
+| Parameter     | Type   | Required | Description                             |
+| ------------- | ------ | :------: | --------------------------------------- |
+| coin          | string |     ✓    | The ticker of the coin for the payment. |
+| payment\_hash | string |     ✓    | The hash of the payment to query.       |
+
+### Response Parameters
+
+| Parameter        | Type   | Description                 |
+| ---------------- | ------ | --------------------------- |
+| payment\_details | object | The payment details object. |
+| id               | int    | Request identifier.         |
 
 #### 📌 Example
 
@@ -32,25 +39,31 @@ The `lightning::payments::get_payment_details` method returns details about a li
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
   ```json
   {
-   "mmrpc": "2.0",
-   "result": {
-    "payment_details": {
-     "payment_hash": "c4e25cc10d77e3cd5f3d2af7b14ad72f123b2a5021bd6705c0b8ee8386bdeceb",
-     "payment_type": {
-      "type": "Outbound Payment",
-      "destination": "0348cc1a9479697cd52db445ea74149ad40bb01bb2045a3e8acba21b70f94ab7cf"
-     },
-     "description": "1 Blokaccino",
-     "amount_in_msat": 1000000,
-     "fee_paid_msat": 1803,
-     "status": "succeeded",
-     "created_at": 1684081413,
-     "last_updated": 1684081419
-    }
-   },
-   "id": 762
+    "mmrpc": "2.0",
+    "result": {
+      "payment_details": {
+        "payment_hash": "414f9b3524fc4e48c99f2723952732d8bc2eba1b35ce3bf2a70f5144b40f599e",
+        "status": "succeeded",
+        "amount_msat": 250000,
+        "fee_msat": 10,
+        "created_at": 1682000000,
+        "description": "Invoice for order #1234",
+        "destination": "03a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+        "preimage": "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+        "route": [
+          {
+            "hop_pubkey": "03a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+            "fee_msat": 5,
+            "channel_id": "1234567890"
+          }
+        ]
+      }
+    },
+    "id": 103
   }
   ```
 </CollapsibleSection>
@@ -72,7 +85,7 @@ The `lightning::payments::get_payment_details` method returns details about a li
   }
   ```
 
-  ##### InvalidRequest (payment_hash not a hash string)
+  ##### InvalidRequest (payment\_hash not a hash string)
 
   ```json
   {
@@ -85,4 +98,4 @@ The `lightning::payments::get_payment_details` method returns details about a li
    "id": 762
   }
   ```
-</CollapsibleSection> 
+</CollapsibleSection>

@@ -1,30 +1,30 @@
 export const title = "Komodo DeFi Framework Method: Import Swaps";
 export const description = "The import_swaps method imports to the local database the swaps data that was exported from another Komodo DeFi Framework API instance.";
 
-# import\_swaps
+# Komodo DeFi Framework Method: Import Swaps
 
-**import\_swaps swaps**
+## import\_swaps {{label: 'import_swaps', tag: 'API-v1'}}
 
 The `import_swaps` method imports to the local database the `swaps` data that was exported from another Komodo DeFi Framework API instance.
 
 Use this method in combination with `my_swap_status` or `my_recent_swaps` to copy the swap history between different devices.
 
-### Request Arguments
+### Request arguments
 
 | Parameter | Type             | Required | Description                                                                                              |
 | --------- | ---------------- | :------: | -------------------------------------------------------------------------------------------------------- |
 | swaps     | array of objects |     ✓    | A map of standard [SwapStatus](/komodo-defi-framework/api/common_structures/swaps/#swap-status) objects. |
 
-### Response Parameters
+### Response parameters
 
 | Parameter       | Type             | Description                                                  |
 | --------------- | ---------------- | ------------------------------------------------------------ |
-| result.imported | array of strings | uuids of swaps that were successfully imported               |
-| result.imported | map              | uuids of swaps that failed to import; includes error message |
+| result.imported | array of strings | UUIDs of swaps that were successfully imported               |
+| result.skipped  | map              | UUIDs of swaps that failed to import; includes error message |
 
-#### 📌 Examples
+#### 📌 Example
 
-#### Command
+#### Request
 
 <CodeGroup title="" tag="POST" label="import_swaps" mm2MethodDecorate="true">
   ```json
@@ -184,12 +184,20 @@ Use this method in combination with `my_swap_status` or `my_recent_swaps` to cop
 
   ```json
   {
-    "result": {
-      "imported": ["07ce08bf-3db9-4dd8-a671-854affc1b7a3"],
-      "skipped": {
-        "1af6bb5e-e131-4b06-b235-36fae8daab0a": "lp_swap:424] File already exists"
+      "result": {
+          "imported": ["07ce08bf-3db9-4dd8-a671-854affc1b7a3"],
+          "skipped": {
+              "1af6bb5e-e131-4b06-b235-36fae8daab0a": "lp_swap:424] File already exists"
+          }
       }
-    }
   }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Error Response" collapsedText="Show Error Response">
+  #### Error response
+
+  ```json
+  { "error": "Invalid swap data" }
   ```
 </CollapsibleSection>

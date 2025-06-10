@@ -1,0 +1,55 @@
+export const title = "Komodo DeFi Framework Method: task::get_new_address::status";
+export const description = "Check the status of a HD address creation task in the Komodo DeFi Framework API.";
+
+# Komodo DeFi Framework Method: task::get\_new\_address::status
+
+## task::get\_new\_address::status   {{label : 'task::get_new_address::status', tag : 'API-v2'}}
+
+Use the `task::get_new_address::status` method to check the status of a HD address creation task.
+
+| Parameter            | Type    | Required | Default | Description                                                 |
+| -------------------- | ------- | :------: | :-----: | ----------------------------------------------------------- |
+| task\_id             | integer |     ✓    |   `-`   | The identifying number returned when initiating the task.   |
+| forget\_if\_finished | boolean |     ✗    |  `true` | If `false`, will return final response for completed tasks. |
+
+### Response Parameters
+
+| Parameter | Type             | Required | Description                                                                                                                 |
+| --------- | ---------------- | :------: | --------------------------------------------------------------------------------------------------------------------------- |
+| status    | string           |     ✓    | Status of the task. `Ok`, `InProgress` or `Error`.                                                                          |
+| details   | string or object |     ✓    | Once complete, a standard [NewAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) object. |
+
+<CodeGroup title="task::get_new_address::status" tag="POST" label="task::get_new_address::status" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "task::get_new_address::status",
+    "params": {
+      "task_id": 3
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (success)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "new_address": {
+              "address": "RDKyU11wFTa8kYETaDbr4YuJZG8C4e6JUm",
+              "derivation_path": "m/44'/141'/0'/0/3",
+              "chain": "External",
+              "balance": {
+                  "spendable": "0",
+                  "unspendable": "0"
+              }
+          }
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>

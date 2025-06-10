@@ -1,5 +1,11 @@
-const fs = require("fs");
-const path = require("path");
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dataDir = path.resolve(__dirname, './data');
+
+const pagesDir = path.resolve(__dirname, '../../src/pages');
 
 function walkDir(dirPath, callback) {
   fs.readdirSync(dirPath).forEach((file) => {
@@ -18,7 +24,7 @@ const getFileNames = (filepath) => {
   fileNames.push(filepath);
 };
 
-walkDir("./src/pages", getFileNames);
+walkDir(pagesDir, getFileNames);
 
 const mapDirObj = {
   "/antara/api/": "/basic-docs/antara/antara-api/",
@@ -48,14 +54,14 @@ const mapDirObj = {
 let pathObj = {};
 fileNames.forEach((filePath) => {
   for (const newPath in mapDirObj) {
-    if (filePath.includes("src/pages" + newPath)) {
+    if (filePath.includes(pagesDir + newPath)) {
       pathObj[
         filePath
-          .replace(newPath, mapDirObj[newPath])
-          .replace("src/pages", "")
+          .replace(pagesDir + newPath, mapDirObj[newPath])
+          .replace(pagesDir, "")
           .replace("index.mdx", "")
           .slice(0, -1) + ".html"
-      ] = filePath.replace("src/pages", "").replace("index.mdx", "");
+      ] = filePath.replace(pagesDir, "").replace("index.mdx", "");
     }
   }
 });
@@ -167,7 +173,7 @@ for (const path in nameChangedMap) {
   pathObj[path] = nameChangedMap[path];
 }
 
-oldDocsRedirects = {
+const oldDocsRedirects = {
   "/basic-docs/cryptoconditions/cc-tokens.html":
     "/basic-docs/antara/antara-api/tokens.html",
   "/basic-docs/cryptoconditions/cc-channels.html":
@@ -400,7 +406,7 @@ for (const oldRedirectedPath in oldDocsRedirects) {
   pathObj[oldRedirectedPath] = pathObj[oldDocsRedirects[oldRedirectedPath].split("#")[0]];
 }
 
-fs.writeFileSync("./utils/Redirect-map.json", JSON.stringify(pathObj, null, 2));
+fs.writeFileSync(path.join(dataDir, "Redirect-map.json"), JSON.stringify(pathObj, null, 2));
 
 const baseUrl = "https://komodoplatform.com/en/docs";
 let arrRedirects = [];
@@ -428,4 +434,4 @@ const transformPaths = (obj) => {
 };
 
 transformPaths(pathObj);
-fs.writeFileSync("./utils/Redirect-map.txt", arrRedirects.join("\n"));
+fs.writeFileSync(path.join(dataDir, "Redirect-map.txt"), arrRedirects.join("\n"));

@@ -1,9 +1,9 @@
-export const title = "Connect to Node";
-export const description = "Connect to a Lightning node using the Komodo DeFi Framework.";
+export const title = "Komodo DeFi Framework Method: lightning::nodes::connect_to_node";
+export const description = "Connect to a Lightning node using the Komodo DeFi Framework API.";
 
-# lightning::nodes::connect_to_node
+# Komodo DeFi Framework Method: lightning::nodes::connect\_to\_node
 
-## Connect to Node {{label : 'lightning::nodes::connect_to_node', tag : 'API-v2'}}
+## lightning::nodes::connect\_to\_node {{label : 'lightning::nodes::connect_to_node', tag : 'API-v2'}}
 
 The `lightning::nodes::connect_to_node` method allows you to connect to a Lightning node.
 
@@ -12,11 +12,18 @@ The `lightning::nodes::connect_to_node` method allows you to connect to a Lightn
 | Parameter     | Type   | Required | Description                                                                         |
 | ------------- | ------ | :------: | ----------------------------------------------------------------------------------- |
 | coin          | string |     ✓    | The coin ticker you would like to connect to a node on.                             |
-| node_address  | string |     ✓    | Lightning node addresses always have a format of `node_pubkey`@`ip_address`:`port`. |
+| node\_address | string |     ✓    | Lightning node addresses always have a format of `node_pubkey`@`ip_address`:`port`. |
+
+### Response Parameters
+
+| Parameter | Type        | Description                                                        |
+| --------- | ----------- | ------------------------------------------------------------------ |
+| result    | string      | Connection result message (e.g., success, already connected, etc.) |
+| id        | int or null | Request identifier, or null.                                       |
 
 #### 📌 Example
 
-<CodeGroup title="Connect to Node" tag="POST" label="lightning::nodes::connect_to_node" mm2MethodDecorate="true">
+<CodeGroup title="lightning::nodes::connect_to_node" tag="POST" label="lightning::nodes::connect_to_node" mm2MethodDecorate="true">
   ```json
   {
     "userpass": "RPC_UserP@SSW0RD",
@@ -31,9 +38,8 @@ The `lightning::nodes::connect_to_node` method allows you to connect to a Lightn
   ```
 </CodeGroup>
 
-<Note>
-  The node address in the above request is for the WalletOfSatoshi lightning node, which is one of the most connected lightning nodes.
-  Other node addresses can be retrieved from any lightning explorer, such as:
+<Note type="info">
+  The node address in the above request is for the WalletOfSatoshi lightning node, which is one of the most connected lightning nodes. Other node addresses can be retrieved from any lightning explorer, such as:
 
   *   [https://1ml.com/](https://1ml.com/)
   *   [https://mempool.space/lightning/](https://mempool.space/lightning/)
@@ -64,21 +70,21 @@ The `lightning::nodes::connect_to_node` method allows you to connect to a Lightn
 <CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
   #### ⚠️ Error Responses
 
-  ##### InvalidRequest Error (invalid node_address)
+  ##### InvalidRequest Error (invalid node\_address)
 
   ```json
   {
-  	"mmrpc": "2.0",
-  	"error": "Error parsing request: Could not parse node address from str rgjhk3",
-  	"error_path": "dispatcher",
-  	"error_trace": "dispatcher:109]",
-  	"error_type": "InvalidRequest",
-  	"error_data": "Could not parse node address from str rgjhk3",
-  	"id": 762
+      "mmrpc": "2.0",
+      "error": "Error parsing request: Could not parse node address from str rgjhk3",
+      "error_path": "dispatcher",
+      "error_trace": "dispatcher:109]",
+      "error_type": "InvalidRequest",
+      "error_data": "Could not parse node address from str rgjhk3",
+      "id": 762
   }
   ```
 
-  ##### ConnectionError Error (timed out waiting to connect to node_address)
+  ##### ConnectionError Error (timed out waiting to connect to node\_address)
 
   ```json
   {
@@ -91,4 +97,4 @@ The `lightning::nodes::connect_to_node` method allows you to connect to a Lightn
       "id": null
   }
   ```
-</CollapsibleSection> 
+</CollapsibleSection>

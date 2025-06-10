@@ -1,9 +1,9 @@
-export const title = "Komodo DeFi Framework Method: Get Lightning Channel Details";
-export const description = "This document describes the method to get details about a Lightning Network channel in Komodo DeFi Framework.";
+export const title = "Komodo DeFi Framework Method: lightning::channels::get_channel_details";
+export const description = "Get details about a Lightning Network channel using the Komodo DeFi Framework API.";
 
-# Komodo DeFi Framework Method: Get Lightning Channel Details
+# Komodo DeFi Framework Method: lightning::channels::get\_channel\_details
 
-## get\_channel\_details {{label : 'lightning::channels::get_channel_details', tag : 'API-v2'}}
+## lightning::channels::get\_channel\_details {{label : 'lightning::channels::get_channel_details', tag : 'API-v2'}}
 
 Returns details about a Lightning Network channel.
 
@@ -13,6 +13,14 @@ Returns details about a Lightning Network channel.
 | --------- | ------ | :------: | ------------------------------------------------------------------ |
 | coin      | string |     ✓    | The ticker of the coin you would like to view channel details for. |
 | uuid      | string |     ✓    | Unique channel identifier.                                         |
+
+### Response Parameters
+
+| Parameter | Type   | Description                             |
+| --------- | ------ | --------------------------------------- |
+| status    | string | The status of the channel (e.g., Open). |
+| details   | object | Channel details object.                 |
+| id        | int    | Request identifier.                     |
 
 #### 📌 Example
 
@@ -31,7 +39,7 @@ Returns details about a Lightning Network channel.
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Get Channel Details Response" collapsedText="Show Get Channel Details Response">
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
   #### Response
 
   ```json
@@ -39,7 +47,16 @@ Returns details about a Lightning Network channel.
       "mmrpc": "2.0",
       "result": {
           "status": "Open",
-          "details": { /* ... channel details ... */ }
+          "details": {
+              "channel_id": "2b50e274-c173-4fa1-95f3-97f9f82ace92",
+              "capacity_sats": 1000000,
+              "local_balance_sats": 600000,
+              "remote_balance_sats": 400000,
+              "counterparty_node_id": "02eb0b178576857b6990ba57d56aa08f651a05a8098496004f42df5e7440b0a9c1",
+              "state": "active",
+              "opened_at": 1681000000,
+              "funding_txid": "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef"
+          }
       },
       "id": 54
   }

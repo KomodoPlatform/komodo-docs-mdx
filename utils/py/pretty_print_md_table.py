@@ -1,6 +1,10 @@
+#!/usr/bin/env python3
 import re
+import os
 
-INPUT_FILE = 'docs/style_update_progress.md'
+DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+
+INPUT_FILE = '../../docs/style_update_progress.md'
 
 with open(INPUT_FILE, 'r') as f:
     lines = f.readlines()

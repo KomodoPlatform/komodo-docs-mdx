@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Dict, List, Set, Tuple
 from collections import defaultdict
 
+DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 class ExampleDeduplicator:
     """Identifies and removes duplicate JSON example files."""

@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from mapping import MethodMapper
 
+DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 @dataclass
 class ExtractedExample:

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import os
 import glob
+import re
 
 script_path = os.path.dirname(os.path.realpath(__file__))
-root_path = os.path.dirname(script_path)
+root_path = os.path.dirname(os.path.dirname(script_path))
+DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 def gen_api_methods_table():
     komodefi_files = glob.glob(f'{root_path}/src/pages/komodo-defi-framework/**/index.mdx', recursive = True)
@@ -18,6 +20,8 @@ def gen_api_methods_table():
             current_method = None
             for line in f.readlines():
                 doc_path = file.replace(f'{root_path}/src/pages', '').replace('/index.mdx', '')
+                if 'common_structures' in doc_path:
+                    continue
                 doc_split = doc_path.split('/')
                 if len(doc_split) > 3:
                     section = doc_split[3]
@@ -30,9 +34,9 @@ def gen_api_methods_table():
                             method_name = heading.split(' ')[0].split('{')[0].strip()
                             current_method = method_name
                         # When CodeGroup is found, use the most recent method heading
-                        if 'CodeGroup' in line and current_method:
+                        if 'CodeGroup' in line and current_method is not None:
                             method = current_method
-                            hash_link = method.replace("_", "-").lower()
+                            hash_link = slugify(method)
                             link = f"[{method}]({doc_path}/#{hash_link})"
                             methods_dict[section].append({
                                 "link": link,
@@ -73,6 +77,12 @@ def escape_underscores(s):
         else:
             output += letter
     return output
+
+def slugify(text):
+    text = text.split("{{")[0].strip()
+    text = re.sub(r'[:_\s]+', '-', text)
+    text = re.sub(r'[^a-zA-Z0-9\-]', '', text)
+    return text.lower()
 
 if __name__ == '__main__':
     gen_api_methods_table()

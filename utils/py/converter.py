@@ -22,6 +22,7 @@ try:
 except ImportError:
     from mapping import MethodMapper, MethodMapping
 
+DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
 
 @dataclass
 class Parameter:
