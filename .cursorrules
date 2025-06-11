@@ -10,46 +10,46 @@
 - Whenever a documentation page is created, moved, or deleted, the corresponding entry in `sidebar.json` must be added, updated, or removed to match.
 
 ## Style Guide Context
-Always follow the style guide located at docs/STYLE_GUIDE.md in the root of this repository.
-
-Key style guide requirements:
-- Use American English spelling and Oxford comma
-- Use Bluebook title case for headings and products
-- Use sentence case for menu items, tabs, buttons, links
-- Use 4-space indent in code blocks
-- Use `#` for page headings. These MUST match the text in `const title = ` at the top of the page. For KDF Methods, it should follow the format `Komodo DeFi Framework Method: stream::orderbook::enable`.
+- Use American English spelling and Oxford comma.
+- Use Bluebook title case for headings and products.
+- Use sentence case for menu items, tabs, buttons, links.
+- Use 4-space indent in code blocks.
+- The `const title = ` at the top of each KDF method page should start with `Komodo DeFi Framework Method: `, followed by the method name.
+- Use `#` for page headings. These are generally method names, in human format (title case, no underscores). Remove `Komodo DeFi Framework Method: ` or other verbose preambles.
 - Use `##` for subheadings. These are generally method names. This line should also include label/tag like `{{label : 'method_name', tag : 'API-v2'}}`.
-- Use `###` for request argument/response parameter table titles.
-- Use `####` for request/response examples (like #### 📌 Examples and #### ⚠️ Error Responses)
-- Each request should be in a codeGroup. Its response should be in a CollapsibleSection. There should only be one response per Collapsible section. 
+- Use `###` for request/response parameter table titles.
+- Use `####` for request/response examples (like #### 📌 Examples and #### ⚠️ Error Responses).
+- Each request should be in a codeGroup. Its response should be in a CollapsibleSection. There should only be one response per Collapsible section.
 - Use absolute links for internal docs: The `pages` folder is the root directory for internal docs. Use absolute links to reference other pages within the `pages` folder, for example: `[Komodo DeFi Framework API methods](/komodo-defi-framework/api/#sub-section-header)`. The url must end with a slash.
-- For KDF API methods, userpass should always be `RPC_UserP@SSW0RD`
-- Request parameter tables must have 5 columns: Parameter, Type, Required, Default, Description
-- **OPTIMIZATION**: If there are no optional parameters (all parameters are required), use a 4-column format: Parameter, Type, Required, Description (omitting the Default column)
-- Parameters should be listed alphabetically within their groupings (required first, then optional)
-- Required column should contain "✓" for required parameters and "✗" for optional parameters (centered alignment)
-- Default column should contain the default value for optional parameters, or "-" for required/no default parameters (centered alignment)
-- Response parameter tables have 3 columns: Parameter, Type, Description (alphabetically ordered)
-- Use `docker compose` not `docker-compose`
-- Always follow best practices
+- For KDF API methods, userpass should always be `RPC_UserP@SSW0RD`.
+- Request parameter tables must have 5 columns: Parameter, Type, Required, Default, Description.
+- **OPTIMIZATION**: If there are no optional parameters (all parameters are required), use a 4-column format: Parameter, Type, Required, Description (omitting the Default column).
+- The Default column should only be included if there are default values for any parameters. If no default values are defined, omit the Default column entirely.
+- Parameters should be listed alphabetically within their groupings (required first, then optional).
+- Required column should contain "✓" for required parameters and "✗" for optional parameters (centered alignment).
+- Default column should contain the default value for optional parameters, or "-" for required/no default parameters (centered alignment).
+- Response parameter tables have 3 columns: Parameter, Type, Description (alphabetically ordered).
+- DO NOT modify escaped underscores (`\_`).
+- Use `docker compose` not `docker-compose`.
+- Always follow best practices.
 
 ## Documentation Structure
-- Individual API methods should be in their own index.mdx file within a folder named after the method
-- After the main heading (#), include a method subheading (##) with the actual method name
-- Include request/response parameter tables with proper formatting
-- Include complete code examples with all required parameters
-- Use CollapsibleSection for API responses
-- CollapsibleSection text should match the CodeGroup title for consistency
-- Separate content sections with subheadings
+- Individual API methods should be in their own index.mdx file within a folder named after the method.
+- After the main heading (#), include a method subheading (##) with the actual method name.
+- Include request/response parameter tables with proper formatting.
+- Include complete code examples with all required parameters.
+- Use CollapsibleSection for API responses.
+- CollapsibleSection text should match the CodeGroup title for consistency.
+- Separate content sections with subheadings.
 
 ## MDX Components Available
-- Note (info, warning, error types)
-- CollapsibleSection (for API responses)
-- OptimizedImage (for images)
-- Heading (with label and tag support)
-- Tag (for CRUD operations)
+- Note (info, warning, error types).
+- CollapsibleSection (for API responses).
+- OptimizedImage (for images).
+- Heading (with label and tag support).
+- Tag (for CRUD operations).
 
-Before making any documentation changes, YOU MUST ALWAYS reference docs/STYLE_GUIDE.md for complete requirements. 
+Before making any documentation changes, YOU MUST ALWAYS reference docs/STYLE_GUIDE.md for complete requirements.
 
 # Enum and Common Object Rule
 Always look for opportunities to use or create common objects and enums in documentation and code. Use enums for parameters or response values with a fixed set of possible values.
@@ -68,4 +68,45 @@ Always look for opportunities to use or create common objects and enums in docum
 - This is a strict requirement for all new and existing documentation.
 
 # Additional Rules
-- You MUST NOT modify `filepathSlugs.json` (This file is generated)
+- You MUST NOT modify `filepathSlugs.json` (This file is generated).
+- For KDF method pages, the ## subheading and label must be the exact API method name, and tag must be one of: API-v1, API-v2, deprecated, overview, structures.
+
+# New Rule for # Headings
+- The `#` heading at the top of each method page must be a human-readable, title-cased phrase describing the method's function. Do NOT use colons (`::`), underscores (`_`), or the exact API method name in the `#` heading. Convert API method names to a descriptive phrase. For example:
+    - `task::enable_bch::cancel` → `Enable BCH Task: Cancel`
+    - `stream::swap_status::enable` → `Enable Swap Status Stream`
+    - `task::enable_eth::user_action` → `Enable ETH Task: User Action`
+    - `task::create_new_account::cancel` → `Create New Account Task: Cancel`
+    - `lightning::nodes::connect_to_node` → `Connect to Lightning Node`
+- The `##` subheading must be the exact API method name, with label/tag as required.
+
+# New Rule for export const title at the top of each KDF method page
+- The `export const title = ` at the top of each KDF method page must start with `Komodo DeFi Framework Method: `, followed by a human-readable, title-cased phrase describing the method's function (not the literal API method name).
+
+# KDF Method Documentation Format
+
+- **`export const title`**:
+  - Format: `export const title = "Komodo DeFi Framework Method: [Human-Readable Title]";`
+  - Example: `export const title = "Komodo DeFi Framework Method: Cancel Enable BCH Task";`
+
+- **`export const description`**:
+  - Provide a concise description of the method's purpose.
+  - Example: `export const description = "Cancel the enable BCH task in the Komodo DeFi Framework API.";`
+
+- **Main Heading (`#`)**:
+  - Use a human-readable, title-cased phrase that describes the method's function.
+  - Example: `# Cancel Enable BCH Task`
+
+- **Subheading (`##`)**:
+  - Use the exact API method name, with label and tag.
+  - Example: `## task::enable_bch::cancel {{label : 'task::enable_bch::cancel', tag : 'API-v2'}}`
+
+- **Request and Response Parameter Tables**:
+  - Follow the style guide's table format, ensuring parameters are listed alphabetically and default values are wrapped in backticks.
+
+- **Code Examples**:
+  - Include complete request examples in a `CodeGroup`.
+  - Use `CollapsibleSection` for responses, matching the `CodeGroup` title for consistency.
+
+- **Error Responses**:
+  - Provide examples of potential error responses in a `CollapsibleSection`.
