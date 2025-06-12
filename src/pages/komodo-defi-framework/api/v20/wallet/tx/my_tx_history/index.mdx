@@ -1,7 +1,7 @@
 export const title = "Komodo DeFi Framework Method: My TX History";
 export const description = "The my_tx_history method allows you to view the transaction history of coins.";
 
-# Komodo DeFi Framework Method: My TX History
+# My TX History
 
 ## my\_tx\_history {{label : 'my_tx_history', tag : 'API-v2'}}
 
@@ -491,6 +491,48 @@ For all other coins, use the legacy [my\_tx\_history](/komodo-defi-framework/api
       }
     },
     "id": null
+  }
+  ```
+</CollapsibleSection>
+
+### Error Types
+
+| Parameter        | Type   | Description                                                              |
+| ---------------- | ------ | ------------------------------------------------------------------------ |
+| NoSuchCoin       | string | The specified coin was not found or is not activated yet                 |
+| InvalidHashError | string | The specified `hash` is not valid                                        |
+| Transport        | string | The request was failed due to a network error                            |
+| HashNotExist     | string | The specified `hash` does not exist                                      |
+| InternalError    | string | The request was failed due to a Komodo DeFi Framework API internal error |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (No Such Coin)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "No such coin KMD",
+      "error_path": "lp_coins",
+      "error_trace": "lp_coins:2234] lp_coins:2156]",
+      "error_type": "NoSuchCoin",
+      "error_data": {
+          "coin": "KMD"
+      },
+      "id": 0
+  }
+  ```
+
+  ##### Error (Invalid Hash)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Invalid  hash: Invalid input length",
+      "error_path": "utxo_common",
+      "error_trace": "utxo_common:1809]",
+      "error_type": "InvalidHashError",
+      "error_data": "Invalid input length",
+      "id": 1
   }
   ```
 </CollapsibleSection>

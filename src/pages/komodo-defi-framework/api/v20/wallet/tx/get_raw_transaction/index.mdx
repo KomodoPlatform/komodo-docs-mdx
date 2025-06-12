@@ -1,9 +1,11 @@
 export const title = "Komodo DeFi Framework Method: Get Raw Transaction";
 export const description = "The get_raw_transaction method returns the full signed raw transaction hex for a given coin and transaction hash.";
 
-# Komodo DeFi Framework Method: Get Raw Transaction
+# Get Raw Transaction
 
 The `get_raw_transaction` method takes `coin` and `tx_hash` as input, and returns the full signed raw transaction hex for any transaction that is confirmed or within the mempool.
+
+## get\_raw\_transaction {{label : 'get_raw_transaction', tag : 'API-v2'}}
 
 ### Request Arguments
 
@@ -19,8 +21,6 @@ The `get_raw_transaction` method takes `coin` and `tx_hash` as input, and return
 | tx\_hex   | string | Bytes of signed transaction in string format. |
 
 #### 📌 Examples
-
-##### Request (DOC)
 
 <CodeGroup title="Get Raw Transaction (DOC)" tag="POST" label="get_raw_transaction" mm2MethodDecorate="true">
   ```json
@@ -51,38 +51,21 @@ The `get_raw_transaction` method takes `coin` and `tx_hash` as input, and return
   ```
 </CollapsibleSection>
 
-##### Request (ETH)
+### Error Types
 
-<CodeGroup title="Get Raw Transaction (ETH)" tag="POST" label="get_raw_transaction" mm2MethodDecorate="true">
-  ```json
-  {
-    "mmrpc": "2.0",
-    "method": "get_raw_transaction",
-    "userpass": "RPC_UserP@SSW0RD",
-    "params": {
-      "coin": "ETH",
-      "tx_hash": "0x529aca42b6b592cca5d400832c83854135b924cada6e1c41b85f27fa0a0984b9"
-    },
-    "id": 1
-  }
-  ```
-</CodeGroup>
+| Parameter        | Type   | Description                                                              |
+| ---------------- | ------ | ------------------------------------------------------------------------ |
+| NoSuchCoin       | string | The specified coin was not found or is not activated yet                 |
+| InvalidHashError | string | The specified `hash` is not valid                                        |
+| Transport        | string | The request was failed due to a network error                            |
+| HashNotExist     | string | The specified `hash` does not exist                                      |
+| InternalError    | string | The request was failed due to a Komodo DeFi Framework API internal error |
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  ##### Response (success)
+<DevComment>
+  This should be the Error responses section standard, with all error responses within the CollapsibleSection below.
+</DevComment>
 
-  ```json
-  {
-      "mmrpc": "2.0",
-      "result": {
-          "tx_hex": "f86e8227578503b6ed90e6825208943faaa59e42f616f859d5771cbc07a99412ae44b288026fe9cb1ec6e9a08026a08e04accc3733376cf7b8f8d51c8398fd244fca736277053a7e87093f6db67708a069cc7dbc57094c4cca7828e6f8d92a8221c457ac7b5d0b0562e9d8896f75d1a5"
-      },
-      "id": 0
-  }
-  ```
-</CollapsibleSection>
-
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
   ##### Error Response (No Such Coin)
 
   ```json
@@ -127,13 +110,3 @@ The `get_raw_transaction` method takes `coin` and `tx_hash` as input, and return
   }
   ```
 </CollapsibleSection>
-
-### Error Types
-
-| Parameter        | Type   | Description                                                              |
-| ---------------- | ------ | ------------------------------------------------------------------------ |
-| NoSuchCoin       | string | The specified coin was not found or is not activated yet                 |
-| InvalidHashError | string | The specified `hash` is not valid                                        |
-| Transport        | string | The request was failed due to a network error                            |
-| HashNotExist     | string | The specified `hash` does not exist                                      |
-| InternalError    | string | The request was failed due to a Komodo DeFi Framework API internal error |
