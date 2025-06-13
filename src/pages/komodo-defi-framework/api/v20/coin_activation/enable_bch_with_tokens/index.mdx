@@ -1,0 +1,360 @@
+export const title = "Komodo DeFi Framework Method: Enable BCH with Tokens";
+export const description = "Using this method, you can enable BCH/tBCH along with multiple SLP tokens in a single command.";
+
+# enable\_bch\_with\_tokens
+
+The Komodo DeFi Framework supports Bitcoin Cash SLP tokens. Using this method, you can enable BCH/tBCH along with multiple SLP tokens in a single command.
+
+<Note>
+  This activation method is deprecated, and no longer in use. BCH activation should be done via [task::enable\_bch::init](/komodo-defi-framework/api/v20/coin_activation/task_managed/enable_utxo/)
+</Note>
+
+### Request Parameters
+
+| Parameter                | Type             | Description                                                                                                                                                                                                                                               |
+| ------------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker                   | string           | Ticker of the platform protocol coin. Options: `BCH` or `tBCH`                                                                                                                                                                                            |
+| bchd\_urls               | array of strings | A list of BCHD gRPC API server URLs, used for  validation of SLP token transactions. It's recommended to add as many servers as possible. The URLs list can be found at [https://bchd.fountainhead.cash/](https://bchd.fountainhead.cash/).               |
+| mode                     | object           | A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode) object.                                                                                                                                             |
+| tx\_history              | boolean          | If `true`, spawns a background loop to store the local cache of address(es) transactions. Defaults to `false`.                                                                                                                                            |
+| slp\_tokens\_requests    | array of objects | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                                      |
+| address\_format          | object           | Optional. Overwrites the address format from coins file, if set. A standard [AddressFormat](/komodo-defi-framework/api/common_structures/wallet/#address-format) object.                                                                                  |
+| allow\_slp\_unsafe\_conf | boolean          | Optional, defaults to `false`. If `true`, allows bchd\_urls to be empty. **Warning:** it is highly unsafe to do so as it may lead to invalid SLP transactions generation and tokens burning.                                                              |
+| get\_balances            | boolean          | Optional, defaults to `true`. If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                   |
+| required\_confirmations  | integer          | Optional, defaults to value in the coins file, or `3` if not set. Confirmations to wait for steps in swap.                                                                                                                                                |
+| requires\_notarization   | boolean          | Optional, defaults to `true`. Has no effect on BCH.                                                                                                                                                                                                       |
+| tx\_history              | boolean          | Optional, defaults to `true`. If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method |
+| utxo\_merge\_params      | object           | A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params) object. Used to reduce a wallet's UTXO count in cases where it is causing significantly slower RPC responses.                                    |
+
+<Note>
+  *   Go to: [https://github.com/KomodoPlatform/coins/tree/master/electrums](https://github.com/KomodoPlatform/coins/tree/master/electrums) for a full list of nodes/servers.
+</Note>
+
+### Response Parameters
+
+| Parameter             | Type    | Description                                                                                                                                                                          |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| current\_block        | integer | Block height of the coin being activated                                                                                                                                             |
+| bch\_addresses\_infos | object  | A standard [AddressInfo](/komodo-defi-framework/api/common_structures/wallet/#address-info) object. Note: the structure may vary based on the value of the `get_balances` parameter. |
+| slp\_addresses\_infos | object  | A standard [AddressInfo](/komodo-defi-framework/api/common_structures/wallet/#address-info) object. Note: the structure may vary based on the value of the `get_balances` parameter. |
+
+<DevComment>
+  bch\_addresses\_infos and slp\_addresses\_infos are the same. This should be consolidated in the api.
+</DevComment>
+
+### 📌 Examples
+
+#### Request with tx\_history, cashaddress format, and automated utxo merging.
+
+<CodeGroup title="" tag="POST" label="enable_bch_with_tokens" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "enable_bch_with_tokens",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "BCH",
+      "allow_slp_unsafe_conf": false,
+      "bchd_urls": [
+        "https://bchd.dragonhound.info"
+      ],
+      "mode": {
+        "rpc": "Electrum",
+        "rpc_data": {
+          "servers": [
+            {
+              "url": "bch.imaginary.cash:50002",
+              "protocol": "SSL"
+            },
+            {
+              "url": "cashnode.bch.ninja:50002",
+              "protocol": "SSL"
+            },
+            {
+              "url": "electrum3.cipig.net:20055",
+              "protocol": "SSL"
+            }
+          ]
+        }
+      },
+      "tx_history": true,
+      "slp_tokens_requests": [
+        {
+          "ticker": "ASLP-SLP",
+          "required_confirmations": 4
+        }
+      ],
+      "required_confirmations": 5,
+      "requires_notarization": false,
+      "address_format": {
+        "format": "cashaddress",
+        "network": "bitcoincash"
+      },
+      "utxo_merge_params": {
+        "merge_at": 50,
+        "check_every": 10,
+        "max_merge_at_once": 25
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+  	"mmrpc": "2.0",
+  	"result": {
+  		"current_block": 1480481,
+  		"bch_addresses_infos": {
+  			"bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
+  				"derivation_method": {
+  					"type": "Iguana"
+  				},
+  				"pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
+  				"balances": {
+  					"spendable": "0.11398301",
+  					"unspendable": "0.00001"
+  				}
+  			}
+  		},
+  		"slp_addresses_infos": {
+  			"simpleledger:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5va3wuz4v": {
+  				"derivation_method": {
+  					"type": "Iguana"
+  				},
+  				"pubkey": "036879df230663db4cd083c8eeb0f293f46abc460ad3c299b0089b72e6d472202c",
+  				"balances": {
+  					"ASLP": {
+  						"spendable": "5.2974",
+  						"unspendable": "0"
+  					}
+  				}
+  			}
+  		}
+  	},
+  	"id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### Request with `get_balances` set to false
+
+<CodeGroup title="" tag="POST" label="enable_bch_with_tokens" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "enable_bch_with_tokens",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "BCH",
+      "allow_slp_unsafe_conf": false,
+      "bchd_urls": [
+        "https://bchd.dragonhound.info"
+      ],
+      "mode": {
+        "rpc": "Electrum",
+        "rpc_data": {
+          "servers": [
+            {
+              "url": "bch.imaginary.cash:50002",
+              "protocol": "SSL"
+            },
+            {
+              "url": "cashnode.bch.ninja:50002",
+              "protocol": "SSL"
+            },
+            {
+              "url": "electrum3.cipig.net:20055",
+              "protocol": "SSL"
+            }
+          ]
+        }
+      },
+      "tx_history": true,
+      "get_balances": false,
+      "slp_tokens_requests": [
+        {
+          "ticker": "ASLP-SLP",
+          "required_confirmations": 4
+        }
+      ]
+    }
+  }
+  ```
+</CodeGroup>
+
+#### Response
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  ```json
+  {
+  	"mmrpc": "2.0",
+  	"result": {
+  		"current_block": 791267,
+  		"bch_addresses_infos": {
+  			"bitcoincash:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5qx64fztj": {
+  				"derivation_method": {
+  					"type": "Iguana"
+  				},
+  				"pubkey": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2"
+  			}
+  		},
+  		"slp_addresses_infos": {
+  			"simpleledger:qrf5vpn78s7rjexrjhlwyzzeg7gw98k7t5va3wuz4v": {
+  				"derivation_method": {
+  					"type": "Iguana"
+  				},
+  				"pubkey": "03d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2",
+  				"tickers": ["ASLP-SLP"]
+  			}
+  		}
+  	},
+  	"id": null
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
+  ### Error Types
+
+  | Structure                  | Type   | Description                                                                         |
+  | -------------------------- | ------ | ----------------------------------------------------------------------------------- |
+  | CoinProtocolParseError     | string | Parsing the protocol of the platform coin you are trying to activate failed         |
+  | InternalError              | string | The request was failed due to an Komodo DeFi Framework API internal error           |
+  | PlatformCoinCreationError  | string | There was an error when trying to activate the platform coin                        |
+  | PlatformConfigIsNotFound   | string | Config of the platform coin you are trying to activate is not found                 |
+  | PlatformIsAlreadyActivated | string | The platform coin you are trying to activate is already activated                   |
+  | PrivKeyNotAllowed          | string | The privkey is not allowed                                                          |
+  | TokenConfigIsNotFound      | string | Config of the token you are trying to activate is not found                         |
+  | TokenProtocolParseError    | string | Parsing the protocol of the token you are trying to activate failed                 |
+  | Transport                  | string | The request was failed due to a network error                                       |
+  | UnexpectedDerivationMethod | string | The derivation method used is unexpected                                            |
+  | UnexpectedPlatformProtocol | string | Unexpected platform protocol found for the platform coin you are trying to activate |
+  | UnexpectedTokenProtocol    | string | Unexpected protocol is found in the config of the token you are trying to activate  |
+
+  #### PlatformIsAlreadyActivated Error
+
+  In this case, you need to [disable](/komodo-defi-framework/api/legacy/disable_coin/) BCH and try again.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "BCH",
+      "error_path": "platform_coin_with_tokens",
+      "error_trace": "platform_coin_with_tokens:281]",
+      "error_type": "PlatformIsAlreadyActivated",
+      "error_data": "BCH",
+      "id": null
+  }
+  ```
+
+  #### PlatformConfigIsNotFound Error
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Platform BCH-wrong config is not found",
+      "error_path": "platform_coin_with_tokens.prelude",
+      "error_trace": "platform_coin_with_tokens:286] prelude:56]",
+      "error_type": "PlatformConfigIsNotFound",
+      "error_data": "BCH-wrong",
+      "id": null
+  }
+  ```
+
+  #### UnexpectedPlatformProtocol Error
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Unexpected platform protocol UTXO for BTC",
+      "error_path": "platform_coin_with_tokens.prelude.bch_with_tokens_activation",
+      "error_trace": "platform_coin_with_tokens:286] prelude:67] bch_with_tokens_activation:127]",
+      "error_type": "UnexpectedPlatformProtocol",
+      "error_data": {
+          "ticker": "BTC",
+          "protocol": {
+              "type": "UTXO"
+          }
+      },
+      "id": null
+  }
+  ```
+
+  #### UnexpectedTokenProtocol Error
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Unexpected token protocol ERC20 { platform: \"ETH\", contract_address: \"0xdAC17F958D2ee523a2206206994597C13D831ec7\" } for USDT-ERC20",
+      "error_path": "platform_coin_with_tokens.prelude.slp_token_activation",
+      "error_trace": "platform_coin_with_tokens:301] platform_coin_with_tokens:114] prelude:67] slp_token_activation:47]",
+      "error_type": "UnexpectedTokenProtocol",
+      "error_data": {
+          "ticker": "USDT-ERC20",
+          "protocol": {
+              "type": "ERC20",
+              "protocol_data": {
+                  "platform": "ETH",
+                  "contract_address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+              }
+          }
+      },
+      "id": null
+  }
+  ```
+
+  #### PlatformCoinCreationError Error
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Error Using empty bchd_urls is unsafe for SLP users! on platform coin BCH creation",
+      "error_path": "platform_coin_with_tokens.bch_with_tokens_activation",
+      "error_trace": "platform_coin_with_tokens:290] bch_with_tokens_activation:212]",
+      "error_type": "PlatformCoinCreationError",
+      "error_data": {
+          "ticker": "BCH",
+          "error": "Using empty bchd_urls is unsafe for SLP users!"
+      },
+      "id": null
+  }
+  ```
+
+  #### PlatformCoinCreationError Error (native)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Error bch:633] utxo:1704] utxo:995] Error parsing the native wallet configuration '/home/user/.Bitcoin Cash Testnet/Bitcoin Cash Testnet.conf': No such file or directory (os error 2) on platform coin tBCH creation",
+      "error_path": "platform_coin_with_tokens.bch_with_tokens_activation",
+      "error_trace": "platform_coin_with_tokens:290] bch_with_tokens_activation:212]",
+      "error_type": "PlatformCoinCreationError",
+      "error_data": {
+          "ticker": "tBCH",
+          "error": "bch:633] utxo:1704] utxo:995] Error parsing the native wallet configuration '/home/user/.Bitcoin Cash Testnet/Bitcoin Cash Testnet.conf': No such file or directory (os error 2)"
+      },
+      "id": null
+  }
+  ```
+
+  #### PlatformCoinCreationError Error (Electrum server not responding)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Error bch:633] utxo:1667] Failed to connect to at least 1 of [ElectrumRpcRequest { url: \"bch0.kister.net:5100\", protocol: TCP, disable_cert_verification: false }, ElectrumRpcRequest { url: \"testnet.imaginary.cash:5000\", protocol: TCP, disable_cert_verification: false }, ElectrumRpcRequest { url: \"blackie.c3-soft.com:6000\", protocol: TCP, disable_cert_verification: false }, ElectrumRpcRequest { url: \"tbch.loping.net:6000\", protocol: TCP, disable_cert_verification: false }, ElectrumRpcRequest { url: \"electroncash.de:5000\", protocol: TCP, disable_cert_verification: false }] in 5 seconds. on platform coin tBCH creation",
+      "error_path": "platform_coin_with_tokens.bch_with_tokens_activation",
+      "error_trace": "platform_coin_with_tokens:290] bch_with_tokens_activation:212]",
+      "error_type": "PlatformCoinCreationError",
+      "error_data": {
+          "ticker": "tBCH",
+          "error": "bch:633] utxo:1667] Failed to connect to at least 1 of [ElectrumRpcRequest { url: \"bch0.kister.net:5100\", protocol: TCP, disable_cert_verification: false }, ElectrumRpcRequest { url: \"testnet.imaginary.cash:5000\", protocol: TCP, disable_cert_verification: false }, ElectrumRpcRequest { url: \"blackie.c3-soft.com:6000\", protocol: TCP, disable_cert_verification: false }, ElectrumRpcRequest { url: \"tbch.loping.net:6000\", protocol: TCP, disable_cert_verification: false }, ElectrumRpcRequest { url: \"electroncash.de:5000\", protocol: TCP, disable_cert_verification: false }] in 5 seconds."
+      },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
