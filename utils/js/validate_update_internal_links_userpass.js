@@ -233,14 +233,11 @@ function processInternalLink(link, currFilePath, filepathSlugs) {
     correctUrl = correctUrlSplit[0] + "#" + slug;
   }
 
-  // Enforce that main API index links point to method headings, not subsections
-  if (currFilePath === "src/pages/komodo-defi-framework/api/index.mdx" && 
-      hash && 
+  // Enforce that main Komodo DeFi Framework API index links point to method headings, not subsections
+  // Unlike the other sections, the slug is not based on path, but on the method heading
+  if (currFilePath.endsWith("src/pages/komodo-defi-framework/api/index.mdx") && 
       (correctUrl.includes("/api/v20/") || correctUrl.includes("/api/v20-dev/") || correctUrl.includes("/api/legacy/"))) {
-    
-    // Extract expected method name from the file path
-    const pathParts = correctUrl.split("/");
-    const methodFileName = pathParts[pathParts.length - 2]; // Get the folder name (method name)
+    console.log("correctUrl: " + correctUrl);
     const fileContent = fs.readFileSync(internalLinkFile, 'utf-8');
     const lines = fileContent.split('\n');
     let methodHeading = null;
@@ -249,33 +246,21 @@ function processInternalLink(link, currFilePath, filepathSlugs) {
       if (trimmed.startsWith('## ')) {
         // Extract the heading text before any {{label ...}}
         methodHeading = trimmed.slice(3).split('{{')[0].trim();
+        console.log("methodHeading: " + methodHeading);
         break;
       }
     }
     if (!methodHeading) {
       throw new Error(`Could not find main method heading (## ...) in file: ${internalLinkFile}`);
     }
-    const expectedSlug = slugify(methodHeading);
-    
-    // Check if the link points to the main method heading
-    if (slug !== expectedSlug) {
-      throw new Error(
-        `API index link validation failed in ${currFilePath}:
-        Link: ${link}
-        Expected to link to main method heading: #${expectedSlug}
-        But found: #${slug}
-        
-        Links in the main API index should point to the main method heading (## ${methodHeading}) 
-        rather than subsections like examples or parameter tables.`
-      );
-    }
+    slug = slugify(methodHeading);
+    correctUrl = correctUrlSplit[0] + "#" + slug;
   }
 
   if (!Object.hasOwn(filepathSlugs, internalLinkFile)) {
     console.log("#----------------------------------------------#");
     console.log("currNormalisedDir: " + currNormalisedDir);
     console.log("currFilePath: " + currFilePath);
-    console.log("hash: " + hash);
     console.log("strippedPath: " + strippedPath);
     console.log("link: " + link);
     console.log("correctUrl: " + correctUrl);
@@ -292,7 +277,6 @@ function processInternalLink(link, currFilePath, filepathSlugs) {
     console.log("##------------------------------------------------##");
     console.log("currNormalisedDir: " + currNormalisedDir);
     console.log("currFilePath: " + currFilePath);
-    console.log("hash: " + hash);
     console.log("strippedPath: " + strippedPath);
     console.log("link: " + link);
     console.log("correctUrl: " + correctUrl);
@@ -308,7 +292,6 @@ function processInternalLink(link, currFilePath, filepathSlugs) {
   } catch (err) {
     console.log("currNormalisedDir:" + currNormalisedDir);
     console.log("currFilePath: " + currFilePath);
-    console.log("hash: " + hash);
     console.log("strippedPath: " + strippedPath);
     console.log("link: " + link);
     console.log("correctUrl: " + correctUrl);

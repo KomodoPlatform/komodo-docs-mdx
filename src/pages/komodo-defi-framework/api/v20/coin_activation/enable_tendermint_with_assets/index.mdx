@@ -9,17 +9,18 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
 
 ### Request Arguments
 
-| Parameter               | Type             | Required |     Default    | Description                                                                                                                                                                                                                              |
-| ----------------------- | ---------------- | :------: | :------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| get\_balances           | boolean          |     ✗    |      true      | If false, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                  |
-| mm2                     | integer          |     ✗    |        -       | Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are 0 or 1.                                                                                    |
-| nodes                   | array of objects |     ✓    |        -       | A list of [CoinNode objects](/komodo-defi-framework/api/common_structures/activation/#coin-node).                                                                                                                                        |
-| priv\_key\_policy       | string           |     ✗    | ContextPrivKey | Value can be [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum).                                                                                                         |
-| required\_confirmations | integer          |     ✗    |        3       | When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap.                                                                                |
-| requires\_notarization  | boolean          |     ✗    |      false     | If true, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
-| ticker                  | string           |     ✓    |        -       | Ticker of the platform protocol coin.                                                                                                                                                                                                    |
-| tokens\_params          | array of objects |     ✓    |        -       | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                     |
-| tx\_history             | boolean          |     ✗    |      false     | If true the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to true to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method.                 |
+| Parameter               | Type             | Required |      Default     | Description                                                                                                                                                                                                                                |
+| ----------------------- | ---------------- | :------: | :--------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| nodes                   | array of objects |     ✓    |         -        | A list of [CoinNode objects](/komodo-defi-framework/api/common_structures/activation/#coin-node).                                                                                                                                          |
+| ticker                  | string           |     ✓    |         -        | Ticker of the platform protocol coin. Current options: `ATOM`, `IRIS`, `OSMOSIS` (with more supported coins on the way).                                                                                                                   |
+| tokens\_params          | array of objects |     ✓    |         -        | A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request) objects.                                                                                                                       |
+| activation\_params      | object           |     ✗    |         -        | Only used with Metamask, Keplr, or WalletConnect activations. Defines the [PrivKeyPolicy](/komodo-defi-framework/api/common_structures/wallet/#priv-key-policy) of the connection.                                                         |
+| get\_balances           | boolean          |     ✗    |      `true`      | If `false`, coin and token balances will not be returned in the response, and the response will be returned more quickly.                                                                                                                  |
+| mm2                     | integer          |     ✗    |         -        | Required if not set in coins file. Informs the Komodo DeFi Framework API whether or not the coin is expected to function. Accepted values are `0` or `1`.                                                                                  |
+| priv\_key\_policy       | string           |     ✗    | `ContextPrivKey` | Value can be [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum).                                                                                                           |
+| required\_confirmations | integer          |     ✗    |        `3`       | When the platform coin is involved, the number of confirmations for the Komodo DeFi Framework API to wait during the transaction steps of an atomic swap.                                                                                  |
+| requires\_notarization  | boolean          |     ✗    |      `false`     | If `true`, coins protected by [Komodo Platform's dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86) will wait for a notarization before progressing to the next atomic swap transactions step. |
+| tx\_history             | boolean          |     ✗    |      `false`     | If `true` the Komodo DeFi Framework API will preload transaction history as a background process. Must be set to `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method.               |
 
 ### Response Parameters
 
@@ -85,7 +86,7 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   ```
 </CollapsibleSection>
 
-#### Request with `get_balances` as `true`
+#### Request with token activation and `get_balances` as `true`
 
 <CodeGroup title="Enable Tendermint Token with Assets (get_balances true)" tag="POST" label="enable_tendermint_with_assets" mm2MethodDecorate="true">
   ```json
@@ -144,121 +145,179 @@ Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and IBC asset
   ```
 </CollapsibleSection>
 
-### ⚠️ Error Responses
+#### Request for Metamask / WalletConnect activation
 
-#### CoinProtocolParseError
+<CodeGroup title="" tag="POST" label="enable_tendermint_with_assets" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "enable_tendermint_with_assets",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ATOM",
+      "tx_history": true,
+      "get_balances": true,
+      "activation_params": {
+        "priv_key_policy": {
+          "type": "WalletConnect",
+          "data": "3569914dd09a5cc4ac92dedab354f06ff5db17ef616233a8ba562cbea51269fd"
+        }
+      },
+      "nodes": [
+        {
+          "url": "https://cosmos-rpc.alpha.komodo.earth/",
+          "api_url": "https://cosmos-api.alpha.komodo.earth/",
+          "grpc_url": "https://cosmos-grpc.alpha.komodo.earth/",
+          "ws_url": "wss://cosmos-rpc.alpha.komodo.earth/websocket"
+        },
+        {
+          "url": "https://cosmoshub.rpc.stakin-nodes.com/"
+        }
+      ],
+      "tokens_params": []
+    }
+  }
+  ```
+</CodeGroup>
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Platform coin IRIS protocol parsing failed: invalid type: null, expected adjacently tagged enum CoinProtocol",
-  "error_path": "platform_coin_with_tokens.prelude",
-  "error_trace": "platform_coin_with_tokens:302] prelude:82]",
-  "error_type": "CoinProtocolParseError",
-  "error_data": {
-    "ticker": "IRIS",
-    "error": "invalid type: null, expected adjacently tagged enum CoinProtocol"
-  },
-  "id": null
-}
-```
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
 
-#### PlatformConfigIsNotFound
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "ticker": "ATOM",
+        "address": "cosmos16drqvl3u8sukfsu4lm3qsk28jr3fahjaswsac8",
+        "current_block": 22148347,
+        "balance": {
+            "spendable": "1.003381",
+            "unspendable": "0"
+        },
+        "tokens_balances": {}
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Platform WALDO config is not found",
-  "error_path": "platform_coin_with_tokens.prelude",
-  "error_trace": "platform_coin_with_tokens:302] prelude:79]",
-  "error_type": "PlatformConfigIsNotFound",
-  "error_data": "WALDO",
-  "id": null
-}
-```
+<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
+  ### ⚠️ Error Responses
 
-#### PlatformIsAlreadyActivated
+  #### CoinProtocolParseError
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "IRIS",
-  "error_path": "platform_coin_with_tokens",
-  "error_trace": "platform_coin_with_tokens:297]",
-  "error_type": "PlatformIsAlreadyActivated",
-  "error_data": "IRIS",
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Platform coin IRIS protocol parsing failed: invalid type: null, expected adjacently tagged enum CoinProtocol",
+    "error_path": "platform_coin_with_tokens.prelude",
+    "error_trace": "platform_coin_with_tokens:302] prelude:82]",
+    "error_type": "CoinProtocolParseError",
+    "error_data": {
+      "ticker": "IRIS",
+      "error": "invalid type: null, expected adjacently tagged enum CoinProtocol"
+    },
+    "id": null
+  }
+  ```
 
-#### UnexpectedPlatformProtocol
+  #### PlatformConfigIsNotFound
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Unexpected platform protocol BCH { slp_prefix: \"simpleledger\" } for BCH",
-  "error_path": "platform_coin_with_tokens.prelude.tendermint_with_assets_activation",
-  "error_trace": "platform_coin_with_tokens:302] prelude:90] tendermint_with_assets_activation:92]",
-  "error_type": "UnexpectedPlatformProtocol",
-  "error_data": {
-    "ticker": "BCH",
-    "protocol": {
-      "type": "BCH",
-      "protocol_data": {
-        "slp_prefix": "simpleledger"
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Platform WALDO config is not found",
+    "error_path": "platform_coin_with_tokens.prelude",
+    "error_trace": "platform_coin_with_tokens:302] prelude:79]",
+    "error_type": "PlatformConfigIsNotFound",
+    "error_data": "WALDO",
+    "id": null
+  }
+  ```
+
+  #### PlatformIsAlreadyActivated
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "IRIS",
+    "error_path": "platform_coin_with_tokens",
+    "error_trace": "platform_coin_with_tokens:297]",
+    "error_type": "PlatformIsAlreadyActivated",
+    "error_data": "IRIS",
+    "id": null
+  }
+  ```
+
+  #### UnexpectedPlatformProtocol
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Unexpected platform protocol BCH { slp_prefix: \"simpleledger\" } for BCH",
+    "error_path": "platform_coin_with_tokens.prelude.tendermint_with_assets_activation",
+    "error_trace": "platform_coin_with_tokens:302] prelude:90] tendermint_with_assets_activation:92]",
+    "error_type": "UnexpectedPlatformProtocol",
+    "error_data": {
+      "ticker": "BCH",
+      "protocol": {
+        "type": "BCH",
+        "protocol_data": {
+          "slp_prefix": "simpleledger"
+        }
       }
-    }
-  },
-  "id": null
-}
-```
+    },
+    "id": null
+  }
+  ```
 
-#### TokenConfigIsNotFound
+  #### TokenConfigIsNotFound
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Token GALT config is not found",
-  "error_path": "platform_coin_with_tokens.prelude",
-  "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:79]",
-  "error_type": "TokenConfigIsNotFound",
-  "error_data": "GALT",
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Token GALT config is not found",
+    "error_path": "platform_coin_with_tokens.prelude",
+    "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:79]",
+    "error_type": "TokenConfigIsNotFound",
+    "error_data": "GALT",
+    "id": null
+  }
+  ```
 
-#### TokenProtocolParseError
+  #### TokenProtocolParseError
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Token BABYDOGE-BEP20 protocol parsing failed: unknown variant `WOOF`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `SLPTOKEN`, `BCH`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`",
-  "error_path": "platform_coin_with_tokens.prelude",
-  "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:82]",
-  "error_type": "TokenProtocolParseError",
-  "error_data": {
-    "ticker": "BABYDOGE-BEP20",
-    "error": "unknown variant `WOOF`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `SLPTOKEN`, `BCH`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`"
-  },
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Token BABYDOGE-BEP20 protocol parsing failed: unknown variant `WOOF`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`",
+    "error_path": "platform_coin_with_tokens.prelude",
+    "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:82]",
+    "error_type": "TokenProtocolParseError",
+    "error_data": {
+      "ticker": "BABYDOGE-BEP20",
+      "error": "unknown variant `WOOF`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`"
+    },
+    "id": null
+  }
+  ```
 
-#### UnexpectedTokenProtocol
+  #### UnexpectedTokenProtocol
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Unexpected token protocol UTXO for KMD",
-  "error_path": "platform_coin_with_tokens.prelude.tendermint_with_assets_activation",
-  "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:90] tendermint_with_assets_activation:101]",
-  "error_type": "UnexpectedTokenProtocol",
-  "error_data": {
-    "ticker": "KMD",
-    "protocol": {
-      "type": "UTXO"
-    }
-  },
-  "id": null
-}
-```
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Unexpected token protocol UTXO for KMD",
+    "error_path": "platform_coin_with_tokens.prelude.tendermint_with_assets_activation",
+    "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:90] tendermint_with_assets_activation:101]",
+    "error_type": "UnexpectedTokenProtocol",
+    "error_data": {
+      "ticker": "KMD",
+      "protocol": {
+        "type": "UTXO"
+      }
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>

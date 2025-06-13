@@ -60,7 +60,9 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
         "policy": "MeanAverageFast"
       },
       "mm2": 1,
-      "priv_key_policy": "ContextPrivKey",
+      "priv_key_policy": {
+        "type": "ContextPrivKey"
+      },
       "swap_contract_address": "0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80",
       "fallback_swap_contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
       "nodes": [
@@ -338,25 +340,84 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
   ```
 </CollapsibleSection>
 
-### ⚠️ Error Responses
+#### Request using WalletConnect
+
+Prior to coin activation using WalletConnect, you need to establish a connection with [wc\_new\_connection](/komodo-defi-framework/api/v20-dev/wc_new_connection/#wc-new-connection)
+
+<CodeGroup title="" tag="POST" label="enable_eth_with_tokens" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "enable_eth_with_tokens",
+    "mmrpc": "2.0",
+    "params": {
+      "ticker": "ETH",
+      "gas_station_url": "https://ethgasstation.info/json/ethgasAPI.json",
+      "gas_station_decimals": 8,
+      "gas_station_policy": {
+        "policy": "MeanAverageFast"
+      },
+      "mm2": 1,
+      "rpc_mode": "Default",
+      "priv_key_policy": {
+        "type": "WalletConnect",
+        "data": "3569914dd09a5cc4ac92dedab354f06ff5db17ef616233a8ba562cbea51269fd"
+      },
+      "swap_contract_address": "0x24ABE4c71FC658C91313b6552cd40cD808b3Ea80",
+      "fallback_swap_contract": "0x8500AFc0bc5214728082163326C2FF0C73f4a871",
+      "nodes": [
+        {
+          "url": "https://eth1.cipig.net:18555",
+          "komodo_proxy": false
+        },
+        {
+          "url": "https://eth2.cipig.net:18555",
+          "komodo_proxy": false
+        },
+        {
+          "url": "https://eth3.cipig.net:18555",
+          "komodo_proxy": false
+        }
+      ],
+      "tx_history": true,
+      "erc20_tokens_requests": [
+        {
+          "ticker": "PEPE-ERC20",
+          "required_confirmations": 4
+        }
+      ],
+      "required_confirmations": 5
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  ```
+</CollapsibleSection>
+
+### Error Types
+
+| Parameter                  | Type   | Description                                                                         |
+| -------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| CoinProtocolParseError     | string | Parsing the protocol of the platform coin you are trying to activate failed         |
+| InternalError              | string | The request was failed due to an Komodo DeFi Framework API internal error           |
+| PlatformCoinCreationError  | string | There was an error when trying to activate the platform coin                        |
+| PlatformConfigIsNotFound   | string | Config of the platform coin you are trying to activate is not found                 |
+| PlatformIsAlreadyActivated | string | The platform coin you are trying to activate is already activated                   |
+| PrivKeyNotAllowed          | string | The privkey is not allowed                                                          |
+| TokenConfigIsNotFound      | string | Config of the token you are trying to activate is not found                         |
+| TokenProtocolParseError    | string | Parsing the protocol of the token you are trying to activate failed                 |
+| Transport                  | string | The request was failed due to a network error                                       |
+| UnexpectedDerivationMethod | string | The derivation method used is unexpected                                            |
+| UnexpectedPlatformProtocol | string | Unexpected platform protocol found for the platform coin you are trying to activate |
+| UnexpectedTokenProtocol    | string | Unexpected protocol is found in the config of the token you are trying to activate  |
 
 <CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
-  ### Error Types
-
-  | Parameter                  | Type   | Description                                                                         |
-  | -------------------------- | ------ | ----------------------------------------------------------------------------------- |
-  | CoinProtocolParseError     | string | Parsing the protocol of the platform coin you are trying to activate failed         |
-  | InternalError              | string | The request was failed due to an Komodo DeFi Framework API internal error           |
-  | PlatformCoinCreationError  | string | There was an error when trying to activate the platform coin                        |
-  | PlatformConfigIsNotFound   | string | Config of the platform coin you are trying to activate is not found                 |
-  | PlatformIsAlreadyActivated | string | The platform coin you are trying to activate is already activated                   |
-  | PrivKeyNotAllowed          | string | The privkey is not allowed                                                          |
-  | TokenConfigIsNotFound      | string | Config of the token you are trying to activate is not found                         |
-  | TokenProtocolParseError    | string | Parsing the protocol of the token you are trying to activate failed                 |
-  | Transport                  | string | The request was failed due to a network error                                       |
-  | UnexpectedDerivationMethod | string | The derivation method used is unexpected                                            |
-  | UnexpectedPlatformProtocol | string | Unexpected platform protocol found for the platform coin you are trying to activate |
-  | UnexpectedTokenProtocol    | string | Unexpected protocol is found in the config of the token you are trying to activate  |
+  ### ⚠️ Error Responses
 
   #### PlatformIsAlreadyActivated Error
 
@@ -438,13 +499,13 @@ Additionally, it supports ERC20 tokens on the ETH chain and associated ERC20 lik
   ```json
   {
       "mmrpc": "2.0",
-      "error": "Token BUSD-ERC20 protocol parsing failed: unknown variant `TERC20`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `SLPTOKEN`, `BCH`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`",
+      "error": "Token BUSD-ERC20 protocol parsing failed: unknown variant `TERC20`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`",
       "error_path": "platform_coin_with_tokens.prelude",
       "error_trace": "platform_coin_with_tokens:314] platform_coin_with_tokens:109] prelude:82]",
       "error_type": "TokenProtocolParseError",
       "error_data": {
           "ticker": "BUSD-ERC20",
-          "error": "unknown variant `TERC20`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `SLPTOKEN`, `BCH`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`"
+          "error": "unknown variant `TERC20`, expected one of `UTXO`, `QTUM`, `QRC20`, `ETH`, `ERC20`, `TENDERMINT`, `TENDERMINTTOKEN`, `LIGHTNING`, `SOLANA`, `SPLTOKEN`, `ZHTLC`"
       },
       "id": null
   }

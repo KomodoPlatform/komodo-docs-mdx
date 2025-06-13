@@ -287,6 +287,102 @@ The `PayForGas` object includes the following items:
   ```
 </CollapsibleSection>
 
+### StakingDetails
+
+The `StakingDetails` object includes the following items:
+
+| Parameter          | Type   | Description                                                                                                                  |
+| ------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| type               | string | The coin type. Currently, only 'Cosmos' and `Qtum` are supported.                                                            |
+| validator\_address | string | The address of the validator to delegate staking to.                                                                         |
+| amount             | string | The amount of coins to stake send to the validator for delegated staking (Cosmos only - QTUM will stake your whole balance). |
+
+<CollapsibleSection expandedText="Hide Cosmos Example" collapsedText="Show Cosmos Example">
+  ```json
+  {
+      "type": "Cosmos",
+      "validator_address": "iva1qq93sapmdcx36uz64vvw5gzuevtxsc7lcfxsat",
+      "amount": "7.77"
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Qtum Example" collapsedText="Show Qtum Example">
+  ```json
+  {
+      "type": "Qtum",
+      "validator_address": "qbgHcqxXYHVJZXHheGpHwLJsB5epDUtWxe"
+  }
+  ```
+</CollapsibleSection>
+
+### StakingInfoDetails
+
+The `StakingInfoDetails` object includes the following items:
+
+| Parameter          | Type    | Description                                                                                                           |
+| ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------- |
+| type               | string  | The coin type. Currently, only 'Cosmos' is supported.                                                                 |
+| filter\_by\_status | string  | Return only validators matching a specific status. Options are `Bonded`, `Unbonded`, and `All`. Defaults to `Bonded`. |
+| limit              | integer | Optional, defaults to `10`. The number of validators displayed per page in response.                                  |
+| page\_number       | integer | Optional, defaults to `1`. The page offset for items in response.                                                     |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "type": "Cosmos",
+      "filter_by_status": "Bonded",
+      "limit": 20,
+      "page_number": 1
+  }
+  ```
+</CollapsibleSection>
+
+### ClaimingDetails
+
+The `ClaimingDetails` object includes the following items:
+
+| Parameter          | Type    | Description                                                                                                  |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------------------ |
+| type               | string  | The coin type. Currently, only 'Cosmos' and `Qtum` are supported.                                            |
+| validator\_address | string  | The address of the validator to delegate staking to.                                                         |
+| force              | boolean | Defaults to `false`. If `true`, will process unprofitable transactions (reward value less than network fees) |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "type": "Cosmos",
+      "validator_address": "iva1qq93sapmdcx36uz64vvw5gzuevtxsc7lcfxsat",
+      "amount": "7.77"
+  }
+  ```
+</CollapsibleSection>
+
+### PrivKeyPolicy
+
+The `PrivKeyPolicy` object includes the following items:
+
+| Parameter | Type   | Description                                                                                                                                                                              |
+| --------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type      | string | Options are `ContextPrivKey`, `WalletConnect`, `Metamask`, or `Trezor`. Defaults to `ContextPrivKey`.                                                                                    |
+| data      | list   | `WalletConnect` type only. The `session_topic` hex string, returned from the response to [wc\_new\_connection](/komodo-defi-framework/api/v20-dev/wc_new_connection/#wc-new-connection). |
+
+<CollapsibleSection expandedText="Hide Trezor Example" collapsedText="Show Trezor Example">
+  ```json
+    {
+      "type": "Trezor"
+    }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide WalletConnect Example" collapsedText="Show WalletConnect Example">
+  ```json
+  {
+    "type": "WalletConnect", "data": "3569914dd09a5cc4ac92dedab354f06ff5db17ef616233a8ba562cbea51269fd"
+  }
+  ```
+</CollapsibleSection>
+
 ### RawTxInfo
 
 The `RawTxInfo` object includes the following items:
@@ -306,12 +402,12 @@ The `RawTxInfo` object includes the following items:
 
 <CollapsibleSection expandedText="Hide UTXO Example" collapsedText="Show UTXO Example">
   ```json
-    {
-        "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
-        "prev_txns": [
-            ...
-        ]
-    }
+  {
+      "tx_hex": "02000000010d23d763f12d77a337cc16df2696ac3f48552dda373c9977fa1f5dd8d5025cb20100000000fdffffff01f40100000000000016001488accd2145b7232b958db5cdf09336ad619541e200000000",
+      "prev_txns": [
+          ...
+      ]
+  }
   ```
 </CollapsibleSection>
 
