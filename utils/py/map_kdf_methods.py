@@ -14,6 +14,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
+import shutil
 
 
 @dataclass
@@ -860,6 +861,70 @@ class MethodMapper:
         
         print(f"\n" + "="*60)
 
+    def remove_method_files(self, method_name: str, dry_run: bool = False) -> None:
+        """
+        Remove all MDX, YAML, and JSON example files related to the specified method.
+        Args:
+            method_name: The method to remove (any format)
+            dry_run: If True, only print what would be deleted
+        """
+        print(f"\n🔍 Searching for files related to method: {method_name}")
+        unified = self.create_unified_mapping()
+        found = []
+        for version in ["v1", "v2"]:
+            for m, mapping in unified[version].items():
+                if m == method_name or m in self._normalize_method_name(method_name) or method_name in self._normalize_method_name(m):
+                    found.append((version, mapping))
+        if not found:
+            print(f"❌ No files found for method '{method_name}'.")
+            return
+        files_to_delete = []
+        dirs_to_delete = []
+        for version, mapping in found:
+            if mapping.mdx_path:
+                mdx_dir = os.path.dirname(os.path.abspath(mapping.mdx_path))
+                if os.path.isdir(mdx_dir):
+                    dirs_to_delete.append(mdx_dir)
+            if mapping.yaml_path:
+                yaml_file = os.path.abspath(mapping.yaml_path)
+                if os.path.isfile(yaml_file):
+                    files_to_delete.append(yaml_file)
+            if mapping.examples_path:
+                ex_dir = os.path.abspath(mapping.examples_path)
+                if os.path.isdir(ex_dir):
+                    dirs_to_delete.append(ex_dir)
+        if not files_to_delete and not dirs_to_delete:
+            print(f"❌ No files or directories found for method '{method_name}'.")
+            return
+        print("\nThe following files/directories will be deleted:")
+        for d in dirs_to_delete:
+            print(f"  [DIR] {d}")
+        for f in files_to_delete:
+            print(f"  [FILE] {f}")
+        confirm = input("\nAre you sure you want to delete these files/directories? [y/N]: ").strip().lower()
+        if confirm != 'y':
+            print("Aborted.")
+            return
+        for d in dirs_to_delete:
+            if dry_run:
+                print(f"[DRY RUN] Would remove directory: {d}")
+            else:
+                try:
+                    shutil.rmtree(d)
+                    print(f"Removed directory: {d}")
+                except Exception as e:
+                    print(f"Error removing directory {d}: {e}")
+        for f in files_to_delete:
+            if dry_run:
+                print(f"[DRY RUN] Would remove file: {f}")
+            else:
+                try:
+                    os.remove(f)
+                    print(f"Removed file: {f}")
+                except Exception as e:
+                    print(f"Error removing file {f}: {e}")
+        print("\n✅ Removal complete.")
+
 
 def main():
     """Main function to generate unified method mapping and update OpenAPI spec."""
@@ -879,6 +944,8 @@ def main():
                        help='Minimal output')
     parser.add_argument('--generate-focused', choices=['activation', 'lightning', 'trading', 'wallet'],
                        help='Generate a focused OpenAPI spec for specific functionality')
+    parser.add_argument('--remove', type=str, metavar='METHOD',
+                       help='Remove all files related to the specified method (MDX, YAML, JSON examples)')
     
     args = parser.parse_args()
     
@@ -889,6 +956,10 @@ def main():
     verbose = args.verbose and not args.quiet
     
     mapper = MethodMapper(verbose=verbose)
+    
+    if args.remove:
+        mapper.remove_method_files(args.remove, dry_run=args.dry_run)
+        return 0
     
     if not args.quiet:
         print("🚀 Starting Komodo DeFi Framework API mapping and maintenance...")
