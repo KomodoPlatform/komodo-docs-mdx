@@ -1,0 +1,84 @@
+/enable_tendermint_token:
+  post:
+    operationId: enable_tendermint_token
+    summary: Enable Tendermint Token
+    description: |
+      Allows you to activate additional Tendermint assets.
+      Before using this method, you first need to use the enable_tendermint_with_assets method.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20/coin_activation/enable_tendermint_token/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["enable_tendermint_token"]
+                    description: The method name
+                    example: "enable_tendermint_token"
+                  params:
+                    type: object
+                    required:
+                      - ticker
+                    properties:
+                      ticker:
+                        $ref: '../../../components/schemas/Common.yaml#/CoinTicker'
+                        description: Ticker of the Tendermint asset
+                        example: "ATOM-IBC_IRIS"
+                      activation_params:
+                        $ref: '../../../components/schemas/Activation.yaml#/TokenActivationParams'
+                        description: Optional. A standard TokenActivationParams object
+    responses:
+      '200':
+        description: Tendermint token enabled successfully
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        balances:
+                          type: object
+                          description: Object containing balance information for addresses
+                          additionalProperties:
+                            type: object
+                            properties:
+                              spendable:
+                                $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                description: Spendable balance amount
+                              unspendable:
+                                $ref: '../../../components/schemas/Common.yaml#/AmountString'
+                                description: Unspendable balance amount
+                        platform_coin:
+                          $ref: '../../../components/schemas/Common.yaml#/CoinTicker'
+                          description: The platform coin ticker
+      '400':
+        description: Bad request - Various error conditions
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+                - type: object
+                  properties:
+                    error_type:
+                      type: string
+                      description: Type of error
+                      enum: 
+                        - "PlatformCoinIsNotActivated"
+                        - "TokenIsAlreadyActivated"
+                        - "TokenConfigIsNotFound"
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

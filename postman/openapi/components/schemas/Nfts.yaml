@@ -1,0 +1,306 @@
+NftFilter:
+  type: object
+  description: Filter object for NFT queries.
+  properties:
+    exclude_spam:
+      type: boolean
+      description: Optional, defaults to false. If true, only tokens with possible_spam:false are included.
+    exclude_phishing:
+      type: boolean
+      description: Optional, defaults to false. If true, only tokens with possible_phishing:false are included.
+NftInfoBasic:
+  type: object
+  description: Basic information about an NFT token.
+  properties:
+    amount:
+      type: string
+      description: The amount of this NFT the user owns (used by ERC1155).
+    chain:
+      type: string
+      description: Chain name. One of AVALANCHE, BSC, ETH, FANTOM, or POLYGON.
+    contract_type:
+      type: string
+      description: The type of NFT contract standard. One of ERC721 or ERC1155.
+    token_address:
+      type: string
+      description: The address of the NFT contract.
+    token_id:
+      type: string
+      description: The token ID of the NFT.
+NftInfo:
+  type: object
+  description: Detailed information about an NFT token.
+  properties:
+    amount:
+      type: string
+      description: The amount of this NFT the user owns (used by ERC1155).
+    block_number_minted:
+      type: integer
+      nullable: true
+      description: The block height when the NFT was minted. May be null.
+    block_number:
+      type: integer
+      description: The block height when the amount or owner changed.
+    chain:
+      type: string
+      description: Chain name. One of AVALANCHE, BSC, ETH, FANTOM, or POLYGON.
+    name:
+      type: string
+      nullable: true
+      description: NFT collection name. May be null.
+    contract_type:
+      type: string
+      description: The type of NFT contract standard. One of ERC721 or ERC1155.
+    last_token_uri_sync:
+      type: string
+      description: When the token_uri was last updated.
+    last_metadata_sync:
+      type: string
+      description: When the metadata was last updated.
+    metadata:
+      type: string
+      nullable: true
+      description: The metadata of the token. May be null.
+    minter_address:
+      type: string
+      nullable: true
+      description: Minter address. May be null.
+    owner_of:
+      type: string
+      description: The wallet address of the owner of the NFT.
+    possible_spam:
+      type: boolean
+      description: If true, the contract address is associated with spam or suspicious activities.
+    possible_phishing:
+      type: boolean
+      description: If true, the token is associated with phishing.
+    symbol:
+      type: string
+      nullable: true
+      description: The symbol of the NFT contract. May be null.
+    token_address:
+      type: string
+      description: The address of the NFT contract.
+    token_id:
+      type: string
+      description: The token ID of the NFT.
+    token_hash:
+      type: string
+      nullable: true
+      description: The token hash. May be null.
+    token_uri:
+      type: string
+      nullable: true
+      description: The URI to the metadata of the token. May be null.
+    token_domain:
+      type: string
+      nullable: true
+      description: Token domain. May be null.
+    uri_meta:
+      $ref: '#/NftMetadata'
+      description: NFT metadata object.
+NftMetadata:
+  type: object
+  description: NFT metadata object.
+  properties:
+    image:
+      type: string
+      description: Optional. Direct URL to the NFT's image.
+    image_url:
+      type: string
+      description: Optional. URL to the NFT's image. Derived from image or image_url fields.
+    image_domain:
+      type: string
+      description: Optional. Extracted domain from the image_url, if valid.
+    name:
+      type: string
+      description: Optional. Name of the token.
+    description:
+      type: string
+      description: Optional. Description of the token.
+    attributes:
+      oneOf:
+        - type: object
+        - type: array
+          items:
+            type: object
+      description: Optional. The values within this parameter will vary, and are set by the creator. Often used to store traits.
+    animation_url:
+      type: string
+      description: Optional. URL to an animation to be displayed instead of a static image.
+    animation_domain:
+      type: string
+      description: Optional. Extracted domain from the animation_url, if valid.
+    external_url:
+      type: string
+      description: Optional. URL to the external source related to the token.
+    external_domain:
+      type: string
+      description: Optional. Extracted domain from the external_url, if valid.
+    image_details:
+      type: object
+      description: Optional. JSON containing additional details or attributes of the image.
+NftProvider:
+  type: object
+  description: NFT provider configuration for enable_nft RPC method.
+  properties:
+    type:
+      type: string
+      description: Specifies the type of the provider.
+    info:
+      type: object
+      description: Additional information about the provider.
+      properties:
+        url:
+          type: string
+          description: URL of the provider's endpoint.
+        komodo_proxy:
+          type: boolean
+          description: Optional. Indicates whether proxy authentication is enabled for the endpoint.
+NftTransfer:
+  type: object
+  description: NFT transfer object for each token transaction.
+  properties:
+    amount:
+      type: string
+      description: Amount of tokens transferred.
+    block_hash:
+      type: string
+      nullable: true
+      description: Hash of block in which transfer occurred. May be null.
+    block_number:
+      type: integer
+      description: Height of block in which transfer occurred.
+    block_timestamp:
+      type: integer
+      description: Block time in unix epoch format.
+    chain:
+      type: string
+      description: Chain name. One of AVALANCHE, BSC, ETH, FANTOM, or POLYGON.
+    token_uri:
+      type: string
+      nullable: true
+      description: The URI to the metadata of the token. May be null.
+    token_domain:
+      type: string
+      nullable: true
+      description: Extracted domain from the token_uri, if valid. May be null.
+    collection_name:
+      type: string
+      nullable: true
+      description: Name of collection which token belongs to. May be null.
+    image_url:
+      type: string
+      nullable: true
+      description: The URI to the token image. May be null.
+    image_domain:
+      type: string
+      nullable: true
+      description: Extracted domain from the image_url, if valid. May be null.
+    token_name:
+      type: string
+      nullable: true
+      description: Name of the token. May be null.
+    contract_type:
+      type: string
+      description: Contract type. ERC721 or ERC1155.
+    token_address:
+      type: string
+      description: Address of token transferred.
+    token_id:
+      type: string
+      description: Token ID.
+    possible_spam:
+      type: boolean
+      description: If true, the contract address is associated with spam or suspicious activities.
+    possible_phishing:
+      type: boolean
+      description: If true, the token is associated with phishing.
+    transaction_hash:
+      type: string
+      description: Transaction ID of the transfer.
+    transaction_index:
+      type: string
+      nullable: true
+      description: Transaction index of the transfer. May be null.
+    log_index:
+      type: string
+      description: Log index of the transfer.
+    value:
+      type: string
+      nullable: true
+      description: Transfer value. May be null.
+    transaction_type:
+      type: string
+      nullable: true
+      description: Transaction type. Possible values are Single. May be null.
+    from_address:
+      type: string
+      description: Address of previous owner which sent the token(s).
+    to_address:
+      type: string
+      description: Address of new owner which received the token(s).
+    status:
+      type: string
+      description: Transfer status. Will be either Send or Receive.
+    verified:
+      type: integer
+      nullable: true
+      description: Deprecated field which will be removed in future. May be null.
+    operator:
+      type: string
+      nullable: true
+      description: May be null.
+    fee_details:
+      type: object
+      description: Optional. A standard FeeInfo object.
+    confirmations:
+      type: integer
+      description: The count of blocks produced since this transaction was confirmed.
+NftTransferFilter:
+  type: object
+  description: Filter object for NFT transfer queries.
+  properties:
+    receive:
+      type: boolean
+      description: Optional, defaults to false. If true, only transfers where user received NFTs are included.
+    send:
+      type: boolean
+      description: Optional, defaults to false. If true, only transfers where user sent NFTs are included.
+    from_date:
+      type: integer
+      description: Optional. Timestamp in unix epoch format. If true, filter includes transfers from this date onwards (inclusive).
+    to_date:
+      type: integer
+      description: Optional. Timestamp in unix epoch format. If true, filter includes transfers up to this date (inclusive).
+    exclude_spam:
+      type: boolean
+      description: Optional, defaults to false. If true, only transfers with possible_spam:false are included.
+    exclude_phishing:
+      type: boolean
+      description: Optional, defaults to false. If true, only transfers with possible_phishing:false are included.
+WithdrawNftData:
+  type: object
+  description: Used for withdrawals of NFTs on ERC721 and ERC1155 contracts.
+  properties:
+    chain:
+      type: string
+      description: The token chain. Chain must be activated first.
+    to:
+      type: string
+      description: Destination address to withdraw the token to.
+    token_address:
+      type: string
+      description: Token address.
+    token_id:
+      type: string
+      description: Token ID.
+    fee:
+      type: object
+      description: A standard WithdrawFee object. May be missing for older transfers.
+    amount:
+      type: string
+      description: Optional, ERC1155 only. Defaults to 1. Amount of NFTs to withdraw. Ignored if max is true.
+    max:
+      type: boolean
+      description: Optional, ERC1155 only. Defaults to false. If true, amount parameter will be ignored and all NFTs with this token_id will be sent. 

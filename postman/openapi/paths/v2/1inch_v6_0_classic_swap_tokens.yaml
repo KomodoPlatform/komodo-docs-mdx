@@ -1,0 +1,101 @@
+/1inch_v6_0_classic_swap_tokens:
+  post:
+    operationId: 1inch_v6_0_classic_swap_tokens
+    summary: 1inch v6.0 Classic Swap Tokens
+    description: |
+      Returns tokens for classic swaps from 1inch API version 6.0.
+      
+      Note: To use this method, you need to set the 1inch_api url in your MM2.json file
+      and set your 1inch API key as an environment variable called ONE_INCH_API_TEST_AUTH.
+      This feature is experimental and requires building KDF from source on the dev branch.
+    x-mdx-doc-path: ../../src/pages/komodo-defi-framework/api/v20-dev/one_inch_v6_0_classic_swap_tokens/index.mdx
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../../components/schemas/Common.yaml#/RpcV2Request'
+              - type: object
+                properties:
+                  method:
+                    type: string
+                    enum: ["1inch_v6_0_classic_swap_tokens"]
+                    description: The method name
+                    example: "1inch_v6_0_classic_swap_tokens"
+                  params:
+                    type: object
+                    required:
+                      - chain_id
+                    properties:
+                      chain_id:
+                        type: integer
+                        description: Chain id
+                        example: 1
+    responses:
+      '200':
+        description: Successfully retrieved available tokens for trading
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../../../components/schemas/Common.yaml#/RpcSuccessResponse'
+                - type: object
+                  properties:
+                    result:
+                      type: object
+                      properties:
+                        tokens:
+                          type: object
+                          description: Object containing available tokens for trade
+                          additionalProperties:
+                            type: object
+                            properties:
+                              address:
+                                type: string
+                                description: Token contract address
+                                pattern: "^0x[a-fA-F0-9]{40}$"
+                                example: "0x328c4c80bc7aca0834db37e6600a6c49e12da4de"
+                              symbol:
+                                type: string
+                                description: Token symbol
+                                example: "aSNXv1"
+                              name:
+                                type: string
+                                description: Token name
+                                example: "Aave Interest bearing SNX"
+                              decimals:
+                                type: integer
+                                description: Number of digits after decimal point for the token amount
+                                example: 18
+                              eip2612:
+                                type: boolean
+                                description: Is Eip-2612 supported
+                                example: false
+                              isFoT:
+                                type: boolean
+                                description: Is FoT token
+                                example: false
+                              logoURI:
+                                type: string
+                                format: uri
+                                description: Token logo URI
+                                example: "https://tokens.1inch.io/0x328c4c80bc7aca0834db37e6600a6c49e12da4de.png"
+                              tags:
+                                type: array
+                                description: Token tags
+                                items:
+                                  type: string
+                                example: ["crosschain", "tokens"]
+      '400':
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse'
+      '500':
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              $ref: '../../../components/schemas/Common.yaml#/RpcErrorResponse' 

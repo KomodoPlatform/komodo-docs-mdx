@@ -1,59 +1,61 @@
 export const title = "Komodo DeFi SDK Common Structures: Orders";
 export const description = "Each order on the Komodo Defi oderbook can be queried to view full details of each order for a pair, or the best orders for a ticker.";
 
-# Order Structures
+# Order Common Structures
+
+## orders\_common\_structures {{label : 'orders_common_structures', tag : 'structures'}}
 
 ### 1inchProtocolImage
 
-| Structure  | Type   | Description                   |
-| ---------- | ------ | ----------------------------- |
-| id         | string | Protocol id.                  |
-| title      | string | Protocol title.               |
-| img        | string | Link to protocol image.       |
-| img\_color | string | Link to protocol image color. |
+| Parameter  | Type   | Required | Default | Description                   |
+| ---------- | ------ | :------: | :-----: | ----------------------------- |
+| id         | string |     ✓    |    -    | Protocol id.                  |
+| title      | string |     ✓    |    -    | Protocol title.               |
+| img        | string |     ✓    |    -    | Link to protocol image.       |
+| img\_color | string |     ✓    |    -    | Link to protocol image color. |
 
 ### 1inchProtocolInfo
 
-| Structure            | Type    | Description                  |
-| -------------------- | ------- | ---------------------------- |
-| name                 | string  | Liquidity source name.       |
-| part                 | numeric | Protocol part.               |
-| from\_token\_address | string  | From-token contract address. |
-| to\_token\_address   | numeric | To-token contract address.   |
+| Parameter            | Type    | Required | Default | Description                  |
+| -------------------- | ------- | :------: | :-----: | ---------------------------- |
+| name                 | string  |     ✓    |    -    | Liquidity source name.       |
+| part                 | numeric |     ✓    |    -    | Protocol part.               |
+| from\_token\_address | string  |     ✓    |    -    | From-token contract address. |
+| to\_token\_address   | numeric |     ✓    |    -    | To-token contract address.   |
 
 ### 1inchTokenInfo
 
-| Structure | Type           | Description                                                |
-| --------- | -------------- | ---------------------------------------------------------- |
-| address   | string         | Token contract address.                                    |
-| symbol    | string         | Token symbol.                                              |
-| name      | string         | Token name.                                                |
-| decimals  | numeric        | Number of digits after decimal point for the token amount. |
-| eip2612   | boolean        | Is Eip-2612 supported.                                     |
-| is\_fot   | boolean        | Is FoT token.                                              |
-| logo\_uri | string         | Token logo uri.                                            |
-| tags      | list of string | Token tags.                                                |
+| Parameter | Type           | Required | Default | Description                                                |
+| --------- | -------------- | :------: | :-----: | ---------------------------------------------------------- |
+| address   | string         |     ✓    |    -    | Token contract address.                                    |
+| symbol    | string         |     ✓    |    -    | Token symbol.                                              |
+| name      | string         |     ✓    |    -    | Token name.                                                |
+| decimals  | numeric        |     ✓    |    -    | Number of digits after decimal point for the token amount. |
+| eip2612   | boolean        |     ✓    |    -    | Is Eip-2612 supported.                                     |
+| is\_fot   | boolean        |     ✓    |    -    | Is FoT token.                                              |
+| logo\_uri | string         |     ✓    |    -    | Token logo uri.                                            |
+| tags      | list of string |     ✓    |    -    | Token tags.                                                |
 
 ### 1inchTxFields
 
-| Structure  | Type    | Description       |
-| ---------- | ------- | ----------------- |
-| from       | string  | From address      |
-| to         | string  | To address        |
-| data       | string  | Transaction data  |
-| value      | numeric | Transaction value |
-| gas\_price | float   | Gas price         |
-| gas        | numeric | Gas               |
+| Parameter  | Type    | Required | Default | Description       |
+| ---------- | ------- | :------: | :-----: | ----------------- |
+| from       | string  |     ✓    |    -    | From address      |
+| to         | string  |     ✓    |    -    | To address        |
+| data       | string  |     ✓    |    -    | Transaction data  |
+| value      | numeric |     ✓    |    -    | Transaction value |
+| gas\_price | float   |     ✓    |    -    | Gas price         |
+| gas        | numeric |     ✓    |    -    | Gas               |
 
 ### CancelBy
 
-| Structure   | Type   | Description                                                                                                                      |
-| ----------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| Type        | string | `All` to cancel all orders; `Pair` to cancel all orders for specific coin pairs; `Coin` to cancel all orders for a specific coin |
-| data        | object | additional data the cancel condition; present with `Pair` and `Coin` types                                                       |
-| data.base   | string | base coin of the pair; `Pair` type only                                                                                          |
-| data.rel    | string | rel coin of the pair; `Pair` type only                                                                                           |
-| data.ticker | string | order is cancelled if it uses `ticker` as base or rel; `Coin` type only                                                          |
+| Parameter   | Type   | Required | Default | Description                                                                                                                      |
+| ----------- | ------ | :------: | :-----: | -------------------------------------------------------------------------------------------------------------------------------- |
+| Type        | string |     ✓    |    -    | `All` to cancel all orders; `Pair` to cancel all orders for specific coin pairs; `Coin` to cancel all orders for a specific coin |
+| data        | object |     ✗    |    -    | additional data the cancel condition; present with `Pair` and `Coin` types                                                       |
+| data.base   | string |     ✗    |    -    | base coin of the pair; `Pair` type only                                                                                          |
+| data.rel    | string |     ✗    |    -    | rel coin of the pair; `Pair` type only                                                                                           |
+| data.ticker | string |     ✗    |    -    | order is cancelled if it uses `ticker` as base or rel; `Coin` type only                                                          |
 
 <CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
   To cancel all orders for a specific coin:
@@ -82,12 +84,12 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 
 ### ConfSettings
 
-| Structure   | Type   | Description                                                                                                                                                                     |
-| ----------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| base\_confs | number | Number of required confirmations on the base coin's blockchain for a transaction to complete an atomic swap event.                                                              |
-| base\_nota  | bool   | Whether [dPoW notarization](https://komodoplatform.com/en/blog/dpow-demystified/) is required on the base coin's blockchain for a transaction to complete an atomic swap event. |
-| rel\_confs  | number | Number of required confirmations on the rel coin's blockchain for a transaction to complete an atomic swap event.                                                               |
-| rel\_nota   | bool   | Whether [dPoW notarization](https://komodoplatform.com/en/blog/dpow-demystified/) is required on the rel coin's blockchain for a transaction to complete an atomic swap event.  |
+| Parameter   | Type   | Required | Default | Description                                                                                                                                                                     |
+| ----------- | ------ | :------: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| base\_confs | number |     ✓    |    -    | Number of required confirmations on the base coin's blockchain for a transaction to complete an atomic swap event.                                                              |
+| base\_nota  | bool   |     ✓    |    -    | Whether [dPoW notarization](https://komodoplatform.com/en/blog/dpow-demystified/) is required on the base coin's blockchain for a transaction to complete an atomic swap event. |
+| rel\_confs  | number |     ✓    |    -    | Number of required confirmations on the rel coin's blockchain for a transaction to complete an atomic swap event.                                                               |
+| rel\_nota   | bool   |     ✓    |    -    | Whether [dPoW notarization](https://komodoplatform.com/en/blog/dpow-demystified/) is required on the rel coin's blockchain for a transaction to complete an atomic swap event.  |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
@@ -104,10 +106,10 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 
 ## MatchBy
 
-| Structure | Type             | Description                                                                                                                  |
-| --------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Type      | string           | `Any` to match with any other order; `Orders` to select specific uuids; `Pubkeys` to select specific nodes; default is `Any` |
-| data      | array of strings | A list of order uuids (to match for `Orders` type) or pubkeys of nodes (to match for `Pubkeys` type)                         |
+| Parameter | Type             | Required | Default | Description                                                                                                |
+| --------- | ---------------- | :------: | :-----: | ---------------------------------------------------------------------------------------------------------- |
+| Type      | string           |     ✗    |  `Any`  | `Any` to match with any other order; `Orders` to select specific uuids; `Pubkeys` to select specific nodes |
+| data      | array of strings |     ✗    |    -    | A list of order uuids (to match for `Orders` type) or pubkeys of nodes (to match for `Pubkeys` type)       |
 
 <CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
   ```json
@@ -135,10 +137,10 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 
 ## OrderAddress
 
-| Structure     | Type   | Description                                                          |
-| ------------- | ------ | -------------------------------------------------------------------- |
-| address\_type | string | Generally `Transparent`, but may be `Shielded` for supporting coins. |
-| address\_data | string | The actual address text for sending and receiving funds.             |
+| Parameter     | Type   | Required | Default | Description                                                          |
+| ------------- | ------ | :------: | :-----: | -------------------------------------------------------------------- |
+| address\_type | string |     ✓    |    -    | Generally `Transparent`, but may be `Shielded` for supporting coins. |
+| address\_data | string |     ✓    |    -    | The actual address text for sending and receiving funds.             |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   ```json
@@ -155,7 +157,7 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
   Compare and confirm the differences between this object in v1 and v2 methods.
 </DevComment>
 
-| Structure                   | Type             | Description                                                                                                                                         |
+| Parameter                   | Type             | Description                                                                                                                                         |
 | --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | coin                        | string           | The ticker of the coin                                                                                                                              |
 | address                     | string           | The address offering the trade                                                                                                                      |
@@ -171,7 +173,7 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 | pubkey                      | string           | The pubkey of the offer provider                                                                                                                    |
 | age                         | number           | The age of the offer (in seconds)                                                                                                                   |
 | zcredits                    | number           | The zeroconf deposit amount (deprecated)                                                                                                            |
-| netid                       | number           | The id of the network on which the request is made (default is `0`)                                                                                 |
+| netid                       | number           | The id of the network on which the request is made                                                                                                  |
 | uuid                        | string           | The uuid of order                                                                                                                                   |
 | is\_mine                    | bool             | Whether the order is placed by me                                                                                                                   |
 | base\_max\_volume           | string (decimal) | The maximum amount of `base` coin the offer provider is willing to buy or sell                                                                      |
@@ -198,7 +200,7 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
   Compare and confirm the differences between this object in v1 and v2 methods.
 </DevComment>
 
-| Structure               | Type   | Description                                                                                                                                                                                                                                                                                   |
+| Parameter               | Type   | Description                                                                                                                                                                                                                                                                                   |
 | ----------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | coin                    | string | The ticker of the coin                                                                                                                                                                                                                                                                        |
 | address                 | object | A standard [OrderAddress](/komodo-defi-framework/api/common_structures/orders/#order-address) object.                                                                                                                                                                                         |
@@ -216,7 +218,7 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 
 ### OrderStatusData
 
-| Structure               | Type            | Description                                                                                                                                                                                 |
+| Parameter               | Type            | Description                                                                                                                                                                                 |
 | ----------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | base                    | string          | base currency                                                                                                                                                                               |
 | rel                     | string          | rel currency                                                                                                                                                                                |
@@ -314,7 +316,7 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
   Compare and confirm the differences between this object in v1 and v2 methods.
 </DevComment>
 
-| Structure                   | Type             | Description                                                                                                                                         |
+| Parameter                   | Type             | Description                                                                                                                                         |
 | --------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | coin                        | string           | The ticker of the coin                                                                                                                              |
 | address                     | string           | The address offering the trade                                                                                                                      |
@@ -357,7 +359,7 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
   Compare and confirm the differences between this object in v1 and v2 methods.
 </DevComment>
 
-| Structure               | Type   | Description                                                                                                                                                                                                                                                                                   |
+| Parameter               | Type   | Description                                                                                                                                                                                                                                                                                   |
 | ----------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | coin                    | string | The ticker of the coin                                                                                                                                                                                                                                                                        |
 | address                 | object | A standard [OrderAddress](/komodo-defi-framework/api/common_structures/orders/#order-address) object.                                                                                                                                                                                         |
@@ -375,7 +377,7 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 
 ## OrderSummaryData
 
-| Structure     | Type             | Description                                                                       |
+| Parameter     | Type             | Description                                                                       |
 | ------------- | ---------------- | --------------------------------------------------------------------------------- |
 | uuid          | string           | uuid of the order                                                                 |
 | order\_type   | string           | Type of the order; "Maker" or "Taker"                                             |
@@ -390,9 +392,9 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 
 ### OrderType
 
-| Structure | Type   | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
-| --------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type      | string | There are two types from which to choose: `GoodTillCancelled` and `FillOrKill`. The `GoodTillCancelled` order is automatically converted to a `maker` order if the order is not matched in 30 seconds, and this `maker` order stays in the orderbook until explicitly cancelled. On the other hand, a `FillOrKill` order is cancelled if it is not matched within 30 seconds. The default type is `GoodTillCancelled` |
+| Parameter | Type   | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --------- | ------ | :------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Type      | string |     ✓    | There are two types from which to choose: `GoodTillCancelled` and `FillOrKill`. The `GoodTillCancelled` order is automatically converted to a `maker` order if the order is not matched in 30 seconds, and this `maker` order stays in the orderbook until explicitly cancelled. On the other hand, a `FillOrKill` order is cancelled if it is not matched within 30 seconds. The default type is `GoodTillCancelled` |
 
 <Note>
   If your order includes UTXO coins activated via electrum, and connection to its servers is lost, your order will automatically cancel and will need to be recreated once the connection is restored.
@@ -422,10 +424,10 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
 
 ### RequestBy
 
-| Structure | Type    | Description                                            |                                                                                                                                                                                  |
-| --------- | ------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| type      | integer | Defines whether requesting by `volume` or by `number`. |                                                                                                                                                                                  |
-| value     | numeric | string                                                 | If `type` is `volume`, the amount of `coin` (defined in the parent object) the user is willing to buy or sell. If `type` is `number`, the number of best price trades to return. |
+| Parameter | Type           | Required | Description                                                                                                                                                                      |
+| --------- | -------------- | :------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| type      | integer        |     ✓    | Defines whether requesting by `volume` or by `number`.                                                                                                                           |
+| value     | numeric string |     ✓    | If `type` is `volume`, the amount of `coin` (defined in the parent object) the user is willing to buy or sell. If `type` is `number`, the number of best price trades to return. |
 
 <CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
   Filter response to return the best trades for up to 20 of the coin defined in the parent object:
@@ -445,6 +447,37 @@ export const description = "Each order on the Komodo Defi oderbook can be querie
   {
     "type": "number",
     "value": 10
+  }
+  ```
+</CollapsibleSection>
+
+### PairDepth
+
+Used in [orderbook\_depth](/komodo-defi-framework/api/legacy/orderbook_depth/) responses to represent the depth information for a trading pair.
+
+| Parameter | Type                | Required | Description               |
+| --------- | ------------------- | :------: | ------------------------- |
+| pair      | string              |     ✓    | Trading pair name         |
+| asks      | array of \[decimal] |     ✓    | Array of ask price levels |
+| bids      | array of \[decimal] |     ✓    | Array of bid price levels |
+
+### DepthInfo
+
+Used within [PairDepth](/komodo-defi-framework/api/common_structures/orders/#pair-depth) objects to represent ask and bid counts.
+
+| Parameter | Type   | Description                              |
+| --------- | ------ | ---------------------------------------- |
+| asks      | number | The number of asks for this trading pair |
+| bids      | number | The number of bids for this trading pair |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+    "pair": ["DOC", "MARTY"],
+    "depth": {
+      "asks": 2,
+      "bids": 6
+    }
   }
   ```
 </CollapsibleSection>
