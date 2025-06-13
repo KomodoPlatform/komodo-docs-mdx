@@ -259,28 +259,80 @@ The `PagingOptions` object includes options of page selection to consult when lo
   ```
 </CollapsibleSection>
 
-## Standard Error types
+### WcConnNs
 
-#### NoSuchCoin
+The `WcConnNs` object contains details of approved chains, methods and events while connected via [WalletConnect](https://specs.walletconnect.com/2.0/).
 
-The specified coin was not found or is not activated yet.
+| Parameter | Type            | Description                                                                                                                                                                                                                                                                                                                                                                              |
+| --------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| chains    | list of strings | A list of chain IDs. For EIP155, refer to [https://chainid.network/](https://chainid.network/). For Cosmos, refer to [https://cosmos.directory/](https://cosmos.directory/)                                                                                                                                                                                                              |
+| methods   | list of strings | A list of approved methods, usable while connected. For EIP155, refer to [https://docs.reown.com/advanced/multichain/rpc-reference/ethereum-rpc](https://docs.reown.com/advanced/multichain/rpc-reference/ethereum-rpc). For Cosmos, refer to [https://docs.reown.com/advanced/multichain/rpc-reference/cosmos-rpc](https://docs.reown.com/advanced/multichain/rpc-reference/cosmos-rpc) |
+| events    | list of strings | A list of events to track during the connection. For EIP155, refer to [https://docs.reown.com/advanced/providers/ethereum#events](https://docs.reown.com/advanced/providers/ethereum#events). For Cosmos, refer to [https://tutorials.cosmos.network/academy/2-cosmos-concepts/10-events.html](https://tutorials.cosmos.network/academy/2-cosmos-concepts/10-events.html)                |
 
-| Structure | Type   | Description                                   |
-| --------- | ------ | --------------------------------------------- |
-| coin      | string | the not found `coin` specified in the Request |
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### EIP155 Example
 
-#### Transport
+  ```json
+  {
+  	"chains": [
+  		"eip155:1",      // ETH
+  		"eip155:56",     // BNB
+  		"eip155:137",    // POLYGON
+  		"eip155:43114"   // AVAX
+  	],
+  	"methods": [
+  		"eth_sendTransaction",
+  		"eth_signTransaction",
+  		"personal_sign"
+  	],
+  	"events": [
+  		"accountsChanged",
+  		"chainChanged"
+  	]
+  }
+  ```
 
-The request was failed due to a network error.
+  #### Cosmos Example
 
-| Structure | Type   | Description                     |
-| --------- | ------ | ------------------------------- |
-| (none)    | string | the transport error description |
+  ```json
+  {
+  	"chains": [
+  		"cosmos:cosmoshub-4",
+  		"cosmos:osmosis-1",
+  		"cosmos:irishub-1"
+  	],
+  	"methods": [
+  	  	"cosmos_signDirect",
+  		  "cosmos_signAmino",
+  		  "cosmos_getAccounts"
+  	],
+  	"events": []
+  }
+  ```
+</CollapsibleSection>
 
-#### InternalError
+### WcSession
 
-The request was failed due to an Komodo DeFi API internal error.
+The `WcSession` object contains details of active WalletConnect sessions.
 
-| Structure | Type   | Description                    |
-| --------- | ------ | ------------------------------ |
-| (none)    | string | the internal error description |
+| Parameter      | Type    | Description                                                                                                                                                                                                                                                                |
+| -------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| topic          | string  | The session topic hex string, used to identify the session for communications with the external wallet/dapp.                                                                                                                                                               |
+| metadata       | object  | Arbitrary data returned from the external wallet/dapp on connection.                                                                                                                                                                                                       |
+| pairing\_topic | string  | The pairing topic hex string, used for the initial external wallet/dapp connection.                                                                                                                                                                                        |
+| namespaces     | object  | Contains the same two [WcConnNs](/komodo-defi-framework/api/common_structures/#wc-conn-ns) objects for Cosmos/EIP155 which were input when initialising the connection via [wc\_new\_connection](/komodo-defi-framework/api/v20-dev/wc_new_connection/#wc-new-connection). |
+| expiry         | integer | A timestamp in [unix epoch format](https://www.epochconverter.com/) indicating when the connection will expire if not otherwise closed.                                                                                                                                    |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example
+
+  ```json
+
+
+  ```
+</CollapsibleSection>
+
+Within each session object, there are a some values which are required as input in other WalletConnect methods:
+
+*   `pairing_topic`: Only used when initally connecting with external wallets/dapps.
+*   `topic`: Once connected, this is use for communications with the connected external wallet/dapp.
