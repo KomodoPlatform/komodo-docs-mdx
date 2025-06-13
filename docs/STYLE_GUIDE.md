@@ -57,7 +57,8 @@ These guidelines are currently a work in progress. All new documentation should 
 
 Use the linked templates below as a starting point for new documentation pages.
 
-- [Komodo DeFi Framework API methods](templates/komodefi_method.mdx)
+- [Komodo DeFi Framework API method template](../../docs/templates/komodefi_method.mdx)
+- [Komodo DeFi Framework API overview template](../../docs/templates/komodefi_overview.mdx)
 
 ## Syntax & Structure 
 
