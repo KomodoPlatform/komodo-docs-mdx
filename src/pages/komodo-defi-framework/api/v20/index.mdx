@@ -103,6 +103,183 @@ It includes a uniform request, successful and error response formats. At the mom
   ```
 </CollapsibleSection>
 
+## Error types
+
+#### NotSufficientBalance
+
+The `available` balance is not sufficient to transfer the specified amount.
+
+| Structure | Type             | Description                                                                                                                                            |
+| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| coin      | string           | the name of the coin which balance is not sufficient. This coin name may differ from the requested coin. For example, ERC20 fees are paid by ETH (gas) |
+| available | string (numeric) | the balance available for transfer                                                                                                                     |
+| required  | string (numeric) | the amount required to transfer the specified amount. This amount is necessary but may not be sufficient                                               |
+
+#### Response (NotSufficientBalance error)
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Not enough DOC to withdraw: available 69.75066225, required at least 1000.00001",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1379] utxo_common:449]",
+  "error_type": "NotSufficientBalance",
+  "error_data": {
+    "coin": "DOC",
+    "available": "69.75066225",
+    "required": "1000.00001"
+  },
+  "id": 0
+}
+```
+
+#### ZeroBalanceToWithdrawMax
+
+The available balance is zero.
+
+| Structure | Type | Description |
+| --------- | ---- | ----------- |
+| (none)    |      |             |
+
+#### AmountTooLow
+
+The specified amount is too low. Required at least `threshold`.
+
+| Structure | Type             | Description                                          |
+| --------- | ---------------- | ---------------------------------------------------- |
+| amount    | string (numeric) | the amount the user was willing to transfer          |
+| threshold | string (numeric) | the `amount` has not to be less than the `threshold` |
+
+#### InvalidAddress
+
+The specified `to` address is not valid.
+
+| Structure | Type   | Description           |
+| --------- | ------ | --------------------- |
+| (none)    | string | the error description |
+
+#### InvalidFeePolicy
+
+The specified `fee` is not valid.
+
+| Structure | Type   | Description           |
+| --------- | ------ | --------------------- |
+| (none)    | string | the error description |
+
+#### Response (InvalidFeePolicy error - attempt to use EthGas for UTXO coin)
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "error_path": "utxo_common",
+  "error_trace": "utxo_common:1371]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
+  "id": 0
+}
+```
+
+#### Response (InvalidFeePolicy error - attempt to use UtxoFixed or UtxoPerKbyte for ETH coin)
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Invalid fee policy: Expected 'EthGas' fee type, found UtxoFixed",
+  "error_path": "eth",
+  "error_trace": "eth:535]",
+  "error_type": "InvalidFeePolicy",
+  "error_data": "Expected 'EthGas' fee type, found UtxoFixed",
+  "id": 0
+}
+```
+
+#### NoSuchCoin
+
+The specified coin was not found or is not activated yet.
+
+| Structure | Type   | Description                                   |
+| --------- | ------ | --------------------------------------------- |
+| coin      | string | the not found `coin` specified in the Request |
+
+#### Transport
+
+The request was failed due to a network error.
+
+| Structure | Type   | Description                     |
+| --------- | ------ | ------------------------------- |
+| (none)    | string | the transport error description |
+
+#### InternalError
+
+The request was failed due to an Komodo DeFi API internal error.
+
+| Structure | Type   | Description                    |
+| --------- | ------ | ------------------------------ |
+| (none)    | string | the internal error description |
+
+## Error cases
+
+### Error - Coin not active
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "BCH",
+  "error_path": "my_tx_history_v2.lp_coins",
+  "error_trace": "my_tx_history_v2:389] lp_coins:2847]",
+  "error_type": "CoinIsNotActive",
+  "error_data": "BCH",
+  "id": null
+}
+```
+
+### Error - Coin not compatible
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "BCH",
+  "error_path": "my_tx_history_v2",
+  "error_trace": "my_tx_history_v2:336]",
+  "error_type": "NotSupportedFor",
+  "error_data": "BCH",
+  "id": null
+}
+```
+
+### Error - Coin enabled without tx\_history = true
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "Storage is not initialized for BCH",
+  "error_path": "my_tx_history_v2",
+  "error_trace": "my_tx_history_v2:343]",
+  "error_type": "StorageIsNotInitialized",
+  "error_data": "Storage is not initialized for BCH",
+  "id": null
+}
+```
+
+### Error - Local database failed
+
+```json
+{
+  "mmrpc": "2.0",
+  "error": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
+  "error_path": "my_tx_history_v2.sql_tx_history_storage",
+  "error_trace": "my_tx_history_v2:351] sql_tx_history_storage:472]",
+  "error_type": "StorageError",
+  "error_data": "SqliteFailure(Error { code: Unknown, extended_code: 1 }, Some(\"no such column: block_height\"))",
+  "id": null
+}
+```
+
+<DevComment>
+  Error responses should be moved into their own file groups
+</DevComment>
+
 ## Common Komodo DeFi SDK Request / Response Objects
 
 There are some [common objects](/komodo-defi-framework/api/common_structures/) that are used in the Komodo DeFi SDK RPC protocol. These standard objects have been collected and grouped into the following sections:
