@@ -5,8 +5,8 @@ This package provides utilities for mapping and converting API documentation
 between MDX and OpenAPI formats.
 """
 
-from .mapping import MethodMapper, MethodMapping
-from .converter import (
+from .map_kdf_methods import MethodMapper, MethodMapping
+from .mdx_to_openapi_converter import (
     MDXParser, 
     OpenAPIConverter, 
     MDXToOpenAPIConverter,

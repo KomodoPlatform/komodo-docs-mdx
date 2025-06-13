@@ -41,20 +41,20 @@ npm ci
 
 ### Script Index
 
-| Script                                 | Purpose & Usage                                                                                      |
-|-----------------------------------------|------------------------------------------------------------------------------------------------------|
-| `create_search_index.js`                | Builds a search index from all MDX files for fast documentation search.                              |
-| `get_file_author_data.js`               | Fetches and updates author/contributor data for documentation files using the GitHub API.            |
-| `ensure_changelog_update.js`            | Checks if changelogs are up to date with the latest Komodo and KDF releases.                         |
-| `file_presence_structure_checker.js`    | Validates that all documentation directories have an `index.mdx` and that sidebar/navbar are in sync.|
-| `findMissingRedirects.js`               | Identifies missing redirects from old documentation URLs to new ones.                                 |
-| `h1_presence_format_checker.js`         | Ensures every MDX file has exactly one `<h1>` heading and that it is properly formatted.             |
-| `validate_update_internal_links_userpass.js` | Validates and updates internal links in MDX files, ensuring correct slugs and userpass values.   |
-| `createRedirectMap.js`                  | Generates a mapping of old documentation URLs to new ones for redirect purposes.                     |
-| `create_author_data_for_renamed_paths.js` | Updates author/contributor data and redirect maps for files that have been renamed.                |
-| `create_data_for_gpts.js`               | Aggregates and converts MDX content for use in GPT-based tools or search.                            |
-| `_removed_search_words.js`              | Contains a list of common words to exclude from search indexing.                                     |
-| `constants.js`                          | Stores project-wide constants (URLs, org info, etc.) for use in scripts.                             |
+| Script                                         | Purpose & Usage                                                                                      |
+|------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| `create_search_index.js`                       | Builds a search index from all MDX files for fast documentation search.                              |
+| `get_file_author_data.js`                      | Fetches and updates author/contributor data for documentation files using the GitHub API.            |
+| `ensure_changelog_update.js`                   | Checks if changelogs are up to date with the latest Komodo and KDF releases.                         |
+| `file_presence_structure_checker.js`           | Validates that all documentation directories have an `index.mdx` and that sidebar/navbar are in sync.|
+| `findMissingRedirects.js`                      | Identifies missing redirects from old documentation URLs to new ones.                                |
+| `h1_presence_format_checker.js`                | Ensures every MDX file has exactly one `<h1>` heading and that it is properly formatted.             |
+| `validate_update_internal_links_userpass.js`   | Validates and updates internal links in MDX files, ensuring correct slugs and userpass values.       |
+| `createRedirectMap.js`                         | Generates a mapping of old documentation URLs to new ones for redirect purposes.                     |
+| `create_author_data_for_renamed_paths.js`      | Updates author/contributor data and redirect maps for files that have been renamed.                  |
+| `create_data_for_gpts.js`                      | Aggregates and converts MDX content for use in GPT-based tools or search.                            |
+| `_removed_search_words.js`                     | Contains a list of common words to exclude from search indexing.                                     |
+| `constants.js`                                 | Stores project-wide constants (URLs, org info, etc.) for use in scripts.                             |
 
 #### Data Subfolder (`js/data/`)
 
@@ -73,17 +73,16 @@ pip install -r requirements.txt
 
 ### Script Index
 
-| Script                        | Purpose & Usage                                                                                                 |
-|-------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `pretty_print_md_table.py`     | Reformats markdown tables for consistent column alignment.                                                      |
-| `deduplicate_examples.py`      | Finds and removes duplicate JSON example files in the Postman examples directory.                               |
-| `gen_api_methods_table.py`     | Generates a markdown table of all API methods, linking to their documentation.                                  |
-| `mapping.py`                   | Provides classes for mapping API methods to MDX and OpenAPI files, and for generating unified mappings.         |
-| `postman_collection_generator.py` | Generates Postman collections from JSON examples, organizing them by method and category.                  |
-| `api_example_manager.py`       | Extracts, deduplicates, and manages JSON API examples from MDX files and generates additional test cases.        |
-| `converter.py`                 | Converts MDX documentation to OpenAPI YAML specifications using mapping and parsing classes.                     |
-| `gen_api_methods_table.py`     | (See above)                                                                                                     |
-| `__init__.py`                  | Exposes main classes for import as a Python package.                                                            |
+| Script                            | Purpose & Usage                                                                                                 |
+|-----------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `pretty_print_md_table.py`        | Reformats markdown tables for consistent column alignment.                                                      |
+| `deduplicate_examples.py`         | Finds and removes duplicate JSON example files in the Postman examples directory.                               |
+| `gen_api_methods_table.py`        | Generates a markdown table of all API methods, linking to their documentation.                                  |
+| `mapping.py`                      | Provides classes for mapping API methods to MDX and OpenAPI files, and for generating unified mappings.         |
+| `postman_collection_generator.py` | Generates Postman collections from JSON examples, organizing them by method and category.                       |
+| `api_example_manager.py`          | Extracts, deduplicates, and manages JSON API examples from MDX files and generates additional test cases.       |
+| `converter.py`                    | Converts MDX documentation to OpenAPI YAML specifications using mapping and parsing classes.                    |
+
 
 #### Data Subfolder (`py/data/`)
 

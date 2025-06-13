@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 py/gen_api_methods_table.py
+python3 py/table_manager.py generate
 
 npm ci --prefix js
 #node js/get_file_author_data.js
