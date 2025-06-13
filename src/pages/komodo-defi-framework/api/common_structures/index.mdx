@@ -5,120 +5,9 @@ export const description = "Starting with version beta-2.1.3434, the Komodo DeFi
 
 The objects are in the request or response of multiple Komodo DeFi SDK methods have been grouped into the following sections:
 
-*   [Activation](/komodo-defi-framework/api/common_structures/activation/)
-*   [Swaps](/komodo-defi-framework/api/common_structures/swaps/)
-*   [Lightning Network](/komodo-defi-framework/api/common_structures/lightning/)
-*   [Non-fungible Tokens](/komodo-defi-framework/api/common_structures/nfts/)
-*   [Wallet Operations](/komodo-defi-framework/api/common_structures/wallet/)
+<TocForIndex />
 
 Structures which are used in more than one section are listed below:
-
-## AddressFormat
-
-| Structure | Type          | Description                                                                                                                                                                                        |
-| --------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| format    | string (enum) | address format to which the input address should be converted. Possible values: `mixedcase` for ETH/ERC20 coins; `cashaddress` or `standard` for UTXO coins; `contract` or `wallet` for QTUM/QRC20 |
-| network   | string (enum) | Optional, only used for UTXO coins. Network prefix for `cashaddress` format. Possible values: `bitcoincash` for BCH mainnet; `bchtest` for BCH testnet; `bchreg` for BCH regtest                   |
-
-<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
-  #### Example
-
-  ```json
-  {
-    "format": "mixedcase"
-  }
-  ```
-
-  ```json
-  {
-    "format": "cashaddress",
-    "network": "bitcoincash"
-  }
-  ```
-</CollapsibleSection>
-
-### BalanceInfo
-
-The `balanceInfo` object includes the following items for a given coin or token:
-
-| Parameter   | Type             | Description                                                                                                              |
-| ----------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| spendable   | string (numeric) | The available amount of a coin or token which is ready to be traded or withdrawn.                                        |
-| unspendable | string (numeric) | The amount of a coin or token which is awaiting confirmation on the block chain for an incoming or outgoing transaction. |
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "spendable": "12.11398301",
-      "unspendable": "0.53"
-  }
-  ```
-</CollapsibleSection>
-
-### DerivationMethod
-
-The `DerivationMethod` object includes the following items for a given coin or token:
-
-| Parameter | Type   | Description                                                                     |
-| --------- | ------ | ------------------------------------------------------------------------------- |
-| type      | string | Defines how keypairs will be generated. Possible values: `Iguana` or `HDWallet` |
-
-<Note>
-  Using the same seed or private key to generate keypairs using different derivation methods will result in a different address and private key for each method.
-</Note>
-
-Where the value indicates:
-
-*   `Iguana`: The coin or token is was activated using Iguana derivation (default).
-*   `HDWallet`: The coin or token is was activated using a Heirarchical Deterministic (HD) Wallet derivation path.
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "type": "Iguana"
-  }
-  ```
-</CollapsibleSection>
-
-### EventStreamConfig
-
-The `EventStreamConfig` object defines which events will be streamed to the client:
-
-| Parameter                      | Type   | Description                                                                            |
-| ------------------------------ | ------ | -------------------------------------------------------------------------------------- |
-| access\_control\_allow\_origin | string | Defines CORS whitelist. Use "\*" to allow fromi any origin.                            |
-| active\_events                 | object | Events to be streamed to the client, along with configuration defineing frequency etc. |
-| worker\_path                   | string | WASM only. Path to a custom `worker.js` file.                                          |
-
-Active events are defined as follows:
-
-*   NETWORK: Network status changes. Requires `stream_interval_seconds` configuration.
-*   HEARTBEAT: Allows clients to easily determine whether channels are functioning. Requires `stream_interval_seconds` configuration.
-*   COIN\_BALANCE: Balance changes. Does not require `stream_interval_seconds` configuration, as the event is triggered by the balance change.
-
-<Note>
-  The `COIN_BALANCE` event may not be available for all coins or tokens.
-</Note>
-
-An example of the event stream output can then be viewed in [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html)
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  "event_stream_configuration": {
-      "access_control_allow_origin": "*",
-      "active_events": {
-          "NETWORK": {
-              "stream_interval_seconds": 1.5,
-          },
-          "COIN_BALANCE": {},
-          "HEATBEAT": {
-              "stream_interval_seconds": 2.4,
-          }
-      },
-      "worker_path": "index.js"
-  }
-  ```
-</CollapsibleSection>
 
 ### NumericFormatsValue
 
@@ -145,92 +34,6 @@ The `NumericFormatsValue` returns a price or amount in three different formats: 
   }
   ```
 </CollapsibleSection>
-
-### FeeInfo
-
-The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests:
-
-| Parameter  | Type             | Description                                                                                                                               |
-| ---------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| type       | string           | Type of transaction fee. Possible values: `UtxoFixed`, `UtxoPerKbyte`, `UtxoPriority`, `EthGas`, `Qrc20Gas`, `CosmosGas`                  |
-| amount     | string (numeric) | Fee amount in coin units, used only when type is `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte` (amount per Kbyte) |
-| priority   | string           | Used only when type is `UtxoPriority`. Possible values: 'Low', 'Normal', 'High'.                                                          |
-| gas\_price | string (numeric) | Used only when fee type is `Qrc20Gas` or `EthGas`; sets the gas price in `gwei` units.                                                    |
-| gas\_price | number (double)  | Used only when fee type is `CosmosGas`; sets the gas price.                                                                               |
-| gas        | number (integer) | Used only when fee type is `EthGas`; sets the gas limit for transaction                                                                   |
-| gas\_limit | number (integer) | Used only when fee type is `Qrc20Gas` or `CosmosGas`; sets the gas limit for transaction                                                  |
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  #### Examples
-
-  ```json
-  {
-    "type": "UtxoFixed",
-    "amount": "0.0001"
-  }
-  ```
-
-  ```json
-  {
-    "type": "UtxoPerKbyte",
-    "amount": "0.0001"
-  }
-  ```
-
-  ```json
-  {
-    "type": "UtxoPriority",
-    "priority": "Low"
-  }
-  ```
-
-  ```json
-  {
-    "type": "EthGas",
-    "gas_price": "10",
-    "gas": 21000
-  }
-  ```
-
-  ```json
-  {
-    "type": "Qrc20Gas",
-    "gas_price": "10",
-    "gas_limit": 21000
-  }
-  ```
-
-  ```json
-  {
-    "type": "CosmosGas",
-    "gas_price": 0.05,
-    "gas_limit": 21000
-  }
-  ```
-</CollapsibleSection>
-
-### ExtendedFeeInfo
-
-| Structure                | Type             | Description                                                                                                                                                   |
-| ------------------------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                     | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas) |
-| amount                   | string (numeric) | fee amount (in decimal representation)                                                                                                                        |
-| amount\_rat              | rational         | fee amount (in rational representation)                                                                                                                       |
-| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                       |
-| amount\_fraction         | fraction         | fee amount (in fraction representation)                                                                                                                       |
-| paid\_from\_trading\_vol | bool             | whether the fee is paid from trading volume and not use actual `coin` balance                                                                                 |
-
-### TotalFeeInfo
-
-| Structure                   | Type             | Description                                                                                                                                                   |
-| --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| coin                        | string           | the fee is paid from the user's balance of this coin. This coin name may differ from the `base` or `rel` coins. For example, ERC20 fees are paid by ETH (gas) |
-| amount                      | string (numeric) | fee amount (in decimal representation)                                                                                                                        |
-| amount\_rat                 | rational         | fee amount (in rational representation)                                                                                                                       |
-| amount\_fraction            | fraction         | fee amount (in fraction representation)                                                                                                                       |
-| required\_balance           | string (numeric) | the required `coin` balance to pay the fee                                                                                                                    |
-| required\_balance\_rat      | rational         | `required_balance` in rational representation                                                                                                                 |
-| required\_balance\_fraction | fraction         | `required_balance` in fraction representation                                                                                                                 |
 
 ### FractionalValue
 
@@ -294,6 +97,65 @@ The `numerator` and `denominator` are BigInteger numbers represented as a sign a
 
 `[-1,[1,1]]` represents `-1000000000000000000000000000000010000000000000000000000000000000` = `-4294967297`
 
+### StreamingConfig
+
+You can optionally apply more detailed configuration to event streaming methods.
+
+| Parameter                 | Type    | Description                                                                                                                                                                                                                                                                                                                                                   |
+| ------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| stream\_interval\_seconds | float   | Interval in seconds between streaming event update requests. Defaults to `10` for [stream::balance::enable](/komodo-defi-framework/api/v20/streaming/balance_enable/) and `5` for [stream::network::enable](/komodo-defi-framework/api/v20/streaming/network_enable/)/[stream::heartbeat::enable](/komodo-defi-framework/api/v20/streaming/heartbeat_enable/) |
+| always\_send              | boolean | [stream::network::enable](/komodo-defi-framework/api/v20/streaming/network_enable/) only. Optional, defaults to `false`. If `true`, network data will always be sent every `stream_interval_seconds`, even when there is no change. If `false`, network data will be sent regardless.                                                                         |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  #### Example
+
+  ```json
+  {
+      "stream_interval_seconds": 33.3
+  }
+  ```
+
+  ### StreamingFeeConfig
+
+  | Parameter       | Type   | Description                                                                                                                                                                                                                                                                                                                                                                                                                   |
+  | --------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | estimate\_every | float  | Optional, defaults to `15`. Interval in seconds between fee estimate updates.                                                                                                                                                                                                                                                                                                                                                 |
+  | estimate\_type  | string | Optional, defaults to `Simple`. If set to `Provider`, users must set the `gas_api` setting in their [MM2.json file](/komodo-defi-framework/setup/configure-mm2-json/) to source recommended fee values from third party providers [Infura](https://www.infura.io/) or [Blocknative](https://www.blocknative.com/) Used in [get\_eth\_estimated\_fee\_per\_gas](/komodo-defi-framework/api/v20/streaming/fee_estimator/) only. |
+
+  #### Example (stream::fee\_estimator::enable)
+
+  ```json
+  {
+      "estimate_every": 33.3,
+      "estimate_type": "Provider"
+  }
+  ```
+</CollapsibleSection>
+
+### EventStreamConfig
+
+The `EventStreamConfig` object defines which events will be streamed to the client:
+
+| Parameter                      | Type   | Description                                                |
+| ------------------------------ | ------ | ---------------------------------------------------------- |
+| access\_control\_allow\_origin | string | Defines CORS whitelist. Use "\*" to allow from any origin. |
+| worker\_path                   | string | WASM only. Path to a custom `worker.js` file.              |
+
+Configurable events, and how to enable them, is detailed in the [streaming methods doc](/komodo-defi-framework/api/v20/streaming/)
+
+An example of the event stream output can then be viewed in [https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html?id=CLIENT\_ID](https://github.com/KomodoPlatform/komodo-defi-framework/blob/main/examples/sse/index.html?id=0)
+
+The `CLIENT_ID` value used in the url must match the `client_id` value used when enabling streaming events. In the case of a single client only, defining the client\_id is not required (it will default to `0`).
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+      "access_control_allow_origin": "*",
+      "worker_path": "index.js"
+  }
+  ```
+</CollapsibleSection>
+
 ### SyncStatus
 
 | Parameter        | Type   | Description                                                                                                                                                                                                     |
@@ -337,69 +199,6 @@ The `numerator` and `denominator` are BigInteger numbers represented as a sign a
       "sync_status": {
         "state": "Finished"
       }
-  }
-  ```
-</CollapsibleSection>
-
-### WithdrawFee
-
-The `WithdrawFee` object varies depending on the coin or token type. Refer to the examples to view the object structure for each type.
-
-| Parameter       | Type           | Description                                                                       |
-| --------------- | -------------- | --------------------------------------------------------------------------------- |
-| type            | string         | The fee type. Either `Utxo`, `Tendermint`, `Qrc20` or `Eth`.                      |
-| amount          | numeric string | `Utxo` or `Tendermint` type only. The fee amount.                                 |
-| coin            | string         | The coin which will be used to pay the transaction fee.                           |
-| gas             | integer        | `Eth` type only. The amount of gas to be used for the transaction.                |
-| gas\_price      | numeric string | `Eth` or `Qrc20` type only. Price per unit of gas to be used for the transaction. |
-| gas\_limit      | numeric string | `Tendermint` or `Qrc20` type only. Maximum gas to be used for the transaction.    |
-| miner\_fee      | numeric string | `Tendermint` type only. Fee to mine the transaction.                              |
-| total\_fee      | numeric string | `Eth` type only. Gas price multiplied by gas amount.                              |
-| total\_gas\_fee | numeric string | `Qrc20` type only. Gas price multiplied by gas amount.                            |
-
-<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
-  #### Example of Eth type
-
-  ```json
-  {
-    "type": "Eth",
-    "coin": "BNB",
-    "gas": 109739,
-    "gas_price": "0.000000003",
-    "total_fee": "0.000329217"
-  }
-  ```
-
-  #### Example of Qrc20 type
-
-  ```json
-  {
-    "type": "Qrc20",
-    "coin": "tQTUM",
-    "miner_fee": "0.00000447",
-    "gas_limit": 100000,
-    "gas_price": 40,
-    "total_gas_fee": "0.04"
-  }
-  ```
-
-  #### Example of Tendermint type
-
-  ```json
-  {
-    "type": "Tendermint",
-    "coin": "IRIS",
-    "amount": "0.038553",
-    "gas_limit": 100000
-  }
-  ```
-
-  #### Example of Utxo type
-
-  ```json
-  {
-    "type": "Utxo",
-    "amount": "0.00001"
   }
   ```
 </CollapsibleSection>
