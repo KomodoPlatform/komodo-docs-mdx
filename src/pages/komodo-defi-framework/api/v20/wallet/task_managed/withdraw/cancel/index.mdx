@@ -1,13 +1,13 @@
-export const title = "# Komodo DeFi Framework Method: task::withdraw::cancel";
+export const title = "Komodo DeFi Framework Method: Cancel Withdraw Task";
 export const description = "Cancel a withdrawal transaction generation task in the Komodo DeFi Framework API.";
 
-# Komodo DeFi Framework Method: task::withdraw::cancel
+# Cancel Withdraw Task
 
 ## task::withdraw::cancel {{label : 'task::withdraw::cancel', tag : 'API-v2'}}
 
 Use the `task::withdraw::cancel` method to cancel the withdrawal preparation task.
 
-### Request Arguments
+### Request Parameters
 
 | Parameter | Type    | Required | Description                                                           |
 | --------- | ------- | :------: | --------------------------------------------------------------------- |
@@ -15,18 +15,16 @@ Use the `task::withdraw::cancel` method to cancel the withdrawal preparation tas
 
 ### Response Parameters
 
-| Parameter    | Type   | Required | Description                                                    |
-| ------------ | ------ | :------: | -------------------------------------------------------------- |
-| result       | string |     ✓    | Indicates task cancellation was succesful.                     |
-| error        | string |     ✗    | An error message to explain what went wrong.                   |
-| error\_path  | string |     ✗    | An indicator of the class or function which reurned the error. |
-| error\_trace | string |     ✗    | An indicator of where in the source code the error was thrown. |
-| error\_type  | string |     ✗    | An enumerated value for the returned error.                    |
-| error\_data  | string |     ✗    | The input task ID which resulted in the error.                 |
+| Parameter    | Type   | Description                                                     |
+| ------------ | ------ | --------------------------------------------------------------- |
+| result       | string | Indicates task cancellation was successful.                     |
+| error        | string | An error message to explain what went wrong.                    |
+| error\_path  | string | An indicator of the class or function which returned the error. |
+| error\_trace | string | An indicator of where in the source code the error was thrown.  |
+| error\_type  | string | An enumerated value for the returned error.                     |
+| error\_data  | string | The input task ID which resulted in the error.                  |
 
 #### 📌 Examples
-
-#### Command
 
 <CodeGroup title="task::withdraw::cancel" tag="POST" label="task::withdraw::cancel" mm2MethodDecorate="true">
   ```json
@@ -42,8 +40,6 @@ Use the `task::withdraw::cancel` method to cancel the withdrawal preparation tas
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (Success)
-
   ```json
   {
     "mmrpc": "2.0",
@@ -53,32 +49,39 @@ Use the `task::withdraw::cancel` method to cancel the withdrawal preparation tas
   ```
 </CollapsibleSection>
 
-<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (Error: No such task / task expired)
+### Error Types
+
+| Parameter    | Type   | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| NoSuchTask   | string | The specified task was not found or expired.         |
+| TaskFinished | string | The task is already finished and cannot be canceled. |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (No Such Task)
 
   ```json
   {
-    "mmrpc": "2.0",
-    "error": "No such task '1'",
-    "error_path": "init_withdraw.manager",
-    "error_trace": "init_withdraw:92] manager:97]",
-    "error_type": "NoSuchTask",
-    "error_data": 1,
-    "id": 0
+      "mmrpc": "2.0",
+      "error": "No such task '1'",
+      "error_path": "init_withdraw.manager",
+      "error_trace": "init_withdraw:92] manager:97]",
+      "error_type": "NoSuchTask",
+      "error_data": 1,
+      "id": 0
   }
   ```
 
-  #### Response (Error: Task already finished)
+  ##### Error Response (Task Finished)
 
   ```json
   {
-    "mmrpc": "2.0",
-    "error": "Task is finished already",
-    "error_path": "init_withdraw.manager",
-    "error_trace": "init_withdraw:94] manager:104]",
-    "error_type": "TaskFinished",
-    "error_data": 4,
-    "id": null
+      "mmrpc": "2.0",
+      "error": "Task is finished already",
+      "error_path": "init_withdraw.manager",
+      "error_trace": "init_withdraw:94] manager:104]",
+      "error_type": "TaskFinished",
+      "error_data": 4,
+      "id": null
   }
   ```
 </CollapsibleSection>

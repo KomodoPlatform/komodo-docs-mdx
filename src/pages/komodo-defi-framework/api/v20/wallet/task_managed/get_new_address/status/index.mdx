@@ -1,11 +1,13 @@
-export const title = "Komodo DeFi Framework Method: task::get_new_address::status";
+export const title = "Komodo DeFi Framework Method: Get New Address Task Status";
 export const description = "Check the status of a HD address creation task in the Komodo DeFi Framework API.";
 
-# Komodo DeFi Framework Method: task::get\_new\_address::status
+# Get New Address Task Status
 
 ## task::get\_new\_address::status   {{label : 'task::get_new_address::status', tag : 'API-v2'}}
 
 Use the `task::get_new_address::status` method to check the status of a HD address creation task.
+
+### Request Parameters
 
 | Parameter            | Type    | Required | Default | Description                                                 |
 | -------------------- | ------- | :------: | :-----: | ----------------------------------------------------------- |
@@ -14,10 +16,12 @@ Use the `task::get_new_address::status` method to check the status of a HD addre
 
 ### Response Parameters
 
-| Parameter | Type             | Required | Description                                                                                                                 |
-| --------- | ---------------- | :------: | --------------------------------------------------------------------------------------------------------------------------- |
-| status    | string           |     ✓    | Status of the task. `Ok`, `InProgress` or `Error`.                                                                          |
-| details   | string or object |     ✓    | Once complete, a standard [NewAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) object. |
+| Parameter | Type             | Description                                                                                                                 |
+| --------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| status    | string           | Status of the task. `Ok`, `InProgress` or `Error`.                                                                          |
+| details   | string or object | Once complete, a standard [NewAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) object. |
+
+#### 📌 Examples
 
 <CodeGroup title="task::get_new_address::status" tag="POST" label="task::get_new_address::status" mm2MethodDecorate="true">
   ```json
@@ -33,8 +37,6 @@ Use the `task::get_new_address::status` method to check the status of a HD addre
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (success)
-
   ```json
   {
       "mmrpc": "2.0",
@@ -49,6 +51,43 @@ Use the `task::get_new_address::status` method to check the status of a HD addre
               }
           }
       },
+      "id": null
+  }
+  ```
+</CollapsibleSection>
+
+### Error Types
+
+| Parameter    | Type   | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| NoSuchTask   | string | The specified task was not found or expired.         |
+| TaskFinished | string | The task is already finished and cannot be canceled. |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (No Such Task)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "No such task '1'",
+      "error_path": "init_withdraw",
+      "error_trace": "init_withdraw:57]",
+      "error_type": "NoSuchTask",
+      "error_data": 1,
+      "id": 0
+  }
+  ```
+
+  ##### Error Response (Task Finished)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Task is finished already",
+      "error_path": "init_withdraw",
+      "error_trace": "init_withdraw:94]",
+      "error_type": "TaskFinished",
+      "error_data": 4,
       "id": null
   }
   ```

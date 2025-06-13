@@ -1,7 +1,7 @@
 export const title = "Komodo DeFi Framework Method: Withdraw";
 export const description = "The withdraw method generates, signs, and returns a transaction that transfers the amount of coin to the address indicated in the to argument.";
 
-# Komodo DeFi Framework Method: Withdraw
+# Withdraw Coins
 
 ## withdraw {{label : 'withdraw', tag : 'API-v2'}}
 
@@ -9,7 +9,7 @@ The `withdraw` method generates, signs, and returns a transaction that transfers
 
 This method generates a raw transaction which should then be broadcast using [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/).
 
-### Request Arguments
+### Request Parameters
 
 | Parameter            | Type             | Required | Default | Description                                                                                                                                     |
 | -------------------- | ---------------- | :------: | :-----: | ----------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -641,46 +641,65 @@ Using the Cosmos [Ecosystem IBC protocol](https://everstake.one/blog/cosmos-ibc-
   You can see the memo is included on the [block explorer](https://irishub.iobscan.io/#/txs/E00982A2A8442D7140916A34E29E287A0B1CBB4B38940372D1966BA7ACDE5BD6)
 </CollapsibleSection>
 
-### Error Responses
+### Error Types
 
-#### InvalidRequest: Unknown fee type
+| Parameter        | Type   | Description                                                  |
+| ---------------- | ------ | ------------------------------------------------------------ |
+| InvalidAmount    | string | The specified amount is invalid or exceeds available balance |
+| InvalidAddress   | string | The specified address is invalid                             |
+| NoSuchCoin       | string | Coin does not exist or has not been activated                |
+| TransactionError | string | Error occurred during transaction creation or signing        |
 
-```json
-{
-    "mmrpc": "2.0",
-    "error": "Error parsing request: unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
-    "error_path": "dispatcher",
-    "error_trace": "dispatcher:109]",
-    "error_type": "InvalidRequest",
-    "error_data": "unknown variant `Tendermint`, expected one of `UtxoFixed`, `UtxoPerKbyte`, `EthGas`, `Qrc20Gas`, `CosmosGas`",
-    "id": 0
-}
-```
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (Invalid Amount)
 
-#### InvalidRequest: wrong parameter type
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Invalid amount: exceeds available balance",
+      "error_path": "withdraw",
+      "error_trace": "withdraw:456]",
+      "error_type": "InvalidAmount",
+      "error_data": "exceeds available balance"
+  }
+  ```
 
-```json
-{
-    "mmrpc": "2.0",
-    "error": "Error parsing request: invalid type: string \"0.1\", expected f64",
-    "error_path": "dispatcher",
-    "error_trace": "dispatcher:109]",
-    "error_type": "InvalidRequest",
-    "error_data": "invalid type: string \"0.1\", expected f64",
-    "id": 0
-}
-```
+  ##### Error (Invalid Address)
 
-#### InvalidFeePolicy: attempt to use EthGas for UTXO coin
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Invalid address: address format is incorrect",
+      "error_path": "withdraw",
+      "error_trace": "withdraw:789]",
+      "error_type": "InvalidAddress",
+      "error_data": "address format is incorrect"
+  }
+  ```
 
-```json
-{
-  "mmrpc": "2.0",
-  "error": "Invalid fee policy: Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-  "error_path": "utxo_common",
-  "error_trace": "utxo_common:1371]",
-  "error_type": "InvalidFeePolicy",
-  "error_data": "Expected 'UtxoFixed' or 'UtxoPerKbyte' fee types, found EthGas",
-  "id": 0
-}
-```
+  ##### Error (No Such Coin)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Coin does not exist or has not been activated",
+      "error_path": "coin_activation",
+      "error_trace": "coin_activation:1234]",
+      "error_type": "NoSuchCoin",
+      "error_data": "Coin does not exist or has not been activated"
+  }
+  ```
+
+  ##### Error (Transaction Error)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Transaction error: failed to create or sign transaction",
+      "error_path": "transaction",
+      "error_trace": "transaction:5678]",
+      "error_type": "TransactionError",
+      "error_data": "failed to create or sign transaction"
+  }
+  ```
+</CollapsibleSection>

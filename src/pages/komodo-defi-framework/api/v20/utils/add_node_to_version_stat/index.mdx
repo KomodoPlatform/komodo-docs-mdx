@@ -1,7 +1,7 @@
 export const title = "Komodo DeFi Framework Method: Add Node to Version Stat";
 export const description = "The add_node_to_version_stat method adds a Node's name, IP address, and PeerID to a local database to track which version of KDF it is running.";
 
-# Komodo DeFi Framework Method: Add Node to Version Stat
+# Add Node to Version Stat
 
 ## add\_node\_to\_version\_stat {{label : 'add_node_to_version_stat', tag : 'API-v2'}}
 
@@ -13,15 +13,21 @@ The `add_node_to_version_stat` method adds a node's name, IP address, and PeerID
   To allow collection of version stats, added nodes must open ports 42845 (tcp) and 42855 (ws).
 </Note>
 
-### Request Arguments
+### Request Parameters
 
-| Parameter | Type   | Required | Default | Description                   |
-| --------- | ------ | :------: | :-----: | ----------------------------- |
-| name      | string |     ✓    |   `-`   | The name assigned to the node |
-| address   | string |     ✓    |   `-`   | The IP address of the node    |
-| peer\_id  | string |     ✓    |   `-`   | The node's unique Peer ID     |
+| Parameter | Type   | Required | Description                   |
+| --------- | ------ | :------: | ----------------------------- |
+| name      | string |     ✓    | The name assigned to the node |
+| address   | string |     ✓    | The IP address of the node    |
+| peer\_id  | string |     ✓    | The node's unique Peer ID     |
 
-#### 📌 Example
+### Response Parameters
+
+| Parameter | Type   | Description                 |
+| --------- | ------ | --------------------------- |
+| result    | string | The outcome of the request. |
+
+#### 📌 Examples
 
 <CodeGroup title="Add Node to Version Stat" tag="POST" label="add_node_to_version_stat" mm2MethodDecorate="true">
   ```json
@@ -48,8 +54,19 @@ The `add_node_to_version_stat` method adds a node's name, IP address, and PeerID
       "id": null
   }
   ```
+</CollapsibleSection>
 
+### Error Types
+
+| Parameter        | Type   | Description                             |
+| ---------------- | ------ | --------------------------------------- |
+| DatabaseError    | string | Database constraint error occurred.     |
+| PeerIdParseError | string | The provided peer ID format is invalid. |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
   #### ⚠️ Error Responses
+
+  ##### DatabaseError (Unique Constraint - Peer ID)
 
   ```json
   {
@@ -63,6 +80,8 @@ The `add_node_to_version_stat` method adds a node's name, IP address, and PeerID
   }
   ```
 
+  ##### DatabaseError (Unique Constraint - Name)
+
   ```json
   {
       "mmrpc": "2.0",
@@ -74,6 +93,8 @@ The `add_node_to_version_stat` method adds a node's name, IP address, and PeerID
       "id": null
   }
   ```
+
+  ##### PeerIdParseError
 
   ```json
   {

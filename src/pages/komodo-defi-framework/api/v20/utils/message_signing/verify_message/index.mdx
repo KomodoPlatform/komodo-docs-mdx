@@ -1,20 +1,20 @@
 export const title = "Komodo DeFi Framework Method: Verify Message";
 export const description = "The method in this document allows you to verify messages for all coins supported by Komodo DeFi Framework.";
 
-# Komodo DeFi Framework Method: Verify Message
+# Verify Message
 
 ## verify\_message {{label : 'verify_message', tag : 'API-v2'}}
 
 The `verify_message` method allows you to confirm the authenticity of a signed message. By using the original message, the wallet's address, and the signature, the verification process can confirm that the message was created by the owner and that it has not been altered.
 
-### Request Arguments
+### Request Parameters
 
-| Parameter | Type   | Required | Default | Description                                      |
-| --------- | ------ | :------: | :-----: | ------------------------------------------------ |
-| address   | string |     ✓    |    -    | The address used to sign the message.            |
-| coin      | string |     ✓    |    -    | The coin to verify the message with.             |
-| message   | string |     ✓    |    -    | The message input via the `sign_message` method. |
-| signature | string |     ✓    |    -    | The signature generated for the message.         |
+| Parameter | Type   | Required | Description                                      |
+| --------- | ------ | :------: | ------------------------------------------------ |
+| address   | string |     ✓    | The address used to sign the message.            |
+| coin      | string |     ✓    | The coin to verify the message with.             |
+| message   | string |     ✓    | The message input via the `sign_message` method. |
+| signature | string |     ✓    | The signature generated for the message.         |
 
 ### Response Parameters
 
@@ -22,7 +22,7 @@ The `verify_message` method allows you to confirm the authenticity of a signed m
 | --------- | ------- | --------------------------------------------------------------- |
 | is\_valid | boolean | `true` if the message signature is valid; `false` if it is not. |
 
-#### 📌 Example
+#### 📌 Examples
 
 <CodeGroup title="Verify Message" tag="POST" label="verify_message" mm2MethodDecorate="true">
   ```json
@@ -41,7 +41,7 @@ The `verify_message` method allows you to confirm the authenticity of a signed m
   ```
 </CodeGroup>
 
-<CollapsibleSection expandedText="Hide Responses" collapsedText="Show Responses">
+<CollapsibleSection expandedText="Hide Verify Message Response" collapsedText="Show Verify Message Response">
   ### Response (valid)
 
   ```json
@@ -67,17 +67,21 @@ The `verify_message` method allows you to confirm the authenticity of a signed m
   ```
 </CollapsibleSection>
 
-#### ⚠️ Error Responses
+### Error Types
 
-**PrefixNotFound:** `sign_message_prefix` is not set in coin config\
-**CoinIsNotFound:** Specified coin is not found\
-**InvalidRequest:** Message verification is not supported by the given coin type\
-**InternalError:** An internal error occurred during the verification process\
-**SignatureDecodingError:** Given signature could not be decoded\
-**AddressDecodingError:** Given address could not be decoded
+| Parameter              | Type   | Description                                                  |
+| ---------------------- | ------ | ------------------------------------------------------------ |
+| PrefixNotFound         | string | `sign_message_prefix` is not set in coin config              |
+| CoinIsNotFound         | string | Specified coin is not found                                  |
+| InvalidRequest         | string | Message verification is not supported by the given coin type |
+| InternalError          | string | An internal error occurred during the verification process   |
+| SignatureDecodingError | string | Given signature could not be decoded                         |
+| AddressDecodingError   | string | Given address could not be decoded                           |
 
 <CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
-  ### PrefixNotFound
+  #### ⚠️ Error Responses
+
+  ##### PrefixNotFound
 
   ```json
   {
@@ -90,7 +94,7 @@ The `verify_message` method allows you to confirm the authenticity of a signed m
   }
   ```
 
-  ### InternalError
+  ##### InternalError
 
   ```json
   {
@@ -104,7 +108,7 @@ The `verify_message` method allows you to confirm the authenticity of a signed m
   }
   ```
 
-  ### SignatureDecodingError
+  ##### SignatureDecodingError
 
   ```json
   {

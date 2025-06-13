@@ -1,13 +1,13 @@
-export const title = "Komodo DeFi Framework Method: task::scan_for_new_addresses::status";
+export const title = "Komodo DeFi Framework Method: Scan For New Addresses Task Status";
 export const description = "Query the status of a scan for new HD addresses in the Komodo DeFi Framework API.";
 
-# Komodo DeFi Framework Method: task::scan\_for\_new\_addresses::status
+# Scan For New Addresses Task Status
 
 ## task::scan\_for\_new\_addresses::status {{label : 'task::scan_for_new_addresses::status', tag : 'API-v2'}}
 
 Use the `task::scan_for_new_addresses::status` method to query the status of a HD address scanning task.
 
-### Request Arguments
+### Request Parameters
 
 | Parameter            | Type    | Required | Default | Description                                                 |
 | -------------------- | ------- | :------: | :-----: | ----------------------------------------------------------- |
@@ -16,14 +16,12 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
 
 ### Response Parameters
 
-| Parameter | Type             | Required | Description                                                                                                                     |
-| --------- | ---------------- | :------: | ------------------------------------------------------------------------------------------------------------------------------- |
-| status    | string           |     ✓    | Status of the task. `Ok`, `InProgress` or `Error`.                                                                              |
-| details   | string or object |     ✓    | Once complete, a standard [ScanAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#scan-addresses-info) object. |
+| Parameter | Type             | Description                                                                                                                     |
+| --------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| status    | string           | Status of the task. `Ok`, `InProgress` or `Error`.                                                                              |
+| details   | string or object | Once complete, a standard [ScanAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#scan-addresses-info) object. |
 
 #### 📌 Examples
-
-#### Command
 
 <CodeGroup title="task::scan_for_new_addresses::status" tag="POST" label="task::scan_for_new_addresses::status" mm2MethodDecorate="true">
   ```json
@@ -39,8 +37,6 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response (success, no new address found)
-
   ```json
   {
     "mmrpc": "2.0",
@@ -55,8 +51,6 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
     "id": null
   }
   ```
-
-  #### Response (success, new address found)
 
   ```json
   {
@@ -89,6 +83,43 @@ Use the `task::scan_for_new_addresses::status` method to query the status of a H
         }
     },
     "id": null
+  }
+  ```
+</CollapsibleSection>
+
+### Error Types
+
+| Parameter    | Type   | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| NoSuchTask   | string | The specified task was not found or expired.         |
+| TaskFinished | string | The task is already finished and cannot be canceled. |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (No Such Task)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "No such task '1'",
+      "error_path": "init_withdraw",
+      "error_trace": "init_withdraw:57]",
+      "error_type": "NoSuchTask",
+      "error_data": 1,
+      "id": 0
+  }
+  ```
+
+  ##### Error Response (Task Finished)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Task is finished already",
+      "error_path": "init_withdraw",
+      "error_trace": "init_withdraw:94]",
+      "error_type": "TaskFinished",
+      "error_data": 4,
+      "id": null
   }
   ```
 </CollapsibleSection>

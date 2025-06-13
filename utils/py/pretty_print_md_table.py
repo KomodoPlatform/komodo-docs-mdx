@@ -3,12 +3,12 @@ import re
 import os
 import sys
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+DOCS_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..', 'docs')
 
 if len(sys.argv) > 1:
     INPUT_FILE = sys.argv[1]
 else:
-    INPUT_FILE = '../../docs/style-update-progress.md'
+    INPUT_FILE = f'{DOCS_DIR}/style-update-progress.md'
 
 with open(INPUT_FILE, 'r') as f:
     lines = f.readlines()

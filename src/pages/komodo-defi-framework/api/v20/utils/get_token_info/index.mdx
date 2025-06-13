@@ -1,7 +1,7 @@
 export const title = "Komodo DeFi Framework Method: Get Token Info";
 export const description = "The `get_token_info` method returns the ticker and decimals values (required for activation) given a platform and contract as input.";
 
-# Komodo DeFi Framework Method: Get Token Info
+# Get Token Info
 
 ## get\_token\_info {{label : 'get_token_info', tag : 'API-v2'}}
 
@@ -11,11 +11,11 @@ The `get_token_info` method returns the ticker and decimals values (required for
   Custom tokens will be `wallet_only`—i.e., you can send and receive tokens, but will not be able to do atomic swaps. To apply for a formal listing of the custom token, please [review the requirements](/komodo-defi-framework/tutorials/listing-a-new-coin/) in our "coins" GitHub repository, and get in touch with our team on the [KomodoPlatform Discord](https://komodoplatform.com/discord).
 </Note>
 
-### Request Arguments
+### Request Parameters
 
-| Parameter | Type   | Required | Default | Description                                                                                           |
-| --------- | ------ | :------: | :-----: | ----------------------------------------------------------------------------------------------------- |
-| protocol  | object |     ✓    |   `-`   | A standard [TokenProtocol](/komodo-defi-framework/api/common_structures/nfts/#token-protocol) object. |
+| Parameter | Type   | Required | Description                                                                                           |
+| --------- | ------ | :------: | ----------------------------------------------------------------------------------------------------- |
+| protocol  | object |     ✓    | A standard [TokenProtocol](/komodo-defi-framework/api/common_structures/nfts/#token-protocol) object. |
 
 ### Response Parameters
 
@@ -25,7 +25,7 @@ The `get_token_info` method returns the ticker and decimals values (required for
 | info.symbol   | string  | The ticker of the token linked to the contract address and network requested.                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | info.decimals | integer | Defines the number of digits after the decimal point that should be used to display the orderbook amounts, balance, and the value of inputs to be used in the case of order creation or a `withdraw` transaction. The default value used for a UTXO type coin (Bitcoin protocol) is `8`, and the default value used for an ERC20 token is `18`. It is **very important** for this value to be set correctly. For example, if this value was set as `9` for BTC, a command to withdraw `1 BTC` tries to withdraw `10^9` satoshis of Bitcoin, i.e., `10 BTC`. |
 
-#### 📌 Example
+#### 📌 Examples
 
 <CodeGroup title="Get Token Info" tag="POST" label="get_token_info" mm2MethodDecorate="true">
   ```json
@@ -62,8 +62,18 @@ The `get_token_info` method returns the ticker and decimals values (required for
       "id": null
   }
   ```
+</CollapsibleSection>
 
+### Error Types
+
+| Parameter  | Type   | Description                                                        |
+| ---------- | ------ | ------------------------------------------------------------------ |
+| NoSuchCoin | string | The specified platform coin was not found or is not activated yet. |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
   #### ⚠️ Error Responses
+
+  ##### NoSuchCoin
 
   ```json
   {

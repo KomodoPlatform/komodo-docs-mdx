@@ -30,9 +30,7 @@ This method is only compatible with the following coin types: `UTXO`, `BCH/SLP`,
 | ------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | streamer\_id | string | An identifier for the data stream. This can be used later to disable streaming for the event with [stream::disable](/komodo-defi-framework/api/v20/streaming/disable/). |
 
-### 📌 Examples
-
-#### Request
+#### 📌 Examples
 
 <CodeGroup title="tx_history_enable" tag="POST" label="balance_enable" mm2MethodDecorate="true">
   ```json
@@ -49,8 +47,6 @@ This method is only compatible with the following coin types: `UTXO`, `BCH/SLP`,
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response
-
   ```json
   {
     "mmrpc": "2.0",
@@ -66,10 +62,17 @@ Here is an example of the stream data you should be able to see in [http://local
 
 `data: {"_type":"TX_HISTORY:KMD","message":{"tx_hex":"0400008085202f89015c649b8da32385ec58802385d179018db8e791d752a2cdf8d7fbf9247049bb81010000006a4730440220224c598d9af09684a848435bded40f9b24cc664d129d2dff5d0c094e6919cf1a0220143d896e7c42d13f57c98fb7eabfdeee27386ece324ec84a18308c106f1cf16301210295546acd9bdd19ec68093fef17e76b098fff5ff9815bb2adbfc2a618f41a74c6ffffffff0200a3e111000000001976a91482a6b17e64687148f4922b1385a11e6221bf5f5988aca0a0548c9c0100001976a914d92154e3a7a6da1b0cc1a4f84bc97fff24a79a3588acb66f1868000000000000000000000000000000","tx_hash":"05e9b6f5c96c71af3435cab55dbb807da47ed93ef1b84fc0a5fa867956e9ce9d","from":["RV5Ge4dLvRHGiYCanRBBEDM1eMR3wHDNLs"],"to":["RMC1cWXngQf2117apEKoLh3x27NoG88yzd","RV5Ge4dLvRHGiYCanRBBEDM1eMR3wHDNLs"],"total_amount":"17721.80883336","spent_by_me":"0","received_by_me":"3","my_balance_change":"3","block_height":0,"timestamp":0,"fee_details":{"type":"Utxo","coin":"KMD","amount":"0.00001"},"coin":"KMD","internal_id":"05e9b6f5c96c71af3435cab55dbb807da47ed93ef1b84fc0a5fa867956e9ce9d","transaction_type":"StandardTransfer","memo":null}}`
 
-<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
-  #### CoinNotFound
+### Error Types
 
-  You need to activate the coin first.
+| Parameter              | Type   | Description                                                   |
+| ---------------------- | ------ | ------------------------------------------------------------- |
+| CoinNotFound           | string | The specified coin was not found or is not activated yet      |
+| UnknownClient          | string | No client has an open connection using this client\_id        |
+| ClientAlreadyListening | string | The requested events are already being sent to the client\_id |
+| CoinNotSupported       | string | The coin type is not supported for this stream                |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (Coin Not Found)
 
   ```json
   {
@@ -82,9 +85,7 @@ Here is an example of the stream data you should be able to see in [http://local
   }
   ```
 
-  #### UnknownClient
-
-  No client has an open connection using this `client_id`.
+  ##### Error (Unknown Client)
 
   ```json
   {
@@ -98,9 +99,7 @@ Here is an example of the stream data you should be able to see in [http://local
   }
   ```
 
-  #### ClientAlreadyListening
-
-  The requested events are already being sent to the `client_id`.
+  ##### Error (Client Already Listening)
 
   ```json
   {
@@ -114,9 +113,7 @@ Here is an example of the stream data you should be able to see in [http://local
   }
   ```
 
-  #### CoinNotSupported Error
-
-  The coin type is not supported for this stream.
+  ##### Error (Coin Not Supported)
 
   ```json
   {

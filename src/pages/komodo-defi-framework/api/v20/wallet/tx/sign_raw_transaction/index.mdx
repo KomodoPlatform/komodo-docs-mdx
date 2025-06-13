@@ -1,7 +1,9 @@
 export const title = "Komodo DeFi Framework Method: Sign Raw Transaction";
 export const description = "The sign_raw_transaction method allows users to sign UTXO or EVM raw transactions, returning a signed transaction hex ready for broadcast.";
 
-# Komodo DeFi Framework Method: Sign Raw Transaction
+# Sign Raw Transaction
+
+## sign\_raw\_transaction {{label : 'sign_raw_transaction', tag : 'API-v2'}}
 
 The `sign_raw_transaction` method allows users to:
 
@@ -16,7 +18,7 @@ The transaction can then be broadcast to the network using the [`send_raw_transa
   If `prev_txns` is not provided, it will be sourced via Electrum servers.
 </Note>
 
-### Request Arguments
+### Request Parameters
 
 | Parameter | Type   | Required | Description                                                                                      |
 | --------- | ------ | :------: | ------------------------------------------------------------------------------------------------ |
@@ -153,12 +155,17 @@ The transaction can then be broadcast to the network using the [`send_raw_transa
   Once you have signed the raw transaction, do not forget to broadcast it to the network using the [`send_raw_transaction`](/komodo-defi-framework/api/legacy/send_raw_transaction/) method.
 </Note>
 
-### Errors
+### Error Types
 
-<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
-  #### Signing Error
+| Parameter      | Type   | Description                                                               |
+| -------------- | ------ | ------------------------------------------------------------------------- |
+| SigningError   | string | Error when signing a raw transaction that belongs to a different key pair |
+| InvalidRequest | string | Error parsing request: invalid digit found in string                      |
+| InvalidParam   | string | Invalid parameter: Invalid input length                                   |
+| NoSuchCoin     | string | Coin does not exist or has not been activated                             |
 
-  You might see this if you try to sign a raw transaction that belongs to a different key pair.
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (Signing Error)
 
   ```json
   {
@@ -169,7 +176,7 @@ The transaction can then be broadcast to the network using the [`send_raw_transa
   }
   ```
 
-  #### Invalid Request
+  ##### Error (Invalid Request)
 
   ```json
   {
@@ -182,7 +189,7 @@ The transaction can then be broadcast to the network using the [`send_raw_transa
   }
   ```
 
-  #### Invalid Parameter
+  ##### Error (Invalid Parameter)
 
   ```json
   {
@@ -195,7 +202,16 @@ The transaction can then be broadcast to the network using the [`send_raw_transa
   }
   ```
 
-  #### No Such Coin
+  ##### Error (No Such Coin)
 
-  Coin does not exist or has not been activated.
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Coin does not exist or has not been activated",
+      "error_path": "coin_activation",
+      "error_trace": "coin_activation:1234]",
+      "error_type": "NoSuchCoin",
+      "error_data": "Coin does not exist or has not been activated"
+  }
+  ```
 </CollapsibleSection>

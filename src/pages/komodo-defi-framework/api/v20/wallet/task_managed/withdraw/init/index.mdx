@@ -1,7 +1,7 @@
-export const title = "# Komodo DeFi Framework Method: task::withdraw::init";
+export const title = "Komodo DeFi Framework Method: Initialize Withdraw Task";
 export const description = "Generate, sign, and return a withdrawal transaction in the Komodo DeFi Framework API.";
 
-# Komodo DeFi Framework Method: task::withdraw::init
+# Initialize Withdraw Task
 
 ## task::withdraw::init {{label : 'task::withdraw::init', tag : 'API-v2'}}
 
@@ -19,7 +19,7 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
   complete.
 </Note>
 
-### Request Arguments
+### Request Parameters
 
 | Parameter             | Type             | Required | Default | Description                                                                                                                                                                                                                                                                                                            |
 | --------------------- | ---------------- | :------: | :-----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -39,13 +39,11 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 
 ### Response Parameters
 
-| Parameter | Type    | Required | Description                                               |
-| --------- | ------- | :------: | --------------------------------------------------------- |
-| task\_id  | integer |     ✓    | An identifying number which is used to query task status. |
+| Parameter | Type    | Description                                               |
+| --------- | ------- | --------------------------------------------------------- |
+| task\_id  | integer | An identifying number which is used to query task status. |
 
 #### 📌 Examples
-
-#### Command
 
 <CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
@@ -63,8 +61,6 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
   ```
 </CodeGroup>
 
-#### Command (max = true)
-
 <CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
@@ -80,8 +76,6 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
   }
   ```
 </CodeGroup>
-
-#### Command (custom UtxoFixed fee)
 
 <CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
@@ -103,8 +97,6 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
   ```
 </CodeGroup>
 
-#### Command (custom UtxoPerKbyte fee)
-
 <CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
@@ -125,8 +117,6 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
   ```
 </CodeGroup>
 
-#### Command (HD wallet: derivation path option)
-
 <CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
   {
@@ -144,8 +134,6 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
   }
   ```
 </CodeGroup>
-
-#### Command (HD wallet: account\_id, chain & address\_id option)
 
 <CodeGroup title="task::withdraw::init" tag="POST" label="task::withdraw::init" mm2MethodDecorate="true">
   ```json
@@ -168,8 +156,6 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response
-
   ```json
   {
     "mmrpc": "2.0",
@@ -177,6 +163,43 @@ To cancel the transaction generation, use the [withdraw\_cancel](/komodo-defi-fr
       "task_id": 0
     },
     "id": null
+  }
+  ```
+</CollapsibleSection>
+
+### Error Types
+
+| Parameter    | Type   | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| NoSuchTask   | string | The specified task was not found or expired.         |
+| TaskFinished | string | The task is already finished and cannot be canceled. |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (No Such Task)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "No such task '1'",
+      "error_path": "init_withdraw",
+      "error_trace": "init_withdraw:57]",
+      "error_type": "NoSuchTask",
+      "error_data": 1,
+      "id": 0
+  }
+  ```
+
+  ##### Error Response (Task Finished)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Task is finished already",
+      "error_path": "init_withdraw",
+      "error_trace": "init_withdraw:94]",
+      "error_type": "TaskFinished",
+      "error_data": 4,
+      "id": null
   }
   ```
 </CollapsibleSection>

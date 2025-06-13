@@ -144,8 +144,9 @@ Use the linked templates below as a starting point for new documentation pages.
 
 ### Error Responses
 
-- The Error Types section should sit below the Examples section, at the bottom of the page.
+- The Error Types section should sit below the Request Parameter Tables, Response Parameter Tables and Examples sections (at the bottom of the page).
 - Error types should be listed in a table format with columns for Parameter, Type, and Description.
+- Error responses should be directly below the ErrorTypes table.
 - Each error response should be enclosed within a `CollapsibleSection` with `expandedText` and `collapsedText` attributes set to "Hide Error Responses" and "Show Error Responses" respectively.
 
 Example:

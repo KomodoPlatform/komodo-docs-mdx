@@ -1,7 +1,7 @@
 export const title = "Komodo DeFi Framework Method: Trade Preimage";
 export const description = "The trade_preimage method returns the approximate fee amounts that are paid per the whole swap.";
 
-# Komodo DeFi Framework Method: Trade Preimage
+# Trade Preimage
 
 ## trade\_preimage {{label : 'trade_preimage', tag : 'API-v2'}}
 
@@ -21,7 +21,7 @@ Depending on the parameters, the function returns different results:
   Use the `trade_preimage` request with `max = true` and `swap_method = "setprice"` arguments to approximate the fee amounts **only**. Do not use the resulting `volume` as an argument of the `setprice`.
 </Note>
 
-### Request Arguments
+### Request Parameters
 
 | Parameter    | Type                       | Required | Default | Description                                                                                                                                                                                 |
 | ------------ | -------------------------- | :------: | :-----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -44,105 +44,6 @@ Depending on the parameters, the function returns different results:
 | taker\_fee                | object           | A standard [ExtendedFeeInfo](/komodo-defi-framework/api/common_structures/wallet/#extended-fee-info) object. The dex fee to be paid by Taker; empty if `swap_method` is `setprice`.                                                                    |
 | fee\_to\_send\_taker\_fee | object           | A standard [ExtendedFeeInfo](/komodo-defi-framework/api/common_structures/wallet/#extended-fee-info) object. The approximate miner fee is paid to send the dex fee; empty if `swap_method` is `setprice`.                                              |
 | total\_fees               | array of objects | A standard [TotalFeeInfo](/komodo-defi-framework/api/common_structures/wallet/#total-fee-info) object. Each element is a sum of fees required to be paid from user's balance of corresponding `ExtendedFeeInfo.coin`; the elements are unique by coin. |
-
-### ⚠️ Error Responses
-
-#### NotSufficientBalance
-
-The `available` balance of the `coin` is not sufficient to start the swap.
-
-| Parameter         | Type                       | Description                                                                               |
-| ----------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
-| coin              | string                     | the name of the coin which balance is not sufficient                                      |
-| available         | string (numeric)           | the balance available for swap, including the amount locked by other swaps                |
-| required          | string (numeric)           | the amount required to start the swap. This amount is necessary but may not be sufficient |
-| locked\_by\_swaps | string (numeric, optional) | the amount locked by other swaps                                                          |
-
-#### NotSufficientBaseCoinBalance
-
-The available balance of the base `coin` is not sufficient to pay transaction fees.
-
-For example, ERC20 fees are paid by ETH (gas), and this error type is returned if the ETH coin balance is not sufficient to start the swap.
-
-| Parameter         | Type                       | Description                                                                               |
-| ----------------- | -------------------------- | ----------------------------------------------------------------------------------------- |
-| coin              | string                     | the name of the base coin which balance is not sufficient                                 |
-| available         | string (numeric)           | the balance available for swap, including the amount locked by other swaps                |
-| required          | string (numeric)           | the amount required to start the swap. This amount is necessary but may not be sufficient |
-| locked\_by\_swaps | string (numeric, optional) | the amount is locked by other swaps                                                       |
-
-#### VolumeTooLow
-
-The specified `volume` is too low. Required at least `threshold`.
-
-<Note>
-  If the `coin` field returned in Response is the same as the `rel` argument in Request, then the base volume threshold can be calculated as follows:
-  `base_coin_threshold = rel_vol_threshold / price`
-</Note>
-
-| Parameter | Type             | Description                                        |
-| --------- | ---------------- | -------------------------------------------------- |
-| coin      | string           | either `base` or `rel` coin specified in Request   |
-| volume    | string (numeric) | the amount the user was willing to trade in `coin` |
-| threshold | string (numeric) | the `volume` has not to be less than this amount   |
-
-#### NoSuchCoin
-
-The specified coin was not found or is not activated yet.
-
-| Parameter | Type   | Description                                      |
-| --------- | ------ | ------------------------------------------------ |
-| coin      | string | either `base` or `rel` coin specified in Request |
-
-#### CoinIsWalletOnly
-
-The specified coin is wallet only and cannot be participated in the swap.
-
-| Parameter | Type   | Description                                      |
-| --------- | ------ | ------------------------------------------------ |
-| coin      | string | either `base` or `rel` coin specified in Request |
-
-#### BaseEqualRel
-
-The coin is wallet only and cannot be participated in the swap.
-
-| Parameter | Type | Description |
-| --------- | ---- | ----------- |
-| (none)    |      |             |
-
-#### InvalidParam
-
-Incorrect use of the `param` parameter in Request.
-
-| Parameter | Type   | Description                                      |
-| --------- | ------ | ------------------------------------------------ |
-| param     | string | the name of the parameter in Request             |
-| reason    | string | the reason why the parameter is used incorrectly |
-
-#### PriceTooLow
-
-The specified `price` is too low.
-
-| Parameter | Type             | Description                                                                        |
-| --------- | ---------------- | ---------------------------------------------------------------------------------- |
-| price     | string (numeric) | the price in `rel` the user was willing to receive per one unit of the `base` coin |
-| threshold | string (numeric) | the `price` has not to be less than this amount                                    |
-
-#### Transport
-
-The request was failed due to a network error.
-
-| Parameter | Type   | Description                     |
-| --------- | ------ | ------------------------------- |
-| (none)    | string | the transport error description |
-
-#### InternalError
-
-The request was failed due to a Komodo DeFi Framework API internal error.
-
-| Parameter | Type   | Description                    |
-| --------- | ------ | ------------------------------ |
-| (none)    | string | the internal error description |
 
 ### 📌 Examples
 
@@ -611,78 +512,181 @@ The request was failed due to a Komodo DeFi Framework API internal error.
   ```
 </CollapsibleSection>
 
-#### Error Response (NotSufficientBalance)
+### ⚠️ Error Types
 
-<CollapsibleSection expandedText="Hide Error Response" collapsedText="Show Error Response">
+| Error                        | Description                                                                       |
+| ---------------------------- | --------------------------------------------------------------------------------- |
+| NotSufficientBalance         | The available balance of the coin is not sufficient to start the swap.            |
+| NotSufficientBaseCoinBalance | The available balance of the base coin is not sufficient to pay transaction fees. |
+| VolumeTooLow                 | The specified volume is too low. Required at least threshold.                     |
+| NoSuchCoin                   | The specified coin was not found or is not activated yet.                         |
+| CoinIsWalletOnly             | The specified coin is wallet only and cannot be participated in the swap.         |
+| BaseEqualRel                 | The base and rel coins are the same.                                              |
+| InvalidParam                 | Incorrect use of a parameter in the request.                                      |
+| PriceTooLow                  | The specified price is too low.                                                   |
+| Transport                    | The request failed due to a network error.                                        |
+| InternalError                | The request failed due to a Komodo DeFi Framework API internal error.             |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  #### ⚠️ Error Responses
+
+  ##### NotSufficientBalance
+
   ```json
   {
     "mmrpc": "2.0",
-    "error": "Not enough BTC for swap: available 0.000015, required at least 0.10012, locked by swaps None",
-    "error_path": "maker_swap",
-    "error_trace": "maker_swap:1540] maker_swap:1641]",
+    "error": "Not enough balance",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:123]",
     "error_type": "NotSufficientBalance",
     "error_data": {
       "coin": "BTC",
-      "available": "0.000015",
-      "required": "0.10012",
+      "available": "0.5",,
       "locked_by_swaps": "0"
+      "required": "1.0"
+    },
+    "id": null
+  }
+  ```
+
+  ##### NotSufficientBaseCoinBalance
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Not enough base coin balance",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:456]",
+    "error_type": "NotSufficientBaseCoinBalance",
+    "error_data": {
+      "coin": "ETH",
+      "available": "0.1",
+      "required": "0.2"
     },
     "id": 0
   }
   ```
-</CollapsibleSection>
 
-#### Error Response (VolumeTooLow)
+  ##### VolumeTooLow
 
-<CollapsibleSection expandedText="Hide Error Response" collapsedText="Show Error Response">
   ```json
   {
     "mmrpc": "2.0",
-    "error": "The volume 0.00001 of the DOC coin less than minimum transaction amount 0.0001",
-    "error_path": "maker_swap",
-    "error_trace": "maker_swap:1599]",
+    "error": "Volume too low",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:789]",
     "error_type": "VolumeTooLow",
     "error_data": {
-      "coin": "DOC",
-      "volume": "0.00001",
-      "threshold": "0.0001"
+      "coin": "BTC",
+      "volume": "0.01",
+      "threshold": "0.1"
     },
-    "id": 0
+    "id": null
   }
   ```
-</CollapsibleSection>
 
-#### Error Response (Transport)
+  ##### NoSuchCoin
 
-<CollapsibleSection expandedText="Hide Error Response" collapsedText="Show Error Response">
   ```json
   {
     "mmrpc": "2.0",
-    "error": "Transport error: JsonRpcError { client_info: 'coin: tBTC', request: JsonRpcRequest { jsonrpc: '2.0', id: '31', method: 'blockchain.estimatefee', params: [Number(1), String('ECONOMICAL')] }, error: Transport('rpc_clients:1237] rpc_clients:1239] ['rpc_clients:2047] common:1385] future timed out']') }",
-    "error_path": "taker_swap.utxo_common",
-    "error_trace": "taker_swap:1599] utxo_common:1990] utxo_common:166]",
-    "error_type": "Transport",
-    "error_data": "JsonRpcError { client_info: 'coin: tBTC', request: JsonRpcRequest { jsonrpc: '2.0', id: '31', method: 'blockchain.estimatefee', params: [Number(1), String('ECONOMICAL')] }, error: Transport('rpc_clients:1237] rpc_clients:1239] ['rpc_clients:2047] common:1385] future timed out']') }",
-    "id": 0
+    "error": "No such coin",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:1011]",
+    "error_type": "NoSuchCoin",
+    "error_data": {
+      "coin": "XYZ"
+    },
+    "id": null
   }
   ```
-</CollapsibleSection>
 
-#### Error Response (InvalidParam)
+  ##### CoinIsWalletOnly
 
-<CollapsibleSection expandedText="Hide Error Response" collapsedText="Show Error Response">
   ```json
   {
     "mmrpc": "2.0",
-    "error": "Incorrect use of the 'max' parameter: 'max' cannot be used with 'sell' or 'buy' method",
-    "error_path": "taker_swap",
-    "error_trace": "taker_swap:1602]",
+    "error": "Coin is wallet only",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:1213]",
+    "error_type": "CoinIsWalletOnly",
+    "error_data": {
+      "coin": "WALLET"
+    },
+    "id": null
+  }
+  ```
+
+  ##### BaseEqualRel
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Base and rel coins are the same",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:1415]",
+    "error_type": "BaseEqualRel",
+    "id": null
+  }
+  ```
+
+  ##### InvalidParam
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Invalid parameter",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:1617]",
     "error_type": "InvalidParam",
     "error_data": {
-      "param": "max",
-      "reason": "'max' cannot be used with 'sell' or 'buy' method"
+      "param": "price",
+      "reason": "Price must be greater than zero"
     },
-    "id": 0
+    "id": null
+  }
+  ```
+
+  ##### PriceTooLow
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Price too low",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:1819]",
+    "error_type": "PriceTooLow",
+    "error_data": {
+      "price": "0.0001",
+      "threshold": "0.001"
+    },
+    "id": null
+  }
+  ```
+
+  ##### Transport
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Transport error",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:2021]",
+    "error_type": "Transport",
+    "error_data": "Network timeout"
+  }
+  ```
+
+  ##### InternalError
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "error": "Internal error",
+    "error_path": "trade_preimage",
+    "error_trace": "trade_preimage:2223]",
+    "error_type": "InternalError",
+    "error_data": "Unexpected server error"
   }
   ```
 </CollapsibleSection>

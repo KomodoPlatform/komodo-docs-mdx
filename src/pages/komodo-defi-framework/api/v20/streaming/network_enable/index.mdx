@@ -24,9 +24,7 @@ Using this method, you can enable network events streaming to a specific client.
 | ------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | streamer\_id | string | An identifier for the data stream. This can be used later to disable streaming for the event with [stream::disable](/komodo-defi-framework/api/v20/streaming/disable/). |
 
-### 📌 Examples
-
-#### Request
+#### 📌 Examples
 
 <CodeGroup title="network_enable" tag="POST" label="network_enable" mm2MethodDecorate="true">
   ```json
@@ -45,8 +43,6 @@ Using this method, you can enable network events streaming to a specific client.
 </CodeGroup>
 
 <CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
-  #### Response
-
   ```json
   {
       "mmrpc": "2.0",
@@ -62,10 +58,15 @@ Here is an example of the stream data you should be able to see in [http://local
 
 `data: {"_type":"NETWORK","message":{"directly_connected_peers":{"12D3KooWBhGrTVfaK9v12eA3Et84Y8Bc6ixfZVVGShsad2GBWzm3":["/ip4/162.55.5.83/tcp/42845"],"12D3KooWMjrYgoAVk5NKyqxPyYJUJyCY9nnZhFt7xwWjAe568PSN":["/ip4/65.108.252.86/tcp/42845/p2p/12D3KooWMjrYgoAVk5NKyqxPyYJUJyCY9nnZhFt7xwWjAe568PSN"]},"gossip_mesh":{"swap/4bfe3af7-dd62-4dbe-9c16-68697c4aa24d":[],"hcheck/12D3KooWEurexTFLmsiw2bQoKdrWuNZSQmjvTinoCMNmfRwfZUmW":[],"orbk/DOC:MARTY":[]},"gossip_peer_topics":{"12D3KooWMjrYgoAVk5NKyqxPyYJUJyCY9nnZhFt7xwWjAe568PSN":[],"12D3KooWBhGrTVfaK9v12eA3Et84Y8Bc6ixfZVVGShsad2GBWzm3":[]},"gossip_topic_peers":{},"relay_mesh":["12D3KooWMjrYgoAVk5NKyqxPyYJUJyCY9nnZhFt7xwWjAe568PSN","12D3KooWBhGrTVfaK9v12eA3Et84Y8Bc6ixfZVVGShsad2GBWzm3"]}}`
 
-<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
-  #### UnknownClient
+### Error Types
 
-  No client has an open connection using this `client_id`.
+| Parameter              | Type   | Description                                                   |
+| ---------------------- | ------ | ------------------------------------------------------------- |
+| UnknownClient          | string | No client has an open connection using this client\_id        |
+| ClientAlreadyListening | string | The requested events are already being sent to the client\_id |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error Response (Unknown Client)
 
   ```json
   {
@@ -79,9 +80,7 @@ Here is an example of the stream data you should be able to see in [http://local
   }
   ```
 
-  #### ClientAlreadyListening
-
-  The requested events are already being sent to the `client_id`.
+  ##### Error (Client Already Listening)
 
   ```json
   {
