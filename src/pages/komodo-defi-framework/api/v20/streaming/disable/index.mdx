@@ -1,0 +1,77 @@
+export const title = "Komodo DeFi Framework Method: Disable Event Streaming";
+export const description = "Using this method, you can disable specific streaming events.";
+
+# disable
+
+Using this method, you can disable specific streaming events.
+
+### Request Parameters
+
+| Parameter    | Type    | Description                                                                                                                      |
+| ------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| client\_id   | integer | This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1)) |
+| streamer\_id | string  | An identifier for the data stream to disable.                                                                                    |
+
+### 📌 Examples
+
+#### Request
+
+<CodeGroup title="" tag="POST" label="disable" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "stream::disable",
+    "mmrpc": "2.0",
+    "params": {
+      "client_id": 1,
+      "streamer_id": "BALANCE:MATIC"
+    }
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+    {
+        "mmrpc": "2.0",
+        "result": {
+            "result": "Success"
+        },
+        "id": null
+    }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Errors" collapsedText="Show Errors">
+  #### StreamerNotFound
+
+  ```json
+    {
+        "mmrpc": "2.0",
+        "error": "StreamerNotFound",
+        "error_path": "disable",
+        "error_trace": "disable:48]",
+        "error_type": "DisableError",
+        "error_data": "StreamerNotFound",
+        "id": null
+    }
+  ```
+
+  #### UnknownClient
+
+  No client has an open connection using this `client_id`.
+
+  ```json
+    {
+        "mmrpc": "2.0",
+        "error": "UnknownClient",
+        "error_path": "disable",
+        "error_trace": "disable:48]",
+        "error_type": "DisableError",
+        "error_data": "UnknownClient",
+        "id": null
+    }
+  ```
+</CollapsibleSection>
