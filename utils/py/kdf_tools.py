@@ -12,28 +12,37 @@ Available Commands:
 - map: Method mapping and OpenAPI management
 - postman: Generate Postman collections
 - compare: Compare repository methods with documentation
+- json-extract: Extract JSON examples from MDX files
 
 Examples:
     kdf_tools.py openapi --version v2 --output-dir ./output
-    kdf_tools.py scan --branch dev --versions v1 v2
-    kdf_tools.py map --dry-run
-    kdf_tools.py postman --versions v2
-    kdf_tools.py compare --branch main
+    kdf_tools.py scan --branch dev --versions v1 v2 --force-refresh
+    kdf_tools.py map --include-postman
+    kdf_tools.py json-extract --versions v2 --nested-structure
+
+Global Options:
+    --dry-run: Show what would be done without making changes
+    --quiet: Suppress verbose output
+    --nested-structure: Use nested directory structure based on MDX organization (default: True)
+    --flat-structure: Use legacy flat directory structure for backward compatibility
 """
 
 import sys
-import os
 import argparse
+import os
 from pathlib import Path
 
-# Add lib directory to path
-sys.path.insert(0, str(Path(__file__).parent / "lib"))
+# Add the lib directory to the path for imports
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))
 
-from lib.converter import MDXToOpenAPIConverter
 from lib.mapping import MethodMapper
-from lib.postman import PostmanCollectionGenerator
+from lib.openapi.converter import MDXToOpenAPIConverter
+from lib.scanning.repository_scanner import KDFRepositoryScanner
+from lib.scanning.extractors import MDXExtractor
+from lib.postman.postman_consolidated import PostmanCollectionGenerator
+from lib.utils import safe_write_json, ensure_directory_exists
 from lib import (
-    KDFRepositoryScanner, UnifiedScanner,
+    UnifiedScanner,
     get_logger, setup_logging
 )
 
@@ -73,8 +82,12 @@ class KDFTools:
         self.log("Starting MDX to OpenAPI conversion...")
         
         try:
-            converter = MDXToOpenAPIConverter()
-            converter.convert_methods(args.version, args.output_dir, args.dry_run)
+            converter = MDXToOpenAPIConverter(base_path=".", use_nested_structure=args.nested_structure)
+            converter.convert_methods(
+                version=args.version,
+                output_dir=args.output_dir,
+                dry_run=args.dry_run
+            )
             self.log("OpenAPI conversion completed successfully!", "success")
             return 0
         except Exception as e:
@@ -116,8 +129,6 @@ class KDFTools:
                 
                 if args.output:
                     output_path = Path(args.data_dir) / args.output
-                    from lib.shared_utils import safe_write_json, ensure_directory_exists
-                    ensure_directory_exists(output_path.parent)
                     safe_write_json(output_path, output_data, indent=2)
                     saved_path = str(output_path)
                 else:
@@ -256,8 +267,6 @@ class KDFTools:
             comparison_filename = f"kdf_repo_vs_docs_comparison_{args.branch}.json"
             comparison_path = Path(args.data_dir) / comparison_filename
             
-            from lib.shared_utils import safe_write_json, ensure_directory_exists
-            ensure_directory_exists(comparison_path.parent)
             safe_write_json(comparison_path, comparison, indent=2)
             
             if self.verbose:
@@ -267,6 +276,100 @@ class KDFTools:
         except Exception as e:
             self.log(f"Comparison failed: {e}", "error")
             return 1
+    
+    def json_extract_command(self, args):
+        """Handle json-extract subcommand - Extract JSON examples from MDX files."""
+        self.log("Starting JSON example extraction from MDX files...")
+        
+        try:
+            # Initialize components
+            mapper = MethodMapper(base_path=".", verbose=self.verbose)
+            extractor = MDXExtractor(verbose=self.verbose, use_nested_structure=args.nested_structure, base_path=".")
+            
+            # Get unified mapping
+            unified_mapping = mapper.create_unified_mapping()
+            
+            # Handle "all" version by converting to actual supported versions
+            versions = args.versions
+            if 'all' in versions:
+                versions = ['v1', 'v2']
+            
+            total_extracted = 0
+            
+            for version in versions:
+                if version not in unified_mapping:
+                    self.log(f"No methods found for version {version}", "warning")
+                    continue
+                
+                methods = unified_mapping[version]
+                version_count = 0
+                
+                self.log(f"Processing {len(methods)} methods for {version.upper()}")
+                
+                for method_name, mapping in methods.items():
+                    if not mapping.has_mdx:
+                        if self.verbose:
+                            print(f"  ⏭️  Skipping {method_name}: No MDX file found")
+                        continue
+                    
+                    # Extract examples from MDX
+                    examples = extractor.extract_from_mdx_file(method_name, mapping, version)
+                    
+                    if not examples:
+                        if self.verbose:
+                            print(f"  ⚪ {method_name}: No JSON examples found")
+                        continue
+                    
+                    if self.verbose:
+                        print(f"  🔍 {method_name}: Found {len(examples)} examples")
+                    
+                    # Save each example
+                    for i, example in enumerate(examples, 1):
+                        if self._save_json_example(example, version, i, args.dry_run):
+                            version_count += 1
+                
+                self.log(f"✅ {version.upper()}: {version_count} examples extracted")
+                total_extracted += version_count
+            
+            self.log(f"🎯 Total: {total_extracted} JSON examples extracted", "success")
+            return 0
+            
+        except Exception as e:
+            self.log(f"JSON extraction failed: {e}", "error")
+            return 1
+    
+    def _save_json_example(self, example, version: str, example_num: int, dry_run: bool = False) -> bool:
+        """Save a JSON example to the appropriate directory."""
+        # Convert method name to directory format
+        dir_name = example.method_name.replace('::', '-')
+        
+        # Create directory path
+        base_dir = Path("../../postman/json/kdf") / version
+        method_dir = base_dir / dir_name
+        
+        # Create filename
+        filename = f"{dir_name}-{example.description}-{example.example_type}-{example_num}.json"
+        file_path = method_dir / filename
+        
+        if dry_run:
+            print(f"  [DRY RUN] Would save: {file_path}")
+            return True
+        
+        try:
+            # Ensure directory exists
+            ensure_directory_exists(method_dir)
+            
+            # Save JSON file
+            safe_write_json(file_path, example.content, indent=2)
+            
+            if self.verbose:
+                print(f"    💾 Saved: {file_path}")
+            return True
+            
+        except Exception as e:
+            if self.verbose:
+                print(f"    ❌ Error saving {file_path}: {e}")
+            return False
     
     def main(self):
         """Main CLI entry point."""
@@ -287,6 +390,10 @@ class KDFTools:
                            help='Show what would be changed without making changes')
         parser.add_argument('--data-dir', default='data',
                            help='Directory to store data files (default: data)')
+        parser.add_argument('--nested-structure', action='store_true', default=True,
+                           help='Use nested directory structure based on MDX organization (default)')
+        parser.add_argument('--flat-structure', dest='nested_structure', action='store_false',
+                           help='Use legacy flat directory structure for backward compatibility')
         
         # Subcommands
         subparsers = parser.add_subparsers(dest='command', help='Available commands')
@@ -338,6 +445,13 @@ class KDFTools:
                                    default=['v1', 'v2'],
                                    help='API versions to scan (default: v1 v2)')
         
+        # JSON Extract subcommand
+        json_extract_parser = subparsers.add_parser('json-extract',
+                                                   help='Extract JSON examples from MDX files')
+        json_extract_parser.add_argument('--versions', nargs='+', choices=['v1', 'v2', 'all'],
+                                        default=['all'],
+                                        help='API versions to process (default: all)')
+        
         args = parser.parse_args()
         
         if not args.command:
@@ -365,6 +479,8 @@ class KDFTools:
                 return self.postman_command(args)
             elif args.command == 'compare':
                 return self.compare_command(args)
+            elif args.command == 'json-extract':
+                return self.json_extract_command(args)
             else:
                 self.log(f"Unknown command: {args.command}", "error")
                 return 1

@@ -130,8 +130,12 @@ utils/py/
 │   ├── shared_utils.py          # Common utilities
 │   ├── cli_base.py              # Base CLI functionality
 │   └── ...                      # Additional specialized modules
+├── demos/                        # 🎭 Demo scripts and examples
+│   ├── README.md                # Demo documentation
+│   ├── demo_nested_structure.py  # Nested structure demo & validator
+│   ├── migrate_to_nested_structure.py # Migration tool
+│   └── repository_integration_example.py # Integration examples
 ├── data/                         # Generated data and cache files
-├── examples/                     # Example files and templates
 ├── kdf_tools.py                 # 🎯 UNIFIED CLI TOOL
 ├── requirements.txt             # Python dependencies
 ├── unified_method_mapping.json  # Generated method mapping
@@ -209,6 +213,33 @@ python kdf_tools.py map --remove method_name
 ```bash
 python kdf_tools.py map --debug method_name
 ```
+
+## 🎭 Demo Scripts & Examples
+
+The `demos/` directory contains demonstration scripts and migration tools:
+
+### **`demo_nested_structure.py`** - Structure Demo & Validator
+Test and validate the nested directory structure functionality:
+```bash
+python demos/demo_nested_structure.py --validate  # Quick validation
+python demos/demo_nested_structure.py --test-only # Test path mappings
+python demos/demo_nested_structure.py            # Full demo
+```
+
+### **`migrate_to_nested_structure.py`** - Migration Tool
+Migrate from flat to nested directory structures:
+```bash
+python demos/migrate_to_nested_structure.py --dry-run  # Preview migration
+python demos/migrate_to_nested_structure.py --migrate  # Execute migration
+```
+
+### **`repository_integration_example.py`** - Integration Examples
+Demonstrates component integration patterns:
+```bash
+python demos/repository_integration_example.py
+```
+
+See `demos/README.md` for detailed documentation.
 
 ## 📈 Library Features
 
