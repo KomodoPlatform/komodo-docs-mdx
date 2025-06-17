@@ -10,8 +10,7 @@ import asyncio
 import aiofiles
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Callable, Union, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import functools
+from concurrent.futures import ThreadPoolExecutor
 import json
 
 from ..constants.config import get_config
@@ -19,11 +18,8 @@ from ..utils.logging_utils import get_logger, ProgressTracker
 from ..utils.string_utils import (
     extract_method_name_from_mdx_content, 
     extract_method_name_from_yaml_filename,
-    convert_dir_to_method_name,
     is_overview_page
 )
-from ..scanning.mdx_scanner import UnifiedScanner
-from ..utils.batch_processor import batch_read_json_files, batch_write_json_files
 
 
 class AsyncFileProcessor:
