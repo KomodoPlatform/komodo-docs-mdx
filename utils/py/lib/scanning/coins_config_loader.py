@@ -218,52 +218,39 @@ class CoinsConfigLoader:
         return None
     
     def get_activation_params_example(self, coin_config: CoinConfig) -> Dict[str, Any]:
-        """Generate appropriate activation parameters for a coin."""
+        """Generate appropriate activation parameters for a coin with multiple servers."""
         if coin_config.protocol_type == "ERC20":
-            # ERC20 token activation
+            # ERC20 token activation - use multiple Ethereum RPC nodes
+            rpc_nodes = self._get_preferred_rpc_nodes(coin_config.nodes, "Ethereum")
             return {
                 "mode": {
                     "rpc": "Ethereum",
                     "rpc_data": {
-                        "rpc_nodes": [
-                            {
-                                "url": coin_config.nodes[0]["url"] if coin_config.nodes else "https://eth.drpc.org"
-                            }
-                        ]
+                        "rpc_nodes": rpc_nodes
                     }
                 }
             }
         
         elif coin_config.protocol_type == "UTXO":
-            # UTXO coin activation
-            electrum_url = "electrum1.cipig.net:10001"
-            if coin_config.electrum:
-                electrum_url = coin_config.electrum[0]["url"]
-            
+            # UTXO coin activation - use multiple electrum servers
+            electrum_servers = self._get_preferred_electrum_servers(coin_config.electrum)
             return {
                 "mode": {
                     "rpc": "Electrum",
                     "rpc_data": {
-                        "electrum_servers": [
-                            {
-                                "url": electrum_url
-                            }
-                        ]
+                        "electrum_servers": electrum_servers
                     }
                 }
             }
         
         elif coin_config.protocol_type == "ETH":
-            # Ethereum activation
+            # Ethereum activation - use multiple RPC nodes
+            rpc_nodes = self._get_preferred_rpc_nodes(coin_config.nodes, "Ethereum")
             return {
                 "mode": {
                     "rpc": "Ethereum",
                     "rpc_data": {
-                        "rpc_nodes": [
-                            {
-                                "url": coin_config.nodes[0]["url"] if coin_config.nodes else "https://eth.drpc.org"
-                            }
-                        ]
+                        "rpc_nodes": rpc_nodes
                     }
                 }
             }
@@ -276,6 +263,127 @@ class CoinsConfigLoader:
                     "rpc_data": {}
                 }
             }
+    
+    def _get_preferred_rpc_nodes(self, nodes: Optional[List[Dict[str, Any]]], protocol_type: str) -> List[Dict[str, Any]]:
+        """Get preferred RPC nodes with cipig/komodo preference and SSL/WSS over TCP."""
+        if not nodes:
+            # Fallback to default servers
+            if protocol_type == "Ethereum":
+                return [
+                    {"url": "https://eth3.cipig.net:18555"},
+                    {"url": "https://node.komodo.earth:8080/ethereum"},
+                    {"url": "https://eth.drpc.org"}
+                ]
+            else:
+                return [{"url": "https://node.komodo.earth:8080"}]
+        
+        # Sort nodes by preference: cipig/komodo first, SSL/WSS over TCP
+        preferred_nodes = []
+        other_nodes = []
+        
+        for node in nodes:
+            url = node.get("url", "")
+            ws_url = node.get("ws_url", "")
+            
+            # Check if it's a preferred domain
+            is_preferred = any(domain in url.lower() for domain in ["cipig", "komodo"])
+            
+            # Prefer HTTPS/WSS over HTTP/TCP
+            is_secure = url.startswith("https://") or url.startswith("wss://")
+            
+            node_entry = {"url": url}
+            
+            # Add WebSocket URL if available and secure
+            if ws_url and ws_url.startswith("wss://"):
+                node_entry["ws_url"] = ws_url
+            
+            if is_preferred:
+                preferred_nodes.append((node_entry, is_secure))
+            else:
+                other_nodes.append((node_entry, is_secure))
+        
+        # Sort by security (secure first)
+        preferred_nodes.sort(key=lambda x: x[1], reverse=True)
+        other_nodes.sort(key=lambda x: x[1], reverse=True)
+        
+        # Combine and take up to 3 nodes
+        final_nodes = []
+        
+        # Add preferred nodes first
+        for node_entry, _ in preferred_nodes:
+            if len(final_nodes) < 3:
+                final_nodes.append(node_entry)
+        
+        # Add other nodes if we need more
+        for node_entry, _ in other_nodes:
+            if len(final_nodes) < 3:
+                final_nodes.append(node_entry)
+        
+        # Ensure we have at least one node
+        if not final_nodes and nodes:
+            final_nodes = [{"url": nodes[0].get("url", "")}]
+        
+        return final_nodes
+    
+    def _get_preferred_electrum_servers(self, electrum_servers: Optional[List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
+        """Get preferred electrum servers with cipig/komodo preference and SSL over TCP."""
+        if not electrum_servers:
+            # Fallback to default cipig electrum servers
+            return [
+                {"url": "electrum1.cipig.net:10001"},
+                {"url": "electrum2.cipig.net:10001"},
+                {"url": "electrum3.cipig.net:20001", "protocol": "SSL"}
+            ]
+        
+        # Sort electrum servers by preference
+        preferred_servers = []
+        other_servers = []
+        
+        for server in electrum_servers:
+            url = server.get("url", "")
+            protocol = server.get("protocol", "TCP")
+            
+            # Check if it's a preferred domain
+            is_preferred = any(domain in url.lower() for domain in ["cipig", "komodo"])
+            
+            # Prefer SSL over TCP
+            is_secure = protocol.upper() == "SSL"
+            
+            server_entry = {"url": url}
+            if protocol and protocol.upper() in ["SSL", "WSS"]:
+                server_entry["protocol"] = protocol
+            
+            # Add WebSocket URL if available
+            if "ws_url" in server:
+                server_entry["ws_url"] = server["ws_url"]
+            
+            if is_preferred:
+                preferred_servers.append((server_entry, is_secure))
+            else:
+                other_servers.append((server_entry, is_secure))
+        
+        # Sort by security (secure first)
+        preferred_servers.sort(key=lambda x: x[1], reverse=True)
+        other_servers.sort(key=lambda x: x[1], reverse=True)
+        
+        # Combine and take up to 3 servers
+        final_servers = []
+        
+        # Add preferred servers first
+        for server_entry, _ in preferred_servers:
+            if len(final_servers) < 3:
+                final_servers.append(server_entry)
+        
+        # Add other servers if we need more
+        for server_entry, _ in other_servers:
+            if len(final_servers) < 3:
+                final_servers.append(server_entry)
+        
+        # Ensure we have at least one server
+        if not final_servers and electrum_servers:
+            final_servers = [{"url": electrum_servers[0].get("url", "")}]
+        
+        return final_servers
     
     def get_available_protocols(self) -> List[str]:
         """Get list of all available protocol types."""

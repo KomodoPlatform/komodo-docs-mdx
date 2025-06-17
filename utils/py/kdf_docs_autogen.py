@@ -22,6 +22,7 @@ import asyncio
 import argparse
 import json
 import sys
+import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 from datetime import datetime
@@ -31,6 +32,404 @@ from lib.async_support.async_utils import AsyncFileProcessor
 from lib.scanning.repository_scanner import KDFRepositoryScanner
 from lib.scanning.enhanced_analyzer import EnhancedRepositoryAnalyzer, EnhancedMethodInfo
 from lib.utils.logging_utils import get_logger, ProgressTracker
+
+
+class MethodPatternAnalyzer:
+    """
+    Analyzes KDF method patterns from the actual Rust source code in the KDF repository.
+    Uses the LocalKDFScanner as the authoritative source for parameter structures.
+    """
+    
+    def __init__(self, enhanced_analyzer=None, repo_path=None):
+        self.enhanced_analyzer = enhanced_analyzer
+        self.repo_path = repo_path
+        self.local_scanner = None
+        self.method_patterns = self._build_fallback_patterns()
+        
+        # Initialize local scanner for Rust code analysis
+        try:
+            from lib.scanning.local_repository_scanner import LocalKDFScanner
+            # Use the correct path where the repository is actually located
+            if repo_path:
+                actual_repo_path = Path(repo_path)
+            else:
+                # Default to data/kdf_repo relative to the current script
+                script_dir = Path(__file__).parent
+                actual_repo_path = script_dir / "data" / "kdf_repo"
+            
+            self.local_scanner = LocalKDFScanner(repo_path=actual_repo_path)
+            
+            # Verify repository is available
+            if self.local_scanner.repo_path.exists():
+                print(f"✅ Local KDF repository found at: {self.local_scanner.repo_path}")
+            else:
+                print(f"⚠️  Local KDF repository not found at: {self.local_scanner.repo_path}")
+                print("   Rust code analysis will be unavailable - falling back to pattern matching")
+                self.local_scanner = None
+                
+        except ImportError as e:
+            print(f"Warning: Could not import LocalKDFScanner: {e}")
+            self.local_scanner = None
+        except Exception as e:
+            print(f"Warning: Failed to initialize LocalKDFScanner: {e}")
+            self.local_scanner = None
+    
+    def _build_fallback_patterns(self) -> Dict[str, Dict[str, Any]]:
+        """Build fallback patterns for when Rust analysis isn't available."""
+        return {
+            # Generic task init patterns (fallback only)
+            "task::*::init": {
+                "parameters": [
+                    {"name": "userpass", "type": "string", "required": True, "description": "Password for authentication"}
+                ],
+                "response": [
+                    {"name": "task_id", "type": "integer", "description": "The identifier of the initialized task"}
+                ],
+                "errors": ["InvalidUserpass", "InternalError", "InvalidRequest"]
+            },
+            
+            # Generic task cancel patterns
+            "task::*::cancel": {
+                "parameters": [
+                    {"name": "task_id", "type": "integer", "required": True, "description": "The identifier of the task to cancel"},
+                    {"name": "userpass", "type": "string", "required": True, "description": "Password for authentication"}
+                ],
+                "response": [
+                    {"name": "result", "type": "string", "description": "Result of the cancellation operation"}
+                ],
+                "errors": ["InvalidUserpass", "InternalError", "NoSuchTask", "InvalidRequest"]
+            },
+            
+            # Generic task status patterns
+            "task::*::status": {
+                "parameters": [
+                    {"name": "task_id", "type": "integer", "required": True, "description": "The identifier of the task to query"},
+                    {"name": "userpass", "type": "string", "required": True, "description": "Password for authentication"}
+                ],
+                "response": [
+                    {"name": "status", "type": "string", "description": "Current status of the task"},
+                    {"name": "details", "type": "object", "description": "Detailed information about the task"}
+                ],
+                "errors": ["InvalidUserpass", "InternalError", "NoSuchTask", "InvalidRequest"]
+            },
+            
+            # Generic task user_action patterns
+            "task::*::user_action": {
+                "parameters": [
+                    {"name": "task_id", "type": "integer", "required": True, "description": "The identifier of the task"},
+                    {"name": "action", "type": "object", "required": True, "description": "The user action to perform"},
+                    {"name": "userpass", "type": "string", "required": True, "description": "Password for authentication"}
+                ],
+                "response": [
+                    {"name": "result", "type": "string", "description": "Result of the user action"}
+                ],
+                "errors": ["InvalidUserpass", "InternalError", "NoSuchTask", "InvalidRequest", "InvalidAction"]
+            }
+        }
+    
+    def infer_parameters_from_pattern(self, method_name: str) -> List[Dict[str, Any]]:
+        """
+        Infer parameters using Rust code analysis as the primary source of truth.
+        Falls back to enhanced analyzer patterns, then basic patterns.
+        """
+        # First priority: Extract parameters from actual Rust code
+        if self.local_scanner:
+            try:
+                method_details = self.local_scanner.extract_method_details(method_name)
+                if method_details.parameters:
+                    return self._convert_rust_parameters(method_details.parameters)
+            except Exception as e:
+                # If Rust analysis fails, continue to fallbacks
+                pass
+        
+        # Second priority: Use enhanced analyzer's pattern analysis
+        if self.enhanced_analyzer:
+            try:
+                category = self.enhanced_analyzer._classify_method_category(method_name)
+                parameters = self.enhanced_analyzer._extract_method_parameters(method_name, category, "v2")
+                if parameters:
+                    return self._convert_enhanced_parameters(parameters)
+            except Exception as e:
+                # If enhanced analysis fails, continue to fallbacks
+                pass
+        
+        # Third priority: Use fallback pattern matching
+        return self._infer_from_fallback_patterns(method_name)
+    
+    def infer_response_from_pattern(self, method_name: str) -> List[Dict[str, Any]]:
+        """
+        Infer response parameters using Rust code analysis as the primary source of truth.
+        Falls back to enhanced analyzer patterns, then basic patterns.
+        """
+        # First priority: Extract response from actual Rust code
+        if self.local_scanner:
+            try:
+                method_details = self.local_scanner.extract_method_details(method_name)
+                if method_details.response_type:
+                    # Convert response type to parameter format
+                    return [{"name": "result", "type": method_details.response_type, "description": "The method result"}]
+            except Exception as e:
+                # If Rust analysis fails, continue to fallbacks
+                pass
+        
+        # Second priority: Use enhanced analyzer's response generation
+        if self.enhanced_analyzer:
+            try:
+                response_data = self.enhanced_analyzer._generate_method_response(method_name, "v2")
+                if response_data and "result" in response_data:
+                    return self._convert_response_to_parameters(response_data["result"])
+            except Exception as e:
+                # If enhanced analysis fails, continue to fallbacks
+                pass
+        
+        # Third priority: Use fallback pattern matching
+        return self._infer_response_from_fallback_patterns(method_name)
+    
+    def _convert_rust_parameters(self, rust_params: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Convert parameters extracted from Rust code to generator format."""
+        converted = []
+        for param in rust_params:
+            converted.append({
+                "name": param.get("name", ""),
+                "type": self._rust_type_to_api_type(param.get("type", "String")),
+                "required": param.get("required", True),
+                "default": param.get("default"),
+                "description": param.get("description", f"Parameter {param.get('name', 'unknown')}")
+            })
+        return converted
+    
+    def _rust_type_to_api_type(self, rust_type: str) -> str:
+        """Convert Rust types to API documentation types."""
+        type_mapping = {
+            "String": "string",
+            "str": "string", 
+            "bool": "boolean",
+            "u64": "integer",
+            "i64": "integer",
+            "u32": "integer",
+            "i32": "integer",
+            "f64": "number",
+            "f32": "number",
+            "Vec<String>": "array of strings",
+            "Vec<u64>": "array of integers",
+            "Option<String>": "string (optional)",
+            "Option<bool>": "boolean (optional)",
+            "Option<u64>": "integer (optional)",
+            "serde_json::Value": "object",
+            "Value": "object"
+        }
+        
+        # Handle generic types
+        if rust_type.startswith("Vec<"):
+            inner_type = rust_type[4:-1]  # Extract inner type from Vec<T>
+            mapped_inner = type_mapping.get(inner_type, inner_type.lower())
+            return f"array of {mapped_inner}"
+        
+        if rust_type.startswith("Option<"):
+            inner_type = rust_type[7:-1]  # Extract inner type from Option<T>
+            mapped_inner = type_mapping.get(inner_type, inner_type.lower())
+            return f"{mapped_inner} (optional)"
+        
+        return type_mapping.get(rust_type, rust_type.lower())
+    
+    def _infer_from_fallback_patterns(self, method_name: str) -> List[Dict[str, Any]]:
+        """Fallback pattern matching when Rust analysis isn't available."""
+        # Check for wildcard pattern matches
+        for pattern_key, pattern_data in self.method_patterns.items():
+            if "*" in pattern_key:
+                if self._matches_wildcard_pattern(method_name, pattern_key):
+                    params = self._convert_parameters(pattern_data["parameters"])
+                    # Add method-specific parameters based on type
+                    return self._add_method_specific_params(method_name, params)
+        
+        # Ultimate fallback
+        return [{"name": "userpass", "type": "string", "required": True, "description": "Password for authentication"}]
+    
+    def _infer_response_from_fallback_patterns(self, method_name: str) -> List[Dict[str, Any]]:
+        """Fallback response pattern matching when Rust analysis isn't available."""
+        # Check for wildcard pattern matches
+        for pattern_key, pattern_data in self.method_patterns.items():
+            if "*" in pattern_key:
+                if self._matches_wildcard_pattern(method_name, pattern_key):
+                    return self._convert_parameters(pattern_data["response"])
+        
+        # Ultimate fallback
+        return [{"name": "result", "type": "object", "description": "The method result"}]
+    
+    def _convert_enhanced_parameters(self, enhanced_params: List) -> List[Dict[str, Any]]:
+        """Convert parameters from enhanced analyzer's ParameterInfo to generator format."""
+        converted = []
+        for param in enhanced_params:
+            # Handle both ParameterInfo objects and dictionaries
+            if hasattr(param, '__dict__'):
+                # It's a ParameterInfo object
+                converted.append({
+                    "name": param.name,
+                    "type": param.type,
+                    "required": param.required,
+                    "default": param.default,
+                    "description": param.description
+                })
+            else:
+                # It's already a dictionary
+                converted.append({
+                    "name": param.get("name", ""),
+                    "type": param.get("type", "string"),
+                    "required": param.get("required", True),
+                    "default": param.get("default"),
+                    "description": param.get("description", "")
+                })
+        return converted
+    
+    def _convert_response_to_parameters(self, response_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Convert response data structure to parameter list format."""
+        parameters = []
+        
+        def extract_fields(data, prefix=""):
+            if isinstance(data, dict):
+                for key, value in data.items():
+                    field_name = f"{prefix}.{key}" if prefix else key
+                    if isinstance(value, dict):
+                        # Nested object
+                        parameters.append({
+                            "name": field_name,
+                            "type": "object",
+                            "description": f"Object containing {key} information"
+                        })
+                        extract_fields(value, field_name)
+                    elif isinstance(value, list):
+                        # Array
+                        parameters.append({
+                            "name": field_name,
+                            "type": "array",
+                            "description": f"Array of {key} items"
+                        })
+                    else:
+                        # Simple value
+                        param_type = self._infer_type_from_value(value)
+                        parameters.append({
+                            "name": field_name,
+                            "type": param_type,
+                            "description": f"The {key} value"
+                        })
+        
+        extract_fields(response_data)
+        return parameters[:5]  # Limit to first 5 parameters for readability
+    
+    def _infer_type_from_value(self, value: Any) -> str:
+        """Infer API type from a sample value."""
+        if isinstance(value, bool):
+            return "boolean"
+        elif isinstance(value, int):
+            return "integer"
+        elif isinstance(value, float):
+            return "number"
+        elif isinstance(value, str):
+            return "string"
+        elif isinstance(value, list):
+            return "array"
+        elif isinstance(value, dict):
+            return "object"
+        else:
+            return "string"
+    
+    def _matches_wildcard_pattern(self, method_name: str, pattern: str) -> bool:
+        """Check if a method name matches a wildcard pattern."""
+        pattern_parts = pattern.split("::")
+        method_parts = method_name.split("::")
+        
+        if len(pattern_parts) != len(method_parts):
+            return False
+        
+        for pattern_part, method_part in zip(pattern_parts, method_parts):
+            if pattern_part != "*" and pattern_part != method_part:
+                return False
+        
+        return True
+    
+    def _add_method_specific_params(self, method_name: str, base_params: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Add method-specific parameters based on the method type."""
+        params = base_params.copy()
+        
+        # Add activation-specific parameters for enable methods
+        if "::enable_" in method_name and "::init" in method_name:
+            activation_params = [
+                {
+                    "name": "ticker", 
+                    "type": "string", 
+                    "required": True, 
+                    "description": f"The coin ticker (e.g., {self._get_example_coin(method_name)} for {self._get_protocol(method_name)} protocol)"
+                },
+                {
+                    "name": "activation_params", 
+                    "type": "object", 
+                    "required": True, 
+                    "description": f"[ActivationParams](/komodo-defi-framework/api/common_structures/activation/#activation-params) for {self._get_protocol(method_name)} protocol"
+                }
+            ]
+            
+            # Add protocol-specific parameters
+            if "erc20" in method_name or "eth" in method_name:
+                activation_params.append({
+                    "name": "priv_key_policy", 
+                    "type": "string", 
+                    "required": False, 
+                    "default": "ContextPrivKey",
+                    "description": "Value can be [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum) for coin activation"
+                })
+            
+            # Insert activation params before userpass
+            userpass_idx = next((i for i, p in enumerate(params) if p["name"] == "userpass"), len(params))
+            for i, param in enumerate(activation_params):
+                params.insert(userpass_idx + i, param)
+        
+        return params
+    
+    def _get_protocol(self, method_name: str) -> str:
+        """Get protocol name from method name."""
+        if "erc20" in method_name:
+            return "ERC20"
+        elif "eth" in method_name:
+            return "ETH"
+        elif "utxo" in method_name:
+            return "UTXO"
+        elif "bch" in method_name:
+            return "BCH"
+        elif "qtum" in method_name:
+            return "QTUM"
+        elif "tendermint" in method_name:
+            return "Tendermint"
+        elif "lightning" in method_name:
+            return "Lightning"
+        else:
+            return "Unknown"
+    
+    def _get_example_coin(self, method_name: str) -> str:
+        """Get example coin for the method's protocol."""
+        protocol = self._get_protocol(method_name)
+        examples = {
+            "ERC20": "1INCH-ERC20",
+            "ETH": "ETH",
+            "UTXO": "KMD",
+            "BCH": "BCH",
+            "QTUM": "QTUM",
+            "Tendermint": "ATOM",
+            "Lightning": "LIGHTNING-BTC"
+        }
+        return examples.get(protocol, "COIN")
+    
+    def _convert_parameters(self, params: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Convert parameter format from fallback patterns to generator format."""
+        converted = []
+        for param in params:
+            converted.append({
+                "name": param.get("name", ""),
+                "type": param.get("type", "string"),
+                "required": param.get("required", True),
+                "default": param.get("default"),
+                "description": param.get("description", "")
+            })
+        return converted
 
 
 class KDFDocsAutoGenerator:
@@ -64,6 +463,9 @@ class KDFDocsAutoGenerator:
             self.logger.error(f"Failed to initialize enhanced analyzer: {e}")
             self.logger.info("Falling back to basic repository scanner")
             self.enhanced_analyzer = None
+        
+        # Initialize pattern analyzer with enhanced analyzer for Rust code access
+        self.pattern_analyzer = MethodPatternAnalyzer(self.enhanced_analyzer, repo_path)
         
         # Define paths
         self.base_dir = Path(__file__).parent
@@ -302,9 +704,10 @@ class KDFDocsAutoGenerator:
         """Fallback to enhanced inference-based analysis if direct analysis fails."""
         from lib.scanning.enhanced_analyzer import EnhancedMethodInfo, ParameterInfo, ErrorInfo, ExampleInfo
         
-        # Generate enhanced parameter info based on method patterns
-        parameters = self.infer_enhanced_parameters(method_name, version)
-        errors = self.infer_enhanced_errors(method_name, version)
+        # Generate enhanced parameter info using the pattern analyzer (which now includes Rust code analysis)
+        parameters = self.pattern_analyzer.infer_parameters_from_pattern(method_name)
+        response_params = self.pattern_analyzer.infer_response_from_pattern(method_name)
+        errors = self.infer_errors_from_pattern(method_name)
         examples = [self.generate_enhanced_example(method_name, version)]
         
         enhanced_info = EnhancedMethodInfo(
@@ -313,7 +716,7 @@ class KDFDocsAutoGenerator:
             handler_file=None,
             description=self.generate_description(method_name),
             parameters=parameters,
-            response=None,
+            response=response_params,
             errors=errors,
             examples=examples,
             related_methods=self.find_related_methods(method_name),
@@ -322,312 +725,61 @@ class KDFDocsAutoGenerator:
         
         return enhanced_info.to_dict()
     
-    def infer_enhanced_parameters(self, method_name: str, version: str) -> List:
-        """Generate enhanced parameter information with better inference."""
-        from lib.scanning.enhanced_analyzer import ParameterInfo
+    def infer_errors_from_pattern(self, method_name: str) -> List:
+        """Infer common error types for the method."""
+        from lib.scanning.enhanced_analyzer import ErrorInfo
         
-        parameters = []
+        errors = []
         
-        # Always include userpass for all methods
-        parameters.append(ParameterInfo(
-            name="userpass",
-            type="string",
-            required=True,
-            default=None,
-            description="Password for authentication",
-            example='"RPC_UserP@SSW0RD"'
-        ))
+        # Common errors for all methods
+        errors.extend([
+            ErrorInfo(
+                name="InvalidUserpass",
+                type="string",
+                description="The userpass provided is invalid"
+            ),
+            ErrorInfo(
+                name="InternalError", 
+                type="string",
+                description="An internal error occurred"
+            )
+        ])
         
-        # Method-specific parameters based on patterns
-        if "enable" in method_name and "task::" in method_name:
-            parameters.extend([
-                ParameterInfo(
-                    name="coin",
+        # Method-specific errors based on patterns
+        if "enable" in method_name:
+            errors.extend([
+                ErrorInfo(
+                    name="CoinAlreadyActivated",
                     type="string", 
-                    required=True,
-                    default=None,
-                    description="Coin ticker symbol",
-                    example='"BTC"'
+                    description="The coin is already activated"
                 ),
-                ParameterInfo(
-                    name="activation_params",
-                    type="object",
-                    required=True,
-                    default=None,
-                    description="Coin activation parameters",
-                    example='{"mode": {"rpc": "Electrum", "rpc_data": {...}}}'
+                ErrorInfo(
+                    name="InvalidActivationParams",
+                    type="string",
+                    description="The activation parameters are invalid"
                 )
             ])
         
-        elif "cancel" in method_name and "task::" in method_name:
-            parameters.append(ParameterInfo(
-                name="task_id",
-                type="number",
-                required=True,
-                default=None,
-                description="Task ID to cancel",
-                example="12345"
+        elif "task::" in method_name:
+            errors.append(ErrorInfo(
+                name="TaskNotFound",
+                type="string",
+                description="The specified task was not found"
             ))
         
-        elif "status" in method_name and "task::" in method_name:
-            parameters.append(ParameterInfo(
-                name="task_id",
-                type="number",
-                required=True, 
-                default=None,
-                description="Task ID to check status",
-                example="12345"
-            ))
-        
-        return parameters
-    
-    def generate_human_title(self, method_name: str) -> str:
-        """Convert API method name to human-readable title."""
-        if "::" in method_name:
-            parts = method_name.split("::")
-            
-            if parts[0] == "task":
-                if len(parts) >= 3:
-                    action = parts[2].replace("_", " ").title()
-                    target = parts[1].replace("_", " ").title()
-                    return f"{action} {target} Task"
-                else:
-                    target = parts[1].replace("_", " ").title()
-                    return f"{target} Task"
-            
-            elif parts[0] == "stream":
-                if len(parts) >= 3:
-                    action = parts[2].replace("_", " ").title()
-                    target = parts[1].replace("_", " ").title()
-                    return f"{action} {target} Stream"
-                else:
-                    target = parts[1].replace("_", " ").title()
-                    return f"{target} Stream"
-            
-            elif parts[0] == "lightning":
-                if len(parts) >= 3:
-                    category = parts[1].replace("_", " ").title()
-                    action = parts[2].replace("_", " ").title()
-                    return f"{action} Lightning {category[:-1] if category.endswith('s') else category}"
-                else:
-                    target = parts[1].replace("_", " ").title()
-                    return f"Lightning {target}"
-            
-            elif parts[0] == "gui_storage":
-                action = parts[1].replace("_", " ").title()
-                return f"{action} GUI Storage"
-            
-            elif parts[0] == "experimental":
-                if len(parts) >= 3:
-                    action = parts[-1].replace("_", " ").title()
-                    category = parts[-2].replace("_", " ").title()
-                    return f"{action} {category}"
-                else:
-                    target = parts[1].replace("_", " ").title()
-                    return f"Experimental {target}"
-            
-            else:
-                # Generic namespaced methods
-                action = parts[-1].replace("_", " ").title()
-                namespace = "::".join(parts[:-1]).replace("_", " ").title()
-                return f"{action} {namespace}"
-        
-        # Simple methods
-        return method_name.replace("_", " ").title()
-    
-    def generate_description(self, method_name: str) -> str:
-        """Generate a descriptive summary for the method."""
-        if "::" in method_name:
-            parts = method_name.split("::")
-            
-            if parts[0] == "task":
-                if "init" in method_name:
-                    return f"Initializes the {parts[1].replace('_', ' ')} task operation in the Komodo DeFi Framework."
-                elif "cancel" in method_name:
-                    return f"Cancels the {parts[1].replace('_', ' ')} task operation in the Komodo DeFi Framework."
-                elif "status" in method_name:
-                    return f"Retrieves the status of the {parts[1].replace('_', ' ')} task operation."
-                elif "user_action" in method_name:
-                    return f"Handles user action for the {parts[1].replace('_', ' ')} task operation."
-                else:
-                    return f"Manages the {parts[1].replace('_', ' ')} task operation in the Komodo DeFi Framework."
-            
-            elif parts[0] == "stream":
-                return f"Manages the {parts[1].replace('_', ' ')} streaming functionality in the Komodo DeFi Framework."
-            
-            elif parts[0] == "lightning":
-                return f"Handles Lightning Network {parts[1].replace('_', ' ')} operations in the Komodo DeFi Framework."
-            
-            elif parts[0] == "gui_storage":
-                return f"Manages GUI storage operations for {parts[1].replace('_', ' ')} in the Komodo DeFi Framework."
-            
-            elif parts[0] == "experimental":
-                return f"Provides experimental functionality for {parts[-1].replace('_', ' ')} operations in the Komodo DeFi Framework."
-        
-        # Default description
-        return f"The {method_name} method provides functionality for {method_name.replace('_', ' ')} operations in the Komodo DeFi Framework."
-    
-    def classify_method_type(self, method_name: str) -> str:
-        """Classify the method type for better template population."""
-        if "::" in method_name:
-            parts = method_name.split("::")
-            return parts[0]  # task, stream, lightning, etc.
-        return "direct"
-    
-    def infer_basic_parameters(self, method_name: str) -> List[Dict[str, Any]]:
-        """Infer basic parameters based on method name patterns."""
-        params = []
-        
-        # Add userpass for all methods
-        params.append({
-            "name": "userpass",
-            "type": "string",
-            "required": True,
-            "default": None,
-            "description": "The user's password for RPC authorization."
-        })
-        
-        # Method-specific parameter inference
-        if "task::" in method_name:
-            if "init" in method_name:
-                if "enable_" in method_name:
-                    # Enable tasks typically need coin parameter
-                    params.append({
-                        "name": "coin",
-                        "type": "string",
-                        "required": True,
-                        "default": None,
-                        "description": "The ticker symbol of the coin to enable."
-                    })
-            elif "status" in method_name or "cancel" in method_name:
-                # Status and cancel operations need task_id
-                params.append({
-                    "name": "task_id",
-                    "type": "number",
-                    "required": True,
-                    "default": None,
-                    "description": "The identifier of the task to query or cancel."
-                })
-            elif "user_action" in method_name:
-                # User action operations need task_id
-                params.append({
-                    "name": "task_id",
-                    "type": "number",
-                    "required": True,
-                    "default": None,
-                    "description": "The identifier of the task requiring user action."
-                })
-        
-        elif "stream::" in method_name:
-            # Stream methods might need different parameters
-            if "enable" in method_name:
-                params.append({
-                    "name": "stream_id",
-                    "type": "string",
-                    "required": False,
-                    "default": None,
-                    "description": "Optional identifier for the stream."
-                })
-        
         elif "lightning::" in method_name:
-            # Lightning methods typically involve coin
-            params.append({
-                "name": "coin",
-                "type": "string",
-                "required": True,
-                "default": None,
-                "description": "The ticker symbol of the Lightning-enabled coin."
-            })
-        
-        elif "gui_storage::" in method_name:
-            # GUI storage methods might need account parameters
-            if "account" in method_name:
-                params.append({
-                    "name": "account_id",
-                    "type": "string",
-                    "required": True,
-                    "default": None,
-                    "description": "The identifier of the account."
-                })
-        
-        return params
-    
-    def infer_basic_response(self, method_name: str) -> Dict[str, Any]:
-        """Infer basic response structure based on method patterns."""
-        response = {}
-        
-        if "task::" in method_name:
-            if "init" in method_name:
-                response = {
-                    "task_id": "number - The identifier of the initialized task",
-                    "result": "string - Result status of the initialization"
-                }
-            elif "status" in method_name:
-                response = {
-                    "status": "string - Current status of the task",
-                    "details": "object - Detailed information about the task state"
-                }
-            elif "cancel" in method_name:
-                response = {
-                    "result": "string - Result of the cancellation operation"
-                }
-        
-        elif "stream::" in method_name:
-            response = {
-                "stream_id": "string - Identifier of the stream",
-                "status": "string - Status of the stream operation"
-            }
-        
-        elif "lightning::" in method_name:
-            response = {
-                "result": "object - Lightning operation result",
-                "coin": "string - The coin ticker involved in the operation"
-            }
-        
-        elif "gui_storage::" in method_name:
-            response = {
-                "result": "string - Result of the GUI storage operation"
-            }
-        
-        else:
-            # Default response structure
-            response = {
-                "result": "object - The method response data"
-            }
-        
-        return response
-    
-    def infer_basic_errors(self, method_name: str) -> List[Dict[str, str]]:
-        """Infer common error types for the method."""
-        errors = [
-            {
-                "name": "InvalidRequest",
-                "description": "Request is missing required parameters or has invalid format"
-            },
-            {
-                "name": "InternalError",
-                "description": "An internal error occurred processing the request"
-            }
-        ]
-        
-        # Method-specific errors
-        if "enable" in method_name or "coin" in method_name.lower():
-            errors.append({
-                "name": "NoSuchCoin",
-                "description": "The specified coin is not supported or not activated"
-            })
-        
-        if "task::" in method_name:
-            errors.append({
-                "name": "NoSuchTask",
-                "description": "The specified task ID does not exist"
-            })
-        
-        if "lightning::" in method_name:
-            errors.append({
-                "name": "LightningError",
-                "description": "Lightning network operation failed"
-            })
+            errors.extend([
+                ErrorInfo(
+                    name="LightningError",
+                    type="string",
+                    description="Lightning network operation failed"
+                ),
+                ErrorInfo(
+                    name="ChannelNotFound",
+                    type="string",
+                    description="The specified channel was not found"
+                )
+            ])
         
         return errors
     
@@ -1069,26 +1221,26 @@ class KDFDocsAutoGenerator:
         ])
         
         # Method-specific errors
-        if "enable" in method_name:
-            errors.extend([
-                ErrorInfo(
-                    name="CoinAlreadyActivated",
-                    type="string", 
-                    description="The coin is already activated"
-                ),
-                ErrorInfo(
-                    name="InvalidActivationParams",
-                    type="string",
-                    description="The activation parameters are invalid"
-                )
-            ])
+        if "enable" in method_name or "coin" in method_name.lower():
+            errors.append({
+                "name": "NoSuchCoin",
+                "type": "string",
+                "description": "The specified coin is not supported or not activated"
+            })
         
-        elif "task::" in method_name:
-            errors.append(ErrorInfo(
-                name="TaskNotFound",
-                type="string",
-                description="The specified task was not found"
-            ))
+        if "task::" in method_name:
+            errors.append({
+                "name": "NoSuchTask",
+                "type": "string",
+                "description": "The specified task ID does not exist"
+            })
+        
+        if "lightning::" in method_name:
+            errors.append({
+                "name": "LightningError",
+                "type": "string",
+                "description": "Lightning network operation failed"
+            })
         
         return errors
     
@@ -1290,6 +1442,92 @@ class KDFDocsAutoGenerator:
             data_rows.append('| ' + ' | '.join(padded_row) + ' |')
         
         return '\n'.join([header_row, separator_row] + data_rows)
+
+    def generate_human_title(self, method_name: str) -> str:
+        """Convert API method name to human-readable title."""
+        if "::" in method_name:
+            parts = method_name.split("::")
+            
+            if parts[0] == "task":
+                if len(parts) >= 3:
+                    action = parts[2].replace("_", " ").title()
+                    target = parts[1].replace("_", " ").title()
+                    return f"{action} {target} Task"
+                else:
+                    target = parts[1].replace("_", " ").title()
+                    return f"{target} Task"
+            
+            elif parts[0] == "stream":
+                if len(parts) >= 3:
+                    action = parts[2].replace("_", " ").title()
+                    target = parts[1].replace("_", " ").title()
+                    return f"{action} {target} Stream"
+                else:
+                    target = parts[1].replace("_", " ").title()
+                    return f"{target} Stream"
+            
+            elif parts[0] == "lightning":
+                if len(parts) >= 3:
+                    category = parts[1].replace("_", " ").title()
+                    action = parts[2].replace("_", " ").title()
+                    return f"{action} Lightning {category[:-1] if category.endswith('s') else category}"
+                else:
+                    target = parts[1].replace("_", " ").title()
+                    return f"Lightning {target}"
+            
+            elif parts[0] == "gui_storage":
+                action = parts[1].replace("_", " ").title()
+                return f"{action} GUI Storage"
+            
+            elif parts[0] == "experimental":
+                if len(parts) >= 3:
+                    action = parts[-1].replace("_", " ").title()
+                    category = parts[-2].replace("_", " ").title()
+                    return f"{action} {category}"
+                else:
+                    target = parts[1].replace("_", " ").title()
+                    return f"Experimental {target}"
+            
+            else:
+                # Generic namespaced methods
+                action = parts[-1].replace("_", " ").title()
+                namespace = "::".join(parts[:-1]).replace("_", " ").title()
+                return f"{action} {namespace}"
+        
+        # Simple methods
+        return method_name.replace("_", " ").title()
+    
+    def generate_description(self, method_name: str) -> str:
+        """Generate a descriptive summary for the method."""
+        if "::" in method_name:
+            parts = method_name.split("::")
+            
+            if parts[0] == "task":
+                if "init" in method_name:
+                    return f"Initializes the {parts[1].replace('_', ' ')} task operation in the Komodo DeFi Framework."
+                elif "cancel" in method_name:
+                    return f"Cancels the {parts[1].replace('_', ' ')} task operation in the Komodo DeFi Framework."
+                elif "status" in method_name:
+                    return f"Retrieves the status of the {parts[1].replace('_', ' ')} task operation."
+                elif "user_action" in method_name:
+                    return f"Handles user action for the {parts[1].replace('_', ' ')} task operation."
+                else:
+                    return f"Manages the {parts[1].replace('_', ' ')} task operation in the Komodo DeFi Framework."
+            
+            elif parts[0] == "stream":
+                return f"Manages the {parts[1].replace('_', ' ')} streaming functionality in the Komodo DeFi Framework."
+            
+            elif parts[0] == "lightning":
+                return f"Handles Lightning Network {parts[1].replace('_', ' ')} operations in the Komodo DeFi Framework."
+            
+            elif parts[0] == "gui_storage":
+                return f"Manages GUI storage operations for {parts[1].replace('_', ' ')} in the Komodo DeFi Framework."
+            
+            elif parts[0] == "experimental":
+                return f"Provides experimental functionality for {parts[-1].replace('_', ' ')} operations in the Komodo DeFi Framework."
+        
+        # Default description
+        return f"The {method_name} method provides functionality for {method_name.replace('_', ' ')} operations in the Komodo DeFi Framework."
 
 
 def main():
