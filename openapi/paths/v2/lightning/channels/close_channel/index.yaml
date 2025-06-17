@@ -1,0 +1,93 @@
+/api/v2/method:
+  post:
+    operationId: lightning-channels-close_channel
+    summary: 'Komodo DeFi Framework Method: Close Lightning Channel'
+    description: Close a Lightning Network channel using the Komodo DeFi Framework
+      API.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - lightning::channels::close_channel
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  coin:
+                    description: The ticker of the coin for the channel to close.
+                    type: string
+                    default: '-'
+                  channel_id:
+                    description: The channel ID to close.
+                    type: string
+                    default: '-'
+                  force:
+                    description: If `true`, the channel will be force-closed.
+                    type: boolean
+                    enum:
+                    - 'true'
+                    example: 'true'
+                    default: '`false`'
+                  target_height:
+                    description: The target block height for closing the channel.
+                    type: integer
+                    default: '-'
+                required:
+                - coin
+                - channel_id
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      description: Status message (e.g., Channel closed successfully).
+                    id:
+                      type: string
+                      description: Request identifier.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

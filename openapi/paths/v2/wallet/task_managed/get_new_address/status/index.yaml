@@ -1,0 +1,87 @@
+/api/v2/method:
+  post:
+    operationId: task-get_new_address-status
+    summary: 'Komodo DeFi Framework Method: Get New Address Task Status'
+    description: Check the status of a HD address creation task in the Komodo DeFi
+      Framework API.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - task::get_new_address::status
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  task_id:
+                    description: The identifying number returned when initiating the
+                      task.
+                    type: integer
+                    default: '`-`'
+                  forget_if_finished:
+                    description: If `false`, will return final response for completed
+                      tasks.
+                    type: boolean
+                    enum:
+                    - 'false'
+                    example: 'false'
+                    default: '`true`'
+                required:
+                - task_id
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      description: Status of the task. `Ok`, `InProgress` or `Error`.
+                    details:
+                      $ref: '#/components/schemas/NewAddressesInfo'
+                      description: Once complete, a standard [NewAddressesInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info)
+                        object.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

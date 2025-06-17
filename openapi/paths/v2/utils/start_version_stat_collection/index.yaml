@@ -1,0 +1,74 @@
+/api/v2/method:
+  post:
+    operationId: start_version_stat_collection
+    summary: 'Komodo DeFi Framework Method: Start Version Stat Collection'
+    description: The start_version_stat_collection method initiates storing version
+      statistics for nodes previously registered via the add_node_to_version_stat
+      method.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - start_version_stat_collection
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  interval:
+                    description: polling rate (in seconds) to check node versions
+                    type: integer
+                required:
+                - interval
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: string
+                      description: The outcome of the request.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

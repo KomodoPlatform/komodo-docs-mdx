@@ -14,48 +14,198 @@ from functools import lru_cache
 # METHOD NAME CONVERSIONS
 # =============================================================================
 
+@lru_cache(maxsize=512)
 def convert_dir_to_method_name(directory_name: str) -> str:
     """
-    Convert directory name to method name format.
+    Convert directory/folder name to canonical method name format.
+    
+    Converts folder format to canonical format:
+    - task-enable_utxo-init → task::enable_utxo::init
+    - lightning-channels-close_channel → lightning::channels::close_channel
+    - experimental-staking-delegate → experimental::staking::delegate
+    - wallet-staking-validators → wallet::staking::validators
+    - stream-balance-enable → stream::balance::enable
+    - non_fungible_tokens-get_nft_list → non_fungible_tokens::get_nft_list
     
     Args:
-        directory_name: Directory name (e.g., "task-enable-eth-init")
+        directory_name: Directory/folder name (e.g., "task-enable_utxo-init")
         
     Returns:
-        Method name (e.g., "task::enable_eth::init")
+        Canonical method name (e.g., "task::enable_utxo::init")
     """
-    # Replace hyphens with double colons, but handle underscores specially
-    if "task-enable-" in directory_name:
-        # Special handling for task methods
-        parts = directory_name.split("-")
-        if len(parts) >= 3:
-            # Convert task-enable-eth-init to task::enable_eth::init
-            method_parts = [parts[0], f"{parts[1]}_{parts[2]}"]
-            if len(parts) > 3:
-                method_parts.extend(parts[3:])
-            return "::".join(method_parts)
+    if not directory_name:
+        return ""
     
+    # Simply replace hyphens with double colons
+    # This preserves underscores within method names
     return directory_name.replace("-", "::")
 
 
+@lru_cache(maxsize=512)
 def convert_method_to_dir_name(method_name: str) -> str:
     """
-    Convert method name to directory name format.
+    Convert canonical method name to directory/folder name format.
+    
+    Converts canonical format to folder format:
+    - task::enable_utxo::init → task-enable_utxo-init
+    - lightning::channels::close_channel → lightning-channels-close_channel
+    - experimental::staking::delegate → experimental-staking-delegate
+    - wallet::staking::validators → wallet-staking-validators
+    - stream::balance::enable → stream-balance-enable
+    - non_fungible_tokens::get_nft_list → non_fungible_tokens-get_nft_list
     
     Args:
-        method_name: Method name (e.g., "task::enable_eth::init")
+        method_name: Canonical method name (e.g., "task::enable_utxo::init")
         
     Returns:
-        Directory name (e.g., "task-enable-eth-init")
+        Directory/folder name (e.g., "task-enable_utxo-init")
     """
-    # Handle special cases first
-    if method_name == "task::enable_z_coin":
-        return "task-enable-z-coin"
-    elif method_name.startswith("task::enable_"):
-        # Convert task::enable_eth to task-enable-eth
-        return method_name.replace("::", "-").replace("_", "-")
+    if not method_name:
+        return ""
     
+    # Simply replace :: with -
+    # This preserves underscores in method names like enable_utxo
     return method_name.replace("::", "-")
+
+
+@lru_cache(maxsize=512)
+def convert_canonical_to_slug(method_name: str) -> str:
+    """
+    Convert canonical method name to URL slug format.
+    
+    Converts canonical format to slug format:
+    - task::enable_utxo::init → task-enable-utxo-init
+    - lightning::channels::close_channel → lightning-channels-close-channel
+    - experimental::staking::delegate → experimental-staking-delegate
+    
+    Args:
+        method_name: Canonical method name (e.g., "task::enable_utxo::init")
+        
+    Returns:
+        URL slug (e.g., "task-enable-utxo-init")
+    """
+    if not method_name:
+        return ""
+    
+    # Replace :: with - and _ with -
+    return method_name.replace("::", "-").replace("_", "-")
+
+
+@lru_cache(maxsize=512)
+def convert_slug_to_canonical(slug: str) -> str:
+    """
+    Convert URL slug to canonical method name format.
+    
+    Note: This conversion is lossy because we can't reliably distinguish
+    between hyphens that should become :: vs those that should become _.
+    This function makes best-effort guesses based on common patterns.
+    
+    Args:
+        slug: URL slug (e.g., "task-enable-utxo-init")
+        
+    Returns:
+        Canonical method name (e.g., "task::enable_utxo::init")
+    """
+    if not slug:
+        return ""
+    
+    # Known patterns where hyphens should become underscores
+    underscore_patterns = [
+        # Enable patterns - specifically handle enable-<coin> patterns
+        r'enable-utxo',     # enable-utxo → enable_utxo
+        r'enable-bch',      # enable-bch → enable_bch
+        r'enable-eth',      # enable-eth → enable_eth
+        r'enable-qtum',     # enable-qtum → enable_qtum
+        r'enable-z-coin',   # enable-z-coin → enable_z_coin
+        r'enable-coin',     # enable-coin → enable_coin
+        # Other common method name patterns
+        r'account-balance',   # account-balance → account_balance
+        r'new-address',       # new-address → new_address
+        r'z-coin',           # z-coin → z_coin
+        r'nft-([a-z]+)',     # nft-list → nft_list
+        r'close-channel',    # close-channel → close_channel
+        r'send-payment',     # send-payment → send_payment
+        r'trusted-node',     # trusted-node → trusted_node
+        r'claimable-balances', # claimable-balances → claimable_balances
+        r'channel-details',   # channel-details → channel_details
+        r'payment-details',   # payment-details → payment_details
+    ]
+    
+    result = slug
+    
+    # Apply underscore patterns
+    for pattern in underscore_patterns:
+        result = re.sub(pattern, lambda m: m.group(0).replace('-', '_'), result)
+    
+    # Convert remaining hyphens to double colons
+    result = result.replace("-", "::")
+    
+    return result
+
+
+@lru_cache(maxsize=512)
+def convert_folder_to_slug(folder_name: str) -> str:
+    """
+    Convert folder format to URL slug format.
+    
+    Args:
+        folder_name: Folder name (e.g., "task-enable_utxo-init")
+        
+    Returns:
+        URL slug (e.g., "task-enable-utxo-init")
+    """
+    if not folder_name:
+        return ""
+    
+    # Replace underscores with hyphens
+    return folder_name.replace("_", "-")
+
+
+@lru_cache(maxsize=512)
+def convert_slug_to_folder(slug: str) -> str:
+    """
+    Convert URL slug to folder format.
+    
+    Note: This conversion is lossy and makes best-effort guesses.
+    
+    Args:
+        slug: URL slug (e.g., "task-enable-utxo-init")
+        
+    Returns:
+        Folder name (e.g., "task-enable_utxo-init")
+    """
+    if not slug:
+        return ""
+    
+    # Known patterns where hyphens should become underscores in folder names
+    underscore_patterns = [
+        # Enable patterns - preserve underscores in method names
+        r'enable-utxo',     # enable-utxo → enable_utxo
+        r'enable-bch',      # enable-bch → enable_bch
+        r'enable-eth',      # enable-eth → enable_eth
+        r'enable-qtum',     # enable-qtum → enable_qtum
+        r'enable-z-coin',   # enable-z-coin → enable_z_coin
+        r'enable-coin',     # enable-coin → enable_coin
+        # Other common method name patterns
+        r'account-balance',   # account-balance → account_balance
+        r'new-address',       # new-address → new_address
+        r'z-coin',           # z-coin → z_coin
+        r'nft-([a-z]+)',     # nft-list → nft_list
+        r'close-channel',    # close-channel → close_channel
+        r'send-payment',     # send-payment → send_payment
+        r'trusted-node',     # trusted-node → trusted_node
+        r'claimable-balances', # claimable-balances → claimable_balances
+        r'channel-details',   # channel-details → channel_details
+        r'payment-details',   # payment-details → payment_details
+    ]
+    
+    result = slug
+    
+    # Apply underscore patterns
+    for pattern in underscore_patterns:
+        result = re.sub(pattern, lambda m: m.group(0).replace('-', '_'), result)
+    
+    return result
 
 
 def format_method_name_for_display(method_name: str) -> str:
@@ -89,43 +239,129 @@ def format_method_name_for_display(method_name: str) -> str:
 # NORMALIZATION FUNCTIONS (CONSOLIDATED)
 # =============================================================================
 
+@lru_cache(maxsize=256)
 def normalize_method_name(method_name: str) -> str:
     """
-    Normalize method name to consistent format (simple version).
+    Normalize method name to consistent format for comparison.
+    
+    SIMPLIFIED: Now that the scanner returns proper full method names with correct prefixes,
+    we can greatly simplify this normalization function.
     
     Args:
         method_name: Method name in any format
         
     Returns:
-        Normalized method name
+        Normalized method name with :: separators
     """
+    if not method_name:
+        return ""
+    
     # Remove extra whitespace and convert to lowercase
     normalized = method_name.strip().lower()
     
-    # Convert various separators to double colon
+    # Handle different separator conventions
+    # Documentation uses: task-enable_bch-cancel (filesystem format)
+    # Repository uses: task::enable_bch::cancel (canonical format)
+    # Convert filesystem format to canonical format
     normalized = normalized.replace("-", "::")
-    normalized = normalized.replace("_", "::")
-    normalized = normalized.replace("/", "::")
     
-    # Handle multiple colons
+    # Clean up any multiple colons that might result from the conversion
     while "::::" in normalized:
         normalized = normalized.replace("::::", "::")
+    
+    # Clean up any leading/trailing colons
+    normalized = normalized.strip(":")
+    
+    # Handle specific KDF method naming patterns
+    normalized = _handle_kdf_method_patterns(normalized)
     
     return normalized
 
 
-def normalize_method_name_variations(method_name: str) -> List[str]:
+def _handle_kdf_method_patterns(method_name: str) -> str:
     """
-    Generate multiple normalized variations of a method name for matching.
+    Handle specific KDF method naming patterns.
+    
+    SIMPLIFIED: Now that we have proper method names from the scanner,
+    we only need to handle a few specific edge cases.
+    
+    Args:
+        method_name: Pre-normalized method name
+        
+    Returns:
+        Method name with any necessary pattern adjustments
+    """
+    # Handle a few specific method name variations that may still exist
+    method_mappings = {
+    }
+    
+    # Apply mappings for specific edge cases only
+    return method_mappings.get(method_name, method_name)
+
+
+@lru_cache(maxsize=128)
+def clean_method_name(method_name: str) -> str:
+    """
+    Clean and normalize method name by removing problematic characters.
+    
+    Args:
+        method_name: Raw method name
+        
+    Returns:
+        Cleaned method name
+    """
+    if not method_name:
+        return ""
+    
+    # Remove leading/trailing whitespace
+    cleaned = method_name.strip()
+    
+    # Remove common problematic prefixes
+    prefixes_to_remove = [
+        "komodo defi framework method: ",
+        "kdf method: ",
+        "method: ",
+        "api method: "
+    ]
+    
+    cleaned_lower = cleaned.lower()
+    for prefix in prefixes_to_remove:
+        if cleaned_lower.startswith(prefix):
+            cleaned = cleaned[len(prefix):].strip()
+            break
+    
+    # Remove extra whitespace and normalize separators
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    
+    # Convert common separators to double colon
+    cleaned = cleaned.replace(' → ', '::')
+    cleaned = cleaned.replace(' -> ', '::')
+    cleaned = cleaned.replace(' | ', '::')
+    
+    # Handle special characters
+    cleaned = cleaned.replace('"', '').replace("'", "")
+    cleaned = cleaned.replace('(', '').replace(')', '')
+    cleaned = cleaned.replace('[', '').replace(']', '')
+    
+    return cleaned.strip()
+
+
+@lru_cache(maxsize=128)
+def normalize_method_name_variations(method_name: str) -> tuple:
+    """
+    Generate normalized variations of a method name for matching.
+    
+    SIMPLIFIED: Now that we have proper method names from the scanner,
+    we only need basic format variations.
     
     Args:
         method_name: The method name to normalize
         
     Returns:
-        List of normalized variations
+        Tuple of normalized variations
     """
     if not method_name:
-        return []
+        return tuple()
     
     variations = {method_name}  # Always include original
     
@@ -134,16 +370,10 @@ def normalize_method_name_variations(method_name: str) -> List[str]:
     if cleaned and cleaned != method_name:
         variations.add(cleaned)
     
-    # Generate format variations (:: vs -)
+    # Generate basic format variations (:: vs -)
     variations.update(_generate_format_variations(cleaned))
     
-    # Generate prefix variations
-    variations.update(_generate_prefix_variations(cleaned))
-    
-    # Generate special case variations
-    variations.update(_generate_special_variations(cleaned))
-    
-    return list(variations)
+    return tuple(variations)
 
 
 def _generate_format_variations(method_name: str) -> set:
@@ -154,80 +384,11 @@ def _generate_format_variations(method_name: str) -> set:
     if '::' in method_name:
         dash_version = method_name.replace('::', '-')
         variations.add(dash_version)
-        
-        # Also try single colon
-        single_colon = method_name.replace('::', ':')
-        variations.add(single_colon)
     
     # Convert - to ::
     elif '-' in method_name and not method_name.startswith(('http-', 'https-')):
         colon_version = method_name.replace('-', '::')
         variations.add(colon_version)
-        
-        # Also try single colon
-        single_colon = method_name.replace('-', ':')
-        variations.add(single_colon)
-    
-    return variations
-
-
-def _generate_prefix_variations(method_name: str) -> set:
-    """Generate variations for known prefixes."""
-    variations = set()
-    
-    prefix_mappings = {
-        'task': ['task', 'task::'],
-        'lightning': ['lightning', 'lightning::'],
-        'stream': ['stream', 'stream::'],
-        'gui_storage': ['gui_storage', 'gui_storage::'],
-        'experimental': ['experimental', 'experimental::']
-    }
-    
-    for prefix, formats in prefix_mappings.items():
-        if method_name.startswith(prefix):
-            base_name = method_name[len(prefix):].lstrip('-:')
-            
-            for fmt in formats:
-                if fmt.endswith(('-', '::')):
-                    variations.add(f"{fmt}{base_name}")
-                else:
-                    variations.add(f"{fmt}::{base_name}")
-                    variations.add(f"{fmt}-{base_name}")
-    
-    return variations
-
-
-def _generate_special_variations(method_name: str) -> set:
-    """Generate special case variations."""
-    variations = set()
-    
-    # Add enable-specific variations
-    variations.update(_generate_enable_variations(method_name))
-    
-    # Add version-specific variations
-    if 'v1' in method_name or 'v2' in method_name:
-        base = method_name.replace('v1', '').replace('v2', '').strip('-:')
-        if base:
-            variations.add(base)
-    
-    return variations
-
-
-def _generate_enable_variations(method_name: str) -> set:
-    """Generate variations for enable methods."""
-    variations = set()
-    
-    enable_patterns = [
-        'enable_', 'enable-', 'enable::'
-    ]
-    
-    for pattern in enable_patterns:
-        if pattern in method_name:
-            # Create variations with different separators
-            base = method_name.replace(pattern, '')
-            variations.add(f"enable::{base}")
-            variations.add(f"enable-{base}")
-            variations.add(f"enable_{base}")
     
     return variations
 
@@ -236,8 +397,44 @@ def _generate_enable_variations(method_name: str) -> set:
 # CONVERSION FUNCTIONS
 # =============================================================================
 
+def convert_filesystem_to_canonical_api_format(filesystem_name: str) -> str:
+    """
+    Convert filesystem-safe method name to canonical API format.
+    
+    This is an alias for convert_dir_to_method_name for clarity.
+    
+    Args:
+        filesystem_name: Filesystem-safe method name
+        
+    Returns:
+        Canonical API format method name
+    """
+    return convert_dir_to_method_name(filesystem_name)
+
+
+def convert_canonical_api_to_filesystem_format(api_name: str) -> str:
+    """
+    Convert canonical API format method name to filesystem-safe format.
+    
+    This is an alias for convert_method_to_dir_name for clarity.
+    
+    Args:
+        api_name: Canonical API format method name
+        
+    Returns:
+        Filesystem-safe method name
+    """
+    return convert_method_to_dir_name(api_name)
+
+
+# =============================================================================
+# BACKWARD COMPATIBILITY FUNCTIONS
+# =============================================================================
+
 def convert_filesystem_to_api_format(method_name: str) -> str:
     """
+    DEPRECATED: Use convert_filesystem_to_canonical_api_format instead.
+    
     Convert filesystem-safe method name to API format.
     
     Args:
@@ -246,15 +443,13 @@ def convert_filesystem_to_api_format(method_name: str) -> str:
     Returns:
         API format method name
     """
-    if not method_name:
-        return method_name
-    
-    # Convert hyphens to double colons for API format
-    return method_name.replace('-', '::')
+    return convert_dir_to_method_name(method_name)
 
 
 def convert_api_to_filesystem_format(method_name: str) -> str:
     """
+    DEPRECATED: Use convert_canonical_api_to_filesystem_format instead.
+    
     Convert API format method name to filesystem-safe format.
     
     Args:
@@ -263,11 +458,7 @@ def convert_api_to_filesystem_format(method_name: str) -> str:
     Returns:
         Filesystem-safe method name
     """
-    if not method_name:
-        return method_name
-    
-    # Convert double colons to hyphens for filesystem safety
-    return method_name.replace('::', '-')
+    return convert_method_to_dir_name(method_name)
 
 
 # =============================================================================
@@ -373,90 +564,65 @@ def generate_api_path(method_name: str, version: str = "v2") -> str:
     return f"/{version}/{method_name.replace('::', '/')}"
 
 
+@lru_cache(maxsize=256)
 def extract_category_from_method(method_name: str) -> Tuple[str, Optional[str]]:
     """
-    Extract category and subcategory from method name.
+    Extract category and optional subcategory from method name.
     
     Args:
-        method_name: Method name
+        method_name: The method name to analyze
         
     Returns:
         Tuple of (category, subcategory)
     """
-    parts = extract_method_parts(method_name)
-    
-    if not parts:
-        return "general", None
-    
-    if len(parts) == 1:
-        return parts[0], None
-    
-    return parts[0], parts[1] if len(parts) > 1 else None
-
-
-# =============================================================================
-# VALIDATION FUNCTIONS
-# =============================================================================
-
-def is_valid_method_name(method_name: str) -> bool:
-    """
-    Validate method name format.
-    
-    Args:
-        method_name: Method name to validate
-        
-    Returns:
-        True if valid, False otherwise
-    """
     if not method_name:
-        return False
+        return ("misc", None)
     
-    method_name = method_name.strip()
+    # Handle task methods
+    if method_name.startswith("task::"):
+        parts = method_name.split("::")
+        if len(parts) >= 3:
+            operation = parts[-1]  # init, status, cancel, user_action
+            base_task = "::".join(parts[1:-1])  # enable_eth, create_new_account, etc.
+            
+            if base_task.startswith("enable_"):
+                return ("coin_activation", "task_managed")
+            elif base_task == "create_new_account":
+                return ("wallet", "task_managed")
+            elif base_task == "withdraw":
+                return ("wallet", "task_managed")
+            else:
+                return ("task_managed", base_task.replace("_", "-"))
     
-    # Basic validation rules
-    if (len(method_name) < 2 or
-        method_name in [':', '::', ':::', '', '/', '\\', '-', '_'] or
-        method_name.startswith(':') or method_name.endswith(':') or
-        not any(c.isalpha() for c in method_name)):
-        return False
+    # Handle lightning methods
+    elif method_name.startswith("lightning::"):
+        parts = method_name.split("::")
+        if len(parts) >= 3:
+            subcategory = parts[1]  # channels, nodes, payments
+            return ("lightning", subcategory)
+        return ("lightning", None)
     
-    # Check for valid characters (letters, numbers, colons, hyphens, underscores, dots)
-    valid_chars = re.compile(r'^[a-zA-Z0-9_:.-]+$')
-    if not valid_chars.match(method_name):
-        return False
+    # Handle streaming methods
+    elif method_name.startswith(("stream::", "streaming::")):
+        return ("streaming", None)
     
-    return True
-
-
-def clean_method_name(method_name: str) -> str:
-    """
-    Clean method name by removing invalid characters and formatting.
+    # Handle wallet methods
+    elif method_name.startswith("wallet::"):
+        parts = method_name.split("::")
+        if len(parts) >= 3:
+            subcategory = parts[1]  # staking
+            return ("wallet", subcategory)
+        return ("wallet", None)
     
-    Args:
-        method_name: Raw method name
-        
-    Returns:
-        Cleaned method name
-    """
-    if not method_name:
-        return ""
-    
-    # Remove leading/trailing whitespace
-    cleaned = method_name.strip()
-    
-    # Remove or replace invalid characters
-    cleaned = re.sub(r'[^\w\s:.-]', '', cleaned)
-    
-    # Normalize whitespace
-    cleaned = re.sub(r'\s+', '_', cleaned)
-    
-    # Remove leading/trailing separators
-    cleaned = re.sub(r'^[_:.-]+|[_:.-]+$', '', cleaned)
-    
-    # Normalize multiple separators
-    cleaned = re.sub(r'[_:.-]{2,}', '::', cleaned)
-    
-    return cleaned
+    # Handle other common patterns
+    elif any(keyword in method_name for keyword in ["swap", "order", "trade"]):
+        return ("trading", None)
+    elif any(keyword in method_name for keyword in ["nft", "non_fungible"]):
+        return ("nft", None)
+    elif "1inch" in method_name:
+        return ("integrations", "1inch")
+    else:
+        return ("misc", None)
 
 
 # =============================================================================
@@ -476,13 +642,36 @@ def extract_method_name_from_mdx_content(content: str) -> Optional[str]:
         Method name if found, None otherwise
     """
     # Look for method heading pattern (##\s+method_name\s*{{)
-    method_pattern = r'##\s+([a-zA-Z0-9_:.-]+)\s*\{\{'
+    # Updated to handle escaped underscores (\_) in MDX headings
+    method_pattern = r'##\s+([a-zA-Z0-9_\\:.-]+)\s*\{\{'
     match = re.search(method_pattern, content)
     
     if match:
-        return match.group(1).strip()
+        method_name = match.group(1).strip()
+        # Convert escaped underscores back to regular underscores
+        method_name = method_name.replace('\\_', '_')
+        return method_name
     
     return None
+
+
+def is_overview_page(content: str) -> bool:
+    """
+    Check if MDX content represents an overview page.
+    
+    Overview pages have 'tag : overview' or 'tag : structures' in their heading metadata.
+    These pages are not individual API methods but documentation organization pages.
+    
+    Args:
+        content: MDX file content
+        
+    Returns:
+        True if this is an overview page, False otherwise
+    """
+    # Look for the overview or structures tag pattern in method headings
+    # Updated pattern to account for escaped characters like \_
+    overview_pattern = r'##\s+[a-zA-Z0-9_:.\\-]+\s*\{\{[^}]*tag\s*:\s*["\'](?:overview|structures)["\'][^}]*\}\}'
+    return bool(re.search(overview_pattern, content))
 
 
 def extract_method_name_from_yaml_filename(filename: str, version: str) -> Optional[str]:
@@ -548,6 +737,45 @@ def extract_methods_from_mdx_codeblocks(content: str, is_legacy: bool = False) -
                     v1_methods.append(method)
     
     return sorted(list(set(v1_methods))), sorted(list(set(v2_methods)))
+
+
+def extract_methods_from_mdx_headings(content: str) -> List[str]:
+    """
+    Extract method names from MDX ## headings, excluding overview and structures pages.
+    
+    This function looks for ## headings with method names and filters out pages
+    tagged as 'overview' or 'structures' since these are not individual API methods.
+    
+    Args:
+        content: MDX file content
+        
+    Returns:
+        List of method names found in headings
+    """
+    methods = []
+    
+    # Skip overview and structures pages entirely
+    if is_overview_page(content):
+        return []
+    
+    # Pattern to find ## headings with labels and tags
+    heading_pattern = r'##\s+([a-zA-Z0-9_:.-]+)\s*\{\{[^}]*label\s*:\s*["\']([a-zA-Z0-9_:.-]+)["\'][^}]*tag\s*:\s*["\']([a-zA-Z0-9_-]+)["\'][^}]*\}\}'
+    
+    matches = re.findall(heading_pattern, content)
+    
+    for heading_text, label_method, tag in matches:
+        # Skip overview and structures tags
+        if tag.lower() in ['overview', 'structures']:
+            continue
+            
+        # Use the label method name as it's more canonical
+        method_name = label_method.strip()
+        
+        # Validate method name format
+        if method_name and not method_name.isspace():
+            methods.append(method_name)
+    
+    return sorted(list(set(methods)))
 
 
 # =============================================================================
@@ -628,4 +856,81 @@ def truncate_text(text: str, max_length: int, suffix: str = "...") -> str:
     if len(text) <= max_length:
         return text
     
-    return text[:max_length - len(suffix)].rstrip() + suffix 
+    return text[:max_length - len(suffix)].rstrip() + suffix
+
+
+# =============================================================================
+# MATCHING FUNCTIONS
+# =============================================================================
+
+def find_best_match(method_name: str, mapping_dict: Dict[str, str]) -> Optional[str]:
+    """
+    Find the best matching key in a mapping dictionary for a given method name.
+    Uses fuzzy matching with Levenshtein distance.
+    
+    Note: Removed @lru_cache decorator because mapping_dict is unhashable.
+    
+    Args:
+        method_name: Method name to find match for
+        mapping_dict: Dictionary to search in
+        
+    Returns:
+        Best matching key or None if no good match found
+    """
+    if not method_name or not mapping_dict:
+        return None
+    
+    # First try exact match
+    if method_name in mapping_dict:
+        return method_name
+    
+    # Try normalized variations
+    variations = normalize_method_name_variations(method_name)
+    for variation in variations:
+        if variation in mapping_dict:
+            return variation
+    
+    # Try fuzzy matching
+    return _fuzzy_match(method_name, mapping_dict)
+
+
+def _fuzzy_match(method_name: str, mapping_dict: Dict[str, str]) -> Optional[str]:
+    """Perform fuzzy matching using edit distance."""
+    if not method_name:
+        return None
+    
+    best_match = None
+    best_score = float('inf')
+    threshold = len(method_name) // 3  # Allow up to 1/3 character differences
+    
+    for key in mapping_dict.keys():
+        if abs(len(key) - len(method_name)) > threshold:
+            continue
+        
+        score = _levenshtein_distance(method_name.lower(), key.lower())
+        if score < best_score and score <= threshold:
+            best_score = score
+            best_match = key
+    
+    return best_match
+
+
+def _levenshtein_distance(s1: str, s2: str) -> int:
+    """Calculate Levenshtein distance between two strings."""
+    if len(s1) < len(s2):
+        return _levenshtein_distance(s2, s1)
+    
+    if len(s2) == 0:
+        return len(s1)
+    
+    previous_row = list(range(len(s2) + 1))
+    for i, c1 in enumerate(s1):
+        current_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            insertions = previous_row[j + 1] + 1
+            deletions = current_row[j] + 1
+            substitutions = previous_row[j] + (c1 != c2)
+            current_row.append(min(insertions, deletions, substitutions))
+        previous_row = current_row
+    
+    return previous_row[-1] 

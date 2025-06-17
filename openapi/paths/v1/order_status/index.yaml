@@ -1,0 +1,69 @@
+/api/v2/method:
+  post:
+    operationId: order_status
+    summary: 'Komodo DeFi Framework Method: Order Status'
+    description: The order_status method returns the data of the order with the selected
+      uuid created by the Komodo DeFi Framework API node.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - order_status
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  uuid:
+                    description: UUID of order to display
+                    type: string
+                required:
+                - uuid
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

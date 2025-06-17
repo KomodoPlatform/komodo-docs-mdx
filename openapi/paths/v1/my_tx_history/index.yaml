@@ -1,0 +1,94 @@
+/api/v2/method:
+  post:
+    operationId: my_tx_history
+    summary: 'Komodo DeFi Framework Method: My Tx History'
+    description: Method description for my_tx_history
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - my_tx_history
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+            required:
+            - method
+            - userpass
+            - mmrpc
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    current_block:
+                      type: number
+                      description: The number of the latest block of coin blockchain
+                    from_id:
+                      type: string
+                      description: The from\_id specified in the request; this value
+                        is null if from\_id was not set
+                    limit:
+                      type: number
+                      description: The limit that was set in the request; note that
+                        the actual number of transactions can differ from the specified
+                        limit (e.g. on the last page)
+                    page_number:
+                      type: number
+                      description: The page\_number that was set in the request
+                    skipped:
+                      type: number
+                      description: The number of skipped records (i.e. the position
+                        of `from_id` in the list + 1); this value is 0 if `from_id`
+                        was not set
+                    sync_status:
+                      $ref: '#/components/schemas/SyncStatus'
+                      description: A standard [SyncStatus](/komodo-defi-framework/api/common_structures/#sync-status)
+                        object. Provides the information that helps to track the progress
+                        of transaction history preloading at background
+                    total:
+                      type: number
+                      description: The total number of transactions available
+                    total_pages:
+                      type: number
+                      description: Total pages available with the selected limit
+                    transactions:
+                      type: array
+                      description: Transactions data
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

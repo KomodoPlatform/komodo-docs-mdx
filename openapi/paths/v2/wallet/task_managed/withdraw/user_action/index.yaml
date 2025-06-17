@@ -1,0 +1,91 @@
+/api/v2/method:
+  post:
+    operationId: task-withdraw-user_action
+    summary: 'Komodo DeFi Framework Method: Withdraw Task User Action'
+    description: Send user action (PIN) to the Trezor device during withdrawal in
+      the Komodo DeFi Framework API.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - task::withdraw::user_action
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  task_id:
+                    description: The identifying number returned when initiating the
+                      withdrawal process.
+                    type: integer
+                  user_action:
+                    description: Object containing the params below
+                    type: object
+                  user_action.action_type:
+                    description: Will be `TrezorPin` for this method
+                    type: string
+                    enum:
+                    - TrezorPin
+                    example: TrezorPin
+                  user_action.pin:
+                    description: When the Trezor device is displaying a grid of numbers
+                      for PIN entry, this param will contain your Trezor pin, as mapped
+                      through your keyboard numpad. See the image below for more information.
+                    type: string
+                required:
+                - task_id
+                - user_action
+                - user_action.action_type
+                - user_action.pin
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: string
+                      description: The outcome of the request.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

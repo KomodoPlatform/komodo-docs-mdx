@@ -1,21 +1,35 @@
 #!/usr/bin/env python3
 """
-File Format Processors - Strategy Pattern Implementation
+Async Processors
 
-Provides unified interface for processing different file formats using the Strategy pattern.
-Each file format has its own specialized processor strategy.
+Provides async processing capabilities for method mapping and file operations.
+Significantly improves performance for large-scale operations.
 """
 
-from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+import asyncio
+import aiofiles
 import json
-import re
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Tuple, Union
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 
-from ..core.logging_utils import get_logger
-from ..mapping.validation import ValidationManager, ValidationLevel
-from ..core.exceptions import FileOperationError, ValidationError
+from ..constants.config import get_config
+from ..utils.logging_utils import get_logger
+from ..utils.file_utils import safe_read_json
+from ..utils.string_utils import (
+    normalize_method_name, extract_method_name_from_mdx_content,
+    extract_method_name_from_yaml_filename
+)
+
+from abc import ABC, abstractmethod
+from typing import Dict, List, Any, Optional, Union
+import re
+import yaml
+
+from ..managers.validation_manager import ValidationManager
+from ..constants.exceptions import FileOperationError, ValidationError
+from ..constants.enums import ValidationLevel
 
 
 @dataclass
@@ -36,6 +50,15 @@ class ProcessingResult:
             self.warnings = []
 
 
+@dataclass
+class ProcessorConfig:
+    """Configuration for file processors."""
+    max_file_size: int = 10 * 1024 * 1024  # 10MB
+    timeout_seconds: int = 30
+    encoding: str = 'utf-8'
+    validation_level: ValidationLevel = ValidationLevel.NORMAL
+
+
 class FileProcessorStrategy(ABC):
     """
     Abstract base class for file processor strategies.
@@ -43,7 +66,7 @@ class FileProcessorStrategy(ABC):
     Defines the interface that all file processors must implement.
     """
     
-    def __init__(self, validation_level: ValidationLevel = ValidationLevel.STANDARD):
+    def __init__(self, validation_level: ValidationLevel = ValidationLevel.NORMAL):
         self.validation_level = validation_level
         self.validator = ValidationManager(validation_level)
         self.logger = get_logger(f"processor-{self.__class__.__name__.lower()}")
@@ -338,8 +361,6 @@ class YAMLProcessorStrategy(FileProcessorStrategy):
         )
         
         try:
-            import yaml
-            
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
@@ -414,7 +435,7 @@ class FileProcessorContext:
     and provides a unified interface for file processing.
     """
     
-    def __init__(self, validation_level: ValidationLevel = ValidationLevel.STANDARD):
+    def __init__(self, validation_level: ValidationLevel = ValidationLevel.NORMAL):
         self.validation_level = validation_level
         self.logger = get_logger("file-processor-context")
         
@@ -497,13 +518,13 @@ class FileProcessorContext:
 
 
 # Convenience functions
-def create_file_processor(validation_level: ValidationLevel = ValidationLevel.STANDARD) -> FileProcessorContext:
+def create_file_processor(validation_level: ValidationLevel = ValidationLevel.NORMAL) -> FileProcessorContext:
     """Create a file processor context with default strategies."""
     return FileProcessorContext(validation_level)
 
 
 def process_single_file(file_path: Union[str, Path], 
-                       validation_level: ValidationLevel = ValidationLevel.STANDARD) -> ProcessingResult:
+                       validation_level: ValidationLevel = ValidationLevel.NORMAL) -> ProcessingResult:
     """Process a single file with automatic processor selection."""
     processor = create_file_processor(validation_level)
     return processor.process_file(file_path) 

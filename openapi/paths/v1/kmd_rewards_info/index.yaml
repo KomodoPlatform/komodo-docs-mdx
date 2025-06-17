@@ -1,0 +1,98 @@
+/api/v2/method:
+  post:
+    operationId: kmd_rewards_info
+    summary: 'Komodo DeFi Framework Method: KMD Rewards Info'
+    description: The kmd_rewards_info method returns information about the active
+      user rewards that can be claimed by an address
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - kmd_rewards_info
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+            required:
+            - method
+            - userpass
+            - mmrpc
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: array
+                      description: The rewards info; each element corresponds to an
+                        unspent output and contains detailed information about the
+                        active user rewards corresponding to it
+                    tx_hash:
+                      type: string
+                      description: The hash of the transaction
+                    height:
+                      type: integer
+                      description: The height of the block in which the transaction
+                        was included (empty if the tx is not mined yet)
+                    output_index:
+                      type: integer
+                      description: The zero-based index of the output in the transaction's
+                        list of outputs
+                    amount:
+                      type: string
+                      description: The transaction output's value
+                    locktime:
+                      type: integer
+                      description: The transaction output's locktime
+                    accrued_rewards:
+                      $ref: '#/components/schemas/AccruedRewards'
+                      description: An [AccruedRewards](/komodo-defi-framework/api/common_structures/wallet/#accrued-rewards)
+                        object representing the amount of accrued rewards or the reason
+                        for their non-existence
+                    accrue_start_at:
+                      type: integer
+                      description: The rewards start to accrue at this time for the
+                        given transaction (empty if the rewards will never accrue
+                        to it)
+                    accrue_stop_at:
+                      type: integer
+                      description: The rewards stop to accrue at this time for the
+                        given transaction (empty if the tx is not mined yet or if
+                        rewards will never accrue to it)
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

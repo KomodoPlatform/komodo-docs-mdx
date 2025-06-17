@@ -1,0 +1,83 @@
+/api/v2/method:
+  post:
+    operationId: task-enable_utxo-init
+    summary: 'Komodo DeFi Framework Method: Enable UTXO Task: Init'
+    description: Task managed activation of UTXO coins like KMD, LTC, BTC & DOGE.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - task::enable_utxo::init
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  ticker:
+                    description: Ticker of the UTXO-based coin you want to enable.
+                    type: string
+                    default: '-'
+                  activation_params:
+                    $ref: '#/components/schemas/ActivationParams'
+                    description: A standard [ActivationParams](/komodo-defi-framework/api/common_structures/activation/#activation-params)
+                      object containing activation configuration parameters for UTXO
+                      coins.
+                  priv_key_policy:
+                    $ref: '#/components/schemas/PrivKeyActivationPolicyEnum'
+                    description: Value can be [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum).
+                required:
+                - ticker
+                - activation_params
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    task_id:
+                      type: integer
+                      description: An identifying number which is used to query task
+                        status.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

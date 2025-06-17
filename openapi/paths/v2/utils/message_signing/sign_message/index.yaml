@@ -1,0 +1,85 @@
+/api/v2/method:
+  post:
+    operationId: sign_message
+    summary: 'Komodo DeFi Framework Method: Sign Message'
+    description: The method in this document allows you to sign messages for all coins
+      supported by Komodo DeFi Framework.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - sign_message
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  coin:
+                    description: The coin to sign a message with.
+                    type: string
+                    default: '`-`'
+                  message:
+                    description: The message you want to sign.
+                    type: string
+                    default: '`-`'
+                  address:
+                    $ref: '#/components/schemas/AddressPath'
+                    description: HD wallets only. A standard [AddressPath](/komodo-defi-framework/api/common_structures/wallet/#address-path)
+                      object. The path to the address for signing the message. If
+                      not provided, the `account_id`, `chain`, and `address_id` will
+                      default to `0`.
+                required:
+                - coin
+                - message
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    signature:
+                      type: string
+                      description: The signature generated for the message.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

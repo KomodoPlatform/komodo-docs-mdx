@@ -1,0 +1,90 @@
+/api/v2/method:
+  post:
+    operationId: task-create_new_account-cancel
+    summary: 'Komodo DeFi Framework Method: Cancel Create New Account Task'
+    description: Cancel a HD account creation task in the Komodo DeFi Framework API.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - task::create_new_account::cancel
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  task_id:
+                    description: The identifying number returned when initiating the
+                      account creation process.
+                    type: integer
+                required:
+                - task_id
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Indicates task cancellation was successful.
+                    error:
+                      type: string
+                      description: An error message to explain what went wrong.
+                    error_path:
+                      type: string
+                      description: An indicator of the class or function which returned
+                        the error.
+                    error_trace:
+                      type: string
+                      description: An indicator of where in the source code the error
+                        was thrown.
+                    error_type:
+                      type: string
+                      description: An enumerated value for the returned error.
+                    error_data:
+                      type: string
+                      description: The input task ID which resulted in the error.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

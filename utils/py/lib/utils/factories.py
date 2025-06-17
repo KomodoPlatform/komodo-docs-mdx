@@ -1,23 +1,48 @@
 #!/usr/bin/env python3
 """
-Factory Pattern Implementation with Dependency Injection
+Factory Components
 
-Provides factory classes for creating different types of generators and processors
-with proper dependency injection for improved modularity and testability.
+Provides factory classes for creating and managing various components
+of the Komodo Documentation Library system.
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, Type, Any, Optional, List, Protocol, Callable
-from dataclasses import dataclass
+import os
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Union, Type, Protocol, Callable
+from dataclasses import dataclass, field
 from enum import Enum
+from abc import ABC, abstractmethod
 
-from ..core.config import KomodoConfig, get_config
-from ..mapping.validation import ValidationManager, ValidationLevel
-from ..core.logging_utils import get_logger
-from .cache import KomodoCache, get_cache
-from .observers import EventPublisher, get_event_publisher
+# Core imports
+from ..constants.config import get_config
+from .logging_utils import get_logger
+
+# Lazy imports to avoid circular dependencies
+def _get_config():
+    """Lazy import of config to avoid circular dependency."""
+    try:
+        from ..constants.config import EnhancedKomodoConfig, get_config
+        return EnhancedKomodoConfig, get_config
+    except ImportError:
+        # Fallback: return None if config not available
+        return None, None
+
+# Try to import logger - fallback if not available
+try:
+    from .logging_utils import get_logger
+except ImportError:
+    # Fallback: return a simple logger stub
+    def get_logger(name="factories"):
+        import logging
+        return logging.getLogger(name)
+
+# Initialize logger
+logger = get_logger("factories")
+
+from ..managers.validation_manager import ValidationManager
+from ..constants.enums import ValidationLevel
+from ..constants.exceptions import ConfigurationError
 # from ..async_support.processors import FileProcessorContext  # Temporarily disabled
-from ..core.exceptions import ConfigurationError
 
 
 class ComponentType(Enum):
@@ -37,45 +62,144 @@ class ComponentType(Enum):
 class ComponentDependencies:
     """Container for component dependencies."""
     
-    config: KomodoConfig
+    config: Any
     logger: Any
-    cache: KomodoCache
-    event_publisher: EventPublisher
     validation_manager: ValidationManager
     
     @classmethod
     def create_default(cls) -> 'ComponentDependencies':
         """Create dependencies with default instances."""
+        EnhancedKomodoConfig, get_config_func = _get_config()
+        get_logger_func = get_logger
+        
+        config = get_config_func() if get_config_func else None
+        logger = get_logger_func("factory") if callable(get_logger_func) else get_logger_func
+        
         return cls(
-            config=get_config(),
-            logger=get_logger("factory"),
-            cache=get_cache(),
-            event_publisher=get_event_publisher(),
+            config=config,
+            logger=logger,
             validation_manager=ValidationManager()
         )
+
+
+@dataclass
+class ComponentCreationSpec:
+    """Specification for creating a component with dependencies."""
+    
+    import_path: str
+    class_name: str
+    init_kwargs: Dict[str, Any] = None
+    dependency_mappings: Dict[str, str] = None
+    
+    def __post_init__(self):
+        """Set default values after initialization."""
+        if self.init_kwargs is None:
+            self.init_kwargs = {}
+        if self.dependency_mappings is None:
+            # Default dependency mappings
+            self.dependency_mappings = {
+                'config': 'config',
+                'validation_manager': 'validation_manager'
+            }
 
 
 class ComponentFactory(ABC):
     """
     Abstract base class for component factories.
     
-    Defines the interface for creating components with dependency injection.
+    CONSOLIDATED: Now uses unified component creation system to eliminate
+    repetitive dependency injection patterns across all creation methods.
     """
     
     def __init__(self, dependencies: ComponentDependencies = None):
         self.dependencies = dependencies or ComponentDependencies.create_default()
         self.logger = self.dependencies.logger
         self._instances: Dict[str, Any] = {}
+        
+        # CONSOLIDATED: Component creation specifications
+        self._component_specs = self._get_component_specs()
     
     @abstractmethod
-    def create(self, component_type: str, **kwargs) -> Any:
-        """Create a component of the specified type."""
+    def _get_component_specs(self) -> Dict[str, ComponentCreationSpec]:
+        """Get component creation specifications for this factory."""
         pass
     
     @abstractmethod
     def get_supported_types(self) -> List[str]:
         """Get list of supported component types."""
         pass
+    
+    def create(self, component_type: str, **kwargs) -> Any:
+        """
+        Create a component of the specified type.
+        
+        CONSOLIDATED: Unified creation logic eliminates duplicate patterns.
+        """
+        if component_type not in self._component_specs:
+            raise ValueError(f"Unknown component type: {component_type}")
+        
+        spec = self._component_specs[component_type]
+        return self._create_component_from_spec(spec, component_type, **kwargs)
+    
+    def _create_component_from_spec(self, spec: ComponentCreationSpec, 
+                                  component_type: str, **kwargs) -> Any:
+        """
+        CONSOLIDATED: Unified component creation from specification.
+        Eliminates duplicate creation and dependency injection logic.
+        """
+        # Import the component class
+        try:
+            module_parts = spec.import_path.rsplit('.', 1)
+            module_path = module_parts[0]
+            
+            # Handle relative imports
+            if module_path.startswith('..'):
+                # Dynamic import for relative modules
+                import importlib
+                full_module_path = f"lib.{module_path[2:]}"  # Remove '..'
+                module = importlib.import_module(full_module_path, package=__package__)
+            else:
+                exec(f"from {spec.import_path} import {spec.class_name}")
+                module = locals()
+                
+        except ImportError as e:
+            self.logger.error(f"Failed to import {spec.class_name} from {spec.import_path}: {e}")
+            raise ConfigurationError(f"Component import failed: {e}", {"component_type": component_type})
+        
+        # Create component with init kwargs
+        try:
+            # Merge spec init_kwargs with runtime kwargs
+            init_kwargs = {**spec.init_kwargs, **kwargs}
+            
+            # Create the component
+            if hasattr(module, spec.class_name):
+                component_class = getattr(module, spec.class_name)
+            else:
+                # Fallback for dynamic imports
+                component_class = getattr(module, spec.class_name)
+            
+            component = component_class(**init_kwargs)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to create {spec.class_name}: {e}")
+            raise ConfigurationError(f"Component creation failed: {e}", {"component_type": component_type})
+        
+        # CONSOLIDATED: Unified dependency injection
+        self._inject_dependencies(component, spec.dependency_mappings)
+        
+        self.logger.debug(f"Created {spec.class_name} for type {component_type}")
+        return component
+    
+    def _inject_dependencies(self, component: Any, dependency_mappings: Dict[str, str]):
+        """
+        CONSOLIDATED: Unified dependency injection logic.
+        Eliminates duplicate injection patterns across all factories.
+        """
+        for component_attr, dependency_key in dependency_mappings.items():
+            if hasattr(self.dependencies, dependency_key):
+                dependency_value = getattr(self.dependencies, dependency_key)
+                setattr(component, component_attr, dependency_value)
+                self.logger.debug(f"Injected {dependency_key} -> {component_attr}")
     
     def get_instance(self, component_type: str, **kwargs) -> Any:
         """Get or create a singleton instance of the component."""
@@ -92,107 +216,76 @@ class ComponentFactory(ABC):
 
 
 class ProcessorFactory(ComponentFactory):
-    """Factory for creating file processors and processing components."""
+    """
+    Factory for creating file processors and processing components.
     
-    def create(self, component_type: str, **kwargs) -> Any:
-        """Create a processor component."""
-        validation_level = kwargs.get('validation_level', ValidationLevel.STANDARD)
-        
-        # if component_type == ComponentType.FILE_PROCESSOR.value:
-        #     return self._create_file_processor(validation_level, **kwargs)
-        
-        # elif component_type == ComponentType.ASYNC_PROCESSOR.value:
-        #     return self._create_async_processor(**kwargs)
-        
-        if component_type == ComponentType.EXTRACTOR.value:
-            return self._create_extractor(**kwargs)
-        
-        elif component_type == ComponentType.DEDUPLICATOR.value:
-            return self._create_deduplicator(**kwargs)
-        
-        else:
-            raise ValueError(f"Unknown processor type: {component_type}")
+    CONSOLIDATED: Uses unified component creation system.
+    """
+    
+    def _get_component_specs(self) -> Dict[str, ComponentCreationSpec]:
+        """
+        CONSOLIDATED: Component specifications eliminate duplicate creation logic.
+        """
+        return {
+            ComponentType.EXTRACTOR.value: ComponentCreationSpec(
+                import_path="..postman.postman_extractors",
+                class_name="MDXExtractor",
+                dependency_mappings={
+                    'config': 'config',
+                    'validation_manager': 'validation_manager'
+                }
+            ),
+            ComponentType.DEDUPLICATOR.value: ComponentCreationSpec(
+                import_path=".deduplicator",
+                class_name="ExampleDeduplicator",
+                dependency_mappings={}
+            )
+        }
     
     def get_supported_types(self) -> List[str]:
         """Get supported processor types."""
         return [
-            # ComponentType.FILE_PROCESSOR.value,  # Temporarily disabled
-            # ComponentType.ASYNC_PROCESSOR.value,  # Temporarily disabled
             ComponentType.EXTRACTOR.value,
             ComponentType.DEDUPLICATOR.value
         ]
-    
-    # def _create_file_processor(self, validation_level: ValidationLevel, **kwargs) -> Any:
-    #     """Create a file processor with dependencies."""
-    #     from ..async_support.processors import FileProcessorContext
-    #     
-    #     processor = FileProcessorContext(validation_level)
-    #     
-    #     # Inject dependencies
-    #     processor.config = self.dependencies.config
-    #     processor.event_publisher = self.dependencies.event_publisher
-    #     
-    #     self.logger.debug(f"Created FileProcessorContext with validation level: {validation_level}")
-    #     return processor
-    
-    # def _create_async_processor(self, **kwargs) -> Any:
-    #     """Create an async processor with dependencies."""
-    #     from ..async_support.async_utils import AsyncFileProcessor
-    #     
-    #     max_workers = kwargs.get('max_workers', self.dependencies.config.processing.max_workers)
-    #     processor = AsyncFileProcessor(max_workers)
-    #     
-    #     # Inject dependencies
-    #     processor.config = self.dependencies.config
-    #     processor.event_publisher = self.dependencies.event_publisher
-    #     
-    #     self.logger.debug(f"Created AsyncFileProcessor with {max_workers} workers")
-    #     return processor
-    
-    def _create_extractor(self, **kwargs) -> Any:
-        """Create an extractor with dependencies."""
-        from ..scanning.extractors import MDXExtractor
-        
-        extractor = MDXExtractor()
-        
-        # Inject dependencies
-        extractor.config = self.dependencies.config
-        extractor.validation_manager = self.dependencies.validation_manager
-        extractor.event_publisher = self.dependencies.event_publisher
-        
-        self.logger.debug("Created MDXExtractor")
-        return extractor
-    
-    def _create_deduplicator(self, **kwargs) -> Any:
-        """Create a deduplicator with dependencies."""
-        from .deduplicator import ExampleDeduplicator
-        
-        deduplicator = ExampleDeduplicator()
-        
-        # Inject dependencies
-        deduplicator.cache = self.dependencies.cache
-        deduplicator.event_publisher = self.dependencies.event_publisher
-        
-        self.logger.debug("Created ExampleDeduplicator")
-        return deduplicator
 
 
 class GeneratorFactory(ComponentFactory):
-    """Factory for creating generators (Postman, OpenAPI, etc.)."""
+    """
+    Factory for creating generators (Postman, OpenAPI, etc.).
     
-    def create(self, component_type: str, **kwargs) -> Any:
-        """Create a generator component."""
-        if component_type == ComponentType.POSTMAN_GENERATOR.value:
-            return self._create_postman_generator(**kwargs)
-        
-        elif component_type == ComponentType.OPENAPI_MANAGER.value:
-            return self._create_openapi_manager(**kwargs)
-        
-        elif component_type == ComponentType.METHOD_MAPPER.value:
-            return self._create_method_mapper(**kwargs)
-        
-        else:
-            raise ValueError(f"Unknown generator type: {component_type}")
+    CONSOLIDATED: Uses unified component creation system.
+    """
+    
+    def _get_component_specs(self) -> Dict[str, ComponentCreationSpec]:
+        """
+        CONSOLIDATED: Component specifications eliminate duplicate creation logic.
+        """
+        return {
+            ComponentType.POSTMAN_GENERATOR.value: ComponentCreationSpec(
+                import_path="..postman.postman_consolidated",
+                class_name="PostmanCollectionGenerator",
+                dependency_mappings={
+                    'config': 'config',
+                    'validation_manager': 'validation_manager'
+                }
+            ),
+            ComponentType.OPENAPI_MANAGER.value: ComponentCreationSpec(
+                import_path="..openapi.openapi_manager",
+                class_name="OpenAPIManager",
+                dependency_mappings={
+                    'config': 'config',
+                    'validation_manager': 'validation_manager'
+                }
+            ),
+            ComponentType.METHOD_MAPPER.value: ComponentCreationSpec(
+                import_path="..managers.method_mapping_manager",
+                class_name="MethodMappingManager",
+                dependency_mappings={
+                    'config': 'config'
+                }
+            )
+        }
     
     def get_supported_types(self) -> List[str]:
         """Get supported generator types."""
@@ -201,62 +294,29 @@ class GeneratorFactory(ComponentFactory):
             ComponentType.OPENAPI_MANAGER.value,
             ComponentType.METHOD_MAPPER.value
         ]
-    
-    def _create_postman_generator(self, **kwargs) -> Any:
-        """Create a Postman generator with dependencies."""
-        from ..postman.postman import PostmanCollectionGenerator
-        
-        generator = PostmanCollectionGenerator()
-        
-        # Inject dependencies
-        generator.config = self.dependencies.config
-        generator.cache = self.dependencies.cache
-        generator.event_publisher = self.dependencies.event_publisher
-        generator.validation_manager = self.dependencies.validation_manager
-        
-        self.logger.debug("Created PostmanCollectionGenerator")
-        return generator
-    
-    def _create_openapi_manager(self, **kwargs) -> Any:
-        """Create an OpenAPI manager with dependencies."""
-        from ..openapi.openapi_manager import OpenAPIManager
-        
-        manager = OpenAPIManager()
-        
-        # Inject dependencies
-        manager.config = self.dependencies.config
-        manager.cache = self.dependencies.cache
-        manager.event_publisher = self.dependencies.event_publisher
-        manager.validation_manager = self.dependencies.validation_manager
-        
-        self.logger.debug("Created OpenAPIManager")
-        return manager
-    
-    def _create_method_mapper(self, **kwargs) -> Any:
-        """Create a method mapper with dependencies."""
-        from ..mapping.mapping import MethodMapper
-        
-        mapper = MethodMapper()
-        
-        # Inject dependencies
-        mapper.config = self.dependencies.config
-        mapper.cache = self.dependencies.cache
-        mapper.event_publisher = self.dependencies.event_publisher
-        
-        self.logger.debug("Created MethodMapper")
-        return mapper
 
 
 class UtilityFactory(ComponentFactory):
-    """Factory for creating utility components."""
+    """
+    Factory for creating utility components.
     
-    def create(self, component_type: str, **kwargs) -> Any:
-        """Create a utility component."""
-        if component_type == ComponentType.VALIDATION_MANAGER.value:
-            return self._create_validation_manager(**kwargs)
-        
-        else:
-            raise ValueError(f"Unknown utility type: {component_type}")
+    CONSOLIDATED: Uses unified component creation system.
+    """
+    
+    def _get_component_specs(self) -> Dict[str, ComponentCreationSpec]:
+        """
+        CONSOLIDATED: Component specifications eliminate duplicate creation logic.
+        """
+        return {
+            ComponentType.VALIDATION_MANAGER.value: ComponentCreationSpec(
+                import_path="..managers.validation_manager",
+                class_name="ValidationManager",
+                init_kwargs={'validation_level': ValidationLevel.NORMAL},  # Default level
+                dependency_mappings={
+                    'config': 'config'
+                }
+            )
+        }
     
     def get_supported_types(self) -> List[str]:
         """Get supported utility types."""
@@ -264,25 +324,26 @@ class UtilityFactory(ComponentFactory):
             ComponentType.VALIDATION_MANAGER.value
         ]
     
-    def _create_validation_manager(self, **kwargs) -> ValidationManager:
-        """Create a validation manager with dependencies."""
-        validation_level = kwargs.get('validation_level', ValidationLevel.STANDARD)
-        manager = ValidationManager(validation_level)
+    def create(self, component_type: str, **kwargs) -> Any:
+        """
+        Create utility component with validation level support.
         
-        # Inject dependencies
-        manager.config = self.dependencies.config
-        manager.event_publisher = self.dependencies.event_publisher
-        
-        self.logger.debug(f"Created ValidationManager with level: {validation_level}")
-        return manager
+        ENHANCED: Supports validation_level parameter for ValidationManager.
+        """
+        if component_type == ComponentType.VALIDATION_MANAGER.value:
+            # Handle validation_level parameter specially
+            validation_level = kwargs.get('validation_level', ValidationLevel.NORMAL)
+            spec = self._component_specs[component_type]
+            spec.init_kwargs['validation_level'] = validation_level
+            
+        return super().create(component_type, **kwargs)
 
 
 class MasterFactory:
     """
     Master factory that coordinates all component factories.
     
-    Provides a unified interface for creating any type of component
-    with proper dependency injection.
+    CONSOLIDATED: Simplified coordination logic using unified factory system.
     """
     
     def __init__(self, dependencies: ComponentDependencies = None):
@@ -298,7 +359,7 @@ class MasterFactory:
         self.factory_map: Dict[str, ComponentFactory] = {}
         self._build_factory_map()
         
-        self.logger.debug("MasterFactory initialized with all specialized factories")
+        self.logger.debug("MasterFactory initialized with consolidated factory system")
     
     def _build_factory_map(self):
         """Build mapping of component types to factories."""
@@ -315,7 +376,7 @@ class MasterFactory:
         factory = self.factory_map[component_type]
         component = factory.create(component_type, **kwargs)
         
-        self.logger.debug(f"Created component {component_type} using {factory.__class__.__name__}")
+        self.logger.debug(f"Created component {component_type} using unified factory system")
         return component
     
     def get_instance(self, component_type: str, **kwargs) -> Any:
@@ -336,24 +397,30 @@ class MasterFactory:
             factory.clear_instances()
         self.logger.info("Cleared all cached instances")
     
-    def create_complete_pipeline(self, validation_level: ValidationLevel = ValidationLevel.STANDARD) -> Dict[str, Any]:
-        """Create a complete processing pipeline with all components."""
+    def create_complete_pipeline(self, validation_level: ValidationLevel = ValidationLevel.NORMAL) -> Dict[str, Any]:
+        """
+        Create a complete processing pipeline with all components.
+        
+        CONSOLIDATED: Uses unified factory system for pipeline creation.
+        """
         pipeline = {}
         
         try:
-            # Create core components
-            pipeline['file_processor'] = self.create(ComponentType.FILE_PROCESSOR.value, 
-                                                   validation_level=validation_level)
-            pipeline['async_processor'] = self.create(ComponentType.ASYNC_PROCESSOR.value)
-            pipeline['method_mapper'] = self.create(ComponentType.METHOD_MAPPER.value)
-            pipeline['postman_generator'] = self.create(ComponentType.POSTMAN_GENERATOR.value)
-            pipeline['openapi_manager'] = self.create(ComponentType.OPENAPI_MANAGER.value)
-            pipeline['validation_manager'] = self.create(ComponentType.VALIDATION_MANAGER.value,
-                                                       validation_level=validation_level)
-            pipeline['extractor'] = self.create(ComponentType.EXTRACTOR.value)
-            pipeline['deduplicator'] = self.create(ComponentType.DEDUPLICATOR.value)
+            # Create available components (skip disabled ones)
+            available_components = [
+                (ComponentType.METHOD_MAPPER.value, {}),
+                (ComponentType.POSTMAN_GENERATOR.value, {}),
+                (ComponentType.OPENAPI_MANAGER.value, {}),
+                (ComponentType.VALIDATION_MANAGER.value, {'validation_level': validation_level}),
+                (ComponentType.EXTRACTOR.value, {}),
+                (ComponentType.DEDUPLICATOR.value, {})
+            ]
             
-            self.logger.info(f"Created complete pipeline with {len(pipeline)} components")
+            for component_type, create_kwargs in available_components:
+                if component_type in self.factory_map:
+                    pipeline[component_type.replace('_', '')] = self.create(component_type, **create_kwargs)
+            
+            self.logger.info(f"Created complete pipeline with {len(pipeline)} components using unified system")
             return pipeline
             
         except Exception as e:
@@ -365,11 +432,12 @@ class DependencyInjector:
     """
     Dependency injection container for managing component dependencies.
     
-    Provides a clean way to inject dependencies into components.
+    ENHANCED: Works with consolidated factory system.
     """
     
     def __init__(self):
-        self.logger = get_logger("dependency-injector")
+        get_logger_func = get_logger
+        self.logger = get_logger_func("dependency-injector") if callable(get_logger_func) else get_logger_func
         self._dependencies: Dict[str, Any] = {}
         self._factories: Dict[Type, Callable] = {}
     
@@ -398,20 +466,24 @@ class DependencyInjector:
         raise ValueError(f"No dependency registered for: {interface_name}")
     
     def inject_dependencies(self, component: Any, dependencies: Dict[str, Type]):
-        """Inject dependencies into a component."""
+        """
+        Inject dependencies into a component.
+        
+        ENHANCED: Integrates with consolidated factory system.
+        """
         for attr_name, interface in dependencies.items():
             dependency = self.get_dependency(interface)
             setattr(component, attr_name, dependency)
-            self.logger.debug(f"Injected {interface.__name__} into {component.__class__.__name__}.{attr_name}")
+            self.logger.debug(f"Injected {interface.__name__} -> {attr_name}")
 
 
-# Global factory instances
+# CONSOLIDATED: Simplified convenience functions that use unified factory system
 _master_factory: Optional[MasterFactory] = None
 _dependency_injector: Optional[DependencyInjector] = None
 
 
 def get_master_factory(dependencies: ComponentDependencies = None) -> MasterFactory:
-    """Get the global master factory instance."""
+    """Get or create master factory instance."""
     global _master_factory
     if _master_factory is None:
         _master_factory = MasterFactory(dependencies)
@@ -419,38 +491,33 @@ def get_master_factory(dependencies: ComponentDependencies = None) -> MasterFact
 
 
 def get_dependency_injector() -> DependencyInjector:
-    """Get the global dependency injector instance."""
+    """Get or create dependency injector instance."""
     global _dependency_injector
     if _dependency_injector is None:
         _dependency_injector = DependencyInjector()
     return _dependency_injector
 
 
-# Convenience functions for common component creation
-def create_file_processor(validation_level: ValidationLevel = ValidationLevel.STANDARD) -> Any:
-    """Create a file processor with default dependencies."""
-    return get_master_factory().create(ComponentType.FILE_PROCESSOR.value, validation_level=validation_level)
-
-
+# CONSOLIDATED: Simplified convenience functions eliminate duplicate factory logic
 def create_postman_generator() -> Any:
-    """Create a Postman generator with default dependencies."""
+    """Create Postman generator using unified factory system."""
     return get_master_factory().create(ComponentType.POSTMAN_GENERATOR.value)
 
 
 def create_method_mapper() -> Any:
-    """Create a method mapper with default dependencies."""
+    """Create method mapper using unified factory system."""
     return get_master_factory().create(ComponentType.METHOD_MAPPER.value)
 
 
-def create_complete_pipeline(validation_level: ValidationLevel = ValidationLevel.STANDARD) -> Dict[str, Any]:
-    """Create a complete processing pipeline."""
+def create_complete_pipeline(validation_level: ValidationLevel = ValidationLevel.NORMAL) -> Dict[str, Any]:
+    """Create complete pipeline using unified factory system."""
     return get_master_factory().create_complete_pipeline(validation_level)
 
 
 def reset_factories():
-    """Reset all factory instances (useful for testing)."""
+    """Reset all factory instances."""
     global _master_factory, _dependency_injector
     if _master_factory:
         _master_factory.clear_all_instances()
     _master_factory = None
-    _dependency_injector = None 
+    _dependency_injector = None

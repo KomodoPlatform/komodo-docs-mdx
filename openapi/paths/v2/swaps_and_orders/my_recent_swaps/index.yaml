@@ -1,0 +1,129 @@
+/api/v2/method:
+  post:
+    operationId: my_recent_swaps
+    summary: 'Komodo DeFi Framework Method: My Recent Swaps'
+    description: The my_recent_swaps method returns the data of the most recent atomic
+      swaps executed by the Komodo DeFi Framework API node.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - my_recent_swaps
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  from_timestamp:
+                    description: Start timestamp in UNIX format
+                    type: integer
+                    default: '-'
+                  from_uuid:
+                    description: The UUID from which to start fetching results
+                    type: string
+                    default: '-'
+                  limit:
+                    description: The maximum number of results to return
+                    type: integer
+                    default: '`10`'
+                  my_coin:
+                    description: Coin being used by you for the swap/trade.
+                    type: string
+                    default: '-'
+                  other_coin:
+                    description: Coin you are trading against
+                    type: string
+                    default: '-'
+                  page_number:
+                    description: Offset for paginated results
+                    type: integer
+                    default: '`1`'
+                  to_timestamp:
+                    description: End timestamp in UNIX format
+                    type: integer
+                    default: '-'
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    found_records:
+                      type: integer
+                      description: The number of returned swaps.
+                    from_uuid:
+                      type: string
+                      description: The from\_uuid that was set in the request; this
+                        value is null if nothing was set.
+                    limit:
+                      type: integer
+                      description: The limit that was set in the request; note that
+                        the actual number of swaps can differ from the specified limit
+                        (e.g. on the last page).
+                    page_number:
+                      type: integer
+                      description: The page\_number that was set in the request; if
+                        both `page_number` and `from_uuid` are not set in request
+                        it will default to `1`; if `from_uuid` is present in request
+                        this value will be always null.
+                    skipped:
+                      type: integer
+                      description: The number of skipped records (i.e. the position
+                        of `from_uuid` in the list + 1 or `(page_number - 1) * limit`;
+                        the value is 0 if `from_uuid` or `page_number` were not set
+                        or `page_number` is 1).
+                    swaps:
+                      $ref: '#/components/schemas/SwapStatus'
+                      description: A list of standard [SwapStatus](/komodo-defi-framework/api/common_structures/swaps/#swap-status)
+                        objects.
+                    total:
+                      type: integer
+                      description: Total number of swaps available with the selected
+                        filters.
+                    total_pages:
+                      type: integer
+                      description: Total pages available with the selected filters
+                        and limit.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

@@ -1,0 +1,386 @@
+CancelBy:
+  type: object
+  properties:
+    Type:
+      description: '`All` to cancel all orders; `Pair` to cancel all orders for specific
+        coin pairs; `Coin` to cancel all orders for a specific coin'
+      type: string
+    data:
+      description: additional data the cancel condition; present with `Pair` and `Coin`
+        types
+      type: object
+    data.base:
+      description: base coin of the pair; `Pair` type only
+      type: string
+    data.rel:
+      description: rel coin of the pair; `Pair` type only
+      type: string
+    data.ticker:
+      description: order is cancelled if it uses `ticker` as base or rel; `Coin` type
+        only
+      type: string
+  required:
+  - Type
+  description: Schema definition for CancelBy
+ConfSettings:
+  type: object
+  properties:
+    base_confs:
+      description: Number of required confirmations on the base coin's blockchain
+        for a transaction to complete an atomic swap event.
+      type: number
+    base_nota:
+      description: Whether [dPoW notarization](https://komodoplatform.com/en/blog/dpow-demystified/)
+        is required on the base coin's blockchain for a transaction to complete an
+        atomic swap event.
+      type: boolean
+    rel_confs:
+      description: Number of required confirmations on the rel coin's blockchain for
+        a transaction to complete an atomic swap event.
+      type: number
+    rel_nota:
+      description: Whether [dPoW notarization](https://komodoplatform.com/en/blog/dpow-demystified/)
+        is required on the rel coin's blockchain for a transaction to complete an
+        atomic swap event.
+      type: boolean
+  required:
+  - base_confs
+  - base_nota
+  - rel_confs
+  - rel_nota
+  description: Schema definition for ConfSettings
+OrderDataV1:
+  type: object
+  properties:
+    coin:
+      description: The ticker of the coin
+      type: string
+    address:
+      description: The address offering the trade
+      type: string
+    price:
+      description: The price the user is willing to buy or sell per one unit of the
+        coin from request
+      type: string
+      enum:
+      - decimal
+    price_rat:
+      $ref: '#/components/schemas/RationalValue'
+      description: The price represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+        object.
+    price_fraction:
+      $ref: '#/components/schemas/FractionalValue'
+      description: The price represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+        object.
+    maxvolume:
+      description: The maximum amount of `base` the offer provider is willing to sell
+      type: string
+      enum:
+      - decimal
+    max_volume_rat:
+      $ref: '#/components/schemas/RationalValue'
+      description: The max volume represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+        object.
+    max_volume_fraction:
+      $ref: '#/components/schemas/FractionalValue'
+      description: The max volume represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+        object.
+    min_volume:
+      description: The minimum amount of `base` coin the offer provider is willing
+        to sell
+      type: string
+      enum:
+      - decimal
+    min_volume_rat:
+      $ref: '#/components/schemas/RationalValue'
+      description: The min volume represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+        object.
+    min_volume_fraction:
+      $ref: '#/components/schemas/FractionalValue'
+      description: The min volume represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+        object.
+    pubkey:
+      description: The pubkey of the offer provider
+      type: string
+    age:
+      description: The age of the offer (in seconds)
+      type: number
+    zcredits:
+      description: The zeroconf deposit amount (deprecated)
+      type: number
+    netid:
+      description: The id of the network on which the request is made
+      type: number
+    uuid:
+      description: The uuid of order
+      type: string
+    is_mine:
+      description: Whether the order is placed by me
+      type: boolean
+    base_max_volume:
+      description: The maximum amount of `base` coin the offer provider is willing
+        to buy or sell
+      type: string
+      enum:
+      - decimal
+    base_max_volume_rat:
+      $ref: '#/components/schemas/RationalValue'
+      description: The `base_max_volume` represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+        object.
+    base_max_volume_fraction:
+      $ref: '#/components/schemas/FractionalValue'
+      description: The `base_max_volume` represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+        object.
+    base_min_volume:
+      description: The minimum amount of `base` coin the offer provider is willing
+        to buy or sell
+      type: string
+      enum:
+      - decimal
+    base_min_volume_rat:
+      $ref: '#/components/schemas/RationalValue'
+      description: The `base_min_volume` represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+        object.
+    base_min_volume_fraction:
+      $ref: '#/components/schemas/FractionalValue'
+      description: The `base_min_volume` represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+        object.
+    base_confs:
+      description: The confirmations settings of `base` coin set by the offer provider
+      type: number
+    base_nota:
+      description: The notarisation settings of `base` coin set by the offer provider
+      type: boolean
+    rel_max_volume:
+      description: The maximum amount of `rel` coin the offer provider is willing
+        to buy or sell
+      type: string
+      enum:
+      - decimal
+    rel_max_volume_rat:
+      $ref: '#/components/schemas/RationalValue'
+      description: The `rel_max_volume` max volume represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+        object.
+    rel_max_volume_fraction:
+      $ref: '#/components/schemas/FractionalValue'
+      description: The `rel_max_volume` max volume represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+        object.
+    rel_min_volume:
+      description: The minimum amount of `rel` coin the offer provider is willing
+        to buy or sell
+      type: string
+      enum:
+      - decimal
+    rel_min_volume_rat:
+      $ref: '#/components/schemas/RationalValue'
+      description: The `rel_min_volume` represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+        object.
+    rel_min_volume_fraction:
+      $ref: '#/components/schemas/FractionalValue'
+      description: The `rel_min_volume` represented as a standard [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+        object.
+    rel_confs:
+      description: The confirmations settings of `rel` coin set by the offer provider
+      type: number
+    rel_nota:
+      description: The notarisation settings of `rel` coin set by the offer provider
+      type: boolean
+    original_tickers:
+      description: Tickers included in response when `orderbook_ticker` is configured
+        for the queried coin in `coins` file
+      type: string
+      enum:
+      - string
+  description: Compare and confirm the differences between this object in v1 and v2
+    methods.
+OrderDataV2:
+  type: object
+  properties:
+    coin:
+      description: The ticker of the coin
+      type: string
+    address:
+      $ref: '#/components/schemas/OrderAddress'
+      description: A standard [OrderAddress](/komodo-defi-framework/api/common_structures/orders/#order-address)
+        object.
+    price:
+      $ref: '#/components/schemas/NumericFormatsValue'
+      description: A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value)
+        object representing the coin price.
+    base_min_volume:
+      $ref: '#/components/schemas/NumericFormatsValue'
+      description: A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value)
+        object representing the minimum base volume.
+    base_max_volume:
+      $ref: '#/components/schemas/NumericFormatsValue'
+      description: A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value)
+        object representing the maximum base volume.
+    base_max_volume_aggr:
+      $ref: '#/components/schemas/NumericFormatsValue'
+      description: Orderbook (v2) only. A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value)
+        object representing the maximum aggregated base amount at the specified price.
+        The sum of max base volumes of the current order and all orders with a worse
+        price.
+    rel_min_volume:
+      $ref: '#/components/schemas/NumericFormatsValue'
+      description: A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value)
+        object representing the minimum rel volume.
+    rel_max_volume:
+      $ref: '#/components/schemas/NumericFormatsValue'
+      description: A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value)
+        object representing the maximum rel volume.
+    rel_max_volume_aggr:
+      $ref: '#/components/schemas/NumericFormatsValue'
+      description: Orderbook (v2) only. A standard [NumericFormatsValue](/komodo-defi-framework/api/common_structures/#numeric-formats-value)
+        object representing the maximum aggregated rel amount at the specified price.
+        The sum of max rel volumes of the current order and all orders with a worse
+        price.
+    pubkey:
+      description: The pubkey of the offer provider
+      type: string
+    uuid:
+      description: The uuid of order
+      type: string
+    is_mine:
+      description: Whether the order is placed by me
+      type: boolean
+    conf_settings:
+      $ref: '#/components/schemas/ConfSettings'
+      description: A standard [ConfSettings](/komodo-defi-framework/api/common_structures/orders/#conf-settings)
+        object.
+  description: Compare and confirm the differences between this object in v1 and v2
+    methods.
+OrderStatusData:
+  type: object
+  properties:
+    base:
+      description: base currency
+      type: string
+    rel:
+      description: rel currency
+      type: string
+    price:
+      description: order price as decimal number
+      type: number
+    price_rat:
+      description: order price as rational number
+      type: number
+    max_base_vol:
+      description: Maximum trade volume
+      type: number
+    max_base_vol_rat:
+      description: Maximum trade volume as rational number
+      type: number
+    min_base_vol:
+      description: Minimum trade volume
+      type: number
+    min_base_vol_rat:
+      description: Minimum trade volume as rational number
+      type: number
+    created_at:
+      description: Timestamp of order creation
+      type: number
+    updated_at:
+      description: Timestamp of last order update
+      type: number
+    matches:
+      description: UUIDS of matching orders
+      type: array
+      items:
+        type: string
+    started_swaps:
+      description: UUIDS of swaps started
+      type: array
+      items:
+        type: string
+    uuid:
+      description: UUID of this order
+      type: string
+    conf_settings:
+      description: Confirmation / Notarisation settings for order
+      type: object
+    base_orderbook_ticker:
+      description: The ticker of the base currency if `orderbook_ticker` is configured
+        for the base currency in `coins` file. If not defined, will return a null
+        value.
+      type: string
+    rel_orderbook_ticker:
+      description: The ticker of the rel currency if `orderbook_ticker` is configured
+        for the rel currency in `coins` file. If not defined, will return a null value.
+      type: string
+    cancellable:
+      description: '`true` if order is in a state which it can be cancelled. `false`
+        if not (e.g. swap is in progress)'
+      type: boolean
+    cancellation_reason:
+      description: '`Cancelled` indicates order was withdrawn by user. `Fulfilled`
+        indicates order was swapped successfully. `TimedOut` indicates a taker order
+        with type `FillOrKill` expired before matching.'
+      type: string
+    available_amount:
+      description: Funds available for order to be matched against, taking into account
+        current spendable balance and `max_volume`
+      type: string
+  description: Schema definition for OrderStatusData
+OrderType:
+  type: object
+  properties:
+    Type:
+      description: 'There are two types from which to choose: `GoodTillCancelled`
+        and `FillOrKill`. The `GoodTillCancelled` order is automatically converted
+        to a `maker` order if the order is not matched in 30 seconds, and this `maker`
+        order stays in the orderbook until explicitly cancelled. On the other hand,
+        a `FillOrKill` order is cancelled if it is not matched within 30 seconds.
+        The default type is `GoodTillCancelled`'
+      type: string
+  required:
+  - Type
+  description: Schema definition for OrderType
+RequestBy:
+  type: object
+  properties:
+    type:
+      description: Defines whether requesting by `volume` or by `number`.
+      type: integer
+    value:
+      description: If `type` is `volume`, the amount of `coin` (defined in the parent
+        object) the user is willing to buy or sell. If `type` is `number`, the number
+        of best price trades to return.
+      type: string
+  required:
+  - type
+  - value
+  description: Schema definition for RequestBy
+PairDepth:
+  type: object
+  properties:
+    pair:
+      description: Trading pair name
+      type: string
+    asks:
+      description: Array of ask price levels
+      type: array
+      items:
+        type: string
+    bids:
+      description: Array of bid price levels
+      type: array
+      items:
+        type: string
+  required:
+  - pair
+  - asks
+  - bids
+  description: Used in [orderbook\_depth](/komodo-defi-framework/api/legacy/orderbook_depth/)
+    responses to represent the depth information for a trading pair.
+DepthInfo:
+  type: object
+  properties:
+    asks:
+      description: The number of asks for this trading pair
+      type: number
+    bids:
+      description: The number of bids for this trading pair
+      type: number
+  description: Used within [PairDepth](/komodo-defi-framework/api/common_structures/orders/#pair-depth)
+    objects to represent ask and bid counts.

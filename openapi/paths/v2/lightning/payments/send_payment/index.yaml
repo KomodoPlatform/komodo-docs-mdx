@@ -1,0 +1,86 @@
+/api/v2/method:
+  post:
+    operationId: lightning-payments-send_payment
+    summary: 'Komodo DeFi Framework Method: Send Lightning Payment'
+    description: Send a Lightning Network payment using the Komodo DeFi Framework
+      API.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - lightning::payments::send_payment
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  coin:
+                    description: The ticker of the coin to send payment from.
+                    type: string
+                  invoice:
+                    description: The Lightning invoice to pay.
+                    type: string
+                  amount:
+                    description: Amount to pay (if not specified in invoice).
+                    type: string
+                required:
+                - coin
+                - invoice
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    payment_hash:
+                      type: string
+                      description: The hash of the payment.
+                    status:
+                      type: string
+                      description: Status of the payment.
+                    id:
+                      type: string
+                      description: Request identifier.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

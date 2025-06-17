@@ -1,0 +1,865 @@
+#!/usr/bin/env python3
+"""
+Method Mapping Manager
+
+Centralized manager for mapping API methods to their corresponding MDX and YAML files.
+Uses enhanced configuration system and specialized components for scanning, 
+normalization, and reporting.
+
+Moved from mapping/mapping.py to managers/ for better organization.
+"""
+
+import os
+import json
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Any
+import glob
+import asyncio
+
+# Import enhanced components
+from .method_mapping import MethodMapping
+from ..scanning.mdx_scanner import UnifiedScanner
+from ..utils import (
+    convert_filesystem_to_api_format,
+    find_best_match, get_logger
+)
+from ..utils.path_utils import EnhancedPathMapper
+from ..utils.postman_collection_parser import PostmanCollectionParser
+from ..utils.logging_utils import get_logger
+from ..constants.config import EnhancedKomodoConfig, get_config
+
+
+
+class MethodMappingManager:
+    """
+    Centralized manager for API method mapping operations.
+    
+    Coordinates scanning, normalization, and reporting of API method mappings
+    across different file types (MDX, YAML, JSON examples).
+    """
+    
+    def __init__(self, config: Optional[EnhancedKomodoConfig] = None, verbose: bool = True):
+        self.config = config or get_config()
+        self.verbose = verbose
+        self.logger = get_logger("method-mapping-manager")
+        
+        # Initialize enhanced components
+        self.path_mapper = EnhancedPathMapper(self.config)
+        self.postman_parser = PostmanCollectionParser(verbose)
+        self._reporter = None  # Lazy loading to avoid circular imports
+        
+        # Configure directories for UnifiedScanner using enhanced config
+        self.base_directories = self._build_scanner_directories()
+        self.unified_scanner = UnifiedScanner(self.base_directories, verbose)
+        
+        # Add async processor for performance improvements
+        self.async_processor = None
+        
+        if self.verbose:
+            self.logger.info("🔧 MethodMappingManager initialized with flexible configuration")
+            self.logger.info("🔗 Postman collection parser enabled for hotlink generation")
+    
+    @property
+    def reporter(self):
+        """Lazy loading property for MappingReporter to avoid circular imports."""
+        if self._reporter is None:
+            from ..reporting.mapping_reporter import MappingReporter
+            self._reporter = MappingReporter(self.verbose)
+        return self._reporter
+    
+    def _build_scanner_directories(self) -> Dict[str, str]:
+        """Build directory configuration for UnifiedScanner from enhanced config."""
+        directories = {}
+        
+        # Get all supported versions
+        supported_versions = self.path_mapper.get_supported_versions(include_deprecated=True)
+        
+        for version in supported_versions:
+            try:
+                # Build directory mappings for each version and file type (already resolved)
+                mdx_dir = self.config.get_directory_for_version_and_type(version, "mdx")
+                yaml_dir = self.config.get_directory_for_version_and_type(version, "yaml")
+                json_dir = self.config.get_directory_for_version_and_type(version, "json")
+                
+                # Use naming convention expected by UnifiedScanner
+                version_suffix = "v1" if version == "v1" else "v2"  # Map v2-dev to v2 for scanner
+                directories.update({
+                    f'mdx_{version_suffix}': mdx_dir,
+                    f'yaml_{version_suffix}': yaml_dir,
+                    f'json_{version_suffix}': json_dir
+                })
+                
+            except Exception as e:
+                if self.verbose:
+                    self.logger.warning(f"Could not configure directories for version {version}: {e}")
+        
+        return directories
+    
+    def _get_async_processor(self):
+        """Lazy initialization of async processor."""
+        if self.async_processor is None:
+            from ..async_support import AsyncMethodProcessor
+            self.async_processor = AsyncMethodProcessor()
+        return self.async_processor
+
+    def _is_overview_method(self, method_name: str, mdx_path: str) -> bool:
+        """
+        Check if a method corresponds to an overview page by examining the MDX content.
+        
+        Args:
+            method_name: The method name to check
+            mdx_path: Path to the MDX file
+            
+        Returns:
+            True if this is an overview page, False otherwise
+        """
+        if not mdx_path or not os.path.exists(mdx_path):
+            return False
+            
+        try:
+            with open(mdx_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            # Use the existing is_overview_page function
+            from ..utils.string_utils import is_overview_page
+            return is_overview_page(content)
+            
+        except Exception as e:
+            if self.verbose:
+                self.logger.warning(f"Could not check overview status for {method_name}: {e}")
+            return False
+
+    async def create_unified_mapping_async(self) -> Dict[str, Dict[str, MethodMapping]]:
+        """Create unified mapping asynchronously - much faster than synchronous version."""
+        if self.verbose:
+            print("🔄 Creating unified mapping asynchronously (faster performance)...")
+        
+        processor = self._get_async_processor()
+        
+        # Build directory configurations
+        mdx_dirs = {}
+        yaml_dirs = {}  
+        json_dirs = {}
+        
+        supported_versions = self.path_mapper.get_supported_versions(include_deprecated=True)
+        
+        for version in supported_versions:
+            try:
+                scanner_version = "v1" if version == "v1" else "v2"
+                if scanner_version == "v1":
+                    mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_legacy)
+                    yaml_dirs[version] = self.config._resolve_path(self.config.directories.yaml_v1)
+                    json_dirs[f"json_{version}"] = self.config._resolve_path(self.config.directories.json_v1)
+                else:
+                    mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_v2)
+                    yaml_dirs[version] = self.config._resolve_path(self.config.directories.yaml_v2)
+                    json_dirs[f"json_{version}"] = self.config._resolve_path(self.config.directories.json_v2)
+            except Exception as e:
+                self.logger.warning(f"Could not configure directories for version {version}: {e}")
+        
+        # Load canonical method names
+        canonical_methods = self._load_canonical_methods()
+        
+        # Scan all file types concurrently using AsyncMethodProcessor
+        mdx_task = processor.scan_mdx_files_async(mdx_dirs)
+        yaml_task = processor.scan_yaml_files_async(yaml_dirs) 
+        example_task = processor.scan_json_examples_async(json_dirs)
+        
+        # Wait for all scans to complete concurrently
+        mdx_mappings, yaml_mappings, example_mappings = await asyncio.gather(
+            mdx_task, yaml_task, example_task
+        )
+        
+        # Rest of the mapping logic remains the same
+        unified = {}
+        
+        for version in supported_versions:
+            unified[version] = {}
+            
+            # Use canonical methods as the authoritative source
+            canonical_method_list = canonical_methods.get(version, [])
+            
+            # Convert discovered methods from filesystem format to canonical format
+            canonical_discovered_methods = set()
+            for method in mdx_mappings.get(version, {}).keys():
+                canonical_discovered_methods.add(convert_filesystem_to_api_format(method))
+            for method in yaml_mappings.get(version, {}).keys():
+                canonical_discovered_methods.add(convert_filesystem_to_api_format(method))
+            for method in example_mappings.get(version, {}).keys():
+                canonical_discovered_methods.add(convert_filesystem_to_api_format(method))
+            
+            # Combine canonical methods with canonical discovered methods
+            all_methods = set(canonical_method_list) | canonical_discovered_methods
+            
+            if self.verbose:
+                print(f"📋 Processing {len(all_methods)} {version.upper()} methods asynchronously...")
+                print(f"   📋 {len(canonical_method_list)} from canonical source")
+                print(f"   📋 {len(canonical_discovered_methods)} discovered and normalized")
+            
+            # Create enhanced mapping for each method
+            overview_methods_filtered = 0
+            for method in all_methods:
+                # Find matching method name and get the file path
+                mdx_method_key = find_best_match(method, mdx_mappings.get(version, {}))
+                mdx_path = mdx_mappings.get(version, {}).get(mdx_method_key) if mdx_method_key else None
+                
+                # Filter out overview pages
+                if mdx_path and self._is_overview_method(method, mdx_path):
+                    overview_methods_filtered += 1
+                    if self.verbose:
+                        self.logger.debug(f"Filtering out overview page: {method} ({mdx_path})")
+                    continue
+                
+                yaml_method_key = find_best_match(method, yaml_mappings.get(version, {}))
+                yaml_path = yaml_mappings.get(version, {}).get(yaml_method_key) if yaml_method_key else None
+                
+                # Handle example mappings
+                examples_path = None
+                example_count = 0
+                example_method_key = find_best_match(method, example_mappings.get(version, {}))
+                if example_method_key and example_method_key in example_mappings.get(version, {}):
+                    example_data = example_mappings[version][example_method_key]
+                    if isinstance(example_data, tuple) and len(example_data) == 2:
+                        examples_path, example_count = example_data
+                    elif isinstance(example_data, str):
+                        examples_path = example_data
+                        example_count = 1
+                
+                # Get enhanced metadata
+                version_status = self.config.get_version_status(version)
+                is_deprecated = self.config.is_version_deprecated(version)
+                
+                # Extract category from method name or path
+                category = self._extract_category_from_method(method)
+                
+                unified[version][method] = MethodMapping(
+                    method=method,
+                    mdx_path=mdx_path,
+                    yaml_path=yaml_path,
+                    examples_path=examples_path,
+                    example_count=example_count,
+                    version=version,
+                    category=category,
+                    deprecated=is_deprecated
+                )
+                
+            if self.verbose and overview_methods_filtered > 0:
+                print(f"   ✅ Filtered out {overview_methods_filtered} overview pages from {version.upper()}")
+        
+        # Integrate Postman collection hotlinks
+        unified = self._integrate_postman_hotlinks(unified)
+        
+        # Show enhanced statistics
+        if self.verbose:
+            self._print_enhanced_mapping_stats(unified)
+        
+        return unified
+    
+    def _extract_category_from_method(self, method_name: str) -> Optional[str]:
+        """Extract category from method name."""
+        if "::" in method_name:
+            parts = method_name.split("::")
+            return parts[0] if parts else None
+        return None
+    
+    def _load_canonical_methods(self) -> Dict[str, List[str]]:
+        """Load canonical method names from KDF repository using enhanced config."""
+        canonical_methods = {"v1": [], "v2": []}
+        
+        try:
+            # Try to load from main OpenAPI file
+            openapi_file = self.config._resolve_path(self.config.directories.openapi_main)
+            if os.path.exists(openapi_file):
+                # This would parse the OpenAPI file to extract method names
+                # For now, return empty lists as placeholder
+                pass
+        except Exception as e:
+            if self.verbose:
+                self.logger.warning(f"Could not load canonical methods: {e}")
+        
+        return canonical_methods
+    
+    def _print_enhanced_mapping_stats(self, unified: Dict[str, Dict[str, MethodMapping]]) -> None:
+        """Print enhanced mapping statistics."""
+        print("\n📊 Enhanced Mapping Statistics:")
+        
+        # Consolidate v2-dev with v2 for statistics (v2-dev is just an alias of v2)
+        consolidated_unified = {}
+        
+        for version, methods in unified.items():
+            if version == "v2-dev":
+                # Merge v2-dev methods with v2
+                if "v2" not in consolidated_unified:
+                    consolidated_unified["v2"] = {}
+                consolidated_unified["v2"].update(methods)
+            else:
+                consolidated_unified[version] = methods
+        
+        for version, methods in consolidated_unified.items():
+            total = len(methods)
+            complete = sum(1 for m in methods.values() if m.is_complete)
+            has_mdx = sum(1 for m in methods.values() if m.has_mdx)
+            has_yaml = sum(1 for m in methods.values() if m.has_yaml)
+            has_examples = sum(1 for m in methods.values() if m.has_examples)
+            has_postman = sum(1 for m in methods.values() if m.has_postman_links)
+            deprecated = sum(1 for m in methods.values() if m.deprecated)
+            
+            avg_completeness = sum(m.completeness_score for m in methods.values()) / total if total > 0 else 0
+            
+            print(f"\n🏷️  {version.upper()}:")
+            print(f"   📄 Total methods: {total}")
+            print(f"   ✅ Complete: {complete} ({complete/total*100:.1f}%)")
+            print(f"   📝 With MDX: {has_mdx} ({has_mdx/total*100:.1f}%)")
+            print(f"   📋 With YAML: {has_yaml} ({has_yaml/total*100:.1f}%)")
+            print(f"   📊 With Examples: {has_examples} ({has_examples/total*100:.1f}%)")
+            print(f"   🔗 With Postman Links: {has_postman} ({has_postman/total*100:.1f}%)")
+            print(f"   ⚠️  Deprecated: {deprecated} ({deprecated/total*100:.1f}%)")
+            print(f"   📈 Avg Completeness: {avg_completeness:.2f}")
+    
+    def save_unified_mapping(self, output_file: Optional[str] = None) -> None:
+        """Save unified mapping to JSON file with metadata."""
+        unified = self.create_unified_mapping()
+        
+        # Convert to JSON-serializable format
+        json_data = self._convert_mapping_to_json(unified)
+        
+        # Add metadata
+        json_data['_metadata'] = {
+            'generated_at': datetime.now().isoformat(),
+            'generated_by': 'method_mapping_manager.py',
+            'total_methods': sum(len(json_data[v]) for v in ['v1', 'v2']),
+            'includes_postman_hotlinks': True
+        }
+        
+        # Use config-based data directory like other commands
+        if output_file is None:
+            data_dir = self.config._resolve_path(self.config.directories.data_dir)
+            output_file = os.path.join(data_dir, "unified_method_mapping.json")
+        elif not os.path.isabs(output_file):
+            data_dir = self.config._resolve_path(self.config.directories.data_dir)
+            output_file = os.path.join(data_dir, os.path.basename(output_file))
+        
+        # Save to file
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(json_data, f, indent=2, ensure_ascii=False)
+        
+        # Also save method paths with hotlinks to separate file
+        self._save_method_paths_with_hotlinks(unified)
+        
+        if self.verbose:
+            print(f"✅ Saved unified mapping to {output_file}")
+            self._print_enhanced_mapping_stats(unified)
+    
+    def _save_method_paths_with_hotlinks(self, unified: Dict[str, Dict[str, MethodMapping]]) -> None:
+        """Save method paths with Postman collection hotlinks to dedicated file (synchronous version)."""
+        from datetime import datetime
+        
+        # Create method paths structure with hotlinks
+        method_paths_data = {
+            "scan_metadata": {
+                "generated_at": datetime.now().isoformat(),
+                "scanner_version": "KDF Method Path Mapper with Postman Hotlinks v1.0.0",
+                "scanner_type": "METHOD_PATH_MAPPING_WITH_POSTMAN_HOTLINKS",
+                "total_versions": len([v for v in unified.keys() if v in ['v1', 'v2']]),
+                "total_methods_with_mdx_paths": sum(
+                    len([m for m in methods.values() if m.has_mdx])
+                    for methods in unified.values()
+                ),
+                "total_methods_with_postman_links": sum(
+                    len([m for m in methods.values() if m.has_postman_links])
+                    for methods in unified.values()
+                ),
+                "versions_processed": [v for v in unified.keys() if v in ['v1', 'v2']],
+                "includes_postman_hotlinks": True,
+                "generated_during_unified_mapping": True
+            },
+            "method_paths": {}
+        }
+        
+        # Build method paths with hotlinks
+        for version in ['v1', 'v2']:
+            if version in unified:
+                version_methods = {}
+                
+                for method_name, mapping in unified[version].items():
+                    method_info = {
+                        "mdx_path": mapping.mdx_path
+                    }
+                    
+                    # Add Postman collection hotlinks if available
+                    if mapping.has_postman_links:
+                        method_info["postman_collection"] = mapping.postman_collection_info
+                    
+                    version_methods[method_name] = method_info
+                
+                # Sort methods alphabetically within this version
+                method_paths_data["method_paths"][version] = dict(sorted(version_methods.items()))
+        
+        # Save to dedicated method paths file
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        output_filename = f"kdf_postman_method_paths_{timestamp}.json"
+        
+        # Use config-based data directory instead of hardcoded path
+        data_dir = self.config._resolve_path(self.config.directories.data_dir)
+        output_file = os.path.join(data_dir, output_filename)
+        
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(method_paths_data, f, indent=2, ensure_ascii=False)
+        
+        if self.verbose:
+            total_with_hotlinks = method_paths_data["scan_metadata"]["total_methods_with_postman_links"]
+            self.logger.success(f"📝 Saved method paths with {total_with_hotlinks} Postman hotlinks to {output_file}")
+
+    async def save_unified_mapping_async(self, output_file: Optional[str] = None) -> None:
+        """Save unified mapping to JSON file with metadata asynchronously."""
+        unified = await self.create_unified_mapping_async()
+        
+        # Convert to JSON-serializable format with proper structure
+        json_data = await self._convert_mapping_to_enhanced_json(unified)
+        
+        # Use config-based data directory like other commands
+        if output_file is None:
+            data_dir = self.config._resolve_path(self.config.directories.data_dir)
+            output_file = os.path.join(data_dir, "unified_method_mapping.json")
+        elif not os.path.isabs(output_file):
+            data_dir = self.config._resolve_path(self.config.directories.data_dir)
+            output_file = os.path.join(data_dir, os.path.basename(output_file))
+        
+        # Save to file asynchronously
+        import asyncio
+        import json
+        
+        def write_json_file():
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(json_data, f, indent=2, ensure_ascii=False)
+        
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, write_json_file)
+        
+        # Also save method paths with hotlinks to separate file
+        await self._save_method_paths_with_hotlinks_async(unified)
+        
+        if self.verbose:
+            print(f"✅ Saved unified mapping to {output_file}")
+            self._print_enhanced_mapping_stats(unified)
+    
+    async def _convert_mapping_to_enhanced_json(self, unified: Dict[str, Dict[str, MethodMapping]]) -> Dict[str, Any]:
+        """Convert mapping objects to enhanced JSON format with missing methods analysis."""
+        # Build the core structure
+        json_data = {
+            "method_paths": {},
+            "summary_statistics": {},
+            "missing": {}
+        }
+        
+        # Build method_paths section (restructured format)
+        for version in unified:
+            if version in ['v1', 'v2']:  # Only include main versions
+                json_data["method_paths"][version] = {}
+                for method in sorted(unified[version].keys()):
+                    mapping = unified[version][method]
+                    method_data = {
+                        'method': mapping.method,
+                        'mdx_path': mapping.mdx_path,
+                        'yaml_path': mapping.yaml_path,
+                        'examples_path': mapping.examples_path,
+                        'postman_path': self._extract_postman_path(mapping),
+                        'has_mdx': mapping.has_mdx,
+                        'has_yaml': mapping.has_yaml,
+                        'has_examples': mapping.has_examples,
+                        'has_postman': mapping.has_postman_links,
+                        'is_complete': mapping.is_complete
+                    }
+                    json_data["method_paths"][version][method] = method_data
+        
+        # Generate summary statistics
+        json_data["summary_statistics"] = await self._generate_summary_statistics(unified)
+        
+        # Generate missing methods analysis
+        json_data["missing"] = await self._generate_missing_methods_analysis(unified)
+        
+        # Update summary with missing methods info if analysis was successful
+        if "statistics" in json_data["missing"] and "overall" in json_data["missing"]["statistics"]:
+            missing_stats = json_data["missing"]["statistics"]["overall"]
+            if "analysis_status" not in missing_stats:  # Only if analysis was successful
+                json_data["summary_statistics"]["includes_missing_methods_analysis"] = True
+                json_data["summary_statistics"]["total_missing_methods"] = missing_stats["total_missing_methods"]
+                json_data["summary_statistics"]["overall_documentation_coverage_percentage"] = missing_stats["overall_coverage_percentage"]
+                json_data["summary_statistics"]["documentation_completeness_status"] = missing_stats["documentation_completeness_status"]
+        
+        return json_data
+    
+    def _extract_postman_path(self, mapping: MethodMapping) -> Optional[str]:
+        """Extract the postman collection file path from mapping."""
+        if mapping.has_postman_links and mapping.postman_collection_info:
+            collection_info = mapping.postman_collection_info.get("collection_info", {})
+            return collection_info.get("file")
+        return None
+    
+    async def _generate_summary_statistics(self, unified: Dict[str, Dict[str, MethodMapping]]) -> Dict[str, Any]:
+        """Generate comprehensive summary statistics."""
+        # Calculate coverage statistics
+        total_methods = sum(len(methods) for version, methods in unified.items() if version in ['v1', 'v2'])
+        
+        mdx_count = sum(len([m for m in methods.values() if m.has_mdx]) 
+                       for version, methods in unified.items() if version in ['v1', 'v2'])
+        yaml_count = sum(len([m for m in methods.values() if m.has_yaml]) 
+                        for version, methods in unified.items() if version in ['v1', 'v2'])
+        examples_count = sum(len([m for m in methods.values() if m.has_examples]) 
+                            for version, methods in unified.items() if version in ['v1', 'v2'])
+        postman_count = sum(len([m for m in methods.values() if m.has_postman_links]) 
+                           for version, methods in unified.items() if version in ['v1', 'v2'])
+        complete_count = sum(len([m for m in methods.values() if m.is_complete]) 
+                            for version, methods in unified.items() if version in ['v1', 'v2'])
+        
+        summary = {
+            "generated_at": datetime.now().isoformat(),
+            "total_methods": total_methods,
+            "coverage_overview": {
+                "mdx_coverage": {
+                    "count": mdx_count,
+                    "percentage": round(mdx_count / total_methods * 100, 1) if total_methods > 0 else 0
+                },
+                "yaml_coverage": {
+                    "count": yaml_count,
+                    "percentage": round(yaml_count / total_methods * 100, 1) if total_methods > 0 else 0
+                },
+                "examples_coverage": {
+                    "count": examples_count,
+                    "percentage": round(examples_count / total_methods * 100, 1) if total_methods > 0 else 0
+                },
+                "postman_coverage": {
+                    "count": postman_count,
+                    "percentage": round(postman_count / total_methods * 100, 1) if total_methods > 0 else 0
+                },
+                "complete_coverage": {
+                    "count": complete_count,
+                    "percentage": round(complete_count / total_methods * 100, 1) if total_methods > 0 else 0
+                }
+            },
+            "version_breakdown": {}
+        }
+        
+        # Version-specific statistics
+        for version in ['v1', 'v2']:
+            if version in unified:
+                methods = unified[version]
+                version_total = len(methods)
+                
+                version_mdx = len([m for m in methods.values() if m.has_mdx])
+                version_yaml = len([m for m in methods.values() if m.has_yaml])
+                version_examples = len([m for m in methods.values() if m.has_examples])
+                version_postman = len([m for m in methods.values() if m.has_postman_links])
+                version_complete = len([m for m in methods.values() if m.is_complete])
+                
+                summary["version_breakdown"][version] = {
+                    "total_methods": version_total,
+                    "mdx_coverage": {
+                        "count": version_mdx,
+                        "percentage": round(version_mdx / version_total * 100, 1) if version_total > 0 else 0
+                    },
+                    "yaml_coverage": {
+                        "count": version_yaml,
+                        "percentage": round(version_yaml / version_total * 100, 1) if version_total > 0 else 0
+                    },
+                    "examples_coverage": {
+                        "count": version_examples,
+                        "percentage": round(version_examples / version_total * 100, 1) if version_total > 0 else 0
+                    },
+                    "postman_coverage": {
+                        "count": version_postman,
+                        "percentage": round(version_postman / version_total * 100, 1) if version_total > 0 else 0
+                    },
+                    "complete_coverage": {
+                        "count": version_complete,
+                        "percentage": round(version_complete / version_total * 100, 1) if version_total > 0 else 0
+                    }
+                }
+        
+        return summary
+    
+    async def _generate_missing_methods_analysis(self, unified: Dict[str, Dict[str, MethodMapping]]) -> Dict[str, Any]:
+        """Generate missing methods analysis by comparing against canonical Rust methods."""
+        try:
+            # Find the latest Rust methods file
+            rust_methods = await self._load_canonical_rust_methods()
+            documented_methods = self._extract_documented_methods_from_unified(unified)
+            
+            # Calculate missing methods
+            missing_methods = self._calculate_missing_methods(rust_methods, documented_methods)
+            missing_stats = self._generate_missing_statistics(rust_methods, documented_methods, missing_methods)
+            
+            # Get the source file reference
+            data_dir = self.config._resolve_path(self.config.directories.data_dir)
+            rust_files = glob.glob(os.path.join(data_dir, "kdf_rust_methods_*.json"))
+            rust_file_name = Path(max(rust_files, key=lambda x: Path(x).stat().st_mtime)).name if rust_files else "unknown"
+            
+            return {
+                "description": "Methods that exist in the Komodo DeFi Framework repository but lack documentation coverage",
+                "data_source": {
+                    "canonical_methods_source": rust_file_name,
+                    "comparison_date": datetime.now().isoformat(),
+                    "missing_criteria": "Methods present in Rust repository but not in method_paths"
+                },
+                "statistics": missing_stats,
+                "methods_lacking_coverage": missing_methods
+            }
+            
+        except Exception as e:
+            if self.verbose:
+                self.logger.warning(f"Could not generate missing methods analysis: {e}")
+            
+            # Return empty structure if analysis fails
+            return {
+                "description": "Missing methods analysis unavailable - canonical Rust methods file not found",
+                "data_source": {
+                    "canonical_methods_source": "not_available",
+                    "comparison_date": datetime.now().isoformat(),
+                    "missing_criteria": "Analysis skipped due to missing data"
+                },
+                "statistics": {
+                    "overall": {"analysis_status": "unavailable"},
+                    "v1": {"analysis_status": "unavailable"},
+                    "v2": {"analysis_status": "unavailable"}
+                },
+                "methods_lacking_coverage": {"v1": [], "v2": []}
+            }
+    
+    async def _load_canonical_rust_methods(self) -> Dict[str, Set[str]]:
+        """Load canonical method names from the latest Rust methods file."""
+        data_dir = self.config._resolve_path(self.config.directories.data_dir)
+        rust_files = glob.glob(os.path.join(data_dir, "kdf_rust_methods_*.json"))
+        
+        if not rust_files:
+            raise FileNotFoundError("No KDF Rust methods file found. Run 'kdf_tools.py scan-rust' first.")
+        
+        # Get the most recent file
+        latest_file = max(rust_files, key=lambda x: Path(x).stat().st_mtime)
+        
+        with open(latest_file, 'r', encoding='utf-8') as f:
+            rust_data = json.load(f)
+        
+        rust_methods = {"v1": set(), "v2": set()}
+        
+        if "repository_data" in rust_data:
+            for version in ["v1", "v2"]:
+                if version in rust_data["repository_data"]:
+                    methods_list = rust_data["repository_data"][version].get("methods", [])
+                    rust_methods[version] = set(methods_list)
+        
+        return rust_methods
+    
+    def _extract_documented_methods_from_unified(self, unified: Dict[str, Dict[str, MethodMapping]]) -> Dict[str, Set[str]]:
+        """Extract documented method names from unified mapping."""
+        documented_methods = {"v1": set(), "v2": set()}
+        
+        for version in ["v1", "v2"]:
+            if version in unified:
+                documented_methods[version] = set(unified[version].keys())
+        
+        return documented_methods
+    
+    def _calculate_missing_methods(self, rust_methods: Dict[str, Set[str]], 
+                                  documented_methods: Dict[str, Set[str]]) -> Dict[str, List[str]]:
+        """Calculate which methods are missing documentation coverage."""
+        missing_methods = {"v1": [], "v2": []}
+        
+        for version in ["v1", "v2"]:
+            rust_set = rust_methods.get(version, set())
+            documented_set = documented_methods.get(version, set())
+            
+            # Methods that exist in Rust but don't have documentation
+            missing_set = rust_set - documented_set
+            missing_methods[version] = sorted(list(missing_set))
+        
+        return missing_methods
+    
+    def _generate_missing_statistics(self, rust_methods: Dict[str, Set[str]], 
+                                   documented_methods: Dict[str, Set[str]], 
+                                   missing_methods: Dict[str, List[str]]) -> Dict[str, Any]:
+        """Generate comprehensive statistics about missing methods."""
+        stats = {}
+        
+        total_rust = sum(len(methods) for methods in rust_methods.values())
+        total_documented = sum(len(methods) for methods in documented_methods.values())
+        total_missing = sum(len(methods) for methods in missing_methods.values())
+        
+        overall_coverage = (total_documented / total_rust * 100) if total_rust > 0 else 0
+        
+        stats["overall"] = {
+            "total_canonical_methods": total_rust,
+            "total_documented_methods": total_documented,
+            "total_missing_methods": total_missing,
+            "overall_coverage_percentage": round(overall_coverage, 1),
+            "documentation_completeness_status": "complete" if total_missing == 0 else "incomplete"
+        }
+        
+        # Version-specific statistics
+        for version in ["v1", "v2"]:
+            rust_count = len(rust_methods.get(version, set()))
+            documented_count = len(documented_methods.get(version, set()))
+            missing_count = len(missing_methods.get(version, []))
+            
+            coverage = (documented_count / rust_count * 100) if rust_count > 0 else 0
+            
+            stats[version] = {
+                "canonical_methods": rust_count,
+                "documented_methods": documented_count,
+                "missing_methods": missing_count,
+                "coverage_percentage": round(coverage, 1),
+                "completeness_status": "complete" if missing_count == 0 else "incomplete"
+            }
+        
+        return stats
+    
+    def _integrate_postman_hotlinks(self, unified: Dict[str, Dict[str, MethodMapping]]) -> Dict[str, Dict[str, MethodMapping]]:
+        """
+        Integrate Postman collection hotlinks into the unified mapping.
+        
+        Args:
+            unified: The unified mapping dictionary
+            
+        Returns:
+            Enhanced unified mapping with Postman hotlinks
+        """
+        if self.verbose:
+            self.logger.info("🔗 Integrating Postman collection hotlinks...")
+        
+        # Parse Postman collections for hotlinks
+        version_hotlinks = self._parse_postman_collections_for_hotlinks()
+        
+        # Integrate hotlinks into existing mappings
+        enhanced_unified = {}
+        total_hotlinks_added = 0
+        
+        for version, methods in unified.items():
+            enhanced_unified[version] = {}
+            
+            # Use centralized version mapping configuration
+            postman_version = self.config.get_postman_version(version)
+            version_hotlinks_data = version_hotlinks.get(postman_version, {})
+            
+            if self.verbose and version != postman_version:
+                self.logger.info(f"📋 Mapping {version} methods to {postman_version} Postman collection ({len(version_hotlinks_data)} hotlinks available)")
+            
+            for method_name, mapping in methods.items():
+                # Get Postman collection info for this method
+                postman_info = version_hotlinks_data.get(method_name)
+                
+                # Create enhanced mapping with postman info
+                enhanced_mapping = MethodMapping(
+                    method=mapping.method,
+                    mdx_path=mapping.mdx_path,
+                    yaml_path=mapping.yaml_path,
+                    examples_path=mapping.examples_path,
+                    example_count=mapping.example_count,
+                    version=mapping.version,
+                    category=mapping.category,
+                    deprecated=mapping.deprecated,
+                    postman_collection_info=postman_info
+                )
+                
+                if enhanced_mapping.has_postman_links:
+                    total_hotlinks_added += 1
+                
+                enhanced_unified[version][method_name] = enhanced_mapping
+        
+        if self.verbose:
+            self.logger.success(f"✅ Integrated {total_hotlinks_added} Postman hotlinks into unified mapping")
+        
+        return enhanced_unified
+
+    def _parse_postman_collections_for_hotlinks(self) -> Dict[str, Dict[str, Dict]]:
+        """
+        Parse Postman collections to extract hotlink information.
+        
+        Returns:
+            Dictionary mapping versions to method hotlinks
+        """
+        try:
+            # Use PostmanCollectionParser to parse all collections
+            collections_dir = self.config._resolve_path("postman/collections")
+            version_hotlinks = self.postman_parser.parse_all_collections(collections_dir)
+            
+            # Convert to hotlink format
+            hotlinks_by_version = {}
+            for version, method_mappings in version_hotlinks.items():
+                hotlinks_by_version[version] = self.postman_parser.generate_postman_hotlinks(method_mappings)
+            
+            if self.verbose:
+                total_hotlinks = sum(len(methods) for methods in hotlinks_by_version.values())
+                self.logger.info(f"📋 Parsed {total_hotlinks} Postman hotlinks across {len(hotlinks_by_version)} versions")
+            
+            return hotlinks_by_version
+            
+        except Exception as e:
+            if self.verbose:
+                self.logger.warning(f"⚠️ Could not parse Postman collections: {e}")
+            return {}
+
+    async def _save_method_paths_with_hotlinks_async(self, unified: Dict[str, Dict[str, MethodMapping]]) -> None:
+        """Save method paths with Postman collection hotlinks to dedicated file."""
+        import asyncio
+        import json
+        from datetime import datetime
+        
+        # Create method paths structure with hotlinks
+        method_paths_data = {
+            "scan_metadata": {
+                "generated_at": datetime.now().isoformat(),
+                "scanner_version": "KDF Method Path Mapper with Postman Hotlinks v1.0.0",
+                "scanner_type": "METHOD_PATH_MAPPING_WITH_POSTMAN_HOTLINKS",
+                "total_versions": len([v for v in unified.keys() if v in ['v1', 'v2']]),
+                "total_methods_with_mdx_paths": sum(
+                    len([m for m in methods.values() if m.has_mdx])
+                    for methods in unified.values()
+                ),
+                "total_methods_with_postman_links": sum(
+                    len([m for m in methods.values() if m.has_postman_links])
+                    for methods in unified.values()
+                ),
+                "versions_processed": [v for v in unified.keys() if v in ['v1', 'v2']],
+                "includes_postman_hotlinks": True,
+                "generated_during_unified_mapping": True
+            },
+            "method_paths": {}
+        }
+        
+        # Build method paths with hotlinks
+        for version in ['v1', 'v2']:
+            if version in unified:
+                version_methods = {}
+                
+                for method_name, mapping in unified[version].items():
+                    method_info = {
+                        "mdx_path": mapping.mdx_path
+                    }
+                    
+                    # Add Postman collection hotlinks if available
+                    if mapping.has_postman_links:
+                        method_info["postman_collection"] = mapping.postman_collection_info
+                    
+                    version_methods[method_name] = method_info
+                
+                # Sort methods alphabetically within this version
+                method_paths_data["method_paths"][version] = dict(sorted(version_methods.items()))
+        
+        # Save to dedicated method paths file
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        output_filename = f"kdf_postman_method_paths_{timestamp}.json"
+        
+        # Use config-based data directory instead of hardcoded path
+        data_dir = self.config._resolve_path(self.config.directories.data_dir)
+        output_file = os.path.join(data_dir, output_filename)
+        
+        def write_method_paths_file():
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(method_paths_data, f, indent=2, ensure_ascii=False)
+        
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, write_method_paths_file)
+        
+        if self.verbose:
+            total_with_hotlinks = method_paths_data["scan_metadata"]["total_methods_with_postman_links"]
+            self.logger.success(f"📝 Saved method paths with {total_with_hotlinks} Postman hotlinks to {output_file}") 

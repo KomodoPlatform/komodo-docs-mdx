@@ -1,0 +1,200 @@
+/api/v2/method:
+  post:
+    operationId: update_maker_order
+    summary: 'Komodo DeFi Framework Method: Update Maker Order'
+    description: The update_maker_order method modifies an active order on the orderbook
+      created by the current node as a maker (or Bob).
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - update_maker_order
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  base_confs:
+                    description: Number of required blockchain confirmations for base
+                      coin atomic swap transaction; defaults to base coin configuration
+                      if not set
+                    type: number
+                    default: '-'
+                  base_nota:
+                    description: Whether dPoW notarization is required for base coin
+                      atomic swap transaction; defaults to base coin configuration
+                      if not set
+                    type: string
+                    default: '-'
+                  max:
+                    description: Komodo DeFi Framework API will use the entire coin
+                      balance for the order, taking `0.001` coins into reserve to
+                      account for fees
+                    type: string
+                    enum:
+                    - '0.001'
+                    example: '0.001'
+                    default: '`false`'
+                  min_volume:
+                    description: 'The minimum amount of `base` coin available for
+                      the order; it must be less or equal than the new volume; the
+                      following values must be greater than or equal to the `min_trading_vol`
+                      of the corresponding coin: <ul><li>the argument `min_volume`</li><li>the
+                      product of the arguments `min_volume` and `new_price`</li></ul>'
+                    type: string
+                    enum:
+                    - min_trading_vol
+                    - min_volume
+                    - base
+                    - new_price
+                    example: min_trading_vol
+                    default: '-'
+                  new_price:
+                    description: The price in `rel` the user is willing to receive
+                      per one unit of the `base` coin
+                    type: string
+                    enum:
+                    - base
+                    - rel
+                    example: base
+                    default: '-'
+                  rel_confs:
+                    description: Number of required blockchain confirmations for rel
+                      coin atomic swap transaction; defaults to rel coin configuration
+                      if not set
+                    type: number
+                    default: '-'
+                  rel_nota:
+                    description: Whether dPoW notarization is required for rel coin
+                      atomic swap transaction; defaults to rel coin configuration
+                      if not set
+                    type: string
+                    default: '-'
+                  uuid:
+                    description: The uuid of the order the user desires to update
+                    type: string
+                    default: '-'
+                  volume_delta:
+                    description: 'Volume added to or subtracted from the `max_base_vol`
+                      of the order to be updated, resulting in the new volume which
+                      is the maximum amount of `base` coin available for the order,
+                      ignored if max is `true`; the following values must be greater
+                      than or equal to the `min_trading_vol` of the corresponding
+                      coin: <ul><li>the new volume which is the `max_base_vol` of
+                      the order to be updated plus `volume_delta`</li><li>the product
+                      of the new volume and the argument `new_price`</li></ul>'
+                    type: string
+                    enum:
+                    - volume_delta
+                    - base
+                    - max_base_vol
+                    - new_price
+                    - min_trading_vol
+                    - 'true'
+                    example: volume_delta
+                    default: '-'
+                required:
+                - uuid
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    base:
+                      type: string
+                      description: The base coin of the order
+                    conf_settings:
+                      $ref: '#/components/schemas/ConfSettings'
+                      description: A standard [ConfSettings](/komodo-defi-framework/api/common_structures/orders/#conf-settings)
+                        object.
+                    created_at:
+                      type: number
+                      description: Unix timestamp in milliseconds, indicating the
+                        order creation time
+                    matches:
+                      type: object
+                      description: Contains the map of ongoing matches with other
+                        orders, empty as the order was recently created
+                    max_base_vol:
+                      type: string
+                      description: The maximum volume of base coin available to trade;
+                        decimal representation
+                    max_base_vol_rat:
+                      type: string
+                      description: The maximum volume of base coin available to trade;
+                        rational representation
+                    min_base_vol:
+                      type: string
+                      description: Komodo DeFi Framework API will not match with other
+                        orders that attempt to trade less than `min_base_vol`; decimal
+                        representation
+                    min_base_vol_rat:
+                      type: string
+                      description: Komodo DeFi Framework API will not match with other
+                        orders that attempt to trade less than `min_base_vol`; rational
+                        representation
+                    price:
+                      type: string
+                      description: The expected amount of `rel` coin to be received
+                        per 1 unit of `base` coin; decimal representation
+                    price_rat:
+                      type: string
+                      description: The expected amount of `rel` coin to be received
+                        per 1 unit of `base` coin; rational representation
+                    rel:
+                      type: string
+                      description: The rel coin of the order
+                    started_swaps:
+                      type: string
+                      description: UUIDs of swaps that were initiated by the order
+                    updated_at:
+                      type: number
+                      description: Unix timestamp in milliseconds, indicating the
+                        order update time
+                    uuid:
+                      type: string
+                      description: UUID of the updated order
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

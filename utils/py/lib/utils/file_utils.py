@@ -13,8 +13,7 @@ from pathlib import Path
 from typing import Dict, Any, Union, Optional, List, Tuple
 from datetime import datetime
 
-from ..core.logging_utils import get_logger
-from ..core.exceptions import FileOperationError, ValidationError
+from ..constants.exceptions import FileOperationError, ValidationError
 
 
 # =============================================================================
@@ -382,4 +381,119 @@ def quick_file_stats(file_paths: List[Union[str, Path]]) -> Dict[str, Any]:
         stats['largest_file'] = {'path': str(file_sizes[-1][0]), 'size': file_sizes[-1][1]}
         stats['average_size'] = stats['total_size'] / len(file_sizes)
     
-    return stats 
+    return stats
+
+
+def cleanup_old_files(directory: str, pattern: str, keep_count: int = 3, verbose: bool = True) -> int:
+    """
+    Clean up old files matching a pattern, keeping only the most recent ones.
+    
+    Args:
+        directory: Directory to search for files
+        pattern: Glob pattern to match files (e.g., "kdf_rust_methods_*.json")
+        keep_count: Number of most recent files to keep (default: 3)
+        verbose: Whether to log cleanup actions
+        
+    Returns:
+        Number of files removed
+    """
+    try:
+        from .logging_utils import get_logger
+        logger = get_logger("file-cleanup") if verbose else None
+        
+        directory_path = Path(directory)
+        if not directory_path.exists():
+            if verbose and logger:
+                logger.info(f"Directory does not exist: {directory}")
+            return 0
+        
+        # Find all matching files
+        matching_files = list(directory_path.glob(pattern))
+        
+        if len(matching_files) <= keep_count:
+            return 0
+        
+        # Sort by modification time (newest first)
+        matching_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        
+        # Files to remove (everything after keep_count)
+        files_to_remove = matching_files[keep_count:]
+        
+        removed_count = 0
+        for file_path in files_to_remove:
+            try:
+                file_path.unlink()
+                removed_count += 1
+                if verbose and logger:
+                    logger.info(f"Removed old file: {file_path.name}")
+            except Exception as e:
+                if verbose and logger:
+                    logger.warning(f"Failed to remove {file_path.name}: {e}")
+        
+        if verbose and logger and removed_count > 0:
+            logger.success(f"Cleanup complete: removed {removed_count} old files, kept {keep_count} most recent")
+        
+        return removed_count
+        
+    except Exception as e:
+        if verbose:
+            try:
+                from .logging_utils import get_logger
+                logger = get_logger("file-cleanup")
+                logger.error(f"Cleanup failed for pattern {pattern}: {e}")
+            except:
+                print(f"Cleanup failed for pattern {pattern}: {e}")
+        return 0
+
+
+def cleanup_kdf_temp_files(data_dir: str = "data", keep_count: int = 3, verbose: bool = True) -> Dict[str, int]:
+    """
+    Clean up KDF temporary files, keeping only the most recent ones.
+    
+    Args:
+        data_dir: Directory containing the files
+        keep_count: Number of files to keep for each type
+        verbose: Whether to log cleanup actions
+        
+    Returns:
+        Dictionary with cleanup results for each file type
+    """
+    cleanup_patterns = {
+        "rust_methods": "kdf_rust_methods_*.json",
+        "mdx_methods": "kdf_mdx_methods_*.json",
+        "openapi_methods": "kdf_openapi_methods_*.json",
+        "json_methods": "kdf_json_methods_*.json",
+        "postman_methods": "kdf_postman_methods_*.json",
+        "mdx_method_paths": "kdf_mdx_method_paths_*.json",
+        "openapi_method_paths": "kdf_openapi_method_paths_*.json",
+        "json_method_paths": "kdf_json_method_paths_*.json",
+        "postman_method_paths": "kdf_postman_method_paths_*.json",
+        "method_mapping": "kdf_method_mapping_*.json",
+        "unified_method_mapping": "unified_method_mapping*.json",
+    }
+    
+    results = {}
+    total_removed = 0
+    
+    if verbose:
+        try:
+            from .logging_utils import get_logger
+            logger = get_logger("kdf-cleanup")
+            logger.info(f"Starting KDF temp file cleanup (keeping {keep_count} most recent of each type)")
+        except:
+            print(f"Starting KDF temp file cleanup (keeping {keep_count} most recent of each type)")
+    
+    for file_type, pattern in cleanup_patterns.items():
+        removed = cleanup_old_files(data_dir, pattern, keep_count, verbose)
+        results[file_type] = removed
+        total_removed += removed
+    
+    if verbose and total_removed > 0:
+        try:
+            from .logging_utils import get_logger
+            logger = get_logger("kdf-cleanup")
+            logger.success(f"Total cleanup: removed {total_removed} old files")
+        except:
+            print(f"Total cleanup: removed {total_removed} old files")
+    
+    return results 

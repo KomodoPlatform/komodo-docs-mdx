@@ -1,0 +1,117 @@
+/api/v2/method:
+  post:
+    operationId: lightning-channels-open_channel
+    summary: 'Komodo DeFi Framework Method: Open Lightning Channel'
+    description: Open a new Lightning Network channel using the Komodo DeFi Framework
+      API.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - lightning::channels::open_channel
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  coin:
+                    description: The ticker of the coin you would like to open a channel
+                      for.
+                    type: string
+                    default: '-'
+                  node_address:
+                    description: Lightning node addresses always have a format of
+                      `node_pubkey`@`ip_address`:`port`.
+                    type: string
+                    enum:
+                    - node_pubkey
+                    - port
+                    - ip_address
+                    example: node_pubkey
+                    default: '-'
+                  amount:
+                    $ref: '#/components/schemas/LightningChannelAmount'
+                    description: A standard [LightningChannelAmount](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-amount)
+                      object.
+                  push_msat:
+                    description: The amount in millisatoshi to push to the counterparty
+                      while opening, to create inbound liquidity for the channel.
+                      Using the `push_msat` parameter avoids having to send funds
+                      in a separate request later. Please note that the funds given
+                      using push\_msat is given unconditionally, meaning that there
+                      is no proof of payment in a preimage as with paying an invoice.
+                    type: integer
+                    enum:
+                    - push_msat
+                    example: push_msat
+                    default: '`0`'
+                  channel_options:
+                    $ref: '#/components/schemas/LightningChannelOptions'
+                    description: A standard [LightningChannelOptions](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options)
+                      object.
+                  channel_configs:
+                    $ref: '#/components/schemas/LightningChannelConfig'
+                    description: A standard [LightningChannelConfig](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-config)
+                      object.
+                required:
+                - coin
+                - node_address
+                - amount
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    uuid:
+                      type: string
+                      description: The unique identifier for the opened channel.
+                    node_address:
+                      type: string
+                      description: The node address of the remote node.
+                    id:
+                      type: string
+                      description: Request identifier.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

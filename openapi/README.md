@@ -17,6 +17,7 @@ postman/openapi/
 │       ├── Swaps.yaml
 │       ├── Wallet.yaml
 │       ├── BotConfig.yaml
+│       ├── Enums.yaml
 │       └── Common.yaml
 └── paths/
     ├── v1/                        # Legacy v1 endpoint definitions

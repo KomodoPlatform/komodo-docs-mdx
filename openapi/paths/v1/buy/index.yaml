@@ -1,0 +1,215 @@
+/api/v2/method:
+  post:
+    operationId: buy
+    summary: 'Komodo DeFi Framework Method: Buy'
+    description: The buy method issues a buy request and attempts to match an order
+      from the orderbook based on the provided arguments.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - buy
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  base:
+                    description: The name of the coin the user desires to receive
+                    type: string
+                    default: '-'
+                  rel:
+                    description: The name of the coin the user desires to sell
+                    type: string
+                    default: '-'
+                  price:
+                    $ref: '#/components/schemas/RationalValue'
+                    description: The price in `rel` the user is willing to pay per
+                      one unit of the `base` coin. Can be a numeric string, expressed
+                      using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+                      or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+                      objects.
+                  volume:
+                    $ref: '#/components/schemas/RationalValue'
+                    description: 'The amount of coins the user is willing to receive
+                      of the `base` coin; the following values must be greater than
+                      or equal to the `min_trading_vol` of the corresponding coin:
+                      <ul><li>the argument `volume`</li><li>the product of the arguments
+                      `volume` and `price`</li></ul>. Can be a numeric string, expressed
+                      using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+                      or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+                      objects.'
+                  min_volume:
+                    $ref: '#/components/schemas/RationalValue'
+                    description: 'The minimum amount of `base` coin to be purchased
+                      in any `GoodTillCancelled` orders after conversion to maker;
+                      the following values must be greater than or equal to the `min_trading_vol`
+                      of the corresponding coin: <ul><li>the argument `min_volume`</li><li>the
+                      product of the arguments `min_volume` and `price`</li></ul>.
+                      Can be a numeric string, expressed using standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+                      or [FractionalValue](/komodo-defi-framework/api/common_structures/#fractional-value)
+                      objects.'
+                  match_by:
+                    $ref: '#/components/schemas/MatchBy'
+                    description: Optional. A standard [MatchBy](/komodo-defi-framework/api/common_structures/orders/#match-by)
+                      object, to filter to include only matches by pubkey or uuid.
+                      *Important:* This condition is not applied after a `GoodTillCancelled`
+                      order is converted to a `maker` request.
+                  order_type:
+                    $ref: '#/components/schemas/OrderType'
+                    description: Optional. A standard [OrderType](/komodo-defi-framework/api/common_structures/orders/#order-type)
+                      object.
+                  base_confs:
+                    description: Number of required blockchain confirmations for base
+                      coin atomic swap transaction; default to base coin configuration
+                      if not set
+                    type: integer
+                    default: '-'
+                  base_nota:
+                    description: Whether dPoW notarization is required for base coin
+                      atomic swap transaction; default to base coin configuration
+                      if not set
+                    type: boolean
+                    default: '-'
+                  rel_confs:
+                    description: Number of required blockchain confirmations for rel
+                      coin atomic swap transaction; default to rel coin configuration
+                      if not set
+                    type: integer
+                    default: '-'
+                  rel_nota:
+                    description: Whether dPoW notarization is required for rel coin
+                      atomic swap transaction; default to rel coin configuration if
+                      not set
+                    type: boolean
+                    default: '-'
+                  save_in_history:
+                    description: Defaults to `true`. If set to `false` no order history
+                      will be saved (though order status will be temporarily stored
+                      while in progress). If `true`, each order's short record history
+                      is stored in a local SQLite database table, and when the order
+                      is cancelled or fully matched, its history will be saved as
+                      a json file
+                    type: boolean
+                    enum:
+                    - 'true'
+                    - 'false'
+                    example: 'true'
+                    default: '`true`'
+                required:
+                - base
+                - rel
+                - price
+                - volume
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    action:
+                      type: string
+                      description: The action of the request (`Buy`)
+                    base:
+                      type: string
+                      description: The base currency of request
+                    base_amount:
+                      type: string
+                      description: The resulting amount of base currency that is received
+                        if the order matches (in decimal representation)
+                    base_amount_rat:
+                      $ref: '#/components/schemas/RationalValue'
+                      description: The resulting amount of base currency that is received
+                        if the order matches, represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+                        object.
+                    rel:
+                      type: string
+                      description: The rel currency of the request
+                    rel_amount:
+                      type: string
+                      description: The maximum amount of `rel` coin that is spent
+                        in order to buy the `base_amount` (according to `price`, in
+                        decimal representation)
+                    rel_amount_rat:
+                      $ref: '#/components/schemas/RationalValue'
+                      description: The maximum amount of `rel` coin that is spent
+                        in order to buy the `base_amount` (according to `price`, represented
+                        as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+                        object).
+                    method:
+                      type: string
+                      description: This field is used for internal P2P interactions;
+                        the value is always equal to "request"
+                    dest_pub_key:
+                      type: string
+                      description: Reserved for future use. `dest_pub_key` allows
+                        the user to choose the P2P node that is eligible to match
+                        with the request. This value defaults to a "zero pubkey",
+                        which means `anyone` can be a match
+                    sender_pubkey:
+                      type: string
+                      description: The public key of this node
+                    uuid:
+                      type: string
+                      description: The request uuid
+                    match_by:
+                      $ref: '#/components/schemas/MatchBy'
+                      description: A standard [MatchBy](/komodo-defi-framework/api/common_structures/orders/#match-by)
+                        object, to filter to include only matches by pubkey or uuid.
+                    conf_settings:
+                      $ref: '#/components/schemas/ConfSettings'
+                      description: A standard [ConfSettings](/komodo-defi-framework/api/common_structures/orders/#conf-settings)
+                        object.
+                    base_orderbook_ticker:
+                      type: string
+                      description: The ticker of the base currency if `orderbook_ticker`
+                        is configured for the base currency in `coins` file. If not
+                        defined, will return a null value.
+                    rel_orderbook_ticker:
+                      type: string
+                      description: The ticker of the rel currency if `orderbook_ticker`
+                        is configured for the rel currency in `coins` file. If not
+                        defined, will return a null value.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

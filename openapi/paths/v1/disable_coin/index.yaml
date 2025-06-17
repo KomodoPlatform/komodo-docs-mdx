@@ -1,0 +1,88 @@
+/api/v2/method:
+  post:
+    operationId: disable_coin
+    summary: 'Komodo DeFi Framework Method: Disable Coin'
+    description: The disable_coin method deactivates the previously enabled coin and
+      also cancels all active orders that use the selected coin.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - disable_coin
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  coin:
+                    description: The ticker of the coin to disable
+                    type: string
+                required:
+                - coin
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    coin:
+                      type: string
+                      description: The ticker of the deactivated coin
+                    cancelled_orders:
+                      type: string
+                      description: UUIDs of cancelled orders
+                    swaps:
+                      type: string
+                      description: UUIDs of active swaps that use the selected coin;
+                        present only in error cases
+                    orders.matching:
+                      type: string
+                      description: UUIDs of matching orders that use the selected
+                        coin; present only in error cases
+                    orders.cancelled:
+                      type: string
+                      description: UUIDs of orders that were successfully cancelled
+                        despite the error
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

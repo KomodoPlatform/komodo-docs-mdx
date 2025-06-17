@@ -1,0 +1,77 @@
+/api/v2/method:
+  post:
+    operationId: recreate_swap_data
+    summary: 'Komodo DeFi Framework Method: Recreate Swap Data'
+    description: The recreate_swap_data method helps recover lost swap data due to
+      storage errors or hardware failure.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - recreate_swap_data
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  swap:
+                    description: Swap data from other side of trade. For example,
+                      to recreate a Maker's swap data, the input would be the corresponding
+                      Taker's swap data.
+                    type: object
+                required:
+                - swap
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: object
+                      description: Opposite side's swap data. For example, if a Taker's
+                        swap data is input, the response would be the corresponding
+                        Maker's swap data.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

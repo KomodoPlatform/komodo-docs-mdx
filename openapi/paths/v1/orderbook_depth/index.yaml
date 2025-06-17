@@ -1,0 +1,76 @@
+/api/v2/method:
+  post:
+    operationId: orderbook_depth
+    summary: 'Komodo DeFi Framework Method: Orderbook Depth'
+    description: The orderbook_depth method returns the number of asks and bids for
+      the specified trading pairs.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - orderbook_depth
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  pairs:
+                    description: An array of trading pairs
+                    type: array
+                    items:
+                      type: string
+                required:
+                - pairs
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      $ref: '#/components/schemas/PairDepth'
+                      description: An array of [PairDepth](/komodo-defi-framework/api/common_structures/orders/#pair-depth)
+                        objects
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

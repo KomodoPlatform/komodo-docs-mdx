@@ -1,237 +1,117 @@
+#!/usr/bin/env python3
 """
-Komodo Documentation Library v2.1.0 - Package-Based Architecture
+Komodo Documentation Library
 
-A comprehensive library for managing API documentation, Postman collections,
-OpenAPI specifications, and file operations for Komodo DeFi Framework.
+A comprehensive library for processing, validating, and managing
+Komodo DeFi Framework API documentation across multiple formats.
 
-RESTRUCTURED VERSION - Now organized into logical packages for better maintainability.
+ULTRA-LEAN VERSION: Optimized for production use with dead weight removed.
 """
 
-# Import everything from new package structure
-# This maintains backward compatibility while using the new organization
+# Core functionality - Enhanced async-first approach
+from .utils.logging_utils import get_logger, setup_logging
 
-# Core functionality - Foundation utilities
-from .core import (
-    # Configuration
-    KomodoConfig, get_config, reset_config,
-    # Exceptions
-    KomodoLibraryError, FileOperationError, ValidationError, ParseError,
-    ConfigurationError, MethodNotFoundError, PostmanGenerationError,
-    OpenAPIError, ExtractionError, DeduplicationError, MappingError,
-    # Logging
-    KomodoLogger, get_logger, setup_logging, ProgressTracker,
-    log_file_operation, log_method_processing, log_stats,
-    # Shared utilities
-    normalize_file_path, validate_file_exists, ensure_directory_exists,
-    safe_read_json, safe_write_json, calculate_content_hash, 
-    convert_dir_to_method_name, format_method_name_for_display,
-    # File operations
-    BaseFileManager, FileOperationResult, ExampleFileManager
+# Configuration and exceptions from constants package
+from .constants import (
+    get_config, ValidationLevel, 
+    FileOperationError, ValidationError, ConfigurationError
 )
 
-# Scanning functionality - File scanning and content extraction
-from .scanning import (
-    UnifiedScanner, ScanResult,
-    ExtractedExample, MDXExtractor,
-    KDFRepositoryScanner, RepositoryInfo, scan_kdf_repository, compare_repo_with_docs
+# Enhanced mapping and processing
+from .managers.method_mapping_manager import (
+    MethodMappingManager, MethodMapping
 )
 
-# Mapping functionality - Method mapping and normalization
-from .mapping import (
-    MethodMapper, MethodMapping,
-    MethodNameNormalizer,
-    PathMapper, PathMapping, VersionConfig, VersionStatus, PathType,
-    ValidationManager, ValidationResult, ValidationLevel,
-    MappingReporter
-)
+from .utils.path_utils import EnhancedPathMapper
 
-# Postman functionality - Collection generation and management
-from .postman import (
-    PostmanRequest, PostmanFolder, PostmanRequestProcessor,
-    MethodCategorizer, FolderOrganizer, CollectionGenerator, EnvironmentGenerator,
-    PostmanFileManager, PostmanReportGenerator,
-    PostmanCollectionGenerator, generate_postman_collections
-)
-
-# OpenAPI functionality - Specification management
-from .openapi import (
-    OpenAPIManager,
-    MDXToOpenAPIConverter, MDXParser, OpenAPIConverter
-)
-
-# Async support - Asynchronous processing utilities
+# Async processing capabilities
 from .async_support import (
-    AsyncFileProcessor, AsyncMethodProcessor, async_cached,
-    run_with_progress, run_async,
-    FileProcessorStrategy, JSONProcessorStrategy, MDXProcessorStrategy, 
-    YAMLProcessorStrategy, FileProcessorContext, ProcessingResult,
-    create_file_processor, process_single_file
+    AsyncMethodProcessor, run_async
 )
 
-# CLI functionality - Command-line interface components
-from .cli import (
-    CLIBase, VersionedCLI, BatchProcessorCLI, create_simple_cli
+# Scanning and analysis
+from .scanning import (
+    UnifiedScanner, KDFRepositoryScanner, PostmanJSONProcessor,
+    LocalKDFScanner, MethodDetails
 )
 
-# Utility functionality - Supporting utilities
+# OpenAPI generation
+from .managers import (
+    OpenAPIManager, TableManager,
+    PostmanFileManager, ValidationManager, MethodMappingManager,
+    DocumentationGenerator
+)
+# Note: APIExampleManager removed to avoid circular imports
+# Use: from lib.managers.example_manager import APIExampleManager
+
+# Postman collection management - now handled by PostmanManager
+# from .postman import (
+#     PostmanCollectionGenerator, MethodCategorizer, PostmanReportGenerator
+# ) - REMOVED: Functionality consolidated into managers.postman_manager
+
+# Utilities and helpers
 from .utils import (
-    KomodoCache, get_cache, cached, cache_file_scan, cache_directory_scan,
-    EventType, Event, Observer, Subject, LoggingObserver, ProgressTrackingObserver,
-    StatisticsObserver, FileEventObserver, CallbackObserver, EventPublisher,
-    get_event_publisher, publish_operation_started, publish_operation_completed,
-    publish_file_processed, publish_file_error,
-    ExampleTemplates, ExampleReporter, ExampleDeduplicator,
-    APIExampleManager
+    normalize_method_name, format_method_name_for_display, extract_method_parts,
+    ensure_directory_exists, safe_read_json, safe_write_json
 )
 
-# Main exports for backward compatibility
+# Import centralized reporting module
+from .reporting import BaseReporter, MappingReporter, PostmanReportGenerator, ExampleReporter
+
+__version__ = "2.0.0-lean"
+
 __all__ = [
-    # Core - Configuration
-    'KomodoConfig', 'get_config', 'reset_config',
+    # Core functionality
+    'get_logger', 'setup_logging', 'get_config',
+    'FileOperationError', 'ValidationError', 'ConfigurationError',
     
-    # Core - Exceptions
-    'KomodoLibraryError', 'FileOperationError', 'ValidationError', 'ParseError',
-    'ConfigurationError', 'MethodNotFoundError', 'PostmanGenerationError',
-    'OpenAPIError', 'ExtractionError', 'DeduplicationError', 'MappingError',
+    # Enhanced mapping (primary)
+    'MethodMappingManager', 'MethodMapping', 'EnhancedPathMapper',
     
-    # Core - Logging
-    'KomodoLogger', 'get_logger', 'setup_logging', 'ProgressTracker',
-    'log_file_operation', 'log_method_processing', 'log_stats',
+    # Async processing
+    'AsyncMethodProcessor', 'run_async',
     
-    # Core - Shared utilities
-    'normalize_file_path', 'validate_file_exists', 'ensure_directory_exists',
-    'safe_read_json', 'safe_write_json', 'calculate_content_hash', 
-    'convert_dir_to_method_name', 'format_method_name_for_display',
+    # Scanning and analysis
+    'UnifiedScanner', 'KDFRepositoryScanner', 'PostmanJSONProcessor',
+    'LocalKDFScanner', 'MethodDetails',
     
-    # Core - File operations
-    'BaseFileManager', 'FileOperationResult', 'ExampleFileManager',
-    
-    # Scanning
-    'UnifiedScanner', 'ScanResult',
-    'ExtractedExample', 'MDXExtractor',
-    'KDFRepositoryScanner', 'RepositoryInfo', 'scan_kdf_repository', 'compare_repo_with_docs',
-    
-    # Mapping
-    'MethodMapper', 'MethodMapping',
-    'MethodNameNormalizer',
-    'PathMapper', 'PathMapping', 'VersionConfig', 'VersionStatus', 'PathType',
-    'ValidationManager', 'ValidationResult', 'ValidationLevel',
-    'MappingReporter',
-    
-    # Postman
-    'PostmanRequest', 'PostmanFolder', 'PostmanRequestProcessor',
-    'MethodCategorizer', 'FolderOrganizer', 'CollectionGenerator', 'EnvironmentGenerator',
-    'PostmanFileManager', 'PostmanReportGenerator',
-    'PostmanCollectionGenerator', 'generate_postman_collections',
-    
-    # OpenAPI
+    # OpenAPI generation
     'OpenAPIManager',
-    'MDXToOpenAPIConverter', 'MDXParser', 'OpenAPIConverter',
     
-    # Async support
-    'AsyncFileProcessor', 'AsyncMethodProcessor', 'async_cached',
-    'run_with_progress', 'run_async',
-    'FileProcessorStrategy', 'JSONProcessorStrategy', 'MDXProcessorStrategy', 
-    'YAMLProcessorStrategy', 'FileProcessorContext', 'ProcessingResult',
-    'create_file_processor', 'process_single_file',
+    # Postman management
+    # 'PostmanCollectionGenerator', 'MethodCategorizer', 'PostmanReportGenerator',
     
-    # CLI
-    'CLIBase', 'VersionedCLI', 'BatchProcessorCLI', 'create_simple_cli',
+    # Managers - Centralized management
+    'TableManager', 'PostmanFileManager', 'ValidationManager', 'MethodMappingManager',
+    'DocumentationGenerator',
     
-    # Utils - Caching
-    'KomodoCache', 'get_cache', 'cached', 'cache_file_scan', 'cache_directory_scan',
+    # Essential utilities
+    'normalize_method_name', 'format_method_name_for_display', 'extract_method_parts',
+    'ensure_directory_exists', 'safe_read_json', 'safe_write_json',
+    'ValidationLevel',
     
-    # Utils - Observer pattern
-    'EventType', 'Event', 'Observer', 'Subject', 'LoggingObserver', 'ProgressTrackingObserver',
-    'StatisticsObserver', 'FileEventObserver', 'CallbackObserver', 'EventPublisher',
-    'get_event_publisher', 'publish_operation_started', 'publish_operation_completed',
-    'publish_file_processed', 'publish_file_error',
-    
-    # Utils - Templates and utilities
-    'ExampleTemplates', 'ExampleReporter', 'ExampleDeduplicator',
-    'APIExampleManager'
+    # Version
+    '__version__',
+
+    # Reporting
+    'BaseReporter', 'MappingReporter', 'PostmanReportGenerator', 'ExampleReporter'
 ]
-
-# Legacy compatibility functions with deprecation warnings
-import warnings
-
-def _warn_legacy_usage(old_name: str, new_name: str):
-    """Helper to issue deprecation warnings."""
-    warnings.warn(
-        f"{old_name} is deprecated. Use {new_name} instead.",
-        DeprecationWarning,
-        stacklevel=3
-    )
-
-# Legacy compatibility functions
-def create_postman_generator(*args, **kwargs):
-    """Legacy function - use PostmanCollectionGenerator directly."""
-    _warn_legacy_usage("create_postman_generator", "PostmanCollectionGenerator")
-    return PostmanCollectionGenerator(*args, **kwargs)
-
-def create_file_scanner(*args, **kwargs):
-    """Legacy function - use UnifiedScanner directly."""
-    _warn_legacy_usage("create_file_scanner", "UnifiedScanner")
-    return UnifiedScanner(*args, **kwargs)
-
-def create_example_manager(*args, **kwargs):
-    """Legacy function - use APIExampleManager directly."""
-    _warn_legacy_usage("create_example_manager", "APIExampleManager")
-    return APIExampleManager(*args, **kwargs)
-
-# Module-level convenience functions
-def quick_generate_postman(versions=['v1', 'v2'], verbose=True):
-    """
-    Quick generation of Postman collections using the new package-based approach.
-    
-    Args:
-        versions: List of API versions to generate
-        verbose: Enable verbose output
-    """
-    generator = PostmanCollectionGenerator()
-    return generate_postman_collections(versions, verbose)
-
-def scan_all_files(versions=['v1', 'v2'], verbose=True):
-    """
-    Quick scan of all files using the new package-based approach.
-    
-    Args:
-        versions: List of API versions to scan
-        verbose: Enable verbose output
-    """
-    scanner = UnifiedScanner()
-    return scanner.scan_all(versions, verbose)
-
-def get_file_manager(base_directory=".", verbose=True):
-    """
-    Get a file manager instance using the new package-based approach.
-    
-    Args:
-        base_directory: Base directory for operations
-        verbose: Enable verbose output
-    """
-    return BaseFileManager(base_directory, verbose)
-
-# Package version information
-__version__ = "2.1.0"
-__author__ = "Komodo Documentation Team"
-__description__ = "Comprehensive library for managing KDF API documentation"
 
 # Package structure information
 PACKAGE_STRUCTURE = {
-    "core": "Foundation utilities (config, exceptions, logging, shared utils)",
+    "constants": "Static data, configuration, exceptions, enums, templates",
     "scanning": "File scanning and content extraction",
-    "mapping": "Method mapping and normalization", 
     "postman": "Postman collection generation and management",
     "openapi": "OpenAPI specification management",
     "async_support": "Asynchronous processing utilities",
-    "cli": "Command-line interface components",
-    "utils": "Supporting utilities (cache, observers, templates, etc.)"
+    "utils": "Supporting utilities (cache, observers, file operations, etc.)",
+    "managers": "Centralized management classes (including method mapping)",
+    "reporting": "Centralized reporting functionality"
 }
 
 def print_package_structure():
-    """Print the new package structure for reference."""
-    print("Komodo Documentation Library v2.1.0 - Package Structure:")
+    """Print the package structure for reference."""
+    print("Komodo Documentation Library v2.0.0-lean - Package Structure:")
     print("=" * 60)
     for package, description in PACKAGE_STRUCTURE.items():
         print(f"📦 {package:15} - {description}")

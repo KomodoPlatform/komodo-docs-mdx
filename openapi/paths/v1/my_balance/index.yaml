@@ -1,0 +1,84 @@
+/api/v2/method:
+  post:
+    operationId: my_balance
+    summary: 'Komodo DeFi Framework Method: My Balance'
+    description: The my_balance method returns the current balance of the specified
+      coin.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - my_balance
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  coin:
+                    description: The name of the coin to retrieve the balance
+                    type: string
+                required:
+                - coin
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                      description: The address that holds the coins
+                    balance:
+                      type: string
+                      description: The number of coins in the address; does not include
+                        `unspendable_balance`
+                    unspendable_balance:
+                      type: string
+                      description: The `coin` balance that is unspendable at the moment
+                        (e.g. if the address has immature UTXOs)
+                    coin:
+                      type: string
+                      description: The name of the coin
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

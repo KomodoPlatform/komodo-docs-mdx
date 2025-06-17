@@ -1,0 +1,76 @@
+/api/v2/method:
+  post:
+    operationId: enable_nft
+    summary: 'Komodo DeFi Framework Method: Enable NFT'
+    description: The enable_nft method activates NFT-like tokens on the platform if
+      the NFT network was already activated, but without the nft_req parameter.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - enable_nft
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  ticker:
+                    $ref: '#/components/schemas/NftNetworkEnum'
+                    description: The ticker of the NFT network, with `NFT_` as a prefix.
+                      See [NftNetworkEnum](/komodo-defi-framework/api/common_structures/enums/#nft-network-enum)
+                      for allowed values.
+                  activation_params:
+                    $ref: '#/components/schemas/NftProvider'
+                    description: A standard [NftProvider](/komodo-defi-framework/api/common_structures/nfts/#nft-provider)
+                      object.
+                required:
+                - ticker
+                - activation_params
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

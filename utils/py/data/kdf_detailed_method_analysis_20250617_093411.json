@@ -1,0 +1,362 @@
+{
+  "v1": {
+    "autoprice": {
+      "method_name": "autoprice",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "fundvalue": {
+      "method_name": "fundvalue",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "inventory": {
+      "method_name": "inventory",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "stats_swap_status": {
+      "method_name": "stats_swap_status",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    }
+  },
+  "v2": {
+    "1inch_v6_0_classic_swap_contract": {
+      "method_name": "1inch_v6_0_classic_swap_contract",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "account_balance": {
+      "method_name": "account_balance",
+      "handler_file": "/home/smk/GITHUB/KP/komodo-docs-mdx/utils/py/kdf_repo/mm2src/coins/eth.rs",
+      "parameters": [],
+      "response_type": "u64",
+      "description": "https://github.com/artemii235/etomic-swap/blob/master/contracts/EtomicSwap.sol Dev chain (195.201.137.5:8565) contract address: 0x83965C539899cC0F918552e5A26915de40ee8852 Ropsten: https://ropsten.etherscan.io/address/0x7bc1bbdd6a0a722fc9bffc49c921b685ecb84b94 ETH mainnet: https://etherscan.io/address/0x8500AFc0bc5214728082163326C2FF0C73f4a871 https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1155.md Payment states from etomic swap smart contract: https://github.com/artemii235/etomic-swap/blob/master/contracts/EtomicSwap.sol#L5 It can change 12.5% max each block according to https://www.blocknative.com/blog/eip-1559-fees Take into account that the dynamic fee may increase by 3% during the swap. Take into account that the dynamic fee may increase until the locktime is expired Take into account that the dynamic fee may increase at each of the following stages: - it may increase by 2% until a swap is started; - it may increase by 3% during the swap. Take into account that the dynamic fee may increase at each of the following stages: - it may increase by 2% until an order is issued; - it may increase by 2% until a swap is started; - it may increase by 3% during the swap. Heuristic default gas limits for withdraw and swap operations (including extra margin value for possible changes in opcodes cost) Gas limit for sending coins Gas limit for transfer ERC20 tokens TODO: maybe this is too much and 150K is okay Gas limit for swap payment tx with coins real values are approx 48,6K by etherscan Gas limit for swap payment tx with ERC20 tokens real values are 98,9K for ERC20 and 135K for ERC-1967 proxied ERC20 contracts (use 'gas_limit' override in coins to tune) Gas limit for swap receiver spend tx with coins real values are 40,7K Gas limit for swap receiver spend tx with ERC20 tokens real values are 72,8K Gas limit for swap refund tx with coins Gas limit for swap refund tx with ERC20 tokens Gas limit for other operations Default gas limits for EthGasLimitV2 Gas limits for maker operations in EtomicSwapMakerV2 contract Gas limits for taker operations in EtomicSwapTakerV2 contract Coin conf param to override default gas limits Gas limit for sending coins Gas limit for sending ERC20 tokens Gas limit for swap payment tx with coins Gas limit for swap payment tx with ERC20 tokens Gas limit for swap receiver spend tx with coins Gas limit for swap receiver spend tx with ERC20 tokens Gas limit for swap refund tx with coins Gas limit for swap refund tx with ERC20 tokens Gas limit for other operations Max transaction type according to EIP-2718 Internal structure describing how transaction pays for gas unit: either legacy gas price or EIP-1559 fee per gas ETH traces for my_address Earliest processed block Latest processed block ERC20 events for my_address Earliest processed block Latest processed block Specifies which blockchain the EthCoin operates on: EVM-compatible or TRON. This distinction allows unified logic for EVM & TRON coins. Ethereum itself or it's forks: ETC/others ERC20 token with smart contract address https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md An alternative to `crate::PrivKeyBuildPolicy`, typical only for ETH coin. Detects the `EthPrivKeyBuildPolicy` with which the given `MmArc` is initialized. pImpl idiom. Specifies the underlying blockchain (EVM or TRON). Either an Iguana address or a 'EthHDWallet' instance. Arc is used to use the same hd wallet from platform coin if we need to. This allows the reuse of the same derived accounts/addresses of the platform coin for tokens and vice versa. Coin needs access to the context in order to reuse the logging and shutdown facilities. Using a weak reference by default in order to avoid circular references and leaks. The name of the coin with which Trezor wallet associates this asset. the block range used for eth_getLogs A mapping of Ethereum addresses to their respective nonce locks. This is used to ensure that only one transaction is sent at a time per address. Each address is associated with an `AsyncMutex` which is locked when a transaction is being created and sent, and unlocked once the transaction is confirmed. This prevents nonce conflicts when multiple transactions are initiated concurrently from the same address. Stores information about NFTs owned by the user. Each entry in the HashMap is uniquely identified by a composite key consisting of the token address and token ID, separated by a comma. This field is essential for tracking the NFT assets information (chain & contract type, amount etc.), where ownership and amount, in ERC1155 case, might change over time. Config provided gas limits for swap and send transactions Config provided gas limits v2 for swap v2 transactions This spawner is used to spawn coin's related futures that should be aborted on coin deactivation and on [`MmArc::stop`]. Information about a token that follows the ERC20 protocol on an EVM-based network. The contract address of the token on the EVM-based network. The number of decimal places the token uses. This represents the smallest unit that the token can be divided into. Single-case address (lowercase) Mixed-case address. https://eips.ethereum.org/EIPS/eip-55 get tx type from pay_for_gas_option currently only type2 and legacy supported if for Eth Classic we also want support for type 1 then use a fn Load saved ETH traces from local DB Load saved ETH traces from local DB Store ETH traces to local DB Store ETH traces to local DB Store ERC20 events to local DB Store ERC20 events to local DB Load saved ERC20 events from local DB Load saved ERC20 events from local DB The id used to differentiate payments on Etomic swap smart contract The id used to differentiate payments on Etomic swap v2 smart contracts Try to parse address from string. # Warning Be very careful using this function since it returns dereferenced clone of value behind the MutexGuard and makes it non-thread-safe. `withdraw_erc1155` function returns details of `ERC-1155` transaction including tx hex, which should be sent to`send_raw_transaction` RPC to broadcast the transaction. `withdraw_erc721` function returns details of `ERC-721` transaction including tx hex, which should be sent to`send_raw_transaction` RPC to broadcast the transaction. Hash message for signature using Ethereum's message signing format. keccak256(PREFIX_LENGTH + PREFIX + MESSAGE_LENGTH + MESSAGE) Signs an Eth transaction using `key_pair`. /// This method polls for the latest nonce from the RPC nodes and uses it for the transaction to be signed. A `nonce_lock` is returned so that the caller doesn't release it until the transaction is sent and the address nonce is updated on RPC nodes. Sign and send eth transaction with provided keypair, This fn is primarily for swap transactions so it uses swap tx fee policy Sign and send eth transaction with metamask API, This fn is primarily for swap transactions so it uses swap tx fee policy Sign eth transaction Gets `SenderRefunded` events from etomic swap smart contract since `from_block` Gets ETH traces from ETH node between addresses in `from_block` and `to_block` Gets Transfer events from ERC20 smart contract `addr` between `from_block` and `to_block` Downloads and saves ETH transaction history of my_address, relies on Parity trace_filter API https://wiki.parity.io/JSONRPC-trace-module#trace_filter, this requires tracing to be enabled in node config. Other ETH clients (Geth, etc.) are `not` supported (yet). Downloads and saves ERC20 transaction history of my_address Returns tx type as number if this type supported by this coin Retrieves the lock associated with a given address. /// This function is used to ensure that only one transaction is sent at a time per address. If the address does not have an associated lock, a new one is created and stored. Sign and send eth transaction. This function is primarily for swap transactions so internally it relies on the swap tx fee policy Estimates how much gas is necessary to allow the contract call to complete. `contract_addr` can be a ERC20 token address or any other contract address. /// # Important /// Don't use this method to estimate gas for a withdrawal of `ETH` coin. For more details, see `withdraw_impl`. /// Also, note that the contract call has to be initiated by my wallet address, because [`CallRequest::from`] is set to [`EthCoinImpl::my_address`]. Gets `PaymentSent` events from etomic swap smart contract since `from_block` Returns events from `from_block` to `to_block` or current `latest` block. According to [\"eth_getLogs\" doc](https://docs.infura.io/api/networks/ethereum/json-rpc-methods/eth_getlogs) `toBlock` is optional, default is \"latest\". Get gas price Get gas base fee and suggest priority tip fees for the next block (see EIP-1559) Checks every second till at least one ETH node recognizes that nonce is increased. Parity has reliable \"nextNonce\" method that always returns correct nonce for address. But we can't expect that all nodes will always be Parity. Some of ETH forks use Geth only so they don't have Parity nodes at all. /// Please note that we just keep looping in case of a transport error hoping it will go away. /// # Warning /// The function is endless, we just keep looping in case of a transport error hoping it will go away. Returns `None` if the transaction hasn't appeared on the RPC nodes at the specified time. Requests the nonce from all available nodes and returns the highest nonce available with the list of nodes that returned the highest nonce. Transactions will be sent using the nodes that returned the highest nonce. Gas price in ETH per gas unit if 'max_fee_per_gas' and 'max_priority_fee_per_gas' are used we set 'gas_price' as 'max_fee_per_gas' for compatibility with GUI Max fee per gas in ETH per gas unit Max priority fee per gas in ETH per gas unit Converts 'number' to value with decimal point and shifts it left by 'decimals' places Shifts 'number' with decimal point right by 'decimals' places and converts it to U256 value This function fixes a bug appeared on `ethabi` update: 1. `ethabi(6.1.0)::Function::decode_input` had ```rust decode(&self.input_param_types(), &data[4..]) ``` /// 2. `ethabi(17.2.0)::Function::decode_input` has ```rust decode(&self.input_param_types(), data) ``` Activate eth coin or erc20 token from coin config and private key build policy Displays the address in mixed-case checksum form https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md `eth_addr_to_hex` converts Address to hex format. Note: the result will be in lowercase. Checks that input is valid mixed-case checksum form address The input must be 0x prefixed hex string Represents errors that can occur while retrieving an Ethereum address. `get_eth_address` returns wallet address for coin with `ETH` protocol type. Note: result address has mixed-case checksum form. Errors encountered while validating Ethereum addresses for NFT withdrawal. The specified coin does not support NFT withdrawal. The provided address is invalid. Validates Ethereum addresses for NFT withdrawal. Returns a tuple of valid `to` address, `token` address, and `EthCoin` instance on success. Errors if the coin doesn't support NFT withdrawal or if the addresses are invalid. Calc estimated total gas fee or price convert fee policy for gas estimate requests As derive_htlc_pubkey_v2 returns coin specific pubkey we can use [Public::from_slice] directly Converts and extended public key derived using BIP32 to an Ethereum public key. Wrapper for [EthCoin::send_taker_funding_impl] Wrapper for [EthCoin::validate_taker_funding_impl] Wrapper for [EthCoin::search_for_taker_funding_spend_impl] Eth doesnt have preimages Eth doesnt have preimages Wrapper for [EthCoin::taker_payment_approve] Eth skips taker_payment_spend_preimage, as it doesnt need it Eth skips taker_payment_spend_preimage, as it doesnt need it Eth doesnt have preimages Wrapper for [EthCoin::find_taker_payment_spend_tx_impl]",
+      "examples": [],
+      "errors": [],
+      "request_type": "RawTransactionRequest"
+    },
+    "get_my_address": {
+      "method_name": "get_my_address",
+      "handler_file": "/home/smk/GITHUB/KP/komodo-docs-mdx/utils/py/kdf_repo/mm2src/coins/lp_coins.rs",
+      "parameters": [],
+      "response_type": "CanRefundHtlc",
+      "description": "`TransactionErr` compatible `try_fus` macro. `TransactionErr` compatible `try_s` macro. `TransactionErr:Plain` compatible `ERR` macro. `TransactionErr:TxRecoverable` compatible `ERR` macro. Helper type used for swap transactions' spend preimage generation result Helper type used for swap v2 tx validation result Helper type used for taker funding's spend preimage validation result Helper type used for taker payment's spend preimage validation result Raw bytes of signed transaction in hexadecimal string, this should be return hexadecimal encoded signed transaction for get_raw_transaction Previous utxo transaction data for signing transaction hash transaction output index transaction output script pub key transaction output amount sign_raw_transaction RPC request's params for signing raw utxo transactions unsigned utxo transaction in hex optional data of previous transactions referred by unsigned transaction inputs Gas price in decimal gwei Max fee per gas in decimal gwei Max priority fee per gas in decimal gwei sign_raw_transaction RPC request's params for signing raw eth transactions Eth transfer value Eth to address Eth contract data Eth gas use limit Optional gas price or fee per gas params sign_raw_transaction RPC request Raw transaction bytes of the transaction Serializable representation of tx hash for displaying purpose Error type for handling tx serialization/deserialization operations. For cases where serialized and deserialized values doesn't verify each other. Keeps transactions while throwing errors. Simply for plain error messages. Returns transaction if the error includes it. Returns plain text part of error. Helper struct wrapping arguments for [WatcherOps::watcher_validate_taker_payment]. Taker payment serialized to raw bytes. Payment refund preimage generated by taker. Taker payment can be refunded after this timestamp. Taker's pubkey. Maker's pubkey. Hash of the secret generated by maker. Validation timeout. Required number of taker payment's on-chain confirmations. Maker coin. Helper struct wrapping arguments for [SwapOps::validate_taker_payment] and [SwapOps::validate_maker_payment]. Payment transaction serialized to raw bytes. Time lock duration in seconds. Payment can be refunded after this timestamp. Pubkey of other side of the swap. Hash of the secret generated by maker. Expected payment amount. Swap contract address if applicable. SPV proof check timeout. Required number of payment's on-chain confirmations. Unique data of specific swap. The reward assigned to watcher for providing help to complete the swap. Enum representing possible variants of swap transaction including secret hash(es) Legacy protocol transaction Taker funding transaction Maker payment v2 (with immediate refund path) Taker payment v2 Helper struct wrapping arguments for [SwapOps::send_taker_payment] and [SwapOps::send_maker_payment]. Time lock duration in seconds. Payment can be refunded after this timestamp. This is either: * Taker's pubkey if this structure is used in [`SwapOps::send_maker_payment`]. * Maker's pubkey if this structure is used in [`SwapOps::send_taker_payment`]. Hash of the secret generated by maker. Payment amount Swap contract address if applicable. Unique data of specific swap. Instructions for the next step of the swap (e.g., Lightning invoice). The reward assigned to watcher for providing help to complete the swap. As of now, this field is specifically used to wait for confirmations of ERC20 approval transaction. This is either: * Taker's payment tx if this structure is used in [`SwapOps::send_maker_spends_taker_payment`]. * Maker's payment tx if this structure is used in [`SwapOps::send_taker_spends_maker_payment`]. This is either: * Taker's pubkey if this structure is used in [`SwapOps::send_maker_spends_taker_payment`]. * Maker's pubkey if this structure is used in [`SwapOps::send_taker_spends_maker_payment`]. This is either: * Taker's pubkey if this structure is used in [`SwapOps::send_maker_refunds_payment`]. * Maker's pubkey if this structure is used in [`SwapOps::send_taker_refunds_payment`]. Additional reward for maker (premium) Actual volume of taker's payment Helper struct wrapping arguments for [SwapOps::check_if_my_payment_sent]. Payment can be refunded after this timestamp. Pubkey of other side of the swap. Hash of the secret generated by maker. Search after specific block to avoid scanning entire blockchain. Swap contract address if applicable. Unique data of specific swap. Payment amount. Instructions for the next step of the swap (e.g., Lightning invoice). Swap operations (mostly based on the Hash/Time locked transactions implemented by coin wallets). Whether the refund transaction can be sent now For example: there are no additional conditions for ETH, but for some UTXO coins we should wait for locktime < MTP Whether the swap payment is refunded automatically or not when the locktime expires, or the other side fails the HTLC. lightning specific Waits for an htlc to be refunded automatically. - lightning specific Consider using [`SwapOps::derive_htlc_pubkey`] if you need the public key only. Some coins may not have a private key. Derives an HTLC key-pair and returns a public key corresponding to that key. Instructions from the taker on how the maker should send his payment. - lightning specific Instructions from the maker on how the taker should send his payment. - lightning specific lightning specific lightning specific Performs an action on Maker coin payment just before the Taker Swap payment refund begins Operation on maker coin from taker swap side Currently lightning specific Performs an action on Maker coin payment after the Taker Swap payment is refunded successfully Operation on maker coin from taker swap side Currently lightning specific Performs an action on Taker coin payment just before the Maker Swap payment refund begins Operation on taker coin from maker swap side Currently lightning specific Performs an action on Taker coin payment after the Maker Swap payment is refunded successfully Operation on taker coin from maker swap side Currently lightning specific Helper struct wrapping arguments for [TakerCoinSwapOpsV2::send_taker_funding] For UTXO-based coins, the taker can refund the funding after this timestamp if the maker hasn't claimed it. For smart contracts, the taker can refund the payment after this timestamp if the maker hasn't pre-approved the transaction. This field is additionally used to wait for confirmations of ERC20 approval transaction. For smart contracts, the taker can refund the payment after this timestamp if the maker hasn't claimed it by revealing their secret. The hash of the secret generated by the taker, needed for immediate refund The hash of the secret generated by the maker, needed to spend the payment Maker's pubkey DEX fee Additional reward for maker (premium) Actual volume of taker's payment Unique data of specific swap Helper struct wrapping arguments for [TakerCoinSwapOpsV2::refund_taker_funding_secret] Additional reward for maker (premium) Actual volume of taker's payment Helper struct wrapping arguments for [TakerCoinSwapOpsV2::gen_taker_funding_spend_preimage] Taker payment transaction serialized to raw bytes Maker's pubkey Taker's pubkey Timelock of the funding tx The hash of the secret generated by taker Timelock of the taker payment The hash of the secret generated by maker Helper struct wrapping arguments for [TakerCoinSwapOpsV2::validate_taker_funding] Taker funding transaction In EVM case: The timestamp after which the taker can refund the funding transaction if the taker hasn't pre-approved the transaction In UTXO case: Taker will be able to refund the payment after this timestamp In EVM case: The timestamp after which the taker can refund the payment transaction if the maker hasn't claimed it by revealing their secret. UTXO doesn't use it The hash of the secret generated by taker The hash of the secret generated by maker Taker's pubkey DEX fee amount Additional reward for maker (premium) Actual volume of taker's payment Unique data of specific swap Helper struct wrapping arguments for taker payment's spend generation, used in [TakerCoinSwapOpsV2::gen_taker_payment_spend_preimage], [TakerCoinSwapOpsV2::validate_taker_payment_spend_preimage] and [TakerCoinSwapOpsV2::sign_and_broadcast_taker_payment_spend] Taker payment transaction serialized to raw bytes Taker will be able to refund the payment after this timestamp The hash of the secret generated by maker Maker's pubkey Maker's address Taker's pubkey DEX fee Additional reward for maker (premium) Actual volume of taker's payment Taker payment spend preimage with taker's signature The preimage, might be () for certain coin types (only signature might be used) Taker's signature Enum covering error cases that can happen during transaction preimage generation. RPC error Error during conversion of BigDecimal amount to coin's specific monetary units (satoshis, wei, etc.). Problem with tx preimage signing. Legacy error produced by usage of try_s/try_fus and other similar macros. Input payment timelock overflows the type used by specific coin. Transaction fee is too high Previous tx is not valid Previous tx output value too low Other errors, can be used to return an error that can happen only in specific coin protocol implementation Enum covering error cases that can happen during swap v2 transaction validation. Payment sent to wrong address or has invalid amount. Error during conversion of BigDecimal amount to coin's specific monetary units (satoshis, wei, etc.). RPC error. Serialized tx bytes don't match ones received from coin's RPC. Provided transaction doesn't have output with specific index Indicates that overflow occurred, either while calculating a total payment or converting the timelock. Internal error Payment transaction is in unexpected state. E.g., `Uninitialized` instead of `PaymentSent` for ETH payment. Payment transaction doesn't exist on-chain. Transaction has wrong properties, for example, it has been sent to a wrong address. Enum covering error cases that can happen during taker funding spend preimage validation. Funding tx has no outputs Actual preimage fee is either too high or too small Error during signature deserialization. Error during preimage comparison to an expected one. Error during taker's signature check. Error during generation of an expected preimage. Input payment timelock overflows the type used by specific coin. Coin's RPC error Enum covering error cases that can happen during taker payment spend preimage validation. Error during signature deserialization. Error during preimage comparison to an expected one. Error during taker's signature check. Error during generation of an expected preimage. Input payment timelock overflows the type used by specific coin. Helper trait used for various types serialization to bytes Defines associated types specific to each coin (Pubkey, Address, etc.) Defines associated types specific to Non-Fungible Tokens (Token Address, Token Id, etc.) Maker will be able to refund the payment after this timestamp The hash of the secret generated by taker, this is used for immediate refund The hash of the secret generated by maker, taker needs it to spend the payment Payment amount Taker's HTLC pubkey Unique data of specific swap Structure representing necessary NFT info for Swap The address of the NFT token The ID of the NFT token. The type of smart contract that governs this NFT Maker will be able to refund the payment after this timestamp The hash of the secret generated by taker, this is used for immediate refund The hash of the secret generated by maker, taker needs it to spend the payment Payment amount Taker's HTLC pubkey Unique data of specific swap Structure representing necessary NFT info for Swap Maker payment tx Maker will be able to refund the payment after this timestamp The hash of the secret generated by taker, this is used for immediate refund The hash of the secret generated by maker, taker needs it to spend the payment Payment amount Maker's HTLC pubkey Unique data of specific swap Maker payment tx Maker will be able to refund the payment after this timestamp The hash of the secret generated by taker, this is used for immediate refund The hash of the secret generated by maker, taker needs it to spend the payment Payment amount Taker's HTLC pubkey Maker's HTLC pubkey Unique data of specific swap Structure representing necessary NFT info for Swap Maker payment tx Maker will be able to refund the payment after this timestamp The hash of the secret generated by taker, this is used for immediate refund The hash of the secret generated by maker, taker needs it to spend the payment Taker's secret Taker's HTLC pubkey Unique data of specific swap Common refund NFT Maker Payment structure for [MakerNftSwapOpsV2::refund_nft_maker_payment_v2_timelock] and [MakerNftSwapOpsV2::refund_nft_maker_payment_v2_secret] methods Maker payment tx The hash of the secret generated by taker, this is used for immediate refund The hash of the secret generated by maker, taker needs it to spend the payment Taker's secret Unique data of specific swap The type of smart contract that governs this NFT Maker payment tx Maker will be able to refund the payment after this timestamp The hash of the secret generated by taker, this is used for immediate refund The hash of the secret generated by maker, taker needs it to spend the payment The secret generated by maker, revealed when maker spends taker's payment Maker's HTLC pubkey Unique data of specific swap Maker payment tx The hash of the secret generated by taker, this is used for immediate refund The hash of the secret generated by maker, taker needs it to spend the payment The secret generated by maker, revealed when maker spends taker's payment Maker's HTLC pubkey Unique data of specific swap The type of smart contract that governs this NFT Operations specific to maker coin in [Trading Protocol Upgrade implementation](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1895) Generate and broadcast maker payment transaction Validate maker payment transaction Refund maker payment transaction using timelock path Refund maker payment transaction using immediate refund path Spend maker payment transaction Validate NFT maker payment transaction Spend NFT maker payment transaction Refund NFT maker payment transaction using timelock path Refund NFT maker payment transaction using immediate refund path Enum representing errors that can occur while waiting for taker payment spend. Timeout error variant, indicating that the wait for taker payment spend has timed out. The timestamp until which the wait was expected to complete. The current timestamp when the timeout occurred. Invalid input transaction error variant, containing additional information about the error. Enum representing different ways a funding transaction can be spent. /// This enum is generic over types that implement the `ParseCoinAssocTypes` trait. Variant indicating that the funding transaction has been spent through a timelock path. Variant indicating that the funding transaction has been spent by revealing a taker's secret (immediate refund path). The spending transaction. The taker's secret value revealed in the spending transaction. Variant indicating that the funds from the funding transaction have been transferred to the taker's payment transaction. Enum representing errors that can occur during the search for funding spend. Variant indicating an invalid input transaction error with additional information. Variant indicating a failure to process the spending transaction with additional details. Variant indicating a coin's RPC error with additional information. Variant indicating an error during conversion of the `from_block` argument with associated `TryFromIntError`. Operations specific to taker coin in [Trading Protocol Upgrade implementation](https://github.com/KomodoPlatform/komodo-defi-framework/issues/1895) Generate and broadcast taker funding transaction that includes dex fee, maker premium and actual trading volume. Funding tx can be reclaimed immediately if maker back-outs (doesn't send maker payment) Validates taker funding transaction. Refunds taker funding transaction using time-locked path without secret reveal. Reclaims taker funding transaction using immediate refund path with secret reveal. Looks for taker funding transaction spend and detects path used Generates and signs a preimage spending funding tx to the combined taker payment Validates taker funding spend preimage generated and signed by maker Sign and send a spending funding tx to the combined taker payment Refunds taker payment transaction. A bool flag that allows skipping the generation and P2P message broadcasting of `TakerPaymentSpendPreimage` on the Taker side, as well as its reception and validation on the Maker side. This is typically used for coins that rely on smart contracts. Generates and signs taker payment spend preimage. The preimage and signature should be shared with maker to proceed with protocol execution. Validate taker payment spend preimage on maker's side. Sign and broadcast taker payment spend on maker's side. Wait until taker payment spend transaction is found on-chain Derives an HTLC key-pair and returns a public key corresponding to that key. Returns taker pubkey for non-private coins, for dex fee calculation Operations that coins have independently from the MarketMaker. That is, things implemented by the coin wallets or public coin services. Base coin balance for tokens, e.g. ETH balance in ERC20 case Receives raw transaction bytes in hexadecimal format as input and returns tx hash in hexadecimal format Receives raw transaction bytes as input and returns tx hash in hexadecimal format Signs raw utxo transaction in hexadecimal format as input and returns signed transaction in hexadecimal format Waits for spending/unlocking of funds locked in a HTLC construction specific to the coin's chain. Implementation should monitor locked funds (UTXO/contract/etc.) until funds are spent/unlocked or timeout is reached. /// Returns spending tx/event from mempool/pending state to allow prompt extraction of preimage secret. Get the minimum amount to send. Get the minimum amount to trade. Is privacy coin like zcash or pirate Returns `true` for coins (like KMD) that should use direct DEX fee burning via OP_RETURN. Should burn part of dex fee coin Use this value as gas limit Make MM2 calculate gas limit in gwei in gwei in satoshi Rename to `GetWithdrawSenderAddresses` when withdraw supports multiple `from` addresses. TODO: Avoid using a single request structure on every platform. Instead, accept a generic type from withdraw implementations. This way we won't have to update the payload for every platform when one of them requires specific addition. Tendermint specific field used for manually providing the IBC channel IDs. Currently, this flag is used by ETH/ERC20 coins activated with MetaMask/WalletConnect(Some wallets e.g Metamask) **only**. Please note that no type should have the same structure as another type, because this enum has the `untagged` deserialization. Deserialize the TxFeeDetails as an untagged enum. Transaction details Coins are sent from these addresses Coins are sent to these addresses Total tx amount The amount spent from \"my\" address The amount received by \"my\" address Resulting \"my\" balance change Block height Transaction timestamp Every coin can has specific fee details: In UTXO tx fee is paid with the coin itself (e.g. 1 BTC and 0.0001 BTC fee). But for ERC20 token transfer fee is paid with another coin: ETH, because it's ETH smart contract function call that requires gas to be burnt. The coin transaction belongs to Internal MM2 id used for internal transaction identification, for some coins it might be equal to transaction hash Amount of accrued rewards. Type of transactions, default is StandardTransfer Raw bytes of signed transaction, this should be sent as is to `send_raw_transaction_bytes` RPC to broadcast the transaction Transaction hash in hexadecimal format This can contain entirely different data depending on the platform. TODO: Perhaps using generics would be more suitable here? Whether the transaction details block height should be updated (when tx is confirmed) Whether the transaction timestamp should be updated (when tx is confirmed) A type alias for a HashMap where the key is a String representing the coin/token ticker, and the value is a `CoinBalance` struct representing the balance of that coin/token. This is used to represent the balance of a wallet or account for multiple coins/tokens. The approximation is needed to cover the dynamic miner fee changing during a swap. Do not increase the trade fee. Increase the trade fee slightly. Increase the trade fee slightly Increase the trade fee significantly. Increase the trade fee largely. Construct [`TradePreimageError`] from [`GenerateTxError`] using additional `coin` and `decimals`. The reason of unsuccessful conversion of two internal numbers, e.g. `u64` from `BigNumber`. Construct [`WithdrawError`] from [`GenerateTxError`] using additional `coin` and `decimals`. NB: Implementations are expected to follow the pImpl idiom, providing cheap reference-counted cloning and garbage collection. The coin can be initialized, but it cannot participate in the swaps. Returns a spawner pinned to the coin. /// # Note /// `WeakSpawner` doesn't prevent the spawned futures from being aborted. Maximum number of digits after decimal point used to denominate integer coin units (satoshis, wei, etc.) Convert input address to the specified address format. Loop collecting coin transaction history and saving it to local DB Path to tx history file Path to tx history migration file Loads existing tx history from file, returns empty vector if file is not found Cleans the existing file if deserialization fails Transaction history background sync status Get fee to be paid per 1 swap transaction Get fee to be paid by sender per whole swap (including possible refund) using the sending value and check if the wallet has sufficient balance to pay the fee. Get fee to be paid by receiver per whole swap and check if the wallet has sufficient balance to pay the fee. Get transaction fee the Taker has to pay to send a `TakerFee` transaction and check if the wallet has sufficient balance to pay the fee. TODO: It's weird that we implement this function on this trait. /// Move this into the `SwapOps` trait when possible (this function requires `MmCoins` trait to be implemented, but it's currently not possible to do `SwapOps: MmCoins` as `MmCoins` is already `MmCoins: SwapOps`. required transaction confirmations number to ensure double-spend safety whether coin requires notarization to ensure double-spend safety set required transaction confirmations number set requires notarization Get swap contract address if the coin uses it in Atomic Swaps. Get fallback swap contract address if the coin uses it in Atomic Swaps. The minimum number of confirmations at which a transaction is considered mature. Get some of the coin protocol related info in serialized format for p2p messaging. Check if serialized coin protocol info is supported by current version. Can also be used to check if orders can be matched or not. Abort all coin related futures on coin deactivation. For Handling the removal/deactivation of token on platform coin deactivation. Determines the secret hash algorithm for a coin, prioritizing specific algorithms for certain protocols. # Attention When adding new coins, update this function to specify their appropriate secret hash algorithm. Otherwise, the function will default to `SecretHashAlgo::DHASH160`, which may not be correct for the new coin. Gets the current state of the parent coin whether it's available for the external requests or not. /// Always `true` for child tokens. Makes the coin disabled to the external requests. Useful for executing `disable_coin` on parent coins that have child tokens enabled. /// Ineffective for child tokens. Represents how to burn part of dex fee. Burn by sending to utxo opreturn output Send non-kmd coins to a dedicated account to exchange for kmd coins and burn them Represents the different types of DEX fees. No dex fee is taken (if taker is dex pubkey) Standard dex fee which will be sent to the dex fee address Dex fee with the burn amount Amount to go to the dex fee address Amount to be burned This indicates how to burn the burn_amount Recreates a `DexFee` from separate fields (usually stored in db). Calculates DEX fee with known taker_pubkey (for some takers dexfee may be zero). Calculates DEX fee with a threshold based on min tx amount of the taker coin. With this fn we may calculate the max dex fee amount, when taker_pubkey is not known yet. Returns dex fee discount if KMD is traded Drops the dex fee in KMD by 25%. This cut will be burned during the taker fee payment. /// Also the cut can be decreased if the new dex fee amount is less than the minimum transaction amount. Drops the dex fee in non-KMD by 25%. This cut will be sent to an output designated as 'burn account' during the taker fee payment (so it cannot be dust). /// The cut can be set to zero if any of resulting amounts is less than the minimum transaction amount. Gets the fee amount associated with the dex fee. Gets the burn amount associated with the dex fee, if applicable. Calculates the total spend amount, considering both the fee and burn amounts. Converts the fee amount to micro-units based on the specified decimal places. Converts the burn amount to micro-units, if applicable, based on the specified decimal places. A map from a currency ticker symbol to the corresponding coin. Similar to `LP_coins`. Obtains a reference to this crate context, creating it if necessary. Adds a Layer 2 coin that depends on a standalone platform. The process of adding l2 coins is identical to that of adding tokens. Adds a platform coin and its associated tokens to the CoinsContext. /// Registers a platform coin alongside its associated ERC-20 tokens and optionally a global NFT. Regular tokens are added to the context without overwriting existing entries, preserving any previously activated tokens. In contrast, the global NFT, if provided, replaces any previously stored NFT data for the platform, ensuring the NFT info is up-to-date. An error is returned if the platform coin is already activated within the context, enforcing a single active instance for each platform. If `ticker` is a platform coin, returns tokens dependent on it. This enum is used in coin activation requests. Enum representing various private key management policies. /// This enum defines the various ways in which private keys can be managed or sourced within the system, whether it's from a local software-based HD Wallet, a hardware device like Trezor, or even external sources like Metamask. The legacy private key policy. /// This policy corresponds to a one-to-one mapping of private keys to addresses. In this scheme, only a single key and corresponding address is activated per coin, without any hierarchical deterministic derivation. The HD Wallet private key policy. /// This variant uses a BIP44 derivation path up to the coin level and contains the necessary information to manage and derive keys using an HD Wallet scheme. Derivation path up to coin. /// Represents the first two segments of the BIP44 derivation path: `purpose` and `coin_type`. A full BIP44 address is structured as: `m/purpose'/coin_type'/account'/change/address_index`. The key that's currently activated and in use for this HD Wallet policy. Extended private key based on the secp256k1 elliptic curve cryptography scheme. The Trezor hardware wallet private key policy. /// Details about how the keys are managed with the Trezor device are abstracted away and are not directly managed by this policy. The Metamask private key policy, specific to the WASM target architecture. /// This variant encapsulates details about how keys are managed when interfacing with the Metamask extension, especially within web-based contexts. WalletConnect private key policy. /// This variant represents the key management details for connections established via WalletConnect. It includes both compressed and uncompressed public keys. - `public_key`: Compressed public key, represented as [H264]. - `public_key_uncompressed`: Uncompressed public key, represented as [H520]. - `session_topic`: WalletConnect session that was used to activate this coin. 'CoinWithPrivKeyPolicy' trait is used to get the private key policy of a coin. The type of the key pair used by the coin. Returns the private key policy of the coin. A common function to get the extended public key for a certain coin and derivation path. Detects the `PrivKeyBuildPolicy` with which the given `MmArc` is initialized. Serializable struct for compatibility with the discontinued DerivationMethod struct Legacy iguana's privkey derivation, used by default HD wallet derivation path, String is temporary here Enum representing methods for deriving cryptographic addresses. /// This enum distinguishes between two primary strategies for address generation: 1. A static, single address approach. 2. A hierarchical deterministic (HD) wallet that can derive multiple addresses. Represents the use of a single, static address for transactions and operations. Represents the use of an HD wallet for deriving multiple addresses. /// The encapsulated HD wallet should be capable of operations like getting the globally enabled address, and more, as defined by the [`HDWalletOps`] trait. # Panic /// Panic if the address mode is [`DerivationMethod::HDWallet`]. A trait representing coins with specific address derivation methods. /// This trait is designed for coins that have a defined mechanism for address derivation, be it a single address approach or a hierarchical deterministic (HD) wallet strategy. Coins implementing this trait should be clear about their chosen derivation method and offer utility functions to interact with that method. /// Implementors of this trait will typically be coins or tokens that are either used within a traditional single address scheme or leverage the power and flexibility of HD wallets. Returns the address derivation method associated with the coin. /// Implementors should return the specific `DerivationMethod` that the coin utilizes, either `SingleAddress` for a static address approach or `HDWallet` for an HD wallet strategy. Checks if the coin uses the HD wallet strategy for address derivation. /// This is a utility function that returns `true` if the coin's derivation method is `HDWallet` and `false` otherwise. /// # Returns /// - `true` if the coin uses an HD wallet for address derivation. - `false` if it uses any other method. Retrieves all addresses associated with the coin. The `IguanaBalanceOps` trait provides an interface for fetching the balance of a coin and its tokens. This trait should be implemented by coins that use the iguana derivation method. The object that holds the balance/s of the coin. Fetches the balance of the coin and its tokens if the coin uses an iguana derivation method. # Breaking Changes Returns the platform coin associated with the coin protocol, if any. Returns the contract address associated with the coin, if any. Several checks to be preformed when a custom token is being activated to check uniqueness among other things. Common methods to handle the connection events. /// Note that the handler methods are sync and shouldn't take long time executing, otherwise it will hurt the performance. If a handler needs to do some heavy work, it should be spawned/done in a separate thread. Using a weak reference by default in order to avoid circular references and leaks. Name of coin the rpc client is intended to work with. RPC client type. Adds a new currency into the list of currencies configured. /// Returns an error if the currency already exists. Initializing the same currency twice is a bad habit (might lead to misleading and confusing information during debugging and maintenance, see DRY) and should be fixed on the call site. /// * `req` - Payload of the corresponding \"enable\" or \"electrum\" RPC request. NB: Returns only the enabled (aka active) coins. Returns coins even if they are on the passive mode Attempts to find a pair of active coins returning None if one is not enabled format to that the input address should be converted Returns the transaction history of selected coin. Returns no more than `limit` records (default: 10). Skips the first records up to from_id (skipping the from_id too). Transactions are sorted by number of confirmations in ascending order. `get_trade_fee` rpc implementation. There is some consideration about this rpc: for eth coin this rpc returns max possible trade fee (estimated for maximum possible gas limit for any kind of swap). However for eth coin, as part of fixing this issue https://github.com/KomodoPlatform/komodo-defi-framework/issues/1848, `max_taker_vol' and `trade_preimage` rpc now return more accurate required gas calculations. So maybe it would be better to deprecate this `get_trade_fee` rpc Use trait in the case, when we have to send requests to rpc client. Returns an alive RPC client or returns an error if no RPC endpoint is currently available. `get_my_address` function returns wallet address for necessary coin without its activation. Currently supports only coins with `ETH` protocol type. Return swap transaction fee policy set swap transaction fee policy Get eip 1559 transaction fee per gas policy (low, medium, high) set for the coin Set eip 1559 transaction fee per gas policy (low, medium, high) Checks addresses that either had empty transaction history last time we checked or has not been checked before. The checking stops at the moment when we find `gap_limit` consecutive empty addresses. Helper to call init_withdraw and wait for completion",
+      "examples": [],
+      "errors": [],
+      "request_type": "Json"
+    },
+    "get_new_address": {
+      "method_name": "get_new_address",
+      "handler_file": "/home/smk/GITHUB/KP/komodo-docs-mdx/utils/py/kdf_repo/mm2src/coins/eth.rs",
+      "parameters": [],
+      "response_type": "u64",
+      "description": "https://github.com/artemii235/etomic-swap/blob/master/contracts/EtomicSwap.sol Dev chain (195.201.137.5:8565) contract address: 0x83965C539899cC0F918552e5A26915de40ee8852 Ropsten: https://ropsten.etherscan.io/address/0x7bc1bbdd6a0a722fc9bffc49c921b685ecb84b94 ETH mainnet: https://etherscan.io/address/0x8500AFc0bc5214728082163326C2FF0C73f4a871 https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1155.md Payment states from etomic swap smart contract: https://github.com/artemii235/etomic-swap/blob/master/contracts/EtomicSwap.sol#L5 It can change 12.5% max each block according to https://www.blocknative.com/blog/eip-1559-fees Take into account that the dynamic fee may increase by 3% during the swap. Take into account that the dynamic fee may increase until the locktime is expired Take into account that the dynamic fee may increase at each of the following stages: - it may increase by 2% until a swap is started; - it may increase by 3% during the swap. Take into account that the dynamic fee may increase at each of the following stages: - it may increase by 2% until an order is issued; - it may increase by 2% until a swap is started; - it may increase by 3% during the swap. Heuristic default gas limits for withdraw and swap operations (including extra margin value for possible changes in opcodes cost) Gas limit for sending coins Gas limit for transfer ERC20 tokens TODO: maybe this is too much and 150K is okay Gas limit for swap payment tx with coins real values are approx 48,6K by etherscan Gas limit for swap payment tx with ERC20 tokens real values are 98,9K for ERC20 and 135K for ERC-1967 proxied ERC20 contracts (use 'gas_limit' override in coins to tune) Gas limit for swap receiver spend tx with coins real values are 40,7K Gas limit for swap receiver spend tx with ERC20 tokens real values are 72,8K Gas limit for swap refund tx with coins Gas limit for swap refund tx with ERC20 tokens Gas limit for other operations Default gas limits for EthGasLimitV2 Gas limits for maker operations in EtomicSwapMakerV2 contract Gas limits for taker operations in EtomicSwapTakerV2 contract Coin conf param to override default gas limits Gas limit for sending coins Gas limit for sending ERC20 tokens Gas limit for swap payment tx with coins Gas limit for swap payment tx with ERC20 tokens Gas limit for swap receiver spend tx with coins Gas limit for swap receiver spend tx with ERC20 tokens Gas limit for swap refund tx with coins Gas limit for swap refund tx with ERC20 tokens Gas limit for other operations Max transaction type according to EIP-2718 Internal structure describing how transaction pays for gas unit: either legacy gas price or EIP-1559 fee per gas ETH traces for my_address Earliest processed block Latest processed block ERC20 events for my_address Earliest processed block Latest processed block Specifies which blockchain the EthCoin operates on: EVM-compatible or TRON. This distinction allows unified logic for EVM & TRON coins. Ethereum itself or it's forks: ETC/others ERC20 token with smart contract address https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md An alternative to `crate::PrivKeyBuildPolicy`, typical only for ETH coin. Detects the `EthPrivKeyBuildPolicy` with which the given `MmArc` is initialized. pImpl idiom. Specifies the underlying blockchain (EVM or TRON). Either an Iguana address or a 'EthHDWallet' instance. Arc is used to use the same hd wallet from platform coin if we need to. This allows the reuse of the same derived accounts/addresses of the platform coin for tokens and vice versa. Coin needs access to the context in order to reuse the logging and shutdown facilities. Using a weak reference by default in order to avoid circular references and leaks. The name of the coin with which Trezor wallet associates this asset. the block range used for eth_getLogs A mapping of Ethereum addresses to their respective nonce locks. This is used to ensure that only one transaction is sent at a time per address. Each address is associated with an `AsyncMutex` which is locked when a transaction is being created and sent, and unlocked once the transaction is confirmed. This prevents nonce conflicts when multiple transactions are initiated concurrently from the same address. Stores information about NFTs owned by the user. Each entry in the HashMap is uniquely identified by a composite key consisting of the token address and token ID, separated by a comma. This field is essential for tracking the NFT assets information (chain & contract type, amount etc.), where ownership and amount, in ERC1155 case, might change over time. Config provided gas limits for swap and send transactions Config provided gas limits v2 for swap v2 transactions This spawner is used to spawn coin's related futures that should be aborted on coin deactivation and on [`MmArc::stop`]. Information about a token that follows the ERC20 protocol on an EVM-based network. The contract address of the token on the EVM-based network. The number of decimal places the token uses. This represents the smallest unit that the token can be divided into. Single-case address (lowercase) Mixed-case address. https://eips.ethereum.org/EIPS/eip-55 get tx type from pay_for_gas_option currently only type2 and legacy supported if for Eth Classic we also want support for type 1 then use a fn Load saved ETH traces from local DB Load saved ETH traces from local DB Store ETH traces to local DB Store ETH traces to local DB Store ERC20 events to local DB Store ERC20 events to local DB Load saved ERC20 events from local DB Load saved ERC20 events from local DB The id used to differentiate payments on Etomic swap smart contract The id used to differentiate payments on Etomic swap v2 smart contracts Try to parse address from string. # Warning Be very careful using this function since it returns dereferenced clone of value behind the MutexGuard and makes it non-thread-safe. `withdraw_erc1155` function returns details of `ERC-1155` transaction including tx hex, which should be sent to`send_raw_transaction` RPC to broadcast the transaction. `withdraw_erc721` function returns details of `ERC-721` transaction including tx hex, which should be sent to`send_raw_transaction` RPC to broadcast the transaction. Hash message for signature using Ethereum's message signing format. keccak256(PREFIX_LENGTH + PREFIX + MESSAGE_LENGTH + MESSAGE) Signs an Eth transaction using `key_pair`. /// This method polls for the latest nonce from the RPC nodes and uses it for the transaction to be signed. A `nonce_lock` is returned so that the caller doesn't release it until the transaction is sent and the address nonce is updated on RPC nodes. Sign and send eth transaction with provided keypair, This fn is primarily for swap transactions so it uses swap tx fee policy Sign and send eth transaction with metamask API, This fn is primarily for swap transactions so it uses swap tx fee policy Sign eth transaction Gets `SenderRefunded` events from etomic swap smart contract since `from_block` Gets ETH traces from ETH node between addresses in `from_block` and `to_block` Gets Transfer events from ERC20 smart contract `addr` between `from_block` and `to_block` Downloads and saves ETH transaction history of my_address, relies on Parity trace_filter API https://wiki.parity.io/JSONRPC-trace-module#trace_filter, this requires tracing to be enabled in node config. Other ETH clients (Geth, etc.) are `not` supported (yet). Downloads and saves ERC20 transaction history of my_address Returns tx type as number if this type supported by this coin Retrieves the lock associated with a given address. /// This function is used to ensure that only one transaction is sent at a time per address. If the address does not have an associated lock, a new one is created and stored. Sign and send eth transaction. This function is primarily for swap transactions so internally it relies on the swap tx fee policy Estimates how much gas is necessary to allow the contract call to complete. `contract_addr` can be a ERC20 token address or any other contract address. /// # Important /// Don't use this method to estimate gas for a withdrawal of `ETH` coin. For more details, see `withdraw_impl`. /// Also, note that the contract call has to be initiated by my wallet address, because [`CallRequest::from`] is set to [`EthCoinImpl::my_address`]. Gets `PaymentSent` events from etomic swap smart contract since `from_block` Returns events from `from_block` to `to_block` or current `latest` block. According to [\"eth_getLogs\" doc](https://docs.infura.io/api/networks/ethereum/json-rpc-methods/eth_getlogs) `toBlock` is optional, default is \"latest\". Get gas price Get gas base fee and suggest priority tip fees for the next block (see EIP-1559) Checks every second till at least one ETH node recognizes that nonce is increased. Parity has reliable \"nextNonce\" method that always returns correct nonce for address. But we can't expect that all nodes will always be Parity. Some of ETH forks use Geth only so they don't have Parity nodes at all. /// Please note that we just keep looping in case of a transport error hoping it will go away. /// # Warning /// The function is endless, we just keep looping in case of a transport error hoping it will go away. Returns `None` if the transaction hasn't appeared on the RPC nodes at the specified time. Requests the nonce from all available nodes and returns the highest nonce available with the list of nodes that returned the highest nonce. Transactions will be sent using the nodes that returned the highest nonce. Gas price in ETH per gas unit if 'max_fee_per_gas' and 'max_priority_fee_per_gas' are used we set 'gas_price' as 'max_fee_per_gas' for compatibility with GUI Max fee per gas in ETH per gas unit Max priority fee per gas in ETH per gas unit Converts 'number' to value with decimal point and shifts it left by 'decimals' places Shifts 'number' with decimal point right by 'decimals' places and converts it to U256 value This function fixes a bug appeared on `ethabi` update: 1. `ethabi(6.1.0)::Function::decode_input` had ```rust decode(&self.input_param_types(), &data[4..]) ``` /// 2. `ethabi(17.2.0)::Function::decode_input` has ```rust decode(&self.input_param_types(), data) ``` Activate eth coin or erc20 token from coin config and private key build policy Displays the address in mixed-case checksum form https://github.com/ethereum/EIPs/blob/master/EIPS/eip-55.md `eth_addr_to_hex` converts Address to hex format. Note: the result will be in lowercase. Checks that input is valid mixed-case checksum form address The input must be 0x prefixed hex string Represents errors that can occur while retrieving an Ethereum address. `get_eth_address` returns wallet address for coin with `ETH` protocol type. Note: result address has mixed-case checksum form. Errors encountered while validating Ethereum addresses for NFT withdrawal. The specified coin does not support NFT withdrawal. The provided address is invalid. Validates Ethereum addresses for NFT withdrawal. Returns a tuple of valid `to` address, `token` address, and `EthCoin` instance on success. Errors if the coin doesn't support NFT withdrawal or if the addresses are invalid. Calc estimated total gas fee or price convert fee policy for gas estimate requests As derive_htlc_pubkey_v2 returns coin specific pubkey we can use [Public::from_slice] directly Converts and extended public key derived using BIP32 to an Ethereum public key. Wrapper for [EthCoin::send_taker_funding_impl] Wrapper for [EthCoin::validate_taker_funding_impl] Wrapper for [EthCoin::search_for_taker_funding_spend_impl] Eth doesnt have preimages Eth doesnt have preimages Wrapper for [EthCoin::taker_payment_approve] Eth skips taker_payment_spend_preimage, as it doesnt need it Eth skips taker_payment_spend_preimage, as it doesnt need it Eth doesnt have preimages Wrapper for [EthCoin::find_taker_payment_spend_tx_impl]",
+      "examples": [],
+      "errors": [],
+      "request_type": "RawTransactionRequest"
+    },
+    "get_shared_db_id": {
+      "method_name": "get_shared_db_id",
+      "handler_file": "/home/smk/GITHUB/KP/komodo-docs-mdx/utils/py/kdf_repo/mm2src/mm2_main/src/rpc/lp_commands/db_id.rs",
+      "parameters": [],
+      "response_type": "GetSharedDbIdResult",
+      "description": null,
+      "examples": [],
+      "errors": [],
+      "request_type": "Json"
+    },
+    "gui_storage::activate_coins": {
+      "method_name": "gui_storage::activate_coins",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::add_account": {
+      "method_name": "gui_storage::add_account",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::deactivate_coins": {
+      "method_name": "gui_storage::deactivate_coins",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::delete_account": {
+      "method_name": "gui_storage::delete_account",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::enable_account": {
+      "method_name": "gui_storage::enable_account",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::get_account_coins": {
+      "method_name": "gui_storage::get_account_coins",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::get_accounts": {
+      "method_name": "gui_storage::get_accounts",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::get_enabled_account": {
+      "method_name": "gui_storage::get_enabled_account",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::set_account_balance": {
+      "method_name": "gui_storage::set_account_balance",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::set_account_description": {
+      "method_name": "gui_storage::set_account_description",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "gui_storage::set_account_name": {
+      "method_name": "gui_storage::set_account_name",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "my_swap_status": {
+      "method_name": "my_swap_status",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "send_asked_data": {
+      "method_name": "send_asked_data",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::connect_metamask::cancel": {
+      "method_name": "task::connect_metamask::cancel",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::connect_metamask::init": {
+      "method_name": "task::connect_metamask::init",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::connect_metamask::status": {
+      "method_name": "task::connect_metamask::status",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_erc20::cancel": {
+      "method_name": "task::enable_erc20::cancel",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_erc20::init": {
+      "method_name": "task::enable_erc20::init",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_erc20::status": {
+      "method_name": "task::enable_erc20::status",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_erc20::user_action": {
+      "method_name": "task::enable_erc20::user_action",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_lightning::user_action": {
+      "method_name": "task::enable_lightning::user_action",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_sia::cancel": {
+      "method_name": "task::enable_sia::cancel",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_sia::init": {
+      "method_name": "task::enable_sia::init",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_sia::status": {
+      "method_name": "task::enable_sia::status",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_sia::user_action": {
+      "method_name": "task::enable_sia::user_action",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_tendermint_token::cancel": {
+      "method_name": "task::enable_tendermint_token::cancel",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_tendermint_token::init": {
+      "method_name": "task::enable_tendermint_token::init",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_tendermint_token::status": {
+      "method_name": "task::enable_tendermint_token::status",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "task::enable_tendermint_token::user_action": {
+      "method_name": "task::enable_tendermint_token::user_action",
+      "handler_file": null,
+      "parameters": [],
+      "response_type": null,
+      "description": null,
+      "examples": [],
+      "errors": []
+    },
+    "trezor_connection_status": {
+      "method_name": "trezor_connection_status",
+      "handler_file": "/home/smk/GITHUB/KP/komodo-docs-mdx/utils/py/kdf_repo/mm2src/mm2_main/src/rpc/lp_commands/trezor.rs",
+      "parameters": [],
+      "response_type": "MmResult",
+      "description": "Can be used to make sure that the Trezor device is expected.",
+      "examples": [],
+      "errors": [],
+      "request_type": "TrezorConnectionStatusReq"
+    }
+  }
+}

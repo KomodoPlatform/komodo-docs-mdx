@@ -1,0 +1,78 @@
+/api/v2/method:
+  post:
+    operationId: change_mnemonic_password
+    summary: 'Komodo DeFi Framework Method: Change Mnemonic Password'
+    description: The change_mnemonic_password method allows a user to update the password
+      used to encrypt a mnemonic phrase in their local database.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - change_mnemonic_password
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  current_password:
+                    description: the active mnemonic password for your wallet
+                    type: string
+                  new_password:
+                    description: the new password to use for encrypting your active
+                      mnemonic password
+                    type: string
+                required:
+                - current_password
+                - new_password
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Returns null on successful password change.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

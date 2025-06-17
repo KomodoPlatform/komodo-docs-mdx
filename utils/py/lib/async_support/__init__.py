@@ -7,7 +7,7 @@ This package provides asynchronous processing capabilities:
 """
 
 from .async_utils import (
-    AsyncFileProcessor, AsyncMethodProcessor, async_cached,
+    AsyncFileProcessor, AsyncMethodProcessor,
     run_with_progress, run_async
 )
 from .processors import (
@@ -18,7 +18,7 @@ from .processors import (
 
 __all__ = [
     # Async utilities
-    'AsyncFileProcessor', 'AsyncMethodProcessor', 'async_cached',
+    'AsyncFileProcessor', 'AsyncMethodProcessor',
     'run_with_progress', 'run_async',
     
     # Processors

@@ -1,0 +1,79 @@
+/api/v2/method:
+  post:
+    operationId: list_banned_pubkeys
+    summary: 'Komodo DeFi Framework Method: List Banned Pubkeys'
+    description: The list_banned_pubkeys method returns a list of public keys of nodes
+      that are banned from interacting with the node executing the method.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - list_banned_pubkeys
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+            required:
+            - method
+            - userpass
+            - mmrpc
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: object
+                      description: The list of pubkeys banned by current node
+                    result.\*.type:
+                      $ref: '#/components/schemas/BanTypeEnum'
+                      description: A standard [BanTypeEnum](/komodo-defi-framework/api/common_structures/enums/#ban-type-enum)
+                        enum. The type of the ban
+                    result.\*.caused_by_swap:
+                      type: string
+                      description: The uuid of the swap that triggered the ban; present
+                        only for the `FailedSwap` type
+                    result.\*.caused_by_event:
+                      type: object
+                      description: The swap event that triggered the ban; present
+                        only for the `FailedSwap` type
+                    result.\*.reason:
+                      type: string
+                      description: The reason for the `Manual` ban
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

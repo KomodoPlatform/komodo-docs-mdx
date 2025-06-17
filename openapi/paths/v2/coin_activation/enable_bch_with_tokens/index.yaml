@@ -1,0 +1,138 @@
+/api/v2/method:
+  post:
+    operationId: enable_bch_with_tokens
+    summary: 'Komodo DeFi Framework Method: Enable BCH with Tokens'
+    description: Using this method, you can enable BCH/tBCH along with multiple SLP
+      tokens in a single command.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - enable_bch_with_tokens
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  bchd_urls:
+                    description: A list of BCHD gRPC API server URLs, used for validation
+                      of SLP token transactions. It's recommended to add as many servers
+                      as possible. The URLs list can be found at [https://bchd.fountainhead.cash/](https://bchd.fountainhead.cash/).
+                    type: string
+                    default: '-'
+                  mode:
+                    $ref: '#/components/schemas/ActivationMode'
+                    description: A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode)
+                      object.
+                  slp_tokens_requests:
+                    $ref: '#/components/schemas/TokensRequest'
+                    description: A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request)
+                      objects.
+                  ticker:
+                    description: Ticker of the platform protocol coin.
+                    type: string
+                    default: '-'
+                  address_format:
+                    $ref: '#/components/schemas/AddressFormat'
+                    description: Overwrites the address format from coins file, if
+                      set. A standard [AddressFormat](/komodo-defi-framework/api/common_structures/wallet/#address-format)
+                      object.
+                  allow_slp_unsafe_conf:
+                    description: If true, allows bchd\_urls to be empty. **Warning:**
+                      it is highly unsafe to do so as it may lead to invalid SLP transactions
+                      generation and tokens burning.
+                    type: boolean
+                    default: 'false'
+                  get_balances:
+                    description: If false, coin and token balances will not be returned
+                      in the response, and the response will be returned more quickly.
+                    type: boolean
+                    default: 'true'
+                  required_confirmations:
+                    description: Confirmations to wait for steps in swap. Defaults
+                      to value in the coins file if not set.
+                    type: integer
+                    default: '3'
+                  requires_notarization:
+                    description: Has no effect on BCH.
+                    type: boolean
+                    default: 'true'
+                  tx_history:
+                    description: If true the Komodo DeFi Framework API will preload
+                      transaction history as a background process. Must be set to
+                      true to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history)
+                      method.
+                    type: boolean
+                    default: 'false'
+                  utxo_merge_params:
+                    $ref: '#/components/schemas/UtxoMergeParams'
+                    description: A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params)
+                      object. Used to reduce a wallet's UTXO count in cases where
+                      it is causing significantly slower RPC responses.
+                required:
+                - bchd_urls
+                - mode
+                - slp_tokens_requests
+                - ticker
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    bch_addresses_infos:
+                      $ref: '#/components/schemas/AddressInfo'
+                      description: 'A standard [AddressInfo](/komodo-defi-framework/api/common_structures/wallet/#address-info)
+                        object. Note: the structure may vary based on the value of
+                        the `get_balances` parameter.'
+                    current_block:
+                      type: integer
+                      description: Block height of the coin being activated.
+                    slp_addresses_infos:
+                      $ref: '#/components/schemas/AddressInfo'
+                      description: 'A standard [AddressInfo](/komodo-defi-framework/api/common_structures/wallet/#address-info)
+                        object. Note: the structure may vary based on the value of
+                        the `get_balances` parameter.'
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

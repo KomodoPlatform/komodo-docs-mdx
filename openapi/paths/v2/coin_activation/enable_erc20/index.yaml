@@ -1,0 +1,88 @@
+/api/v2/method:
+  post:
+    operationId: enable_erc20
+    summary: 'Komodo DeFi Framework Method: Enable ERC20'
+    description: Method description for enable_erc20
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - enable_erc20
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  ticker:
+                    description: Ticker of the ERC20-like token you want to enable.
+                    type: string
+                    default: '-'
+                  activation_params:
+                    $ref: '#/components/schemas/TokenActivationParams'
+                    description: A standard [TokenActivationParams](/komodo-defi-framework/api/common_structures/nfts/#token-activation-params)
+                      object.
+                required:
+                - ticker
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    balances:
+                      type: object
+                      description: An object containing balance information for activated
+                        addresses.
+                    platform_coin:
+                      type: string
+                      description: The platform coin for this token (e.g., "ETH" for
+                        ERC20 tokens).
+                    required_confirmations:
+                      type: number
+                      description: The number of confirmations required for transactions.
+                    token_contract_address:
+                      type: string
+                      description: The contract address of the activated token.
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

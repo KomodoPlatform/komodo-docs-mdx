@@ -1,0 +1,80 @@
+/api/v2/method:
+  post:
+    operationId: approve_token
+    summary: 'Komodo DeFi Framework Method: Approve Token (v2)'
+    description: Method description for approve_token
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - approve_token
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  coin:
+                    description: Token ticker
+                    type: string
+                  spender:
+                    description: Address of smart contract to approve for spending
+                    type: string
+                  amount:
+                    description: Approved amount to spend (in coins units)
+                    type: string
+                required:
+                - coin
+                - spender
+                - amount
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    result:
+                      type: string
+                      description: Approval transaction id
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

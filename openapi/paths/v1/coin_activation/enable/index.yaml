@@ -1,0 +1,171 @@
+/api/v2/method:
+  post:
+    operationId: enable
+    summary: 'Komodo DeFi Framework Method: enable'
+    description: Enable a coin using the native or RPC method in the Komodo DeFi Framework
+      API.
+    tags:
+    - Komodo DeFi Framework API V2
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              method:
+                type: string
+                enum:
+                - enable
+                description: The method name
+              userpass:
+                type: string
+                description: RPC password for authentication
+                example: RPC_UserP@SSW0RD
+              mmrpc:
+                type: string
+                enum:
+                - '2.0'
+                description: The JSON-RPC version
+                example: '2.0'
+              params:
+                type: object
+                properties:
+                  coin:
+                    description: The name of the coin the user desires to enable
+                    type: string
+                    default: '-'
+                  urls:
+                    description: Required for ETH/ERC20 and other gas model chains.
+                      URLs of Ethereum RPC nodes to which the user desires to connect
+                    type: string
+                    default: '-'
+                  swap_contract_address:
+                    description: Required for QRC20 only. Address of etomic swap smart
+                      contract
+                    type: string
+                    default: '-'
+                  fallback_swap_contract:
+                    description: Required for QRC20 only. Address of backup etomic
+                      swap smart contract
+                    type: string
+                    default: '-'
+                  gas_station_decimals:
+                    description: 'For ETH/ERC20 and other gas model chains. Defines
+                      the decimals used to denominate the gas station response to
+                      gwei units. For example, the ETH gas station uses 8 decimals,
+                      which means that "average": 860 is equal to 86 gwei. While the
+                      Matic gas station uses 9 decimals, so 860 would mean 860 gwei
+                      exactly.'
+                    type: integer
+                    enum:
+                    - average
+                    example: average
+                    default: '`8`'
+                  gas_station_policy.policy:
+                    description: For ETH/ERC20 and other gas model chains. Defines
+                      the method of gas price calculation from the station response.
+                      Value can be [gas-station-policy-enum](/komodo-defi-framework/api/common_structures/enums/#gas-station-policy-enum).
+                    type: string
+                    default: '`MeanAverageFast`'
+                  mm2:
+                    description: Required if not set in `coins` file. Informs the
+                      Komodo DeFi Framework API whether or not the coin is expected
+                      to function. Accepted values are `0` or `1`
+                    type: integer
+                    enum:
+                    - '1'
+                    - coins
+                    - '0'
+                    example: '1'
+                    default: '-'
+                  tx_history:
+                    description: If `true` the Komodo DeFi Framework API will preload
+                      transaction history as a background process. Must be set to
+                      `true` to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history)
+                      method
+                    type: boolean
+                    enum:
+                    - 'true'
+                    example: 'true'
+                    default: '`false`'
+                  required_confirmations:
+                    description: Number of confirmations for the Komodo DeFi Framework
+                      API to wait during the transaction steps of an atomic swap.
+                    type: integer
+                    default: '`3`'
+                  requires_notarization:
+                    description: If `true`, coins protected by [Komodo Platform's
+                      dPoW security](https://satindergrewal.medium.com/delayed-proof-of-work-explained-9a74250dbb86)
+                      will wait for a notarization before progressing to the next
+                      atomic swap transactions step.
+                    type: boolean
+                    enum:
+                    - 'true'
+                    example: 'true'
+                    default: '`false`'
+                required:
+                - coin
+            required:
+            - method
+            - userpass
+            - mmrpc
+            - params
+    responses:
+      '200':
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mmrpc:
+                  type: string
+                  enum:
+                  - '2.0'
+                  description: The JSON-RPC version
+                result:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                      description: The address of the user's `coin` wallet, based
+                        on the user's passphrase
+                    balance:
+                      type: string
+                      description: The amount of `coin` the user holds in their wallet;
+                        does not include `unspendable_balance`
+                    unspendable_balance:
+                      type: string
+                      description: The `coin` balance that is unspendable at the moment
+                        (e.g. if the address has immature UTXOs)
+                    coin:
+                      type: string
+                      description: The ticker of enabled coin
+                    required_confirmations:
+                      type: number
+                      description: Komodo DeFi Framework API will wait for this number
+                        of coin's transaction confirmations during the swap
+                    requires_notarization:
+                      type: string
+                      description: Whether the node must wait for a notarization of
+                        the selected coin that is performing the atomic swap transactions
+                    mature_confirmations:
+                      type: number
+                      description: The number of coinbase transaction confirmations
+                        required to become mature; UTXO coins only
+                    result:
+                      type: string
+                      description: The result of the request; this value either indicates
+                        `success`, or an error or other type of failure
+                  description: The response result
+                id:
+                  type:
+                  - integer
+                  - string
+                  - 'null'
+                  description: The request ID
+      '400':
+        description: Bad request
+      '500':
+        description: Internal server error

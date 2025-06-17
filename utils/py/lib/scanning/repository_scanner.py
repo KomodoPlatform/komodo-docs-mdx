@@ -3,17 +3,20 @@
 KDF Repository Scanner - Consolidated
 
 This module handles all aspects of scanning the KDF repository for API method names,
-including fetching source code from remote repositories and extracting method names
-from Rust dispatcher code.
+including fetching source code from remote repositories, extracting method names
+from Rust dispatcher code, and generating documentation for missing methods.
 
 Consolidated from previously separate components:
 - RepositoryFetcher: HTTP fetching of source code
 - MethodExtractor: Regex-based method extraction from Rust code
 - KDFRepositoryScanner: Coordination and high-level scanning logic
+- KDFMethodDocGenerator: Documentation generation for missing methods
 """
 
 import re
 import requests
+import json
+import argparse
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Any, Union, Tuple
 from dataclasses import dataclass
@@ -634,4 +637,287 @@ class KDFRepositoryScanner:
         from ..reporting.mapping_reporter import MappingReporter
         reporter = MappingReporter(verbose=self.verbose)
         return reporter.generate_comparison_report(comparison, method_mappings)
+
+
+class KDFMethodDocGenerator:
+    """
+    Documentation generator for missing KDF methods.
+    
+    This class integrates with the repository scanner to generate compliant
+    documentation for methods that are missing from the documentation.
+    """
+    
+    def __init__(self):
+        # Get the absolute path to the data directory
+        current_dir = Path(__file__).parent.parent.parent  # Go up to utils/py/
+        self.unified_mapping_path = current_dir / "data/unified_method_mapping.json"
+        self.template_path = Path("templates/komodefi_method.mdx")
+        
+        # Import the scanner components needed for documentation generation
+        try:
+            from ..utils.github_scanner import GitHubScanner
+            from ..utils.method_analyzer import MethodAnalyzer
+            from ..utils.doc_generator import DocumentationGenerator
+            
+            self.github_scanner = GitHubScanner()
+            self.method_analyzer = MethodAnalyzer()
+            self.doc_generator = DocumentationGenerator()
+        except ImportError as e:
+            print(f"Warning: Could not import documentation generation components: {e}")
+            self.github_scanner = None
+            self.method_analyzer = None
+            self.doc_generator = None
+        
+    def load_missing_methods(self) -> Dict[str, List[str]]:
+        """Load the list of missing methods from unified mapping."""
+        try:
+            with open(self.unified_mapping_path, 'r') as f:
+                data = json.load(f)
+            return data.get('missing', {}).get('methods_lacking_coverage', {})
+        except FileNotFoundError:
+            print(f"Error: {self.unified_mapping_path} not found")
+            return {}
+        except json.JSONDecodeError as e:
+            print(f"Error parsing JSON: {e}")
+            return {}
+    
+    def validate_method(self, method_name: str) -> Tuple[bool, str]:
+        """Validate if the method is in the missing methods list."""
+        missing_methods = self.load_missing_methods()
+        
+        # Check both v1 and v2
+        for version, methods in missing_methods.items():
+            if method_name in methods:
+                return True, version
+        
+        return False, ""
+    
+    def generate_human_readable_title(self, method_name: str) -> str:
+        """Convert API method name to human-readable title."""
+        # Handle different method name patterns
+        if "::" in method_name:
+            # Handle namespaced methods like "task::enable_bch::cancel"
+            parts = method_name.split("::")
+            if len(parts) >= 2:
+                if parts[0] == "task":
+                    # Task methods: "task::enable_bch::cancel" -> "Cancel Enable BCH Task"
+                    if len(parts) == 3:
+                        action = parts[2].replace("_", " ").title()
+                        target = parts[1].replace("_", " ").title()
+                        return f"{action} {target} Task"
+                    else:
+                        target = parts[1].replace("_", " ").title()
+                        return f"{target} Task"
+                elif parts[0] == "stream":
+                    # Stream methods: "stream::balance::enable" -> "Enable Balance Stream"
+                    if len(parts) == 3:
+                        action = parts[2].replace("_", " ").title()
+                        target = parts[1].replace("_", " ").title()
+                        return f"{action} {target} Stream"
+                elif parts[0] == "lightning":
+                    # Lightning methods: "lightning::payments::send_payment" -> "Send Lightning Payment"
+                    if len(parts) == 3:
+                        category = parts[1].replace("_", " ").title()
+                        action = parts[2].replace("_", " ").title()
+                        return f"{action} Lightning {category[:-1]}"  # Remove 's' from category
+                elif parts[0] == "experimental":
+                    # Experimental methods: "experimental::staking::delegate" -> "Delegate Staking"
+                    if len(parts) >= 3:
+                        action = parts[-1].replace("_", " ").title()
+                        category = parts[-2].replace("_", " ").title()
+                        return f"{action} {category}"
+                elif parts[0] == "gui_storage":
+                    # GUI storage methods: "gui_storage::add_account" -> "Add GUI Storage Account"
+                    action = parts[1].replace("_", " ").title()
+                    return f"{action} GUI Storage"
+                else:
+                    # Generic namespaced methods
+                    action = parts[-1].replace("_", " ").title()
+                    namespace = "::".join(parts[:-1]).replace("_", " ").title()
+                    return f"{action} {namespace}"
+        
+        # Handle simple methods
+        return method_name.replace("_", " ").title()
+    
+    def generate_method_description(self, method_name: str, method_info: Dict) -> str:
+        """Generate a method description based on analysis."""
+        # Create basic description based on method name and purpose
+        if "::" in method_name:
+            parts = method_name.split("::")
+            if parts[0] == "task":
+                if "cancel" in method_name:
+                    return f"Cancels the {parts[1].replace('_', ' ')} task operation in the Komodo DeFi Framework."
+                elif "init" in method_name:
+                    return f"Initializes the {parts[1].replace('_', ' ')} task operation in the Komodo DeFi Framework."
+                elif "status" in method_name:
+                    return f"Retrieves the status of the {parts[1].replace('_', ' ')} task operation."
+                elif "user_action" in method_name:
+                    return f"Handles user action for the {parts[1].replace('_', ' ')} task operation."
+            elif parts[0] == "stream":
+                return f"Manages the {parts[1].replace('_', ' ')} streaming functionality in the Komodo DeFi Framework."
+            elif parts[0] == "lightning":
+                return f"Handles Lightning Network {parts[1].replace('_', ' ')} operations in the Komodo DeFi Framework."
+        
+        return f"The `{method_name}` method provides functionality for {method_name.replace('_', ' ')} operations in the Komodo DeFi Framework."
+    
+    def determine_api_version_tag(self, method_name: str, version: str) -> str:
+        """Determine the appropriate API version tag."""
+        if version == "v1":
+            return "API-v1"
+        elif version == "v2":
+            return "API-v2"
+        else:
+            return "API-v2"  # Default to v2
+    
+    def generate_documentation(self, method_name: str) -> Optional[str]:
+        """Generate complete documentation for a method."""
+        if not all([self.github_scanner, self.method_analyzer, self.doc_generator]):
+            print("Error: Documentation generation components not available")
+            return None
+            
+        # Validate method
+        is_valid, version = self.validate_method(method_name)
+        if not is_valid:
+            print(f"Error: Method '{method_name}' is not in the missing methods list")
+            return None
+        
+        print(f"Generating documentation for {method_name} ({version})...")
+        
+        # Scan repository for method information
+        print("Scanning repository for method details...")
+        method_info = self.github_scanner.scan_method(method_name)
+        
+        # Show handler information if found
+        if method_info.get('rpc_handler'):
+            handler = method_info['rpc_handler']
+            print(f"Found RPC handler in {handler.get('version', 'unknown')} dispatcher")
+            print(f"Handler file: {handler.get('file_path', 'unknown')}")
+        
+        # Analyze method parameters
+        print("Analyzing method parameters...")
+        analysis = self.method_analyzer.analyze_method(method_name, method_info)
+        
+        # Generate human-readable elements
+        human_title = self.generate_human_readable_title(method_name)
+        description = self.generate_method_description(method_name, method_info)
+        api_tag = self.determine_api_version_tag(method_name, version)
+        
+        # Generate documentation
+        print("Generating documentation...")
+        doc_content = self.doc_generator.generate_documentation(
+            method_name=method_name,
+            human_title=human_title,
+            description=description,
+            api_tag=api_tag,
+            analysis=analysis,
+            template_path=self.template_path
+        )
+        
+        return doc_content
+    
+    def save_documentation(self, method_name: str, content: str, version: str) -> str:
+        """Save generated documentation to appropriate location."""
+        # Use the py/data/generated_docs directory
+        current_dir = Path(__file__).parent.parent.parent  # Go up to utils/py/
+        base_path = current_dir / "data" / "generated_docs" / version
+        
+        # Create method-specific directory structure
+        method_parts = method_name.split("::")
+        if len(method_parts) > 1:
+            # Handle namespaced methods
+            method_dir = base_path / "/".join(method_parts)
+        else:
+            # Handle simple methods
+            method_dir = base_path / method_name
+        
+        # Create directory if it doesn't exist
+        method_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Save to index.mdx
+        output_file = method_dir / "index.mdx"
+        with open(output_file, 'w') as f:
+            f.write(content)
+        
+        return str(output_file)
+    
+    def run(self, method_name: str, save: bool = True, output_file: Optional[str] = None) -> None:
+        """Main execution method."""
+        try:
+            # Generate documentation
+            content = self.generate_documentation(method_name)
+            if not content:
+                return
+            
+            if save:
+                if output_file:
+                    # Save to specified file
+                    Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+                    with open(output_file, 'w') as f:
+                        f.write(content)
+                    print(f"Documentation saved to: {output_file}")
+                else:
+                    # Save to standard location
+                    is_valid, version = self.validate_method(method_name)
+                    saved_path = self.save_documentation(method_name, content, version)
+                    print(f"Documentation saved to: {saved_path}")
+            else:
+                # Just print to stdout
+                print("\n" + "="*80)
+                print("GENERATED DOCUMENTATION")
+                print("="*80)
+                print(content)
+        
+        except Exception as e:
+            print(f"Error generating documentation: {e}")
+            raise
+
+
+def main():
+    """Main CLI entry point for documentation generation."""
+    parser = argparse.ArgumentParser(
+        description="Generate KDF method documentation from repository analysis"
+    )
+    parser.add_argument(
+        "method_name",
+        help="Name of the method to generate documentation for"
+    )
+    parser.add_argument(
+        "--list-missing",
+        action="store_true",
+        help="List all missing methods"
+    )
+    parser.add_argument(
+        "--no-save",
+        action="store_true",
+        help="Don't save the file, just print to stdout"
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        help="Output file path (if not using standard location)"
+    )
+    
+    args = parser.parse_args()
+    
+    generator = KDFMethodDocGenerator()
+    
+    if args.list_missing:
+        missing_methods = generator.load_missing_methods()
+        print("Missing Methods:")
+        print("="*50)
+        for version, methods in missing_methods.items():
+            print(f"\n{version.upper()} ({len(methods)} methods):")
+            for method in sorted(methods):
+                print(f"  - {method}")
+        return
+    
+    generator.run(
+        method_name=args.method_name,
+        save=not args.no_save,
+        output_file=args.output
+    )
+
+
+if __name__ == "__main__":
+    main()
 

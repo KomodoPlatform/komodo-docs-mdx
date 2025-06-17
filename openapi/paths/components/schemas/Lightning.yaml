@@ -1,0 +1,391 @@
+ConfirmationTargets:
+  type: object
+  properties:
+    background:
+      description: Used for transactions that can tolerate slower confirmation times
+        when the transaction fee rate decreases. These transactions are not time-sensitive
+        and can afford to wait longer for confirmation. The recommended range is `12`
+        to `144` blocks to ensure a low `feerate`.
+      type: integer
+    normal:
+      description: Used for transactions that we want to confirm promptly, without
+        significant delay (e.g, transactions for opening payment channels). These
+        transactions are important but not critical. Suggested value is `6` blocks
+        to ensure a moderate `feerate`.
+      type: integer
+    high_priority:
+      description: Used for transactions that require quick confirmation to prevent
+        potential loss of funds (e.g. redeeming a Hashed Time Lock Contract (HTLC)
+        on the blockchain before it times out). These transactions are time-critical
+        and must be confirmed promptly to ensure the security of funds. Recommended
+        value for `high_priority` is 1-2 blocks to ensure a high `feerate`.
+      type: integer
+  required:
+  - background
+  - normal
+  - high_priority
+  description: This object represents the number of blocks required for an on-chain
+    lightning-related transaction to be confirmed. It is used for estimating the transaction
+    fee rate (`feerate`) for different transaction types in the context of permissionless
+    transactions performed by the node. Different target types are `background`, `normal`,
+    and `high_priority`.
+CounterpartyChannelConfig:
+  type: object
+  properties:
+    allow_outbound_0conf:
+      description: When setting an outbound channel, it can be used straight away
+        [without waiting](https://docs.rs/lightning/latest/lightning/util/config/struct.ChannelHandshakeLimits.html#structfield.trust_own_funding_0conf)
+        for any on-chain confirmations.
+      type: boolean
+      default: true
+    force_announced_channel_preference:
+      description: Set to force an incoming channel to match our announced channel
+        preference in ChannelOptions announced\_channel.
+      type: boolean
+      default: true
+    outbound_channels_confirmations:
+      description: Confirmations we will wait for before considering an inbound channel
+        locked in.
+      type: integer
+      default: 144
+    our_locktime_limit:
+      description: Set to the amount of blocks we're willing to wait to claim money
+        back to us.
+      type: boolean
+      default: false
+    min_funding_sats:
+      description: Minimum allowed satoshis when an inbound channel is funded.
+      type: boolean
+      default: false
+    max_funding_sats:
+      description: Maximum allowed satoshis when an inbound channel is funded.
+      type: boolean
+      default: false
+    max_htlc_minimum_msat:
+      description: The remote node sets a limit on the minimum size of HTLCs we can
+        send to them. This allows us to limit the maximum minimum-size they can require.
+      type: boolean
+      default: false
+    min_max_htlc_value_in_flight_msat:
+      $ref: '#/components/schemas/HTLCs'
+      description: The remote node sets a limit on the maximum value of pending HTLCs
+        to them at any given time to limit their funds exposure to [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract).
+        This allows us to set a minimum such value.
+    max_channel_reserve_sats:
+      $ref: '#/components/schemas/HTLCs'
+      description: The remote node will require us to keep a certain amount in direct
+        payment to ourselves at all time, ensuring that we are able to be punished
+        if we broadcast an old state. This allows us to limit the amount which we
+        will have to keep to ourselves (and cannot use for [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)).
+    min_max_accepted_htlcs:
+      description: The remote node sets a limit on the maximum number of pending HTLCs
+        to them at any given time. This allows us to set a minimum such value.
+      type: boolean
+      default: false
+  description: Schema definition for CounterpartyChannelConfig
+LightningActivationParams:
+  type: object
+  properties:
+    node_pubkey:
+      description: Lightning node pubkey
+      type: string
+    backup_password:
+      description: Backup password used to encrypt channel backups
+      type: string
+    listening_port:
+      description: Listening port for the Lightning network
+      type: integer
+      default: 9735
+  required:
+  - node_pubkey
+  - backup_password
+  description: Schema definition for LightningActivationParams
+LightningChannelAmount:
+  type: object
+  properties:
+    type:
+      description: '`Exact` for a specific amount or `Max` for whole balance.'
+      type: string
+    value:
+      description: Required if type is `Exact`. The amount in BTC you want to open
+        the channel with.
+      type: object
+  required:
+  - type
+  description: Schema definition for LightningChannelAmount
+LightningChannelConfig:
+  type: object
+  properties:
+    forwarding_fee_proportional_millionths:
+      description: Amount (in milli-satoshi) charged for payments forwarded outbound
+        over the channel, in excess of proportional\_fee\_in\_millionths\_sats.
+      type: integer
+    forwarding_fee_base_msat:
+      description: Amount (in milli-satoshi) charged for payments forwarded outbound
+        over the channel, in excess of proportional\_fee\_in\_millionths\_sats.
+      type: integer
+    cltv_expiry_delta:
+      description: Blocks until [CheckLockTimeVerify (CLTV)](https://academy.bit2me.com/en/que-es-cltv-bitcoin/)
+        expiry.
+      type: integer
+    max_dust_htlc_exposure_msat:
+      $ref: '#/components/schemas/HTLCs'
+      description: Limit our total exposure to in-flight [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)
+        which are burned to fees as they are too small to claim on-chain.
+    force_close_avoidance_max_fee_sats:
+      description: The additional fee we're willing to pay to avoid waiting for the
+        counterparty's locktime to reclaim funds.
+      type: integer
+  description: Schema definition for LightningChannelConfig
+LightningChannelOptions:
+  type: object
+  properties:
+    proportional_fee_in_millionths_sats:
+      description: Amount (in milli-satoshi) charged for payments forwarded outbound
+        over the channel, in excess of proportional\_fee\_in\_millionths\_sats.
+      type: integer
+      default: 0
+    base_fee_msat:
+      description: Amount (in milli-satoshi) charged for payments forwarded outbound
+        over the channel, in excess of proportional\_fee\_in\_millionths\_sats.
+      type: integer
+      default: 1000
+    cltv_expiry_delta:
+      description: Blocks until [CheckLockTimeVerify (CLTV)](https://academy.bit2me.com/en/que-es-cltv-bitcoin/)
+        expiry.
+      type: integer
+      default: 72
+    max_dust_htlc_exposure_msat:
+      $ref: '#/components/schemas/HTLCs'
+      description: Limit our total exposure to in-flight [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)
+        which are burned to fees as they are too small to claim on-chain.
+    force_close_avoidance_max_fee_sats:
+      description: The additional fee we're willing to pay to avoid waiting for the
+        counterparty's locktime to reclaim funds.
+      type: integer
+      default: 1000
+  description: Schema definition for LightningChannelOptions
+LightningClosedChannelsFilter:
+  type: object
+  properties:
+    channel_id:
+      description: Unique string identifying a channel by its ID.
+      type: string
+    counterparty_node_id:
+      description: A hexadecimal string identifying a counterparty node.
+      type: string
+    funding_tx:
+      description: A transaction ID which added funds.
+      type: string
+    from_funding_value:
+      description: The minimum value of channel funding in satoshis.
+      type: integer
+    to_funding_value:
+      description: The maximum value of channel funding in satoshis.
+      type: integer
+    channel_type:
+      description: '`Inbound` or `Outbound`.'
+      type: string
+    closing_tx:
+      description: A transaction ID which closed the channel.
+      type: integer
+    closure_reason:
+      description: The reason a channel was closed.
+      type: integer
+    claiming_tx:
+      description: The ID of the transaction that returned the remaining outbound
+        funds when the channel was closed to our on-chain address.
+      type: integer
+    from_claimed_balance:
+      description: The minimum balance of channel funds claimed in satoshis.
+      type: integer
+    to_claimed_balance:
+      description: The maximum balance of channel funds claimed in satoshis.
+      type: integer
+    channel_visibility:
+      description: '`Public` or `Private`.'
+      type: integer
+  description: Schema definition for LightningClosedChannelsFilter
+LightningOpenChannelsFilter:
+  type: object
+  properties:
+    channel_id:
+      description: Unique string identifying a channel by its ID.
+      type: string
+    counterparty_node_id:
+      description: A hexadecimal string identifying a counterparty node.
+      type: string
+    funding_tx:
+      description: A transaction ID which added funds.
+      type: string
+    from_funding_value_sats:
+      description: The minimum value of channel funding in satoshis.
+      type: integer
+    to_funding_value_sats:
+      description: The maximum value of channel funding in satoshis.
+      type: integer
+    is_outbound:
+      description: If `true`, limits the response to outbound channels only.
+      type: boolean
+    from_balance_msat:
+      description: The minimum channel balance in millisatoshis.
+      type: integer
+    to_balance_msat:
+      description: The maximum channel balance in millisatoshis.
+      type: integer
+    from_outbound_capacity_msat:
+      description: The minimum outbound capacity of the channel balance in millisatoshis.
+      type: integer
+    to_outbound_capacity_msat:
+      description: The maximum outbound capacity of the channel balance in millisatoshis.
+      type: integer
+    from_inbound_capacity_msat:
+      description: The minimum inbound capacity of the channel balance in millisatoshis.
+      type: integer
+    to_inbound_capacity_msat:
+      description: The maximum inbound capacity of the channel balance in millisatoshis.
+      type: integer
+    confirmed:
+      description: If `true`, only channels with channel opening transactions that
+        passed the number of confirmations required for the channel to be usable will
+        be returned.
+      type: boolean
+    is_usable:
+      description: If `true`, only channels that are confirmed and the counterparty
+        is online, meaning that these channels can be used for payments will be returned.
+      type: boolean
+    is_public:
+      description: If `true`, only channels that our node announces to the lightning
+        network, these channels are visible on lightning explorers will be returned.
+      type: boolean
+  description: Schema definition for LightningOpenChannelsFilter
+LightningPayment:
+  type: object
+  properties:
+    type:
+      description: The payment type. Accepted values are `invoice` or [`keysend`](https://cdecker-lightning.readthedocs.io/lightning-keysend.7.html).
+      type: string
+    invoice:
+      description: Only used if `type` is `invoice`. An identifying string which represents
+        the invoice.
+      type: string
+    destination:
+      description: Only used if `type` is `keysend`. A `node_pubkey` (which is also
+        the node address in lightning context). Not to be confused with an onchain
+        address.
+      type: string
+    amount_in_msat:
+      description: Only used if `type` is `keysend`. Amount to be paid, in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)
+        (A thousandth of a satoshi; the same as 0.00000000001 bitcoin).
+      type: string
+    expiry:
+      description: Only used if `type` is `keysend`. Seconds until the payment expires.
+      type: string
+  required:
+  - type
+  description: Schema definition for LightningPayment
+LightningPaymentFilter:
+  type: object
+  properties:
+    payment_type:
+      $ref: '#/components/schemas/LightningPaymentType'
+      description: A standard [LightningPaymentType](/komodo-defi-framework/api/common_structures/lightning/#lightning-payment-type)
+        object.
+    description:
+      description: A note to indicate the purpose of the invoice.
+      type: string
+    status:
+      description: 'Accepted values: `pending`, `succeeded`, `failed`.'
+      type: string
+    from_amount_msat:
+      description: Minimum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)
+      type: integer
+    to_amount_msat:
+      description: Maximum amount sent in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)
+      type: integer
+    from_fee_paid_msat:
+      description: Minimum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)
+      type: integer
+    to_fee_paid_msat:
+      description: Maximum transaction fee paid in [millisatoshis](https://bitcoindata.science/bitcoin-units-converter)
+      type: integer
+    from_timestamp:
+      description: Minimum timestamp in [unix epoch format](https://www.epochconverter.com/)
+        of payment results to return.
+      type: string
+    to_timestamp:
+      description: Maximum timestamp in [unix epoch format](https://www.epochconverter.com/)
+        of payment results to return.
+      type: string
+  description: Schema definition for LightningPaymentFilter
+LightningPaymentType:
+  type: object
+  properties:
+    type:
+      description: Accepted values are `Outbound Payment` or `Inbound Payment`.
+      type: string
+    destination:
+      description: Only used if `type` is `Outbound Payment`. A pubkey which will
+        receive the payment.
+      type: string
+  required:
+  - type
+  description: Schema definition for LightningPaymentType
+ChannelConfigLimits:
+  type: object
+  properties:
+    force_announced_channel_preference:
+      description: The user may override this preference in the channel opening request
+        method call.
+      type: boolean
+      default: false
+    their_to_self_delay:
+      description: The time that we require our counterparty to wait to claim their
+        money, if they broadcast a revoked transaction. This can be increased to provide
+        more punishment for broadcasting old states, but will result in higher fees
+        (since emergency transactions will be larger).
+      type: integer
+      default: 1008
+    our_to_self_delay:
+      description: The time that our counterparty requires us to wait to claim our
+        money, if we broadcast a revoked transaction.
+      type: integer
+      default: 1008
+    our_htlc_minimum_msat:
+      $ref: '#/components/schemas/HTLC'
+      description: The smallest value [HTLC](https://academy.binance.com/en/glossary/hashed-timelock-contract)
+        we will accept to forward from the counterparty.
+    max_accepted_htlcs:
+      $ref: '#/components/schemas/HTLCs'
+      description: The maximum number of [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)
+        we will accept from the counterparty.
+    min_max_htlc_value_in_flight_msat:
+      $ref: '#/components/schemas/HTLCs'
+      description: The remote node sets a limit on the maximum value of pending HTLCs
+        to them at any given time to limit their funds exposure to [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract).
+        This allows us to set a minimum such value.
+    max_channel_reserve_sats:
+      $ref: '#/components/schemas/HTLCs'
+      description: The remote node will require us to keep a certain amount in direct
+        payment to ourselves at all time, ensuring that we are able to be punished
+        if we broadcast an old state. This allows us to limit the amount which we
+        will have to keep to ourselves (and cannot use for [HTLCs](https://academy.binance.com/en/glossary/hashed-timelock-contract)).
+    min_max_accepted_htlcs:
+      description: The remote node sets a limit on the maximum number of pending HTLCs
+        to them at any given time. This allows us to set a minimum such value.
+      type: boolean
+      default: false
+  description: Schema definition for ChannelConfigLimits
+LightningChannelValue:
+  type: object
+  properties:
+    type:
+      description: '`Exact` for a specific amount or `Max` for whole balance.'
+      type: string
+    value:
+      description: Required if type is `Exact`. The amount in BTC you want to open
+        the channel with.
+      type: object
+  required:
+  - type
+  description: Schema definition for LightningChannelValue
