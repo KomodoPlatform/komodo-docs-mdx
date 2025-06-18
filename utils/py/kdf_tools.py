@@ -11,6 +11,7 @@ Available Commands:
 - postman: Generate Postman collections (--clean-before for auto-cleanup)
 - scan-rust: Scan KDF Rust repository for RPC methods
 - scan-mdx: Scan MDX documentation files for method names
+- gap-analysis: Compare Rust methods with MDX documentation
 - map_methods: Method mapping and OpenAPI management
 - json-extract: Extract JSON examples from MDX files
 - cleanup: Clean up old temporary files
@@ -1404,8 +1405,8 @@ class KDFTools:
         success = False
         try:
             data_dir = self._get_data_dir()
-            reports_dir = os.path.join(data_dir, "reports")
-
+            reports_dir = Path(os.path.join(data_dir, "reports"))
+            
             # Load latest Rust scan data
             rust_data = {}
             rust_scan_files = glob.glob(os.path.join(reports_dir, "report-kdf_rust_methods_*.json"))
