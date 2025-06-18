@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - Fee
+  version: v2
+  description: Method description for Fee
+paths:
+  /Fee:
+    post:
+      summary: 'Komodo DeFi Framework Overview: EVM Fee Management'
+      description: Method description for Fee
+      operationId: Fee
+      tags:
+      - Fee
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - Fee
+      responses:
+        '200':
+          description: Successful response for Fee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fee_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

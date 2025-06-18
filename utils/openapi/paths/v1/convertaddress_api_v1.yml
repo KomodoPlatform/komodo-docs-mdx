@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Convertaddress API
+  version: v1
+  description: OpenAPI specification for the convertaddress methods.
+paths:
+  /convertaddress:
+    post:
+      summary: Convert Address
+      description: The convertaddress method converts an input address to a specified
+        address format.
+      operationId: convertaddress
+      tags:
+      - convertaddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - convertaddress
+      responses:
+        '200':
+          description: Successful response for convertaddress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/convertaddress_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  address: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

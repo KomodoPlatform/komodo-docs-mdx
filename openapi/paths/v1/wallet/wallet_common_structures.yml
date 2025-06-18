@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - wallet_common_structures
+  version: v1
+  description: Starting with version beta-2.1.3434, the Komodo DeFi SDK supports the
+    standardized protocol format called mmrpc 2.0.
+paths:
+  /wallet_common_structures:
+    post:
+      summary: 'Komodo DeFi SDK Common Structures: Wallet Operations'
+      description: Starting with version beta-2.1.3434, the Komodo DeFi SDK supports
+        the standardized protocol format called mmrpc 2.0.
+      operationId: wallet_common_structures
+      tags:
+      - wallet_common_structures
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - wallet_common_structures
+      responses:
+        '200':
+          description: Successful response for wallet_common_structures
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/wallet_common_structures_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

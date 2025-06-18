@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - query_nft_database_tables
+  version: v2
+  description: The query_nft_database_tables method describes the structure and querying
+    of local NFT database tables after using update_nft.
+paths:
+  /query_nft_database_tables:
+    post:
+      summary: Query NFT Database Tables
+      description: The query_nft_database_tables method describes the structure and
+        querying of local NFT database tables after using update_nft.
+      operationId: query_nft_database_tables
+      tags:
+      - query_nft_database_tables
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - query_nft_database_tables
+      responses:
+        '200':
+          description: Successful response for query_nft_database_tables
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/query_nft_database_tables_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

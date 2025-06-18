@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::create_new_account::init
+  version: v2
+  description: Initialize a task to create a new HD account using the Komodo DeFi
+    Framework API.
+paths:
+  /task::create_new_account::init:
+    post:
+      summary: Initialize Create New Account Task
+      description: Initialize a task to create a new HD account using the Komodo DeFi
+        Framework API.
+      operationId: task::create_new_account::init
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::create_new_account::init
+                params:
+                  type: object
+                  properties:
+                    account_id:
+                      description: If not defined, will increment to the next unused
+                        account id in the wallet.
+                      type: integer
+                      default: '-'
+                    coin:
+                      description: Ticker of coin you would like to initialize a HD
+                        account for.
+                      type: string
+                      default: '-'
+                    gap_limit:
+                      description: The maximum number of empty addresses in a row.
+                        Defaults to the value provided on activation, or `20` if no
+                        value was provided.
+                      type: integer
+                      default: '`20`'
+                    scan:
+                      description: If `true`, will scan the account for funded addresses.
+                      type: boolean
+                      default: '`true`'
+                  required:
+                  - coin
+      responses:
+        '200':
+          description: Successful response for task::create_new_account::init
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_create_new_account_init_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  task_id: 123
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

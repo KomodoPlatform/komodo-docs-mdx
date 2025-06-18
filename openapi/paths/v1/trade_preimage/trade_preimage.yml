@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - trade_preimage
+  version: v1
+  description: The trade_preimage method returns the approximate fee amounts that
+    are paid per the whole swap.
+paths:
+  /trade_preimage:
+    post:
+      summary: Trade Preimage
+      description: The trade_preimage method returns the approximate fee amounts that
+        are paid per the whole swap.
+      operationId: trade_preimage
+      tags:
+      - trade_preimage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - trade_preimage
+      responses:
+        '200':
+          description: Successful response for trade_preimage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/trade_preimage_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  base_coin_fee: {}
+                  fee_to_send_taker_fee: {}
+                  rel_coin_fee: {}
+                  result: {}
+                  taker_fee: {}
+                  total_fees: {}
+                  volume: string_value
+                  volume_fraction: {}
+                  volume_rat: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

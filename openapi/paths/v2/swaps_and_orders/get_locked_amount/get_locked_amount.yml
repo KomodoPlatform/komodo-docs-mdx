@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - get_locked_amount
+  version: v2
+  description: The get_locked_amount method returns the amount of a coin currently
+    locked by a swap in progress, with details in decimal, fraction, and rational
+    formats.
+paths:
+  /get_locked_amount:
+    post:
+      summary: Get Locked Amount
+      description: The get_locked_amount method returns the amount of a coin currently
+        locked by a swap in progress, with details in decimal, fraction, and rational
+        formats.
+      operationId: get_locked_amount
+      tags:
+      - get_locked_amount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_locked_amount
+                params:
+                  type: object
+                  properties:
+                    coin:
+                      description: The ticker of the coin you want to query.
+                      type: string
+                  required:
+                  - coin
+      responses:
+        '200':
+          description: Successful response for get_locked_amount
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_locked_amount_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  coin: string_value
+                  locked_amount: {}
+                  locked_amount.decimal: string_value
+                  locked_amount.rational: {}
+                  locked_amount.fraction: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

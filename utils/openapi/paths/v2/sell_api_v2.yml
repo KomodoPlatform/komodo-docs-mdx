@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Sell API
+  version: v2
+  description: OpenAPI specification for the sell methods.
+paths:
+  /sell:
+    post:
+      summary: Sell
+      description: The sell method issues a sell request and attempts to match an
+        order from the orderbook based on the provided arguments.
+      operationId: sell
+      tags:
+      - sell
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - sell
+      responses:
+        '200':
+          description: Successful response for sell
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sell_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  action: string_value
+                  base: string_value
+                  base_amount: string_value
+                  base_amount_rat: {}
+                  base_orderbook_ticker: string_value
+                  conf_settings: {}
+                  dest_pub_key: string_value
+                  match_by: {}
+                  method: string_value
+                  rel: string_value
+                  rel_amount: string_value
+                  rel_amount_rat: {}
+                  rel_orderbook_ticker: string_value
+                  sender_pubkey: string_value
+                  uuid: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

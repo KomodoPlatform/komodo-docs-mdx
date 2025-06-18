@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - coin_activation
+  version: v1
+  description: Learn about the two methods of coin activation, enable and electrum.
+paths:
+  /coin_activation:
+    post:
+      summary: Coin Activation
+      description: Learn about the two methods of coin activation, enable and electrum.
+      operationId: coin_activation
+      tags:
+      - coin_activation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - coin_activation
+      responses:
+        '200':
+          description: Successful response for coin_activation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/coin_activation_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -24,7 +24,7 @@ echo "============== 📊 Step 1A: Scanning KDF repository... ==============="
 echo "# This step scans the Rust source code and produces:"
 echo "#   - utils/py/data/kdf_rust_methods_{branch}_YYYYMMDD_HHMMSS.json"
 echo "#   - Contains all RPC methods found in Rust code (v1 & v2)"
-if ! python py/kdf_tools.py scan-rust --branch dev --versions v1 v2; then
+if ! python py/kdf_tools.py scan-rust --branch dev --versions all; then
     echo "❌ Step 1A failed: Repository scanning"
     exit 1
 fi
@@ -60,7 +60,7 @@ echo "#   - Generates common schema files with auto-detected enums"
 echo "#   - Creates category-specific OpenAPI files (task, lightning, etc.)"
 echo "#   - Includes request/response schemas, parameters, examples"
 echo "#   - Processes both v1 and v2 in a single run for comprehensive tracking"
-if ! python py/kdf_tools.py openapi --version all; then
+if ! python py/kdf_tools.py openapi --clean-before --version all; then
     echo "❌ Step 2 failed: OpenAPI specification generation"
     exit 1
 fi
@@ -100,15 +100,12 @@ if ! python py/kdf_tools.py postman --versions all; then
 fi
 echo
 
-# Step 5: Create Unified Mapping & Analysis
-# OUTPUT: Creates/updates unified mapping files showing relationships between all components
-# CONTAINS: Cross-references between MDX files, OpenAPI specs, JSON examples, Postman, and comprehensive gap analysis
-# PURPOSE: Provides comprehensive view of documentation ecosystem, coverage analysis, and enables advanced tooling
+# Step 5: Create comprehensive mappings and reports
 echo "============== 🗺️ Step 5: Creating unified mapping & comprehensive analysis... ==============="
 echo "# This step creates comprehensive mappings and produces:"
 echo "#   - Unified mapping files showing relationships between:"
 echo "#     * MDX documentation files"
-echo "#     * OpenAPI specification files"  
+echo "#     * OpenAPI specification files"
 echo "#     * JSON example files"
 echo "#     * Postman collection entries"
 echo "#   - Comprehensive coverage analysis and gap identification:"
@@ -120,7 +117,7 @@ echo "#   - Enables cross-referencing and consistency checking"
 echo "#   - Powers advanced tooling and automation"
 echo "#   - Includes hotlinks to specific Postman collection requests"
 echo "#   - Maps method names to collection folder paths and request IDs"
-if ! python py/kdf_tools.py methods-map; then
+if ! python py/kdf_tools.py map_methods; then
     echo "❌ Step 5 failed: Unified mapping generation"
     exit 1
 fi

@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - List Banned Pubkeys API
+  version: v1
+  description: OpenAPI specification for the list_banned_pubkeys methods.
+paths:
+  /list_banned_pubkeys:
+    post:
+      summary: List Banned Pubkeys
+      description: The list_banned_pubkeys method returns a list of public keys of
+        nodes that are banned from interacting with the node executing the method.
+      operationId: list_banned_pubkeys
+      tags:
+      - list_banned_pubkeys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - list_banned_pubkeys
+      responses:
+        '200':
+          description: Successful response for list_banned_pubkeys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/list_banned_pubkeys_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: {}
+                  result.\*.type: string_value
+                  result.\*.caused_by_swap: string_value
+                  result.\*.caused_by_event: {}
+                  result.\*.reason: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - experimental::staking
+  version: v2
+  description: An overview of the staking methods in the Komodo DeFi Framework API.
+paths:
+  /experimental::staking:
+    post:
+      summary: 'Komodo DeFi Framework Method Overview: Staking Methods'
+      description: An overview of the staking methods in the Komodo DeFi Framework
+        API.
+      operationId: experimental::staking
+      tags:
+      - experimental
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - experimental::staking
+      responses:
+        '200':
+          description: Successful response for experimental::staking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/experimental_staking_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

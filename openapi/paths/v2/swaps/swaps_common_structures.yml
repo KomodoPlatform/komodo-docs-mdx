@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - swaps_common_structures
+  version: v2
+  description: Each active or completed trade from the Komodo DeFi SDK includes an
+    unique identifier (UUID), a summary of the trade and detailed information relating
+    to each swap event.
+paths:
+  /swaps_common_structures:
+    post:
+      summary: 'Komodo DeFi SDK Common Structures: Swaps'
+      description: Each active or completed trade from the Komodo DeFi SDK includes
+        an unique identifier (UUID), a summary of the trade and detailed information
+        relating to each swap event.
+      operationId: swaps_common_structures
+      tags:
+      - swaps_common_structures
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - swaps_common_structures
+      responses:
+        '200':
+          description: Successful response for swaps_common_structures
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/swaps_common_structures_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

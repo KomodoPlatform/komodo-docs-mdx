@@ -1,0 +1,165 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - 1Inch V6 0 Classic Swap Create API
+  version: v2
+  description: OpenAPI specification for the 1inch_v6_0_classic_swap_create methods.
+paths:
+  /1inch_v6_0_classic_swap_create:
+    post:
+      summary: 1inch v6.0 Classic Swap Create
+      description: Method description for 1inch_v6_0_classic_swap_create
+      operationId: 1inch_v6_0_classic_swap_create
+      tags:
+      - 1inch_v6_0_classic_swap_create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - 1inch_v6_0_classic_swap_create
+                params:
+                  type: object
+                  properties:
+                    allow_partial_fill:
+                      description: If true, the algorithm can cancel part of the route,
+                        if the rate has become less attractive. Unswapped tokens will
+                        return to 'my address'.
+                      type: boolean
+                    amount:
+                      description: Swap amount (in coins units)
+                      type: string
+                    base:
+                      description: Base coin name
+                      type: string
+                    compatibility:
+                      description: Exclude the Unoswap method
+                      type: boolean
+                    complexity_level:
+                      description: 'Maximum number of token-connectors to be used
+                        in a transaction, min: 0; max: 3'
+                      type: string
+                    connector_tokens:
+                      description: Token-connectors can be specified via this parameter.
+                        If not set, default token-connectors will be used
+                      type: string
+                    disable_estimate:
+                      description: If true, disable most of the checks
+                      type: boolean
+                    excluded_protocols:
+                      description: 'Excluded supported liquidity sources. Should be
+                        the same for a quote and swap, max: 5'
+                      type: string
+                    fee:
+                      description: 'Partner fee, percentage of src token amount will
+                        be sent to referrer address, min: 0; max: 3. Should be the
+                        same for quote and swap rpc.'
+                      type: number
+                    gas_limit:
+                      description: 'Maximum amount of gas for a swap. Should be the
+                        same for a quote and swap. max: 11500000'
+                      type: string
+                    gas_price:
+                      description: Network price per gas, in Gwei. 1inch takes in
+                        account gas expenses to determine exchange route. Should be
+                        the same for a quote and swap
+                      type: string
+                    include_gas:
+                      description: Include estimated gas in return value
+                      type: boolean
+                    include_protocols:
+                      description: Return used swap protocols in response
+                      type: boolean
+                    include_tokens_info:
+                      description: Return fromToken and toToken info in response
+                      type: boolean
+                    main_route_parts:
+                      description: 'Limit maximum number of main route parts. Should
+                        be the same for a quote and swap. max: 50'
+                      type: string
+                    parts:
+                      description: 'Limit maximum number of parts each main route
+                        parts can be split into. Should be the same for a quote and
+                        swap. max: 100'
+                      type: string
+                    permit:
+                      description: Used according [https://eips.ethereum.org/EIPS/eip-2612](https://eips.ethereum.org/EIPS/eip-2612)
+                      type: string
+                    protocols:
+                      description: 'Specify liquidity sources e.g.: \&protocols=WETH,CURVE,BALANCER,...,ZRX
+                        (by default - all used)'
+                      type: string
+                    receiver:
+                      description: This address will receive funds after the swap.
+                        By default same address as 'my address'
+                      type: boolean
+                    referrer:
+                      description: Address to receive the partner fee. Must be set
+                        explicitly if fee is also set
+                      type: boolean
+                    rel:
+                      description: Rel coin name (must be from the same EVM chain
+                        as the base coin)
+                      type: string
+                    slippage:
+                      description: 'Allowed slippage, min: 0; max: 50'
+                      type: number
+                    use_permit2:
+                      description: Enable this flag for auto approval by Permit2 contract
+                        if you did an approval to Uniswap Permit2 smart contract for
+                        this token.
+                      type: boolean
+                  required:
+                  - amount
+                  - base
+                  - rel
+                  - slippage
+      responses:
+        '200':
+          description: Successful response for 1inch_v6_0_classic_swap_create
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/1inch_v6_0_classic_swap_create_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  dst_amount: {}
+                  src_token: {}
+                  dst_token: {}
+                  protocols: {}
+                  tx: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

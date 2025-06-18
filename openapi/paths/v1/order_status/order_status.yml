@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - order_status
+  version: v1
+  description: The order_status method returns the data of the order with the selected
+    uuid created by the Komodo DeFi Framework API node.
+paths:
+  /order_status:
+    post:
+      summary: Order Status
+      description: The order_status method returns the data of the order with the
+        selected uuid created by the Komodo DeFi Framework API node.
+      operationId: order_status
+      tags:
+      - order_status
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - order_status
+      responses:
+        '200':
+          description: Successful response for order_status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order_status_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

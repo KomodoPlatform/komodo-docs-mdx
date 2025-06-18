@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - metrics
+  version: v1
+  description: The metrics method returns a snapshot of the current Komodo DeFi Framework
+    API metrics used in Prometheus and Grafana.
+paths:
+  /metrics:
+    post:
+      summary: Metrics
+      description: The metrics method returns a snapshot of the current Komodo DeFi
+        Framework API metrics used in Prometheus and Grafana.
+      operationId: metrics
+      tags:
+      - metrics
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - metrics
+      responses:
+        '200':
+          description: Successful response for metrics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/metrics_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  metrics: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Recover Funds Of Swap API
+  version: v2
+  description: OpenAPI specification for the recover_funds_of_swap methods.
+paths:
+  /recover_funds_of_swap:
+    post:
+      summary: Recover Funds Of Swap
+      description: Learn how to recover funds from a swap-payment address in case
+        of an error using the recover_funds_of_swap method in the Komodo DeFi Framework
+        API.
+      operationId: recover_funds_of_swap
+      tags:
+      - recover_funds_of_swap
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - recover_funds_of_swap
+      responses:
+        '200':
+          description: Successful response for recover_funds_of_swap
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/recover_funds_of_swap_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  action: string_value
+                  coin: string_value
+                  tx_hash: string_value
+                  tx_hex: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

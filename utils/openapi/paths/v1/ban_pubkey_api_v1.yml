@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Ban Pubkey API
+  version: v1
+  description: OpenAPI specification for the ban_pubkey methods.
+paths:
+  /ban_pubkey:
+    post:
+      summary: Ban Pubkey
+      description: The ban_pubkey method bans the selected pubkey ignoring its order
+        matching messages and preventing its orders from displaying in the orderbook.
+      operationId: ban_pubkey
+      tags:
+      - ban_pubkey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - ban_pubkey
+      responses:
+        '200':
+          description: Successful response for ban_pubkey
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ban_pubkey_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

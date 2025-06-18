@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - get_raw_transaction
+  version: v2
+  description: The get_raw_transaction method returns the full signed raw transaction
+    hex for a given coin and transaction hash.
+paths:
+  /get_raw_transaction:
+    post:
+      summary: Get Raw Transaction
+      description: The get_raw_transaction method returns the full signed raw transaction
+        hex for a given coin and transaction hash.
+      operationId: get_raw_transaction
+      tags:
+      - get_raw_transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_raw_transaction
+      responses:
+        '200':
+          description: Successful response for get_raw_transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_raw_transaction_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  tx_hex: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

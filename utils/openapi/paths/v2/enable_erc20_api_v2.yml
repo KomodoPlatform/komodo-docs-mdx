@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Enable Erc20 API
+  version: v2
+  description: OpenAPI specification for the enable_erc20 methods.
+paths:
+  /enable_erc20:
+    post:
+      summary: Enable ERC20
+      description: Method description for enable_erc20
+      operationId: enable_erc20
+      tags:
+      - enable_erc20
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - enable_erc20
+      responses:
+        '200':
+          description: Successful response for enable_erc20
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/enable_erc20_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  balances: {}
+                  platform_coin: string_value
+                  required_confirmations: {}
+                  token_contract_address: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

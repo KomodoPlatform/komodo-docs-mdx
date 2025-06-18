@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Get Public Key API
+  version: v2
+  description: OpenAPI specification for the get_public_key methods.
+paths:
+  /get_public_key:
+    post:
+      summary: Get Public Key
+      description: The get_public_key method returns the compressed secp256k1 pubkey
+        corresponding to the user
+      operationId: get_public_key
+      tags:
+      - get_public_key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_public_key
+      responses:
+        '200':
+          description: Successful response for get_public_key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_public_key_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  public_key: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

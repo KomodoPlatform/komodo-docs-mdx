@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - stream::fee_estimator::enable
+  version: v2
+  description: Using this method, you can enable the fee estimation stream.
+paths:
+  /stream::fee_estimator::enable:
+    post:
+      summary: Fee Estimator Streaming
+      description: Using this method, you can enable the fee estimation stream.
+      operationId: stream::fee_estimator::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::fee_estimator::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1))
+                      type: integer
+                    coin:
+                      description: The coin or token to enable the fee estimation
+                        stream for.
+                      type: string
+                  required:
+                  - client_id
+                  - coin
+      responses:
+        '200':
+          description: Successful response for stream::fee_estimator::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_fee_estimator_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

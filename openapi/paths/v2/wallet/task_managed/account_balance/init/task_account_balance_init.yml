@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::account_balance::init
+  version: v2
+  description: Initialise an account balance request for HD wallets in the Komodo
+    DeFi Framework API.
+paths:
+  /task::account_balance::init:
+    post:
+      summary: Initialize Account Balance Task
+      description: Initialise an account balance request for HD wallets in the Komodo
+        DeFi Framework API.
+      operationId: task::account_balance::init
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::account_balance::init
+                params:
+                  type: object
+                  properties:
+                    account_index:
+                      description: For GUIs, this will be zero. In CLI you can use
+                        other values if you [know what you are doing](https://learnmeabitcoin.com/technical/hd-wallets)
+                      type: integer
+                    coin:
+                      description: Ticker of activated coin you want to see addresses
+                        and balance for
+                      type: string
+                  required:
+                  - account_index
+                  - coin
+      responses:
+        '200':
+          description: Successful response for task::account_balance::init
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_account_balance_init_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  task_id: 123
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

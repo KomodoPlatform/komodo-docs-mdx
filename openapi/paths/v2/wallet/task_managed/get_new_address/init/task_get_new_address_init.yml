@@ -1,0 +1,79 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::get_new_address::init
+  version: v2
+  description: Generate a new HD address in the Komodo DeFi Framework API.
+paths:
+  /task::get_new_address::init:
+    post:
+      summary: Initialize Get New Address Task
+      description: Generate a new HD address in the Komodo DeFi Framework API.
+      operationId: task::get_new_address::init
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::get_new_address::init
+                params:
+                  type: object
+                  properties:
+                    account_id:
+                      description: Generally this will be `0` unless you have multiple
+                        accounts registered on your Trezor
+                      type: integer
+                      default: '`0`'
+                    chain:
+                      description: '`Internal`, or `External`. External is used for
+                        addresses that are intended to be visible outside of the wallet
+                        (e.g. for receiving payments). Internal is used for addresses
+                        which are not meant to be visible outside of the wallet and
+                        is used to return the leftover change from a transaction.'
+                      type: string
+                      default: '`"External"`'
+                    coin:
+                      description: The ticker of the coin you want to get a new address
+                        for
+                      type: string
+                      default: '`-`'
+                    gap_limit:
+                      description: The maximum number of empty addresses in a row.
+                        Defaults to the value provided on activation or 20 if no value
+                        was provided
+                      type: integer
+                      default: '`20`'
+                  required:
+                  - coin
+      responses:
+        '200':
+          description: Successful response for task::get_new_address::init
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_get_new_address_init_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  new_address: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

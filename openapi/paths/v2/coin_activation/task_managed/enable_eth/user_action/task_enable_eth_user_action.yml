@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::enable_eth::user_action
+  version: v2
+  description: Handle user action (e.g., Trezor PIN entry) for ETH/EVM activation
+    task.
+paths:
+  /task::enable_eth::user_action:
+    post:
+      summary: 'Enable ETH Task: User Action'
+      description: Handle user action (e.g., Trezor PIN entry) for ETH/EVM activation
+        task.
+      operationId: task::enable_eth::user_action
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::enable_eth::user_action
+      responses:
+        '200':
+          description: Successful response for task::enable_eth::user_action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_enable_eth_user_action_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

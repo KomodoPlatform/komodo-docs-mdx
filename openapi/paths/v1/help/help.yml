@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - help
+  version: v1
+  description: The help method returns the full API documentation in the terminal.
+paths:
+  /help:
+    post:
+      summary: Help
+      description: The help method returns the full API documentation in the terminal.
+      operationId: help
+      tags:
+      - help
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - help
+      responses:
+        '200':
+          description: Successful response for help
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/help_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  (output): {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

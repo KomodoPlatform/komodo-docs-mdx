@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - verify_message
+  version: v2
+  description: The method in this document allows you to verify messages for all coins
+    supported by Komodo DeFi Framework.
+paths:
+  /verify_message:
+    post:
+      summary: Verify Message
+      description: The method in this document allows you to verify messages for all
+        coins supported by Komodo DeFi Framework.
+      operationId: verify_message
+      tags:
+      - verify_message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - verify_message
+                params:
+                  type: object
+                  properties:
+                    address:
+                      description: The address used to sign the message.
+                      type: string
+                    coin:
+                      description: The coin to verify the message with.
+                      type: string
+                    message:
+                      description: The message input via the `sign_message` method.
+                      type: string
+                    signature:
+                      description: The signature generated for the message.
+                      type: string
+                  required:
+                  - address
+                  - coin
+                  - message
+                  - signature
+      responses:
+        '200':
+          description: Successful response for verify_message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/verify_message_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  is_valid: true
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

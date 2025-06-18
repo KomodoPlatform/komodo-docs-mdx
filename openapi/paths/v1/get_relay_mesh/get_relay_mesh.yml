@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - get_relay_mesh
+  version: v1
+  description: The get_relay_mesh method returns a list of peerIDs included in our
+    local relay mesh.
+paths:
+  /get_relay_mesh:
+    post:
+      summary: Get Relay Mesh
+      description: The get_relay_mesh method returns a list of peerIDs included in
+        our local relay mesh.
+      operationId: get_relay_mesh
+      tags:
+      - get_relay_mesh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_relay_mesh
+      responses:
+        '200':
+          description: Successful response for get_relay_mesh
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_relay_mesh_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  PeerIDs: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

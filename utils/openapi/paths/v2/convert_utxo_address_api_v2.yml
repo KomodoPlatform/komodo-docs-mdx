@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Convert Utxo Address API
+  version: v2
+  description: OpenAPI specification for the convert_utxo_address methods.
+paths:
+  /convert_utxo_address:
+    post:
+      summary: Convert UTXO Address
+      description: The convert_utxo_address method takes a UTXO address as input and
+        returns the equivalent address for another UTXO coin.
+      operationId: convert_utxo_address
+      tags:
+      - convert_utxo_address
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - convert_utxo_address
+      responses:
+        '200':
+          description: Successful response for convert_utxo_address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/convert_utxo_address_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::enable_utxo::status
+  version: v2
+  description: Query the status of UTXO activation task.
+paths:
+  /task::enable_utxo::status:
+    post:
+      summary: 'Enable UTXO Task: Status'
+      description: Query the status of UTXO activation task.
+      operationId: task::enable_utxo::status
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::enable_utxo::status
+                params:
+                  type: object
+                  properties:
+                    forget_if_finished:
+                      description: If false, will return final response for completed
+                        tasks.
+                      type: boolean
+                      default: '`true`'
+                    task_id:
+                      description: The identifying number returned when initiating
+                        the initialisation process.
+                      type: integer
+                      default: '-'
+                  required:
+                  - task_id
+      responses:
+        '200':
+          description: Successful response for task::enable_utxo::status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_enable_utxo_status_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  status: string_value
+                  details: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

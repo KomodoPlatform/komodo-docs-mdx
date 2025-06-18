@@ -1,0 +1,62 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - stream::network::enable
+  version: v2
+  description: Using this method, you can enable network events streaming.
+paths:
+  /stream::network::enable:
+    post:
+      summary: Enable Network Streaming
+      description: Using this method, you can enable network events streaming.
+      operationId: stream::network::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::network::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: In the case of a single client, this defaults to
+                        `0`. This ID can be used to access data via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1)
+                      type: integer
+                      default: '`0`'
+                    config:
+                      description: A standard [StreamingConfig](/komodo-defi-framework/api/common_structures/#streaming-config)
+                        object.
+                      type: object
+                      default: '-'
+      responses:
+        '200':
+          description: Successful response for stream::network::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_network_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

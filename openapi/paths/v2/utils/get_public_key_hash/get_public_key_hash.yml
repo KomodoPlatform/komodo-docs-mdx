@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - get_public_key_hash
+  version: v2
+  description: The get_public_key_hash method returns the RIPEMD-160 hash version
+    of your public key.
+paths:
+  /get_public_key_hash:
+    post:
+      summary: Get Public Key Hash
+      description: The get_public_key_hash method returns the RIPEMD-160 hash version
+        of your public key.
+      operationId: get_public_key_hash
+      tags:
+      - get_public_key_hash
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_public_key_hash
+      responses:
+        '200':
+          description: Successful response for get_public_key_hash
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_public_key_hash_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  public_key_hash: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

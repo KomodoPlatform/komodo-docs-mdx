@@ -35,44 +35,67 @@ class MDXParser:
         self.enum_patterns = defaultdict(set)
 
     def parse_mdx_file(self, file_path: Path) -> Optional[Dict[str, Any]]:
+        # TEST COMMENT
         """Parse an MDX file and extract method information."""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
 
-            # Extract method name from the ## heading
-            method_match = re.search(r'^##\s+([^\s{]+)', content, re.MULTILINE)
-            if not method_match:
-                return None
-
-            # Clean up method name by removing escape backslashes
-            method_name = method_match.group(1).replace('\\_', '_')
-
-            # Extract title and description from exports
-            title_match = re.search(r'export const title = ["\']([^"\']+)["\']', content)
-            desc_match = re.search(r'export const description = ["\']([^"\']+)["\']', content)
-
-            title = title_match.group(1) if title_match else f"Komodo DeFi Framework Method: {method_name}"
-            description = desc_match.group(1) if desc_match else f"Method description for {method_name}"
-
-            # Extract parameters from parameter tables
-            parameters = self._extract_parameters_from_mdx(content)
-
-            # Extract response parameters (for future use)
-            response_parameters = self._extract_response_parameters_from_mdx(content)
-
-            return {
-                'method_name': method_name,
-                'title': title,
-                'description': description,
-                'parameters': parameters,
-                'response_parameters': response_parameters,
-                'file_path': str(file_path)
-            }
+            if 'common_structures/enums' in str(file_path):
+                return self._parse_enum_file(content, file_path)
+            elif 'common_structures' in str(file_path):
+                return self._parse_structure_file(content, file_path)
+            else:
+                return self._parse_method_file(content, file_path)
 
         except Exception as e:
             print(f"Error parsing {file_path}: {e}")
             return None
+
+    def _parse_enum_file(self, content: str, file_path: Path) -> Optional[Dict[str, Any]]:
+        """Parses an MDX file containing an enum definition."""
+        enum_name_match = re.search(r'#\s+([a-zA-Z0-9_]+)', content)
+        if enum_name_match:
+            enum_name = enum_name_match.group(1)
+            self.enum_patterns[enum_name] = set() # Placeholder for actual enum values
+            return {"type": "enum", "name": enum_name, "file_path": str(file_path)}
+        return None
+
+    def _parse_structure_file(self, content: str, file_path: Path) -> Optional[Dict[str, Any]]:
+        """Parses an MDX file containing a common structure definition."""
+        structure_name_match = re.search(r'#\s+([a-zA-Z0-9_]+)', content)
+        if structure_name_match:
+            structure_name = structure_name_match.group(1)
+            self.common_structures[structure_name] += 1
+            return {"type": "structure", "name": structure_name, "file_path": str(file_path)}
+        return None
+
+    def _parse_method_file(self, content: str, file_path: Path) -> Optional[Dict[str, Any]]:
+        """Parse an MDX file for method information."""
+        method_match = re.search(r'^##\s+([^\s{]+)', content, re.MULTILINE)
+        if not method_match:
+            return None
+
+        method_name = method_match.group(1).replace('\\_', '_')
+
+        title_match = re.search(r'export const title = ["\']([^"\']+)["\']', content)
+        desc_match = re.search(r'export const description = ["\']([^"\']+)["\']', content)
+
+        title = title_match.group(1) if title_match else f"Komodo DeFi Framework Method: {method_name}"
+        description = desc_match.group(1) if desc_match else f"Method description for {method_name}"
+
+        parameters = self._extract_parameters_from_mdx(content)
+        response_parameters = self._extract_response_parameters_from_mdx(content)
+
+        return {
+            'type': 'method',
+            'method_name': method_name,
+            'title': title,
+            'description': description,
+            'parameters': parameters,
+            'response_parameters': response_parameters,
+            'file_path': str(file_path)
+        }
 
     def _extract_response_parameters_from_mdx(self, content: str) -> List[Dict[str, Any]]:
         """Extract response parameters from MDX response tables."""
@@ -321,6 +344,10 @@ class MDXParser:
             # Get the correct default value
             actual_default = default_value or self._extract_default_from_description(description)
 
+            # Check for common structures and update counter
+            if 'common structure' in description.lower():
+                self.common_structures[param_name.strip('`')] += 1
+            
             parameters.append(Parameter(
                 name=param_name.strip('`').replace('\\_', '_'),
                 type=cleaned_type,

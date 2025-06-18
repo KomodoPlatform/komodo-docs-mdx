@@ -1,0 +1,48 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::enable_bch
+  version: v2
+  description: Overview of task managed activation methods for BCH and SLP tokens.
+paths:
+  /task::enable_bch:
+    post:
+      summary: Enable BCH Task Overview
+      description: Overview of task managed activation methods for BCH and SLP tokens.
+      operationId: task::enable_bch
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::enable_bch
+      responses:
+        '200':
+          description: Successful response for task::enable_bch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_enable_bch_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

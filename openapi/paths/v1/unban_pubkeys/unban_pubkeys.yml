@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - unban_pubkeys
+  version: v1
+  description: The unban_pubkeys method will remove all currently banned pubkeys from
+    your ban list, or specific pubkeys from a user defined list.
+paths:
+  /unban_pubkeys:
+    post:
+      summary: Unban Pubkeys
+      description: The unban_pubkeys method will remove all currently banned pubkeys
+        from your ban list, or specific pubkeys from a user defined list.
+      operationId: unban_pubkeys
+      tags:
+      - unban_pubkeys
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - unban_pubkeys
+      responses:
+        '200':
+          description: Successful response for unban_pubkeys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/unban_pubkeys_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  still_banned: {}
+                  unbanned: {}
+                  were_not_banned: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

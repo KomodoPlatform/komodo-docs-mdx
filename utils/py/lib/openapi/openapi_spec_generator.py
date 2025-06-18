@@ -98,27 +98,45 @@ class OpenApiSpecGenerator:
         """
         Writes a given OpenAPI specification to a YAML file.
         """
+        # Determine base directories based on version
+        if version == 'v1':
+            mdx_base_dirs = [self.path_mapper.config.directories.mdx_legacy]
+            yaml_base_dir = self.path_mapper.config.directories.yaml_v1
+        else: # v2 and v2-dev
+            mdx_base_dirs = [
+                self.path_mapper.config.directories.mdx_v2,
+                self.path_mapper.config.directories.mdx_v2_dev
+            ]
+            yaml_base_dir = self.path_mapper.config.directories.yaml_v2
+
         if mdx_path:
             root = self.path_mapper.config.workspace_root
-            for src_dir in [self.path_mapper.config.directories.mdx_v2, 
-                            self.path_mapper.config.directories.mdx_v2_dev,
-                            "src/pages/komodo-defi-framework/api/common_structures"]:
+            relative_mdx_path = None
+            
+            # Add common structures to search paths
+            search_dirs = mdx_base_dirs + ["src/pages/komodo-defi-framework/api/common_structures"]
+
+            for src_dir in search_dirs:
                 try:
                     relative_mdx_path = Path(mdx_path).relative_to(Path(root) / src_dir)
                     break
                 except ValueError:
                     continue
-            else:
-                raise ValueError(f"Could not determine relative path for {mdx_path}")
+            
+            if relative_mdx_path is None:
+                raise ValueError(f"Could not determine relative path for {mdx_path} in any of the expected directories.")
+
             path_parts = list(relative_mdx_path.parts)
             
-            if 'api' in path_parts: path_parts.remove('api')
-            if version.upper() in path_parts: path_parts.remove(version.upper())
-            if 'index.mdx' in path_parts: path_parts.remove('index.mdx')
+            # Clean up path components
+            if 'index.mdx' in path_parts:
+                path_parts.remove('index.mdx')
 
-            output_path = Path(self.path_mapper.config.directories.yaml_v2) / version / Path('/'.join(path_parts))
+            # The final output path should be relative to the versioned yaml directory
+            output_path = Path(self.path_mapper.config.workspace_root) / yaml_base_dir / '/'.join(path_parts)
         else:
-            output_path = Path(self.path_mapper.config.directories.yaml_v2) / version
+            # Fallback for cases without mdx_path
+            output_path = Path(self.path_mapper.config.workspace_root) / yaml_base_dir
 
         filename = self._generate_filename(method_name)
         full_path = output_path / f"{filename}.yml"

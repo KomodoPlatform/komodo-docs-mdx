@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::init_trezor::status
+  version: v2
+  description: Query the status of Trezor device initialisation in the Komodo DeFi
+    Framework API.
+paths:
+  /task::init_trezor::status:
+    post:
+      summary: task::init_trezor::status
+      description: Query the status of Trezor device initialisation in the Komodo
+        DeFi Framework API.
+      operationId: task::init_trezor::status
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::init_trezor::status
+      responses:
+        '200':
+          description: Successful response for task::init_trezor::status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_init_trezor_status_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  status: string_value
+                  details: {}
+                  details.type: string_value
+                  details.model: string_value
+                  details.device_name: string_value
+                  details.device_id: string_value
+                  details.device_pubkey: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

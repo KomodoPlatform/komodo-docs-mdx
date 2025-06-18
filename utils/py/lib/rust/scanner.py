@@ -255,7 +255,7 @@ class KDFScanner:
         try:
             response = requests.get(url, timeout=30)
             response.raise_for_status()
-            self.logger.success(f"Successfully fetched source ({len(response.text):,} chars)")
+            # self.logger.success(f"Successfully fetched {url} ({len(response.text):,} chars)")
             return response.text
         except requests.RequestException as e:
             self.logger.error(f"Failed to fetch source: {e}")

@@ -1,0 +1,49 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::enable_qtum::init
+  version: v2
+  description: Task managed activation of QTUM and QRC20 tokens.
+paths:
+  /task::enable_qtum::init:
+    post:
+      summary: 'Enable QTUM Task: Init'
+      description: Task managed activation of QTUM and QRC20 tokens.
+      operationId: task::enable_qtum::init
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::enable_qtum::init
+      responses:
+        '200':
+          description: Successful response for task::enable_qtum::init
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_enable_qtum_init_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  task_id: 123
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

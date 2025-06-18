@@ -1,0 +1,68 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::scan_for_new_addresses::status
+  version: v2
+  description: Query the status of a scan for new HD addresses in the Komodo DeFi
+    Framework API.
+paths:
+  /task::scan_for_new_addresses::status:
+    post:
+      summary: Scan For New Addresses Task Status
+      description: Query the status of a scan for new HD addresses in the Komodo DeFi
+        Framework API.
+      operationId: task::scan_for_new_addresses::status
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::scan_for_new_addresses::status
+                params:
+                  type: object
+                  properties:
+                    forget_if_finished:
+                      description: If `false`, will return final response for completed
+                        tasks.
+                      type: boolean
+                      default: '`true`'
+                    task_id:
+                      description: The identifying number returned when initiating
+                        the task.
+                      type: integer
+                      default: '`-`'
+                  required:
+                  - task_id
+      responses:
+        '200':
+          description: Successful response for task::scan_for_new_addresses::status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_scan_for_new_addresses_status_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  status: string_value
+                  details: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

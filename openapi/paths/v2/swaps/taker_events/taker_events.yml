@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - taker_events
+  version: v2
+  description: A description of events and outcomes for each step of an atomic swap
+    from the taker
+paths:
+  /taker_events:
+    post:
+      summary: 'Komodo Defi SDK Swaps: Taker Events'
+      description: A description of events and outcomes for each step of an atomic
+        swap from the taker
+      operationId: taker_events
+      tags:
+      - taker_events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - taker_events
+      responses:
+        '200':
+          description: Successful response for taker_events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/taker_events_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

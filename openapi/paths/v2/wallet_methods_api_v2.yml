@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Wallet Methods API
+  version: v2
+  description: OpenAPI specification for the wallet_methods methods.
+paths:
+  /wallet_methods:
+    post:
+      summary: 'Komodo DeFi Framework Method Overview: Wallet Methods'
+      description: This document provides an overview of all wallet methods available
+        in the Komodo DeFi Framework.
+      operationId: wallet_methods
+      tags:
+      - wallet_methods
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - wallet_methods
+      responses:
+        '200':
+          description: Successful response for wallet_methods
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/wallet_methods_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

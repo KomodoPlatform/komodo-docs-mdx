@@ -45,6 +45,8 @@ class OpenAPIManager:
         self.all_methods = {}
         self.success_count = 0
         self.error_count = 0
+        self.enum_count = 0
+        self.structure_count = 0
 
     def generate_openapi_spec(self, version: str = "v2") -> str:
         """
@@ -60,12 +62,17 @@ class OpenAPIManager:
         """
         self.vlog(f"Starting OpenAPI generation for version: {version}")
         
-        # Define source directories to scan for MDX files
-        source_dirs = [
-            Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2,
-            Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2_dev,
-            Path(self.config.workspace_root) / "src/pages/komodo-defi-framework/api/common_structures"
-        ]
+        # Define source directories based on version
+        source_dirs = []
+        if version == "v1":
+            source_dirs.append(Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_legacy)
+        elif version == "v2":
+            source_dirs.append(Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2)
+            source_dirs.append(Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2_dev)
+        
+        # Add common structures directory, which is relevant for all versions
+        source_dirs.append(Path(self.config.workspace_root) / "src/pages/komodo-defi-framework/api/common_structures")
+        
         source_dirs = [d for d in source_dirs if d.exists()]
         
         # Discover and process all MDX files
@@ -74,32 +81,38 @@ class OpenAPIManager:
                 self.vlog(f"Processing file: {mdx_file}")
                 
                 # Parse the MDX file to get method information
-                method_info = self.mdx_parser.parse_mdx_file(mdx_file)
+                parsed_info = self.mdx_parser.parse_mdx_file(mdx_file)
                 
-                if method_info:
-                    method_name = method_info['method_name']
-                    self.all_methods[method_name] = method_info
-                    
-                    # Generate the individual OpenAPI spec for the method
-                    spec = self.spec_generator.generate_openapi_spec(method_info, version)
-                    
-                    # Write the spec to a file
-                    openapi_path = self.spec_generator.write_openapi_file(
-                        spec, method_name, version, mdx_path=str(mdx_file)
-                    )
-                    self.success_count += 1
-                    
-                    # Track method details for reporting
-                    self.spec_generator.all_method_details.append(OpenAPIMethod(
-                        name=method_name,
-                        summary=method_info['title'],
-                        mdx_path=str(mdx_file),
-                        openapi_path=openapi_path
-                    ))
-                    self.spec_generator.all_path_details.append(PathDetail(
-                        path=openapi_path,
-                        method_name=method_name
-                    ))
+                if parsed_info:
+                    doc_type = parsed_info.get('type')
+                    if doc_type == 'method':
+                        method_name = parsed_info['method_name']
+                        self.all_methods[method_name] = parsed_info
+                        
+                        # Generate the individual OpenAPI spec for the method
+                        spec = self.spec_generator.generate_openapi_spec(parsed_info, version)
+                        
+                        # Write the spec to a file
+                        openapi_path = self.spec_generator.write_openapi_file(
+                            spec, method_name, version, mdx_path=str(mdx_file)
+                        )
+                        self.success_count += 1
+                        
+                        # Track method details for reporting
+                        self.spec_generator.all_method_details.append(OpenAPIMethod(
+                            name=method_name,
+                            summary=parsed_info['title'],
+                            mdx_path=str(mdx_file),
+                            openapi_path=openapi_path
+                        ))
+                        self.spec_generator.all_path_details.append(PathDetail(
+                            path=openapi_path,
+                            method_name=method_name
+                        ))
+                    elif doc_type == 'enum':
+                        self.enum_count += 1
+                    elif doc_type == 'structure':
+                        self.structure_count += 1
                 else:
                     self.error_count += 1
         
@@ -113,11 +126,15 @@ class OpenAPIManager:
         stats = self.get_stats()
         self.vlog(f"OpenAPI generation complete. {stats['files_processed']} files processed.")
         
+        # Get enum and structure counts from the parser
+        enums_count = len(self.mdx_parser.enum_patterns)
+        structures_count = len(self.mdx_parser.common_structures)
+        
         # Generate tracking files
         self.spec_generator.generate_tracking_files(version, self.success_count, self.error_count,
-                                             self.mdx_parser.enum_patterns, 0, 0, [str(d) for d in source_dirs])
+                                             self.mdx_parser.enum_patterns, structures_count, enums_count, [str(d) for d in source_dirs])
 
-        return f"Successfully generated OpenAPI specs for {self.success_count} methods with {self.error_count} errors."
+        return f"Successfully generated OpenAPI specs for {self.success_count} methods with {self.error_count} errors, and processed {self.enum_count} enums and {self.structure_count} structures."
 
     def vlog(self, message: str):
         """Verbose logging utility."""

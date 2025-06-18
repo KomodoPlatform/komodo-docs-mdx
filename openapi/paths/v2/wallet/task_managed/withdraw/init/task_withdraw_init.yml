@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::withdraw::init
+  version: v2
+  description: Generate, sign, and return a withdrawal transaction in the Komodo DeFi
+    Framework API.
+paths:
+  /task::withdraw::init:
+    post:
+      summary: Initialize Withdraw Task
+      description: Generate, sign, and return a withdrawal transaction in the Komodo
+        DeFi Framework API.
+      operationId: task::withdraw::init
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::withdraw::init
+                params:
+                  type: object
+                  properties:
+                    amount:
+                      description: The amount the user desires to withdraw, ignored
+                        when `max=true`
+                      type: string
+                      default: '`-`'
+                    coin:
+                      description: The name of the coin the user desires to withdraw
+                      type: string
+                      default: '`-`'
+                    fee:
+                      description: Used only to set a custom fee, otherwise fee value
+                        will be derived from a deamon's `estimatefee` (or similar)
+                        RPC method
+                      type: object
+                      default: '`-`'
+                    fee.amount:
+                      description: Fee amount in coin units, used only when type is
+                        `UtxoFixed` (fixed amount not depending on tx size) or `UtxoPerKbyte`
+                        (amount per Kbyte)
+                      type: string
+                      default: '`-`'
+                    fee.type:
+                      description: 'Type of transaction fee; possible values: `UtxoFixed`
+                        or `UtxoPerKbyte`'
+                      type: string
+                      default: '`-`'
+                    from:
+                      description: Used only for transactions using a hardware wallet.
+                        For more information, see the [Trezor Integration guide](/komodo-defi-framework/api/v20/utils/task_init_trezor/)
+                      type: string
+                      default: '`-`'
+                    from.account_id:
+                      description: HD wallets only. Generally this will be `0` unless
+                        you have multiple accounts registered on your HD wallet
+                      type: integer
+                      default: '`-`'
+                    from.address_id:
+                      description: HD wallets only. Check the output from coin activation
+                        to find the ID of an address with balance.
+                      type: integer
+                      default: '`-`'
+                    from.chain:
+                      description: HD wallets only. `Internal`, or `External`. External
+                        is used for addresses that are intended to be visible outside
+                        of the wallet (e.g. for receiving payments). `Internal` is
+                        used for addresses which are not meant to be visible outside
+                        of the wallet and is used to return the leftover change from
+                        a transaction.
+                      type: string
+                      default: '`-`'
+                    from.derivation_path:
+                      description: HD wallets only. Follows the format `m/44'/COIN_ID'/ACCOUNT_ID'/CHAIN/ADDRESS_ID`
+                      type: string
+                      default: '`-`'
+                    max:
+                      description: Withdraw the maximum available amount.
+                      type: boolean
+                      default: '`false`'
+                    memo:
+                      description: Used for ZHTLC and Tendermint coins only. Attaches
+                        a memo to the transaction.
+                      type: string
+                      default: '`-`'
+                    to:
+                      description: Coins are withdrawn to this address
+                      type: string
+                      default: '`-`'
+                  required:
+                  - coin
+                  - to
+      responses:
+        '200':
+          description: Successful response for task::withdraw::init
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_withdraw_init_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  task_id: 123
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Get Wallet Names API
+  version: v2
+  description: OpenAPI specification for the get_wallet_names methods.
+paths:
+  /get_wallet_names:
+    post:
+      summary: Get Wallet Names
+      description: The get_wallet_names method returns a list of wallet names for
+        a user
+      operationId: get_wallet_names
+      tags:
+      - get_wallet_names
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_wallet_names
+      responses:
+        '200':
+          description: Successful response for get_wallet_names
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_wallet_names_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  activated_wallet: string_value
+                  wallet_names: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

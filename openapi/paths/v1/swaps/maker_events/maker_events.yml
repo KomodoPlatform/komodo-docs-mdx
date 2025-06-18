@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - maker_events
+  version: v1
+  description: A description of events and outcomes for each step of an atomic swap
+    from the maker
+paths:
+  /maker_events:
+    post:
+      summary: 'Komodo Defi SDK Swaps: Maker Events'
+      description: A description of events and outcomes for each step of an atomic
+        swap from the maker
+      operationId: maker_events
+      tags:
+      - maker_events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - maker_events
+      responses:
+        '200':
+          description: Successful response for maker_events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/maker_events_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

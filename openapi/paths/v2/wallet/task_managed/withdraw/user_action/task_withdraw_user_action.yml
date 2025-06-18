@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::withdraw::user_action
+  version: v2
+  description: Send user action (PIN) to the Trezor device during withdrawal in the
+    Komodo DeFi Framework API.
+paths:
+  /task::withdraw::user_action:
+    post:
+      summary: Withdraw Task User Action
+      description: Send user action (PIN) to the Trezor device during withdrawal in
+        the Komodo DeFi Framework API.
+      operationId: task::withdraw::user_action
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::withdraw::user_action
+                params:
+                  type: object
+                  properties:
+                    task_id:
+                      description: The identifying number returned when initiating
+                        the withdrawal process.
+                      type: integer
+                    user_action:
+                      description: Object containing the params below
+                      type: object
+                    user_action.action_type:
+                      description: Will be `TrezorPin` for this method
+                      type: string
+                    user_action.pin:
+                      description: When the Trezor device is displaying a grid of
+                        numbers for PIN entry, this param will contain your Trezor
+                        pin, as mapped through your keyboard numpad. See the image
+                        below for more information.
+                      type: string
+                  required:
+                  - task_id
+                  - user_action
+                  - user_action.action_type
+                  - user_action.pin
+      responses:
+        '200':
+          description: Successful response for task::withdraw::user_action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_withdraw_user_action_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

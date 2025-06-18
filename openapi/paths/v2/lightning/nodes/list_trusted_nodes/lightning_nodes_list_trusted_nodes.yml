@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - lightning::nodes::list_trusted_nodes
+  version: v2
+  description: List all trusted Lightning nodes using the Komodo DeFi Framework API.
+paths:
+  /lightning::nodes::list_trusted_nodes:
+    post:
+      summary: List Trusted Lightning Nodes
+      description: List all trusted Lightning nodes using the Komodo DeFi Framework
+        API.
+      operationId: lightning::nodes::list_trusted_nodes
+      tags:
+      - lightning
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - lightning::nodes::list_trusted_nodes
+      responses:
+        '200':
+          description: Successful response for lightning::nodes::list_trusted_nodes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/lightning_nodes_list_trusted_nodes_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  trusted_nodes: string_value
+                  id: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

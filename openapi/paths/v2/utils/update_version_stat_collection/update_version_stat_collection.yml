@@ -1,0 +1,60 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - update_version_stat_collection
+  version: v2
+  description: The update_version_stat_collection method updates the polling interval
+    for version stats collection.
+paths:
+  /update_version_stat_collection:
+    post:
+      summary: Update Version Stat Collection
+      description: The update_version_stat_collection method updates the polling interval
+        for version stats collection.
+      operationId: update_version_stat_collection
+      tags:
+      - update_version_stat_collection
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - update_version_stat_collection
+                params:
+                  type: object
+                  properties:
+                    interval:
+                      description: Polling rate (in seconds) to query node versions
+                      type: integer
+                  required:
+                  - interval
+      responses:
+        '200':
+          description: Successful response for update_version_stat_collection
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/update_version_stat_collection_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

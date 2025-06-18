@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - sign_raw_transaction
+  version: v2
+  description: The sign_raw_transaction method allows users to sign UTXO or EVM raw
+    transactions, returning a signed transaction hex ready for broadcast.
+paths:
+  /sign_raw_transaction:
+    post:
+      summary: Sign Raw Transaction
+      description: The sign_raw_transaction method allows users to sign UTXO or EVM
+        raw transactions, returning a signed transaction hex ready for broadcast.
+      operationId: sign_raw_transaction
+      tags:
+      - sign_raw_transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - sign_raw_transaction
+                params:
+                  type: object
+                  properties:
+                    coin:
+                      description: The coin to sign the raw transaction with.
+                      type: string
+                    tx:
+                      description: A standard [RawTxInfo object](/komodo-defi-framework/api/common_structures/wallet/#raw-tx-info).
+                      type: object
+                    type:
+                      description: 'The operation type. Accepted values: `UTXO` (for
+                        UTXO coins), `ETH` (for EVM coins).'
+                      type: string
+                  required:
+                  - coin
+                  - tx
+                  - type
+      responses:
+        '200':
+          description: Successful response for sign_raw_transaction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/sign_raw_transaction_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  tx_hex: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

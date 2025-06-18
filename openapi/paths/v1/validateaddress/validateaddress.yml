@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - validateaddress
+  version: v1
+  description: The validateaddress method checks if an input string is a valid address
+    of the specified coin.
+paths:
+  /validateaddress:
+    post:
+      summary: Validate Address
+      description: The validateaddress method checks if an input string is a valid
+        address of the specified coin.
+      operationId: validateaddress
+      tags:
+      - validateaddress
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - validateaddress
+      responses:
+        '200':
+          description: Successful response for validateaddress
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/validateaddress_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  is_valid: {}
+                  reason: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

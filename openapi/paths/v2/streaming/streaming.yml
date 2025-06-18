@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - streaming
+  version: v2
+  description: This document provides an overview of methods to configure and initiate
+    the KDF streaming interface.
+paths:
+  /streaming:
+    post:
+      summary: 'Komodo DeFi Framework Method Overview: Streaming Methods'
+      description: This document provides an overview of methods to configure and
+        initiate the KDF streaming interface.
+      operationId: streaming
+      tags:
+      - streaming
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - streaming
+      responses:
+        '200':
+          description: Successful response for streaming
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/streaming_Response'
+              example:
+                mmrpc: '2.0'
+                result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

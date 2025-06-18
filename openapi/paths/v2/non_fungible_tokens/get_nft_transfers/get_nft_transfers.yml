@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - get_nft_transfers
+  version: v2
+  description: The get_nft_transfers method returns a list of NFT transfers involving
+    the user, with filtering and pagination options.
+paths:
+  /get_nft_transfers:
+    post:
+      summary: Get NFT Transfers
+      description: The get_nft_transfers method returns a list of NFT transfers involving
+        the user, with filtering and pagination options.
+      operationId: get_nft_transfers
+      tags:
+      - get_nft_transfers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_nft_transfers
+      responses:
+        '200':
+          description: Successful response for get_nft_transfers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_nft_transfers_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  transfer_history: {}
+                  total: 123
+                  skipped: 123
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,53 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - task::enable_lightning::status
+  version: v2
+  description: Check the status of a lightning node initialization task on the Komodo
+    DeFi Framework.
+paths:
+  /task::enable_lightning::status:
+    post:
+      summary: Check Lightning Activation Status
+      description: Check the status of a lightning node initialization task on the
+        Komodo DeFi Framework.
+      operationId: task::enable_lightning::status
+      tags:
+      - task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - task::enable_lightning::status
+      responses:
+        '200':
+          description: Successful response for task::enable_lightning::status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/task_enable_lightning_status_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  platform_coin: string_value
+                  address: string_value
+                  balance: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

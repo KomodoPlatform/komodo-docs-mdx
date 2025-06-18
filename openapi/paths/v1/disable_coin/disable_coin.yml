@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - disable_coin
+  version: v1
+  description: The disable_coin method deactivates the previously enabled coin and
+    also cancels all active orders that use the selected coin.
+paths:
+  /disable_coin:
+    post:
+      summary: Disable Coin
+      description: The disable_coin method deactivates the previously enabled coin
+        and also cancels all active orders that use the selected coin.
+      operationId: disable_coin
+      tags:
+      - disable_coin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - disable_coin
+      responses:
+        '200':
+          description: Successful response for disable_coin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/disable_coin_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  coin: string_value
+                  cancelled_orders: string_value
+                  swaps: string_value
+                  orders.matching: string_value
+                  orders.cancelled: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

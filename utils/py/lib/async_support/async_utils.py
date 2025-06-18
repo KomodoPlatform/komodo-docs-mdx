@@ -192,7 +192,7 @@ class AsyncFileProcessor:
                 # Use default continue_on_error behavior (True for individual tasks)
                 self.logger.warning(f"Task failed: {e}")
                 results.append(None)
-                progress.update()
+            progress.update()
         
         progress.finish()
         return results

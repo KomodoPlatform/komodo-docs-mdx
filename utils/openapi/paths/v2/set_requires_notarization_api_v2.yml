@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Set Requires Notarization API
+  version: v2
+  description: OpenAPI specification for the set_requires_notarization methods.
+paths:
+  /set_requires_notarization:
+    post:
+      summary: Set Requires Notarization
+      description: The set_requires_notarization method indicates whether Komodo DeFi
+        Framework API must wait for a dPoW notarization of the given atomic swap transactions.
+      operationId: set_requires_notarization
+      tags:
+      - set_requires_notarization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - set_requires_notarization
+      responses:
+        '200':
+          description: Successful response for set_requires_notarization
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/set_requires_notarization_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  coin: string_value
+                  requires_notarization: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

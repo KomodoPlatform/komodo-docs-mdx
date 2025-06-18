@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - best_orders
+  version: v1
+  description: The best_orders method returns the best price orders that can fill
+    the volume for all existing pairs with the selected coin.
+paths:
+  /best_orders:
+    post:
+      summary: Best Orders
+      description: The best_orders method returns the best price orders that can fill
+        the volume for all existing pairs with the selected coin.
+      operationId: best_orders
+      tags:
+      - best_orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - best_orders
+      responses:
+        '200':
+          description: Successful response for best_orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/best_orders_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

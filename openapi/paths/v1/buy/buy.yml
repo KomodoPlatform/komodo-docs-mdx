@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework API - buy
+  version: v1
+  description: The buy method issues a buy request and attempts to match an order
+    from the orderbook based on the provided arguments.
+paths:
+  /buy:
+    post:
+      summary: Buy
+      description: The buy method issues a buy request and attempts to match an order
+        from the orderbook based on the provided arguments.
+      operationId: buy
+      tags:
+      - buy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - buy
+      responses:
+        '200':
+          description: Successful response for buy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/buy_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  action: string_value
+                  base: string_value
+                  base_amount: string_value
+                  base_amount_rat: {}
+                  rel: string_value
+                  rel_amount: string_value
+                  rel_amount_rat: {}
+                  method: string_value
+                  dest_pub_key: string_value
+                  sender_pubkey: string_value
+                  uuid: string_value
+                  match_by: {}
+                  conf_settings: {}
+                  base_orderbook_ticker: string_value
+                  rel_orderbook_ticker: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
