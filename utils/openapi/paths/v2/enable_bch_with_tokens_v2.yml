@@ -1,0 +1,135 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Enable Bch With Tokens V2 API
+  version: v2
+  description: OpenAPI specification for the enable_bch_with_tokens_v2 methods.
+paths:
+  /enable_bch_with_tokens:
+    post:
+      summary: Enable BCH with Tokens
+      description: Using this method, you can enable BCH/tBCH along with multiple
+        SLP tokens in a single command.
+      operationId: enable_bch_with_tokens
+      tags:
+      - enable_bch_with_tokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - enable_bch_with_tokens
+                params:
+                  type: object
+                  properties:
+                    address_format:
+                      description: Overwrites the address format from coins file,
+                        if set. A standard [AddressFormat](/komodo-defi-framework/api/common_structures/wallet/#address-format)
+                        object.
+                      type: object
+                      default: '-'
+                    allow_slp_unsafe_conf:
+                      description: If true, allows bchd\_urls to be empty. **Warning:**
+                        it is highly unsafe to do so as it may lead to invalid SLP
+                        transactions generation and tokens burning.
+                      type: boolean
+                      default: 'false'
+                    bchd_urls:
+                      description: A list of BCHD gRPC API server URLs, used for validation
+                        of SLP token transactions. It's recommended to add as many
+                        servers as possible. The URLs list can be found at [https://bchd.fountainhead.cash/](https://bchd.fountainhead.cash/).
+                      type: string
+                      default: '-'
+                    get_balances:
+                      description: If false, coin and token balances will not be returned
+                        in the response, and the response will be returned more quickly.
+                      type: boolean
+                      default: 'true'
+                    mode:
+                      description: A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode)
+                        object.
+                      type: object
+                      default: '-'
+                    required_confirmations:
+                      description: Confirmations to wait for steps in swap. Defaults
+                        to value in the coins file if not set.
+                      type: integer
+                      default: '3'
+                    requires_notarization:
+                      description: Has no effect on BCH.
+                      type: boolean
+                      default: 'true'
+                    slp_tokens_requests:
+                      description: A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request)
+                        objects.
+                      type: array
+                      default: '-'
+                    ticker:
+                      description: Ticker of the platform protocol coin.
+                      type: string
+                      default: '-'
+                    tx_history:
+                      description: If true the Komodo DeFi Framework API will preload
+                        transaction history as a background process. Must be set to
+                        true to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history)
+                        method.
+                      type: boolean
+                      default: 'false'
+                    utxo_merge_params:
+                      description: A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params)
+                        object. Used to reduce a wallet's UTXO count in cases where
+                        it is causing significantly slower RPC responses.
+                      type: object
+                      default: '-'
+                  required:
+                  - bchd_urls
+                  - mode
+                  - slp_tokens_requests
+                  - ticker
+      responses:
+        '200':
+          description: Successful response for enable_bch_with_tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/enable_bch_with_tokens_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  bch_addresses_infos: {}
+                  current_block: 123
+                  slp_addresses_infos: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

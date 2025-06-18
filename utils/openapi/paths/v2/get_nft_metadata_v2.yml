@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Get Nft Metadata V2 API
+  version: v2
+  description: OpenAPI specification for the get_nft_metadata_v2 methods.
+paths:
+  /get_nft_metadata:
+    post:
+      summary: Get NFT Metadata
+      description: The get_nft_metadata method returns metadata for a specific NFT,
+        including collection, contract type, and ownership details.
+      operationId: get_nft_metadata
+      tags:
+      - get_nft_metadata
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_nft_metadata
+      responses:
+        '200':
+          description: Successful response for get_nft_metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_nft_metadata_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  amount: string_value
+                  block_number_minted: 123
+                  block_number: 123
+                  chain: string_value
+                  name: string_value
+                  contract_type: string_value
+                  last_token_uri_sync: string_value
+                  last_metadata_sync: string_value
+                  metadata: string_value
+                  minter_address: string_value
+                  owner_of: string_value
+                  possible_spam: true
+                  possible_phishing: true
+                  symbol: string_value
+                  token_address: string_value
+                  token_id: string_value
+                  token_hash: string_value
+                  token_uri: string_value
+                  token_domain: string_value
+                  uri_meta: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

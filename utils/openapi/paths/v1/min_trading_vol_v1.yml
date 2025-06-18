@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Min Trading Vol V1 API
+  version: v1
+  description: OpenAPI specification for the min_trading_vol_v1 methods.
+paths:
+  /min_trading_vol:
+    post:
+      summary: Min Trading Vol
+      description: The min_trading_vol method returns the minimum required volume
+        for buy/sell/setprice methods for the selected coin.
+      operationId: min_trading_vol
+      tags:
+      - min_trading_vol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - min_trading_vol
+      responses:
+        '200':
+          description: Successful response for min_trading_vol
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/min_trading_vol_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: {}
+                  coin: string_value
+                  min_trading_vol: string_value
+                  min_trading_vol_rat: {}
+                  min_trading_vol_fraction: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

@@ -1,0 +1,111 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Trade Preimage V2 API
+  version: v2
+  description: OpenAPI specification for the trade_preimage_v2 methods.
+paths:
+  /trade_preimage:
+    post:
+      summary: Trade Preimage
+      description: The trade_preimage method returns the approximate fee amounts that
+        are paid per the whole swap.
+      operationId: trade_preimage
+      tags:
+      - trade_preimage
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - trade_preimage
+                params:
+                  type: object
+                  properties:
+                    base:
+                      description: The base currency of the request.
+                      type: string
+                      default: '`-`'
+                    max:
+                      description: Whether to return the maximum available volume
+                        for `setprice` method; must not be set or `false` if `swap_method`
+                        is `buy` or `sell`.
+                      type: boolean
+                      default: '`false`'
+                    price:
+                      description: The price in `rel` the user is willing to pay per
+                        one unit of the `base` coin.
+                      type: string
+                      default: '`-`'
+                    rel:
+                      description: The rel currency of the request.
+                      type: string
+                      default: '`-`'
+                    swap_method:
+                      description: 'The name of the method whose preimage is requested.
+                        Possible values: `buy`, `sell`, `setprice`. See [SwapMethodEnum](/komodo-defi-framework/api/common_structures/enums/#swap-method-enum).'
+                      $ref: '#/components/schemas/swap-method-enum'
+                      default: '`-`'
+                    volume:
+                      description: The amount the user is willing to trade; ignored
+                        if `max = true` **and** `swap_method = setprice`, otherwise,
+                        it must be set.
+                      type: string
+                      default: '`-`'
+                  required:
+                  - base
+                  - price
+                  - rel
+                  - swap_method
+      responses:
+        '200':
+          description: Successful response for trade_preimage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/trade_preimage_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  base_coin_fee: {}
+                  rel_coin_fee: {}
+                  volume: string_value
+                  volume_rat: {}
+                  volume_fraction: {}
+                  taker_fee: {}
+                  fee_to_send_taker_fee: {}
+                  total_fees: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

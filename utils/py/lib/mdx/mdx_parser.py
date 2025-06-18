@@ -72,6 +72,10 @@ class MDXParser:
 
     def _parse_method_file(self, content: str, file_path: Path) -> Optional[Dict[str, Any]]:
         """Parse an MDX file for method information."""
+        # If the file is tagged as an overview, skip it.
+        if "tag : 'overview'" in content:
+            return None
+
         method_match = re.search(r'^##\s+([^\s{]+)', content, re.MULTILINE)
         if not method_match:
             return None

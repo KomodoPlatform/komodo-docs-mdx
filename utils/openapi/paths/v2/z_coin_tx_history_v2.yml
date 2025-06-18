@@ -1,0 +1,99 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Z Coin Tx History V2 API
+  version: v2
+  description: OpenAPI specification for the z_coin_tx_history_v2 methods.
+paths:
+  /z_coin_tx_history:
+    post:
+      summary: ZHTLC Coin Transaction History
+      description: Method description for z_coin_tx_history
+      operationId: z_coin_tx_history
+      tags:
+      - z_coin_tx_history
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - z_coin_tx_history
+                params:
+                  type: object
+                  properties:
+                    coin:
+                      description: Ticker of the coin to get history for.
+                      type: string
+                      default: '-'
+                    limit:
+                      description: Limits the number of returned transactions. Ignored
+                        if `max = true`.
+                      type: integer
+                      default: '`10`'
+                    paging_options.FromId:
+                      description: Komodo DeFi Framework API will skip records until
+                        it reaches this ID, skipping the from\_id as well; track the
+                        internal\_id of the last displayed transaction to find the
+                        value of this field for the next page
+                      type: string
+                      default: '-'
+                    paging_options.PageNumber:
+                      description: Komodo DeFi Framework API will return limit swaps
+                        from the selected page. Ignored if `FromId` is set.
+                      type: integer
+                      default: '-'
+                  required:
+                  - coin
+      responses:
+        '200':
+          description: Successful response for z_coin_tx_history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/z_coin_tx_history_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  current_block: {}
+                  from_id: string_value
+                  limit: {}
+                  page_number: {}
+                  skipped: {}
+                  sync_status: {}
+                  total: {}
+                  total_pages: {}
+                  transactions: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

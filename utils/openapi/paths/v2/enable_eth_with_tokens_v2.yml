@@ -1,0 +1,69 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Enable Eth With Tokens V2 API
+  version: v2
+  description: OpenAPI specification for the enable_eth_with_tokens_v2 methods.
+paths:
+  /enable_eth_with_tokens:
+    post:
+      summary: Enable ETH with Tokens
+      description: The enable_eth_with_tokens method allows you to enable a platform
+        coin like ETH along with multiple ERC20 like tokens of the platform coin chain
+        in a single command.
+      operationId: enable_eth_with_tokens
+      tags:
+      - enable_eth_with_tokens
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - enable_eth_with_tokens
+      responses:
+        '200':
+          description: Successful response for enable_eth_with_tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/enable_eth_with_tokens_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  current_block: 123
+                  erc20_addresses_infos: {}
+                  eth_addresses_infos: {}
+                  nfts_infos: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

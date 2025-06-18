@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Set Swap Transaction Fee Policy V2 API
+  version: v2
+  description: OpenAPI specification for the set_swap_transaction_fee_policy_v2 methods.
+paths:
+  /set_swap_transaction_fee_policy:
+    post:
+      summary: Set Swap Transaction Fee Policy
+      description: Method description for set_swap_transaction_fee_policy
+      operationId: set_swap_transaction_fee_policy
+      tags:
+      - set_swap_transaction_fee_policy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - set_swap_transaction_fee_policy
+                params:
+                  type: object
+                  properties:
+                    coin:
+                      description: Ticker of the supported ETH/EVM coin or token for
+                        which you want to set the fee policy.
+                      type: string
+                    swap_tx_fee_policy:
+                      description: 'Possible values: `Low`, `Medium`, `High`, `Internal`.'
+                      type: string
+                  required:
+                  - coin
+                  - swap_tx_fee_policy
+      responses:
+        '200':
+          description: Successful response for set_swap_transaction_fee_policy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/set_swap_transaction_fee_policy_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

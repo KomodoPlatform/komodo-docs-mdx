@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - My Recent Swaps V1 API
+  version: v1
+  description: OpenAPI specification for the my_recent_swaps_v1 methods.
+paths:
+  /my_recent_swaps:
+    post:
+      summary: My Recent Swaps
+      description: The my_recent_swaps method returns the data of the most recent
+        atomic swaps executed by the Komodo DeFi Framework API node.
+      operationId: my_recent_swaps
+      tags:
+      - my_recent_swaps
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - my_recent_swaps
+      responses:
+        '200':
+          description: Successful response for my_recent_swaps
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/my_recent_swaps_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  swaps: {}
+                  from_uuid: string_value
+                  skipped: {}
+                  limit: {}
+                  total: {}
+                  page_number: {}
+                  total_pages: {}
+                  found_records: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

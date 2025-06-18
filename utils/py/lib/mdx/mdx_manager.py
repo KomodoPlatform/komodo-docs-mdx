@@ -20,6 +20,7 @@ from ..constants import DocumentDifference, QualityReport
 from .mdx_analysis import DocumentAnalyzer
 from ..validation.style_validator import StyleValidator
 from .mdx_draft_matching import DocumentDiscoveryScanner
+from utils.py.lib.constants.config import get_config
 
 
 class QualityReportGenerator:
@@ -203,7 +204,8 @@ class DraftsManager:
         self.style_guide_file = style_guide or (self.script_dir.parent.parent / "docs" / "STYLE_GUIDE.md")
         
         # Output directory for reports
-        self.reports_dir = self.script_dir / "data" / "quality_reports"
+        self.config = get_config()
+        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
         self.reports_dir.mkdir(exist_ok=True)
         
         # Initialize utility components

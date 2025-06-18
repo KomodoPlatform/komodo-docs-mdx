@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - My Swap Status V1 API
+  version: v1
+  description: OpenAPI specification for the my_swap_status_v1 methods.
+paths:
+  /my_swap_status:
+    post:
+      summary: My Swap Status
+      description: The my_swap_status method returns the data of an atomic swap executed
+        on an Komodo DeFi Framework API node.
+      operationId: my_swap_status
+      tags:
+      - my_swap_status
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - my_swap_status
+      responses:
+        '200':
+          description: Successful response for my_swap_status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/my_swap_status_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  events: {}
+                  success_events: string_value
+                  error_events: string_value
+                  type: string_value
+                  uuid: string_value
+                  gui: string_value
+                  mm_version: string_value
+                  maker_coin: string_value
+                  taker_coin: string_value
+                  maker_amount: string_value
+                  taker_amount: string_value
+                  maker_coin_usd_price: string_value
+                  taker_coin_usd_price: string_value
+                  my_info: {}
+                  recoverable: true
+                  my_order_uuid: string_value
+                  is_finished: true
+                  is_success: true
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

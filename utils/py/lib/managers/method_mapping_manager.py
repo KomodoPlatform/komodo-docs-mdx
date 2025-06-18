@@ -53,6 +53,8 @@ class MethodMappingManager:
         # Configure directories for UnifiedScanner using enhanced config
         self.base_directories = self._build_scanner_directories()
         self.unified_scanner = UnifiedScanner(self.base_directories, verbose)
+        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        self.reports_dir.mkdir(parents=True, exist_ok=True)
         
         # Add async processor for performance improvements
         self.async_processor = None
@@ -65,7 +67,7 @@ class MethodMappingManager:
     def reporter(self):
         """Lazy loading property for MappingReporter to avoid circular imports."""
         if self._reporter is None:
-            from .mapping_reporter import MappingReporter
+            from ..reporters.mapping_reporter import MappingReporter
             self._reporter = MappingReporter(self.verbose)
         return self._reporter
     
@@ -328,9 +330,8 @@ class MethodMappingManager:
     
     def save_unified_mapping(self, unified_mapping, filename="unified_method_mapping.json"):
         """Saves the unified mapping to a file in the data directory."""
-        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        reports_dir.mkdir(parents=True, exist_ok=True)
-        output_path = reports_dir / filename
+        self.reports_dir.mkdir(parents=True, exist_ok=True)
+        output_path = self.reports_dir / filename
         
         try:
             with open(output_path, 'w') as f:
@@ -343,8 +344,7 @@ class MethodMappingManager:
 
     def load_unified_mapping(self, filename="unified_method_mapping.json"):
         """Loads the unified mapping from a file in the data directory."""
-        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        file_path = reports_dir / filename
+        file_path = self.reports_dir / filename
         if not file_path.exists():
             self.logger.warning(f"⚠️  Could not find unified mapping file: {file_path}")
             return None
@@ -366,9 +366,8 @@ class MethodMappingManager:
         
         timestamped_filename = f"{base_name}_{timestamp}.{extension}"
         
-        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        reports_dir.mkdir(parents=True, exist_ok=True)
-        output_path = reports_dir / timestamped_filename
+        self.reports_dir.mkdir(parents=True, exist_ok=True)
+        output_path = self.reports_dir / timestamped_filename
         
         try:
             with open(output_path, 'w') as f:
@@ -428,10 +427,8 @@ class MethodMappingManager:
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         output_filename = f"kdf_postman_method_paths_{timestamp}.json"
         
-        # Use config-based data directory and save to reports subdir
-        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        reports_dir.mkdir(parents=True, exist_ok=True)
-        output_file = reports_dir / output_filename
+        self.reports_dir.mkdir(parents=True, exist_ok=True)
+        output_file = self.reports_dir / output_filename
 
         def write_method_paths_file():
             with open(output_file, 'w', encoding='utf-8') as f:
@@ -450,15 +447,13 @@ class MethodMappingManager:
         # Convert to JSON-serializable format with proper structure
         json_data = await self._convert_mapping_to_enhanced_json(unified)
         
-        # Use config-based data directory and save to reports subdir
-        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        reports_dir.mkdir(parents=True, exist_ok=True)
+        
         
         if output_file is None:
-            output_file_path = reports_dir / "unified_method_mapping.json"
+            output_file_path = self.reports_dir / "unified_method_mapping.json"
         else:
             # If an output file is provided, make sure it's inside the reports dir
-            output_file_path = reports_dir / Path(output_file).name
+            output_file_path = self.reports_dir / Path(output_file).name
         
         # Save to file asynchronously
         import asyncio
@@ -850,9 +845,8 @@ class MethodMappingManager:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"kdf_postman_method_paths_{timestamp}.json"
         
-        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        reports_dir.mkdir(parents=True, exist_ok=True)
-        output_path = reports_dir / filename
+        self.reports_dir.mkdir(parents=True, exist_ok=True)
+        output_path = self.reports_dir / filename
 
         def write_method_paths_file():
             try:

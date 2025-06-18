@@ -1,0 +1,66 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Cancel All Orders V1 API
+  version: v1
+  description: OpenAPI specification for the cancel_all_orders_v1 methods.
+paths:
+  /cancel_all_orders:
+    post:
+      summary: Cancel All Orders
+      description: The cancel_all_orders cancels the active orders created by the
+        Komodo DeFi Framework API node by specified condition.
+      operationId: cancel_all_orders
+      tags:
+      - cancel_all_orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - cancel_all_orders
+      responses:
+        '200':
+          description: Successful response for cancel_all_orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cancel_all_orders_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  cancelled: string_value
+                  currently_matching: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

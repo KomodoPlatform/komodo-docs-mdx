@@ -1,0 +1,84 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Orderbook V1 API
+  version: v1
+  description: OpenAPI specification for the orderbook_v1 methods.
+paths:
+  /orderbook:
+    post:
+      summary: Orderbook
+      description: The orderbook method requests from the network the currently available
+        orders for the specified trading pair.
+      operationId: orderbook
+      tags:
+      - orderbook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - orderbook
+      responses:
+        '200':
+          description: Successful response for orderbook
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/orderbook_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  asks: {}
+                  base: string_value
+                  netid: {}
+                  numbids: {}
+                  numasks: {}
+                  rel: string_value
+                  timestamp: {}
+                  bids: {}
+                  total_asks_base_vol: string_value
+                  total_asks_base_vol_fraction: {}
+                  total_asks_base_vol_rat: {}
+                  total_asks_rel_vol: string_value
+                  total_asks_rel_vol_fraction: {}
+                  total_asks_rel_vol_rat: {}
+                  total_bids_base_vol: string_value
+                  total_bids_base_vol_fraction: {}
+                  total_bids_base_vol_rat: {}
+                  total_bids_rel_vol: string_value
+                  total_bids_rel_vol_fraction: {}
+                  total_bids_rel_vol_rat: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

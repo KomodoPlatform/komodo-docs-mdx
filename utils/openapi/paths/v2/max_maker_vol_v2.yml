@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Max Maker Vol V2 API
+  version: v2
+  description: OpenAPI specification for the max_maker_vol_v2 methods.
+paths:
+  /max_maker_vol:
+    post:
+      summary: Max Maker Volume
+      description: Method description for max_maker_vol
+      operationId: max_maker_vol
+      tags:
+      - max_maker_vol
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - max_maker_vol
+                params:
+                  type: object
+                  properties:
+                    coin:
+                      description: The ticker of the coin you want to query.
+                      type: string
+                  required:
+                  - coin
+      responses:
+        '200':
+          description: Successful response for max_maker_vol
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/max_maker_vol_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  coin: string_value
+                  volume: {}
+                  balance: {}
+                  locked_by_swaps: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

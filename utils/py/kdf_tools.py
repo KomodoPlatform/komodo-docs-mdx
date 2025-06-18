@@ -84,6 +84,11 @@ class KDFTools:
         self.quiet = False
         self.logger = None
         self.config = None
+        self.cleaner = None
+        self.config = get_config()
+        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        self.reports_dir.mkdir(exist_ok=True, parents=True)
+        
     
     def setup_logging(self, verbose=True):
         """Setup logging configuration."""
@@ -116,6 +121,10 @@ class KDFTools:
             base_path=str(workspace_root),
             environment=DeploymentEnvironment.DEVELOPMENT
         )
+        self.cleaner = GeneratedFilesCleaner(
+            config=self.config,
+            verbose=self.verbose
+        )
         
         if self.verbose:
             self.logger.folder(f"Workspace root: {workspace_root}")
@@ -132,19 +141,14 @@ class KDFTools:
     
     def _resolve_data_directory_path(self, data_dir: str) -> str:
         """
-        Resolve data directory path using config constants.
-        
-        Args:
-            data_dir: The data directory name or path
-            
-        Returns:
-            Absolute path to the data directory
+        Resolves the absolute path for the data directory.
         """
-        if os.path.isabs(data_dir):
-            return data_dir
-        
-        # Use config's _resolve_path method directly
-        return self.config._resolve_path(data_dir)
+        # If the path is already absolute, return it as is
+        if Path(data_dir).is_absolute():
+            return str(data_dir)
+
+        # Otherwise, join it with the workspace root from the config
+        return str(Path(self.config.workspace_root) / data_dir)
     
     def log(self, message, level="info"):
         """Log a message with appropriate level."""
@@ -194,11 +198,12 @@ class KDFTools:
         self._print_header(command_title, config)
         
         success = False
+        report_paths = []
         try:
             # Auto-cleanup generated files if requested
             if args.clean_before:
                 self.logger.clean("Cleaning up old OpenAPI files before generation...")
-                if not self._cleanup_before_generation(['openapi'], args.dry_run, args.keep):
+                if not self._cleanup_before_generation(['openapi', 'reports'], args.dry_run, args.keep):
                     self.log("Cleanup failed, continuing anyway...", "warning")
             
             # Initialize OpenAPI manager with enhanced enum/schema support
@@ -213,31 +218,45 @@ class KDFTools:
                 
                 # Process v1 first
                 self.log("📂 Processing v1 (legacy methods)...")
-                result_v1 = manager.generate_openapi_spec(version="v1")
-                self.log(f"✅ V1: {result_v1}")
-                
-                # Store v1 methods for combined tracking
-                v1_methods = dict(manager.all_methods)
+                # Store pre-v1 counts
+                v1_pre_count = manager.success_count
+                result_v1 = manager.generate_openapi_specs(version="v1")
+                # Calculate v1 count
+                v1_post_count = manager.success_count
+                v1_count = v1_post_count - v1_pre_count
+                self.log(f"✅ V1: Processed {v1_count} methods.")
                 
                 # Process v2 
                 self.log("📂 Processing v2 (current methods)...")
-                manager.all_methods = {} # Reset for v2
-                result_v2 = manager.generate_openapi_spec(version="v2")
-                self.log(f"✅ V2: {result_v2}")
-                
-                # Store v2 methods for combined tracking
-                v2_methods = dict(manager.all_methods)
-                
-                # Combine methods from both versions for comprehensive tracking
-                combined_methods = {**v1_methods, **v2_methods}
-                manager.all_methods = combined_methods
-                
-                result = f"✅ All versions processed successfully!\n   📊 V1 methods: {len(v1_methods)}\n   📊 V2 methods: {len(v2_methods)}\n   📊 Total methods: {len(combined_methods)}"
+                # Store pre-v2 counts
+                v2_pre_count = manager.success_count
+                result_v2 = manager.generate_openapi_specs(version="v2")
+                # Calculate v2 count
+                v2_post_count = manager.success_count
+                v2_count = v2_post_count - v2_pre_count
+                self.log(f"✅ V2: Processed {v2_count} methods.")
+
+                total_count = manager.success_count
+                result = f"✅ All versions processed successfully!\n   📊 V1 methods: {v1_count}\n   📊 V2 methods: {v2_count}\n   📊 Total methods: {total_count}"
             else:
                 # Generate OpenAPI specs for single version
-                result = manager.generate_openapi_spec(version=args.version)
+                result = manager.generate_openapi_specs(version=args.version)
             
             self.log(f"✅ {result}")
+            
+            # NEW: Call tracking file generation when 'all' versions are processed
+            if args.version == "all":
+                self.log("📊 Generating OpenAPI tracking files...")
+                enums_count = len(manager.mdx_parser.enum_patterns)
+                structures_count = len(manager.mdx_parser.common_structures)
+                source_dirs = [str(Path(self.config.workspace_root) / self.config.directories.mdx_legacy),
+                               str(Path(self.config.workspace_root) / self.config.directories.mdx_v2)]
+                
+                manager.spec_generator.generate_tracking_files(
+                    "all", manager.success_count, manager.error_count,
+                    manager.mdx_parser.enum_patterns, structures_count,
+                    enums_count, source_dirs, manager.all_methods
+                )
             
             # Show statistics about generated schemas
             stats = manager.get_stats()
@@ -247,17 +266,21 @@ class KDFTools:
             self.log(f"   • Structures found: {stats['structures_found']}")
             
             self.log("🔚 Finished MDX to OpenAPI conversion.")
+
+            # Generate tracking files
+            processed_versions = [args.version] if args.version != "all" else ["v1", "v2"]
+            openapi_report_path = self._generate_openapi_tracking_files(manager, processed_versions)
+            if openapi_report_path:
+                report_paths.append(openapi_report_path)
             
             success = True
-            
         except Exception as e:
-            self.log(f"❌ An error occurred during OpenAPI generation: {e}", "error")
-            if self.verbose:
-                traceback.print_exc()
-        
-        self._print_footer(command_title, success=success)
-        return 0 if success else 1
-
+            self.log(f"An error occurred during OpenAPI generation: {e}", "error")
+            self.log(traceback.format_exc(), "error")
+            success = False
+        finally:
+            self._print_footer(command_title, success=success, report_paths=report_paths)
+            
     def scan_rust(self, args):
         """Handle scan-rust subcommand - KDF repository scanning with async processing."""
         command_title = "KDF Repository Scan"
@@ -378,9 +401,6 @@ class KDFTools:
             
             # Generate filenames
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            reports_dir = Path(self._resolve_data_directory_path(self.config.directories.reports_dir))
-            reports_dir.mkdir(exist_ok=True, parents=True)
-            
             # STEP 1: Generate method paths file (primary data source)
             method_paths_data = self._generate_mdx_method_paths_data(
                 doc_results, versions, current_branch
@@ -388,7 +408,7 @@ class KDFTools:
             
             # Save method paths file first
             paths_filename = f"kdf_mdx_method_paths_{timestamp}.json"
-            paths_output_path = reports_dir / paths_filename
+            paths_output_path = self.reports_dir / paths_filename
             safe_write_json(paths_output_path, method_paths_data, indent=2)
             
             if self.verbose:
@@ -401,7 +421,7 @@ class KDFTools:
             
             # Save methods file
             methods_filename = f"kdf_mdx_methods_{timestamp}.json"
-            methods_output_path = reports_dir / methods_filename
+            methods_output_path = self.reports_dir / methods_filename
             safe_write_json(methods_output_path, methods_data, indent=2)
             
             if self.verbose:
@@ -436,7 +456,7 @@ class KDFTools:
             "scan_metadata": {
                 "generated_at": datetime.now().isoformat(),
                 "scanner_version": "KDFMethodPathMapper v1.5.0",
-                "scanner_type": "METHOD_PATH_MAPPING",
+                "scanner_type": "MDX_METHOD_PATH_MAPPING",
                 "total_versions": len(versions),
                 "total_documented_methods": 0,
                 "versions_processed": versions,
@@ -863,10 +883,8 @@ class KDFTools:
             if args.output:
                 self.log(f"Full report saved to: {args.output}", "success")
             else:
-                # Find the generated report file
-                reports_dir = analyzer.reports_dir
                 import glob
-                latest_report_files = glob.glob(str(reports_dir / "draft_quality_report_*.md"))
+                latest_report_files = glob.glob(str(self.reports_dir / "draft_quality_report_*.md"))
                 if latest_report_files:
                     latest_report = max(latest_report_files, key=lambda p: Path(p).stat().st_mtime)
                     self.log(f"Full report saved to: {latest_report}", "success")
@@ -1039,24 +1057,152 @@ class KDFTools:
         pass
 
     def _create_generation_summary(self, selected_methods, generated_files, summary_file):
-        """Placeholder for creating a generation summary."""
-        pass
+        with open(summary_file, "w") as f:
+            f.write(f"Generated {len(generated_files)} files for {len(selected_methods)} methods.\n\n")
+            f.write("Generated Files:\n" + "\n".join(f"- {Path(p).name}" for p in generated_files) + "\n\n")
+            f.write("Selected Methods:\n" + "\n".join(f"- {m}" for m in selected_methods) + "\n")
 
     def _save_json_example(self, example, version: str, example_num: int, dry_run: bool = False) -> bool:
-        """Placeholder for saving a JSON example."""
-        pass
+        return run_async(self._save_json_example_async(example, version, example_num, dry_run))
 
     def _generate_json_tracking_files(self, all_extracted_methods: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
-        """Placeholder for generating JSON tracking files."""
-        pass
+        """Top-level function to generate all JSON-related tracking files."""
+        self.log("Generating JSON tracking files...", "info")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        data_dir = Path(self._get_data_dir()) / "reports"
+        ensure_directory_exists(data_dir)
+        
+        self._generate_json_method_paths_file(timestamp, data_dir, all_extracted_methods)
+        self._generate_json_methods_file(timestamp, data_dir, all_extracted_methods, extraction_stats)
+    
+    def _generate_openapi_tracking_files(self, openapi_manager: OpenAPIManager, versions: List[str]) -> str:
+        """Generates all necessary tracking files for OpenAPI."""
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        data_dir = Path(self.config.directories.reports_dir)
+        
+        # Ensure the data directory exists
+        data_dir.mkdir(parents=True, exist_ok=True)
+
+        return self._generate_openapi_method_paths_file(
+            timestamp=timestamp,
+            data_dir=data_dir,
+            all_methods=openapi_manager.all_methods,
+            versions=versions,
+            path_mapper=openapi_manager.path_mapper
+        )
+
+    def _generate_openapi_method_paths_file(self, timestamp: str, data_dir: Path, all_methods: Dict[str, Any], versions: List[str], path_mapper) -> str:
+        """Creates a JSON file that maps each method to its OpenAPI spec path."""
+        self.log("🗺️  Generating OpenAPI method-to-path mapping...")
+        
+        paths_data = { "v1": {}, "v2": {} }
+        
+        for versioned_method_key, parsed_info in all_methods.items():
+            openapi_path = parsed_info.get("openapi_path")
+            method_name = parsed_info.get("method_name")
+            version = parsed_info.get("version")
+            
+            if not all([openapi_path, method_name, version]):
+                continue
+
+            if version == "v1":
+                paths_data["v1"][method_name] = openapi_path
+            elif version == "v2":
+                paths_data["v2"][method_name] = openapi_path
+
+        total_methods = len(paths_data["v1"]) + len(paths_data["v2"])
+
+        if total_methods == 0:
+            self.log("No methods with paths found for OpenAPI.", "warning")
+            return None
+
+        metadata = {
+            "generated_at": datetime.now().isoformat(),
+            "scanner_version": "KDF-OpenAPI-Path-Generator v1.0.0",
+            "scanner_type": "OPENAPI_METHOD_PATH_MAPPING",
+            "total_versions": len(versions) if "all" not in versions else 2,
+            "total_documented_methods": total_methods,
+            "versions_processed": versions,
+            "is_primary_data_source": False
+        }
+
+        output_data = {
+            "scan_metadata": metadata,
+            "method_paths": paths_data
+        }
+
+        file_path = data_dir / f"report-kdf_openapi_method_paths_{timestamp}.json"
+        safe_write_json(file_path, output_data, indent=2)
+        
+        self.log(f"✅ 💾 Saved OpenAPI method paths mapping to: {file_path}")
+        self.log(f"📊 V1: {len(paths_data['v1'])} methods")
+        self.log(f"📊 V2: {len(paths_data['v2'])} methods")
+        
+        return str(file_path)
 
     def _generate_json_method_paths_file(self, timestamp: str, data_dir: Path, all_extracted_methods: Dict[str, Any]) -> None:
-        """Placeholder for generating a JSON method paths file."""
-        pass
+        """Creates a JSON file mapping each method to its JSON examples path."""
+        self.log("Generating JSON method paths file...")
+        paths_data = {
+            "scan_metadata": {
+                "generated_at": datetime.now().isoformat(),
+                "scanner_version": "KDF-Postman-Path-Generator v1.0.0",
+                "scanner_type": "POSTMAN_METHOD_PATH_MAPPING",
+                "total_versions": 2,
+                "total_documented_methods": len(all_extracted_methods),
+                "versions_processed": ["v1", "v2"],
+                "is_primary_data_source": False
+            },
+            "method_paths": {
+                "v1": {method: data["mdx_path"] for method, data in all_extracted_methods.items() if data["version"] == "v1"},
+                "v2": {method: data["mdx_path"] for method, data in all_extracted_methods.items() if data["version"] == "v2"}
+            }
+        }
+
+        file_path = data_dir / f"report-kdf_postman_method_paths_{timestamp}.json"
+        safe_write_json(file_path, paths_data, indent=2)
+        
+        self.log(f"✅ 💾 Saved Postman method paths mapping to: {file_path}")
+        self.log(f"📊 V1: {len(paths_data['method_paths']['v1'])} methods")
+        self.log(f"📊 V2: {len(paths_data['method_paths']['v2'])} methods")
 
     def _generate_json_methods_file(self, timestamp: str, data_dir: Path, all_extracted_methods: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
-        """Placeholder for generating a JSON methods file."""
-        pass
+        """Generates a JSON file that maps each method to its extracted JSON examples."""
+        self.log("Generating JSON methods file...")
+        methods_data = {
+            "scan_metadata": {
+                "generated_at": datetime.now().isoformat(),
+                "scanner_version": "KDF-JSON-Extractor v1.0.0",
+                "scanner_type": "JSON_EXTRACTOR",
+                "total_versions": 2,
+                "total_methods": len(all_extracted_methods),
+                "versions_processed": ["v1", "v2"],
+                "is_primary_data_source": False
+            },
+            "repository_data": {
+                "v1": {
+                    "methods": all_extracted_methods.get("v1", []),
+                    "extraction_patterns_used": ["JSON extraction from MDX files"],
+                    "total_extracted": extraction_stats.get("v1", 0),
+                    "total_methods_processed": len(all_extracted_methods.get("v1", [])),
+                    "total_examples_found": extraction_stats.get("v1", 0)
+                },
+                "v2": {
+                    "methods": all_extracted_methods.get("v2", []),
+                    "extraction_patterns_used": ["JSON extraction from MDX files"],
+                    "total_extracted": extraction_stats.get("v2", 0),
+                    "total_methods_processed": len(all_extracted_methods.get("v2", [])),
+                    "total_examples_found": extraction_stats.get("v2", 0)
+                }
+            }
+        }
+
+        file_path = data_dir / f"report-kdf_json_extractor_methods_{timestamp}.json"
+        safe_write_json(file_path, methods_data, indent=2)
+        
+        self.log(f"✅ 💾 Saved JSON extraction methods to: {file_path}")
+        self.log(f"📊 V1: {len(methods_data['repository_data']['v1']['methods'])} methods")
+        self.log(f"📊 V2: {len(methods_data['repository_data']['v2']['methods'])} methods")
 
     def _cleanup_before_generation(self, categories: List[str], dry_run: bool = False, keep_count: int = 0) -> bool:
         """
@@ -1405,11 +1551,10 @@ class KDFTools:
         success = False
         try:
             data_dir = self._get_data_dir()
-            reports_dir = Path(os.path.join(data_dir, "reports"))
             
             # Load latest Rust scan data
             rust_data = {}
-            rust_scan_files = glob.glob(os.path.join(reports_dir, "report-kdf_rust_methods_*.json"))
+            rust_scan_files = glob.glob(os.path.join(self.reports_dir, "report-kdf_rust_methods_*.json"))
             if rust_scan_files:
                 latest_rust_scan = max(rust_scan_files, key=os.path.getctime)
                 self.log(f"Found latest Rust methods file: {os.path.basename(latest_rust_scan)}")
@@ -1425,7 +1570,7 @@ class KDFTools:
 
             # Load latest MDX methods data
             mdx_methods = {}
-            mdx_scan_files = glob.glob(os.path.join(reports_dir, "kdf_mdx_methods_*.json"))
+            mdx_scan_files = glob.glob(os.path.join(self.reports_dir, "kdf_mdx_methods_*.json"))
             if mdx_scan_files:
                 latest_mdx_scan = max(mdx_scan_files, key=os.path.getctime)
                 self.log(f"Found latest MDX methods file: {os.path.basename(latest_mdx_scan)}")

@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Recreate Swap Data V2 API
+  version: v2
+  description: OpenAPI specification for the recreate_swap_data_v2 methods.
+paths:
+  /recreate_swap_data:
+    post:
+      summary: Recreate Swap Data
+      description: The recreate_swap_data method helps recover lost swap data due
+        to storage errors or hardware failure.
+      operationId: recreate_swap_data
+      tags:
+      - recreate_swap_data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - recreate_swap_data
+                params:
+                  type: object
+                  properties:
+                    swap:
+                      description: Swap data from other side of trade. For example,
+                        to recreate a Maker's swap data, the input would be the corresponding
+                        Taker's swap data.
+                      type: object
+                  required:
+                  - swap
+      responses:
+        '200':
+          description: Successful response for recreate_swap_data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/recreate_swap_data_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

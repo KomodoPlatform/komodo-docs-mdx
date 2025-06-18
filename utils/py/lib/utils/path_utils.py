@@ -18,6 +18,7 @@ import json
 from ..constants.config import get_config, EnhancedKomodoConfig
 from ..constants.enums import VersionStatus
 from ..constants.data_structures import PathMapping
+from ..utils.logging_utils import get_logger
 
 class EnhancedPathMapper:
     """
@@ -183,6 +184,22 @@ class EnhancedPathMapper:
         """Convert method name to filename format."""
         return method_name.replace("::", "-")
     
+    def get_version_from_path(self, file_path: str) -> Optional[str]:
+        """
+        Determine API version from a file path.
+        """
+        path_str = str(file_path)
+
+        v1_dir = str(self.config.get_directory_for_version_and_type("v1", "yaml"))
+        v2_dir = str(self.config.get_directory_for_version_and_type("v2", "yaml"))
+        v2_dev_dir = str(self.config.get_directory_for_version_and_type("v2_dev", "yaml"))
+        
+        if v1_dir in path_str:
+            return "v1"
+        if v2_dir in path_str or v2_dev_dir in path_str:
+            return "v2"
+        return None
+
     def get_supported_versions(self, include_deprecated: bool = False) -> List[str]:
         """Get list of supported versions from configuration."""
         versions = []

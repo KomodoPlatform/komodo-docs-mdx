@@ -20,26 +20,37 @@ from ..constants.config import get_config
 class GeneratedFilesCleaner:
     """Handles cleanup of generated files before regeneration."""
     
-    def __init__(self, keep_count: int = 3, verbose: bool = True):
+    def __init__(self, config: Optional[Any] = None, 
+                 keep_count: int = 3, verbose: bool = True, dry_run: bool = False):
         """
         Initialize the cleaner.
         
         Args:
+            config: Application configuration object
             keep_count: Number of recent files of each type to keep.
             verbose: Whether to log cleanup actions
+            dry_run: If True, simulate cleanup without deleting files
         """
-        self.config = get_config()
-        self.workspace_root = normalize_file_path(self.config.workspace_root)
+        self.config = config or get_config()
+        self.workspace_root = Path(self.config.workspace_root).resolve()
         self.keep_count = keep_count
         self.verbose = verbose
-        self.logger = get_logger("generated-files-cleanup") if verbose else None
+        self.dry_run = dry_run
+        self.logger = get_logger("FileCleaner") if verbose else None
+        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
         
         # Define categories of generated files that need cleanup
         self.FILE_CATEGORIES = {
             'openapi': {
                 'patterns': [
-                    'openapi/paths/**/*.yaml',
-                    'openapi/paths/**/*.yml', 
+                    'openapi/paths/v1/**/*.yaml',
+                    'openapi/paths/v1/**/*.yml',
+                    'openapi/paths/v2/**/*.yaml',
+                    'openapi/paths/v2/**/*.yml',
+                    'openapi/paths/v1/*.yaml',
+                    'openapi/paths/v1/*.yml',
+                    'openapi/paths/v2/*.yaml',
+                    'openapi/paths/v2/*.yml',
                     'openapi/components/schemas/Generated.yaml',
                     'openapi/components/schemas/Generated.yml',
                     'openapi/temp/**/*',
@@ -87,7 +98,7 @@ class GeneratedFilesCleaner:
             },
             'report_files': {
                 'patterns': [
-                    f'{self.config.directories.reports_dir}/**/*.json'
+                    f'{self.reports_dir}/**/*.json'
                 ],
                 'description': 'Timestamped report files in the reports subdirectory',
                 'preserve_dirs': [],
@@ -542,6 +553,88 @@ class GeneratedFilesCleaner:
                     self.logger.error(f"Error processing pattern {pattern}: {e}")
         
         return cleaned_files
+
+    def cleanup_generated_files(self, category: str) -> int:
+        """General purpose file cleanup based on category."""
+        # This is a placeholder for a more robust category-based cleanup.
+        # For now, it delegates to the new specific methods.
+        if category == 'openapi':
+            return self.clean_openapi_files()
+        # Add other categories here as needed
+        # elif category == 'postman':
+        #     return self.clean_postman_files()
+        else:
+            self.logger.warning(f"Cleanup not implemented for category: {category}")
+            return 0
+
+    def clean_openapi_files(self):
+        """Cleans all generated OpenAPI specification files."""
+        self._log("Cleaning OpenAPI specification files...")
+        openapi_paths = self.workspace_root / 'openapi' / 'paths'
+        dirs_to_clean = [openapi_paths / 'v1', openapi_paths / 'v2']
+        
+        removed_count = 0
+        for directory in dirs_to_clean:
+            if directory.is_dir():
+                for item in directory.iterdir():
+                    if item.is_file() and item.suffix in ['.yaml', '.yml']:
+                        if self._remove_item(item):
+                            removed_count += 1
+                    elif item.is_dir():
+                        # Recursively clean subdirectories
+                        removed_count += self._clean_directory_recursively(item)
+        
+        self._log(f"Removed {removed_count} OpenAPI files.", "success")
+        return removed_count
+
+    def _clean_directory_recursively(self, directory: Path):
+        """Helper to recursively clean files in a directory."""
+        removed_count = 0
+        for item in directory.iterdir():
+            if item.is_file() and item.suffix in ['.yaml', '.yml']:
+                if self._remove_item(item):
+                    removed_count += 1
+            elif item.is_dir():
+                removed_count += self._clean_directory_recursively(item)
+        return removed_count
+
+    def _remove_item(self, path: Path):
+        """Removes a file or directory with logging and dry-run support."""
+        try:
+            if self.dry_run:
+                self._log(f"[Dry Run] Would remove: {path.relative_to(self.workspace_root)}")
+            else:
+                if path.is_dir():
+                    shutil.rmtree(path)
+                else:
+                    path.unlink()
+                self._log(f"Removed: {path.relative_to(self.workspace_root)}")
+            return True
+        except Exception as e:
+            self._log(f"Error removing {path}: {e}", "error")
+            return False
+
+    def clean_reports(self, keep_count):
+        """Cleans old report files."""
+        self._log(f"Cleaning reports, keeping {keep_count} most recent...")
+        
+        # Group files by pattern
+        patterns = [
+            "report-kdf_rust_methods_*.json", "report-kdf_mdx_methods_*.json",
+            "report-kdf_openapi_method_paths_*.json", "report-kdf_postman_method_paths_*.json",
+            "report-kdf_json_extractor_methods_*.json", "report-kdf_gap_analysis_*.json"
+        ]
+        
+        removed_count = 0
+        for pattern in patterns:
+            files = sorted(self.reports_dir.glob(pattern), key=lambda f: f.stat().st_mtime, reverse=True)
+            if len(files) > keep_count:
+                for f in files[keep_count:]:
+                    if self._remove_item(f):
+                        removed_count += 1
+        
+        self._log(f"Removed {removed_count} old report files.", "success")
+        return removed_count
 
 
 def clean_generated_files(workspace_root: Union[str, Path], 

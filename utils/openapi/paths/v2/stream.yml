@@ -1,0 +1,535 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Stream API
+  version: v2
+  description: OpenAPI specification for the stream methods.
+paths:
+  /stream::balance::enable:
+    post:
+      summary: Enable Balance Streaming
+      description: Using this method, you can enable balance events streaming for
+        a specific coin.
+      operationId: stream::balance::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::balance::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: In the case of a single client, this defaults to
+                        `0`. This ID can be used to access data via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1)
+                      type: integer
+                      default: '`0`'
+                    coin:
+                      description: Ticker of the coin to activate streaming for. The
+                        coin must be activated first.
+                      type: string
+                      default: '-'
+                    config:
+                      description: EVM only. A standard [StreamingConfig](/komodo-defi-framework/api/common_structures/#streaming-config)
+                        object.
+                      type: object
+                      default: '-'
+                  required:
+                  - coin
+      responses:
+        '200':
+          description: Successful response for stream::balance::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_balance_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stream::disable:
+    post:
+      summary: Disable Streaming
+      description: Using this method, you can disable specific streaming events.
+      operationId: stream::disable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::disable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1))
+                      type: integer
+                    streamer_id:
+                      description: An identifier for the data stream to disable.
+                      type: string
+                  required:
+                  - client_id
+                  - streamer_id
+      responses:
+        '200':
+          description: Successful response for stream::disable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_disable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stream::fee_estimator::enable:
+    post:
+      summary: Fee Estimator Streaming
+      description: Using this method, you can enable the fee estimation stream.
+      operationId: stream::fee_estimator::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::fee_estimator::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1))
+                      type: integer
+                    coin:
+                      description: The coin or token to enable the fee estimation
+                        stream for.
+                      type: string
+                  required:
+                  - client_id
+                  - coin
+      responses:
+        '200':
+          description: Successful response for stream::fee_estimator::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_fee_estimator_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stream::heartbeat::enable:
+    post:
+      summary: Enable Heartbeat Streaming
+      description: Using this method, you can enable heartbeat events streaming.
+      operationId: stream::heartbeat::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::heartbeat::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: In the case of a single client, this defaults to
+                        `0`. This ID can be used to access data via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1).
+                      type: integer
+                      default: '`0`'
+                    config:
+                      description: A standard [StreamingConfig](/komodo-defi-framework/api/common_structures/#streaming-config)
+                        object.
+                      type: object
+                      default: '-'
+      responses:
+        '200':
+          description: Successful response for stream::heartbeat::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_heartbeat_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stream::network::enable:
+    post:
+      summary: Enable Network Streaming
+      description: Using this method, you can enable network events streaming.
+      operationId: stream::network::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::network::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: In the case of a single client, this defaults to
+                        `0`. This ID can be used to access data via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1)
+                      type: integer
+                      default: '`0`'
+                    config:
+                      description: A standard [StreamingConfig](/komodo-defi-framework/api/common_structures/#streaming-config)
+                        object.
+                      type: object
+                      default: '-'
+      responses:
+        '200':
+          description: Successful response for stream::network::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_network_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stream::order_status::enable:
+    post:
+      summary: Enable Order Status Streaming
+      description: Using this method, you can enable the order status stream.
+      operationId: stream::order_status::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::order_status::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1))
+                      type: integer
+                  required:
+                  - client_id
+      responses:
+        '200':
+          description: Successful response for stream::order_status::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_order_status_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stream::orderbook::enable:
+    post:
+      summary: Orderbook Streaming
+      description: Using this method, you can enable the orderbook stream for a given
+        pair.
+      operationId: stream::orderbook::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::orderbook::enable
+                params:
+                  type: object
+                  properties:
+                    base:
+                      description: Base currency of a pair
+                      type: string
+                    client_id:
+                      description: This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1))
+                      type: integer
+                    rel:
+                      description: Related currency, also known as the "quote currency"
+                      type: string
+                  required:
+                  - base
+                  - client_id
+                  - rel
+      responses:
+        '200':
+          description: Successful response for stream::orderbook::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_orderbook_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stream::swap_status::enable:
+    post:
+      summary: Enable Swap Status Streaming
+      description: Using this method, you can enable the swap status stream.
+      operationId: stream::swap_status::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::swap_status::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: This ID can be used to access data (e.g. via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1))
+                      type: integer
+                  required:
+                  - client_id
+      responses:
+        '200':
+          description: Successful response for stream::swap_status::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_swap_status_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stream::tx_history::enable:
+    post:
+      summary: Enable Transaction History Streaming
+      description: Using this method, you can enable transaction history events streaming
+        for a specific coin.
+      operationId: stream::tx_history::enable
+      tags:
+      - stream
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              - params
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - stream::tx_history::enable
+                params:
+                  type: object
+                  properties:
+                    client_id:
+                      description: This ID can be used to access data via [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1)
+                      type: integer
+                      default: '`0`'
+                    coin:
+                      description: Ticker of the coin to activate streaming for. The
+                        coin must be activated first.
+                      type: string
+                      default: '-'
+                  required:
+                  - coin
+      responses:
+        '200':
+          description: Successful response for stream::tx_history::enable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/stream_tx_history_enable_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  streamer_id: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

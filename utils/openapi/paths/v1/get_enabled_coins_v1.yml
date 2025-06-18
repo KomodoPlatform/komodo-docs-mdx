@@ -1,0 +1,67 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - Get Enabled Coins V1 API
+  version: v1
+  description: OpenAPI specification for the get_enabled_coins_v1 methods.
+paths:
+  /get_enabled_coins:
+    post:
+      summary: Get Enabled Coins
+      description: The get_enabled_coins method returns data of coins that are currently
+        enabled on the user
+      operationId: get_enabled_coins
+      tags:
+      - get_enabled_coins
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - get_enabled_coins
+      responses:
+        '200':
+          description: Successful response for get_enabled_coins
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/get_enabled_coins_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  result: {}
+                  result.address: string_value
+                  result.ticker: string_value
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

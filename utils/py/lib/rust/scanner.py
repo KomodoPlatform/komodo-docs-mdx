@@ -48,7 +48,8 @@ class KDFScanner:
         self.cache_duration = timedelta(hours=cache_duration_hours)
 
         self.data_dir = Path(self.config.directories.data_dir)
-        self.reports_dir = Path(self.config.directories.reports_dir)
+        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        self.reports_dir.mkdir(exist_ok=True, parents=True)
         
         if not self.is_local:
             self.url_templates = {

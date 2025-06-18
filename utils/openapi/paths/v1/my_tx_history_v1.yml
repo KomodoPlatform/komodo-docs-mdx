@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Komodo DeFi Framework - My Tx History V1 API
+  version: v1
+  description: OpenAPI specification for the my_tx_history_v1 methods.
+paths:
+  /my_tx_history:
+    post:
+      summary: My Tx History
+      description: Method description for my_tx_history
+      operationId: my_tx_history
+      tags:
+      - my_tx_history
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - userpass
+              - method
+              properties:
+                userpass:
+                  type: string
+                  description: User password for authentication.
+                  example: RPC_UserP@SSW0RD
+                method:
+                  type: string
+                  description: Name of the method to be called.
+                  enum:
+                  - my_tx_history
+      responses:
+        '200':
+          description: Successful response for my_tx_history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/my_tx_history_Response'
+              example:
+                mmrpc: '2.0'
+                result:
+                  current_block: {}
+                  from_id: string_value
+                  limit: {}
+                  page_number: {}
+                  skipped: {}
+                  sync_status: {}
+                  total: {}
+                  total_pages: {}
+                  transactions: {}
+                id: 0
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        error_path:
+          type: string
+        error_trace:
+          type: string
+        error_type:
+          type: string
+        error_data:
+          type: object

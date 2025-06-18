@@ -14,6 +14,7 @@ from typing import Dict, List, Any, Set
 import os
 
 # Import local modules
+from ..utils.logging_utils import get_logger
 from .openapi_spec_generator import OpenApiSpecGenerator
 from ..mdx.mdx_parser import MDXParser
 from ..utils.path_utils import EnhancedPathMapper
@@ -47,8 +48,9 @@ class OpenAPIManager:
         self.error_count = 0
         self.enum_count = 0
         self.structure_count = 0
+        self.logger = get_logger("openapi-manager")
 
-    def generate_openapi_spec(self, version: str = "v2") -> str:
+    def generate_openapi_specs(self, version: str = "v2") -> str:
         """
         Main orchestration method. It finds all relevant MDX files, parses them,
         generates individual OpenAPI specs, and then aggregates them into
@@ -60,7 +62,7 @@ class OpenAPIManager:
         Returns:
             A string message summarizing the result of the operation.
         """
-        self.vlog(f"Starting OpenAPI generation for version: {version}")
+        self.logger.info(f"Starting OpenAPI generation for version: {version}")
         
         # Define source directories based on version
         source_dirs = []
@@ -77,26 +79,32 @@ class OpenAPIManager:
         
         # Discover and process all MDX files
         for dir_path in source_dirs:
-            for mdx_file in dir_path.rglob("*.mdx"):
-                self.vlog(f"Processing file: {mdx_file}")
+            for mdx_file in sorted(dir_path.rglob("*.mdx")):
                 
                 # Parse the MDX file to get method information
                 parsed_info = self.mdx_parser.parse_mdx_file(mdx_file)
                 
                 if parsed_info:
+                    parsed_info['version'] = version
                     doc_type = parsed_info.get('type')
                     if doc_type == 'method':
                         method_name = parsed_info['method_name']
-                        self.all_methods[method_name] = parsed_info
                         
                         # Generate the individual OpenAPI spec for the method
-                        spec = self.spec_generator.generate_openapi_spec(parsed_info, version)
-                        
+                        spec = self.spec_generator.build_openapi_spec(parsed_info, version)
                         # Write the spec to a file
                         openapi_path = self.spec_generator.write_openapi_file(
                             spec, method_name, version, mdx_path=str(mdx_file)
                         )
+                        self.logger.save(f"{version} YAML created for [{method_name}]")
                         self.success_count += 1
+                        
+                        # Add openapi_path to parsed_info for tracking
+                        parsed_info['openapi_path'] = openapi_path
+                        
+                        # Use a versioned key to prevent overwrites
+                        versioned_method_key = f"{method_name}_{version}"
+                        self.all_methods[versioned_method_key] = parsed_info
                         
                         # Track method details for reporting
                         self.spec_generator.all_method_details.append(OpenAPIMethod(
@@ -124,7 +132,7 @@ class OpenAPIManager:
         
         # Final reporting
         stats = self.get_stats()
-        self.vlog(f"OpenAPI generation complete. {stats['files_processed']} files processed.")
+        self.logger.info(f"OpenAPI generation complete. {stats['files_processed']} files processed.")
         
         # Get enum and structure counts from the parser
         enums_count = len(self.mdx_parser.enum_patterns)
@@ -132,7 +140,8 @@ class OpenAPIManager:
         
         # Generate tracking files
         self.spec_generator.generate_tracking_files(version, self.success_count, self.error_count,
-                                             self.mdx_parser.enum_patterns, structures_count, enums_count, [str(d) for d in source_dirs])
+                                             self.mdx_parser.enum_patterns, structures_count, 
+                                             enums_count, [str(d) for d in source_dirs], self.all_methods)
 
         return f"Successfully generated OpenAPI specs for {self.success_count} methods with {self.error_count} errors, and processed {self.enum_count} enums and {self.structure_count} structures."
 
@@ -143,12 +152,14 @@ class OpenAPIManager:
 
     def get_stats(self) -> Dict[str, Any]:
         """
-        Retrieves and consolidates statistics from the converter.
-        This method is kept for backward compatibility and to provide a single
-        point of access for statistics.
+        Retrieves and consolidates statistics from the manager and spec_generator.
         """
-        # The actual statistics are now managed within the converter
-        return self.spec_generator.get_stats()
+        spec_stats = self.spec_generator.get_stats()
+        return {
+            'files_processed': spec_stats.get('files_processed', 0),
+            'enums_found': self.enum_count,
+            'structures_found': self.structure_count,
+        }
 
     def _merge_specs(self, paths: List[str], version: str) -> Dict:
         """
@@ -189,9 +200,9 @@ class OpenAPIManager:
                     main_spec["components"]["schemas"].update(spec["components"]["schemas"])
             
             except FileNotFoundError:
-                self.vlog(f"Warning: File not found - {path}")
+                self.logger.info(f"Warning: File not found - {path}")
             except yaml.YAMLError as e:
-                self.vlog(f"Error parsing YAML file {path}: {e}")
+                self.logger.info(f"Error parsing YAML file {path}: {e}")
                 
         return main_spec
 
@@ -216,7 +227,7 @@ class OpenAPIManager:
         with open(output_path, 'w') as f:
             yaml.dump(spec, f, sort_keys=False, allow_unicode=True)
             
-        self.vlog(f"Main OpenAPI spec file written to: {output_path}")
+        self.logger.info(f"Main OpenAPI spec file written to: {output_path}")
 
     def update_main_spec(self, version: str):
         """
@@ -224,7 +235,7 @@ class OpenAPIManager:
         and categorized spec files and merging them. This ensures the main
         spec is always up-to-date.
         """
-        self.vlog("Updating main OpenAPI specification...")
+        self.logger.info("Updating main OpenAPI specification...")
         
         # Define directories to scan for spec files
         spec_dirs = [
@@ -246,4 +257,4 @@ class OpenAPIManager:
         # Write the final main spec file
         self._write_main_openapi_file(merged_spec, version)
         
-        self.vlog("Main OpenAPI specification updated successfully.") 
+        self.logger.info("Main OpenAPI specification updated successfully.") 
