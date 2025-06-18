@@ -375,47 +375,6 @@ class KDFTools:
             # Scan documentation files
             doc_results = run_async(doc_scanner.scan_all_files_async(versions))
             
-            # Load Rust repository methods for comparison (if available)
-            rust_data = None
-            try:
-                # Load the latest kdf_rust_methods file from Step 1A
-                rust_files = glob.glob(str(Path(data_dir) / "kdf_rust_methods_*.json"))
-                if rust_files:
-                    # Get the most recent file
-                    latest_rust_file = max(rust_files, key=lambda x: Path(x).stat().st_mtime)
-                    if self.verbose:
-                        print(f"📊 Loading Rust methods from: {Path(latest_rust_file).name}")
-                    
-                    with open(latest_rust_file, 'r', encoding='utf-8') as f:
-                        rust_file_data = json.load(f)
-                    
-                    # Extract repository data in the expected format
-                    if "repository_data" in rust_file_data:
-                        rust_data = {}
-                        for version in versions:
-                            if version in rust_file_data["repository_data"]:
-                                # Create a simple object with methods attribute
-                                class RustVersionData:
-                                    def __init__(self, methods):
-                                        self.methods = methods
-                                
-                                methods = rust_file_data["repository_data"][version].get("methods", [])
-                                rust_data[version] = RustVersionData(methods)
-                                
-                                if self.verbose:
-                                    print(f"   📋 {version.upper()}: {len(methods)} Rust methods loaded")
-                    
-                    if self.verbose and rust_data:
-                        print("📊 Loaded Rust repository methods for gap analysis")
-                else:
-                    if self.verbose:
-                        print("⚠️  No kdf_rust_methods_*.json file found from Step 1A")
-                        print("   Run 'python py/kdf_tools.py scan-rust --branch dev --versions v1 v2' first")
-            except Exception as e:
-                if self.verbose:
-                    print(f"⚠️  Could not load Rust repository methods: {e}")
-                    print("   Run 'python py/kdf_tools.py scan-rust --branch dev --versions v1 v2' first")
-            
             # Generate filenames
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             reports_dir = Path(self._resolve_data_directory_path(self.config.directories.reports_dir))
@@ -423,7 +382,7 @@ class KDFTools:
             
             # STEP 1: Generate method paths file (primary data source)
             method_paths_data = self._generate_mdx_method_paths_data(
-                doc_results, rust_data, versions, current_branch
+                doc_results, versions, current_branch
             )
             
             # Save method paths file first
@@ -449,34 +408,15 @@ class KDFTools:
                 
                 # Display summary from the paths data
                 total_documented_methods = method_paths_data["scan_metadata"]["total_documented_methods"]
-                total_methods = methods_data["scan_metadata"]["total_methods"]
                 
                 print()
                 print("📊 Summary:")
                 for version in versions:
                     if version in method_paths_data["method_paths"]:
                         documented = len(method_paths_data["method_paths"][version])
-                        total = len(methods_data["repository_data"].get(version, {}).get("methods", []))
-                        print(f"✅ {version.upper()}: {total} total methods, {documented} with paths")
+                        print(f"✅ {version.upper()}: {documented} methods with paths")
                 
-                print(f"\n📄 Total: {total_methods} methods across {len(versions)} versions")
-                print(f"📁 Documented: {total_documented_methods} methods with file paths")
-                
-                # Show gap analysis summary
-                gap_analysis = method_paths_data.get("gap_analysis", {})
-                total_rust_gaps = sum(len(gap_analysis.get("rust_methods_without_mdx", {}).get(v, [])) for v in versions)
-                
-                if total_rust_gaps > 0:
-                    print(f"\n⚠️  Gap Analysis:")
-                    print(f"   🔧 Rust methods without MDX: {total_rust_gaps} (documentation needed)")
-                    print(f"   📋 See detailed analysis in: {paths_output_path}")
-                else:
-                    # Check if we had Rust data to compare against
-                    total_rust_methods = sum(method_paths_data.get("gap_analysis", {}).get("statistics", {}).get(v, {}).get("total_rust_methods", 0) for v in versions)
-                    if total_rust_methods > 0:
-                        print(f"\n✅ Gap Analysis: All {total_rust_methods} Rust methods have MDX documentation!")
-                    else:
-                        print(f"\n📋 Gap Analysis: No Rust methods data available for comparison")
+                print(f"\n📄 Total documented: {total_documented_methods} methods across {len(versions)} versions")
             
             success = True
             
@@ -489,25 +429,21 @@ class KDFTools:
         self._print_footer(command_title, success=success)
         return 0 if success else 1
     
-    def _generate_mdx_method_paths_data(self, doc_results, rust_data, versions, current_branch):
+    def _generate_mdx_method_paths_data(self, doc_results, versions, current_branch):
         """Generate the method paths data structure (primary data source)."""
         method_paths_data = {
             "scan_metadata": {
                 "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDFMethodPathMapper v1.4.0",
+                "scanner_version": "KDFMethodPathMapper v1.5.0",
                 "scanner_type": "METHOD_PATH_MAPPING",
                 "total_versions": len(versions),
                 "total_documented_methods": 0,
                 "versions_processed": versions,
-                "includes_gap_analysis": True,
+                "includes_gap_analysis": False,
                 "generated_during_mdx_scan": True,
                 "is_primary_data_source": True
             },
-            "method_paths": {},
-            "gap_analysis": {
-                "rust_methods_without_mdx": {},
-                "statistics": {}
-            }
+            "method_paths": {}
         }
         
         total_documented_methods = 0
@@ -527,48 +463,13 @@ class KDFTools:
                 for method_name, file_path in version_data['mdx_files'].items():
                     method_paths[method_name] = str(file_path)
             
-            # Get Rust methods for gap analysis (canonical methods from source code)
-            rust_methods = set()
-            if rust_data and version in rust_data:
-                rust_methods = set(rust_data[version].methods)
-            
-            # Gap analysis: Compare Rust methods vs documented methods
-            documented_methods = set(method_paths.keys())
-            
-            # rust_methods_without_mdx: Canonical Rust methods that don't have MDX documentation
-            rust_methods_without_mdx = [
-                method for method in rust_methods 
-                if method not in documented_methods
-            ]
-            
             # Store method paths (only MDX files with actual paths)
             method_paths_data["method_paths"][version] = dict(sorted(method_paths.items()))
             total_documented_methods += len(method_paths)
             
-            # Store gap analysis
-            method_paths_data["gap_analysis"]["rust_methods_without_mdx"][version] = rust_methods_without_mdx
-            
-            # Calculate statistics
-            documented_count = len(method_paths)
-            rust_count = len(rust_methods)
-            coverage_vs_rust = (documented_count / rust_count * 100) if rust_count > 0 else 0
-            
-            method_paths_data["gap_analysis"]["statistics"][version] = {
-                "documented_methods": documented_count,
-                "total_rust_methods": rust_count,
-                "rust_methods_without_mdx": len(rust_methods_without_mdx),
-                "coverage_vs_rust": coverage_vs_rust
-            }
-            
             if self.verbose:
                 print(f"🔍 Processing {version.upper()} documentation...")
-                print(f"   📁 MDX files with paths: {documented_count}")
-                if rust_count > 0:
-                    print(f"   📊 Rust coverage: {documented_count}/{rust_count} ({coverage_vs_rust:.1f}%)")
-                    if rust_methods_without_mdx:
-                        print(f"   📝 Rust methods without MDX: {len(rust_methods_without_mdx)}")
-                else:
-                    print(f"   ⚠️  No Rust methods data available for gap analysis")
+                print(f"   📁 MDX files with paths: {len(method_paths)}")
         
         # Update total documented methods count
         method_paths_data["scan_metadata"]["total_documented_methods"] = total_documented_methods
@@ -1348,15 +1249,121 @@ class KDFTools:
 
     def setup_review_draft_quality_parser(self, subparsers):
         """Setup parser for the review-draft-quality command."""
-        pass
+        parser = subparsers.add_parser(
+            'review-draft-quality',
+            help='Compare generated documentation with live versions.',
+            description='Compares generated documentation with live versions to assess quality.'
+        )
+        parser.add_argument(
+            '--generated', type=Path, required=True,
+            help='Path to the generated documentation file.'
+        )
+        parser.add_argument(
+            '--live', type=Path, required=True,
+            help='Path to the live documentation file.'
+        )
+        parser.add_argument(
+            '--generated-dir', type=Path,
+            help='Directory containing generated documentation files.'
+        )
+        parser.add_argument(
+            '--live-dir', type=Path,
+            help='Directory containing live documentation files.'
+        )
+        parser.add_argument(
+            '--output', type=Path,
+            help='Path to save the review report.'
+        )
+        parser.add_argument(
+            '--format', choices=['json', 'markdown'], default='markdown',
+            help='Format of the review report.'
+        )
+        parser.set_defaults(func=self.review_draft_quality_command)
 
     def setup_scan_existing_docs_parser(self, subparsers):
         """Setup parser for the scan-existing-docs command."""
-        pass
+        parser = subparsers.add_parser(
+            'scan-existing-docs',
+            help='Scan existing KDF documentation to extract method patterns.',
+            description='Scans existing KDF documentation to extract method patterns.'
+        )
+        parser.add_argument(
+            '--docs-path', type=Path,
+            help='Path to the directory containing existing documentation files.'
+        )
+        parser.add_argument(
+            '--async-scan', action='store_true',
+            help='Use asynchronous scanning for better performance.'
+        )
+        parser.add_argument(
+            '--output', type=Path,
+            help='Path to save the extracted method patterns.'
+        )
+        parser.add_argument(
+            '--generate-report', action='store_true',
+            help='Generate an analysis report of the extracted method patterns.'
+        )
+        parser.add_argument(
+            '--show-categories', action='store_true',
+            help='Show method categories in the analysis report.'
+        )
+        parser.set_defaults(func=self.scan_existing_docs_command)
 
     def setup_generate_docs_parser(self, subparsers):
         """Setup parser for the generate-docs command."""
-        pass
+        parser = subparsers.add_parser(
+            'generate-docs',
+            help='Generate documentation for missing KDF methods.',
+            description='Generates documentation for missing KDF methods.'
+        )
+        parser.add_argument(
+            '--branch', type=str,
+            help='Branch of the repository to generate documentation for.'
+        )
+        parser.add_argument(
+            '--repo-path', type=Path,
+            help='Path to the repository containing the KDF code.'
+        )
+        parser.add_argument(
+            '--method', type=str,
+            help='Specific method to generate documentation for.'
+        )
+        parser.add_argument(
+            '--version', type=str,
+            help='Version of the API to generate documentation for.'
+        )
+        parser.add_argument(
+            '--methods-file', type=Path,
+            help='Path to a file containing methods to generate documentation for.'
+        )
+        parser.add_argument(
+            '--interactive', action='store_true',
+            help='Interactively select methods to generate documentation for.'
+        )
+        parser.add_argument(
+            '--output-dir', type=Path,
+            help='Directory to save generated documentation files.'
+        )
+        parser.add_argument(
+            '--generate-summary', action='store_true',
+            help='Generate a summary report of the documentation generation process.'
+        )
+        parser.set_defaults(func=self.generate_docs_command)
+
+    def setup_gap_analysis_parser(self, subparsers):
+        """Setup parser for the gap-analysis command."""
+        parser = subparsers.add_parser(
+            "gap-analysis",
+            help="Perform gap analysis between Rust and MDX methods.",
+            description="Compares methods found in the Rust repository against those documented in MDX files."
+        )
+        parser.add_argument(
+            "--versions",
+            nargs="+",
+            default=["v1", "v2"],
+            help="List of API versions to process (e.g., v1 v2)."
+        )
+        parser.set_defaults(func=self.gap_analysis_command)
 
     def _generate_postman_tracking_file_from_latest_data(self, versions: List[str]) -> None:
         """Placeholder for generating Postman tracking file."""
@@ -1387,6 +1394,106 @@ class KDFTools:
         )
         parser.set_defaults(func=self.scan_rust)
 
+    def gap_analysis_command(self, args):
+        """Handle gap-analysis subcommand."""
+        command_title = "Documentation Gap Analysis"
+        config = [
+            f"Versions: {args.versions}"
+        ]
+        self._print_header(command_title, config)
+        success = False
+        try:
+            data_dir = self._get_data_dir()
+            reports_dir = os.path.join(data_dir, "reports")
+
+            # Load latest Rust scan data
+            rust_data = {}
+            rust_scan_files = glob.glob(os.path.join(reports_dir, "report-kdf_rust_methods_*.json"))
+            if rust_scan_files:
+                latest_rust_scan = max(rust_scan_files, key=os.path.getctime)
+                self.log(f"Found latest Rust methods file: {os.path.basename(latest_rust_scan)}")
+                with open(latest_rust_scan, 'r') as f:
+                    rust_methods_data = json.load(f).get("repository_data", {})
+                    for v in args.versions:
+                        if v in rust_methods_data:
+                            rust_data[v] = rust_methods_data[v].get("methods", [])
+            else:
+                self.log(f"⚠️  No 'report-kdf_rust_methods_*.json' file found.", "warning")
+                self.log(f"   Run 'python py/kdf_tools.py scan-rust' first", "warning")
+                return
+
+            # Load latest MDX methods data
+            mdx_methods = {}
+            mdx_scan_files = glob.glob(os.path.join(reports_dir, "kdf_mdx_methods_*.json"))
+            if mdx_scan_files:
+                latest_mdx_scan = max(mdx_scan_files, key=os.path.getctime)
+                self.log(f"Found latest MDX methods file: {os.path.basename(latest_mdx_scan)}")
+                with open(latest_mdx_scan, 'r') as f:
+                    mdx_methods_data = json.load(f).get("repository_data", {})
+                    for v in args.versions:
+                        if v in mdx_methods_data:
+                            mdx_methods[v] = mdx_methods_data[v].get("methods", [])
+            else:
+                self.log(f"⚠️  No 'kdf_mdx_methods_*.json' file found.", "warning")
+                self.log(f"   Run 'python py/kdf_tools.py scan-mdx' first", "warning")
+                return
+
+            # Perform Gap Analysis
+            self.log("📊 Performing Gap Analysis...")
+            gap_analysis_data = {
+                "rust_methods_without_mdx": {v: [] for v in args.versions},
+                "mdx_methods_without_rust": {v: [] for v in args.versions},
+                "statistics": {}
+            }
+
+            for v in args.versions:
+                if v not in rust_data or v not in mdx_methods:
+                    continue
+                self.log(f"🔍 Processing {v.upper()}...")
+                rust_method_set = set(rust_data.get(v, []))
+                doc_method_set = set(mdx_methods.get(v, []))
+
+                missing_in_docs = sorted(list(rust_method_set - doc_method_set))
+                extra_in_docs = sorted(list(doc_method_set - rust_method_set))
+
+                gap_analysis_data["rust_methods_without_mdx"][v] = missing_in_docs
+                gap_analysis_data["mdx_methods_without_rust"][v] = extra_in_docs
+                
+                total_rust_methods = len(rust_method_set)
+                total_doc_methods = len(doc_method_set)
+                
+                coverage = (total_doc_methods / total_rust_methods * 100) if total_rust_methods > 0 else 0
+
+                gap_analysis_data["statistics"][v] = {
+                    "total_rust_methods": total_rust_methods,
+                    "documented_methods": total_doc_methods,
+                    "undocumented_methods": len(missing_in_docs),
+                    "extra_methods_in_docs": len(extra_in_docs),
+                    "documentation_coverage_percent": f"{coverage:.2f}%"
+                }
+
+                self.log(f"   - Total methods in Rust: {total_rust_methods}")
+                self.log(f"   - Total methods in MDX: {total_doc_methods}")
+                self.log(f"   - Coverage: {coverage:.2f}%")
+                if missing_in_docs:
+                    self.log(f"   - 🚨 Undocumented methods: {len(missing_in_docs)}")
+                if extra_in_docs:
+                    self.log(f"   - ⚠️  Extra methods in docs: {len(extra_in_docs)}")
+
+            # Save report
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            report_path = reports_dir / f"kdf_gap_analysis_{timestamp}.json"
+            safe_write_json(report_path, gap_analysis_data, indent=2)
+            self.log(f"✅ 💾 Gap analysis report saved to: {report_path}")
+
+            success = True
+
+        except Exception as e:
+            self.logger.error(f"Error during gap analysis: {e}")
+            self.logger.error(traceback.format_exc())
+        finally:
+            self._print_footer(command_title, success=success)
+
     def main(self):
         """Main entry point for CLI."""
         parser = argparse.ArgumentParser(
@@ -1404,6 +1511,7 @@ class KDFTools:
         self.setup_postman_parser(subparsers)
         self.setup_scan_rust_parser(subparsers)
         self.setup_scan_mdx_parser(subparsers)
+        self.setup_gap_analysis_parser(subparsers)
         self.setup_map_methods_parser(subparsers)
         self.setup_json_extract_parser(subparsers)
         self.setup_cleanup_parser(subparsers)

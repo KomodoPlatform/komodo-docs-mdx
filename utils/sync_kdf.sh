@@ -117,7 +117,18 @@ echo "#   - Powers advanced tooling and automation"
 echo "#   - Includes hotlinks to specific Postman collection requests"
 echo "#   - Maps method names to collection folder paths and request IDs"
 if ! python py/kdf_tools.py map_methods; then
-    echo "❌ Step 5 failed: Unified mapping generation"
+    echo "❌ Step 5A failed: Unified mapping generation"
+    exit 1
+fi
+echo
+
+# Step 5B: Perform Gap Analysis
+echo "============== 🗺️ Step 5B: Performing Gap Analysis... ================"
+echo "# This step compares Rust methods against documented methods and reports:"
+echo "#   - Undocumented methods (in Rust but not in docs)"
+echo "#   - Extra methods (in docs but not in Rust)"
+if ! python py/kdf_tools.py gap-analysis --versions all; then
+    echo "❌ Step 5B failed: Gap analysis"
     exit 1
 fi
 echo
