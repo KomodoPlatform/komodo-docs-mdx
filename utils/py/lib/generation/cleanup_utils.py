@@ -119,8 +119,8 @@ class GeneratedFilesCleaner:
         total_files = 0
         total_dirs = 0
         
-        self._log(f"Starting cleanup of generated files (dry_run={dry_run})")
-        self._log(f"Categories to clean: {', '.join(categories)}")
+        self.logger.clean(f"Starting cleanup of generated files (dry_run={dry_run})")
+        self.logger.clean(f"Categories to clean: {', '.join(categories)}")
         
         for category in categories:
             if category not in self.FILE_CATEGORIES:

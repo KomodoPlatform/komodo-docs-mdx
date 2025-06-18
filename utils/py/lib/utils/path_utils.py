@@ -17,7 +17,7 @@ import json
 # Import enhanced configuration system
 from ..constants.config import get_config, EnhancedKomodoConfig
 from ..constants.enums import VersionStatus
-from ..constants.data_structures import PathInfo, PathMapping
+from ..constants.data_structures import PathMapping
 
 class EnhancedPathMapper:
     """

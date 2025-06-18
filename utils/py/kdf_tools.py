@@ -61,7 +61,7 @@ from utils.py.lib.rust.scanner import KDFScanner
 
 class KDFTools:
     """Unified KDF Tools CLI."""
-    CLEANUP_CATEGORIES = ["openapi", "postman", "reports", "all"]
+    CLEANUP_CATEGORIES = ["openapi", "postman", "reports", "rust", "all"]
 
     def __init__(self):
         self.verbose = True
@@ -94,7 +94,7 @@ class KDFTools:
             else:
                 # Still not found, use the script-based detection as fallback
                 if self.verbose:
-                    self.log("⚠️ Could not find workspace root with src/pages directory, using script location", "warning")
+                    self.log("Could not find workspace root with src/pages directory, using script location", "warning")
 
         self.config = get_config(
             base_path=str(workspace_root),
@@ -102,8 +102,8 @@ class KDFTools:
         )
 
         if self.verbose:
-            self.log(f"📁 Workspace root: {workspace_root}")
-            self.log(f"📁 Data directory: {self._get_data_dir()}")
+            self.logger.folder(f"Workspace root: {workspace_root}")
+            self.logger.folder(f"Data directory: {self._get_data_dir()}")
 
     def _get_data_dir(self) -> str:
         """Get absolute path to data directory using config constants."""
@@ -142,20 +142,20 @@ class KDFTools:
     def _print_header(self, title, config_lines=None):
         """Prints a standardized command header."""
         self.log(f"")
-        self.log(f"============== 🚀 Starting: {title} ==============")
+        self.logger.start(f"============== Starting: {title} ==============")
         if config_lines:
-            self.log("Config:")
+            self.logger.config("Config:")
             for line in config_lines:
-                self.log(f"    - {line}")
+                self.logger.config(f"    - {line}")
         self.log("")
 
     def _print_footer(self, title, success=True, output_paths=None, report_paths=None):
         """Prints a standardized command footer."""
         self.log("")
         if success:
-            self.log(f"============== ✅ Success: {title} ==============")
+            self.logger.finish(f"✅ Success: {title}")
         else:
-            self.log(f"============== ❌ Failed: {title} ==============")
+            self.logger.finish(f"❌ Failed: {title}")
 
         if output_paths:
             self.log("  Output data paths:")
@@ -181,7 +181,7 @@ class KDFTools:
         try:
             # Auto-cleanup generated files if requested
             if args.clean_before:
-                self.log("🧹 Cleaning up old OpenAPI files before generation...")
+                self.logger.clean("Cleaning up old OpenAPI files before generation...")
                 if not self._cleanup_before_generation(['openapi'], args.dry_run, args.keep):
                     self.log("Cleanup failed, continuing anyway...", "warning")
             

@@ -5,9 +5,6 @@ Base Reporter
 Provides a base class for report generation with common utilities.
 """
 
-from typing import Dict, List
-
-
 class BaseReporter:
     """Base class for reporters providing common formatting utilities."""
 

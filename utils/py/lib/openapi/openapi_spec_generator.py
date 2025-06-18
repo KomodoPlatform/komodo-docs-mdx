@@ -11,7 +11,7 @@ import re
 import yaml
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Set
+from typing import Dict, List, Any, Set
 from collections import defaultdict
 from datetime import datetime
 

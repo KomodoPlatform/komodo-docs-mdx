@@ -19,7 +19,7 @@ from typing import Dict, List, Set, Optional, Any, Union, Tuple
 from datetime import datetime, timedelta
 
 from ..utils.logging_utils import get_logger
-from ..utils import normalize_method_name, safe_write_json, safe_read_json, ensure_directory_exists
+from ..utils import ensure_directory_exists
 from ..constants import RustMethodDetails, UnifiedRepositoryInfo
 
 
@@ -29,12 +29,12 @@ class KDFScanner:
     Can operate on a local clone or a remote GitHub repository.
     """
 
-    def __init__(self, repo_path: Optional[Union[str, Path]] = None,
-                 data_dir: Optional[Union[str, Path]] = None,
+    def __init__(self, config: Any, repo_path: Optional[Union[str, Path]] = None,
                  branch: str = "dev",
                  cache_duration_hours: int = 1,
                  verbose: bool = True):
         self.logger = get_logger("kdf-scanner")
+        self.config = config
         self.script_dir = Path(__file__).parent.parent.parent
         self.repo_path = Path(repo_path) if repo_path else None
         self.is_local = self.repo_path is not None
@@ -42,21 +42,17 @@ class KDFScanner:
         self.verbose = verbose
         self.cache_duration = timedelta(hours=cache_duration_hours)
 
-        if self.is_local:
-            self.data_dir = data_dir or (self.script_dir / "data")
-        else:
-            self.data_dir = Path(data_dir) if data_dir else (self.script_dir / "data")
+        self.data_dir = Path(self.config.directories.data_dir)
+        self.reports_dir = Path(self.config.directories.reports_dir)
+        
+        if not self.is_local:
             self.url_templates = {
                 "v1": f"https://raw.githubusercontent.com/KomodoPlatform/komodo-defi-framework/{self.branch}/mm2src/mm2_main/src/rpc/dispatcher/dispatcher_legacy.rs",
                 "v2": f"https://raw.githubusercontent.com/KomodoPlatform/komodo-defi-framework/{self.branch}/mm2src/mm2_main/src/rpc/dispatcher/dispatcher.rs"
             }
 
         self.data_dir.mkdir(exist_ok=True, parents=True)
-        self.logger.info(f"Initialized KDFScanner in {'LOCAL' if self.is_local else 'REMOTE'} mode.")
-        if self.is_local:
-            self.logger.info(f"Local repository path: {self.repo_path}")
-        else:
-            self.logger.info(f"Remote repository branch: {self.branch}")
+        self.reports_dir.mkdir(exist_ok=True, parents=True)
 
     # Local repository methods
     def setup_repository(self, force_clone: bool = False) -> bool:
@@ -137,7 +133,7 @@ class KDFScanner:
         
         if self.verbose:
             mode = 'LOCAL' if self.is_local else 'REMOTE'
-            self.logger.info(f"🔍 Scanning KDF repository asynchronously (mode: {mode}, branch: {self.branch})")
+            self.logger.scan(f"Scanning KDF repository asynchronously (mode: {mode}, branch: {self.branch})")
         
         import asyncio
         tasks = [self._scan_version_async(version) for version in versions]
@@ -152,10 +148,6 @@ class KDFScanner:
                 version, repo_info = result
                 repository_info[version] = repo_info
         
-        if self.verbose:
-            total_methods = sum(len(info.methods) for info in repository_info.values())
-            self.logger.success(f"✅ Async scan completed: {total_methods} methods across {len(repository_info)} versions")
-
         return repository_info
 
     async def _scan_version_async(self, version: str) -> Optional[Tuple[str, UnifiedRepositoryInfo]]:
@@ -212,9 +204,9 @@ class KDFScanner:
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             branch_name = self.branch
-            filename = f"kdf_rust_methods_{branch_name}_{timestamp}.json"
+            filename = f"report-kdf_rust_methods_{branch_name}_{timestamp}.json"
         
-        file_path = self.data_dir / filename
+        file_path = self.reports_dir / filename
         
         data = {
             "scan_metadata": {
@@ -244,14 +236,12 @@ class KDFScanner:
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, _save_file)
             
-        if self.verbose:
-            self.logger.success(f"💾 Saved repository methods to: {file_path}")
         
         return str(file_path)
 
     # Remote repository methods
     def _fetch_remote_content(self, url: str) -> Optional[str]:
-        self.logger.info(f"Fetching source from {url}")
+        self.logger.fetch(f"Fetching source from {url}")
         try:
             response = requests.get(url, timeout=30)
             response.raise_for_status()

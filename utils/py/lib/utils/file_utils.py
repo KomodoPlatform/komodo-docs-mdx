@@ -390,7 +390,7 @@ def cleanup_old_files(directory: str, pattern: str, keep_count: int = 3, verbose
     
     Args:
         directory: Directory to search for files
-        pattern: Glob pattern to match files (e.g., "kdf_rust_methods_*.json")
+        pattern: Glob pattern to match files (e.g., "report-kdf_rust_methods_*.json")
         keep_count: Number of most recent files to keep (default: 3)
         verbose: Whether to log cleanup actions
         
@@ -446,7 +446,6 @@ def cleanup_old_files(directory: str, pattern: str, keep_count: int = 3, verbose
         return 0
 
 
-def cleanup_kdf_temp_files(data_dir: str = "data", keep_count: int = 3, verbose: bool = True) -> Dict[str, int]:
     """
     Clean up KDF temporary files, keeping only the most recent ones.
     
@@ -459,16 +458,16 @@ def cleanup_kdf_temp_files(data_dir: str = "data", keep_count: int = 3, verbose:
         Dictionary with cleanup results for each file type
     """
     cleanup_patterns = {
-        "rust_methods": "kdf_rust_methods_*.json",
-        "mdx_methods": "kdf_mdx_methods_*.json",
-        "openapi_methods": "kdf_openapi_methods_*.json",
-        "json_methods": "kdf_json_methods_*.json",
-        "postman_methods": "kdf_postman_methods_*.json",
-        "mdx_method_paths": "kdf_mdx_method_paths_*.json",
-        "openapi_method_paths": "kdf_openapi_method_paths_*.json",
-        "json_method_paths": "kdf_json_method_paths_*.json",
-        "postman_method_paths": "kdf_postman_method_paths_*.json",
-        "method_mapping": "kdf_method_mapping_*.json",
+        "rust_methods": "report-kdf_rust_methods_*.json",
+        "mdx_methods": "report-kdf_mdx_methods_*.json",
+        "openapi_methods": "report-kdf_openapi_methods_*.json",
+        "json_methods": "report-kdf_json_methods_*.json",
+        "postman_methods": "report-kdf_postman_methods_*.json",
+        "mdx_method_paths": "report-kdf_mdx_method_paths_*.json",
+        "openapi_method_paths": "report-kdf_openapi_method_paths_*.json",
+        "json_method_paths": "report-kdf_json_method_paths_*.json",
+        "postman_method_paths": "report-kdf_postman_method_paths_*.json",
+        "method_mapping": "report-kdf_method_mapping_*.json",
         "unified_method_mapping": "unified_method_mapping*.json",
     }
     

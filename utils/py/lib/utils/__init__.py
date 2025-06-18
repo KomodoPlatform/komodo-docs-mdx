@@ -14,7 +14,7 @@ from .file_utils import (
     normalize_file_path, ensure_directory_exists, find_files_by_pattern,
     safe_read_json, safe_write_json, get_file_stats, extract_filename_parts,
     calculate_file_hash, calculate_content_hash, safe_copy_file, create_backup_path,
-    clean_empty_directories, quick_file_stats, cleanup_old_files, cleanup_kdf_temp_files,
+    clean_empty_directories, quick_file_stats, cleanup_old_files, 
     validate_file_exists
 )
 
@@ -75,7 +75,6 @@ __all__ = [
     'clean_empty_directories',
     'quick_file_stats',
     'cleanup_old_files',
-    'cleanup_kdf_temp_files',
     'validate_file_exists',
     'safe_read_json',
     'safe_write_json',

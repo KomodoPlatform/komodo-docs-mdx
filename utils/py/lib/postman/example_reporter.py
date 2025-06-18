@@ -6,7 +6,7 @@ Handles report generation and statistics for API example management.
 Provides formatted summaries and analysis reports.
 """
 
-from typing import Dict, List, TYPE_CHECKING, Tuple
+from typing import Dict, List, Tuple
 from pathlib import Path
 from ..base.base_reporter import BaseReporter
 from .postman_scanner import ExtractedExample

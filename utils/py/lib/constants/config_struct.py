@@ -90,6 +90,7 @@ class DirectoryConfig:
     reports_dir: str = "utils/py/data/reports"
     cache_dir: str = "cache"
     category_mappings: str = "utils/py/data/category_mappings.json"
+    kdf_repo_path: str = "utils/kdf_repo"
     
     def get_version_directories(self) -> Dict[str, Dict[str, str]]:
         """Get directories organized by version and type."""

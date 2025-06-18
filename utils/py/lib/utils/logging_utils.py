@@ -18,6 +18,30 @@ from datetime import datetime
 _config_provider: Optional[Callable] = None
 
 
+# Custom log levels
+SAVE_LEVEL = 25  # Between INFO and WARNING
+SUCCESS_LEVEL = 26 # Above SAVE
+PROGRESS_LEVEL = 22 # Between INFO and SAVE
+SCAN_LEVEL = 23 # Between PROGRESS and SAVE
+FETCH_LEVEL = 24 # Between SCAN and SAVE
+CLEAN_LEVEL = 21 # Below PROGRESS
+CONFIG_LEVEL = 19 # Below INFO
+FOLDER_LEVEL = 18 # Below CONFIG
+START_LEVEL = 27 # Above SUCCESS
+FINISH_LEVEL = 28 # Above START
+
+logging.addLevelName(SAVE_LEVEL, "SAVE")
+logging.addLevelName(SUCCESS_LEVEL, "SUCCESS")
+logging.addLevelName(PROGRESS_LEVEL, "PROGRESS")
+logging.addLevelName(SCAN_LEVEL, "SCAN")
+logging.addLevelName(FETCH_LEVEL, "FETCH")
+logging.addLevelName(CLEAN_LEVEL, "CLEAN")
+logging.addLevelName(CONFIG_LEVEL, "CONFIG")
+logging.addLevelName(FOLDER_LEVEL, "FOLDER")
+logging.addLevelName(START_LEVEL, "START")
+logging.addLevelName(FINISH_LEVEL, "FINISH")
+
+
 def set_config_provider(provider: Callable):
     """
     Set the configuration provider function to avoid circular imports.
@@ -51,17 +75,23 @@ class EmojiFormatter(logging.Formatter):
     """Custom formatter that adds emoji indicators for different log levels."""
     
     EMOJI_MAP = {
-        'DEBUG': '🔍 ',
-        'INFO': 'ℹ️  ',
+        'DEBUG': '🐛 ',
+        'INFO': '› ',
         'WARNING': '⚠️  ',
         'ERROR': '❌ ',
         'CRITICAL': '🚨 ',
         'SUCCESS': '✅ ',
+        'START': '🚀 ',
+        'FINISH': '🏁 ',
         'PROGRESS': '🔄 ',
         'SAVE': '💾 ',
+        'SCAN': '🔍 ',
+        'FETCH': '📡 ',
+        'CLEAN': '🧹 ',
+        'CONFIG': '🔧 ',
+        'FOLDER': '📁 ',
         'SKIP': '⏭️  ',
         'DELETE': '🗑️  ',
-        'CREATE': '📁 ',
         'UPDATE': '🔄 '
     }
     
@@ -70,11 +100,12 @@ class EmojiFormatter(logging.Formatter):
         self.emoji_enabled = emoji_enabled
     
     def format(self, record):
-        # Add emoji if enabled
-        if self.emoji_enabled:
+        # Add emoji if enabled and message is not empty
+        if self.emoji_enabled and record.msg and record.msg.strip():
+            # Use levelname for emoji mapping
             emoji = self.EMOJI_MAP.get(record.levelname, '')
-            if emoji:
-                record.msg = f"{emoji} {record.msg}"
+            if emoji and not record.msg.startswith(emoji.strip()):
+                record.msg = f"{emoji}{record.msg}"
         
         return super().format(record)
 
@@ -111,9 +142,7 @@ class KomodoLogger:
         else:
             self._config_provider = _config_provider
         
-        # Custom log levels
-        logging.addLevelName(25, 'SUCCESS')
-        logging.addLevelName(22, 'PROGRESS')
+        # Custom log levels are now defined globally
         
         # Setup handlers
         self._setup_handlers()
@@ -138,7 +167,7 @@ class KomodoLogger:
         """Setup logging handlers based on configuration."""
         # Prevent duplicate handlers
         if self.logger.handlers:
-            return
+            self.logger.handlers.clear()
             
         emoji_output, log_file, quiet, verbose, progress_indicators = self._get_config_values()
         
@@ -181,7 +210,7 @@ class KomodoLogger:
     def info(self, message: str, **kwargs):
         """Log info message."""
         self.logger.info(message, extra=kwargs)
-    
+
     def warning(self, message: str, **kwargs):
         """Log warning message."""
         self.logger.warning(message, extra=kwargs)
@@ -196,41 +225,58 @@ class KomodoLogger:
     
     def success(self, message: str, **kwargs):
         """Log success message."""
-        self.logger.log(25, message, extra=kwargs)
+        self.logger.log(SUCCESS_LEVEL, message, extra=kwargs)
     
+    def save(self, message: str, **kwargs):
+        """Log save message."""
+        self.logger.log(SAVE_LEVEL, message, extra=kwargs)
+
+    def scan(self, message: str, **kwargs):
+        """Log scan message."""
+        self.logger.log(SCAN_LEVEL, message, extra=kwargs)
+
+    def fetch(self, message: str, **kwargs):
+        """Log fetch message."""
+        self.logger.log(FETCH_LEVEL, message, extra=kwargs)
+
+    def clean(self, message: str, **kwargs):
+        """Log clean message."""
+        self.logger.log(CLEAN_LEVEL, message, extra=kwargs)
+
+    def config(self, message: str, **kwargs):
+        """Log config message."""
+        self.logger.log(CONFIG_LEVEL, message, extra=kwargs)
+
+    def folder(self, message: str, **kwargs):
+        """Log folder message."""
+        self.logger.log(FOLDER_LEVEL, message, extra=kwargs)
+
+    def start(self, message: str, **kwargs):
+        """Log start message."""
+        self.logger.log(START_LEVEL, message, extra=kwargs)
+
+    def finish(self, message: str, **kwargs):
+        """Log finish message."""
+        self.logger.log(FINISH_LEVEL, message, extra=kwargs)
+
     def progress(self, message: str, **kwargs):
         """Log progress message."""
         config = _get_config()
         if config.logging.progress_indicators:
-            self.logger.log(22, message, extra=kwargs)
-    
-    def operation(self, operation: str, message: str, **kwargs):
-        """Log operation-specific message with custom emoji."""
-        config = _get_config()
-        if config.logging.emoji_output:
-            emoji_map = {
-                'save': '💾 ',
-                'skip': '⏭️  ',
-                'delete': '🗑️  ',
-                'create': '📁 ',
-                'update': '🔄 ',
-                'scan': '🔍 ',
-                'process': '⚙️  ',
-                'generate': '🔨 ',
-                'validate': '✅ '
-            }
-            emoji = emoji_map.get(operation.lower(), '')
-            if emoji:
-                message = f"{emoji}{message}"
-        
-        self.logger.info(message, extra=kwargs)
+            self.logger.log(PROGRESS_LEVEL, message, extra=kwargs)
     
     def file_operation(self, operation: str, file_path: str, success: bool = True, **kwargs):
         """Log file operation with standardized format."""
         action = "completed" if success else "failed"
-        level = self.success if success else self.error
-        level(f"File {operation} {action}: {file_path}", **kwargs)
-    
+        log_method = self.success if success else self.error
+        
+        message = f"File {operation} {action}: {file_path}"
+        
+        if operation.lower() == 'save' and success:
+            self.save(message, **kwargs)
+        else:
+            log_method(message, **kwargs)
+
     def method_operation(self, method_name: str, operation: str, details: str = "", **kwargs):
         """Log method-specific operations."""
         message = f"Method '{method_name}': {operation}"
