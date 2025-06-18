@@ -1,0 +1,232 @@
+#!/usr/bin/env python3
+"""
+OpenAPI Manager
+
+This module contains the OpenAPIManager class, which orchestrates the entire
+OpenAPI specification generation process. It discovers MDX files, uses the
+MDXParser to extract information, and the OpenApiSpecGenerator to generate
+the final specification files.
+"""
+
+import yaml
+from pathlib import Path
+from typing import Dict, List, Any, Set
+import os
+
+# Import local modules
+from .openapi_spec_generator import OpenApiSpecGenerator
+from ..mdx.mdx_parser import MDXParser
+from ..utils.path_utils import EnhancedPathMapper
+from ..constants import OpenAPIMethod, PathDetail, get_config
+
+
+class OpenAPIManager:
+    """
+    Manages the end-to-end process of generating OpenAPI specifications
+    from MDX documentation files. It acts as a high-level orchestrator,
+    coordinating the parser and converter to produce individual and
+    categorized OpenAPI specs.
+    """
+
+    def __init__(self, config: object = None, verbose: bool = True):
+        self.config = config or get_config()
+        self.base_path = Path(self.config.workspace_root)
+        self.path_mapper = EnhancedPathMapper(config=self.config)
+        self.verbose = verbose
+        
+        # Initialize the main components
+        self.mdx_parser = MDXParser(self.base_path)
+        self.spec_generator = OpenApiSpecGenerator(
+            base_path=self.base_path,
+            path_mapper=self.path_mapper
+        )
+        
+        # Tracking attributes
+        self.all_methods = {}
+        self.success_count = 0
+        self.error_count = 0
+
+    def generate_openapi_spec(self, version: str = "v2") -> str:
+        """
+        Main orchestration method. It finds all relevant MDX files, parses them,
+        generates individual OpenAPI specs, and then aggregates them into
+        category-based specs.
+
+        Args:
+            version: The API version to process (e.g., "v2").
+
+        Returns:
+            A string message summarizing the result of the operation.
+        """
+        self.vlog(f"Starting OpenAPI generation for version: {version}")
+        
+        # Define source directories to scan for MDX files
+        source_dirs = [
+            Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2,
+            Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2_dev,
+            Path(self.config.workspace_root) / "src/pages/komodo-defi-framework/api/common_structures"
+        ]
+        source_dirs = [d for d in source_dirs if d.exists()]
+        
+        # Discover and process all MDX files
+        for dir_path in source_dirs:
+            for mdx_file in dir_path.rglob("*.mdx"):
+                self.vlog(f"Processing file: {mdx_file}")
+                
+                # Parse the MDX file to get method information
+                method_info = self.mdx_parser.parse_mdx_file(mdx_file)
+                
+                if method_info:
+                    method_name = method_info['method_name']
+                    self.all_methods[method_name] = method_info
+                    
+                    # Generate the individual OpenAPI spec for the method
+                    spec = self.spec_generator.generate_openapi_spec(method_info, version)
+                    
+                    # Write the spec to a file
+                    openapi_path = self.spec_generator.write_openapi_file(
+                        spec, method_name, version, mdx_path=str(mdx_file)
+                    )
+                    self.success_count += 1
+                    
+                    # Track method details for reporting
+                    self.spec_generator.all_method_details.append(OpenAPIMethod(
+                        name=method_name,
+                        summary=method_info['title'],
+                        mdx_path=str(mdx_file),
+                        openapi_path=openapi_path
+                    ))
+                    self.spec_generator.all_path_details.append(PathDetail(
+                        path=openapi_path,
+                        method_name=method_name
+                    ))
+                else:
+                    self.error_count += 1
+        
+        # Generate common schemas like enums and structures
+        self.spec_generator.generate_common_schemas(self.mdx_parser.enum_patterns, Path(self.config.workspace_root) / "openapi/paths/components")
+        
+        # Generate categorized OpenAPI specifications
+        self.spec_generator._generate_category_specs(self.all_methods, version)
+        
+        # Final reporting
+        stats = self.get_stats()
+        self.vlog(f"OpenAPI generation complete. {stats['files_processed']} files processed.")
+        
+        # Generate tracking files
+        self.spec_generator.generate_tracking_files(version, self.success_count, self.error_count,
+                                             self.mdx_parser.enum_patterns, 0, 0, [str(d) for d in source_dirs])
+
+        return f"Successfully generated OpenAPI specs for {self.success_count} methods with {self.error_count} errors."
+
+    def vlog(self, message: str):
+        """Verbose logging utility."""
+        if self.verbose:
+            print(message)
+
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        Retrieves and consolidates statistics from the converter.
+        This method is kept for backward compatibility and to provide a single
+        point of access for statistics.
+        """
+        # The actual statistics are now managed within the converter
+        return self.spec_generator.get_stats()
+
+    def _merge_specs(self, paths: List[str], version: str) -> Dict:
+        """
+        Merges multiple OpenAPI specification files into a single dictionary.
+        This is useful for creating aggregated or master specifications.
+
+        Args:
+            paths: A list of file paths to the OpenAPI YAML files.
+            version: The API version string.
+
+        Returns:
+            A dictionary representing the merged OpenAPI specification.
+        """
+        main_spec = {
+            "openapi": "3.0.0",
+            "info": {
+                "title": f"Komodo DeFi Framework API - {version.upper()}",
+                "version": version,
+                "description": "The comprehensive OpenAPI specification for Komodo DeFi Framework API."
+            },
+            "paths": {},
+            "components": {
+                "schemas": {}
+            }
+        }
+        
+        for path in paths:
+            try:
+                with open(path, 'r') as f:
+                    spec = yaml.safe_load(f)
+                
+                # Merge paths
+                if "paths" in spec:
+                    main_spec["paths"].update(spec.get("paths", {}))
+                
+                # Merge components
+                if "components" in spec and "schemas" in spec["components"]:
+                    main_spec["components"]["schemas"].update(spec["components"]["schemas"])
+            
+            except FileNotFoundError:
+                self.vlog(f"Warning: File not found - {path}")
+            except yaml.YAMLError as e:
+                self.vlog(f"Error parsing YAML file {path}: {e}")
+                
+        return main_spec
+
+    def _get_yaml_files(self, directory: str) -> List[str]:
+        """
+        Recursively finds all YAML files in a given directory.
+        """
+        yaml_files = []
+        for root, _, files in os.walk(directory):
+            for file in files:
+                if file.endswith((".yaml", ".yml")):
+                    yaml_files.append(os.path.join(root, file))
+        return yaml_files
+
+    def _write_main_openapi_file(self, spec: Dict, version: str):
+        """
+        Writes the main, aggregated OpenAPI specification to a file.
+        The output path is determined by the PathMapper.
+        """
+        output_path = self.path_mapper.openapi_path / f"main_openapi_spec_{version}.yml"
+        
+        with open(output_path, 'w') as f:
+            yaml.dump(spec, f, sort_keys=False, allow_unicode=True)
+            
+        self.vlog(f"Main OpenAPI spec file written to: {output_path}")
+
+    def update_main_spec(self, version: str):
+        """
+        Updates the main OpenAPI specification by discovering all individual
+        and categorized spec files and merging them. This ensures the main
+        spec is always up-to-date.
+        """
+        self.vlog("Updating main OpenAPI specification...")
+        
+        # Define directories to scan for spec files
+        spec_dirs = [
+            Path(self.config.workspace_root) / self.path_mapper.config.directories.yaml_v2,
+            Path(self.config.workspace_root) / self.path_mapper.config.directories.openapi_main
+        ]
+        
+        all_spec_files = []
+        for directory in spec_dirs:
+            if directory.exists():
+                all_spec_files.extend(self._get_yaml_files(str(directory)))
+                
+        # Remove duplicates
+        all_spec_files = sorted(list(set(all_spec_files)))
+        
+        # Merge all found specs
+        merged_spec = self._merge_specs(all_spec_files, version)
+        
+        # Write the final main spec file
+        self._write_main_openapi_file(merged_spec, version)
+        
+        self.vlog("Main OpenAPI specification updated successfully.") 

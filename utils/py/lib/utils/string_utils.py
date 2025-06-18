@@ -6,7 +6,7 @@ These utilities handle method name normalization, formatting, and path generatio
 """
 
 import re
-from typing import Tuple, Optional, List, Dict, Pattern
+from typing import Tuple, Optional, List, Dict
 from functools import lru_cache
 
 
@@ -391,74 +391,6 @@ def _generate_format_variations(method_name: str) -> set:
         variations.add(colon_version)
     
     return variations
-
-
-# =============================================================================
-# CONVERSION FUNCTIONS
-# =============================================================================
-
-def convert_filesystem_to_canonical_api_format(filesystem_name: str) -> str:
-    """
-    Convert filesystem-safe method name to canonical API format.
-    
-    This is an alias for convert_dir_to_method_name for clarity.
-    
-    Args:
-        filesystem_name: Filesystem-safe method name
-        
-    Returns:
-        Canonical API format method name
-    """
-    return convert_dir_to_method_name(filesystem_name)
-
-
-def convert_canonical_api_to_filesystem_format(api_name: str) -> str:
-    """
-    Convert canonical API format method name to filesystem-safe format.
-    
-    This is an alias for convert_method_to_dir_name for clarity.
-    
-    Args:
-        api_name: Canonical API format method name
-        
-    Returns:
-        Filesystem-safe method name
-    """
-    return convert_method_to_dir_name(api_name)
-
-
-# =============================================================================
-# BACKWARD COMPATIBILITY FUNCTIONS
-# =============================================================================
-
-def convert_filesystem_to_api_format(method_name: str) -> str:
-    """
-    DEPRECATED: Use convert_filesystem_to_canonical_api_format instead.
-    
-    Convert filesystem-safe method name to API format.
-    
-    Args:
-        method_name: Filesystem-safe method name
-        
-    Returns:
-        API format method name
-    """
-    return convert_dir_to_method_name(method_name)
-
-
-def convert_api_to_filesystem_format(method_name: str) -> str:
-    """
-    DEPRECATED: Use convert_canonical_api_to_filesystem_format instead.
-    
-    Convert API format method name to filesystem-safe format.
-    
-    Args:
-        method_name: API format method name
-        
-    Returns:
-        Filesystem-safe method name
-    """
-    return convert_method_to_dir_name(method_name)
 
 
 # =============================================================================

@@ -6,15 +6,13 @@ Handles batch processing of files with progress tracking and error handling.
 Optimized for processing large numbers of files efficiently.
 """
 
-import json
-import asyncio
 from pathlib import Path
-from typing import List, Dict, Any, Union, Optional, Tuple
+from typing import List, Dict, Any, Union, Tuple
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .logging_utils import get_logger
-from .file_types import FileInfo, OperationResult, BatchResult
+from .file_types import OperationResult, BatchResult
 from .file_utils import safe_read_json, safe_write_json
 
 

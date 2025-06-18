@@ -1,53 +1,45 @@
+#!/usr/bin/env python3
 """
 Managers Package - Centralized Management Classes
 
 This package consolidates all manager classes that coordinate complex operations:
 - OpenAPIManager: OpenAPI specification management
-- TableManager: API methods table generation
-- PostmanFileManager: Postman file operations
+- PostmanManager: Postman collection and file operations
 - ValidationManager: Validation operations
 - MethodMappingManager: API method mapping operations
-- MethodMapping: Data structure for method mapping information
 - SimpleComparator: Simple JSON-based method comparison
-- DocumentationGenerator: Generate comprehensive MDX documentation
+- MdxGenerator: Generate comprehensive MDX documentation
+- DraftsManager: Draft quality analysis and comparison management
 
-Note: APIExampleManager removed from init to avoid circular imports.
-Import directly: from lib.managers.example_manager import APIExampleManager
+Note: MethodMapping data structure moved to constants package.
 """
 
-from .openapi_manager import OpenAPIManager
-from .table_manager import TableManager
-# Removed: from .example_manager import APIExampleManager  # Circular import
-from .postman_manager import PostmanFileManager
+from ..openapi.openapi_manager import OpenAPIManager
 from .validation_manager import ValidationManager
 from .method_mapping_manager import MethodMappingManager
-from .method_mapping import MethodMapping
-from .simple_comparator import SimpleComparator
+from ..mdx.mdx_manager import review_draft_quality, DraftsManager
+from ..postman.postman_manager import PostmanManager, PostmanFileManager
 
-# Import documentation generator
-try:
-    from .documentation_generator import (
-        DocumentationGenerator, generate_documentation_from_analysis, generate_single_method_doc
-    )
-except ImportError:
-    # Documentation generator not available
-    DocumentationGenerator = None
-    generate_documentation_from_analysis = None
-    generate_single_method_doc = None
+from ..mdx.mdx_generator import MdxGenerator
+
+# Import MethodMapping from constants (moved there to avoid circular imports)
+from ..constants import MethodMapping
 
 __all__ = [
     # Core managers
     'OpenAPIManager',
-    'TableManager', 
-    # 'APIExampleManager',  # Removed due to circular import
+    'PostmanManager',
     'PostmanFileManager',
     'ValidationManager',
     'MethodMappingManager',
+    
+    # Data structures (re-exported for convenience)
     'MethodMapping',
-    'SimpleComparator',
     
     # Documentation generation
-    'DocumentationGenerator',
-    'generate_documentation_from_analysis',
-    'generate_single_method_doc'
+    'MdxGenerator',
+
+    # Quality analysis
+    'DraftsManager',
+    'review_draft_quality',
 ] 

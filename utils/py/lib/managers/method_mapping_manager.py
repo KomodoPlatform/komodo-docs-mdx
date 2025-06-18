@@ -13,19 +13,20 @@ import os
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Any, Set
 import glob
 import asyncio
 
 # Import enhanced components
-from .method_mapping import MethodMapping
-from ..scanning.mdx_scanner import UnifiedScanner
+from ..constants import MethodMapping
+from ..mdx.mdx_scanner import UnifiedScanner
 from ..utils import (
-    convert_filesystem_to_api_format,
-    find_best_match, get_logger
+    convert_dir_to_method_name,
+    find_best_match, get_logger,
+    extract_category_from_method
 )
 from ..utils.path_utils import EnhancedPathMapper
-from ..utils.postman_collection_parser import PostmanCollectionParser
+from ..postman.parser import PostmanCollectionParser
 from ..utils.logging_utils import get_logger
 from ..constants.config import EnhancedKomodoConfig, get_config
 
@@ -64,7 +65,7 @@ class MethodMappingManager:
     def reporter(self):
         """Lazy loading property for MappingReporter to avoid circular imports."""
         if self._reporter is None:
-            from ..reporting.mapping_reporter import MappingReporter
+            from .mapping_reporter import MappingReporter
             self._reporter = MappingReporter(self.verbose)
         return self._reporter
     
@@ -146,15 +147,19 @@ class MethodMappingManager:
         
         for version in supported_versions:
             try:
-                scanner_version = "v1" if version == "v1" else "v2"
-                if scanner_version == "v1":
+                if version == "v1":
                     mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_legacy)
                     yaml_dirs[version] = self.config._resolve_path(self.config.directories.yaml_v1)
-                    json_dirs[f"json_{version}"] = self.config._resolve_path(self.config.directories.json_v1)
-                else:
+                    json_dirs[version] = self.config._resolve_path(self.config.directories.json_v1)
+                elif version == "v2":
                     mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_v2)
                     yaml_dirs[version] = self.config._resolve_path(self.config.directories.yaml_v2)
-                    json_dirs[f"json_{version}"] = self.config._resolve_path(self.config.directories.json_v2)
+                    json_dirs[version] = self.config._resolve_path(self.config.directories.json_v2)
+                elif version == "v2-dev":
+                    mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_v2_dev)
+                    yaml_dirs[version] = self.config._resolve_path(self.config.directories.yaml_v2)  # v2-dev uses v2 yaml
+                    json_dirs[version] = self.config._resolve_path(self.config.directories.json_v2)  # v2-dev uses v2 json
+
             except Exception as e:
                 self.logger.warning(f"Could not configure directories for version {version}: {e}")
         
@@ -174,7 +179,15 @@ class MethodMappingManager:
         # Rest of the mapping logic remains the same
         unified = {}
         
-        for version in supported_versions:
+        # Get all canonical versions to process
+        canonical_versions_to_process = self.config.version_mapping.get_all_canonical_versions()
+
+        for version in canonical_versions_to_process:
+            if version not in mdx_mappings and version not in yaml_mappings and version not in example_mappings:
+                if self.verbose:
+                    self.logger.debug(f"Skipping version {version} as no data was found.")
+                continue
+
             unified[version] = {}
             
             # Use canonical methods as the authoritative source
@@ -183,11 +196,11 @@ class MethodMappingManager:
             # Convert discovered methods from filesystem format to canonical format
             canonical_discovered_methods = set()
             for method in mdx_mappings.get(version, {}).keys():
-                canonical_discovered_methods.add(convert_filesystem_to_api_format(method))
+                canonical_discovered_methods.add(convert_dir_to_method_name(method))
             for method in yaml_mappings.get(version, {}).keys():
-                canonical_discovered_methods.add(convert_filesystem_to_api_format(method))
+                canonical_discovered_methods.add(convert_dir_to_method_name(method))
             for method in example_mappings.get(version, {}).keys():
-                canonical_discovered_methods.add(convert_filesystem_to_api_format(method))
+                canonical_discovered_methods.add(convert_dir_to_method_name(method))
             
             # Combine canonical methods with canonical discovered methods
             all_methods = set(canonical_method_list) | canonical_discovered_methods
@@ -231,7 +244,7 @@ class MethodMappingManager:
                 is_deprecated = self.config.is_version_deprecated(version)
                 
                 # Extract category from method name or path
-                category = self._extract_category_from_method(method)
+                category, _ = extract_category_from_method(method)
                 
                 unified[version][method] = MethodMapping(
                     method=method,
@@ -257,11 +270,7 @@ class MethodMappingManager:
         return unified
     
     def _extract_category_from_method(self, method_name: str) -> Optional[str]:
-        """Extract category from method name."""
-        if "::" in method_name:
-            parts = method_name.split("::")
-            return parts[0] if parts else None
-        return None
+        pass
     
     def _load_canonical_methods(self) -> Dict[str, List[str]]:
         """Load canonical method names from KDF repository using enhanced config."""
@@ -317,39 +326,58 @@ class MethodMappingManager:
             print(f"   ⚠️  Deprecated: {deprecated} ({deprecated/total*100:.1f}%)")
             print(f"   📈 Avg Completeness: {avg_completeness:.2f}")
     
-    def save_unified_mapping(self, output_file: Optional[str] = None) -> None:
-        """Save unified mapping to JSON file with metadata."""
-        unified = self.create_unified_mapping()
+    def save_unified_mapping(self, unified_mapping, filename="unified_method_mapping.json"):
+        """Saves the unified mapping to a file in the data directory."""
+        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        output_path = reports_dir / filename
         
-        # Convert to JSON-serializable format
-        json_data = self._convert_mapping_to_json(unified)
+        try:
+            with open(output_path, 'w') as f:
+                json.dump(unified_mapping, f, indent=4)
+            self.logger.info(f"✅ Saved unified mapping to {output_path}")
+            return str(output_path)
+        except IOError as e:
+            self.logger.error(f"❌ Error saving unified mapping to {output_path}: {e}")
+            return None
+
+    def load_unified_mapping(self, filename="unified_method_mapping.json"):
+        """Loads the unified mapping from a file in the data directory."""
+        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        file_path = reports_dir / filename
+        if not file_path.exists():
+            self.logger.warning(f"⚠️  Could not find unified mapping file: {file_path}")
+            return None
+        try:
+            with open(file_path, 'r') as f:
+                return json.load(f)
+        except (IOError, json.JSONDecodeError) as e:
+            self.logger.error(f"❌ Error loading unified mapping from {file_path}: {e}")
+            return None
+
+    def save_method_paths(self, method_paths, filename="kdf_postman_method_paths.json"):
+        """Saves the method paths with Postman hotlinks."""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        # Add metadata
-        json_data['_metadata'] = {
-            'generated_at': datetime.now().isoformat(),
-            'generated_by': 'method_mapping_manager.py',
-            'total_methods': sum(len(json_data[v]) for v in ['v1', 'v2']),
-            'includes_postman_hotlinks': True
-        }
+        # separate filename from extension
+        parts = filename.split('.')
+        base_name = parts[0]
+        extension = parts[1] if len(parts) > 1 else 'json'
         
-        # Use config-based data directory like other commands
-        if output_file is None:
-            data_dir = self.config._resolve_path(self.config.directories.data_dir)
-            output_file = os.path.join(data_dir, "unified_method_mapping.json")
-        elif not os.path.isabs(output_file):
-            data_dir = self.config._resolve_path(self.config.directories.data_dir)
-            output_file = os.path.join(data_dir, os.path.basename(output_file))
+        timestamped_filename = f"{base_name}_{timestamp}.{extension}"
         
-        # Save to file
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(json_data, f, indent=2, ensure_ascii=False)
+        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        output_path = reports_dir / timestamped_filename
         
-        # Also save method paths with hotlinks to separate file
-        self._save_method_paths_with_hotlinks(unified)
-        
-        if self.verbose:
-            print(f"✅ Saved unified mapping to {output_file}")
-            self._print_enhanced_mapping_stats(unified)
+        try:
+            with open(output_path, 'w') as f:
+                json.dump(method_paths, f, indent=4)
+            self.logger.info(f"✅  📝 Saved method paths with 0 Postman hotlinks to {output_path}")
+            return str(output_path)
+        except IOError as e:
+            self.logger.error(f"❌ Error saving method paths to {output_path}: {e}")
+            return None
     
     def _save_method_paths_with_hotlinks(self, unified: Dict[str, Dict[str, MethodMapping]]) -> None:
         """Save method paths with Postman collection hotlinks to dedicated file (synchronous version)."""
@@ -400,12 +428,16 @@ class MethodMappingManager:
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         output_filename = f"kdf_postman_method_paths_{timestamp}.json"
         
-        # Use config-based data directory instead of hardcoded path
-        data_dir = self.config._resolve_path(self.config.directories.data_dir)
-        output_file = os.path.join(data_dir, output_filename)
-        
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(method_paths_data, f, indent=2, ensure_ascii=False)
+        # Use config-based data directory and save to reports subdir
+        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        output_file = reports_dir / output_filename
+
+        def write_method_paths_file():
+            with open(output_file, 'w', encoding='utf-8') as f:
+                json.dump(method_paths_data, f, indent=2, ensure_ascii=False)
+
+        write_method_paths_file()
         
         if self.verbose:
             total_with_hotlinks = method_paths_data["scan_metadata"]["total_methods_with_postman_links"]
@@ -418,20 +450,22 @@ class MethodMappingManager:
         # Convert to JSON-serializable format with proper structure
         json_data = await self._convert_mapping_to_enhanced_json(unified)
         
-        # Use config-based data directory like other commands
+        # Use config-based data directory and save to reports subdir
+        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        
         if output_file is None:
-            data_dir = self.config._resolve_path(self.config.directories.data_dir)
-            output_file = os.path.join(data_dir, "unified_method_mapping.json")
-        elif not os.path.isabs(output_file):
-            data_dir = self.config._resolve_path(self.config.directories.data_dir)
-            output_file = os.path.join(data_dir, os.path.basename(output_file))
+            output_file_path = reports_dir / "unified_method_mapping.json"
+        else:
+            # If an output file is provided, make sure it's inside the reports dir
+            output_file_path = reports_dir / Path(output_file).name
         
         # Save to file asynchronously
         import asyncio
         import json
-        
+            
         def write_json_file():
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file_path, 'w', encoding='utf-8') as f:
                 json.dump(json_data, f, indent=2, ensure_ascii=False)
         
         loop = asyncio.get_event_loop()
@@ -441,9 +475,9 @@ class MethodMappingManager:
         await self._save_method_paths_with_hotlinks_async(unified)
         
         if self.verbose:
-            print(f"✅ Saved unified mapping to {output_file}")
+            print(f"✅ Saved unified mapping to {output_file_path}")
             self._print_enhanced_mapping_stats(unified)
-    
+
     async def _convert_mapping_to_enhanced_json(self, unified: Dict[str, Dict[str, MethodMapping]]) -> Dict[str, Any]:
         """Convert mapping objects to enhanced JSON format with missing methods analysis."""
         # Build the core structure
@@ -799,67 +833,34 @@ class MethodMappingManager:
             return {}
 
     async def _save_method_paths_with_hotlinks_async(self, unified: Dict[str, Dict[str, MethodMapping]]) -> None:
-        """Save method paths with Postman collection hotlinks to dedicated file."""
-        import asyncio
-        import json
-        from datetime import datetime
-        
-        # Create method paths structure with hotlinks
-        method_paths_data = {
-            "scan_metadata": {
-                "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDF Method Path Mapper with Postman Hotlinks v1.0.0",
-                "scanner_type": "METHOD_PATH_MAPPING_WITH_POSTMAN_HOTLINKS",
-                "total_versions": len([v for v in unified.keys() if v in ['v1', 'v2']]),
-                "total_methods_with_mdx_paths": sum(
-                    len([m for m in methods.values() if m.has_mdx])
-                    for methods in unified.values()
-                ),
-                "total_methods_with_postman_links": sum(
-                    len([m for m in methods.values() if m.has_postman_links])
-                    for methods in unified.values()
-                ),
-                "versions_processed": [v for v in unified.keys() if v in ['v1', 'v2']],
-                "includes_postman_hotlinks": True,
-                "generated_during_unified_mapping": True
-            },
-            "method_paths": {}
-        }
-        
-        # Build method paths with hotlinks
-        for version in ['v1', 'v2']:
-            if version in unified:
-                version_methods = {}
-                
-                for method_name, mapping in unified[version].items():
-                    method_info = {
-                        "mdx_path": mapping.mdx_path
-                    }
-                    
-                    # Add Postman collection hotlinks if available
-                    if mapping.has_postman_links:
-                        method_info["postman_collection"] = mapping.postman_collection_info
-                    
-                    version_methods[method_name] = method_info
-                
-                # Sort methods alphabetically within this version
-                method_paths_data["method_paths"][version] = dict(sorted(version_methods.items()))
-        
-        # Save to dedicated method paths file
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_filename = f"kdf_postman_method_paths_{timestamp}.json"
-        
-        # Use config-based data directory instead of hardcoded path
-        data_dir = self.config._resolve_path(self.config.directories.data_dir)
-        output_file = os.path.join(data_dir, output_filename)
-        
-        def write_method_paths_file():
-            with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(method_paths_data, f, indent=2, ensure_ascii=False)
-        
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, write_method_paths_file)
-        
+        """
+        Asynchronously extracts method paths with Postman hotlinks and saves to a timestamped file.
+        """
         if self.verbose:
-            total_with_hotlinks = method_paths_data["scan_metadata"]["total_methods_with_postman_links"]
-            self.logger.success(f"📝 Saved method paths with {total_with_hotlinks} Postman hotlinks to {output_file}") 
+            self.logger.info("💾 Saving method paths with Postman hotlinks...")
+            
+        method_paths = {}
+        for version, methods in unified.items():
+            method_paths[version] = {
+                method: self._extract_postman_path(mapping)
+                for method, mapping in methods.items()
+                if self._extract_postman_path(mapping)
+            }
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"kdf_postman_method_paths_{timestamp}.json"
+        
+        reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        output_path = reports_dir / filename
+
+        def write_method_paths_file():
+            try:
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    json.dump(method_paths, f, indent=2, ensure_ascii=False)
+                if self.verbose:
+                    self.logger.info(f"✅ Saved method paths to {output_path}")
+            except IOError as e:
+                self.logger.error(f"❌ Error saving method paths to {output_path}: {e}")
+
+        await asyncio.to_thread(write_method_paths_file) 

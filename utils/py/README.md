@@ -19,7 +19,64 @@ python kdf_tools.py scan --help
 python kdf_tools.py map --help
 python kdf_tools.py postman --help
 python kdf_tools.py compare --help
+python kdf_tools.py review-draft-quality --help
+python kdf_tools.py scan-existing-docs --help
+python kdf_tools.py generate-docs --help
 ```
+
+## 🔍 Draft Quality Analysis
+
+**NEW:** Compare generated documentation drafts with live versions to identify improvement opportunities.
+
+### Quick Start
+
+```bash
+# Analyze all generated docs vs live versions
+make review-draft-quality
+
+# Get detailed analysis with verbose output
+make review-draft-quality-verbose
+
+# See what would be analyzed (dry run)
+make dry-run-quality-review
+
+# Or use the unified CLI directly
+python kdf_tools.py review-draft-quality --help
+python kdf_tools.py review-draft-quality --verbose
+```
+
+### Features
+
+- **Comprehensive comparison** of generated vs live documentation
+- **Quality metrics** and similarity scoring
+- **Style guide compliance** validation
+- **Template effectiveness** analysis
+- **Actionable recommendations** for improvement
+- **Detailed markdown reports** with executive summaries
+
+### Use Cases
+
+1. **Continuous Improvement**: Track documentation quality over time
+2. **Template Optimization**: Identify gaps in templates and generation logic
+3. **Style Compliance**: Ensure generated docs meet style guide standards
+4. **Process Enhancement**: Focus manual review effort on high-impact areas
+5. **Quality Assurance**: Validate documentation before publication
+
+### Example Output
+
+```markdown
+# Documentation Draft Quality Analysis Report
+
+**Overall Similarity:** 72.3%
+**Critical Issues:** 3 | **Major Issues:** 18 | **Minor Issues:** 24
+
+## Top Improvement Opportunities
+1. Review parameter table formatting - affects 8 documents
+2. Enhance example generation logic - affects 6 documents  
+3. Fix template metadata format - affects 5 documents
+```
+
+📖 **Full Documentation:** [README_DRAFT_QUALITY.md](README_DRAFT_QUALITY.md)
 
 ## 📚 Library Architecture
 
@@ -115,6 +172,68 @@ python kdf_tools.py compare --branch main --versions v2
 **Options:**
 - `--branch`: Git branch to compare against (default: dev)
 - `--versions`: API versions to compare (v1, v2)
+
+#### `review-draft-quality` - **Draft Quality Analysis**
+**Purpose:**  
+Compare generated documentation drafts with final live versions to identify improvement opportunities.
+
+**Usage:**
+```bash
+python kdf_tools.py review-draft-quality                     # Analyze all documents
+python kdf_tools.py review-draft-quality --verbose          # Verbose analysis
+python kdf_tools.py review-draft-quality --dry-run          # Show what would be analyzed
+python kdf_tools.py review-draft-quality --generated path/to/generated.mdx --live path/to/live.mdx  # Specific files
+```
+
+**Options:**
+- `--generated`: Path to specific generated document
+- `--live`: Path to specific live document  
+- `--generated-dir`: Directory containing generated documents
+- `--live-dir`: Directory containing live documents
+- `--output`: Output file for quality report
+- `--format`: Output format (markdown, json)
+- `--similarity-threshold`: Similarity threshold for flagging differences
+- `--verbose`: Enable verbose logging
+- `--dry-run`: Show what would be analyzed without running
+
+#### `scan-existing-docs` - **Scan Existing Documentation**
+**Purpose:**  
+Scan existing KDF documentation to extract method patterns and build pattern awareness for documentation generation.
+
+**Usage:**
+```bash
+python kdf_tools.py scan-existing-docs                        # Scan with default settings
+python kdf_tools.py scan-existing-docs --async-scan           # Use async scanning for better performance
+python kdf_tools.py scan-existing-docs --generate-report      # Generate analysis report
+```
+
+**Options:**
+- `--docs-path`: Path to the directory containing existing documentation
+- `--async-scan`: Use asynchronous scanning for better performance
+- `--generate-report`: Generate an analysis report of the extracted patterns
+- `--show-categories`: Show method categories in the analysis report
+- `--output`: Output file for the extracted patterns
+
+#### `generate-docs` - **Generate Documentation**
+**Purpose:**  
+Generate comprehensive documentation for missing KDF API methods using multiple analysis sources.
+
+**Usage:**
+```bash
+python kdf_tools.py generate-docs                             # Generate all missing methods
+python kdf_tools.py generate-docs --interactive               # Interactive method selection
+python kdf_tools.py generate-docs --method task::enable_bch::init  # Generate specific method
+```
+
+**Options:**
+- `--branch`: Git branch to scan (default: dev)
+- `--repo-path`: Path to the repository containing KDF methods
+- `--method`: Generate documentation for a specific method
+- `--version`: API version for the specific method (default: v2)
+- `--methods-file`: Path to a JSON file containing methods to generate documentation for
+- `--interactive`: Allow interactive method selection
+- `--output-dir`: Output directory for generated documentation
+- `--generate-summary`: Generate a summary report of the documentation generation
 
 ## 📁 Directory Structure
 
@@ -212,6 +331,21 @@ python kdf_tools.py map --remove method_name
 ### Debug Method Matching
 ```bash
 python kdf_tools.py map --debug method_name
+```
+
+### Review Draft Quality
+```bash
+python kdf_tools.py review-draft-quality --verbose
+```
+
+### Scan Existing Documentation
+```bash
+python kdf_tools.py scan-existing-docs --async-scan --generate-report
+```
+
+### Generate Missing Documentation
+```bash
+python kdf_tools.py generate-docs --interactive
 ```
 
 ## 🎭 Demo Scripts & Examples
@@ -360,6 +494,9 @@ python kdf_tools.py scan --help
 python kdf_tools.py map --help
 python kdf_tools.py postman --help
 python kdf_tools.py compare --help
+python kdf_tools.py review-draft-quality --help
+python kdf_tools.py scan-existing-docs --help
+python kdf_tools.py generate-docs --help
 ```
 
 ---

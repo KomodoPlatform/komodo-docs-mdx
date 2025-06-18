@@ -6,15 +6,13 @@ This module provides testing utilities extracted from the demo and test files,
 providing patterns for testing the various components of the library.
 """
 
-import json
-from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 from datetime import datetime
 
 from ..utils.logging_utils import get_logger
-from ..constants import get_config
-from ..scanning import LocalKDFScanner, MethodDetails
-from ..managers import DocumentationGenerator
+from ..rust.scanner import KDFScanner
+from ..constants import RustMethodDetails
+from ..mdx.mdx_generator import MdxGenerator
 
 
 class DocumentationTestSuite:
@@ -31,8 +29,8 @@ class DocumentationTestSuite:
         self.logger.info("Testing Missing Methods Lookup")
         
         try:
-            from ..scanning import LocalKDFScanner
-            scanner = LocalKDFScanner()
+            from ..rust.scanner import KDFScanner
+            scanner = KDFScanner()
             
             # Load missing methods data (would need to be implemented)
             # missing_methods = scanner.load_missing_methods()
@@ -52,7 +50,7 @@ class DocumentationTestSuite:
         """Test human-readable title generation for different method types."""
         self.logger.info("Testing Title Generation")
         
-        generator = DocumentationGenerator()
+        generator = MdxGenerator()
         
         test_methods = [
             "task::enable_bch::cancel",
@@ -74,7 +72,7 @@ class DocumentationTestSuite:
         """Test parameter table generation with different scenarios."""
         self.logger.info("Testing Parameter Table Generation")
         
-        generator = DocumentationGenerator()
+        generator = MdxGenerator()
         
         # Test with various parameter configurations
         test_parameters = [
@@ -109,7 +107,7 @@ class DocumentationTestSuite:
         """Test complete documentation generation for a method."""
         self.logger.info(f"Testing Method Documentation Generation for: {method_name}")
         
-        generator = DocumentationGenerator()
+        generator = MdxGenerator()
         
         # Mock method info
         method_info = {
@@ -140,13 +138,13 @@ class DocumentationTestSuite:
         self.logger.info("Testing Local Repository Scanner")
         
         try:
-            scanner = LocalKDFScanner()
+            scanner = KDFScanner()
             
             # Test method details extraction (mock)
             test_method = "task::enable_bch::cancel"
             
             # This would normally extract from actual repo
-            mock_details = MethodDetails(
+            mock_details = RustMethodDetails(
                 method_name=test_method,
                 handler_file="/path/to/handler.rs",
                 parameters=[
@@ -249,13 +247,13 @@ class RepositoryTestUtilities:
     def test_repository_setup(self, branch: str = "dev") -> bool:
         """Test setting up the local repository."""
         try:
-            from ..scanning import setup_local_kdf_repo
-            return setup_local_kdf_repo(branch=branch, force_clone=False)
+            from ..rust.scanner import KDFScanner
+            return KDFScanner(repo_path="data/kdf_repo").setup_repository(force_clone=False)
         except Exception as e:
             self.logger.error(f"Repository setup test failed: {e}")
             return False
     
-    def test_method_scanning(self, method_names: List[str]) -> Dict[str, MethodDetails]:
+    def test_method_scanning(self, method_names: List[str]) -> Dict[str, RustMethodDetails]:
         """Test scanning specific methods."""
         try:
             from ..scanning import scan_local_methods
@@ -264,7 +262,7 @@ class RepositoryTestUtilities:
             self.logger.error(f"Method scanning test failed: {e}")
             return {}
     
-    def validate_method_details(self, method_details: MethodDetails) -> Dict[str, bool]:
+    def validate_method_details(self, method_details: RustMethodDetails) -> Dict[str, bool]:
         """Validate the structure of method details."""
         return {
             "has_method_name": bool(method_details.method_name),
@@ -292,12 +290,13 @@ def validate_library_integration() -> bool:
     """Test that all library components can be imported and used."""
     try:
         # Test imports
-        from ..scanning import LocalKDFScanner, MethodDetails
-        from ..managers import DocumentationGenerator
+        from ..rust.scanner import KDFScanner
+        from ..constants import RustMethodDetails
+        from .doc_generator import MdxGenerator
         
         # Test basic instantiation
-        scanner = LocalKDFScanner()
-        generator = DocumentationGenerator()
+        scanner = KDFScanner()
+        generator = MdxGenerator()
         
         return True
     except ImportError as e:

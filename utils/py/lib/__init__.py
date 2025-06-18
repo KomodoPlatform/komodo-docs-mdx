@@ -18,9 +18,8 @@ from .constants import (
 )
 
 # Enhanced mapping and processing
-from .managers.method_mapping_manager import (
-    MethodMappingManager, MethodMapping
-)
+from .managers.method_mapping_manager import MethodMappingManager
+from .constants import MethodMapping
 
 from .utils.path_utils import EnhancedPathMapper
 
@@ -30,16 +29,20 @@ from .async_support import (
 )
 
 # Scanning and analysis
-from .scanning import (
-    UnifiedScanner, KDFRepositoryScanner, PostmanJSONProcessor,
-    LocalKDFScanner, MethodDetails
-)
+from .rust.scanner import KDFScanner
+from .constants import RustMethodDetails
+from .mdx.mdx_local_scanner import scan_existing_documentation, scan_existing_documentation_async, ExistingDocsScanner
+from .constants import MethodPattern, UnifiedParameterInfo
+from .mdx.mdx_scanner import UnifiedScanner
+
+# Documentation Generation
+from .mdx.mdx_generator import MdxGenerator
+
 
 # OpenAPI generation
 from .managers import (
-    OpenAPIManager, TableManager,
-    PostmanFileManager, ValidationManager, MethodMappingManager,
-    DocumentationGenerator
+    OpenAPIManager, PostmanManager, PostmanFileManager, ValidationManager, MethodMappingManager,
+    DraftsManager, review_draft_quality
 )
 # Note: APIExampleManager removed to avoid circular imports
 # Use: from lib.managers.example_manager import APIExampleManager
@@ -56,7 +59,9 @@ from .utils import (
 )
 
 # Import centralized reporting module
-from .reporting import BaseReporter, MappingReporter, PostmanReportGenerator, ExampleReporter
+from .reporters.base_reporter import BaseReporter
+from .reporters.mapping_reporter import MappingReporter
+from .postman.postman_reporter import PostmanReportGenerator
 
 __version__ = "2.0.0-lean"
 
@@ -72,18 +77,20 @@ __all__ = [
     'AsyncMethodProcessor', 'run_async',
     
     # Scanning and analysis
-    'UnifiedScanner', 'KDFRepositoryScanner', 'PostmanJSONProcessor',
-    'LocalKDFScanner', 'MethodDetails',
+    'KDFScanner', 'RustMethodDetails', 'UnifiedParameterInfo', 'ExistingDocsScanner',
+    'scan_existing_documentation', 'scan_existing_documentation_async',
+    'UnifiedScanner',
+    
+    # Documentation Generation
+    'MdxGenerator', 'generate_missing_documentation', 'generate_missing_documentation_async',
     
     # OpenAPI generation
     'OpenAPIManager',
     
-    # Postman management
-    # 'PostmanCollectionGenerator', 'MethodCategorizer', 'PostmanReportGenerator',
-    
     # Managers - Centralized management
-    'TableManager', 'PostmanFileManager', 'ValidationManager', 'MethodMappingManager',
-    'DocumentationGenerator',
+    'PostmanManager', 'PostmanFileManager', 'ValidationManager', 'MethodMappingManager',
+    'DraftsManager', 'review_draft_quality',
+    'MdxGenerator',
     
     # Essential utilities
     'normalize_method_name', 'format_method_name_for_display', 'extract_method_parts',
@@ -94,7 +101,7 @@ __all__ = [
     '__version__',
 
     # Reporting
-    'BaseReporter', 'MappingReporter', 'PostmanReportGenerator', 'ExampleReporter'
+    'BaseReporter', 'MappingReporter', 'PostmanReportGenerator'
 ]
 
 # Package structure information
@@ -103,6 +110,7 @@ PACKAGE_STRUCTURE = {
     "scanning": "File scanning and content extraction",
     "postman": "Postman collection generation and management",
     "openapi": "OpenAPI specification management",
+    "generation": "Documentation generation",
     "async_support": "Asynchronous processing utilities",
     "utils": "Supporting utilities (cache, observers, file operations, etc.)",
     "managers": "Centralized management classes (including method mapping)",

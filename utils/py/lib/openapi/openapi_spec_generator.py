@@ -1,0 +1,299 @@
+#!/usr/bin/env python3
+"""
+OpenAPI Converter
+
+This module contains the OpenApiSpecGenerator class, which is responsible for
+converting parsed MDX information into OpenAPI specification format. It handles
+the creation of schemas, parameters, responses, and the final OpenAPI file.
+"""
+
+import re
+import yaml
+import json
+from pathlib import Path
+from typing import Dict, List, Optional, Any, Set
+from collections import defaultdict
+from datetime import datetime
+
+# Import constants and path utilities
+from ..constants import (
+    UnifiedParameterInfo as Parameter,
+    OpenAPIMethod,
+    PathDetail
+)
+from ..utils.path_utils import EnhancedPathMapper
+from ..mdx.mdx_parser import MDXParser
+
+# Import local modules
+from .openapi_schema_factory import OpenApiSchemaFactory
+from .openapi_schema_generator import OpenApiSchemaGenerator
+
+
+class OpenApiSpecGenerator:
+    """
+    Converts MDX documentation into OpenAPI specification files.
+    It processes method information parsed by MDXParser to generate structured
+    OpenAPI schemas, including request bodies, responses, and common components
+    like enums and data structures.
+    """
+    def __init__(self, base_path: str = ".", path_mapper: EnhancedPathMapper = None):
+        self.base_path = Path(base_path)
+        self.path_mapper = path_mapper or EnhancedPathMapper()
+        self.mdx_parser = MDXParser(base_path)
+        self.schema_creator = OpenApiSchemaFactory()
+        self.common_schema_generator = OpenApiSchemaGenerator(self.path_mapper)
+        
+        self.all_methods = defaultdict(list)
+        self.all_method_details: List[OpenAPIMethod] = []
+        self.all_path_details: List[PathDetail] = []
+        self.all_enums = defaultdict(set)
+
+    def generate_openapi_spec(self, method_info: Dict[str, Any], version: str = "v2") -> Dict[str, Any]:
+        """
+        Generates a complete OpenAPI specification for a single method.
+
+        Args:
+            method_info: A dictionary containing parsed information for a method.
+            version: The API version string (e.g., "v2").
+
+        Returns:
+            A dictionary representing the OpenAPI specification for the method.
+        """
+        method_name = method_info['method_name']
+        
+        # Prepare a simple summary from the title
+        summary = method_info.get('title', f"Komodo DeFi Framework Method: {method_name}")
+        summary = summary.replace("Komodo DeFi Framework Method: ", "")
+
+        spec = {
+            "openapi": "3.0.0",
+            "info": {
+                "title": f"Komodo DeFi Framework API - {method_name}",
+                "version": version,
+                "description": method_info.get('description', f"API documentation for the {method_name} method.")
+            },
+            "paths": {
+                f"/{method_name}": {
+                    "post": {
+                        "summary": summary,
+                        "description": method_info.get('description', ''),
+                        "operationId": method_name,
+                        "tags": [method_name.split('::')[0]],
+                        "requestBody": {
+                            "content": {
+                                "application/json": {
+                                    "schema": self.schema_creator.create_request_body_schema(method_info)
+                                }
+                            }
+                        },
+                        "responses": self.schema_creator.create_response_schema(method_info)
+                    }
+                }
+            }
+        }
+        return spec
+
+    def write_openapi_file(self, spec: Dict[str, Any], method_name: str, version: str, 
+                          output_dir: str = None, dry_run: bool = False, mdx_path: str = "") -> str:
+        """
+        Writes a given OpenAPI specification to a YAML file.
+        """
+        if mdx_path:
+            root = self.path_mapper.config.workspace_root
+            for src_dir in [self.path_mapper.config.directories.mdx_v2, 
+                            self.path_mapper.config.directories.mdx_v2_dev,
+                            "src/pages/komodo-defi-framework/api/common_structures"]:
+                try:
+                    relative_mdx_path = Path(mdx_path).relative_to(Path(root) / src_dir)
+                    break
+                except ValueError:
+                    continue
+            else:
+                raise ValueError(f"Could not determine relative path for {mdx_path}")
+            path_parts = list(relative_mdx_path.parts)
+            
+            if 'api' in path_parts: path_parts.remove('api')
+            if version.upper() in path_parts: path_parts.remove(version.upper())
+            if 'index.mdx' in path_parts: path_parts.remove('index.mdx')
+
+            output_path = Path(self.path_mapper.config.directories.yaml_v2) / version / Path('/'.join(path_parts))
+        else:
+            output_path = Path(self.path_mapper.config.directories.yaml_v2) / version
+
+        filename = self._generate_filename(method_name)
+        full_path = output_path / f"{filename}.yml"
+        
+        if not dry_run:
+            output_path.mkdir(parents=True, exist_ok=True)
+            with open(full_path, 'w', encoding='utf-8') as f:
+                yaml.dump(spec, f, allow_unicode=True, sort_keys=False)
+        
+        return str(full_path)
+
+    def _generate_filename(self, method_name: str) -> str:
+        """Generates a clean filename from a method name."""
+        return method_name.replace('::', '_')
+
+    def generate_common_schemas(self, all_enums: Dict[str, Set[str]], output_base: Path):
+        """
+        Delegates the generation of common schemas to the OpenApiSchemaGenerator.
+        """
+        self.common_schema_generator.generate_common_schemas(all_enums, output_base)
+
+    def _generate_category_specs(self, all_methods: Dict[str, Dict], version: str):
+        """
+        Groups all processed methods by category and generates a spec file for each.
+        """
+        categorized_methods = defaultdict(list)
+        for method_name, method_info in all_methods.items():
+            category = method_name.split('::')[0]
+            categorized_methods[category].append(method_info)
+            
+        for category, methods in categorized_methods.items():
+            self._generate_category_spec_file(category, methods, version)
+
+    def _generate_category_spec_file(self, category: str, methods: List[Dict], version: str):
+        """
+        Creates a single OpenAPI specification file for a given category.
+        """
+        if version == "v1":
+            output_path = Path(self.path_mapper.config.directories.yaml_v1) / f"{category}_api_{version}.yml"
+        else:
+            output_path = Path(self.path_mapper.config.directories.yaml_v2) / f"{category}_api_{version}.yml"
+        
+        spec = {
+            "openapi": "3.0.0",
+            "info": {
+                "title": f"Komodo DeFi Framework - {category.replace('_', ' ').title()} API",
+                "version": version,
+                "description": f"OpenAPI specification for the {category} methods."
+            },
+            "paths": {},
+            "components": {
+                "schemas": {}
+            }
+        }
+        
+        for method_info in methods:
+            method_name = method_info['method_name']
+            method_spec = self.generate_openapi_spec(method_info, version)
+            spec["paths"].update(method_spec.get("paths", {}))
+            
+            if "components" in method_spec:
+                for comp_name, comp_schema in method_spec["components"].get("schemas", {}).items():
+                    if comp_name not in spec["components"]["schemas"]:
+                        spec["components"]["schemas"][comp_name] = comp_schema
+        
+        spec["components"]["schemas"]["ErrorResponse"] = {
+            "type": "object",
+            "properties": {
+                "error": {"type": "string"},
+                "error_path": {"type": "string"},
+                "error_trace": {"type": "string"},
+                "error_type": {"type": "string"},
+                "error_data": {"type": "object"}
+            }
+        }
+        
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, 'w') as f:
+            yaml.dump(spec, f, sort_keys=False)
+
+    def get_stats(self) -> Dict[str, Any]:
+        """
+        Returns statistics about the OpenAPI generation process.
+        """
+        return {
+            "files_processed": len(self.all_method_details),
+            "errors": 0,
+            "enums_found": len(self.all_enums),
+            "structures_found": 0,
+            "methods": self.all_method_details,
+            "paths": self.all_path_details,
+            "enums": {k: list(v) for k, v in self.all_enums.items()}
+        }
+
+    def generate_tracking_files(self, version: str, success_count: int, error_count: int,
+                                all_enums: Dict[str, Set[str]], structures_count: int,
+                                enums_count: int, source_dirs: List[str]) -> None:
+        """
+        Generates tracking and summary files for the generation process.
+        """
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        data_dir = Path(self.path_mapper.config.directories.data_dir)
+
+        self._generate_openapi_methods_file(
+            timestamp, data_dir, version, success_count, error_count,
+            all_enums, structures_count, enums_count, source_dirs
+        )
+        self._generate_openapi_method_paths_file(timestamp, data_dir)
+
+    def _generate_openapi_method_paths_file(self, timestamp: str, data_dir: Path) -> None:
+        """
+        Creates a text file listing all generated OpenAPI method paths.
+        """
+        sorted_paths = sorted(self.all_path_details, key=lambda p: p.path)
+        paths_file = data_dir / "openapi_method_paths.txt"
+        if paths_file.exists():
+            backup_dir = Path(self.path_mapper.config.directories.backup_dir)
+            backup_dir.mkdir(exist_ok=True)
+            backup_path = backup_dir / f"openapi_method_paths_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+            paths_file.rename(backup_path)
+            
+        with open(paths_file, "w") as f:
+            f.write(f"# OpenAPI Method Paths - Generated at {timestamp}\n")
+            grouped_paths = defaultdict(list)
+            for detail in sorted_paths:
+                top_level = Path(detail.path).parts[1]
+                grouped_paths[top_level].append(detail)
+            
+            for group, paths in grouped_paths.items():
+                f.write(f"## Version: {group.upper()}\n")
+                for detail in paths:
+                    f.write(f"- `{detail.path}` (Method: `{detail.method_name}`)\n")
+                f.write("\n")
+
+    def _generate_openapi_methods_file(self, timestamp: str, data_dir: Path, version: str,
+                                     success_count: int, error_count: int, all_enums: Dict[str, Set[str]],
+                                     structures_count: int, enums_count: int, source_dirs: List[str]) -> None:
+        """
+        Generates a comprehensive JSON summary file of the generation process.
+        """
+        output_file = data_dir / "openapi_methods.json"
+        
+        if output_file.exists():
+            backup_dir = Path(self.path_mapper.config.directories.backup_dir)
+            backup_dir.mkdir(exist_ok=True)
+            backup_path = backup_dir / f"openapi_methods_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            output_file.rename(backup_path)
+
+        # Ensure the directory exists
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+
+        output_data = {
+            "generation_timestamp": timestamp,
+            "api_version": version,
+            "source_directories": source_dirs,
+            "statistics": {
+                "total_methods_processed": success_count,
+                "errors": error_count,
+                "total_structures_found": structures_count,
+                "total_enums_found": enums_count
+            },
+            "methods": [
+                {
+                    "name": method.name,
+                    "summary": method.summary,
+                    "mdx_path": method.mdx_path,
+                    "openapi_path": method.openapi_path
+                }
+                for method in sorted(self.all_method_details, key=lambda m: m.name)
+            ],
+            "enums": {
+                name: sorted(list(values))
+                for name, values in sorted(all_enums.items())
+            }
+        }
+        
+        with open(output_file, 'w') as f:
+            json.dump(output_data, f, indent=2) 

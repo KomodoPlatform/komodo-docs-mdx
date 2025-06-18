@@ -18,10 +18,91 @@ from .enums import (
 from .templates import ExampleTemplates
 
 # Configuration management
-from .config import (
-    DirectoryConfig, VersionConfig, ProcessingConfig,
-    LoggingConfig, ValidationConfig, EnhancedKomodoConfig, get_config, reset_config
+from .config import get_config, reset_config
+from .config_struct import (
+    CoinConfig,
+    DirectoryConfig,
+    EnhancedKomodoConfig,
+    LoggingConfig,
+    OpenAPIConfig,
+    ProcessingConfig,
+    ValidationConfig,
+    VersionConfig,
+    VersionMappingConfig
 )
+
+# Data structures (consolidated dataclasses)
+from .data_structures import (
+    
+    # Remaining structures in data_structures.py
+    RustMethodDetails,
+    RustRepositoryInfo,
+    ExtractedExample,
+    FileInfo,
+    PathInfo,
+    PathMapping,
+    ScanResult,
+    ParameterAnalysis,
+    MethodAnalysis,
+    AnalysisResult,
+    AnalysisMetrics,
+    ComparisonResult,
+    ValidationRule,
+    AsyncTask,
+    ProcessingJob,
+    FactoryConfig,
+    CreationResult
+)
+
+# Import from unified structures
+from .unified_struct import (
+    UnifiedMethodInfo,
+    UnifiedParameterInfo,
+    UnifiedErrorInfo,
+    UnifiedExampleInfo,
+    UnifiedOperationResult,
+    UnifiedValidationIssue,
+    UnifiedBatchResult,
+    UnifiedRepositoryInfo
+)
+
+# Import from domain-specific structures
+from .postman_struct import (
+    PostmanRequest,
+    PostmanRequestInfo,
+    PostmanMethodMapping,
+    PostmanFolder
+)
+
+from .openapi_struct import (
+    OpenAPIMethod,
+    PathDetail
+)
+
+from .mdx_struct import (
+    DocumentSection,
+    DocumentationStatus,
+    MethodMapping,
+    ExistingDocInfo,
+    MethodPattern
+)
+
+from .drafts_struct import (
+    DraftInfo,
+    DraftOperation,
+    DocumentDifference,
+    QualityReport
+)
+
+# For backward compatibility, alias old names to new unified names
+OperationResult = UnifiedOperationResult
+BatchResult = UnifiedBatchResult
+MethodInfo = UnifiedMethodInfo
+ParameterInfo = UnifiedParameterInfo
+ErrorInfo = UnifiedErrorInfo
+ExampleInfo = UnifiedExampleInfo
+ValidationIssue = UnifiedValidationIssue
+RepositoryInfo = UnifiedRepositoryInfo
 
 # Exception hierarchy
 from .exceptions import (
@@ -31,25 +112,123 @@ from .exceptions import (
     raise_file_not_found, raise_invalid_json, raise_method_not_mapped
 )
 
+# Configuration functions only (dataclasses are in data_structures)
+from .config import get_config, reset_config
+
+# Enums
+from .enums import (
+    FileType,
+    ValidationLevel,
+    VersionStatus,
+    DeploymentEnvironment,
+    PathType,
+    EventType,
+    ProcessingStatus
+)
+
+# Templates
+from .templates import ExampleTemplates
+
 __all__ = [
-    # Enums
-    'ValidationLevel', 'VersionStatus', 'PathType', 'FileType', 'EventType', 'ProcessingStatus',
+    # Configuration
+    'DirectoryConfig',
+    'VersionMappingConfig', 
+    'VersionConfig',
+    'ProcessingConfig',
+    'LoggingConfig',
+    'ValidationConfig',
+    'EnhancedKomodoConfig',
+    'get_config',
+    'reset_config',
     
-    # Constants
-    'DEFAULT_CACHE_TTL', 'DEFAULT_BATCH_SIZE', 'DEFAULT_TIMEOUT', 'DEFAULT_MAX_RETRIES',
-    'MDX_PATTERNS', 'JSON_PATTERNS', 'YAML_PATTERNS', 'API_VERSIONS', 'SUPPORTED_EXTENSIONS',
-    'FILE_PATTERNS', 'BATCH_SIZES', 'TIMEOUT_SETTINGS', 'VALIDATION_RULES',
+    # Enums
+    'FileType',
+    'ValidationLevel',
+    'VersionStatus',
+    'DeploymentEnvironment',
+    'PathType',
+    'EventType',
+    'ProcessingStatus',
+    
+    # Exceptions
+    'KomodoLibraryError',
+    'FileOperationError', 
+    'ValidationError',
+    'ParseError',
+    'ConfigurationError',
+    'MethodNotFoundError',
+    'PostmanGenerationError',
+    'OpenAPIError',
+    'ExtractionError',
+    'DeduplicationError',
+    'MappingError',
+    'raise_file_not_found',
+    'raise_invalid_json',
+    'raise_method_not_mapped',
     
     # Templates
     'ExampleTemplates',
     
-    # Configuration
-    'DirectoryConfig', 'VersionConfig', 'ProcessingConfig',
-    'LoggingConfig', 'ValidationConfig', 'EnhancedKomodoConfig', 'get_config', 'reset_config',
+    # Unified structures
+    'UnifiedMethodInfo',
+    'UnifiedParameterInfo',
+    'UnifiedErrorInfo',
+    'UnifiedExampleInfo',
+    'UnifiedOperationResult',
+    'UnifiedValidationIssue',
+    'UnifiedBatchResult',
+    'UnifiedRepositoryInfo',
     
-    # Exceptions
-    'KomodoLibraryError', 'FileOperationError', 'ValidationError', 'ParseError',
-    'ConfigurationError', 'MethodNotFoundError', 'PostmanGenerationError',
-    'OpenAPIError', 'ExtractionError', 'DeduplicationError', 'MappingError',
-    'raise_file_not_found', 'raise_invalid_json', 'raise_method_not_mapped'
+    # Postman structures
+    'PostmanRequest',
+    'PostmanRequestInfo',
+    'PostmanMethodMapping',
+    'PostmanFolder',
+    
+    # OpenAPI structures
+    'OpenAPIMethod',
+    'PathDetail',
+    
+    # MDX/Documentation structures
+    'DocumentSection',
+    'DocumentationStatus',
+    'MethodMapping',
+    'ExistingDocInfo',
+    'MethodPattern',
+    
+    # Drafts structures
+    'DraftInfo',
+    'DraftOperation',
+    'DocumentDifference',
+    'QualityReport',
+    
+    # Remaining data structures
+    'RustMethodDetails',
+    'RustRepositoryInfo',
+    'ExtractedExample',
+    'CoinConfig',
+    'FileInfo',
+    'PathInfo',
+    'PathMapping',
+    'ScanResult',
+    'ParameterAnalysis',
+    'MethodAnalysis',
+    'AnalysisResult',
+    'AnalysisMetrics',
+    'ComparisonResult',
+    'ValidationRule',
+    'AsyncTask',
+    'ProcessingJob',
+    'FactoryConfig',
+    'CreationResult',
+    
+    # Backward compatibility aliases
+    'OperationResult',  # -> UnifiedOperationResult
+    'BatchResult',      # -> UnifiedBatchResult
+    'MethodInfo',       # -> UnifiedMethodInfo
+    'ParameterInfo',    # -> UnifiedParameterInfo
+    'ErrorInfo',        # -> UnifiedErrorInfo
+    'ExampleInfo',      # -> UnifiedExampleInfo
+    'ValidationIssue',   # -> UnifiedValidationIssue
+    'RepositoryInfo'     # -> UnifiedRepositoryInfo
 ] 

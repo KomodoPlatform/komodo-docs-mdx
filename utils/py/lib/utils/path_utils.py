@@ -1,44 +1,23 @@
+#!/usr/bin/env python3
 """
-Path Utilities for KDF Documentation Structure
+Path Utilities
 
-This module provides flexible path mapping utilities that can handle:
-- Version migrations (v20-dev → v20, v1 → deprecated)
-- Structural changes in documentation
-- Method deprecation and removal
-- Future extensibility
-
-REFACTORED: Now uses enhanced configuration system from core module
-instead of maintaining duplicate version and path configurations.
+Enhanced path resolution and management utilities for the Komodo DeFi Framework documentation tools.
+Consolidates path logic and provides centralized path mapping with enhanced configuration support.
 """
 
 import os
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Tuple, Any
+from dataclasses import dataclass
 from functools import lru_cache
+import json
 
 # Import enhanced configuration system
 from ..constants.config import get_config, EnhancedKomodoConfig
-from ..constants.enums import PathType, VersionStatus
-
-@dataclass
-class PathMapping:
-    """Complete path mapping for a method with enhanced metadata."""
-    method_name: str
-    version: str
-    mdx_path: str
-    category: str
-    subcategory: Optional[str] = None
-    openapi_path: str = ""
-    postman_json_path: str = ""
-    postman_collection_path: str = ""
-    deprecated: bool = False
-    migration_source: Optional[str] = None
-    
-    # Enhanced metadata
-    version_status: Optional[VersionStatus] = None
-    migration_target: Optional[str] = None
+from ..constants.enums import VersionStatus
+from ..constants.data_structures import PathInfo, PathMapping
 
 class EnhancedPathMapper:
     """
@@ -57,61 +36,15 @@ class EnhancedPathMapper:
         Initialize category mappings for different versions.
         This allows for flexible restructuring of categories.
         """
-        return {
-            "v2": {
-                # Coin Activation
-                "coin_activation": "coin_activation",
-                "task_managed": "coin_activation/task_managed",
-                
-                # Trading & Orders
-                "swaps_and_orders": "trading",
-                "orderbook": "trading",
-                "best_orders": "trading", 
-                "active_swaps": "trading",
-                
-                # Lightning Network
-                "lightning": "lightning",
-                "lightning/channels": "lightning/channels",
-                "lightning/nodes": "lightning/nodes", 
-                "lightning/payments": "lightning/payments",
-                "lightning/activation": "lightning/activation",
-                
-                # Streaming
-                "streaming": "streaming",
-                "stream": "streaming",  # Handle both naming conventions
-                
-                # Wallet Management
-                "wallet": "wallet",
-                "wallet/staking": "wallet/staking",
-                "wallet/task_managed": "wallet/task_managed",
-                "wallet/tx": "wallet/transactions",
-                "wallet/fee_management": "wallet/fees",
-                
-                # Utilities
-                "utils": "utilities",
-                "utils/message_signing": "utilities/messaging", 
-                "utils/task_init_trezor": "utilities/hardware",
-                "utils/telegram_alerts": "utilities/notifications",
-                
-                # NFTs
-                "non_fungible_tokens": "nft",
-                
-                # External Integrations
-                "1inch": "integrations/1inch",
-                
-                # Default fallback
-                "_default": "misc"
-            },
-            "v1": {
-                # V1 has mostly flat structure, but we can organize it
-                "coin_activation": "coin_activation",
-                "trading": "trading",
-                "orders": "trading",
-                "swaps": "trading", 
-                "wallet": "wallet",
-                "_default": "general"
+        try:
+            mappings_path = Path(self.config._resolve_path(self.config.directories.category_mappings))
+            with open(mappings_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return {
+                "v2": {"_default": "misc"},
+                "v1": {"_default": "general"}
             }
-        }
     
     def get_method_path_mapping(self, method_name: str, mdx_path: str, version: str) -> PathMapping:
         """
@@ -126,12 +59,12 @@ class EnhancedPathMapper:
             PathMapping with all generated paths and enhanced metadata
         """
         # Normalize version using configuration
-        normalized_version = self.config.normalize_version(version)
+        normalized_version = self.config.version_mapping.get_canonical_version(version)
         
         # Get version metadata from configuration
-        version_status = self.config.get_version_status(normalized_version)
-        migration_target = self.config.get_migration_target(normalized_version)
-        is_deprecated = self.config.is_version_deprecated(normalized_version)
+        version_status = self.config.version_mapping.get_version_status(normalized_version)
+        migration_target = self.config.version_mapping.get_migration_target(normalized_version)
+        is_deprecated = self.config.version_mapping.is_deprecated(normalized_version)
         
         # Extract category and subcategory from MDX path
         category, subcategory = self._extract_category_from_mdx_path(mdx_path, normalized_version)
@@ -212,11 +145,12 @@ class EnhancedPathMapper:
         
         # Convert method name to filename
         filename = self._method_name_to_filename(method_name) + ".yaml"
+        base_path = Path(base_dir)
         
         if subcategory:
-            return os.path.join(base_dir, category, subcategory, filename)
+            return str(base_path / category / subcategory / filename)
         else:
-            return os.path.join(base_dir, category, filename)
+            return str(base_path / category / filename)
     
     def _generate_postman_json_path(self, method_name: str, category: str, subcategory: Optional[str], base_dir: str) -> str:
         """Generate Postman JSON file path."""
@@ -224,33 +158,29 @@ class EnhancedPathMapper:
             return ""
         
         # Convert method name to directory name
-        method_dir = self._method_name_to_dirname(method_name)
+        method_dir = self._method_name_to_filename(method_name)
+        base_path = Path(base_dir)
         
         if subcategory:
-            return os.path.join(base_dir, category, subcategory, method_dir)
+            return str(base_path / category / subcategory / method_dir)
         else:
-            return os.path.join(base_dir, category, method_dir)
+            return str(base_path / category / method_dir)
     
     def _generate_postman_collection_path(self, category: str, subcategory: Optional[str], version: str) -> str:
         """Generate Postman collection path using configuration."""
         try:
-            collections_dir = self.config._resolve_path(self.config.directories.postman_collections)
+            collections_dir = Path(self.config._resolve_path(self.config.directories.postman_collections))
             
             if subcategory:
-                return os.path.join(collections_dir, f"{version}_{category}_{subcategory}.json")
+                return str(collections_dir / f"{version}_{category}_{subcategory}.json")
             else:
-                return os.path.join(collections_dir, f"{version}_{category}.json")
+                return str(collections_dir / f"{version}_{category}.json")
         except Exception:
             return ""
     
     @lru_cache(maxsize=128)
     def _method_name_to_filename(self, method_name: str) -> str:
         """Convert method name to filename format."""
-        return method_name.replace("::", "-")
-    
-    @lru_cache(maxsize=128)
-    def _method_name_to_dirname(self, method_name: str) -> str:
-        """Convert method name to directory name format."""
         return method_name.replace("::", "-")
     
     def get_supported_versions(self, include_deprecated: bool = False) -> List[str]:
@@ -269,8 +199,8 @@ class EnhancedPathMapper:
         Returns:
             Dictionary with migration information and actions taken
         """
-        from_normalized = self.config.normalize_version(from_version)
-        to_normalized = self.config.normalize_version(to_version)
+        from_normalized = self.config.version_mapping.get_canonical_version(from_version)
+        to_normalized = self.config.version_mapping.get_canonical_version(to_version)
         
         migration_info = {
             "method": method_name,
@@ -281,7 +211,7 @@ class EnhancedPathMapper:
         }
         
         # Check if migration is supported
-        migration_target = self.config.get_migration_target(from_normalized)
+        migration_target = self.config.version_mapping.get_migration_target(from_normalized)
         if migration_target and migration_target != to_normalized:
             migration_info["warnings"] = [
                 f"Version {from_normalized} is configured to migrate to {migration_target}, not {to_normalized}"
@@ -309,26 +239,26 @@ class EnhancedPathMapper:
         
         # Collect all directories that need to be created
         if path_mapping.openapi_path:
-            directories_to_create.append(os.path.dirname(path_mapping.openapi_path))
+            directories_to_create.append(Path(path_mapping.openapi_path).parent)
         
         if path_mapping.postman_json_path:
-            directories_to_create.append(path_mapping.postman_json_path)
+            directories_to_create.append(Path(path_mapping.postman_json_path))
         
         if path_mapping.postman_collection_path:
-            directories_to_create.append(os.path.dirname(path_mapping.postman_collection_path))
+            directories_to_create.append(Path(path_mapping.postman_collection_path).parent)
         
         created_dirs = []
         for directory in directories_to_create:
-            if directory and not os.path.exists(directory):
+            if directory and not directory.exists():
                 if not dry_run:
                     try:
-                        os.makedirs(directory, exist_ok=True)
-                        created_dirs.append(directory)
+                        directory.mkdir(parents=True, exist_ok=True)
+                        created_dirs.append(str(directory))
                     except Exception as e:
                         # Log error but continue
                         pass
                 else:
-                    created_dirs.append(f"[DRY RUN] {directory}")
+                    created_dirs.append(f"[DRY RUN] {str(directory)}")
         
         return created_dirs
 

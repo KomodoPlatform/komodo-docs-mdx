@@ -17,22 +17,17 @@ except ImportError:
     __all__ = []
 
 from .lib.managers.method_mapping_manager import MethodMappingManager, MethodMapping
-from .lib.managers.openapi_manager import (
-    OpenAPIManager,
-    MDXParser,
-    OpenAPIConverter,
-    Parameter,
-    Response,
-    MethodInfo
-)
+from .lib.openapi.openapi_manager import OpenAPIManager
+from .lib.mdx.mdx_parser import MDXParser
+from .lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
+from .lib.constants import ParameterInfo, MethodInfo
 
 __all__ = [
     'MethodMappingManager',
     'MethodMapping', 
     'OpenAPIManager',  # Main comprehensive manager
     'MDXParser',
-    'OpenAPIConverter',
-    'Parameter',
-    'Response',
+    'OpenApiSpecGenerator',
+    'ParameterInfo',
     'MethodInfo'
 ] 

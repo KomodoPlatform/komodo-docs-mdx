@@ -215,4 +215,61 @@ examples: ## Show example usage commands
 	@echo ""
 	@echo "5. Use KDF tools:"
 	@echo "   make tools-openapi"
-	@echo "   make tools-postman" 
+	@echo "   make tools-postman"
+
+# Quality Analysis
+.PHONY: review-draft-quality
+review-draft-quality: setup-env  ## Review draft quality by comparing generated docs with live versions
+	@echo "🔍 Reviewing draft quality..."
+	$(PYTHON) kdf_tools.py review-draft-quality
+
+.PHONY: review-draft-quality-verbose  
+review-draft-quality-verbose: setup-env  ## Review draft quality with verbose output
+	@echo "🔍 Reviewing draft quality (verbose)..."
+	$(PYTHON) kdf_tools.py review-draft-quality --verbose
+
+.PHONY: review-draft-quality-specific
+review-draft-quality-specific: setup-env  ## Review specific document pair (requires GENERATED= and LIVE= vars)
+	@echo "🔍 Reviewing specific document pair..."
+	@if [ -z "$(GENERATED)" ] || [ -z "$(LIVE)" ]; then \
+		echo "❌ Error: Both GENERATED and LIVE variables must be set"; \
+		echo "   Usage: make review-draft-quality-specific GENERATED=path/to/generated.mdx LIVE=path/to/live.mdx"; \
+		exit 1; \
+	fi
+	$(PYTHON) kdf_tools.py review-draft-quality --generated "$(GENERATED)" --live "$(LIVE)" --verbose
+
+.PHONY: dry-run-quality-review
+dry-run-quality-review: setup-env  ## Show what would be analyzed in draft quality review
+	@echo "🔍 Showing what would be analyzed in draft quality review..."
+	$(PYTHON) kdf_tools.py review-draft-quality --dry-run
+
+# Documentation Generation
+.PHONY: scan-existing-docs
+scan-existing-docs: setup-env  ## Scan existing KDF documentation to extract method patterns
+	@echo "🔍 Scanning existing documentation..."
+	$(PYTHON) kdf_tools.py scan-existing-docs
+
+.PHONY: scan-existing-docs-async
+scan-existing-docs-async: setup-env  ## Scan existing docs with async processing (faster)
+	@echo "🔍 Scanning existing documentation (async)..."
+	$(PYTHON) kdf_tools.py scan-existing-docs --async-scan --generate-report
+
+.PHONY: generate-docs
+generate-docs: setup-env  ## Generate documentation for missing KDF methods
+	@echo "📄 Generating documentation for missing methods..."
+	$(PYTHON) kdf_tools.py generate-docs
+
+.PHONY: generate-docs-interactive
+generate-docs-interactive: setup-env  ## Generate docs with interactive method selection
+	@echo "📄 Generating documentation (interactive)..."
+	$(PYTHON) kdf_tools.py generate-docs --interactive --generate-summary
+
+.PHONY: generate-docs-method
+generate-docs-method: setup-env  ## Generate docs for specific method (requires METHOD= var)
+	@echo "📄 Generating documentation for specific method..."
+	@if [ -z "$(METHOD)" ]; then \
+		echo "❌ Error: METHOD variable must be set"; \
+		echo "   Usage: make generate-docs-method METHOD=task::enable_bch::init"; \
+		exit 1; \
+	fi
+	$(PYTHON) kdf_tools.py generate-docs --method "$(METHOD)" --version "$(VERSION)" 

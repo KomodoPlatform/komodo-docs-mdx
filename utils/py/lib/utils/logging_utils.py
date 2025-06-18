@@ -103,6 +103,7 @@ class KomodoLogger:
         self.name = name
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
+        self.logger.propagate = False  # Prevent duplicate logging
         
         # Use injected config provider or global one
         if config_provider:
