@@ -36,7 +36,12 @@ class KDFScanner:
         self.logger = get_logger("kdf-scanner")
         self.config = config
         self.script_dir = Path(__file__).parent.parent.parent
-        self.repo_path = Path(repo_path) if repo_path else None
+
+        if repo_path:
+            self.repo_path = Path(self.config._resolve_path(str(repo_path)))
+        else:
+            self.repo_path = None
+            
         self.is_local = self.repo_path is not None
         self.branch = branch
         self.verbose = verbose
@@ -228,8 +233,10 @@ class KDFScanner:
             data["repository_data"][version] = repo_dict
 
         def _save_file():
-            ensure_directory_exists(file_path.parent)
-            with open(file_path, 'w') as f:
+            # Use config resolver to ensure the path is absolute from workspace root
+            absolute_file_path = Path(self.config._resolve_path(str(file_path)))
+            ensure_directory_exists(absolute_file_path.parent)
+            with open(absolute_file_path, 'w') as f:
                 json.dump(data, f, indent=2, default=str)
         
         import asyncio

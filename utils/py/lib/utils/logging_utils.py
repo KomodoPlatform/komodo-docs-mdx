@@ -25,6 +25,7 @@ PROGRESS_LEVEL = 22 # Between INFO and SAVE
 SCAN_LEVEL = 23 # Between PROGRESS and SAVE
 FETCH_LEVEL = 24 # Between SCAN and SAVE
 CLEAN_LEVEL = 21 # Below PROGRESS
+DELETE_LEVEL = 29 # Below CLEAN
 CONFIG_LEVEL = 19 # Below INFO
 FOLDER_LEVEL = 18 # Below CONFIG
 START_LEVEL = 27 # Above SUCCESS
@@ -36,6 +37,7 @@ logging.addLevelName(PROGRESS_LEVEL, "PROGRESS")
 logging.addLevelName(SCAN_LEVEL, "SCAN")
 logging.addLevelName(FETCH_LEVEL, "FETCH")
 logging.addLevelName(CLEAN_LEVEL, "CLEAN")
+logging.addLevelName(DELETE_LEVEL, "DELETE")
 logging.addLevelName(CONFIG_LEVEL, "CONFIG")
 logging.addLevelName(FOLDER_LEVEL, "FOLDER")
 logging.addLevelName(START_LEVEL, "START")
@@ -243,6 +245,10 @@ class KomodoLogger:
         """Log clean message."""
         self.logger.log(CLEAN_LEVEL, message, extra=kwargs)
 
+    def delete(self, message: str, **kwargs):
+        """Log delete message."""
+        self.logger.log(DELETE_LEVEL, message, extra=kwargs)
+
     def config(self, message: str, **kwargs):
         """Log config message."""
         self.logger.log(CONFIG_LEVEL, message, extra=kwargs)
@@ -271,9 +277,10 @@ class KomodoLogger:
         log_method = self.success if success else self.error
         
         message = f"File {operation} {action}: {file_path}"
-        
         if operation.lower() == 'save' and success:
             self.save(message, **kwargs)
+        elif operation.lower() == 'delete' and success:
+            self.delete(message, **kwargs)
         else:
             log_method(message, **kwargs)
 
