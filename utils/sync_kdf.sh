@@ -24,7 +24,7 @@ echo "============== 📊 Step 1A: Scanning KDF repository... ==============="
 echo "# This step scans the Rust source code and produces:"
 echo "#   - utils/py/data/kdf_rust_methods_{branch}_YYYYMMDD_HHMMSS.json"
 echo "#   - Contains all RPC methods found in Rust code (v1 & v2)"
-if ! python py/kdf_tools.py scan-rust --branch dev --versions all; then
+if ! python py/kdf_tools.py scan-rust --branch dev --versions all --clean-before --keep 1; then
     echo "❌ Step 1A failed: Repository scanning"
     exit 1
 fi
@@ -40,8 +40,7 @@ echo "#   - utils/py/data/kdf_mdx_methods_YYYYMMDD_HHMMSS.json"
 echo "#   - Contains all methods found in MDX/YAML documentation"
 echo "#   - utils/py/data/kdf_mdx_method_paths_YYYYMMDD_HHMMSS.json"
 echo "#   - Contains method-to-path mapping (generated efficiently during scan)"
-echo "#   - Includes gap analysis for debugging and planning"
-if ! python py/kdf_tools.py scan-mdx --versions all; then
+if ! python py/kdf_tools.py scan-mdx --versions all --clean-before --keep 1; then
     echo "❌ Step 1B failed: MDX documentation scanning"
     exit 1
 fi

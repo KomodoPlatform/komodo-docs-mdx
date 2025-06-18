@@ -314,12 +314,25 @@ class KDFTools:
     
     def scan_mdx_command(self, args):
         """Handle MDX-only scanning - extract method names from MDX documentation files."""
+        command_title = "MDX Documentation Scan"
+        versions = args.versions
+        if 'all' in versions:
+            versions = ['v1', 'v2']
+
+        config_lines = [
+            f"Versions: {versions}",
+            f"Clean before: {args.clean_before}",
+            f"Keep: {args.keep}"
+        ]
+        self._print_header(command_title, config_lines)
+        
+        success = False
         try:
-            # Handle "all" version by converting to actual supported versions
-            versions = args.versions
-            if 'all' in versions:
-                versions = ['v1', 'v2']
-            
+            if args.clean_before:
+                self.logger.clean("Cleaning up old MDX scan files before generation...")
+                if not self._cleanup_before_generation(['mdx'], args.dry_run, args.keep):
+                    self.log("Cleanup failed, continuing anyway...", "warning")
+
             # Use default data directory from config
             data_dir = self._get_data_dir()
             
@@ -427,10 +440,7 @@ class KDFTools:
             )
             
             # Save methods file
-            if args.output:
-                methods_filename = args.output
-            else:
-                methods_filename = f"kdf_mdx_methods_{timestamp}.json"
+            methods_filename = f"kdf_mdx_methods_{timestamp}.json"
             methods_output_path = reports_dir / methods_filename
             safe_write_json(methods_output_path, methods_data, indent=2)
             
@@ -468,7 +478,7 @@ class KDFTools:
                     else:
                         print(f"\n📋 Gap Analysis: No Rust methods data available for comparison")
             
-            return 0
+            success = True
             
         except Exception as e:
             self.log(f"MDX documentation scan failed: {e}", "error")
@@ -476,6 +486,9 @@ class KDFTools:
                 traceback.print_exc()
             return 1
         
+        self._print_footer(command_title, success=success)
+        return 0 if success else 1
+    
     def _generate_mdx_method_paths_data(self, doc_results, rust_data, versions, current_branch):
         """Generate the method paths data structure (primary data source)."""
         method_paths_data = {
@@ -683,29 +696,37 @@ class KDFTools:
     
     def postman_command(self, args):
         """Handle postman subcommand - Generate Postman collections."""
-        self.log("Starting Postman collection generation...")
+        command_title = "Postman Collection Generation"
+        versions = args.versions
+        if "all" in versions:
+            versions = ["v1", "v2"]
         
+        config_lines = [
+            f"Versions: {versions}",
+            f"Clean before: {args.clean_before}",
+            f"Keep: {args.keep}"
+        ]
+        self._print_header(command_title, config_lines)
+        
+        success = False
         try:
             # Auto-cleanup generated files if requested
             if args.clean_before:
-                self.log("🧹 Cleaning up old Postman collections before generation...")
-                if not self._cleanup_before_generation(['postman_collections'], args.dry_run, args.keep):
+                self.logger.clean("Cleaning up old Postman collections before generation...")
+                if not self._cleanup_before_generation(['postman'], args.dry_run, args.keep):
                     self.log("Cleanup failed, continuing anyway...", "warning")
             
-            # Handle "all" version by converting to actual supported versions
-            versions = args.versions if args.versions != ["all"] else ["v1", "v2"]
-            
             # Step 1: Generate method paths file first (like other commands)
-            self.log("🗺️ Generating method mapping with Postman hotlinks...")
-            mapper = MethodMappingManager(verbose=self.verbose)
+            self.logger.info("🗺️ Generating method mapping with Postman hotlinks...")
+            mapper = MethodMappingManager(config=self.config, verbose=self.verbose)
             
             # Use async mapping for better performance and generate paths file
             run_async(mapper.save_unified_mapping_async())
             
             # Step 2: Generate Postman collections
-            self.log("📮 Generating Postman collections...")
+            self.logger.info("📮 Generating Postman collections...")
             # Initialize manager
-            manager = PostmanManager(verbose=self.verbose)
+            manager = PostmanManager(config=self.config, verbose=self.verbose)
             
             # Generate collections
             results = manager.generate_collections(versions)
@@ -714,16 +735,19 @@ class KDFTools:
             # Step 3: Generate tracking file - read from the method paths file we just created
             self._generate_postman_tracking_file_from_latest_data(versions)
             
-            self.log("✅ Postman collection generation completed!")
+            self.logger.success("✅ Postman collection generation completed!")
             if not self.quiet:
                 print(summary)
+            success = True
             
         except Exception as e:
             self.log(f"❌ Error in postman command: {e}", "error")
             if self.verbose:
                 self.log(f"Full traceback: {traceback.format_exc()}", "error")
+        
+        self._print_footer(command_title, success=success)
+        return 0 if success else 1
     
- 
     def json_extract_command(self, args):
         """Handle json-extract subcommand - Extract JSON examples from MDX files."""
         self.log("Starting JSON example extraction from MDX files...")
@@ -1144,14 +1168,16 @@ class KDFTools:
             "openapi": self.config.directories.openapi_main,
             "postman": self.config.directories.postman_collections,
             "reports": self.config.directories.reports_dir,
-            "rust": self.config.directories.reports_dir
+            "rust": self.config.directories.reports_dir,
+            "mdx": self.config.directories.reports_dir
         }
         
         file_patterns = {
             "openapi": "report-mdx_kdf_*_*.json",
             "postman": "kdf-postman-*.json",
             "reports": "report-*.json",
-            "rust": "report-kdf_rust_methods_*.json"
+            "rust": "report-kdf_rust_methods_*.json",
+            "mdx": "kdf_mdx_method*.json"
         }
         
         all_cleaned = True
@@ -1222,8 +1248,8 @@ class KDFTools:
             description='Converts OpenAPI specifications into Postman collections for easier API testing and integration.'
         )
         parser.add_argument(
-            '--versions', nargs='+', default=['v2'],
-            help="List of versions to process (e.g., v1 v2). Default: ['v2']"
+            '--versions', nargs='+', default=['all'],
+            help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
         )
         parser.add_argument(
             '--clean-before', action='store_true',
@@ -1263,6 +1289,18 @@ class KDFTools:
             help='Scan MDX files for method names.',
             description='Scans local MDX documentation to extract API method names and paths.'
         )
+        parser.add_argument(
+            '--versions', nargs='+', default=['all'],
+            help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
+        )
+        parser.add_argument(
+            '--clean-before', action='store_true',
+            help='Clean up old scan files before running.'
+        )
+        parser.add_argument(
+            '--keep', type=int, default=3,
+            help='Number of recent files to keep during cleanup.'
+        )
         parser.set_defaults(func=self.scan_mdx_command)
 
     def setup_map_methods_parser(self, subparsers):
@@ -1272,8 +1310,24 @@ class KDFTools:
 
     def setup_json_extract_parser(self, subparsers):
         """Setup parser for the json-extract command."""
-        # Add implementation here
-        pass
+        parser = subparsers.add_parser(
+            'json-extract',
+            help='Extract JSON examples from MDX files.',
+            description='Extracts JSON request/response examples from MDX documentation.'
+        )
+        parser.add_argument(
+            '--versions', nargs='+', default=['all'],
+            help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
+        )
+        parser.add_argument(
+            '--clean-before', action='store_true',
+            help='Clean up old JSON example files before running.'
+        )
+        parser.add_argument(
+            '--keep', type=int, default=3,
+            help='Number of recent files to keep during cleanup.'
+        )
+        parser.set_defaults(func=self.json_extract_command)
 
     def setup_cleanup_parser(self, subparsers):
         """Setup parser for the cleanup command."""
@@ -1387,6 +1441,5 @@ def main():
         print(f"An unexpected error occurred: {e}")
         traceback.print_exc()
         sys.exit(1)
-
 if __name__ == '__main__':
     main()
