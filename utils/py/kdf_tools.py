@@ -71,6 +71,7 @@ from utils.py.lib.constants.data_structures import ScanMetadata
 from utils.py.lib.rust.scanner import KDFScanner
 from utils.py.lib.openapi.openapi_manager import OpenAPIManager
 from utils.py.lib.postman.postman_manager import PostmanManager
+from utils.py.lib.utils.data_utils import sort_version_method_counts
 
 from utils.py.lib.generation.cleanup_utils import GeneratedFilesCleaner
 from utils.py.lib.async_support import run_async
@@ -215,9 +216,18 @@ class KDFTools:
             
             self.log("🔚 Finished MDX to OpenAPI conversion.")
 
+            v1_methods = [m for m, d in manager.all_methods.items() if d['version'] == 'v1']
+            v2_methods = [m for m, d in manager.all_methods.items() if d['version'] == 'v2']
+            version_method_counts = {
+                'v1': len(v1_methods),
+                'v2': len(v2_methods),
+                'all': len(v1_methods) + len(v2_methods)
+            }
+            version_method_counts = sort_version_method_counts(version_method_counts)
+
             # Generate tracking files
             processed_versions = [args.version] if args.version != "all" else ["v1", "v2"]
-            openapi_report_path = self._generate_openapi_tracking_files(manager, processed_versions)
+            openapi_report_path = self._generate_openapi_tracking_files(manager, processed_versions, version_method_counts)
             if openapi_report_path:
                 report_paths.append(openapi_report_path)
             
@@ -287,10 +297,7 @@ class KDFTools:
         
     def _calc_version_method_counts(self, repo_info: Dict[str, UnifiedRepositoryInfo]) -> Dict[str, int]:
         version_method_counts = {version: len(info.methods) for version, info in repo_info.items()}
-        total_methods = sum(version_method_counts.values())
-        version_method_counts['all'] = total_methods
-        version_method_counts = dict(sorted(version_method_counts.items()))
-        return version_method_counts
+        return sort_version_method_counts(version_method_counts)
     
     def scan_mdx_command(self, args):
         """Handle MDX-only scanning - extract method names from MDX documentation files."""
@@ -430,7 +437,7 @@ class KDFTools:
 
         total_documented_methods = sum(version_method_counts.values())
         version_method_counts.update({"all": total_documented_methods})
-        version_method_counts = dict(sorted(version_method_counts.items()))
+        version_method_counts = sort_version_method_counts(version_method_counts)
 
         metadata = ScanMetadata(
             scanner_type="MDX_METHOD_PATH_MAPPING",
@@ -473,19 +480,21 @@ class KDFTools:
             else:
                 methods_by_version[version] = []
         
+        version_method_counts = {v: len(m) for v, m in methods_by_version.items()}
+        version_method_counts = sort_version_method_counts(version_method_counts)
+
         # Create the methods data structure
+        metadata = ScanMetadata(
+            scanner_type="MDX_METHOD_PATH_MAPPING",
+            scanner_version="KDFMethodPathMapper v2.0.0",
+            generated_during="mdx_scan",
+            method_source="mdx",
+            is_primary_data_source=True,
+            version_method_counts=version_method_counts
+        )
+
         methods_data = {
-            "scan_metadata": {
-                "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDFDocumentationScanner v2.3.0",
-                "scanner_type": "MDX_DOCUMENTATION",
-                "total_versions": len(versions),
-                "total_methods": total_methods,
-                "includes_path_mapping": False,
-                "method_source": "derived_from_paths_file_mdx_only",
-                "paths_file_reference": paths_file_path.name,
-                "includes_only_documented_methods": True
-            },
+            "scan_metadata": metadata.to_dict(),
             "repository_data": {}
         }
         
@@ -1058,15 +1067,14 @@ class KDFTools:
         self._generate_json_method_paths_file(all_extracted_methods)
         self._generate_json_methods_file(all_extracted_methods, extraction_stats)
     
-    def _generate_openapi_tracking_files(self, openapi_manager: OpenAPIManager, versions: List[str]) -> str:
+    def _generate_openapi_tracking_files(self, openapi_manager: OpenAPIManager, versions: List[str], version_method_counts: Dict[str, int]) -> str:
         """Generates all necessary tracking files for OpenAPI."""
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
         return self.openapi_spec_generator._generate_openapi_method_paths_file(
-            timestamp=timestamp,
             all_methods=openapi_manager.all_methods,
+            path_mapper=openapi_manager.path_mapper,
             versions=versions,
-            path_mapper=openapi_manager.path_mapper
+            version_method_counts=version_method_counts
         )  
 
     def _generate_json_method_paths_file(self, all_extracted_methods: Dict[str, Any]) -> None:
