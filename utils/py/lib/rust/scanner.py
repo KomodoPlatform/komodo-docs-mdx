@@ -2,18 +2,15 @@
 """
 KDF Repository Scanner - Consolidated
 
-This module handles all aspects of scanning the KDF repository for API method information,
-supporting both local and remote repository sources.
+This module handles all aspects of scanning the local KDF repository for API method information,
 
-Consolidated from:
-- rust_local_scanner.py
-- rust_remote_scanner.py
 """
 
 import re
 import subprocess
 import json
 import requests
+import asyncio
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Any, Union, Tuple
 from datetime import datetime, timedelta
@@ -21,12 +18,12 @@ from datetime import datetime, timedelta
 from ..utils.logging_utils import get_logger
 from ..utils import ensure_directory_exists
 from ..constants import RustMethodDetails, UnifiedRepositoryInfo
+from ..constants.data_structures import ScanMetadata
 
 
 class KDFScanner:
     """
     Comprehensive scanner for the Komodo DeFi Framework repository.
-    Can operate on a local clone or a remote GitHub repository.
     """
 
     def __init__(self, config: Any, repo_path: Optional[Union[str, Path]] = None,
@@ -37,35 +34,20 @@ class KDFScanner:
         self.config = config
         self.script_dir = Path(__file__).parent.parent.parent
 
-        if repo_path:
-            self.repo_path = Path(self.config._resolve_path(str(repo_path)))
-        else:
-            self.repo_path = None
+        self.repo_path = Path(self.config._resolve_path(self.config.directories.kdf_repo_path))
             
-        self.is_local = self.repo_path is not None
         self.branch = branch
         self.verbose = verbose
         self.cache_duration = timedelta(hours=cache_duration_hours)
 
         self.data_dir = Path(self.config.directories.data_dir)
         self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        self.reports_dir.mkdir(exist_ok=True, parents=True)
         
-        if not self.is_local:
-            self.url_templates = {
-                "v1": f"https://raw.githubusercontent.com/KomodoPlatform/komodo-defi-framework/{self.branch}/mm2src/mm2_main/src/rpc/dispatcher/dispatcher_legacy.rs",
-                "v2": f"https://raw.githubusercontent.com/KomodoPlatform/komodo-defi-framework/{self.branch}/mm2src/mm2_main/src/rpc/dispatcher/dispatcher.rs"
-            }
 
         self.data_dir.mkdir(exist_ok=True, parents=True)
         self.reports_dir.mkdir(exist_ok=True, parents=True)
 
-    # Local repository methods
     def setup_repository(self, force_clone: bool = False) -> bool:
-        if not self.is_local:
-            self.logger.error("Repository setup is only available in local mode.")
-            return False
-
         repo_url = "https://github.com/KomodoPlatform/komodo-defi-framework.git"
 
         if self.repo_path.exists() and not force_clone:
@@ -99,11 +81,7 @@ class KDFScanner:
             self.logger.error(f"Failed to clone repository: {e.stderr.decode()}")
             return False
 
-    def find_method_files_locally(self) -> Dict[str, List[Path]]:
-        if not self.is_local:
-            self.logger.error("This method is only available in local mode.")
-            return {}
-
+    def find_method_files(self) -> Dict[str, List[Path]]:
         if not self.repo_path.exists():
             raise FileNotFoundError(f"Repository not found at {self.repo_path}")
 
@@ -138,8 +116,7 @@ class KDFScanner:
             versions = ["v1", "v2"]
         
         if self.verbose:
-            mode = 'LOCAL' if self.is_local else 'REMOTE'
-            self.logger.scan(f"Scanning KDF repository asynchronously (mode: {mode}, branch: {self.branch})")
+            self.logger.scan(f"Scanning KDF repository {self.branch} asynchronously")
         
         import asyncio
         tasks = [self._scan_version_async(version) for version in versions]
@@ -162,24 +139,16 @@ class KDFScanner:
         source_content = None
         url = None
 
-        if self.is_local:
-            dispatcher_filename = "dispatcher_legacy.rs" if version == "v1" else "dispatcher.rs"
-            dispatcher_path = self.repo_path / "mm2src" / "mm2_main" / "src" / "rpc" / "dispatcher" / dispatcher_filename
-            if not dispatcher_path.exists():
-                self.logger.error(f"Dispatcher file for {version} not found at {dispatcher_path}")
-                return None
-            
-            def read_local_file():
-                return dispatcher_path.read_text(encoding='utf-8', errors='ignore')
-            source_content = await loop.run_in_executor(None, read_local_file)
-            url = str(dispatcher_path)
-        else:
-            if version not in self.url_templates:
-                self.logger.error(f"No URL template for version {version}")
-                return None
-            url = self.url_templates[version]
-            source_content = await loop.run_in_executor(None, self._fetch_remote_content, url)
-
+        dispatcher_filename = "dispatcher_legacy.rs" if version == "v1" else "dispatcher.rs"
+        dispatcher_path = self.repo_path / "mm2src" / "mm2_main" / "src" / "rpc" / "dispatcher" / dispatcher_filename
+        if not dispatcher_path.exists():
+            self.logger.error(f"Dispatcher file for {version} not found at {dispatcher_path}")
+            return None
+        
+        def read_local_file():
+            return dispatcher_path.read_text(encoding='utf-8', errors='ignore')
+        source_content = await loop.run_in_executor(None, read_local_file)
+        url = str(dispatcher_path)
         if not source_content:
             self.logger.warning(f"No source content found for version {version}")
             return None
@@ -205,22 +174,21 @@ class KDFScanner:
         repo_info.methods = sorted(list(methods))
         return version, repo_info
 
-    async def save_repository_methods_async(self, repo_info: Dict[str, UnifiedRepositoryInfo], 
-                                          filename: str = None) -> str:
-        if filename is None:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            branch_name = self.branch
-            filename = f"report-kdf_rust_methods_{branch_name}.json"
+    async def save_repository_methods_async(self, repo_info: Dict[str, UnifiedRepositoryInfo], version_method_counts: Dict[str, int]) -> str:
+
+        file_path = self.reports_dir / "report-kdf_rust_methods.json"
         
-        file_path = self.reports_dir / filename
-        
+        metadata = ScanMetadata(
+            scanner_type="RUST_METHODS_SCAN",
+            scanner_version="KDFScanner v4.0.0",
+            generated_during="rust_scan",
+            method_source=f"KDF Repository (branch: {self.branch})",
+            is_primary_data_source=True,
+            total_known_methods=version_method_counts
+        )
+
         data = {
-            "scan_metadata": {
-                "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDFScanner v3.0.0",
-                "total_versions": len(repo_info),
-                "total_methods": sum(len(info.methods) for info in repo_info.values())
-            },
+            "scan_metadata": metadata.to_dict(),
             "repository_data": {}
         }
         
@@ -240,7 +208,6 @@ class KDFScanner:
             with open(absolute_file_path, 'w') as f:
                 json.dump(data, f, indent=2, default=str)
         
-        import asyncio
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, _save_file)
             
@@ -261,17 +228,10 @@ class KDFScanner:
 
     # Content retrieval
     def _get_content(self, file_path_in_repo: Union[str, Path]) -> Optional[str]:
-        if self.is_local:
-            full_path = self.repo_path / file_path_in_repo
-            if full_path.exists():
-                return full_path.read_text(encoding='utf-8', errors='ignore')
-            return None
-        else:
-            # This is simplified; for remote, we usually fetch specific dispatcher files by URL
-            # A full remote file tree traversal is not implemented to avoid complexity.
-            # We will fetch dispatcher files by their known URLs.
-            self.logger.warning("General file content retrieval is not supported in remote mode. Use specific scan methods.")
-            return None
+        full_path = self.repo_path / file_path_in_repo
+        if full_path.exists():
+            return full_path.read_text(encoding='utf-8', errors='ignore')
+        return None
 
     # Method Name Extraction (Quick Scan)
     def scan_repository_for_method_names(self, versions: List[str] = None) -> Dict[str, List[str]]:
@@ -281,18 +241,12 @@ class KDFScanner:
         all_methods = {}
         for version in versions:
             source_content = None
-            if self.is_local:
-                dispatcher_filename = "dispatcher_legacy.rs" if version == "v1" else "dispatcher.rs"
-                dispatcher_path = self.repo_path / "mm2src" / "mm2_main" / "src" / "rpc" / "dispatcher" / dispatcher_filename
-                if dispatcher_path.exists():
-                    source_content = dispatcher_path.read_text(encoding='utf-8', errors='ignore')
-                else:
-                    self.logger.error(f"Dispatcher file for {version} not found at {dispatcher_path}")
-            else: # Remote
-                if version in self.url_templates:
-                    source_content = self._fetch_remote_content(self.url_templates[version])
-                else:
-                    self.logger.error(f"No URL template for version {version}")
+            dispatcher_filename = "dispatcher_legacy.rs" if version == "v1" else "dispatcher.rs"
+            dispatcher_path = self.repo_path / "mm2src" / "mm2_main" / "src" / "rpc" / "dispatcher" / dispatcher_filename
+            if dispatcher_path.exists():
+                source_content = dispatcher_path.read_text(encoding='utf-8', errors='ignore')
+            else:
+                self.logger.error(f"Dispatcher file for {version} not found at {dispatcher_path}")
 
             if source_content:
                 methods = self._extract_methods_from_source(source_content, version)
@@ -389,12 +343,8 @@ class KDFScanner:
 
     # Method Detail Extraction (Deep Scan)
     def extract_method_details(self, method_name: str) -> RustMethodDetails:
-        if not self.is_local:
-            self.logger.error("Method detail extraction is only available in local mode.")
-            return RustMethodDetails(method_name=method_name)
-
         method_info = RustMethodDetails(method_name=method_name)
-        method_files = self.find_method_files_locally()
+        method_files = self.find_method_files()
 
         handler_patterns = [
             rf"pub async fn {method_name.replace('::', '_')}_rpc",

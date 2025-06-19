@@ -65,6 +65,7 @@ from utils.py.lib import (
     get_logger, DraftsManager,
     MdxGenerator, ExistingDocsScanner
 )
+from utils.py.lib.constants import UnifiedRepositoryInfo
 from utils.py.lib.constants.config import get_config
 from utils.py.lib.constants.data_structures import ScanMetadata
 from utils.py.lib.rust.scanner import KDFScanner
@@ -94,6 +95,7 @@ class KDFTools:
             self.logger.folder(f"Workspace root: {self.config.workspace_root}")
             self.logger.folder(f"Data directory: {self.config.directories.data_dir}")
             self.logger.folder(f"Reports directory: {self.config.directories.reports_dir}")
+            self.logger.folder(f"KDF repository: {self.config.directories.kdf_repo_path}")
 
     
     def log(self, message, level="info"):
@@ -230,9 +232,13 @@ class KDFTools:
     def scan_rust(self, args):
         """Handle scan-rust subcommand - KDF repository scanning with async processing."""
         command_title = "KDF Repository Scan"
+        versions = args.versions
+        if 'all' in versions:
+            versions = ['v1', 'v2']
+            
         config = [
             f"Branch: {args.branch}",
-            f"Versions: {args.versions}",
+            f"Versions: {versions}",
             f"Clean before: {args.clean_before}",
             f"Keep: {args.keep}"
         ]
@@ -250,28 +256,25 @@ class KDFTools:
 
             scanner = KDFScanner(
                 config=self.config,
+                repo_path=self.config.directories.kdf_repo_path,
                 branch=args.branch,
                 verbose=self.verbose
             )
             
-            versions_to_scan = args.versions
-            if "all" in versions_to_scan:
-                versions_to_scan = ["v1", "v2"]
-
-            self.logger.info(f"Initialized KDFScanner in REMOTE mode.")
-            self.logger.info(f"Remote repository branch: {scanner.branch}")
-            
-            repo_info = await scanner.scan_repository_methods_async(versions=versions_to_scan)
-            
-            # Save results to file
-            output_file = await scanner.save_repository_methods_async(repo_info)
-            output_paths.append(output_file)
-            
-            self.logger.save(f"Saved repository methods to: {output_file}")
+            repo_info = await scanner.scan_repository_methods_async(versions)
+            if repo_info:
+                version_method_counts = self._calc_version_method_counts(repo_info)
+                # Save results to file
+                output_file = await scanner.save_repository_methods_async(repo_info, version_method_counts)
+                output_paths.append(output_file)
             
             # Additional logic for processing/reporting on repo_info
-            total_methods = sum(len(v.methods) for v in repo_info.values())
-            self.logger.finish(f"Async scan completed: {total_methods} methods across {len(repo_info)} versions")
+            self.logger.finish(f"Async KDF Repository scan completed:")
+            self.log(f"📊 Rust Repository Scan Statistics:")
+            self.log(f"   • V1 methods processed: {version_method_counts['v1']}")
+            self.log(f"   • V2 methods processed: {version_method_counts['v2']}")
+            self.log(f"   • Total methods processed: {version_method_counts['all']}")
+            self.log("🔚 Finished Rust repository scan.")
             success = True
 
         try:
@@ -281,6 +284,13 @@ class KDFTools:
             if self.verbose:
                 traceback.print_exc()
             return 1
+        
+    def _calc_version_method_counts(self, repo_info: Dict[str, UnifiedRepositoryInfo]) -> Dict[str, int]:
+        version_method_counts = {version: len(info.methods) for version, info in repo_info.items()}
+        total_methods = sum(version_method_counts.values())
+        version_method_counts['all'] = total_methods
+        version_method_counts = dict(sorted(version_method_counts.items()))
+        return version_method_counts
     
     def scan_mdx_command(self, args):
         """Handle MDX-only scanning - extract method names from MDX documentation files."""

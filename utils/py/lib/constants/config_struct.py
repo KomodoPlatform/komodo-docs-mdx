@@ -105,12 +105,8 @@ class DirectoryConfig:
         """
         root = Path(self.workspace_root)
         for name, value in self.__dict__.items():
-            if isinstance(value, str):
-                # We only want to convert paths that are relative to the project root
-                # and exist.
-                potential_path = root / value
-                if potential_path.exists():
-                    setattr(self, name, potential_path)
+            if isinstance(value, str) and name != 'workspace_root':
+                setattr(self, name, root / value)
 
     def get_version_directories(self) -> Dict[str, Dict[str, Path]]:
         """Get directories organized by version and type."""
