@@ -18,7 +18,6 @@ import os
 
 # Import constants and path utilities
 from ..constants import (
-    UnifiedParameterInfo as Parameter,
     OpenAPIMethod,
     PathDetail
 )
@@ -42,12 +41,14 @@ class OpenApiSpecGenerator:
     OpenAPI schemas, including request bodies, responses, and common components
     like enums and data structures.
     """
-    def __init__(self, base_path: str = ".", path_mapper: EnhancedPathMapper = None):
-        self.base_path = Path(base_path)
-        self.path_mapper = path_mapper or EnhancedPathMapper()
-        self.mdx_parser = MDXParser(base_path)
-        self.schema_creator = OpenApiSchemaFactory()
-        self.common_schema_generator = OpenApiSchemaGenerator(self.path_mapper)
+    def __init__(self, config=None, path_mapper=None, mdx_parser=None, schema_creator=None, common_schema_generator=None):
+        self.config = config or get_config()
+        self.base_path = Path(self.config.workspace_root)
+        self.path_mapper = path_mapper or EnhancedPathMapper(config=self.config)
+        
+        self.mdx_parser = mdx_parser or MDXParser()
+        self.schema_creator = schema_creator or OpenApiSchemaFactory()
+        self.common_schema_generator = common_schema_generator or OpenApiSchemaGenerator()
         
         self.all_methods = defaultdict(list)
         self.all_method_details: List[OpenAPIMethod] = []
@@ -104,6 +105,24 @@ class OpenApiSpecGenerator:
         }
         return spec
 
+    def build_component_spec(self, component_info: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Generates a simple OpenAPI component specification for an enum or structure.
+        """
+        comp_name = component_info['name']
+        comp_type = component_info.get('type', 'object')
+
+        return {
+            "components": {
+                "schemas": {
+                    comp_name: {
+                        "type": "string" if comp_type == "enum" else "object",
+                        "title": f"Component: {comp_name}"
+                    }
+                }
+            }
+        }
+
     def write_openapi_file(self, spec: Dict[str, Any], method_name: str, version: str, 
                           output_dir: str = None, dry_run: bool = False, mdx_path: str = "") -> str:
         """
@@ -146,7 +165,7 @@ class OpenApiSpecGenerator:
 
             # The final output path should be relative to the versioned yaml directory
             if str(mdx_path).startswith(str(self.path_mapper.config.directories.mdx_common_structures)):
-                output_path = self.path_mapper.config.directories.workspace_root / "openapi/paths/components/schemas" / '/'.join(path_parts) / filename
+                output_path = Path(self.path_mapper.config.directories.openapi_schemas) / filename
             else:
                 output_path = self.path_mapper.config.directories.workspace_root / yaml_base_dir / '/'.join(path_parts) / filename
         
@@ -350,6 +369,7 @@ class OpenApiSpecGenerator:
                 "v1": {
                     "branch": "add/postman/utils", 
                     "version": "v1",
+                    "source_type": "OPENAPI_DOCUMENTATION",
                     "methods": v1_methods,
                     "last_updated": datetime.now().isoformat(),
                     "extraction_patterns_used": ["MDX file parsing"]
@@ -357,6 +377,7 @@ class OpenApiSpecGenerator:
                 "v2": {
                     "branch": "add/postman/utils",
                     "version": "v2",
+                    "source_type": "OPENAPI_DOCUMENTATION",
                     "methods": v2_methods,
                     "last_updated": datetime.now().isoformat(),
                     "extraction_patterns_used": ["MDX file parsing"]

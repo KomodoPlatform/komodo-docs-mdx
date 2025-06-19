@@ -27,7 +27,6 @@ Examples:
 
 Global Options:
     --dry-run: Show what would be done without making changes
-    --quiet: Suppress verbose output
     --keep: Number of recent temporary files to keep during auto-cleanup (default: 3)
 """
 
@@ -84,7 +83,6 @@ class KDFTools:
     
     def __init__(self):
         self.verbose = True
-        self.quiet = False
         self.config = get_config()
         self.logger = get_logger("kdf-tools")
         self.openapi_spec_generator = OpenApiSpecGenerator()
@@ -101,8 +99,6 @@ class KDFTools:
     
     def log(self, message, level="info"):
         """Log a message with appropriate level."""
-        if self.quiet:
-            return
         
         # Map simple levels to logger methods
         log_method = getattr(self.logger, level, self.logger.info)
@@ -321,20 +317,15 @@ class KDFTools:
                 if not self._cleanup_before_generation(['mdx'], args.dry_run, args.keep):
                     self.log("Cleanup failed, continuing anyway...", "warning")
 
-                # Use default data directory from config
-                data_dir = self._get_data_dir()
-            
             # Get current git branch of the repository
             try:
                 result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
                                       capture_output=True, text=True, cwd=self.config.workspace_root, check=True)
                 current_branch = result.stdout.strip()
-                if self.verbose:
-                    print(f"📋 Detected git branch: {current_branch}")
+                print(f"📋 Detected git branch: {current_branch}")
             except (subprocess.CalledProcessError, FileNotFoundError):
                 current_branch = "unknown"
-                if self.verbose:
-                    print("⚠️  Could not detect git branch, using 'unknown'")
+                print("⚠️  Could not detect git branch, using 'unknown'")
             
             if self.verbose:
                 print("💡 Using async processing for MDX file scanning")
@@ -547,28 +538,17 @@ class KDFTools:
                     mapper.debug_method_matching(args.debug)
                 return 0
             
-            if not self.quiet:
-                print("\n📋 Generating unified method mapping...")
-                
-                # Check if async processing is available and recommended
-                if hasattr(mapper, 'create_unified_mapping_async'):
-                    print("💡 Async processing is available for faster performance!")
-                    print("   The mapping will now use concurrent file processing.")
+            print("\n📋 Generating unified method mapping...")
             
-            # Use async version for mapping generation
             if hasattr(mapper, 'save_unified_mapping_async'):
-                if self.verbose:
-                    print("💡 Using async processing for method mapping...")
+                print("💡💡💡 Using async processing for method mapping...💡💡💡")
                 run_async(mapper.save_unified_mapping_async())
             else:
+                print("💡 Not Using async processing for method mapping...💡")
                 mapper.save_unified_mapping()
             
-            # Generate Postman methods tracking file from the latest method paths data
             self._generate_postman_tracking_file_from_latest_data(['v1', 'v2'])
             
-            # Auto-cleanup old mapping files - REMOVED: Will be handled by Step 6 comprehensive cleanup
-            # from lib.utils import cleanup_kdf_temp_files
-            # cleanup_kdf_temp_files('data', keep_count=3, verbose=self.verbose)
             
             self.log("Method mapping completed successfully!", "success")
             return 0
@@ -618,8 +598,7 @@ class KDFTools:
             self._generate_postman_tracking_file_from_latest_data(versions)
             
             self.logger.success("✅ Postman collection generation completed!")
-            if not self.quiet:
-                print(summary)
+            print(summary)
             success = True
             
         except Exception as e:
@@ -1597,36 +1576,51 @@ class KDFTools:
         finally:
             self._print_footer(command_title, success=success)
 
+    def generate_common_schemas_command(self, args):
+        """Generates OpenAPI schemas for common structures and enums."""
+        command_title = "Generate Common Schemas"
+        self._print_header(command_title)
+        success = False
+        try:
+            manager = OpenAPIManager(config=self.config, verbose=self.verbose)
+            manager.generate_common_schemas_only()
+            success = True
+        except Exception as e:
+            self.log(f"An error occurred during common schema generation: {e}", "error")
+            self.log(traceback.format_exc(), "error")
+        finally:
+            self._print_footer(command_title, success=success)
+
     def main(self):
-        """Main entry point for CLI."""
+        """Main entry point for the KDF Tools CLI."""
         parser = argparse.ArgumentParser(
-            description='Komodo DeFi Framework Tools - Unified CLI',
+            description="Unified KDF Tools CLI",
             formatter_class=argparse.RawTextHelpFormatter
         )
-        parser.add_argument('--dry-run', action='store_true', help='Show what would be done without making changes.')
-        parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output.')
-        parser.add_argument('-q', '--quiet', action='store_true', help='Suppress all output except errors.')
+        subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
-        subparsers = parser.add_subparsers(dest='command', required=True, help='Available commands')
-
-        # Setup parsers for all commands
-        self.setup_openapi_parser(subparsers)
-        self.setup_postman_parser(subparsers)
         self.setup_scan_rust_parser(subparsers)
         self.setup_scan_mdx_parser(subparsers)
-        self.setup_gap_analysis_parser(subparsers)
+        self.setup_openapi_parser(subparsers)
+        self.setup_postman_parser(subparsers)
         self.setup_map_methods_parser(subparsers)
         self.setup_json_extract_parser(subparsers)
         self.setup_cleanup_parser(subparsers)
         self.setup_review_draft_quality_parser(subparsers)
         self.setup_scan_existing_docs_parser(subparsers)
         self.setup_generate_docs_parser(subparsers)
+        self.setup_gap_analysis_parser(subparsers)
         
-        args = parser.parse_args()
+        # New parser for generate-common-schemas
+        common_schemas_parser = subparsers.add_parser(
+            "generate-common-schemas",
+            help="Generate OpenAPI schemas for common structures and enums.",
+            description="This command scans the common_structures directory and generates a corresponding OpenAPI schema file for each enum and structure."
+        )
+        common_schemas_parser.set_defaults(func=self.generate_common_schemas_command)
 
-        # Setup logging and config
-        self.quiet = args.quiet
-        is_verbose = args.verbose or not args.quiet
+        args = parser.parse_args()
+        
         
         # Add dry_run to args if not present (for commands that dont have it)
         if not hasattr(args, 'dry_run'):
@@ -1637,8 +1631,12 @@ class KDFTools:
         # Execute command
         if hasattr(args, 'func'):
             return args.func(args)
+        elif args.command == "gap-analysis":
+            self.gap_analysis_command(args)
+        elif args.command == "generate-common-schemas":
+            self.generate_common_schemas_command(args)
         else:
-            self.log("No function associated with command.", "error")
+            parser.print_help()
             return 1
 
 def main():

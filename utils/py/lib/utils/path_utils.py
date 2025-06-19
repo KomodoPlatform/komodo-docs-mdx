@@ -279,6 +279,3 @@ class EnhancedPathMapper:
         
         return created_dirs
 
-
-# Backward compatibility aliases
-PathMapper = EnhancedPathMapper 

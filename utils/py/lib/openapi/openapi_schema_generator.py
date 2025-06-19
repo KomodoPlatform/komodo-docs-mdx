@@ -13,7 +13,8 @@ import yaml
 from pathlib import Path
 from typing import Dict, List, Any, Set
 
-from ..utils.path_utils import PathMapper
+from ..utils.path_utils import EnhancedPathMapper
+from ..constants.config import get_config
 from .openapi_schema_factory import OpenApiSchemaFactory
 
 
@@ -31,23 +32,25 @@ class OpenApiSchemaGenerator:
     _ENUM_TABLE_REGEX = re.compile(r'\| Value \|.*?\n\|-.*\n(.*)', re.DOTALL)
     _ENUM_TABLE_ROW_REGEX = re.compile(r'\|\s*`([^`]+)`\s*\|')
 
-    def __init__(self, path_mapper: PathMapper):
-        self.path_mapper = path_mapper
+    def __init__(self, config=None, path_mapper=None):
+        self.config = config or get_config()
+        self.base_path = Path(self.config.workspace_root)
+        self.path_mapper = path_mapper or EnhancedPathMapper(config=self.config)
+        self.schemas_path = self.path_mapper.config.directories.openapi_schemas
 
     def generate_common_schemas(self, all_enums: Dict[str, Set[str]]):
         """
         Generates schemas for common data structures and enums.
         """
-        schemas_path = self.path_mapper.config.directories.openapi_schemas
         
         # Generate files for manually defined enums
         manual_enums = self._extract_manual_enums_from_docs()
         for enum_name, schema in manual_enums.items():
-            with open(schemas_path / f"{enum_name}.yml", 'w') as f:
+            with open(Path(self.schemas_path) / f"{enum_name}.yml", 'w') as f:
                 yaml.dump({"title": enum_name, **schema}, f, sort_keys=False)
 
         # Generate files for common data structures
-        self._generate_individual_structure_files(schemas_path)
+        self._generate_individual_structure_files()
 
         # Log any enums that are documented but not in the manual list for review
         self._output_undocumented_enums_for_review(all_enums)
@@ -57,8 +60,7 @@ class OpenApiSchemaGenerator:
         Creates a file listing enums that are found in parameter descriptions
         but do not have a corresponding manual enum file.
         """
-        reports_path = self.path_mapper.config.directories.reports_dir
-        review_file = reports_path / "undocumented_enums_for_review.txt"
+        review_file = self.path_mapper.config.directories.reports_dir / "undocumented_enums_for_review.txt"
         
         manual_enums_path = self.path_mapper.config.directories.mdx_common_structures / "enums"
         existing_enums = {p.stem for p in manual_enums_path.glob("*.mdx")}
@@ -77,7 +79,7 @@ class OpenApiSchemaGenerator:
                         f.write(f"  - {value}\n")
                     f.write("```\n\n")
 
-    def _generate_individual_structure_files(self, schemas_path: Path):
+    def _generate_individual_structure_files(self):
         """
         Scans for structure definition files and creates a YAML schema file for each.
         """
@@ -88,9 +90,9 @@ class OpenApiSchemaGenerator:
         for structure_file in structure_dir.rglob("*.mdx"):
             if "enums" in structure_file.parts:
                 continue
-            self._create_structure_schema_file(structure_file, schemas_path)
+            self._create_structure_schema_file(structure_file)
 
-    def _create_structure_schema_file(self, structure_file: Path, schemas_path: Path):
+    def _create_structure_schema_file(self, structure_file: Path):
         """
         Parses a single structure .mdx file and creates a corresponding OpenAPI schema file.
         """
@@ -101,7 +103,6 @@ class OpenApiSchemaGenerator:
         
         for structure_name, schema in structures.items():
             filename = f"{structure_name.lower()}.yml"
-            output_path = schemas_path / filename
             
             full_schema = {
                 "title": structure_name,
@@ -109,7 +110,7 @@ class OpenApiSchemaGenerator:
                 "properties": schema
             }
             
-            with open(output_path, 'w') as f_out:
+            with open(Path(self.schemas_path) / filename, 'w') as f_out:
                 yaml.dump(full_schema, f_out, sort_keys=False)
 
     def _parse_structure_definitions(self, content: str) -> Dict[str, Dict[str, Any]]:

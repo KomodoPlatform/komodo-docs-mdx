@@ -30,21 +30,16 @@ class OpenAPIManager:
     categorized OpenAPI specs.
     """
 
-    def __init__(self, config: object = None, verbose: bool = True):
-        self.config = config or get_config()
+    def __init__(self, config=None, verbose: bool = True):
+        self.config = config if config else get_config()
         self.base_path = Path(self.config.workspace_root)
-        self.path_mapper = EnhancedPathMapper(config=self.config)
+        self.path_mapper = EnhancedPathMapper()
         self.verbose = verbose
         
         # Initialize the main components
-        self.mdx_parser = MDXParser(self.base_path)
-        self.spec_generator = OpenApiSpecGenerator(
-            base_path=self.base_path,
-            path_mapper=self.path_mapper
-        )
-        self.schema_generator = OpenApiSchemaGenerator(
-            path_mapper=self.path_mapper
-        )
+        self.mdx_parser = MDXParser()
+        self.spec_generator = OpenApiSpecGenerator()
+        self.schema_generator = OpenApiSchemaGenerator()
         
         # Tracking attributes
         self.all_methods = {}
@@ -77,7 +72,7 @@ class OpenAPIManager:
             source_dirs.append(Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2_dev)
         
         # Add common structures directory, which is relevant for all versions
-        source_dirs.append(Path(self.config.workspace_root) / "src/pages/komodo-defi-framework/api/common_structures")
+        source_dirs.append(self.path_mapper.config.directories.mdx_common_structures)
         
         source_dirs = [d for d in source_dirs if d.exists()]
         
@@ -129,7 +124,9 @@ class OpenAPIManager:
                     self.error_count += 1
         
         # Generate common schemas like enums and structures
-        self.schema_generator.generate_common_schemas(self.mdx_parser.enum_patterns)
+        self.schema_generator.generate_common_schemas(
+            self.mdx_parser.enum_patterns
+        )
         
         # Generate categorized OpenAPI specifications
         self.spec_generator._generate_category_specs(self.all_methods, version)
@@ -164,6 +161,37 @@ class OpenAPIManager:
             'enums_found': self.enum_count,
             'structures_found': self.structure_count,
         }
+
+    def generate_common_schemas_only(self):
+        """
+        Discovers and processes only common component files (enums, structures)
+        and generates their corresponding OpenAPI schemas.
+        """
+        self.logger.info("Starting common schema generation...")
+        
+        common_structures_dir = self.path_mapper.config.directories.mdx_common_structures
+        if not common_structures_dir.exists():
+            self.logger.warning(f"Common structures directory not found at: {common_structures_dir}")
+            return
+
+        for mdx_file in sorted(common_structures_dir.rglob("*.mdx")):
+            parsed_info = self.mdx_parser.parse_mdx_file(mdx_file)
+            if parsed_info:
+                doc_type = parsed_info.get('type')
+                name = parsed_info.get('name')
+
+                if doc_type in ['enum', 'structure']:
+                    spec = self.spec_generator.build_component_spec(parsed_info)
+                    self.spec_generator.write_openapi_file(
+                        spec, name, 'v2', mdx_path=str(mdx_file)
+                    )
+                    self.logger.save(f"Schema created for [{name}]")
+                    if doc_type == 'enum':
+                        self.enum_count += 1
+                    else:
+                        self.structure_count += 1
+        
+        self.logger.info(f"Common schema generation complete. Processed {self.enum_count} enums and {self.structure_count} structures.")
 
     def _merge_specs(self, paths: List[str], version: str) -> Dict:
         """

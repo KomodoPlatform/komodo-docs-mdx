@@ -25,7 +25,7 @@ from ..constants import FileType, FileInfo, OperationResult, BatchResult, Parame
 from .batch_processor import BatchFileProcessor, batch_read_json_files, batch_write_json_files
 
 # Path utilities
-from .path_utils import EnhancedPathMapper, PathMapping, PathMapper
+from .path_utils import EnhancedPathMapper, PathMapping
 
 # String processing
 from .string_utils import (
@@ -96,7 +96,6 @@ __all__ = [
     # Path utilities
     'EnhancedPathMapper',
     'PathMapping',
-    'PathMapper',
     
     # String operations
     'normalize_method_name',

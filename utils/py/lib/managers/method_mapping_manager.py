@@ -46,7 +46,7 @@ class MethodMappingManager:
         self.logger = get_logger("method-mapping-manager")
         
         # Initialize enhanced components
-        self.path_mapper = EnhancedPathMapper(self.config)
+        self.path_mapper = EnhancedPathMapper()
         self.postman_parser = PostmanCollectionParser(verbose)
         self._reporter = None  # Lazy loading to avoid circular imports
         

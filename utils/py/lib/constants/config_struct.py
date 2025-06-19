@@ -77,7 +77,7 @@ class DirectoryConfig:
     yaml_v1: str = "openapi/paths/v1"
     yaml_v2: str = "openapi/paths/v2"
     openapi_components: str = "openapi/paths/components"
-    openapi_schemas: str = "openapi/paths/schemas"
+    openapi_schemas: str = "openapi/paths/components/schemas"
     openapi_main: str = "openapi/openapi.yaml"
     
     # Postman collection paths

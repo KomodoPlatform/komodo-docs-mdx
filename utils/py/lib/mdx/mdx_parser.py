@@ -14,7 +14,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 # Import path utilities
-from ..utils.path_utils import PathMapper
+from ..constants.config import get_config
+from ..utils.path_utils import EnhancedPathMapper
 from ..constants import UnifiedParameterInfo as Parameter, UnifiedMethodInfo as MethodInfo
 
 
@@ -28,8 +29,10 @@ class Response:
 
 class MDXParser:
     """Parser for MDX files to extract API method information."""
-    def __init__(self, base_path: str = "."):
-        self.base_path = Path(base_path)
+    def __init__(self):
+        self.config = get_config()
+        self.path_mapper = EnhancedPathMapper()
+        self.base_path = Path(self.config.workspace_root)
         # Track common structures across all parsed methods
         self.common_structures = defaultdict(int)
         self.enum_patterns = defaultdict(set)
