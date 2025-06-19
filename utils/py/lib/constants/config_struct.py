@@ -8,6 +8,7 @@ in the Komodo DeFi Framework documentation tools.
 
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
+from pathlib import Path
 
 from .enums import ValidationLevel, VersionStatus, DeploymentEnvironment
 
@@ -64,6 +65,8 @@ class CoinConfig:
 @dataclass
 class DirectoryConfig:
     """Enhanced configuration for directory paths with version support."""
+    workspace_root: str  # The absolute path to the workspace root
+
     # MDX documentation paths
     mdx_v1: str = "src/pages/komodo-defi-framework/api/legacy"
     mdx_v2: str = "src/pages/komodo-defi-framework/api/v20"
@@ -91,8 +94,25 @@ class DirectoryConfig:
     cache_dir: str = "cache"
     category_mappings: str = "utils/py/data/category_mappings.json"
     kdf_repo_path: str = "utils/kdf_repo"
-    
-    def get_version_directories(self) -> Dict[str, Dict[str, str]]:
+
+    def __post_init__(self):
+        """Resolve all path strings to absolute Path objects."""
+        self._resolve_paths()
+
+    def _resolve_paths(self):
+        """
+        Converts all string paths in the configuration to absolute pathlib.Path objects.
+        """
+        root = Path(self.workspace_root)
+        for name, value in self.__dict__.items():
+            if isinstance(value, str):
+                # We only want to convert paths that are relative to the project root
+                # and exist.
+                potential_path = root / value
+                if potential_path.exists():
+                    setattr(self, name, potential_path)
+
+    def get_version_directories(self) -> Dict[str, Dict[str, Path]]:
         """Get directories organized by version and type."""
         return {
             "v1": {
@@ -111,6 +131,25 @@ class DirectoryConfig:
                 "mdx": self.mdx_v2_dev
             }
         }
+
+    def get_relative_path(self, absolute_path: str) -> str:
+        """
+        Convert an absolute path to a relative path from the workspace root.
+        
+        Args:
+            absolute_path: The full path to convert.
+            
+        Returns:
+            A relative path string.
+        """
+        path = Path(absolute_path)
+        if not path.is_absolute():
+            return str(absolute_path)
+        
+        try:
+            return str(path.relative_to(self.workspace_root))
+        except ValueError:
+            return str(absolute_path)
 
 
 @dataclass
@@ -343,7 +382,7 @@ class EnhancedKomodoConfig:
     """Enhanced configuration with flexible directory management and version handling."""
     
     # Core configuration
-    directories: DirectoryConfig = field(default_factory=DirectoryConfig)
+    directories: DirectoryConfig = field(init=False)
     versions: Dict[str, VersionConfig] = field(default_factory=VersionConfig.create_version_configs)
     version_mapping: VersionMappingConfig = field(default_factory=VersionMappingConfig)
     openapi: OpenAPIConfig = field(default_factory=OpenAPIConfig)
@@ -363,8 +402,9 @@ class EnhancedKomodoConfig:
     
     def __post_init__(self):
         """Post-initialization setup."""
-        self._setup_logging()
         self._resolve_workspace_root()
+        self.directories = DirectoryConfig(workspace_root=self.workspace_root)
+        self._setup_logging()
     
     def _setup_logging(self):
         """Configure logging based on settings."""
@@ -378,7 +418,6 @@ class EnhancedKomodoConfig:
         """Resolve workspace root if not explicitly set."""
         if self.workspace_root is None:
             # Try to find workspace root by looking for characteristic files
-            from pathlib import Path
             current = Path.cwd()
             for parent in [current] + list(current.parents):
                 if (parent / "src" / "pages").exists() and (parent / "utils").exists():
@@ -425,35 +464,4 @@ class EnhancedKomodoConfig:
         if not include_deprecated:
             versions = [v for v in versions if not self.is_version_deprecated(v)]
         return sorted(versions)
-    
-    # Directory resolution methods
-    def get_directory_for_version_and_type(self, version: str, file_type: str) -> str:
-        """Get directory path for a specific version and file type."""
-        canonical_version = self.get_canonical_version(version)
-        
-        if file_type == "mdx":
-            if canonical_version == "v1":
-                return self._resolve_path(self.directories.mdx_v1)
-            else:
-                return self._resolve_path(self.directories.mdx_v2)
-        elif file_type == "yaml":
-            if canonical_version == "v1":
-                return self._resolve_path(self.directories.yaml_v1)
-            else:
-                return self._resolve_path(self.directories.yaml_v2)
-        elif file_type == "json":
-            if canonical_version == "v1":
-                return self._resolve_path(self.directories.postman_json_v1)
-            else:
-                return self._resolve_path(self.directories.postman_json_v2)
-        else:
-            raise ValueError(f"Unknown file type: {file_type}")
-    
-    def get_all_directories(self) -> Dict[str, str]:
-        """Get all configured directories as resolved paths."""
-        from dataclasses import asdict
-        return {
-            name: self._resolve_path(path)
-            for name, path in asdict(self.directories).items()
-        }
 

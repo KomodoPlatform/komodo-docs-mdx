@@ -5,7 +5,7 @@ Postman JSON Example Scanners
 Handles scanning and processing of JSON example files for Postman collection generation.
 Now uses UnifiedScanner for file discovery and delegates to PostmanUtilities for processing.
 
-REFACTORED: Includes replacement classes for ExtractedExample and MDXExtractor from old postman modules.
+REFACTORED: Includes replacement classes for ExtractedExample and MdxJsonExampleExtractor from old postman modules.
 """
 
 import os
@@ -17,13 +17,10 @@ import re
 
 from ..mdx.mdx_scanner import UnifiedScanner
 from ..utils.logging_utils import get_logger
-from ..utils.string_utils import convert_dir_to_method_name
 from .postman_utils import (
     template_json_body,
     generate_request_description,
-    generate_test_script,
-    validate_method_operation_match,
-    validate_content_for_operation
+    generate_test_script
 )
 from ..constants.data_structures import ExtractedExample
 from ..constants.postman_struct import PostmanRequest
@@ -31,7 +28,7 @@ from ..constants.postman_struct import PostmanRequest
 
 
 
-class MDXExtractor:
+class MdxJsonExampleExtractor:
     """
     Extracts examples from MDX files - replacement for old postman module.
     

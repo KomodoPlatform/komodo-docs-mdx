@@ -149,11 +149,30 @@ class MethodMappingManager:
             mdx_task, yaml_task, example_task
         )
         
+        # Merge v2-dev into v2 right after scanning to ensure consistent path handling
+        if 'v2' in mdx_mappings and 'v2-dev' in mdx_mappings:
+            mdx_mappings['v2'].update(mdx_mappings.pop('v2-dev', {}))
+        if 'v2' in yaml_mappings and 'v2-dev' in yaml_mappings:
+            yaml_mappings['v2'].update(yaml_mappings.pop('v2-dev', {}))
+        if 'v2' in example_mappings and 'v2-dev' in example_mappings:
+            example_mappings['v2'].update(example_mappings.pop('v2-dev', {}))
+
+        # Also merge canonical methods
+        if 'v2' in canonical_methods and 'v2-dev' in canonical_methods:
+            v2_set = set(canonical_methods['v2'])
+            v2_dev_set = set(canonical_methods.pop('v2-dev', []))
+            v2_set.update(v2_dev_set)
+            canonical_methods['v2'] = sorted(list(v2_set))
+        
         # Rest of the mapping logic remains the same
         unified = {}
         
         # Get all canonical versions to process
         canonical_versions_to_process = self.config.version_mapping.get_all_canonical_versions()
+
+        # Remove v2-dev since it's merged into v2
+        if 'v2-dev' in canonical_versions_to_process:
+            canonical_versions_to_process.remove('v2-dev')
 
         for version in canonical_versions_to_process:
             if version not in mdx_mappings and version not in yaml_mappings and version not in example_mappings:
@@ -185,7 +204,7 @@ class MethodMappingManager:
             
             # Create enhanced mapping for each method
             overview_methods_filtered = 0
-            for method in all_methods:
+            for method in sorted(list(all_methods)):
                 # Find matching method name and get the file path
                 mdx_method_key = find_best_match(method, mdx_mappings.get(version, {}))
                 mdx_path = mdx_mappings.get(version, {}).get(mdx_method_key) if mdx_method_key else None
@@ -236,7 +255,25 @@ class MethodMappingManager:
         # Integrate Postman collection hotlinks
         unified = self._integrate_postman_hotlinks(unified)
         
-        # Show enhanced statistics
+        # Merge v2-dev into v2 to treat them as a single version downstream
+        if 'v2' in unified and 'v2-dev' in unified:
+            v2_methods = unified.get('v2', {})
+            v2_dev_methods = unified.pop('v2-dev', {})  # Use pop to get and remove
+            
+            merged_count = 0
+            for method, mapping in v2_dev_methods.items():
+                if method not in v2_methods:
+                    # Re-assign version and merge
+                    mapping.version = 'v2'
+                    v2_methods[method] = mapping
+                    merged_count += 1
+            
+            unified['v2'] = v2_methods
+            
+            if self.verbose and merged_count > 0:
+                print(f"   ✅ Merged {merged_count} v2-dev methods into v2, treating as a single version.")
+        
+        # Final check for unified mapping content before saving
         if self.verbose:
             self._print_enhanced_mapping_stats(unified)
         

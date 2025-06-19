@@ -57,16 +57,15 @@ sys.path.insert(0, str(_workspace_root))
 from utils.py.lib.mdx.mdx_generator import MdxGenerator
 
 
-from utils.py.lib.postman.postman_scanner import MDXExtractor, ExtractedExample
+from utils.py.lib.postman.postman_scanner import MdxJsonExampleExtractor, ExtractedExample
 from utils.py.lib.managers import MethodMappingManager
 from utils.py.lib.utils import safe_write_json, ensure_directory_exists
 from utils.py.lib import (
     UnifiedScanner,
-    get_logger, setup_logging, DraftsManager,
+    get_logger, DraftsManager,
     MdxGenerator, ExistingDocsScanner
 )
 from utils.py.lib.constants.config import get_config
-from utils.py.lib.constants.enums import DeploymentEnvironment
 from utils.py.lib.rust.scanner import KDFScanner
 from utils.py.lib.openapi.openapi_manager import OpenAPIManager
 from utils.py.lib.postman.postman_manager import PostmanManager
@@ -83,75 +82,18 @@ class KDFTools:
     def __init__(self):
         self.verbose = True
         self.quiet = False
-        self.logger = None
-        self.config = None
-        self.cleaner = None
         self.config = get_config()
-        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        self.reports_dir.mkdir(exist_ok=True, parents=True)
         self.logger = get_logger("kdf-tools")
         self.openapi_spec_generator = OpenApiSpecGenerator()
-        
-    
-    def setup_logging(self, verbose=True):
-        """Setup logging configuration."""
-        setup_logging(verbose=verbose)
-        self.logger = get_logger("kdf-tools")
-        self.verbose = verbose
-    
-    def setup_config(self):
-        """Setup configuration with proper workspace root."""
-
-        # Auto-detect workspace root from current script location
-        script_dir = Path(__file__).parent.absolute()
-        # Go up from utils/py/ to workspace root
-        workspace_root = script_dir.parent.parent
-        
-        # Verify this is correct by checking for characteristic files
-        if not (workspace_root / "src" / "pages").exists():
-            # If not found, try searching upward from current working directory
-            current = Path.cwd()
-            for parent in [current] + list(current.parents):
-                if (parent / "src" / "pages").exists() and (parent / "utils" / "py").exists():
-                    workspace_root = parent
-                    break
-            else:
-                # Still not found, use the script-based detection as fallback
-                if self.verbose:
-                    self.logger.warning("Could not find workspace root with src/pages directory, using script location")
-
-        self.config = get_config(
-            base_path=str(workspace_root),
-            environment=DeploymentEnvironment.DEVELOPMENT
-        )
         self.cleaner = GeneratedFilesCleaner(
             config=self.config,
             verbose=self.verbose
         )
-        
         if self.verbose:
-            self.logger.folder(f"Workspace root: {workspace_root}")
-            self.logger.folder(f"Data directory: {self._get_data_dir()}")
+            self.logger.folder(f"Workspace root: {self.config.workspace_root}")
+            self.logger.folder(f"Data directory: {self.config.directories.data_dir}")
+            self.logger.folder(f"Reports directory: {self.config.directories.reports_dir}")
 
-    def _get_data_dir(self) -> str:
-        """Get absolute path to data directory using config constants."""
-        if self.config:
-            # Use config to resolve data directory path
-            return self._resolve_data_directory_path(self.config.directories.data_dir)
-        else:
-            # Fallback to relative path
-            return os.path.join(os.path.dirname(__file__), self.config.directories.data_dir if self.config else "data")
-    
-    def _resolve_data_directory_path(self, data_dir: str) -> str:
-        """
-        Resolves the absolute path for the data directory.
-        """
-        # If the path is already absolute, return it as is
-        if Path(data_dir).is_absolute():
-            return str(data_dir)
-
-        # Otherwise, join it with the workspace root from the config
-        return str(Path(self.config.workspace_root) / data_dir)
     
     def log(self, message, level="info"):
         """Log a message with appropriate level."""
@@ -380,6 +322,8 @@ class KDFTools:
                 print("🗺️  Generating method-to-path mapping first, then deriving methods file")
                 print(f"📋 Versions: {', '.join(versions)}")
                 print(f"📁 Data directory: {data_dir}")
+                print(f"📁 Reports directory: {self.config.directories.reports_dir}")
+                print(f"📁 Workspace root: {self.config.workspace_root}")
                 print()
             
             # Use async scanning for better performance
@@ -402,7 +346,7 @@ class KDFTools:
             
             # Save method paths file first
             paths_filename = f"report-kdf_mdx_method_paths.json"
-            paths_output_path = self.reports_dir / paths_filename
+            paths_output_path = Path(self.config.directories.reports_dir / paths_filename)
             safe_write_json(paths_output_path, method_paths_data, indent=2)
             
             if self.verbose:
@@ -415,7 +359,7 @@ class KDFTools:
             
             # Save methods file
             methods_filename = f"report-kdf_mdx_methods.json"
-            methods_output_path = self.reports_dir / methods_filename
+            methods_output_path = Path(self.config.directories.reports_dir / methods_filename)
             safe_write_json(methods_output_path, methods_data, indent=2)
             
             if self.verbose:
@@ -671,7 +615,7 @@ class KDFTools:
         try:
             # Initialize components
             mapper = MethodMappingManager(verbose=self.verbose)
-            extractor = MDXExtractor(verbose=self.verbose)
+            extractor = MdxJsonExampleExtractor(verbose=self.verbose)
             
             # Get unified mapping using async for better performance (consistent with other commands)
             if self.verbose:
@@ -692,7 +636,9 @@ class KDFTools:
                 'total_examples_found': 0,
                 'methods_with_examples': 0,
                 'methods_without_examples': 0,
-                'versions_processed': versions
+                'versions_processed': versions,
+                'v1': {'total_extracted': 0, 'total_examples_found': 0, 'methods_with_examples': 0},
+                'v2': {'total_extracted': 0, 'total_examples_found': 0, 'methods_with_examples': 0}
             }
             
             for version in versions:
@@ -752,26 +698,53 @@ class KDFTools:
                             'examples_count': len(cleaned_examples),
                             'examples': []
                         }
-                    
+                    if not args.dry_run:
                     # Save each example
-                    for i, example in enumerate(cleaned_examples, 1):
-                        if self._save_json_example(example, version, i, args.dry_run):
-                            version_count += 1
-                            # Track example info
-                            all_extracted_methods[method_name]['examples'].append({
-                                'example_num': i,
-                                'description': example.description,
-                                'example_type': example.example_type,
-                                'line_number': example.line_number
+                        for i, example in enumerate(cleaned_examples, 1):
+
+                            # Clean method name for folder creation
+                            folder_name = example.method_name.replace("::", "_")
+                            
+                            # Define output directory based on version
+                            output_dir = self.config.directories.postman_json_v1 if version == 'v1' else self.config.directories.postman_json_v2
+                            
+                            # Create full path for the example file
+                            example_dir = output_dir / folder_name
+                            
+                            ensure_directory_exists(example_dir)
+
+                            # Generate filename
+                            filename = f"{example.example_type}_{i}.json"
+                            output_path = example_dir / filename
+                            all_extracted_methods[method_name].update({
+                                'json_examples_path': str(example_dir),
                             })
+                            if self._save_json_example(output_path, example):
+                                version_count += 1
+                                # Track example info
+                                all_extracted_methods[method_name]['examples'].append({
+                                    'example_num': i,
+                                    'description': example.description,
+                                    'example_type': example.example_type,
+                                    'line_number': example.line_number
+                                })
+                                self.logger.save(f"🔍 {method_name}: Saved example {i} to {self.config.directories.get_relative_path(str(output_path))}")
                     
                     version_examples += len(cleaned_examples)
                     version_methods_with_examples += 1
                 
                 self.log(f"✅ {version.upper()}: {version_count} examples extracted from {version_methods_with_examples} methods")
+                
+                # Update global stats
                 extraction_stats['total_extracted'] += version_count
                 extraction_stats['total_examples_found'] += version_examples
                 extraction_stats['methods_with_examples'] += version_methods_with_examples
+
+                # Update version-specific stats
+                if version in extraction_stats:
+                    extraction_stats[version]['total_extracted'] = version_count
+                    extraction_stats[version]['total_examples_found'] = version_examples
+                    extraction_stats[version]['methods_with_examples'] = version_methods_with_examples
             
             # Generate tracking files
             if not args.dry_run:
@@ -878,7 +851,7 @@ class KDFTools:
                 self.log(f"Full report saved to: {args.output}", "success")
             else:
                 import glob
-                latest_report_files = glob.glob(str(self.reports_dir / "draft_quality_report_*.md"))
+                latest_report_files = glob.glob(str(self.config.directories.reports_dir / "draft_quality_report_*.md"))
                 if latest_report_files:
                     latest_report = max(latest_report_files, key=lambda p: Path(p).stat().st_mtime)
                     self.log(f"Full report saved to: {latest_report}", "success")
@@ -1056,44 +1029,21 @@ class KDFTools:
             f.write("Generated Files:\n" + "\n".join(f"- {Path(p).name}" for p in generated_files) + "\n\n")
             f.write("Selected Methods:\n" + "\n".join(f"- {m}" for m in selected_methods) + "\n")
 
-    async def _save_json_example_async(self, example: ExtractedExample, version: str, example_num: int, dry_run: bool = False) -> bool:
+    async def _save_json_example_async(self, output_path: Path, example: ExtractedExample) -> bool:
         """Asynchronously save a single JSON example to the correct file path."""
-        # Clean method name for folder creation
-        folder_name = example.method_name.replace("::", "_")
-        
-        # Define output directory based on version
-        output_dir = Path(self.config.directories.postman_json_v1) if version == 'v1' else Path(self.config.directories.postman_json_v2)
-        
-        # Create full path for the example file
-        example_dir = output_dir / folder_name
-        
-        # Ensure directory exists
-        if not dry_run:
-            ensure_directory_exists(example_dir)
-
-        # Generate filename
-        filename = f"{example.example_type}_{example_num}.json"
-        output_path = example_dir / filename
-        
-        # Save the file
-        if self.verbose:
-            self.log(f"  💾 Saving {version} example for '{example.method_name}' to {output_path}")
-        
-        if not dry_run:
-            safe_write_json(output_path, example.content, indent=2)
-            
+        safe_write_json(output_path, example.content, indent=2)
         return True
 
-    def _save_json_example(self, example, version: str, example_num: int, dry_run: bool = False) -> bool:
-        return run_async(self._save_json_example_async(example, version, example_num, dry_run))
+    def _save_json_example(self, output_path: Path, example: ExtractedExample) -> bool:
+        return run_async(self._save_json_example_async(output_path, example))
 
     def _generate_json_tracking_files(self, all_extracted_methods: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
         """Top-level function to generate all JSON-related tracking files."""
         self.log("Generating JSON tracking files...", "info")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        self._generate_json_method_paths_file(timestamp, self.reports_dir, all_extracted_methods)
-        self._generate_json_methods_file(timestamp, self.reports_dir, all_extracted_methods, extraction_stats)
+        self._generate_json_method_paths_file(all_extracted_methods)
+        self._generate_json_methods_file(all_extracted_methods, extraction_stats)
     
     def _generate_openapi_tracking_files(self, openapi_manager: OpenAPIManager, versions: List[str]) -> str:
         """Generates all necessary tracking files for OpenAPI."""
@@ -1106,69 +1056,84 @@ class KDFTools:
             path_mapper=openapi_manager.path_mapper
         )  
 
-    def _generate_json_method_paths_file(self, timestamp: str, data_dir: Path, all_extracted_methods: Dict[str, Any]) -> None:
+    def _generate_json_method_paths_file(self, all_extracted_methods: Dict[str, Any]) -> None:
         """Creates a JSON file mapping each method to its JSON examples path."""
-        self.log("Generating JSON method paths file...")
+        self.logger.info("Generating JSON method paths file...")
+        v1_methods = [data["method_name"] for data in all_extracted_methods.values() if data["version"] == "v1"]
+        v2_methods = [data["method_name"] for data in all_extracted_methods.values() if data["version"] == "v2"]
         paths_data = {
             "scan_metadata": {
                 "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDF-Postman-Path-Generator v1.0.0",
-                "scanner_type": "POSTMAN_METHOD_PATH_MAPPING",
+                "scanner_version": "KDF-MDX-JSON-Example-Extractor v1.0.0",
+                "scanner_type": "MDX_JSON_EXAMPLE_EXTRACTOR",
                 "total_versions": 2,
-                "total_documented_methods": len(all_extracted_methods),
+                "total_methods": {
+                    "all": len(v1_methods) + len(v2_methods),
+                    "v1": len(v1_methods),
+                    "v2": len(v2_methods)
+                },
                 "versions_processed": ["v1", "v2"],
                 "is_primary_data_source": False
             },
             "method_paths": {
-                "v1": {method: data["mdx_path"] for method, data in all_extracted_methods.items() if data["version"] == "v1"},
-                "v2": {method: data["mdx_path"] for method, data in all_extracted_methods.items() if data["version"] == "v2"}
+                "v1": v1_methods,
+                "v2": v2_methods
             }
         }
 
-        file_path = data_dir / f"report-kdf_postman_json_method_paths.json"
+        file_path = self.config.directories.reports_dir / "report-kdf_postman_json_method_paths.json"
         safe_write_json(file_path, paths_data, indent=2)
         
-        self.log(f"✅ 💾 Saved Postman method paths mapping to: {file_path}")
+        log_path = self.config.directories.get_relative_path(str(file_path))
+        self.log(f"✅ 💾 Saved Postman method paths mapping to: {log_path}")
         self.log(f"📊 V1: {len(paths_data['method_paths']['v1'])} methods")
         self.log(f"📊 V2: {len(paths_data['method_paths']['v2'])} methods")
 
-    def _generate_json_methods_file(self, timestamp: str, data_dir: Path, all_extracted_methods: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
+    def _generate_json_methods_file(self, all_extracted_methods: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
         """Generates a JSON file that maps each method to its extracted JSON examples."""
         self.log("Generating JSON methods file...")
+        v1_methods_data = [data for data in all_extracted_methods.values() if data["version"] == "v1"]
+        v2_methods_data = [data for data in all_extracted_methods.values() if data["version"] == "v2"]
+        v1_methods = [data["method_name"] for data in v1_methods_data]
+        v2_methods = [data["method_name"] for data in v2_methods_data]
         methods_data = {
             "scan_metadata": {
                 "generated_at": datetime.now().isoformat(),
                 "scanner_version": "KDF-JSON-Extractor v1.0.0",
                 "scanner_type": "JSON_EXTRACTOR",
                 "total_versions": 2,
-                "total_methods": len(all_extracted_methods),
+                "total_methods": {
+                    "all": len(v1_methods) + len(v2_methods),
+                    "v1": len(v1_methods),
+                    "v2": len(v2_methods)
+                },
                 "versions_processed": ["v1", "v2"],
                 "is_primary_data_source": False
             },
             "repository_data": {
                 "v1": {
-                    "methods": all_extracted_methods.get("v1", []),
+                    "methods": v1_methods,
                     "extraction_patterns_used": ["JSON extraction from MDX files"],
-                    "total_extracted": extraction_stats.get("v1", 0),
-                    "total_methods_processed": len(all_extracted_methods.get("v1", [])),
-                    "total_examples_found": extraction_stats.get("v1", 0)
+                    "total_extracted": extraction_stats['v1']['total_extracted'],
+                    "total_methods_processed": len(v1_methods),
+                    "total_examples_found": extraction_stats['v1']['total_examples_found']
                 },
                 "v2": {
-                    "methods": all_extracted_methods.get("v2", []),
+                    "methods": v2_methods,
                     "extraction_patterns_used": ["JSON extraction from MDX files"],
-                    "total_extracted": extraction_stats.get("v2", 0),
-                    "total_methods_processed": len(all_extracted_methods.get("v2", [])),
-                    "total_examples_found": extraction_stats.get("v2", 0)
+                    "total_extracted": extraction_stats['v2']['total_extracted'],
+                    "total_methods_processed": len(v2_methods),
+                    "total_examples_found": extraction_stats['v2']['total_examples_found']
                 }
             }
         }
-
-        file_path = data_dir / f"report-kdf_postman_json_methods"
+        file_path = self.config.directories.reports_dir / "report-kdf_postman_json_methods.json"
         safe_write_json(file_path, methods_data, indent=2)
         
-        self.log(f"✅ 💾 Saved JSON extraction methods to: {file_path}")
-        self.log(f"📊 V1: {len(methods_data['repository_data']['v1']['methods'])} methods")
-        self.log(f"📊 V2: {len(methods_data['repository_data']['v2']['methods'])} methods")
+        log_path = self.config.directories.get_relative_path(str(file_path))
+        self.log(f"✅ 💾 Saved JSON extraction examples summary to: {log_path}")
+        self.log(f"📊 V1: {extraction_stats['v1']['total_examples_found']} examples from {extraction_stats['v1']['methods_with_examples']} methods")
+        self.log(f"📊 V2: {extraction_stats['v2']['total_examples_found']} examples from {extraction_stats['v2']['methods_with_examples']} methods")
 
     def _cleanup_before_generation(self, categories: List[str], dry_run: bool = False, keep_count: int = 0) -> bool:
         """
@@ -1179,7 +1144,7 @@ class KDFTools:
         self.logger.clean(f"Starting cleanup for categories: {categories} (keeping {keep_count} recent files)...")
         
         base_dirs = {
-            "openapi": self.config.directories.openapi_main,
+            "openapi": self.config.directories.openapi_main.parent,
             "postman": self.config.directories.postman_collections,
             "reports": self.config.directories.reports_dir,
             "rust": self.config.directories.reports_dir,
@@ -1201,13 +1166,7 @@ class KDFTools:
                 self.log(f"Unknown cleanup category: {category}", "warning")
                 continue
 
-            # Resolve directory path correctly
-            dir_path_str = base_dirs[category]
-            if not os.path.isabs(dir_path_str):
-                dir_path = Path(self.config.workspace_root) / dir_path_str
-            else:
-                dir_path = Path(dir_path_str)
-
+            dir_path = base_dirs[category]
             pattern = file_patterns[category]
             
             if not dir_path.exists():
@@ -1236,7 +1195,7 @@ class KDFTools:
 
                 self.log(f"Found {len(files_to_delete)} file(s) to delete for category '{category}':")
                 for f in files_to_delete:
-                    relative_path = f.relative_to(self.config.workspace_root)
+                    relative_path = self.config.directories.get_relative_path(f)
                     self.log(f"  - Deleting {relative_path}")
                     if not dry_run:
                         try:
@@ -1530,11 +1489,9 @@ class KDFTools:
         self._print_header(command_title, config)
         success = False
         try:
-            data_dir = self._get_data_dir()
-            
             # Load latest Rust scan data
             rust_data = {}
-            rust_scan_files = glob.glob(os.path.join(self.reports_dir, "report-kdf_rust_methods_*.json"))
+            rust_scan_files = glob.glob(os.path.join(str(self.config.directories.reports_dir), "report-kdf_rust_methods_*.json"))
             if rust_scan_files:
                 latest_rust_scan = max(rust_scan_files, key=os.path.getctime)
                 self.log(f"Found latest Rust methods file: {os.path.basename(latest_rust_scan)}")
@@ -1550,7 +1507,7 @@ class KDFTools:
 
             # Load latest MDX methods data
             mdx_methods = {}
-            mdx_scan_files = glob.glob(os.path.join(self.reports_dir, "report-kdf_mdx_methods_*.json"))
+            mdx_scan_files = glob.glob(os.path.join(str(self.config.directories.reports_dir), "report-kdf_mdx_methods_*.json"))
             if mdx_scan_files:
                 latest_mdx_scan = max(mdx_scan_files, key=os.path.getctime)
                 self.log(f"Found latest MDX methods file: {os.path.basename(latest_mdx_scan)}")
@@ -1608,7 +1565,7 @@ class KDFTools:
 
             # Save report
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_path = self.reports_dir / f"report-kdf_gap_analysis.json"
+            report_path = self.config.directories.reports_dir / "report-kdf_gap_analysis.json"
             safe_write_json(report_path, gap_analysis_data, indent=2)
             self.log(f"✅ 💾 Gap analysis report saved to: {report_path}")
 
@@ -1650,8 +1607,6 @@ class KDFTools:
         # Setup logging and config
         self.quiet = args.quiet
         is_verbose = args.verbose or not args.quiet
-        self.setup_logging(verbose=is_verbose)
-        self.setup_config()
         
         # Add dry_run to args if not present (for commands that dont have it)
         if not hasattr(args, 'dry_run'):
