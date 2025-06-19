@@ -7,11 +7,8 @@ calculating similarities, and validating content structure.
 """
 
 import re
-from typing import Dict, List, Optional, Tuple
-from pathlib import Path
+from typing import Dict, List, Tuple
 from difflib import SequenceMatcher
-from utils.py.lib.constants.data_structures import DocumentSection
-from utils.py.lib.validation.style_validator import StyleValidator
 from utils.py.lib.utils.logging_utils import get_logger
 
 
