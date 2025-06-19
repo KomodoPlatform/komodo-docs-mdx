@@ -9,9 +9,13 @@ generation logic from the main converter class.
 """
 
 import re
+import os
+from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 from ..constants import UnifiedParameterInfo as Parameter
+from ..utils import get_logger
+from ..constants.config import get_config
 
 
 class OpenApiSchemaFactory:
@@ -21,7 +25,7 @@ class OpenApiSchemaFactory:
     and parameter schemas based on parsed MDX documentation.
     """
     # Compiled regex for performance
-    _ARRAY_OF_REF_REGEX = re.compile(r'array of `?([\w_]+)`?', re.IGNORECASE)
+    _ARRAY_OF_REF_REGEX = re.compile(r'array of `([\w_]+)`', re.IGNORECASE)
     _ENUM_REF_REGEX = re.compile(r'\[([\w\s]+)\]\((.*?)\)')
     _ENUM_ANCHOR_REGEX = re.compile(r'#([\w-]+enum)$', re.IGNORECASE)
 
@@ -37,95 +41,173 @@ class OpenApiSchemaFactory:
         'object': 'object'
     }
 
-    @staticmethod
-    def create_request_body_schema(method_info: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Creates the request body schema, including 'userpass', 'method', and 'params'.
-        """
-        method_name = method_info['method_name']
-        parameters = method_info.get('parameters', [])
+    def __init__(self, config=None, path_mapper=None):
+        self.config = config or get_config()
+        self.logger = get_logger(__name__)
+        # Storing path_mapper if provided
+        self.path_mapper = path_mapper
+        
+        if self.path_mapper is None:
+            self.logger.warning("PathMapper not provided to OpenApiSchemaFactory. Reference generation will be disabled.")
+            
+    def _get_ref_path(self, schema_name: str, current_file_path: str) -> Optional[str]:
+        if not self.path_mapper:
+            return None
+        
+        schema_file_path = self.path_mapper.get_schema_path(schema_name)
+        if schema_file_path and schema_file_path.exists():
+            try:
+                # Calculate relative path from the current file's directory
+                current_dir = Path(current_file_path).parent
+                relative_path = os.path.relpath(schema_file_path, current_dir)
+                # Format for OpenAPI reference
+                return str(relative_path).replace("\\", "/")
+            except ValueError:
+                # This can happen if paths are on different drives (on Windows)
+                # or other path resolution issues.
+                return None
+        return None
 
-        # Create schema for the 'params' object
-        params_schema = OpenApiSchemaFactory._create_params_schema(parameters)
+    def create_parameter_schema(self, param: Dict, file_path: str):
+        schema = {"description": param.get("Description", "")}
+        param_type = param.get("Type", "string").lower()
 
-        # Build the full request body schema
-        request_body_schema = {
-            "type": "object",
-            "required": ["userpass", "method"],
-            "properties": {
-                "userpass": {
-                    "type": "string",
-                    "description": "User password for authentication.",
-                    "example": "RPC_UserP@SSW0RD"
-                },
-                "method": {
-                    "type": "string",
-                    "description": "Name of the method to be called.",
-                    "enum": [method_name]
-                }
-            }
+        # A more precise regex to find known common structure names within the description.
+        # This looks for specific keywords like 'Pagination', 'HistoryTarget', etc.
+        # to avoid false positives.
+        known_structures = [
+            "Pagination", "HistoryTarget", "SyncStatus", "ErrorResponse", 
+            "Order", "Swap", "Taker", "Maker", "Activation" 
+        ] # This list can be expanded
+        
+        # Build a regex pattern to match any of the known structures
+        pattern = r'\b(' + '|'.join(known_structures) + r')\b'
+        match = re.search(pattern, param.get("Description", ""))
+        
+        if match:
+            ref_name = match.group(1)
+            ref_path = self._get_ref_path(ref_name, file_path)
+            if ref_path:
+                # If a valid reference path is found, check if it's an array
+                if "array" in param_type:
+                    return {
+                        "type": "array",
+                        "items": {"$ref": ref_path}
+                    }
+                return {"$ref": ref_path}
+
+        # Fallback to simple type mapping if no ref found
+        if "string" in param_type:
+            schema["type"] = "string"
+        elif "integer" in param_type or "int" in param_type:
+            schema["type"] = "integer"
+        elif "number" in param_type or "float" in param_type:
+            schema["type"] = "number"
+        elif "boolean" in param_type or "bool" in param_type:
+            schema["type"] = "boolean"
+        elif "array" in param_type:
+            schema["type"] = "array"
+            # A simple array of strings is assumed if no item type is defined
+            schema["items"] = {"type": "string"}
+        elif "object" in param_type:
+            schema["type"] = "object"
+        else:
+            schema["type"] = "string"
+            
+        default_val = param.get("Default", "")
+        if default_val and default_val != '-':
+             schema['default'] = default_val.strip('`')
+
+        return schema
+
+    def create_request_body_schema(self, method_info: Dict[str, Any], file_path: str) -> Dict[str, Any]:
+        """
+        Creates the request body schema for a given method.
+        """
+        required_params = []
+        properties = {}
+        
+        # Add 'userpass' and 'method' as standard required properties
+        properties['userpass'] = {
+            'type': 'string',
+            'description': 'User password for authentication.',
+            'example': 'RPC_UserP@SSW0RD'
         }
-
-        # Add 'params' to properties if there are any parameters
-        if params_schema["properties"]:
-            request_body_schema["properties"]["params"] = params_schema
-            if params_schema.get("required"):
-                request_body_schema["required"].append("params")
-
-        return request_body_schema
-
-    @staticmethod
-    def create_response_schema(method_info: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Creates the full response schema, including both success and error responses.
-        """
-        method_name = method_info['method_name']
-        response_parameters = method_info.get('response_parameters', [])
-
-        # Define the basic structure for the result object
-        result_object_schema = {
-            "type": "object",
-            "properties": {}
+        properties['method'] = {
+            'type': 'string',
+            'description': 'Name of the method to be called.',
+            'enum': [method_info.get('method_name')]
         }
-
-        # Populate the result object with response parameters
-        if response_parameters:
-            for param in response_parameters:
-                param_name = param.get('name', '').strip('`')
+        required_params.extend(['userpass', 'method'])
+        
+        # Process parameters from method_info
+        params = method_info.get('parameters', [])
+        if params:
+            param_properties = {}
+            param_required = []
+            for param in params:
+                param_name = param.name
                 if not param_name:
                     continue
-
-                param_schema = {
-                    "description": param.get('description', '')
+                
+                if param.required:
+                    param_required.append(param_name)
+                
+                # Map to the keys expected by create_parameter_schema
+                schema_param = {
+                    "Parameter": param.name,
+                    "Type": param.type,
+                    "Description": param.description,
+                    "Default": param.default_value
                 }
+                param_properties[param_name] = self.create_parameter_schema(schema_param, file_path)
 
-                # Use reference for enums/structures or define type
-                param_type = param.get('type', 'string')
-                if param_type.startswith("#/"):
-                    param_schema["$ref"] = param_type
-                else:
-                    param_schema["type"] = OpenApiSchemaFactory._map_type(param_type)
+            properties['params'] = {
+                "type": "object",
+                "properties": param_properties
+            }
+            if param_required:
+                 properties['params']['required'] = param_required
 
-                result_object_schema["properties"][param_name] = param_schema
+            required_params.append('params')
 
-        # Define the overall success response schema
-        component_name = f"{method_name.replace('::', '_')}_Response"
-        success_response_schema = {
-            "$ref": f"#/components/schemas/{component_name}"
+        return {
+            'type': 'object',
+            'required': required_params,
+            'properties': properties
         }
-
-        # Basic error response schema
-        error_response_schema = {
-            "$ref": "#/components/schemas/ErrorResponse"
-        }
+        
+    def create_response_schema(self, method_info: Dict[str, Any], file_path: str) -> Dict[str, Any]:
+        """
+        Creates the response schema for a given method.
+        This includes a '200' success response with a schema definition and example,
+        and a 'default' error response.
+        """
+        method_name = method_info.get('method_name', 'unknown_method')
+        
+        response_properties = {}
+        for param in method_info.get('response_parameters', []):
+            param_name = param.name
+            if param_name:
+                # Map to the keys expected by create_parameter_schema
+                schema_param = {
+                    "Parameter": param.name,
+                    "Type": param.type,
+                    "Description": param.description,
+                    "Default": "" # Not relevant for responses
+                }
+                response_properties[param_name] = self.create_parameter_schema(schema_param, file_path)
 
         return {
             "200": {
                 "description": f"Successful response for {method_name}",
                 "content": {
                     "application/json": {
-                        "schema": success_response_schema,
-                        "example": OpenApiSchemaFactory.generate_success_example(method_info)
+                        "schema": {
+                            "type": "object",
+                            "properties": response_properties
+                        },
+                        "example": method_info.get('success_response_example', {})
                     }
                 }
             },
@@ -133,7 +215,9 @@ class OpenApiSchemaFactory:
                 "description": "Unexpected error",
                 "content": {
                     "application/json": {
-                        "schema": error_response_schema
+                        "schema": {
+                            "$ref": self._get_ref_path("ErrorResponse", file_path) or '#/components/schemas/ErrorResponse'
+                        }
                     }
                 }
             }
@@ -160,40 +244,6 @@ class OpenApiSchemaFactory:
             "result": result,
             "id": 0
         }
-
-    @staticmethod
-    def create_parameter_schema(param_type: str, param_desc: str, default_value: str = "") -> Dict[str, Any]:
-        """
-        Creates a detailed schema for a single parameter.
-        """
-        param_schema = {"description": param_desc}
-        
-        # Handle various type definitions
-        array_match = OpenApiSchemaFactory._ARRAY_OF_REF_REGEX.search(param_type)
-        if array_match:
-            item_name = array_match.group(1)
-            param_schema['type'] = 'array'
-            param_schema['items'] = {"$ref": f"#/components/schemas/{item_name}"}
-        elif 'array of' in param_type.lower():
-            item_type = param_type.lower().split('of')[-1].strip().rstrip('s')
-            param_schema['type'] = 'array'
-            param_schema['items'] = {'type': OpenApiSchemaFactory._map_type(item_type)}
-        elif "enum" in param_desc.lower():
-            enum_ref = OpenApiSchemaFactory._extract_enum_references_from_description(param_desc)
-            if enum_ref:
-                param_schema['$ref'] = f"#/components/schemas/{enum_ref}"
-            else:
-                param_schema['type'] = OpenApiSchemaFactory._map_type(param_type)
-        elif param_type.startswith('`') and param_type.endswith('`'):
-            ref_name = param_type.strip('`')
-            param_schema['$ref'] = f"#/components/schemas/{ref_name}"
-        else:
-            param_schema['type'] = OpenApiSchemaFactory._map_type(param_type)
-        
-        if default_value:
-            param_schema['default'] = default_value.strip('`')
-            
-        return param_schema
 
     @staticmethod
     def _create_params_schema(parameters: List[Parameter]) -> Dict[str, Any]:

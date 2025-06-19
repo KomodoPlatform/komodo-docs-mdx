@@ -47,7 +47,7 @@ class OpenApiSpecGenerator:
         self.path_mapper = path_mapper or EnhancedPathMapper(config=self.config)
         
         self.mdx_parser = mdx_parser or MDXParser()
-        self.schema_creator = schema_creator or OpenApiSchemaFactory()
+        self.schema_creator = schema_creator or OpenApiSchemaFactory(path_mapper=self.path_mapper)
         self.common_schema_generator = common_schema_generator or OpenApiSchemaGenerator()
         
         self.all_methods = defaultdict(list)
@@ -60,50 +60,41 @@ class OpenApiSpecGenerator:
         self.logger = get_logger("openapi-spec-generator")
 
 
-    def build_openapi_spec(self, method_info: Dict[str, Any], version: str = "v2") -> Dict[str, Any]:
+    def build_openapi_spec(self, method_info: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Generates a complete OpenAPI specification for a single method.
-
-        Args:
-            method_info: A dictionary containing parsed information for a method.
-            version: The API version string (e.g., "v2").
-
-        Returns:
-            A dictionary representing the OpenAPI specification for the method.
+        Builds the full OpenAPI specification for a single method.
         """
-        method_name = method_info['method_name']
-        
-        # Prepare a simple summary from the title
-        summary = method_info.get('title', f"Komodo DeFi Framework Method: {method_name}")
-        summary = summary.replace("Komodo DeFi Framework Method: ", "")
+        if not method_info or not isinstance(method_info, dict):
+            return {}
+            
+        method_name = method_info.get('method_name', 'unknown_method')
 
-        spec = {
-            "openapi": "3.0.0",
-            "info": {
-                "title": f"Komodo DeFi Framework API - {method_name}",
-                "version": version,
-                "description": method_info.get('description', f"API documentation for the {method_name} method.")
-            },
+        return {
             "paths": {
                 f"/{method_name}": {
                     "post": {
-                        "summary": summary,
-                        "description": method_info.get('description', ''),
-                        "operationId": method_name,
-                        "tags": [method_name.split('::')[0]],
+                        "summary": method_info.get('description'),
+                        "description": method_info.get('description'),
+                        "operationId": method_info.get('method_name'),
+                        "tags": [method_info.get('category', "default")],
                         "requestBody": {
                             "content": {
                                 "application/json": {
-                                    "schema": self.schema_creator.create_request_body_schema(method_info)
+                                    "schema": self.schema_creator.create_request_body_schema(
+                                        method_info, 
+                                        method_info.get('file_path')
+                                    )
                                 }
                             }
                         },
-                        "responses": self.schema_creator.create_response_schema(method_info)
+                        "responses": self.schema_creator.create_response_schema(
+                            method_info,
+                            method_info.get('file_path')
+                        )
                     }
                 }
             }
         }
-        return spec
 
     def build_component_spec(self, component_info: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -216,8 +207,7 @@ class OpenApiSpecGenerator:
         }
         
         for method_info in methods:
-            method_name = method_info['method_name']
-            method_spec = self.build_openapi_spec(method_info, version)
+            method_spec = self.build_openapi_spec(method_info)
             spec["paths"].update(method_spec.get("paths", {}))
             
             if "components" in method_spec:

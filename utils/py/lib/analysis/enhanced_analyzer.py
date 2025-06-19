@@ -18,7 +18,7 @@ from typing import Dict, List, Set, Optional, Any, Union
 
 from ..utils.logging_utils import get_logger
 from ...data.coins_config_loader import CoinsConfigLoader
-from ..constants import ParameterInfo, ErrorInfo, ExampleInfo, UnifiedMethodInfo
+from ..constants import ParameterInfo, UnifiedErrorInfo, UnifiedExampleInfo, UnifiedMethodInfo
 
 
 class EnhancedRepositoryAnalyzer:
@@ -150,33 +150,33 @@ class EnhancedRepositoryAnalyzer:
         # Common error patterns by method category
         self.error_patterns = {
             "task": [
-                ErrorInfo("NoSuchTask", "string", "The specified task was not found or has expired"),
-                ErrorInfo("TaskFinished", "string", "The task is already finished and cannot be modified"),
-                ErrorInfo("TaskTimedOut", "string", "The task operation timed out"),
-                ErrorInfo("CoinCreationError", "string", "Error occurred during coin activation"),
-                ErrorInfo("HwError", "string", "Hardware wallet error requiring user action")
+                UnifiedErrorInfo("NoSuchTask", "string", "The specified task was not found or has expired"),
+                UnifiedErrorInfo("TaskFinished", "string", "The task is already finished and cannot be modified"),
+                UnifiedErrorInfo("TaskTimedOut", "string", "The task operation timed out"),
+                UnifiedErrorInfo("CoinCreationError", "string", "Error occurred during coin activation"),
+                UnifiedErrorInfo("HwError", "string", "Hardware wallet error requiring user action")
             ],
             "lightning": [
-                ErrorInfo("LightningError", "string", "Lightning Network operation failed"),
-                ErrorInfo("NoSuchCoin", "string", "The specified coin is not activated"),
-                ErrorInfo("InsufficientBalance", "string", "Insufficient balance for the operation"),
-                ErrorInfo("ChannelNotFound", "string", "The specified channel was not found")
+                UnifiedErrorInfo("LightningError", "string", "Lightning Network operation failed"),
+                UnifiedErrorInfo("NoSuchCoin", "string", "The specified coin is not activated"),
+                UnifiedErrorInfo("InsufficientBalance", "string", "Insufficient balance for the operation"),
+                UnifiedErrorInfo("ChannelNotFound", "string", "The specified channel was not found")
             ],
             "gui_storage": [
-                ErrorInfo("AccountNotFound", "string", "The specified account was not found"),
-                ErrorInfo("StorageError", "string", "Error accessing GUI storage"),
-                ErrorInfo("InvalidAccountData", "string", "The account data is invalid")
+                UnifiedErrorInfo("AccountNotFound", "string", "The specified account was not found"),
+                UnifiedErrorInfo("StorageError", "string", "Error accessing GUI storage"),
+                UnifiedErrorInfo("InvalidAccountData", "string", "The account data is invalid")
             ],
             "stream": [
-                ErrorInfo("CoinNotFound", "string", "The specified coin was not found"),
-                ErrorInfo("UnknownClient", "string", "No client connection found with this client_id"),
-                ErrorInfo("ClientAlreadyListening", "string", "The client is already listening to this stream"),
-                ErrorInfo("CoinNotSupported", "string", "The coin type is not supported for streaming")
+                UnifiedErrorInfo("CoinNotFound", "string", "The specified coin was not found"),
+                UnifiedErrorInfo("UnknownClient", "string", "No client connection found with this client_id"),
+                UnifiedErrorInfo("ClientAlreadyListening", "string", "The client is already listening to this stream"),
+                UnifiedErrorInfo("CoinNotSupported", "string", "The coin type is not supported for streaming")
             ],
             "common": [
-                ErrorInfo("InvalidUserpass", "string", "The userpass provided is invalid"),
-                ErrorInfo("InternalError", "string", "An internal error occurred"),
-                ErrorInfo("InvalidRequest", "string", "The request parameters are invalid")
+                UnifiedErrorInfo("InvalidUserpass", "string", "The userpass provided is invalid"),
+                UnifiedErrorInfo("InternalError", "string", "An internal error occurred"),
+                UnifiedErrorInfo("InvalidRequest", "string", "The request parameters are invalid")
             ]
         }
         
@@ -414,63 +414,63 @@ class EnhancedRepositoryAnalyzer:
         """Initialize common error patterns for different method types."""
         self.error_patterns = {
             "common": [
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="InvalidUserpass",
                     type="string",
                     description="The userpass provided is invalid"
                 ),
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="InternalError",
                     type="string", 
                     description="An internal error occurred processing the request"
                 )
             ],
             "task": [
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="NoSuchTask",
                     type="string",
                     description="The specified task was not found or has expired"
                 ),
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="TaskFinished",
                     type="string",
                     description="The task is already finished and cannot be modified"
                 ),
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="TaskTimedOut",
                     type="string",
                     description="The task operation timed out"
                 )
             ],
             "coin_activation": [
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="CoinCreationError",
                     type="string",
                     description="Error occurred during coin activation"
                 ),
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="CoinAlreadyActivated",
                     type="string",
                     description="The coin is already activated"
                 ),
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="InvalidActivationParams",
                     type="string",
                     description="The activation parameters are invalid or incomplete"
                 )
             ],
             "lightning": [
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="LightningError",
                     type="string",
                     description="Lightning network operation failed"
                 ),
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="InvoiceError",
                     type="string",
                     description="Invalid or expired Lightning invoice"
                 ),
-                ErrorInfo(
+                UnifiedErrorInfo(
                     name="ChannelError",
                     type="string",
                     description="Lightning channel operation failed"
@@ -564,7 +564,7 @@ class EnhancedRepositoryAnalyzer:
         else:
             return "general"
     
-    def _extract_method_errors(self, method_name: str, category: str) -> List[ErrorInfo]:
+    def _extract_method_errors(self, method_name: str, category: str) -> List[UnifiedErrorInfo]:
         """Extract relevant errors based on method category."""
         errors = []
         
@@ -783,7 +783,7 @@ class EnhancedRepositoryAnalyzer:
         return required_params + optional_params
     
     def _generate_method_examples(self, method_name: str, version: str, 
-                                parameters: List[ParameterInfo]) -> List[ExampleInfo]:
+                                parameters: List[ParameterInfo]) -> List[UnifiedExampleInfo]:
         """Generate realistic examples based on method type and parameters."""
         examples = []
         
@@ -838,7 +838,7 @@ class EnhancedRepositoryAnalyzer:
         response = self._generate_method_response(method_name, version)
         
         # Create example
-        example = ExampleInfo(
+        example = UnifiedExampleInfo(
             title=f"{method_name.replace('_', ' ').title()} Example",
             request=request,
             response=response,

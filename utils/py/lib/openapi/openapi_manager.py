@@ -14,7 +14,7 @@ from typing import Dict, List, Any, Set
 import os
 
 # Import local modules
-from ..utils.logging_utils import get_logger
+from ..utils import get_logger
 from .openapi_spec_generator import OpenApiSpecGenerator
 from .openapi_schema_generator import OpenApiSchemaGenerator
 from ..mdx.mdx_parser import MDXParser
@@ -33,13 +33,13 @@ class OpenAPIManager:
     def __init__(self, config=None, verbose: bool = True):
         self.config = config if config else get_config()
         self.base_path = Path(self.config.workspace_root)
-        self.path_mapper = EnhancedPathMapper()
+        self.path_mapper = EnhancedPathMapper(self.config)
         self.verbose = verbose
         
         # Initialize the main components
-        self.mdx_parser = MDXParser()
-        self.spec_generator = OpenApiSpecGenerator()
-        self.schema_generator = OpenApiSchemaGenerator()
+        self.mdx_parser = MDXParser(config=self.config)
+        self.spec_generator = OpenApiSpecGenerator(config=self.config, schema_factory=self.path_mapper, path_mapper=self.path_mapper)
+        self.schema_generator = OpenApiSchemaGenerator(config=self.config, path_mapper=self.path_mapper)
         
         # Tracking attributes
         self.all_methods = {}
@@ -90,7 +90,7 @@ class OpenAPIManager:
                         method_name = parsed_info['method_name']
                         
                         # Generate the individual OpenAPI spec for the method
-                        spec = self.spec_generator.build_openapi_spec(parsed_info, version)
+                        spec = self.spec_generator.build_openapi_spec(parsed_info)
                         # Write the spec to a file
                         openapi_path = self.spec_generator.write_openapi_file(
                             spec, method_name, version, mdx_path=str(mdx_file)
@@ -123,14 +123,12 @@ class OpenAPIManager:
                 else:
                     self.error_count += 1
         
-        # Generate common schemas like enums and structures
-        self.schema_generator.generate_common_schemas(
-            self.mdx_parser.enum_patterns
-        )
+        # This MUST run before generating individual method files so that $refs can be resolved.
+        self.schema_generator.generate_common_schemas()
         
-        # Generate categorized OpenAPI specifications
+        # Generate consolidated spec files for categories.
         self.spec_generator._generate_category_specs(self.all_methods, version)
-        
+
         # Final reporting
         stats = self.get_stats()
         self.logger.info(f"OpenAPI generation complete. {stats['files_processed']} files processed.")

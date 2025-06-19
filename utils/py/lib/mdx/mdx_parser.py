@@ -8,6 +8,7 @@ It is designed to handle the specific structure of Komodo DeFi Framework documen
 """
 
 import re
+import json
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple, Set
 from collections import defaultdict
@@ -16,7 +17,7 @@ from dataclasses import dataclass
 # Import path utilities
 from ..constants.config import get_config
 from ..utils.path_utils import EnhancedPathMapper
-from ..constants import UnifiedParameterInfo as Parameter, UnifiedMethodInfo as MethodInfo
+from ..constants import UnifiedParameterInfo, UnifiedMethodInfo
 
 
 # Create a simple Response class for backward compatibility
@@ -199,8 +200,8 @@ class MDXParser:
 
         return parameters
 
-    def _create_placeholder_method_info(self, method_name: str, mdx_path: str) -> MethodInfo:
-        return MethodInfo(
+    def _create_placeholder_method_info(self, method_name: str, mdx_path: str) -> UnifiedMethodInfo:
+        return UnifiedMethodInfo(
             name=method_name,
             mdx_path=mdx_path,
             summary=f"Komodo DeFi Framework Method: {method_name}",
@@ -213,7 +214,7 @@ class MDXParser:
             ]
         )
 
-    def _parse_content(self, content: str, method_name: str, mdx_path: str) -> MethodInfo:
+    def _parse_content(self, content: str, method_name: str, mdx_path: str) -> UnifiedMethodInfo:
         title_match = re.search(r'export const title = ["\']([^"\']+)["\']', content)
         description_match = re.search(r'export const description =\s*["\']([^"\']+)["\']', content)
         summary = title_match.group(1) if title_match else f"Komodo DeFi Framework Method: {method_name}"
@@ -235,7 +236,7 @@ class MDXParser:
         responses = self._parse_responses_table(content)
         request_body_schema = self._extract_request_body_schema(content, method_name)
 
-        return MethodInfo(
+        return UnifiedMethodInfo(
             name=method_name,
             mdx_path=mdx_path,
             summary=summary,
@@ -245,7 +246,7 @@ class MDXParser:
             request_body_schema=request_body_schema
         )
 
-    def _parse_parameters_table(self, content: str) -> List[Parameter]:
+    def _parse_parameters_table(self, content: str) -> List[UnifiedParameterInfo]:
         parameters = []
 
         # Look for request parameters section
@@ -263,7 +264,7 @@ class MDXParser:
             
         return parameters
 
-    def _parse_parameter_table(self, table_content: str) -> List[Parameter]:
+    def _parse_parameter_table(self, table_content: str) -> List[UnifiedParameterInfo]:
         """Parse a parameter table."""
         parameters = []
         
@@ -355,7 +356,7 @@ class MDXParser:
             if 'common structure' in description.lower():
                 self.common_structures[param_name.strip('`')] += 1
             
-            parameters.append(Parameter(
+            parameters.append(UnifiedParameterInfo(
                 name=param_name.strip('`').replace('\\_', '_'),
                 type=cleaned_type,
                 required=is_required,
@@ -458,7 +459,7 @@ class MDXParser:
             return 'object'
         return 'string'
 
-    def _extract_parameters_from_mdx(self, content: str) -> List[Parameter]:
+    def _extract_parameters_from_mdx(self, content: str) -> List[UnifiedParameterInfo]:
         """Extract parameters from MDX parameter tables."""
         parameters = []
         

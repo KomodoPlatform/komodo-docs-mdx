@@ -100,17 +100,6 @@ class UnifiedOperationResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-@dataclass
-class UnifiedValidationIssue:
-    """Unified validation issue structure."""
-    severity: str  # 'error', 'warning', 'info'
-    issue_type: str
-    description: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    suggested_fix: Optional[str] = None
-    rule_name: Optional[str] = None
-
 
 @dataclass
 class UnifiedBatchResult:

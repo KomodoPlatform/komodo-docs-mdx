@@ -184,6 +184,19 @@ class EnhancedPathMapper:
         """Convert method name to filename format."""
         return method_name.replace("::", "-")
     
+    def get_schema_path(self, schema_name: str) -> Optional[Path]:
+        """Constructs the full path to a schema file in the components directory."""
+        try:
+            schemas_dir = Path(self.config.directories.schemas)
+            # Ensure schema_name is a valid filename
+            safe_schema_name = re.sub(r'[^a-zA-Z0-9_.-]', '', schema_name)
+            schema_file = schemas_dir / f"{safe_schema_name}.yml"
+            if schema_file.exists():
+                return schema_file
+        except Exception:
+            return None
+        return None
+
     def get_version_from_path(self, file_path: str) -> Optional[str]:
         """
         Determine API version from a file path.
