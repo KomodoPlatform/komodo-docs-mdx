@@ -248,22 +248,24 @@ class PostmanManager:
         self.logger = get_logger("postman-manager")
         collections_dir = self.config._resolve_path(self.config.directories.postman_collections)
         environments_dir = self.config._resolve_path(self.config.directories.postman_environments)
+        
         self.file_manager = PostmanFileManager(
             collections_dir=collections_dir,
             environments_dir=environments_dir,
             verbose=self.verbose
         )
-
-        # Correctly initialize the scanner here
+        
+        # Initialize the scanner with all supported JSON directories
         json_dirs = {
-            "v1": self.config._resolve_path(self.config.directories.json_v1),
-            "v2": self.config._resolve_path(self.config.directories.json_v2),
+            'v1': self.config._resolve_path(self.config.directories.postman_json_v1),
+            'v2': self.config._resolve_path(self.config.directories.postman_json_v2)
         }
         self.scanner = PostmanJSONProcessor(
+            config=self.config,
             json_dirs=json_dirs,
             verbose=self.verbose
         )
-        self._reporter = None
+        self._reporter = None # Lazy load to prevent circular imports
     
     @property
     def reporter(self):

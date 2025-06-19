@@ -67,7 +67,7 @@ class OpenAPIManager:
         # Define source directories based on version
         source_dirs = []
         if version == "v1":
-            source_dirs.append(Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_legacy)
+            source_dirs.append(Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v1)
         elif version == "v2":
             source_dirs.append(Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2)
             source_dirs.append(Path(self.config.workspace_root) / self.path_mapper.config.directories.mdx_v2_dev)

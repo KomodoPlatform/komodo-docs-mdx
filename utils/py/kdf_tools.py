@@ -252,7 +252,7 @@ class KDFTools:
                 self.log("📊 Generating OpenAPI tracking files...")
                 enums_count = len(manager.mdx_parser.enum_patterns)
                 structures_count = len(manager.mdx_parser.common_structures)
-                source_dirs = [str(Path(self.config.workspace_root) / self.config.directories.mdx_legacy),
+                source_dirs = [str(Path(self.config.workspace_root) / self.config.directories.mdx_v1),
                                str(Path(self.config.workspace_root) / self.config.directories.mdx_v2)]
                 
                 manager.spec_generator.generate_tracking_files(
@@ -385,16 +385,7 @@ class KDFTools:
             # Use async scanning for better performance
             
             # Initialize documentation scanner
-            base_directories = {
-                'mdx_v1': os.path.join(self.config.workspace_root, 'src/pages/komodo-defi-framework/api/legacy'),
-                'mdx_v2': os.path.join(self.config.workspace_root, 'src/pages/komodo-defi-framework/api/v20'),
-                'mdx_v2_dev': os.path.join(self.config.workspace_root, 'src/pages/komodo-defi-framework/api/v20-dev'),
-                'yaml_v1': os.path.join(self.config.workspace_root, 'openapi/paths/v1'),
-                'yaml_v2': os.path.join(self.config.workspace_root, 'openapi/paths/v2'),
-                'json_v1': os.path.join(self.config.workspace_root, 'postman/json/kdf/v1'),
-                'json_v2': os.path.join(self.config.workspace_root, 'postman/json/kdf/v2'),
-            }
-            doc_scanner = UnifiedScanner(base_directories=base_directories, verbose=self.verbose)
+            doc_scanner = UnifiedScanner(verbose=self.verbose)
             
             if self.verbose:
                 self.logger.info("🔍 Scanning MDX documentation files asynchronously")
@@ -1065,6 +1056,34 @@ class KDFTools:
             f.write("Generated Files:\n" + "\n".join(f"- {Path(p).name}" for p in generated_files) + "\n\n")
             f.write("Selected Methods:\n" + "\n".join(f"- {m}" for m in selected_methods) + "\n")
 
+    async def _save_json_example_async(self, example: ExtractedExample, version: str, example_num: int, dry_run: bool = False) -> bool:
+        """Asynchronously save a single JSON example to the correct file path."""
+        # Clean method name for folder creation
+        folder_name = example.method_name.replace("::", "_")
+        
+        # Define output directory based on version
+        output_dir = Path(self.config.directories.postman_json_v1) if version == 'v1' else Path(self.config.directories.postman_json_v2)
+        
+        # Create full path for the example file
+        example_dir = output_dir / folder_name
+        
+        # Ensure directory exists
+        if not dry_run:
+            ensure_directory_exists(example_dir)
+
+        # Generate filename
+        filename = f"{example.example_type}_{example_num}.json"
+        output_path = example_dir / filename
+        
+        # Save the file
+        if self.verbose:
+            self.log(f"  💾 Saving {version} example for '{example.method_name}' to {output_path}")
+        
+        if not dry_run:
+            safe_write_json(output_path, example.content, indent=2)
+            
+        return True
+
     def _save_json_example(self, example, version: str, example_num: int, dry_run: bool = False) -> bool:
         return run_async(self._save_json_example_async(example, version, example_num, dry_run))
 
@@ -1192,7 +1211,7 @@ class KDFTools:
             pattern = file_patterns[category]
             
             if not dir_path.exists():
-                self.log(f"Directory not found for category '{category}': {dir_path}", "warning")
+                self.logger.clean(f"Directory not found for category '{category}': {dir_path}", "warning")
                 continue
 
             self.logger.clean(f"Scanning for '{pattern}' in '{dir_path}'...")
@@ -1300,8 +1319,22 @@ class KDFTools:
 
     def setup_map_methods_parser(self, subparsers):
         """Setup parser for the map-methods command."""
-        # Add implementation here
-        pass
+        parser = subparsers.add_parser(
+            'map_methods',
+            help='Generate a unified mapping of all method-related files.',
+            description='Creates a comprehensive JSON file that maps each method to its corresponding MDX, OpenAPI, and Postman files.'
+        )
+        parser.add_argument(
+            '--remove',
+            type=str,
+            help='Remove all files associated with a specific method.'
+        )
+        parser.add_argument(
+            '--debug',
+            type=str,
+            help='Debug method matching for a specific method.'
+        )
+        parser.set_defaults(func=self.methods_map_command)
 
     def setup_json_extract_parser(self, subparsers):
         """Setup parser for the json-extract command."""
@@ -1575,7 +1608,7 @@ class KDFTools:
 
             # Save report
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_path = reports_dir / f"kdf_gap_analysis_{timestamp}.json"
+            report_path = self.reports_dir / f"kdf_gap_analysis_{timestamp}.json"
             safe_write_json(report_path, gap_analysis_data, indent=2)
             self.log(f"✅ 💾 Gap analysis report saved to: {report_path}")
 

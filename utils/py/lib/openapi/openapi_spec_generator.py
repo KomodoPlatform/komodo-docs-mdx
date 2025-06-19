@@ -108,7 +108,7 @@ class OpenApiSpecGenerator:
         """
         # Determine base directories based on version
         if version == 'v1':
-            mdx_base_dirs = [self.path_mapper.config.directories.mdx_legacy]
+            mdx_base_dirs = [self.path_mapper.config.directories.mdx_v1]
             yaml_base_dir = self.path_mapper.config.directories.yaml_v1
         else: # v2 and v2-dev
             mdx_base_dirs = [

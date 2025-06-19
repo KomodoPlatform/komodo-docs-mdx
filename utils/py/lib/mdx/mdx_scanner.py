@@ -22,6 +22,7 @@ from ..utils.file_utils import (
 )
 from ..utils.string_utils import is_overview_page, extract_methods_from_mdx_headings
 from ..constants.data_structures import ScanResult
+from ..constants.config import get_config
 
 
 class UnifiedScanner:
@@ -34,31 +35,26 @@ class UnifiedScanner:
     PERFORMANCE UPGRADE: Now supports async operations for 3-5x faster scanning.
     """
     
-    def __init__(self, base_directories: Dict[str, Union[str, Path]] = None, 
-                 verbose: bool = True):
-        self.base_directory = "."
+    def __init__(self, verbose=False, config=None):
         self.verbose = verbose
         self.logger = get_logger("unified-scanner")
-        
-        self.base_directories = base_directories or {}
+        self.config = config or get_config()
+
+        self.base_directories = {
+            'mdx_v1': self.config.directories.mdx_v1,
+            'mdx_v2': self.config.directories.mdx_v2,
+            'mdx_v2_dev': self.config.directories.mdx_v2_dev,
+            'yaml_v1': self.config.directories.yaml_v1,
+            'yaml_v2': self.config.directories.yaml_v2,
+            'postman_json_v1': self.config.directories.postman_json_v1,
+            'postman_json_v2': self.config.directories.postman_json_v2,
+        }
         
         # Initialize async processor for performance
         self.async_processor = None
         
-        # Default directory configurations
-        if not self.base_directories:
-            self.base_directories = {
-                'mdx_v1': '../../src/pages/komodo-defi-framework/api/legacy',
-                'mdx_v2': '../../src/pages/komodo-defi-framework/api/v20',
-                'mdx_v2_dev': '../../src/pages/komodo-defi-framework/api/v20-dev',
-                'yaml_v1': '../../openapi/paths/v1',
-                'yaml_v2': '../../openapi/paths/v2',
-                'json_v1': '../../postman/json/kdf/v1',
-                'json_v2': '../../postman/json/kdf/v2',
-            }
-        
         if self.verbose:
-            self.logger.info(f"Initialized UnifiedScanner with async support and {len(self.base_directories)} directories")
+            self.logger.info(f"Initialized UnifiedScanner with {len(self.base_directories)} directories")
 
     def _get_async_processor(self):
         """Lazy initialization of async processor."""
@@ -234,7 +230,7 @@ class UnifiedScanner:
         # Convert tuple format to list format expected by this interface
         converted_results = {}
         for ver, methods in results.items():
-            # Extract version from key (e.g., 'json_v1' -> 'v1')
+            # Extract version from key (e.g., 'postman_json_v1' -> 'v1')
             ver_key = ver.replace('json_', '') if 'json_' in ver else ver
             if version and ver_key != version:
                 continue

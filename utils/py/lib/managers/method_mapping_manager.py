@@ -51,8 +51,7 @@ class MethodMappingManager:
         self._reporter = None  # Lazy loading to avoid circular imports
         
         # Configure directories for UnifiedScanner using enhanced config
-        self.base_directories = self._build_scanner_directories()
-        self.unified_scanner = UnifiedScanner(self.base_directories, verbose)
+        self.unified_scanner = UnifiedScanner(verbose=verbose, config=self.config)
         self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         
@@ -70,34 +69,6 @@ class MethodMappingManager:
             from ..reporters.mapping_reporter import MappingReporter
             self._reporter = MappingReporter(self.verbose)
         return self._reporter
-    
-    def _build_scanner_directories(self) -> Dict[str, str]:
-        """Build directory configuration for UnifiedScanner from enhanced config."""
-        directories = {}
-        
-        # Get all supported versions
-        supported_versions = self.path_mapper.get_supported_versions(include_deprecated=True)
-        
-        for version in supported_versions:
-            try:
-                # Build directory mappings for each version and file type (already resolved)
-                mdx_dir = self.config.get_directory_for_version_and_type(version, "mdx")
-                yaml_dir = self.config.get_directory_for_version_and_type(version, "yaml")
-                json_dir = self.config.get_directory_for_version_and_type(version, "json")
-                
-                # Use naming convention expected by UnifiedScanner
-                version_suffix = "v1" if version == "v1" else "v2"  # Map v2-dev to v2 for scanner
-                directories.update({
-                    f'mdx_{version_suffix}': mdx_dir,
-                    f'yaml_{version_suffix}': yaml_dir,
-                    f'json_{version_suffix}': json_dir
-                })
-                
-            except Exception as e:
-                if self.verbose:
-                    self.logger.warning(f"Could not configure directories for version {version}: {e}")
-        
-        return directories
     
     def _get_async_processor(self):
         """Lazy initialization of async processor."""
@@ -150,17 +121,17 @@ class MethodMappingManager:
         for version in supported_versions:
             try:
                 if version == "v1":
-                    mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_legacy)
+                    mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_v1)
                     yaml_dirs[version] = self.config._resolve_path(self.config.directories.yaml_v1)
-                    json_dirs[version] = self.config._resolve_path(self.config.directories.json_v1)
+                    json_dirs[version] = self.config._resolve_path(self.config.directories.postman_json_v1)
                 elif version == "v2":
                     mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_v2)
                     yaml_dirs[version] = self.config._resolve_path(self.config.directories.yaml_v2)
-                    json_dirs[version] = self.config._resolve_path(self.config.directories.json_v2)
+                    json_dirs[version] = self.config._resolve_path(self.config.directories.postman_json_v2)
                 elif version == "v2-dev":
                     mdx_dirs[version] = self.config._resolve_path(self.config.directories.mdx_v2_dev)
                     yaml_dirs[version] = self.config._resolve_path(self.config.directories.yaml_v2)  # v2-dev uses v2 yaml
-                    json_dirs[version] = self.config._resolve_path(self.config.directories.json_v2)  # v2-dev uses v2 json
+                    json_dirs[version] = self.config._resolve_path(self.config.directories.postman_json_v2)  # v2-dev uses v2 json
 
             except Exception as e:
                 self.logger.warning(f"Could not configure directories for version {version}: {e}")

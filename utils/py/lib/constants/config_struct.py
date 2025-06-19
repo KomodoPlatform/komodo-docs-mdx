@@ -65,7 +65,7 @@ class CoinConfig:
 class DirectoryConfig:
     """Enhanced configuration for directory paths with version support."""
     # MDX documentation paths
-    mdx_legacy: str = "src/pages/komodo-defi-framework/api/legacy"
+    mdx_v1: str = "src/pages/komodo-defi-framework/api/legacy"
     mdx_v2: str = "src/pages/komodo-defi-framework/api/v20"
     mdx_v2_dev: str = "src/pages/komodo-defi-framework/api/v20-dev"
     
@@ -75,8 +75,8 @@ class DirectoryConfig:
     openapi_main: str = "openapi/openapi.yaml"
     
     # Postman collection paths
-    json_v1: str = "postman/json/kdf/v1"
-    json_v2: str = "postman/json/kdf/v2"
+    postman_json_v1: str = "postman/json/kdf/v1"
+    postman_json_v2: str = "postman/json/kdf/v2"
     postman_collections: str = "postman/collections"
     postman_environments: str = "postman/environments"
     
@@ -97,17 +97,17 @@ class DirectoryConfig:
         return {
             "v1": {
                 "yaml": self.yaml_v1,
-                "json": self.json_v1,
-                "mdx": self.mdx_legacy
+                "json": self.postman_json_v1,
+                "mdx": self.mdx_v1
             },
             "v2": {
                 "yaml": self.yaml_v2,
-                "json": self.json_v2,
+                "json": self.postman_json_v2,
                 "mdx": self.mdx_v2
             },
             "v2-dev": {
                 "yaml": self.yaml_v2,  # v2-dev uses same YAML as v2
-                "json": self.json_v2,  # v2-dev uses same JSON as v2
+                "json": self.postman_json_v2,  # v2-dev uses same JSON as v2
                 "mdx": self.mdx_v2_dev
             }
         }
@@ -433,7 +433,7 @@ class EnhancedKomodoConfig:
         
         if file_type == "mdx":
             if canonical_version == "v1":
-                return self._resolve_path(self.directories.mdx_legacy)
+                return self._resolve_path(self.directories.mdx_v1)
             else:
                 return self._resolve_path(self.directories.mdx_v2)
         elif file_type == "yaml":
@@ -443,9 +443,9 @@ class EnhancedKomodoConfig:
                 return self._resolve_path(self.directories.yaml_v2)
         elif file_type == "json":
             if canonical_version == "v1":
-                return self._resolve_path(self.directories.json_v1)
+                return self._resolve_path(self.directories.postman_json_v1)
             else:
-                return self._resolve_path(self.directories.json_v2)
+                return self._resolve_path(self.directories.postman_json_v2)
         else:
             raise ValueError(f"Unknown file type: {file_type}")
     

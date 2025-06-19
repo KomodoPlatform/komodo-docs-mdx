@@ -360,7 +360,7 @@ class AsyncMethodProcessor:
         # Scan all versions concurrently
         tasks = []
         for version_key, directory in directories.items():
-            # Extract version from directory key (e.g., 'json_v1' -> 'v1')
+            # Extract version from directory key (e.g., 'postman_json_v1' -> 'v1')
             if version_key.startswith('json_'):
                 version = version_key[5:]  # Remove 'json_' prefix
             else:

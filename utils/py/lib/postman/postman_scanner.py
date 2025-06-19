@@ -181,7 +181,8 @@ class PostmanJSONProcessor:
     and delegates to PostmanUtilities for processing logic.
     """
     
-    def __init__(self, json_dirs: Dict[str, str], verbose: bool = True):
+    def __init__(self, config, json_dirs: Dict[str, str], verbose: bool = True):
+        self.config = config
         self.json_dirs = json_dirs
         self.verbose = verbose
         self.logger = get_logger("postman-json-processor")
@@ -189,9 +190,7 @@ class PostmanJSONProcessor:
         
         # Use UnifiedScanner for file discovery
         self.scanner = UnifiedScanner(
-            base_directories={
-                f'json_{k}': v for k, v in json_dirs.items()
-            },
+            config=self.config,
             verbose=verbose
         )
     

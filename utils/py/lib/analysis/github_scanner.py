@@ -67,7 +67,7 @@ class GitHubScanner:
             f"async fn {method_name}",  # Async Rust function
             f"pub fn {method_name}",  # Public Rust function
             f"pub async fn {method_name}",  # Public async Rust function
-            method_name.replace("::", "_"),  # Convert :: to _
+            method_name.replace("::", "-"),  # Convert :: to _
         ]
         
         for pattern in search_patterns:
@@ -107,7 +107,7 @@ class GitHubScanner:
     def extract_method_signature(self, file_content: str, method_name: str) -> Optional[Dict]:
         """Extract method signature from file content."""
         # Convert :: to _ for function name search
-        rust_method_name = method_name.replace("::", "_")
+        rust_method_name = method_name.replace("::", "-")
         
         # Patterns to match Rust function signatures
         patterns = [
