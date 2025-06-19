@@ -24,9 +24,11 @@ class OpenApiSchemaGenerator:
     This class handles the discovery, parsing, and generation of reusable
     components from the MDX documentation.
     """
-    # Compiled regex patterns for parsing
-    _STRUCTURE_DEF_REGEX = re.compile(r'##\s+([\w_]+)\s*\{\{.*?\}\}\s*\n(.*?)(?=\n##|\Z)', re.DOTALL)
-    _STRUCTURE_TABLE_ROW_REGEX = re.compile(r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|')
+    # Regex to find structure definitions (### Heading) and their content (until the next ### or ##)
+    _STRUCTURE_DEF_REGEX = re.compile(r'###\s+([\w_]+)\s*\n(.*?)(?=\n###|\n##|\Z)', re.DOTALL)
+    # Regex to find enum definitions (### Heading ending with Enum) and their content
+    _ENUM_DEF_REGEX = re.compile(r'###\s+([\w_]+Enum)\s*\n(.*?)(?=\n###|\n##|\Z)', re.DOTALL)
+    _STRUCTURE_TABLE_ROW_REGEX = re.compile(r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|')
     _ENUM_NAME_REGEX = re.compile(r'##\s+([\w_]+)')
     _ENUM_DESC_REGEX = re.compile(r'export const description = "(.*?)"')
     _ENUM_TABLE_REGEX = re.compile(r'\| Value \|.*?\n\|-.*\n(.*)', re.DOTALL)
@@ -42,12 +44,21 @@ class OpenApiSchemaGenerator:
         """
         Generates schemas for common data structures and enums.
         """
-        
-        # Generate files for manually defined enums
+        # Generate files for manually defined enums from the enums/index.mdx file
         manual_enums = self._extract_manual_enums_from_docs()
         for enum_name, schema in manual_enums.items():
-            with open(Path(self.schemas_path) / f"{enum_name}.yml", 'w') as f:
-                yaml.dump({"title": enum_name, **schema}, f, sort_keys=False)
+            full_schema = {
+                'components': {
+                    'schemas': {
+                        enum_name: {
+                            **schema,
+                            "title": f"Component: {enum_name}"
+                        }
+                    }
+                }
+            }
+            with open(Path(self.schemas_path) / f"{enum_name}.yml", 'w', encoding='utf-8') as f:
+                yaml.dump(full_schema, f, sort_keys=False, allow_unicode=True)
 
         # Generate files for common data structures
         self._generate_individual_structure_files()
@@ -94,35 +105,49 @@ class OpenApiSchemaGenerator:
 
     def _create_structure_schema_file(self, structure_file: Path):
         """
-        Parses a single structure .mdx file and creates a corresponding OpenAPI schema file.
+        Parses a single structure .mdx file and creates a corresponding OpenAPI schema file
+        for each structure defined within it (marked by ###).
         """
-        with open(structure_file, 'r') as f:
+        with open(structure_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
         structures = self._parse_structure_definitions(content)
         
-        for structure_name, schema in structures.items():
-            filename = f"{structure_name.lower()}.yml"
+        for structure_name, schema_properties in structures.items():
+            # Use the captured structure_name for the filename
+            filename = f"{structure_name}.yml"
             
+            # The title in the YAML should also be the structure name
             full_schema = {
-                "title": structure_name,
-                "type": "object",
-                "properties": schema
+                'components': {
+                    'schemas': {
+                        structure_name: {
+                            "type": "object",
+                            "title": f"Component: {structure_name}",
+                            "properties": schema_properties
+                        }
+                    }
+                }
             }
             
-            with open(Path(self.schemas_path) / filename, 'w') as f_out:
-                yaml.dump(full_schema, f_out, sort_keys=False)
+            output_file_path = Path(self.schemas_path) / filename
+            with open(output_file_path, 'w', encoding='utf-8') as f_out:
+                yaml.dump(full_schema, f_out, sort_keys=False, allow_unicode=True)
 
     def _parse_structure_definitions(self, content: str) -> Dict[str, Dict[str, Any]]:
         """
-        Parses an MDX file for structure definitions.
+        Parses an MDX file for structure definitions. A single file can contain
+        multiple structures, each denoted by a '###' heading.
         """
         structures = {}
         matches = self._STRUCTURE_DEF_REGEX.findall(content)
         
         for match in matches:
             structure_name, structure_content = match
-            structures[structure_name] = self._parse_structure_table(structure_content)
+            # Each match corresponds to one structure (e.g., ActivationMode)
+            properties = self._parse_structure_table(structure_content)
+            if properties: # Only add if properties were found
+                structures[structure_name] = properties
             
         return structures
 
@@ -131,12 +156,24 @@ class OpenApiSchemaGenerator:
         Parses a markdown table within a structure's section to extract properties.
         """
         properties = {}
-        rows = self._STRUCTURE_TABLE_ROW_REGEX.findall(structure_content)
+        # Regex updated to handle 4 or 5 columns (Parameter, Type, Required, Default, Description)
+        rows = re.findall(
+            r'\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|\s*(.*?)\s*\|(?:s*(.*)\s*\|)?', 
+            structure_content
+        )
         
         for row in rows:
-            param_name, param_type, param_desc = row
-            param_name = param_name.strip('`')
+            # Unpack row, handling both 4 and 5 column tables
+            if len(row) == 5 and row[4] is not None:
+                param_name, param_type, required, default, param_desc = row
+            else:
+                param_name, param_type, required, default, _ = row
+                param_desc = default # In 4-column tables, 4th col is description
+                default = ''
+
+            param_name = param_name.strip().strip('`')
             
+            # Skip table header row
             if 'parameter' in param_name.lower() or '---' in param_name:
                 continue
             
@@ -150,7 +187,8 @@ class OpenApiSchemaGenerator:
 
     def _extract_manual_enums_from_docs(self) -> Dict[str, Dict[str, Any]]:
         """
-        Scans documentation for manually defined enum files.
+        Scans documentation for manually defined enum files. A single file can
+        contain multiple enums, each denoted by a '###' heading ending in 'Enum'.
         """
         enums = {}
         enum_dir = self.path_mapper.config.directories.mdx_common_structures / "enums"
@@ -158,21 +196,20 @@ class OpenApiSchemaGenerator:
             return enums
             
         for enum_file in enum_dir.glob("*.mdx"):
-            with open(enum_file, 'r') as f:
+            with open(enum_file, 'r', encoding='utf-8') as f:
                 content = f.read()
-            
-            name_match = self._ENUM_NAME_REGEX.search(content)
-            if not name_match:
-                continue
-            enum_name = name_match.group(1)
-            
-            desc_match = self._ENUM_DESC_REGEX.search(content)
-            description = desc_match.group(1) if desc_match else f"Enum for {enum_name}"
-            
-            table_match = self._ENUM_TABLE_REGEX.search(content)
-            if table_match:
-                table_content = table_match.group(1)
-                values = self._parse_enum_values_from_table(table_content)
+
+            # Find all enum definitions in the file
+            matches = self._ENUM_DEF_REGEX.findall(content)
+
+            for match in matches:
+                enum_name, enum_content = match
+                
+                # Simple description for now
+                description = f"Enum for {enum_name}"
+
+                # The rest of the content is assumed to be the table
+                values = self._parse_enum_values_from_table(enum_content)
                 if values:
                     enums[enum_name] = {
                         "type": "string",
