@@ -396,10 +396,14 @@ class EnhancedKomodoConfig:
     log_level: str = "INFO"
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     
+    # New attribute for kdf_docs_root
+    kdf_docs_root: Optional[Path] = None
+    
     def __post_init__(self):
         """Post-initialization setup."""
         self._resolve_workspace_root()
         self.directories = DirectoryConfig(workspace_root=self.workspace_root)
+        self.kdf_docs_root = self.directories.workspace_root / "src/pages/komodo-defi-framework"
         self._setup_logging()
     
     def _setup_logging(self):
@@ -460,4 +464,21 @@ class EnhancedKomodoConfig:
         if not include_deprecated:
             versions = [v for v in versions if not self.is_version_deprecated(v)]
         return sorted(versions)
+
+    def get_mm2_dev_docs_paths(self, versions: List[str]) -> List[Path]:
+        """Returns a list of paths to the Komodo DeFi Framework API documentation for the specified versions."""
+        paths = []
+        v1_path = self.kdf_docs_root / 'api' / 'v1'
+        if 'v1' in versions and v1_path.exists():
+            paths.append(v1_path)
+
+        v2_path = self.kdf_docs_root / 'api' / 'v20'
+        if 'v2' in versions and v2_path.exists():
+            paths.append(v2_path)
+        
+        common_struct_path = self.kdf_docs_root / 'api' / 'common_structures'
+        if common_struct_path.exists():
+            paths.append(common_struct_path)
+
+        return paths
 
