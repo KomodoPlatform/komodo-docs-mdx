@@ -6,46 +6,19 @@ Consolidated dataclass definitions for the Komodo DeFi Framework documentation t
 Organized by domain to eliminate duplication and improve maintainability.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
 
-from .enums import FileType, ValidationLevel, VersionStatus, DeploymentEnvironment
+from .enums import FileType
 
 # Import unified structures
 from .unified_struct import (
     UnifiedMethodInfo,
     UnifiedParameterInfo,
     UnifiedErrorInfo,
-    UnifiedExampleInfo,
-    UnifiedOperationResult,
-    UnifiedValidationIssue,
-    UnifiedBatchResult,
-    UnifiedRepositoryInfo
-)
-
-# Import domain-specific structures
-from .postman_struct import (
-    PostmanRequest,
-    PostmanRequestInfo,
-    PostmanMethodMapping,
-    PostmanFolder
-)
-
-from .mdx_struct import (
-    DocumentSection,
-    DocumentationStatus,
-    MethodMapping,
-    ExistingDocInfo,
-    MethodPattern
-)
-
-from .drafts_struct import (
-    DraftInfo,
-    DraftOperation,
-    DocumentDifference,
-    QualityReport
+    UnifiedExampleInfo
 )
 
 
@@ -262,6 +235,30 @@ class ScanResult:
     error: Optional[str] = None
     metadata: Optional[Dict[str, Any]] = None
 
+
+@dataclass
+class ScanMetadata:
+    """Standardized metadata for various scanning and report generation processes."""
+    scanner_type: str
+    scanner_version: str
+    generated_at: str = field(default_factory=lambda: datetime.now().isoformat())
+    generated_during: Optional[str] = None # e.g. "mdx_scan", "json_scan", "openapi_scan", "postman_scan", "gap_analysis"
+    method_source: Optional[str] = None # e.g. "mdx", "json", "openapi", "postman", "gap_analysis"
+    is_primary_data_source: Optional[bool] = None 
+    
+    # Method counts - can be populated based on the scan type
+    # e.g. {"all": 100, "v1": 50, "v2": 50}
+    version_method_counts: Optional[Dict[str, int]] = None 
+    total_known_methods: Optional[Dict[str, int]] = None
+    total_methods_with_mdx_paths: Optional[Dict[str, int]] = None
+    total_methods_with_postman_links: Optional[Dict[str, int]] = None
+    total_methods_with_json_examples: Optional[Dict[str, int]] = None
+    total_methods_with_openapi_paths: Optional[Dict[str, int]] = None
+    
+    def to_dict(self):
+        """Converts the dataclass to a dictionary, excluding None values."""
+        data = asdict(self)
+        return {k: v for k, v in data.items() if v is not None}
 
 # =============================================================================
 # ANALYSIS DOMAIN - Analysis and comparison operations
