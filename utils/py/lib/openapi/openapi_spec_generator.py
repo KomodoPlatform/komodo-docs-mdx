@@ -27,6 +27,9 @@ from ..mdx.mdx_parser import MDXParser
 # Import local modules
 from .openapi_schema_factory import OpenApiSchemaFactory
 from .openapi_schema_generator import OpenApiSchemaGenerator
+from ..utils.file_utils import safe_write_json
+from ..constants.config import get_config
+from ..utils.logging_utils import get_logger
 
 
 class OpenApiSpecGenerator:
@@ -47,6 +50,11 @@ class OpenApiSpecGenerator:
         self.all_method_details: List[OpenAPIMethod] = []
         self.all_path_details: List[PathDetail] = []
         self.all_enums = defaultdict(set)
+        self.config = get_config()
+        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        self.reports_dir.mkdir(exist_ok=True, parents=True)
+        self.logger = get_logger("openapi-spec-generator")
+
 
     def build_openapi_spec(self, method_info: Dict[str, Any], version: str = "v2") -> Dict[str, Any]:
         """
@@ -232,47 +240,77 @@ class OpenApiSpecGenerator:
         Generates tracking and summary files for the generation process.
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        data_dir = Path(self.path_mapper.config.directories.reports_dir)
 
         self._generate_openapi_methods_file(
-            timestamp, data_dir, version, success_count, error_count,
+            timestamp, version, success_count, error_count,
             all_enums, structures_count, enums_count, source_dirs, all_methods
         )
-        self._generate_openapi_method_paths_file(timestamp, data_dir)
+        self._generate_openapi_method_paths_file(
+            timestamp=timestamp,
+            all_methods=self.all_methods,
+            versions=version,
+            path_mapper=self.path_mapper
+        )
 
-    def _generate_openapi_method_paths_file(self, timestamp: str, data_dir: Path) -> None:
-        """
-        Creates a text file listing all generated OpenAPI method paths.
-        """
-        sorted_paths = sorted(self.all_path_details, key=lambda p: p.path)
-        paths_file = data_dir / "openapi_method_paths.txt"
-        if paths_file.exists():
-            backup_dir = Path(self.path_mapper.config.directories.backup_dir)
-            backup_dir.mkdir(exist_ok=True)
-            backup_path = backup_dir / f"openapi_method_paths_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-            paths_file.rename(backup_path)
-            
-        with open(paths_file, "w") as f:
-            f.write(f"# OpenAPI Method Paths - Generated at {timestamp}\n")
-            grouped_paths = defaultdict(list)
-            for detail in sorted_paths:
-                top_level = Path(detail.path).parts[1]
-                grouped_paths[top_level].append(detail)
-            
-            for group, paths in grouped_paths.items():
-                f.write(f"## Version: {group.upper()}\n")
-                for detail in paths:
-                    f.write(f"- `{detail.path}` (Method: `{detail.method_name}`)\n")
-                f.write("\n")
 
-    def _generate_openapi_methods_file(self, timestamp: str, data_dir: Path, version: str,
+
+    def _generate_openapi_method_paths_file(self, timestamp: str, all_methods: Dict[str, Any], versions: List[str], path_mapper) -> str:
+        """Creates a JSON file that maps each method to its OpenAPI spec path."""
+        self.logger.info("🗺️  Generating OpenAPI method-to-path mapping...")
+        
+        paths_data = { "v1": {}, "v2": {} }
+        
+        for versioned_method_key, parsed_info in all_methods.items():
+            openapi_path = parsed_info.get("openapi_path")
+            method_name = parsed_info.get("method_name")
+            version = parsed_info.get("version")
+            
+            if not all([openapi_path, method_name, version]):
+                continue
+
+            if version == "v1":
+                paths_data["v1"][method_name] = openapi_path
+            elif version == "v2":
+                paths_data["v2"][method_name] = openapi_path
+
+        total_methods = len(paths_data["v1"]) + len(paths_data["v2"])
+
+        if total_methods == 0:
+            self.logger.warning("No methods with paths found for OpenAPI.")
+            return None
+
+        metadata = {
+            "generated_at": datetime.now().isoformat(),
+            "scanner_version": "KDF-OpenAPI-Path-Generator v1.0.0",
+            "scanner_type": "OPENAPI_METHOD_PATH_MAPPING",
+            "total_versions": len(versions) if "all" not in versions else 2,
+            "total_documented_methods": total_methods,
+            "versions_processed": versions,
+            "is_primary_data_source": False
+        }
+
+        output_data = {
+            "scan_metadata": metadata,
+            "method_paths": paths_data
+        }
+
+        file_path = self.reports_dir / f"report-kdf_openapi_method_paths_{timestamp}.json"
+        safe_write_json(file_path, output_data, indent=2)
+        
+        self.logger.save(f"✅ 💾 Saved OpenAPI method paths mapping to: {file_path}")
+        self.logger.save(f"📊 V1: {len(paths_data['v1'])} methods")
+        self.logger.save(f"📊 V2: {len(paths_data['v2'])} methods")
+        
+        return str(file_path)
+    
+    def _generate_openapi_methods_file(self, timestamp: str, version: str,
                                      success_count: int, error_count: int, all_enums: Dict[str, Set[str]],
                                      structures_count: int, enums_count: int, source_dirs: List[str], all_methods: Dict[str, Any]) -> None:
         """
         Generates a comprehensive JSON summary file of the generation process.
         """
         path_file_name = f"report-kdf_openapi_methods_{timestamp}.json"
-        output_file = data_dir / path_file_name
+        output_file = self.reports_dir / path_file_name
         
         # backup existing
         if output_file.exists():

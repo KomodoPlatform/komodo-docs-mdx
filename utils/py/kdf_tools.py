@@ -73,6 +73,7 @@ from utils.py.lib.postman.postman_manager import PostmanManager
 
 from utils.py.lib.generation.cleanup_utils import GeneratedFilesCleaner
 from utils.py.lib.async_support import run_async
+from utils.py.lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
 
 
 class KDFTools:
@@ -88,6 +89,8 @@ class KDFTools:
         self.config = get_config()
         self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
         self.reports_dir.mkdir(exist_ok=True, parents=True)
+        self.logger = get_logger("kdf-tools")
+        self.openapi_spec_generator = OpenApiSpecGenerator()
         
     
     def setup_logging(self, verbose=True):
@@ -115,7 +118,7 @@ class KDFTools:
             else:
                 # Still not found, use the script-based detection as fallback
                 if self.verbose:
-                    self.log("Could not find workspace root with src/pages directory, using script location", "warning")
+                    self.logger.warning("Could not find workspace root with src/pages directory, using script location")
 
         self.config = get_config(
             base_path=str(workspace_root),
@@ -1069,76 +1072,20 @@ class KDFTools:
         """Top-level function to generate all JSON-related tracking files."""
         self.log("Generating JSON tracking files...", "info")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        data_dir = Path(self._get_data_dir()) / "reports"
-        ensure_directory_exists(data_dir)
         
-        self._generate_json_method_paths_file(timestamp, data_dir, all_extracted_methods)
-        self._generate_json_methods_file(timestamp, data_dir, all_extracted_methods, extraction_stats)
+        self._generate_json_method_paths_file(timestamp, self.reports_dir, all_extracted_methods)
+        self._generate_json_methods_file(timestamp, self.reports_dir, all_extracted_methods, extraction_stats)
     
     def _generate_openapi_tracking_files(self, openapi_manager: OpenAPIManager, versions: List[str]) -> str:
         """Generates all necessary tracking files for OpenAPI."""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        data_dir = Path(self.config.directories.reports_dir)
-        
-        # Ensure the data directory exists
-        data_dir.mkdir(parents=True, exist_ok=True)
 
-        return self._generate_openapi_method_paths_file(
+        return self.openapi_spec_generator._generate_openapi_method_paths_file(
             timestamp=timestamp,
-            data_dir=data_dir,
             all_methods=openapi_manager.all_methods,
             versions=versions,
             path_mapper=openapi_manager.path_mapper
-        )
-
-    def _generate_openapi_method_paths_file(self, timestamp: str, data_dir: Path, all_methods: Dict[str, Any], versions: List[str], path_mapper) -> str:
-        """Creates a JSON file that maps each method to its OpenAPI spec path."""
-        self.log("🗺️  Generating OpenAPI method-to-path mapping...")
-        
-        paths_data = { "v1": {}, "v2": {} }
-        
-        for versioned_method_key, parsed_info in all_methods.items():
-            openapi_path = parsed_info.get("openapi_path")
-            method_name = parsed_info.get("method_name")
-            version = parsed_info.get("version")
-            
-            if not all([openapi_path, method_name, version]):
-                continue
-
-            if version == "v1":
-                paths_data["v1"][method_name] = openapi_path
-            elif version == "v2":
-                paths_data["v2"][method_name] = openapi_path
-
-        total_methods = len(paths_data["v1"]) + len(paths_data["v2"])
-
-        if total_methods == 0:
-            self.log("No methods with paths found for OpenAPI.", "warning")
-            return None
-
-        metadata = {
-            "generated_at": datetime.now().isoformat(),
-            "scanner_version": "KDF-OpenAPI-Path-Generator v1.0.0",
-            "scanner_type": "OPENAPI_METHOD_PATH_MAPPING",
-            "total_versions": len(versions) if "all" not in versions else 2,
-            "total_documented_methods": total_methods,
-            "versions_processed": versions,
-            "is_primary_data_source": False
-        }
-
-        output_data = {
-            "scan_metadata": metadata,
-            "method_paths": paths_data
-        }
-
-        file_path = data_dir / f"report-kdf_openapi_method_paths_{timestamp}.json"
-        safe_write_json(file_path, output_data, indent=2)
-        
-        self.log(f"✅ 💾 Saved OpenAPI method paths mapping to: {file_path}")
-        self.log(f"📊 V1: {len(paths_data['v1'])} methods")
-        self.log(f"📊 V2: {len(paths_data['v2'])} methods")
-        
-        return str(file_path)
+        )  
 
     def _generate_json_method_paths_file(self, timestamp: str, data_dir: Path, all_extracted_methods: Dict[str, Any]) -> None:
         """Creates a JSON file mapping each method to its JSON examples path."""
