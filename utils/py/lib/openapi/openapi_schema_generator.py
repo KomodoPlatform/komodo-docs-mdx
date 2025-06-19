@@ -34,12 +34,11 @@ class OpenApiSchemaGenerator:
     def __init__(self, path_mapper: PathMapper):
         self.path_mapper = path_mapper
 
-    def generate_common_schemas(self, all_enums: Dict[str, Set[str]], output_base: Path):
+    def generate_common_schemas(self, all_enums: Dict[str, Set[str]]):
         """
         Generates schemas for common data structures and enums.
         """
-        schemas_path = output_base / "components" / "schemas"
-        schemas_path.mkdir(parents=True, exist_ok=True)
+        schemas_path = self.path_mapper.config.directories.openapi_schemas
         
         # Generate files for manually defined enums
         manual_enums = self._extract_manual_enums_from_docs()
@@ -51,16 +50,17 @@ class OpenApiSchemaGenerator:
         self._generate_individual_structure_files(schemas_path)
 
         # Log any enums that are documented but not in the manual list for review
-        self._output_undocumented_enums_for_review(all_enums, output_base)
+        self._output_undocumented_enums_for_review(all_enums)
 
-    def _output_undocumented_enums_for_review(self, all_enums: Dict[str, Set[str]], output_base: Path):
+    def _output_undocumented_enums_for_review(self, all_enums: Dict[str, Set[str]]):
         """
         Creates a file listing enums that are found in parameter descriptions
         but do not have a corresponding manual enum file.
         """
-        review_file = output_base / "undocumented_enums_for_review.txt"
+        reports_path = self.path_mapper.config.directories.reports_dir
+        review_file = reports_path / "undocumented_enums_for_review.txt"
         
-        manual_enums_path = Path(self.path_mapper.config.directories.mdx_v2) / "structures" / "enums"
+        manual_enums_path = self.path_mapper.config.directories.mdx_common_structures / "enums"
         existing_enums = {p.stem for p in manual_enums_path.glob("*.mdx")}
         
         with open(review_file, 'w') as f:
@@ -81,7 +81,7 @@ class OpenApiSchemaGenerator:
         """
         Scans for structure definition files and creates a YAML schema file for each.
         """
-        structure_dir = Path(self.path_mapper.config.directories.mdx_v2) / "structures"
+        structure_dir = self.path_mapper.config.directories.mdx_common_structures
         if not structure_dir.exists():
             return
             
@@ -152,7 +152,7 @@ class OpenApiSchemaGenerator:
         Scans documentation for manually defined enum files.
         """
         enums = {}
-        enum_dir = Path(self.path_mapper.config.directories.mdx_v2) / "structures" / "enums"
+        enum_dir = self.path_mapper.config.directories.mdx_common_structures / "enums"
         if not enum_dir.exists():
             return enums
             

@@ -16,6 +16,7 @@ import os
 # Import local modules
 from ..utils.logging_utils import get_logger
 from .openapi_spec_generator import OpenApiSpecGenerator
+from .openapi_schema_generator import OpenApiSchemaGenerator
 from ..mdx.mdx_parser import MDXParser
 from ..utils.path_utils import EnhancedPathMapper
 from ..constants import OpenAPIMethod, PathDetail, get_config
@@ -39,6 +40,9 @@ class OpenAPIManager:
         self.mdx_parser = MDXParser(self.base_path)
         self.spec_generator = OpenApiSpecGenerator(
             base_path=self.base_path,
+            path_mapper=self.path_mapper
+        )
+        self.schema_generator = OpenApiSchemaGenerator(
             path_mapper=self.path_mapper
         )
         
@@ -125,7 +129,7 @@ class OpenAPIManager:
                     self.error_count += 1
         
         # Generate common schemas like enums and structures
-        self.spec_generator.generate_common_schemas(self.mdx_parser.enum_patterns, Path(self.config.workspace_root) / "openapi/paths/components")
+        self.schema_generator.generate_common_schemas(self.mdx_parser.enum_patterns)
         
         # Generate categorized OpenAPI specifications
         self.spec_generator._generate_category_specs(self.all_methods, version)

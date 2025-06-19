@@ -126,7 +126,7 @@ class OpenApiSpecGenerator:
             relative_mdx_path = None
             
             # Add common structures to search paths
-            search_dirs = mdx_base_dirs + ["src/pages/komodo-defi-framework/api/common_structures"]
+            search_dirs = mdx_base_dirs + [self.path_mapper.config.directories.mdx_common_structures]
 
             for src_dir in search_dirs:
                 try:
@@ -145,7 +145,10 @@ class OpenApiSpecGenerator:
                 path_parts.remove('index.mdx')
 
             # The final output path should be relative to the versioned yaml directory
-            output_path = Path(self.path_mapper.config.workspace_root) / yaml_base_dir / '/'.join(path_parts) / filename
+            if str(mdx_path).startswith(str(self.path_mapper.config.directories.mdx_common_structures)):
+                output_path = self.path_mapper.config.directories.workspace_root / "openapi/paths/components/schemas" / '/'.join(path_parts) / filename
+            else:
+                output_path = self.path_mapper.config.directories.workspace_root / yaml_base_dir / '/'.join(path_parts) / filename
         
         
         
@@ -156,11 +159,7 @@ class OpenApiSpecGenerator:
         
         return str(output_path)
 
-    def generate_common_schemas(self, all_enums: Dict[str, Set[str]], output_base: Path):
-        """
-        Delegates the generation of common schemas to the OpenApiSchemaGenerator.
-        """
-        self.common_schema_generator.generate_common_schemas(all_enums, output_base)
+        
 
     def _generate_category_specs(self, all_methods: Dict[str, Dict], version: str):
         """
@@ -286,11 +285,11 @@ class OpenApiSpecGenerator:
             return None
 
         metadata = ScanMetadata(
-            scanner_type="OPENAPI_METHOD_PATH_MAPPING",
-            scanner_version="KDF-OpenAPI-Path-Generator v2.0.0",
+            scanner_type="OPENAPI_SPEC_GENERATOR",
+            scanner_version="KDF-OpenAPI-Generator v2.0.0",
             version_method_counts=sort_version_method_counts(version_method_counts),
             generated_during="OpenAPI spec generation",
-            method_source=f"MDX method files",
+            method_source="MDX method files",
             is_primary_data_source=False
         )
         
@@ -337,15 +336,12 @@ class OpenApiSpecGenerator:
         }
         
         metadata = ScanMetadata(
-            scanner_type="OPENAPI_DOCUMENTATION",
+            scanner_type="OPENAPI_SPEC_GENERATOR",
             scanner_version="KDF-OpenAPI-Generator v2.0.0",
             version_method_counts=sort_version_method_counts(version_method_counts),
-            generated_during="openapi_scan",
-            method_source="generated_from_mdx",
-            is_primary_data_source=False,
-            paths_file_reference="report-kdf_openapi_method_paths.json",
-            includes_path_mapping=True,
-            includes_only_documented_methods=True,
+            generated_during="OpenAPI spec generation",
+            method_source="MDX method files",
+            is_primary_data_source=False
         )
 
         output_data = {
@@ -354,7 +350,6 @@ class OpenApiSpecGenerator:
                 "v1": {
                     "branch": "add/postman/utils", 
                     "version": "v1",
-                    "source_type": "OPENAPI_DOCUMENTATION",
                     "methods": v1_methods,
                     "last_updated": datetime.now().isoformat(),
                     "extraction_patterns_used": ["MDX file parsing"]
@@ -362,7 +357,6 @@ class OpenApiSpecGenerator:
                 "v2": {
                     "branch": "add/postman/utils",
                     "version": "v2",
-                    "source_type": "OPENAPI_DOCUMENTATION",
                     "methods": v2_methods,
                     "last_updated": datetime.now().isoformat(),
                     "extraction_patterns_used": ["MDX file parsing"]
@@ -450,12 +444,12 @@ class OpenApiSpecGenerator:
         }
         
         metadata = ScanMetadata(
-            scanner_type="OPENAPI_METHOD_PATH_MAPPING",
+            scanner_type="OPENAPI_SPEC_GENERATOR",
             scanner_version="KDF-OpenAPI-Generator v2.0.0",
             version_method_counts=sort_version_method_counts(version_method_counts),
             generated_during="OpenAPI spec generation",
             method_source="MDX method files",
-            is_primary_data_source=False,
+            is_primary_data_source=False
         )
 
         output_data = {
