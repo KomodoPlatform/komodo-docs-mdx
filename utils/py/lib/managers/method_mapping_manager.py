@@ -628,8 +628,8 @@ class MethodMappingManager:
             missing_stats = self._generate_missing_statistics(rust_methods, documented_methods, missing_methods)
             
             # Get the source file reference
-            data_dir = self.config._resolve_path(self.config.directories.data_dir)
-            rust_files = glob.glob(os.path.join(data_dir, "kdf_rust_methods_*.json"))
+            reports_dir = self.config._resolve_path(self.config.directories.reports_dir)
+            rust_files = glob.glob(os.path.join(reports_dir, "report-kdf_rust_methods.json"))
             rust_file_name = Path(max(rust_files, key=lambda x: Path(x).stat().st_mtime)).name if rust_files else "unknown"
             
             return {
@@ -665,8 +665,8 @@ class MethodMappingManager:
     
     async def _load_canonical_rust_methods(self) -> Dict[str, Set[str]]:
         """Load canonical method names from the latest Rust methods file."""
-        data_dir = self.config._resolve_path(self.config.directories.data_dir)
-        rust_files = glob.glob(os.path.join(data_dir, "kdf_rust_methods_*.json"))
+        reports_dir = self.config._resolve_path(self.config.directories.reports_dir)
+        rust_files = glob.glob(os.path.join(reports_dir, "report-kdf_rust_methods.json"))
         
         if not rust_files:
             raise FileNotFoundError("No KDF Rust methods file found. Run 'kdf_tools.py scan-rust' first.")

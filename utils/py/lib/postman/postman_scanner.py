@@ -259,8 +259,8 @@ class PostmanJSONProcessor:
                     category = self.categorizer.categorize_method(method_name)
                     categorized_requests[category].append(request)
                     
-                    if self.verbose:
-                        self.logger.debug(f"Processed {method_name} -> {category}")
+                    # if self.verbose:
+                        # self.logger.debug(f"Processed {method_name} json_file: {json_file} -> {category}")
             
             except Exception as e:
                 if self.verbose:

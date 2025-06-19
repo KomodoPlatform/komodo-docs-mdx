@@ -361,7 +361,7 @@ class ProgressTracker:
         self.start_time = datetime.now()
         
         # Calculate update frequency for performance
-        self.update_frequency = max(1, self.total // 10)
+        self.update_frequency = max(1, self.total // 20)
         
         self.logger.progress(f"{operation}: Starting ({total} items)")
     

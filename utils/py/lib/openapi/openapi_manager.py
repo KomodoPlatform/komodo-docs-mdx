@@ -51,34 +51,40 @@ class OpenAPIManager:
         self.structure_count = 0
         self.logger = get_logger("openapi-manager")
 
-    def generate_openapi_specs(self, version: str) -> str:
-        self.logger.info(f"Processing version: {version}")
-        
-        # First, parse all MDX files to gather information, including enums
-        mdx_files = self._get_mdx_files_for_version(version)
-        all_parsed_info = [self.mdx_parser.parse_mdx_file(f) for f in mdx_files]
-        
-        # Now, generate the common schemas using the collected enum patterns
-        self.schema_generator.generate_common_schemas(self.mdx_parser.enum_patterns)
+    def generate_openapi_specs(self, version: str, process_schemas: bool = True, process_methods: bool = True, link_schemas: bool = True) -> str:
+        self.logger.info(f"Processing version: {version} with flags: schemas={process_schemas}, methods={process_methods}, link={link_schemas}")
 
-        # Then process the methods
+        all_parsed_info = []
+        # Schemas and methods require parsing MDX files.
+        if process_schemas or process_methods:
+            mdx_files = self._get_mdx_files_for_version(version)
+            all_parsed_info = [self.mdx_parser.parse_mdx_file(f) for f in mdx_files]
+
+        if process_schemas:
+            self.logger.info("Processing schemas...")
+            self.schema_generator.generate_common_schemas(self.mdx_parser.enum_patterns)
+
         processed_methods = {}
-        for parsed_info in all_parsed_info:
-            if parsed_info and parsed_info.get('type') == 'method':
-                parsed_info['version'] = version
-                spec = self.spec_generator.build_openapi_spec(parsed_info)
-                if spec:
-                    method_name = parsed_info['method_name']
-                    # Use the spec_generator to handle writing, which now has correct pathing logic
-                    self.spec_generator.write_openapi_file(spec, method_name, version, mdx_path=parsed_info['file_path'])
-                    processed_methods[method_name] = parsed_info
-
-        self.all_methods.update(processed_methods)
+        if process_methods:
+            self.logger.info("Processing methods...")
+            for parsed_info in all_parsed_info:
+                if parsed_info and parsed_info.get('type') == 'method':
+                    parsed_info['version'] = version
+                    spec = self.spec_generator.build_openapi_spec(parsed_info)
+                    if spec:
+                        method_name = parsed_info['method_name']
+                        self.spec_generator.write_openapi_file(spec, method_name, version, mdx_path=parsed_info['file_path'])
+                        processed_methods[method_name] = parsed_info
+            self.all_methods.update(processed_methods)
         
-        # Finally, generate the consolidated category files
-        self.spec_generator._generate_category_specs(self.all_methods, version)
+        # When linking, we assume methods were processed before and `all_methods` is populated.
+        if link_schemas:
+            self.logger.info("Linking schemas by generating category specs...")
+            if not self.all_methods and not process_methods:
+                self.logger.warning("`link_schemas` is true, but `process_methods` is false and no methods are cached. Results may be incomplete.")
+            self.spec_generator._generate_category_specs(self.all_methods, version)
         
-        return f"Processed {len(processed_methods)} methods for version {version}."
+        return f"Processed version {version}. Schemas: {process_schemas}, Methods: {len(processed_methods)}, Linking: {link_schemas}."
 
     def _get_mdx_files_for_version(self, version: str) -> List[str]:
         # Define source directories based on version

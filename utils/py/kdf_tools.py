@@ -131,14 +131,27 @@ class KDFTools:
             for path in report_paths:
                 self.log(f"    - {path}")
         self.log("")
-        
+    
     def openapi_command(self, args):
         """Handle openapi subcommand - MDX to OpenAPI conversion."""
         command_title = "MDX to OpenAPI Conversion"
+        
+        # Determine processing stages
+        process_schemas = args.process_schemas
+        process_methods = args.process_methods
+        link_schemas = args.link_schemas
+
+        # If no specific stage is selected, run all stages
+        if not any([process_schemas, process_methods, link_schemas]):
+            process_schemas = process_methods = link_schemas = True
+
         config = [
             f"Version: {args.version}",
             f"Clean before: {args.clean_before}",
-            f"Keep: {args.keep}"
+            f"Keep: {args.keep}",
+            f"Process schemas: {process_schemas}",
+            f"Process methods: {process_methods}",
+            f"Link schemas: {link_schemas}"
         ]
         self._print_header(command_title, config)
         
@@ -148,7 +161,7 @@ class KDFTools:
             # Auto-cleanup generated files if requested
             if args.clean_before:
                 self.logger.clean("Cleaning up old OpenAPI files before generation...")
-                if not self._cleanup_before_generation(['openapi', 'reports'], args.dry_run, args.keep):
+                if not self._cleanup_before_generation(['openapi'], args.dry_run, args.keep):
                     self.log("Cleanup failed, continuing anyway...", "warning")
             
             # Initialize OpenAPI manager with enhanced enum/schema support
@@ -163,20 +176,26 @@ class KDFTools:
                 
                 # Process v1 first
                 self.log("📂 Processing v1 (legacy methods)...")
-                # Store pre-v1 counts
                 v1_pre_count = manager.success_count
-                result_v1 = manager.generate_openapi_specs(version="v1")
-                # Calculate v1 count
+                result_v1 = manager.generate_openapi_specs(
+                    version="v1",
+                    process_schemas=process_schemas,
+                    process_methods=process_methods,
+                    link_schemas=link_schemas
+                )
                 v1_post_count = manager.success_count
                 v1_count = v1_post_count - v1_pre_count
                 self.log(f"✅ V1: Processed {v1_count} methods.")
                 
                 # Process v2 
                 self.log("📂 Processing v2 (current methods)...")
-                # Store pre-v2 counts
                 v2_pre_count = manager.success_count
-                result_v2 = manager.generate_openapi_specs(version="v2")
-                # Calculate v2 count
+                result_v2 = manager.generate_openapi_specs(
+                    version="v2",
+                    process_schemas=process_schemas,
+                    process_methods=process_methods,
+                    link_schemas=link_schemas
+                )
                 v2_post_count = manager.success_count
                 v2_count = v2_post_count - v2_pre_count
                 self.log(f"✅ V2: Processed {v2_count} methods.")
@@ -185,11 +204,15 @@ class KDFTools:
                 result = f"✅ All versions processed successfully!\n   📊 V1 methods: {v1_count}\n   📊 V2 methods: {v2_count}\n   📊 Total methods: {total_count}"
             else:
                 # Generate OpenAPI specs for single version
-                result = manager.generate_openapi_specs(version=args.version)
+                result = manager.generate_openapi_specs(
+                    version=args.version,
+                    process_schemas=process_schemas,
+                    process_methods=process_methods,
+                    link_schemas=link_schemas
+                )
             
             self.log(f"✅ {result}")
             
-            # NEW: Call tracking file generation when 'all' versions are processed
             if args.version == "all":
                 self.log("📊 Generating OpenAPI tracking files...")
                 enums_count = len(manager.mdx_parser.enum_patterns)
@@ -203,7 +226,6 @@ class KDFTools:
                     enums_count, source_dirs, manager.all_methods
                 )
             
-            # Show statistics about generated schemas
             stats = manager.get_stats()
             self.log(f"📊 Generation Statistics:")
             self.log(f"   • Total methods processed: {stats['files_processed']}")
@@ -221,7 +243,6 @@ class KDFTools:
             }
             version_method_counts = sort_version_method_counts(version_method_counts)
 
-            # Generate tracking files
             processed_versions = [args.version] if args.version != "all" else ["v1", "v2"]
             openapi_report_path = self._generate_openapi_tracking_files(manager, processed_versions, version_method_counts)
             if openapi_report_path:
@@ -234,6 +255,7 @@ class KDFTools:
             success = False
         finally:
             self._print_footer(command_title, success=success, report_paths=report_paths)
+
             
     def scan_rust(self, args):
         """Handle scan-rust subcommand - KDF repository scanning with async processing."""
@@ -666,7 +688,7 @@ class KDFTools:
                     
                     if not examples:
                         if self.verbose:
-                            print(f"  ⚪ {method_name}: No JSON examples found")
+                            self.logger.info(f"{method_name}: No JSON examples found")
                         extraction_stats['methods_without_examples'] += 1
                         continue
                     
@@ -729,7 +751,7 @@ class KDFTools:
                                     'example_type': example.example_type,
                                     'line_number': example.line_number
                                 })
-                                self.logger.save(f"🔍 {method_name}: Saved example {i} to {self.config.directories.get_relative_path(str(output_path))}")
+                                self.logger.save(f"{method_name}: Saved example {i} to {self.config.directories.get_relative_path(str(output_path))}")
                     
                     version_examples += len(cleaned_examples)
                     version_methods_with_examples += 1
@@ -852,7 +874,7 @@ class KDFTools:
                 self.log(f"Full report saved to: {args.output}", "success")
             else:
                 import glob
-                latest_report_files = glob.glob(str(self.config.directories.reports_dir / "draft_quality_report_*.md"))
+                latest_report_files = glob.glob(str(self.config.directories.reports_dir / "draft_quality_report.md"))
                 if latest_report_files:
                     latest_report = max(latest_report_files, key=lambda p: Path(p).stat().st_mtime)
                     self.log(f"Full report saved to: {latest_report}", "success")
@@ -1151,15 +1173,13 @@ class KDFTools:
         }
         
         file_patterns = {
-            "openapi": "report-mdx_kdf_*_*.json",
-            "reports": "report-*.json",
+            "openapi": "report-kdf_openapi*.json",
             "rust": "report-kdf_rust_method*.json",
-            "postman": "report-kdf_postman_method*.json",
+            "postman": "report-kdf_postman*.json",
             "mdx": "report-kdf_mdx_method*.json"
         }
         
         all_cleaned = True
-        
         for category in categories:
             if category not in base_dirs:
                 self.log(f"Unknown cleanup category: {category}", "warning")
@@ -1251,6 +1271,18 @@ class KDFTools:
         parser.add_argument(
             '--keep', type=int, default=3,
             help='Number of recent files to keep during cleanup.'
+        )
+        parser.add_argument(
+            '--process-schemas', action='store_true',
+            help='Only process and generate schemas for enums and structures.'
+        )
+        parser.add_argument(
+            '--process-methods', action='store_true',
+            help='Only process and generate OpenAPI specs for methods.'
+        )
+        parser.add_argument(
+            '--link-schemas', action='store_true',
+            help='Only link schemas in existing method specs.'
         )
         parser.set_defaults(func=self.openapi_command)
 
@@ -1490,7 +1522,7 @@ class KDFTools:
         try:
             # Load latest Rust scan data
             rust_data = {}
-            rust_scan_files = glob.glob(os.path.join(str(self.config.directories.reports_dir), "report-kdf_rust_methods_*.json"))
+            rust_scan_files = glob.glob(os.path.join(str(self.config.directories.reports_dir), "report-kdf_rust_methods.json"))
             if rust_scan_files:
                 latest_rust_scan = max(rust_scan_files, key=os.path.getctime)
                 self.log(f"Found latest Rust methods file: {os.path.basename(latest_rust_scan)}")
@@ -1500,13 +1532,13 @@ class KDFTools:
                         if v in rust_methods_data:
                             rust_data[v] = rust_methods_data[v].get("methods", [])
             else:
-                self.log(f"⚠️  No 'report-kdf_rust_methods_*.json' file found.", "warning")
+                self.log(f"⚠️  No 'report-kdf_rust_methods.json' file found.", "warning")
                 self.log(f"   Run 'python py/kdf_tools.py scan-rust' first", "warning")
                 return
 
             # Load latest MDX methods data
             mdx_methods = {}
-            mdx_scan_files = glob.glob(os.path.join(str(self.config.directories.reports_dir), "report-kdf_mdx_methods_*.json"))
+            mdx_scan_files = glob.glob(os.path.join(str(self.config.directories.reports_dir), "report-kdf_mdx_methods.json"))
             if mdx_scan_files:
                 latest_mdx_scan = max(mdx_scan_files, key=os.path.getctime)
                 self.log(f"Found latest MDX methods file: {os.path.basename(latest_mdx_scan)}")
@@ -1516,7 +1548,7 @@ class KDFTools:
                         if v in mdx_methods_data:
                             mdx_methods[v] = mdx_methods_data[v].get("methods", [])
             else:
-                self.log(f"⚠️  No 'report-kdf_mdx_methods_*.json' file found.", "warning")
+                self.log(f"⚠️  No 'report-kdf_mdx_methods.json' file found.", "warning")
                 self.log(f"   Run 'python py/kdf_tools.py scan-mdx' first", "warning")
                 return
 
