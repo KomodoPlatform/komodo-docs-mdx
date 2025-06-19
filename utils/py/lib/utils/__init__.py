@@ -19,7 +19,7 @@ from .file_utils import (
 )
 
 # Import dataclasses from constants
-from ..constants import FileType, FileInfo, OperationResult, BatchResult, ParameterAnalysis, MethodAnalysis, FileOperationError
+from ..constants import FileType, FileInfo, UnifiedOperationResult, UnifiedBatchResult, ParameterAnalysis, MethodAnalysis, FileOperationError
 
 # Batch processing
 from .batch_processor import BatchFileProcessor, batch_read_json_files, batch_write_json_files
@@ -82,8 +82,8 @@ __all__ = [
     # Data types
     'FileType',
     'FileInfo',
-    'OperationResult',
-    'BatchResult',
+    'UnifiedOperationResult',
+    'UnifiedBatchResult',
     'ParameterAnalysis',
     'MethodAnalysis',
     'FileOperationError',

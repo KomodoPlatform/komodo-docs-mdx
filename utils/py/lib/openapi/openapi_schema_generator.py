@@ -16,6 +16,8 @@ from typing import Dict, List, Any, Set
 from ..utils.path_utils import EnhancedPathMapper
 from ..constants.config import get_config
 from .openapi_schema_factory import OpenApiSchemaFactory
+from ..utils.file_utils import ensure_directory_exists
+from ..utils.logging_utils import get_logger
 
 
 class OpenApiSchemaGenerator:
@@ -36,11 +38,14 @@ class OpenApiSchemaGenerator:
 
     def __init__(self, config=None, path_mapper=None):
         self.config = config or get_config()
-        self.base_path = Path(self.config.workspace_root)
+        self.logger = get_logger(__name__)
         self.path_mapper = path_mapper or EnhancedPathMapper(config=self.config)
+        self.schema_factory = OpenApiSchemaFactory(config=self.config, path_mapper=self.path_mapper)
+        self.schemas_dir = Path(self.config.directories.openapi_schemas)
+        self.common_structures_dir = Path(self.config.directories.mdx_common_structures)
         self.schemas_path = self.path_mapper.config.directories.openapi_schemas
 
-    def generate_common_schemas(self, all_enums: Dict[str, Set[str]]):
+    def generate_common_schemas(self, all_enums: Dict[str, Set[str]] = None):
         """
         Generates schemas for common data structures and enums.
         """
@@ -61,6 +66,7 @@ class OpenApiSchemaGenerator:
                 yaml.dump(full_schema, f, sort_keys=False, allow_unicode=True)
 
         # Generate files for common data structures
+        self.logger.info("Generating individual structure files...")
         self._generate_individual_structure_files()
 
         # Log any enums that are documented but not in the manual list for review
@@ -108,33 +114,15 @@ class OpenApiSchemaGenerator:
         Parses a single structure .mdx file and creates a corresponding OpenAPI schema file
         for each structure defined within it (marked by ###).
         """
-        with open(structure_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-        
-        structures = self._parse_structure_definitions(content)
-        
-        for structure_name, schema_properties in structures.items():
-            # Use the captured structure_name for the filename
-            filename = f"{structure_name}.yml"
-            
-            # The title in the YAML should also be the structure name
-            full_schema = {
-                'components': {
-                    'schemas': {
-                        structure_name: {
-                            "type": "object",
-                            "title": f"Component: {structure_name}",
-                            "properties": schema_properties
-                        }
-                    }
-                }
-            }
-            
-            output_file_path = Path(self.schemas_path) / filename
-            with open(output_file_path, 'w', encoding='utf-8') as f_out:
-                yaml.dump(full_schema, f_out, sort_keys=False, allow_unicode=True)
+        try:
+            content = structure_file.read_text(encoding="utf-8")
+            structures = self._parse_structure_definitions(content, str(structure_file))
+            for name, schema in structures.items():
+                self._write_schema_file(name, schema)
+        except Exception as e:
+            self.logger.error(f"Error processing structure file {structure_file}: {e}")
 
-    def _parse_structure_definitions(self, content: str) -> Dict[str, Dict[str, Any]]:
+    def _parse_structure_definitions(self, content: str, file_path: str) -> Dict[str, Dict]:
         """
         Parses an MDX file for structure definitions. A single file can contain
         multiple structures, each denoted by a '###' heading.
@@ -145,13 +133,13 @@ class OpenApiSchemaGenerator:
         for match in matches:
             structure_name, structure_content = match
             # Each match corresponds to one structure (e.g., ActivationMode)
-            properties = self._parse_structure_table(structure_content)
+            properties = self._parse_structure_table(structure_content, file_path)
             if properties: # Only add if properties were found
                 structures[structure_name] = properties
             
         return structures
 
-    def _parse_structure_table(self, structure_content: str) -> Dict[str, Any]:
+    def _parse_structure_table(self, structure_content: str, file_path: str) -> Dict[str, Dict]:
         """
         Parses a markdown table within a structure's section to extract properties.
         """
@@ -181,9 +169,19 @@ class OpenApiSchemaGenerator:
             param_type = param_type.strip()
             param_desc = param_desc.strip()
 
-            properties[param_name] = OpenApiSchemaFactory.create_parameter_schema(param_type, param_desc)
+            properties[param_name] = self.schema_factory.create_parameter_schema(
+                {"Type": param_type, "Description": param_desc, "Parameter": param_name},
+                file_path
+            )
             
         return properties
+
+    def _write_schema_file(self, name: str, schema: Dict):
+        """Writes a schema to a YAML file."""
+        filename = f"{name}.yml"
+        output_file_path = Path(self.schemas_dir) / filename
+        with open(output_file_path, 'w', encoding='utf-8') as f_out:
+            yaml.dump(schema, f_out, sort_keys=False, allow_unicode=True)
 
     def _extract_manual_enums_from_docs(self) -> Dict[str, Dict[str, Any]]:
         """

@@ -187,13 +187,14 @@ class OpenApiSchemaFactory:
         
         response_properties = {}
         for param in method_info.get('response_parameters', []):
-            param_name = param.name
+            print(f"param: {param}")
+            param_name = param.get('name')
             if param_name:
                 # Map to the keys expected by create_parameter_schema
                 schema_param = {
-                    "Parameter": param.name,
-                    "Type": param.type,
-                    "Description": param.description,
+                    "Parameter": param_name,
+                    "Type": param.get('type'),
+                    "Description": param.get('description'),
                     "Default": "" # Not relevant for responses
                 }
                 response_properties[param_name] = self.create_parameter_schema(schema_param, file_path)

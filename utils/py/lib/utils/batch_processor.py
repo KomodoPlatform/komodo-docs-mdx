@@ -12,7 +12,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from .logging_utils import get_logger
-from .file_types import OperationResult, BatchResult
+from .file_types import UnifiedOperationResult, UnifiedBatchResult
 from .file_utils import safe_read_json, safe_write_json
 
 
@@ -29,17 +29,17 @@ class BatchFileProcessor:
         self.verbose = verbose
         self.logger = get_logger("batch-processor")
     
-    def batch_read_json(self, file_paths: List[Union[str, Path]]) -> BatchResult:
+    def batch_read_json(self, file_paths: List[Union[str, Path]]) -> UnifiedBatchResult:
         """Read multiple JSON files concurrently."""
         start_time = datetime.now()
         results = []
         
-        def read_single(file_path: Path) -> OperationResult:
+        def read_single(file_path: Path) -> UnifiedOperationResult:
             op_start = datetime.now()
             try:
                 data = safe_read_json(file_path)
                 duration = (datetime.now() - op_start).total_seconds() * 1000
-                return OperationResult(
+                return UnifiedOperationResult(
                     success=True,
                     file_path=str(file_path),
                     operation="read_json",
@@ -49,7 +49,7 @@ class BatchFileProcessor:
                 )
             except Exception as e:
                 duration = (datetime.now() - op_start).total_seconds() * 1000
-                return OperationResult(
+                return UnifiedOperationResult(
                     success=False,
                     file_path=str(file_path),
                     operation="read_json",
@@ -73,7 +73,7 @@ class BatchFileProcessor:
         if self.verbose:
             self.logger.info(f"Batch read: {successful}/{len(file_paths)} files successful")
         
-        return BatchResult(
+        return UnifiedBatchResult(
             total=len(file_paths),
             successful=successful,
             failed=len(file_paths) - successful,
@@ -82,17 +82,17 @@ class BatchFileProcessor:
         )
     
     def batch_write_json(self, file_data_pairs: List[Tuple[Union[str, Path], Dict[str, Any]]],
-                         indent: int = 2) -> BatchResult:
+                         indent: int = 2) -> UnifiedBatchResult:
         """Write multiple JSON files concurrently."""
         start_time = datetime.now()
         results = []
         
-        def write_single(file_path: Path, data: Dict[str, Any]) -> OperationResult:
+        def write_single(file_path: Path, data: Dict[str, Any]) -> UnifiedOperationResult:
             op_start = datetime.now()
             try:
                 safe_write_json(file_path, data, indent=indent)
                 duration = (datetime.now() - op_start).total_seconds() * 1000
-                return OperationResult(
+                return UnifiedOperationResult(
                     success=True,
                     file_path=str(file_path),
                     operation="write_json",
@@ -102,7 +102,7 @@ class BatchFileProcessor:
                 )
             except Exception as e:
                 duration = (datetime.now() - op_start).total_seconds() * 1000
-                return OperationResult(
+                return UnifiedOperationResult(
                     success=False,
                     file_path=str(file_path),
                     operation="write_json",
@@ -127,7 +127,7 @@ class BatchFileProcessor:
         if self.verbose:
             self.logger.info(f"Batch write: {successful}/{len(file_data_pairs)} files successful")
         
-        return BatchResult(
+        return UnifiedBatchResult(
             total=len(file_data_pairs),
             successful=successful,
             failed=len(file_data_pairs) - successful,
@@ -137,14 +137,14 @@ class BatchFileProcessor:
 
 
 # Convenience functions
-def batch_read_json_files(file_paths: List[Union[str, Path]], max_workers: int = 4) -> BatchResult:
+def batch_read_json_files(file_paths: List[Union[str, Path]], max_workers: int = 4) -> UnifiedBatchResult:
     """Quick batch read of JSON files."""
     processor = BatchFileProcessor(max_workers=max_workers)
     return processor.batch_read_json(file_paths)
 
 
 def batch_write_json_files(file_data_pairs: List[Tuple[Union[str, Path], Dict[str, Any]]], 
-                          max_workers: int = 4, indent: int = 2) -> BatchResult:
+                          max_workers: int = 4, indent: int = 2) -> UnifiedBatchResult:
     """Quick batch write of JSON files."""
     processor = BatchFileProcessor(max_workers=max_workers)
     return processor.batch_write_json(file_data_pairs, indent) 

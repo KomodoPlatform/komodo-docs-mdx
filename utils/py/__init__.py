@@ -20,7 +20,7 @@ from .lib.managers.method_mapping_manager import MethodMappingManager, MethodMap
 from .lib.openapi.openapi_manager import OpenAPIManager
 from .lib.mdx.mdx_parser import MDXParser
 from .lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
-from .lib.constants import ParameterInfo, MethodInfo
+from .lib.constants import UnifiedParameterInfo, UnifiedMethodInfo
 
 __all__ = [
     'MethodMappingManager',
@@ -28,6 +28,6 @@ __all__ = [
     'OpenAPIManager',  # Main comprehensive manager
     'MDXParser',
     'OpenApiSpecGenerator',
-    'ParameterInfo',
-    'MethodInfo'
+    'UnifiedParameterInfo',
+    'UnifiedMethodInfo'
 ] 

@@ -20,6 +20,7 @@ from .openapi_schema_generator import OpenApiSchemaGenerator
 from ..mdx.mdx_parser import MDXParser
 from ..utils.path_utils import EnhancedPathMapper
 from ..constants import OpenAPIMethod, PathDetail, get_config
+from .openapi_schema_factory import OpenApiSchemaFactory
 
 
 class OpenAPIManager:
@@ -38,7 +39,8 @@ class OpenAPIManager:
         
         # Initialize the main components
         self.mdx_parser = MDXParser(config=self.config)
-        self.spec_generator = OpenApiSpecGenerator(config=self.config, schema_factory=self.path_mapper, path_mapper=self.path_mapper)
+        self.schema_factory = OpenApiSchemaFactory(config=self.config, path_mapper=self.path_mapper)
+        self.spec_generator = OpenApiSpecGenerator(config=self.config, path_mapper=self.path_mapper, schema_creator=self.schema_factory)
         self.schema_generator = OpenApiSchemaGenerator(config=self.config, path_mapper=self.path_mapper)
         
         # Tracking attributes
@@ -49,20 +51,36 @@ class OpenAPIManager:
         self.structure_count = 0
         self.logger = get_logger("openapi-manager")
 
-    def generate_openapi_specs(self, version: str = "v2") -> str:
-        """
-        Main orchestration method. It finds all relevant MDX files, parses them,
-        generates individual OpenAPI specs, and then aggregates them into
-        category-based specs.
-
-        Args:
-            version: The API version to process (e.g., "v2").
-
-        Returns:
-            A string message summarizing the result of the operation.
-        """
-        self.logger.info(f"Starting OpenAPI generation for version: {version}")
+    def generate_openapi_specs(self, version: str) -> str:
+        self.logger.info(f"Processing version: {version}")
         
+        # First, parse all MDX files to gather information, including enums
+        mdx_files = self._get_mdx_files_for_version(version)
+        all_parsed_info = [self.mdx_parser.parse_mdx_file(f) for f in mdx_files]
+        
+        # Now, generate the common schemas using the collected enum patterns
+        self.schema_generator.generate_common_schemas(self.mdx_parser.enum_patterns)
+
+        # Then process the methods
+        processed_methods = {}
+        for parsed_info in all_parsed_info:
+            if parsed_info and parsed_info.get('type') == 'method':
+                parsed_info['version'] = version
+                spec = self.spec_generator.build_openapi_spec(parsed_info)
+                if spec:
+                    method_name = parsed_info['method_name']
+                    # Use the spec_generator to handle writing, which now has correct pathing logic
+                    self.spec_generator.write_openapi_file(spec, method_name, version, mdx_path=parsed_info['file_path'])
+                    processed_methods[method_name] = parsed_info
+
+        self.all_methods.update(processed_methods)
+        
+        # Finally, generate the consolidated category files
+        self.spec_generator._generate_category_specs(self.all_methods, version)
+        
+        return f"Processed {len(processed_methods)} methods for version {version}."
+
+    def _get_mdx_files_for_version(self, version: str) -> List[str]:
         # Define source directories based on version
         source_dirs = []
         if version == "v1":
@@ -77,72 +95,12 @@ class OpenAPIManager:
         source_dirs = [d for d in source_dirs if d.exists()]
         
         # Discover and process all MDX files
+        mdx_files = []
         for dir_path in source_dirs:
             for mdx_file in sorted(dir_path.rglob("*.mdx")):
-                
-                # Parse the MDX file to get method information
-                parsed_info = self.mdx_parser.parse_mdx_file(mdx_file)
-                
-                if parsed_info:
-                    parsed_info['version'] = version
-                    doc_type = parsed_info.get('type')
-                    if doc_type == 'method':
-                        method_name = parsed_info['method_name']
-                        
-                        # Generate the individual OpenAPI spec for the method
-                        spec = self.spec_generator.build_openapi_spec(parsed_info)
-                        # Write the spec to a file
-                        openapi_path = self.spec_generator.write_openapi_file(
-                            spec, method_name, version, mdx_path=str(mdx_file)
-                        )
-                        self.logger.save(f"{version} YAML created for [{method_name}]")
-                        self.success_count += 1
-                        
-                        # Add openapi_path to parsed_info for tracking
-                        parsed_info['openapi_path'] = openapi_path
-                        
-                        # Use a versioned key to prevent overwrites
-                        versioned_method_key = f"{method_name}_{version}"
-                        self.all_methods[versioned_method_key] = parsed_info
-                        
-                        # Track method details for reporting
-                        self.spec_generator.all_method_details.append(OpenAPIMethod(
-                            name=method_name,
-                            summary=parsed_info['title'],
-                            mdx_path=str(mdx_file),
-                            openapi_path=openapi_path
-                        ))
-                        self.spec_generator.all_path_details.append(PathDetail(
-                            path=openapi_path,
-                            method_name=method_name
-                        ))
-                    elif doc_type == 'enum':
-                        self.enum_count += 1
-                    elif doc_type == 'structure':
-                        self.structure_count += 1
-                else:
-                    self.error_count += 1
+                mdx_files.append(str(mdx_file))
         
-        # This MUST run before generating individual method files so that $refs can be resolved.
-        self.schema_generator.generate_common_schemas()
-        
-        # Generate consolidated spec files for categories.
-        self.spec_generator._generate_category_specs(self.all_methods, version)
-
-        # Final reporting
-        stats = self.get_stats()
-        self.logger.info(f"OpenAPI generation complete. {stats['files_processed']} files processed.")
-        
-        # Get enum and structure counts from the parser
-        enums_count = len(self.mdx_parser.enum_patterns)
-        structures_count = len(self.mdx_parser.common_structures)
-        
-        # Generate tracking files
-        self.spec_generator.generate_tracking_files(version, self.success_count, self.error_count,
-                                             self.mdx_parser.enum_patterns, structures_count, 
-                                             enums_count, [str(d) for d in source_dirs], self.all_methods)
-
-        return f"Successfully generated OpenAPI specs for {self.success_count} methods with {self.error_count} errors, and processed {self.enum_count} enums and {self.structure_count} structures."
+        return mdx_files
 
     def vlog(self, message: str):
         """Verbose logging utility."""

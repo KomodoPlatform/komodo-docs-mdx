@@ -61,7 +61,6 @@ from .unified_struct import (
     UnifiedErrorInfo,
     UnifiedExampleInfo,
     UnifiedOperationResult,
-    UnifiedValidationIssue,
     UnifiedBatchResult,
     UnifiedRepositoryInfo
 )
@@ -93,16 +92,6 @@ from .drafts_struct import (
     DocumentDifference,
     QualityReport
 )
-
-# For backward compatibility, alias old names to new unified names
-OperationResult = UnifiedOperationResult
-BatchResult = UnifiedBatchResult
-MethodInfo = UnifiedMethodInfo
-ParameterInfo = UnifiedParameterInfo
-ErrorInfo = UnifiedErrorInfo
-ExampleInfo = UnifiedExampleInfo
-ValidationIssue = UnifiedValidationIssue
-RepositoryInfo = UnifiedRepositoryInfo
 
 # Exception hierarchy
 from .exceptions import (
@@ -175,7 +164,6 @@ __all__ = [
     'UnifiedErrorInfo',
     'UnifiedExampleInfo',
     'UnifiedOperationResult',
-    'UnifiedValidationIssue',
     'UnifiedBatchResult',
     'UnifiedRepositoryInfo',
     
@@ -222,13 +210,4 @@ __all__ = [
     'FactoryConfig',
     'CreationResult',
     
-    # Backward compatibility aliases
-    'OperationResult',  # -> UnifiedOperationResult
-    'BatchResult',      # -> UnifiedBatchResult
-    'MethodInfo',       # -> UnifiedMethodInfo
-    'ParameterInfo',    # -> UnifiedParameterInfo
-    'ErrorInfo',        # -> UnifiedErrorInfo
-    'ExampleInfo',      # -> UnifiedExampleInfo
-    'ValidationIssue',   # -> UnifiedValidationIssue
-    'RepositoryInfo'     # -> UnifiedRepositoryInfo
 ] 

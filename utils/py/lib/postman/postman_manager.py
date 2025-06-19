@@ -11,7 +11,7 @@ import asyncio
 from pathlib import Path
 from typing import Dict, List, Any, Tuple
 
-from ..utils.file_types import OperationResult
+from ..utils.file_types import UnifiedOperationResult
 from ..utils.file_utils import safe_read_json, safe_write_json, ensure_directory_exists
 from ..utils.logging_utils import get_logger
 from ..constants.config import get_config
@@ -29,7 +29,7 @@ class PostmanFileManager:
     Manages file operations for Postman collections and environments.
     
     Provides validation, loading, saving, and management functionality with
-    structured error handling using OperationResult.
+    structured error handling using UnifiedOperationResult.
     """
     
     def __init__(self, collections_dir: str = "../../postman/collections",
@@ -44,7 +44,7 @@ class PostmanFileManager:
         ensure_directory_exists(self.collections_dir)
         ensure_directory_exists(self.environments_dir)
     
-    def save_collection(self, collection: Dict[str, Any], version: str) -> OperationResult:
+    def save_collection(self, collection: Dict[str, Any], version: str) -> UnifiedOperationResult:
         """Save Postman collection."""
         filename = f"KDF_API_{version.upper()}_Collection.postman_collection.json"
         filepath = self.collections_dir / filename
@@ -52,7 +52,7 @@ class PostmanFileManager:
         # Validate collection structure
         is_valid, errors = self.validate_collection_structure(collection)
         if not is_valid:
-            return OperationResult(
+            return UnifiedOperationResult(
                 success=False,
                 file_path=str(filepath),
                 operation="save_collection",
@@ -66,7 +66,7 @@ class PostmanFileManager:
             if self.verbose:
                 self.logger.info(f"Saved collection: {filename}")
             
-            return OperationResult(
+            return UnifiedOperationResult(
                 success=True,
                 file_path=str(filepath),
                 operation="save_collection",
@@ -74,7 +74,7 @@ class PostmanFileManager:
                 data=collection
             )
         except Exception as e:
-            return OperationResult(
+            return UnifiedOperationResult(
                 success=False,
                 file_path=str(filepath),
                 operation="save_collection",
@@ -82,7 +82,7 @@ class PostmanFileManager:
                 errors=[str(e)]
             )
     
-    def save_environment(self, environment: Dict[str, Any], version: str) -> OperationResult:
+    def save_environment(self, environment: Dict[str, Any], version: str) -> UnifiedOperationResult:
         """Save Postman environment."""
         filename = f"KDF_API_{version.upper()}_Environment.postman_environment.json"
         filepath = self.environments_dir / filename
@@ -90,7 +90,7 @@ class PostmanFileManager:
         # Validate environment structure
         is_valid, errors = self.validate_environment_structure(environment)
         if not is_valid:
-            return OperationResult(
+            return UnifiedOperationResult(
                 success=False,
                 file_path=str(filepath),
                 operation="save_environment",
@@ -104,7 +104,7 @@ class PostmanFileManager:
             if self.verbose:
                 self.logger.info(f"Saved environment: {filename}")
             
-            return OperationResult(
+            return UnifiedOperationResult(
                 success=True,
                 file_path=str(filepath),
                 operation="save_environment",
@@ -112,7 +112,7 @@ class PostmanFileManager:
                 data=environment
             )
         except Exception as e:
-            return OperationResult(
+            return UnifiedOperationResult(
                 success=False,
                 file_path=str(filepath),
                 operation="save_environment",

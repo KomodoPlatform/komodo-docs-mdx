@@ -205,7 +205,7 @@ class OpenApiSpecGenerator:
                 "schemas": {}
             }
         }
-        
+        self.logger.info(f"Generating category spec file for {category} with {len(methods)} methods")
         for method_info in methods:
             method_spec = self.build_openapi_spec(method_info)
             spec["paths"].update(method_spec.get("paths", {}))

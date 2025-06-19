@@ -30,9 +30,9 @@ class Response:
 
 class MDXParser:
     """Parser for MDX files to extract API method information."""
-    def __init__(self):
-        self.config = get_config()
-        self.path_mapper = EnhancedPathMapper()
+    def __init__(self, config=None, path_mapper=None):
+        self.config = config or get_config()
+        self.path_mapper = path_mapper or EnhancedPathMapper()
         self.base_path = Path(self.config.workspace_root)
         # Track common structures across all parsed methods
         self.common_structures = defaultdict(int)
