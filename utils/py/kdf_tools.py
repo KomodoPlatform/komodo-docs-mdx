@@ -78,7 +78,7 @@ from utils.py.lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
 
 class KDFTools:
     """Unified KDF Tools CLI."""
-    CLEANUP_CATEGORIES = ["openapi", "postman", "reports", "rust", "all"]
+    CLEANUP_CATEGORIES = ["openapi", "postman", "rust", "all"]
     
     def __init__(self):
         self.verbose = True
@@ -401,7 +401,7 @@ class KDFTools:
             )
             
             # Save method paths file first
-            paths_filename = f"kdf_mdx_method_paths_{timestamp}.json"
+            paths_filename = f"report-kdf_mdx_method_paths.json"
             paths_output_path = self.reports_dir / paths_filename
             safe_write_json(paths_output_path, method_paths_data, indent=2)
             
@@ -414,7 +414,7 @@ class KDFTools:
             )
             
             # Save methods file
-            methods_filename = f"kdf_mdx_methods_{timestamp}.json"
+            methods_filename = f"report-kdf_mdx_methods.json"
             methods_output_path = self.reports_dir / methods_filename
             safe_write_json(methods_output_path, methods_data, indent=2)
             
@@ -1125,7 +1125,7 @@ class KDFTools:
             }
         }
 
-        file_path = data_dir / f"report-kdf_postman_method_paths_{timestamp}.json"
+        file_path = data_dir / f"report-kdf_postman_json_method_paths.json"
         safe_write_json(file_path, paths_data, indent=2)
         
         self.log(f"✅ 💾 Saved Postman method paths mapping to: {file_path}")
@@ -1163,7 +1163,7 @@ class KDFTools:
             }
         }
 
-        file_path = data_dir / f"report-kdf_json_extractor_methods_{timestamp}.json"
+        file_path = data_dir / f"report-kdf_postman_json_methods"
         safe_write_json(file_path, methods_data, indent=2)
         
         self.log(f"✅ 💾 Saved JSON extraction methods to: {file_path}")
@@ -1188,10 +1188,10 @@ class KDFTools:
         
         file_patterns = {
             "openapi": "report-mdx_kdf_*_*.json",
-            "postman": "kdf-postman-*.json",
             "reports": "report-*.json",
-            "rust": "report-kdf_rust_methods_*.json",
-            "mdx": "kdf_mdx_method*.json"
+            "rust": "report-kdf_rust_method*.json",
+            "postman": "report-kdf_postman_method*.json",
+            "mdx": "report-kdf_mdx_method*.json"
         }
         
         all_cleaned = True
@@ -1211,7 +1211,7 @@ class KDFTools:
             pattern = file_patterns[category]
             
             if not dir_path.exists():
-                self.logger.clean(f"Directory not found for category '{category}': {dir_path}", "warning")
+                self.logger.clean(f"Directory not found for category '{category}': {dir_path}")
                 continue
 
             self.logger.clean(f"Scanning for '{pattern}' in '{dir_path}'...")
@@ -1365,7 +1365,7 @@ class KDFTools:
             description='Removes old generated files from various tool operations.'
         )
         parser.add_argument(
-            '--categories', nargs='+', choices=self.CLEANUP_CATEGORIES, default=['reports'],
+            '--categories', nargs='+', choices=self.CLEANUP_CATEGORIES, default=['all'],
             help=f"Categories to clean. Choices: {self.CLEANUP_CATEGORIES}"
         )
         parser.add_argument(
@@ -1550,7 +1550,7 @@ class KDFTools:
 
             # Load latest MDX methods data
             mdx_methods = {}
-            mdx_scan_files = glob.glob(os.path.join(self.reports_dir, "kdf_mdx_methods_*.json"))
+            mdx_scan_files = glob.glob(os.path.join(self.reports_dir, "report-kdf_mdx_methods_*.json"))
             if mdx_scan_files:
                 latest_mdx_scan = max(mdx_scan_files, key=os.path.getctime)
                 self.log(f"Found latest MDX methods file: {os.path.basename(latest_mdx_scan)}")
@@ -1560,7 +1560,7 @@ class KDFTools:
                         if v in mdx_methods_data:
                             mdx_methods[v] = mdx_methods_data[v].get("methods", [])
             else:
-                self.log(f"⚠️  No 'kdf_mdx_methods_*.json' file found.", "warning")
+                self.log(f"⚠️  No 'report-kdf_mdx_methods_*.json' file found.", "warning")
                 self.log(f"   Run 'python py/kdf_tools.py scan-mdx' first", "warning")
                 return
 
@@ -1608,7 +1608,7 @@ class KDFTools:
 
             # Save report
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_path = self.reports_dir / f"kdf_gap_analysis_{timestamp}.json"
+            report_path = self.reports_dir / f"report-kdf_gap_analysis.json"
             safe_write_json(report_path, gap_analysis_data, indent=2)
             self.log(f"✅ 💾 Gap analysis report saved to: {report_path}")
 

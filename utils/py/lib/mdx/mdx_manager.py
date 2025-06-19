@@ -521,7 +521,7 @@ class DraftsManager:
         # Save report
         if output_file is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = self.reports_dir / f"quality_report_{timestamp}.md"
+            output_file = self.reports_dir / f"quality_report.md"
         
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(markdown_report)

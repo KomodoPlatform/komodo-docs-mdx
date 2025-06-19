@@ -210,7 +210,7 @@ class KDFScanner:
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             branch_name = self.branch
-            filename = f"report-kdf_rust_methods_{branch_name}_{timestamp}.json"
+            filename = f"report-kdf_rust_methods_{branch_name}.json"
         
         file_path = self.reports_dir / filename
         

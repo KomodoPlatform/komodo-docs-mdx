@@ -294,7 +294,7 @@ class OpenApiSpecGenerator:
             "method_paths": paths_data
         }
 
-        file_path = self.reports_dir / f"report-kdf_openapi_method_paths_{timestamp}.json"
+        file_path = self.reports_dir / f"report-kdf_openapi_method_paths.json"
         safe_write_json(file_path, output_data, indent=2)
         
         self.logger.save(f"✅ 💾 Saved OpenAPI method paths mapping to: {file_path}")
@@ -309,7 +309,7 @@ class OpenApiSpecGenerator:
         """
         Generates a comprehensive JSON summary file of the generation process.
         """
-        path_file_name = f"report-kdf_openapi_methods_{timestamp}.json"
+        path_file_name = f"report-kdf_openapi_methods.json"
         output_file = self.reports_dir / path_file_name
         
         # backup existing
@@ -335,7 +335,7 @@ class OpenApiSpecGenerator:
                 "total_methods": len(all_methods),
                 "includes_path_mapping": True,
                 "method_source": "generated_from_mdx",
-                "paths_file_reference": f"report-kdf_openapi_method_paths_{timestamp}.json",
+                "paths_file_reference": f"report-kdf_openapi_method_paths.json",
                 "includes_only_documented_methods": True
             },
             "repository_data": {

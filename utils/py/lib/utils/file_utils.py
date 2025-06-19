@@ -290,7 +290,7 @@ def create_backup_path(file_path: Union[str, Path], suffix: str = ".backup") -> 
     """
     path = normalize_file_path(file_path)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup_name = f"{path.stem}_{timestamp}{suffix}{path.suffix}"
+    backup_name = f"{path.stem}{suffix}{path.suffix}"
     return path.parent / backup_name
 
 
@@ -458,17 +458,13 @@ def cleanup_old_files(directory: str, pattern: str, keep_count: int = 3, verbose
         Dictionary with cleanup results for each file type
     """
     cleanup_patterns = {
-        "rust_methods": "report-kdf_rust_methods_*.json",
-        "mdx_methods": "report-kdf_mdx_methods_*.json",
-        "openapi_methods": "report-kdf_openapi_methods_*.json",
-        "json_methods": "report-kdf_json_methods_*.json",
-        "postman_methods": "report-kdf_postman_methods_*.json",
-        "mdx_method_paths": "report-kdf_mdx_method_paths_*.json",
-        "openapi_method_paths": "report-kdf_openapi_method_paths_*.json",
-        "json_method_paths": "report-kdf_json_method_paths_*.json",
-        "postman_method_paths": "report-kdf_postman_method_paths_*.json",
-        "method_mapping": "report-kdf_method_mapping_*.json",
-        "unified_method_mapping": "unified_method_mapping*.json",
+        "rust_methods": "report-kdf_rust_method*.json",
+        "mdx_methods": "report-kdf_mdx_method*.json",
+        "openapi_methods": "report-kdf_openapi_method*.json",
+        "json_methods": "report-kdf_json_method*.json",
+        "postman_methods": "report-kdf_postman_method*.json",
+        "method_mapping": "report-kdf_method_mapping.json",
+        "unified_method_mapping": "report-kdf_unified_method_mapping.json",
     }
     
     results = {}

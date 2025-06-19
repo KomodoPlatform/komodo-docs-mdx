@@ -620,9 +620,9 @@ class GeneratedFilesCleaner:
         
         # Group files by pattern
         patterns = [
-            "report-kdf_rust_methods_*.json", "report-kdf_mdx_methods_*.json",
-            "report-kdf_openapi_method_paths_*.json", "report-kdf_postman_method_paths_*.json",
-            "report-kdf_json_extractor_methods_*.json", "report-kdf_gap_analysis_*.json"
+            "report-kdf_rust_method*.json", "report-kdf_mdx_method*.json",
+            "report-kdf_openapi_method*.json", "report-kdf_postman_json_method*.json",
+            "report-kdf_gap_analysis.json"
         ]
         
         removed_count = 0

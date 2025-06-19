@@ -335,7 +335,7 @@ class MethodMappingManager:
         base_name = parts[0]
         extension = parts[1] if len(parts) > 1 else 'json'
         
-        timestamped_filename = f"{base_name}_{timestamp}.{extension}"
+        timestamped_filename = f"{base_name}.{extension}"
         
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         output_path = self.reports_dir / timestamped_filename
@@ -396,7 +396,7 @@ class MethodMappingManager:
         
         # Save to dedicated method paths file
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        output_filename = f"kdf_postman_method_paths_{timestamp}.json"
+        output_filename = f"kdf_postman_method_paths.json"
         
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         output_file = self.reports_dir / output_filename
@@ -814,7 +814,7 @@ class MethodMappingManager:
             }
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"kdf_postman_method_paths_{timestamp}.json"
+        filename = f"report-kdf_postman_json_method_paths.json"
         
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         output_path = self.reports_dir / filename
