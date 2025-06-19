@@ -66,6 +66,7 @@ from utils.py.lib import (
     MdxGenerator, ExistingDocsScanner
 )
 from utils.py.lib.constants.config import get_config
+from utils.py.lib.constants.data_structures import ScanMetadata
 from utils.py.lib.rust.scanner import KDFScanner
 from utils.py.lib.openapi.openapi_manager import OpenAPIManager
 from utils.py.lib.postman.postman_manager import PostmanManager
@@ -285,6 +286,7 @@ class KDFTools:
         """Handle MDX-only scanning - extract method names from MDX documentation files."""
         command_title = "MDX Documentation Scan"
         versions = args.versions
+        report_paths = []
         if 'all' in versions:
             versions = ['v1', 'v2']
 
@@ -302,8 +304,8 @@ class KDFTools:
                 if not self._cleanup_before_generation(['mdx'], args.dry_run, args.keep):
                     self.log("Cleanup failed, continuing anyway...", "warning")
 
-            # Use default data directory from config
-            data_dir = self._get_data_dir()
+                # Use default data directory from config
+                data_dir = self._get_data_dir()
             
             # Get current git branch of the repository
             try:
@@ -321,9 +323,9 @@ class KDFTools:
                 print("💡 Using async processing for MDX file scanning")
                 print("🗺️  Generating method-to-path mapping first, then deriving methods file")
                 print(f"📋 Versions: {', '.join(versions)}")
-                print(f"📁 Data directory: {data_dir}")
-                print(f"📁 Reports directory: {self.config.directories.reports_dir}")
                 print(f"📁 Workspace root: {self.config.workspace_root}")
+                print(f"📁 Reports directory: {self.config.directories.reports_dir}")
+
                 print()
             
             # Use async scanning for better performance
@@ -337,36 +339,34 @@ class KDFTools:
             # Scan documentation files
             doc_results = run_async(doc_scanner.scan_all_files_async(versions))
             
-            # Generate filenames
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            # STEP 1: Generate method paths file (primary data source)
-            method_paths_data = self._generate_mdx_method_paths_data(
-                doc_results, versions, current_branch
-            )
-            
-            # Save method paths file first
-            paths_filename = f"report-kdf_mdx_method_paths.json"
-            paths_output_path = Path(self.config.directories.reports_dir / paths_filename)
-            safe_write_json(paths_output_path, method_paths_data, indent=2)
-            
-            if self.verbose:
-                self.logger.success(f"💾 Saved method paths mapping to: {paths_output_path}")
-            
-            # STEP 2: Derive methods file from the paths file (eliminates duplication)
-            methods_data = self._generate_mdx_methods_from_paths_file(
-                paths_output_path, current_branch, versions
-            )
-            
-            # Save methods file
-            methods_filename = f"report-kdf_mdx_methods.json"
-            methods_output_path = Path(self.config.directories.reports_dir / methods_filename)
-            safe_write_json(methods_output_path, methods_data, indent=2)
-            
-            if self.verbose:
+            if doc_results:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                # STEP 1: Generate method paths file (primary data source)
+                method_paths_data = self._generate_mdx_method_paths_data(
+                    doc_results, versions, current_branch
+                )
+                paths_output_path = self.config.directories.reports_dir / f"report-kdf_mdx_method_paths.json"
+                print(f"💾 Saved documentation paths to: {paths_output_path}")  
+
+                safe_write_json(paths_output_path, method_paths_data)
+                report_paths.append(str(paths_output_path))
+                
+                print(f"💾 Saved documentation paths to: {paths_output_path}")
+                
+                # STEP 2: Generate methods file from the paths data (secondary data source)
+                methods_data = self._generate_mdx_methods_from_paths_file(
+                    paths_output_path, current_branch, versions
+                )
+                methods_output_path = self.config.directories.reports_dir / f"report-kdf_mdx_methods.json"
+                safe_write_json(methods_output_path, methods_data)
+                report_paths.append(str(methods_output_path))
+                print(f"💾 Saved documentation methods to: {methods_output_path}")
+                # Report success and show summary
+                self.logger.success(f"💾 Saved documentation paths to: {paths_output_path}")
                 self.logger.success(f"💾 Saved documentation methods to: {methods_output_path}")
                 
                 # Display summary from the paths data
-                total_documented_methods = method_paths_data["scan_metadata"]["total_documented_methods"]
+                total_documented_methods = method_paths_data["scan_metadata"]["version_method_counts"]
                 
                 print()
                 print("📊 Summary:")
@@ -385,56 +385,59 @@ class KDFTools:
                 traceback.print_exc()
             return 1
         
-        self._print_footer(command_title, success=success)
+        self._print_footer(command_title, success=success, output_paths=report_paths)
         return 0 if success else 1
     
+
     def _generate_mdx_method_paths_data(self, doc_results, versions, current_branch):
-        """Generate the method paths data structure (primary data source)."""
-        method_paths_data = {
-            "scan_metadata": {
-                "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDFMethodPathMapper v1.5.0",
-                "scanner_type": "MDX_METHOD_PATH_MAPPING",
-                "total_versions": len(versions),
-                "total_documented_methods": 0,
-                "versions_processed": versions,
-                "includes_gap_analysis": False,
-                "generated_during_mdx_scan": True,
-                "is_primary_data_source": True
-            },
-            "method_paths": {}
-        }
-        
-        total_documented_methods = 0
-        
+        """
+        Generate the method paths data structure (primary data source).
+        This version uses the ScanMetadata dataclass for standardized metadata.
+        """
+        method_paths = {}
+        version_method_counts = {}
+
         for version in versions:
             if version not in doc_results:
                 if self.verbose:
                     print(f"⚠️  No documentation found for version {version}")
+                version_method_counts[version] = 0
+                method_paths[version] = {}
                 continue
-            
-            # Extract method paths ONLY from MDX files (these are the documented methods)
-            method_paths = {}
+
             version_data = doc_results[version]
-            
-            # Get methods from MDX files (with paths) - these are the only ones that count as "documented"
+            current_version_paths = {}
             if 'mdx_files' in version_data:
                 for method_name, file_path in version_data['mdx_files'].items():
-                    method_paths[method_name] = str(file_path)
+                    current_version_paths[method_name] = str(file_path)
             
-            # Store method paths (only MDX files with actual paths)
-            method_paths_data["method_paths"][version] = dict(sorted(method_paths.items()))
-            total_documented_methods += len(method_paths)
-            
+            method_paths[version] = dict(sorted(current_version_paths.items()))
+            version_method_counts[version] = len(current_version_paths)
+
             if self.verbose:
                 print(f"🔍 Processing {version.upper()} documentation...")
-                print(f"   📁 MDX files with paths: {len(method_paths)}")
-        
-        # Update total documented methods count
-        method_paths_data["scan_metadata"]["total_documented_methods"] = total_documented_methods
+                print(f"   📁 MDX files with paths: {len(current_version_paths)}")
+
+        total_documented_methods = sum(version_method_counts.values())
+        version_method_counts.update({"all": total_documented_methods})
+        version_method_counts = dict(sorted(version_method_counts.items()))
+
+        metadata = ScanMetadata(
+            scanner_type="MDX_METHOD_PATH_MAPPING",
+            scanner_version="KDFMethodPathMapper v2.0.0",
+            generated_during="mdx_scan",
+            method_source="mdx",
+            is_primary_data_source=True,
+            version_method_counts=version_method_counts
+        )
+
+        method_paths_data = {
+            "scan_metadata": metadata.to_dict(),
+            "method_paths": method_paths
+        }
         
         return method_paths_data
-    
+
     def _generate_mdx_methods_from_paths_file(self, paths_file_path, current_branch, versions):
         """Generate the methods file by deriving method lists from the paths file."""
         # Read the paths file that was just generated
@@ -1066,7 +1069,6 @@ class KDFTools:
                 "generated_at": datetime.now().isoformat(),
                 "scanner_version": "KDF-MDX-JSON-Example-Extractor v1.0.0",
                 "scanner_type": "MDX_JSON_EXAMPLE_EXTRACTOR",
-                "total_versions": 2,
                 "total_methods": {
                     "all": len(v1_methods) + len(v2_methods),
                     "v1": len(v1_methods),
@@ -1239,7 +1241,7 @@ class KDFTools:
         parser = subparsers.add_parser(
             'openapi',
             help='Generate OpenAPI specs from MDX documentation.',
-            description='Processes MDX documentation files to create OpenAPI specifications.'
+            description='Processes MDX documentation files to create OpenAPI specifications'
         )
         parser.add_argument(
             '--version', type=str, default='v2',
