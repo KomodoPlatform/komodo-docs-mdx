@@ -851,7 +851,7 @@ class MethodMappingManager:
             }
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"report-kdf_postman_json_method_paths.json"
+        filename = f"report-kdf_postman_collection_method_paths.json"
         
         self.reports_dir.mkdir(parents=True, exist_ok=True)
         output_path = self.reports_dir / filename
