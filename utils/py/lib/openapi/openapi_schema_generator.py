@@ -49,6 +49,7 @@ class OpenApiSchemaGenerator:
         """
         Generates schemas for common data structures and enums.
         """
+        self.logger.critical("!!!!!!!!!! EXECUTING generate_common_schemas !!!!!!!!!!!")
         # Generate files for manually defined enums from the enums/index.mdx file
         manual_enums = self._extract_manual_enums_from_docs()
         for enum_name, schema in manual_enums.items():
@@ -118,7 +119,14 @@ class OpenApiSchemaGenerator:
             content = structure_file.read_text(encoding="utf-8")
             structures = self._parse_structure_definitions(content, str(structure_file))
             for name, schema in structures.items():
-                self._write_schema_file(name, schema)
+                full_schema = {
+                    'components': {
+                        'schemas': {
+                            name: schema
+                        }
+                    }
+                }
+                self._write_schema_file(name, full_schema)
         except Exception as e:
             self.logger.error(f"Error processing structure file {structure_file}: {e}")
 
@@ -135,7 +143,10 @@ class OpenApiSchemaGenerator:
             # Each match corresponds to one structure (e.g., ActivationMode)
             properties = self._parse_structure_table(structure_content, file_path)
             if properties: # Only add if properties were found
-                structures[structure_name] = properties
+                structures[structure_name] = {
+                    'type': 'object',
+                    'properties': properties
+                }
             
         return structures
 
@@ -178,8 +189,10 @@ class OpenApiSchemaGenerator:
 
     def _write_schema_file(self, name: str, schema: Dict):
         """Writes a schema to a YAML file."""
+        ensure_directory_exists(self.schemas_dir)
         filename = f"{name}.yml"
         output_file_path = Path(self.schemas_dir) / filename
+        self.logger.info(f"Writing schema for {name} to {output_file_path}")
         with open(output_file_path, 'w', encoding='utf-8') as f_out:
             yaml.dump(schema, f_out, sort_keys=False, allow_unicode=True)
 

@@ -95,8 +95,17 @@ class DirectoryConfig:
     data_dir: str = "utils/py/data"
     reports_dir: str = "reports"
     cache_dir: str = "cache"
-    category_mappings: str = "utils/py/data/category_mappings.json"
     kdf_repo_path: str = "utils/kdf_repo"
+
+    # Report files
+    rust_methods_report: str = "reports/kdf_rust_methods.json"
+    rust_method_paths_report: str = "reports/kdf_rust_method_paths.json"
+    mdx_methods_report: str = "reports/kdf_mdx_methods.json"
+    mdx_method_paths_report: str = "reports/kdf_mdx_method_paths.json"
+    unified_method_mapping_report: str = "reports/kdf_unified_method_map.json"
+    kdf_gap_analysis_report: str = "reports/kdf_gap_analysis.json"
+    category_mappings: str = "reports/category_mappings.json"
+
 
     def __post_init__(self):
         """Resolve all path strings to absolute Path objects."""

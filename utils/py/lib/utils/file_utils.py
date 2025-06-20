@@ -390,7 +390,7 @@ def cleanup_old_files(directory: str, pattern: str, keep_count: int = 3, verbose
     
     Args:
         directory: Directory to search for files
-        pattern: Glob pattern to match files (e.g., "report-kdf_rust_methods_*.json")
+        pattern: Glob pattern to match files (e.g., "report-kdf_rust_method*.json")
         keep_count: Number of most recent files to keep (default: 3)
         verbose: Whether to log cleanup actions
         

@@ -7,27 +7,24 @@ Postman collections, and repository analysis. This tool consolidates functionali
 from multiple specialized scripts into a single, easy-to-use interface.
 
 Available Commands:
-- openapi: Convert MDX documentation to OpenAPI specs (--clean-before for auto-cleanup)
-- postman: Generate Postman collections (--clean-before for auto-cleanup)
+- openapi: Convert MDX documentation to OpenAPI specs
+- postman: Generate Postman collections
 - scan-rust: Scan KDF Rust repository for RPC methods
 - scan-mdx: Scan MDX documentation files for method names
 - gap-analysis: Compare Rust methods with MDX documentation
 - map_methods: Method mapping and OpenAPI management
 - json-extract: Extract JSON examples from MDX files
-- cleanup: Clean up old temporary files
 
 Recommended Workflows:
-    # Generate with automatic cleanup
-    kdf_tools.py openapi --version v2 --clean-before
-    kdf_tools.py postman --versions v2 --clean-before
+    kdf_tools.py openapi --version v2
+    kdf_tools.py postman --versions v2
 
 Examples:
-    kdf_tools.py openapi --version v2 --clean-before # Generate OpenAPI with cleanup
-    kdf_tools.py postman --clean-before              # Generate Postman with cleanup
+    kdf_tools.py openapi --version v2 # Generate OpenAPI
+    kdf_tools.py postman              # Generate Postman
 
 Global Options:
     --dry-run: Show what would be done without making changes
-    --keep: Number of recent temporary files to keep during auto-cleanup (default: 3)
 """
 
 import sys
@@ -72,24 +69,18 @@ from utils.py.lib.openapi.openapi_manager import OpenAPIManager
 from utils.py.lib.postman.postman_manager import PostmanManager
 from utils.py.lib.utils.data_utils import sort_version_method_counts
 
-from utils.py.lib.generation.cleanup_utils import GeneratedFilesCleaner
 from utils.py.lib.async_support import run_async
 from utils.py.lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
 
 
 class KDFTools:
     """Unified KDF Tools CLI."""
-    CLEANUP_CATEGORIES = ["openapi", "postman", "rust", "all"]
     
     def __init__(self):
         self.verbose = True
         self.config = get_config()
         self.logger = get_logger("kdf-tools")
         self.openapi_spec_generator = OpenApiSpecGenerator()
-        self.cleaner = GeneratedFilesCleaner(
-            config=self.config,
-            verbose=self.verbose
-        )
         if self.verbose:
             self.logger.folder(f"Workspace root: {self.config.workspace_root}")
             self.logger.folder(f"Data directory: {self.config.directories.data_dir}")
@@ -131,101 +122,64 @@ class KDFTools:
             for path in report_paths:
                 self.log(f"    - {path}")
         self.log("")
-    
+        
     def openapi_command(self, args):
         """Handle openapi subcommand - MDX to OpenAPI conversion."""
         command_title = "MDX to OpenAPI Conversion"
-        
-        # Determine processing stages
-        process_schemas = args.process_schemas
-        process_methods = args.process_methods
-        link_schemas = args.link_schemas
-
-        # If no specific stage is selected, run all stages
-        if not any([process_schemas, process_methods, link_schemas]):
-            process_schemas = process_methods = link_schemas = True
-
         config = [
-            f"Version: {args.version}",
-            f"Clean before: {args.clean_before}",
-            f"Keep: {args.keep}",
-            f"Process schemas: {process_schemas}",
-            f"Process methods: {process_methods}",
-            f"Link schemas: {link_schemas}"
         ]
         self._print_header(command_title, config)
         
         success = False
         report_paths = []
         try:
-            # Auto-cleanup generated files if requested
-            if args.clean_before:
-                self.logger.clean("Cleaning up old OpenAPI files before generation...")
-                if not self._cleanup_before_generation(['openapi'], args.dry_run, args.keep):
-                    self.log("Cleanup failed, continuing anyway...", "warning")
-            
             # Initialize OpenAPI manager with enhanced enum/schema support
             manager = OpenAPIManager(
                 config=self.config,
                 verbose=self.verbose
             )
             
-            # Handle "all" version by processing both v1 and v2
-            if args.version == "all":
-                self.log("🔄 Processing all versions (v1 and v2) in a single run...")
-                
-                # Process v1 first
-                self.log("📂 Processing v1 (legacy methods)...")
-                v1_pre_count = manager.success_count
-                result_v1 = manager.generate_openapi_specs(
-                    version="v1",
-                    process_schemas=process_schemas,
-                    process_methods=process_methods,
-                    link_schemas=link_schemas
-                )
-                v1_post_count = manager.success_count
-                v1_count = v1_post_count - v1_pre_count
-                self.log(f"✅ V1: Processed {v1_count} methods.")
-                
-                # Process v2 
-                self.log("📂 Processing v2 (current methods)...")
-                v2_pre_count = manager.success_count
-                result_v2 = manager.generate_openapi_specs(
-                    version="v2",
-                    process_schemas=process_schemas,
-                    process_methods=process_methods,
-                    link_schemas=link_schemas
-                )
-                v2_post_count = manager.success_count
-                v2_count = v2_post_count - v2_pre_count
-                self.log(f"✅ V2: Processed {v2_count} methods.")
+            self.log("🔄 Processing all versions (v1 and v2) in a single run...")
+            
+            # Process v1 first
+            self.log("📂 Processing v1 (legacy methods)...")
+            # Store pre-v1 counts
+            v1_pre_count = manager.success_count
+            result_v1 = manager.generate_openapi_specs(version="v1")
+            # Calculate v1 count
+            v1_post_count = manager.success_count
+            v1_count = v1_post_count - v1_pre_count
+            self.log(f"✅ V1: Processed {v1_count} methods.")
+            
+            # Process v2 
+            self.log("📂 Processing v2 (current methods)...")
+            # Store pre-v2 counts
+            v2_pre_count = manager.success_count
+            result_v2 = manager.generate_openapi_specs(version="v2")
+            # Calculate v2 count
+            v2_post_count = manager.success_count
+            v2_count = v2_post_count - v2_pre_count
+            self.log(f"✅ V2: Processed {v2_count} methods.")
 
-                total_count = manager.success_count
-                result = f"✅ All versions processed successfully!\n   📊 V1 methods: {v1_count}\n   📊 V2 methods: {v2_count}\n   📊 Total methods: {total_count}"
-            else:
-                # Generate OpenAPI specs for single version
-                result = manager.generate_openapi_specs(
-                    version=args.version,
-                    process_schemas=process_schemas,
-                    process_methods=process_methods,
-                    link_schemas=link_schemas
-                )
+            total_count = manager.success_count
+            result = f"✅ All versions processed successfully!\n   📊 V1 methods: {v1_count}\n   📊 V2 methods: {v2_count}\n   📊 Total methods: {total_count}"
             
             self.log(f"✅ {result}")
             
-            if args.version == "all":
-                self.log("📊 Generating OpenAPI tracking files...")
-                enums_count = len(manager.mdx_parser.enum_patterns)
-                structures_count = len(manager.mdx_parser.common_structures)
-                source_dirs = [str(Path(self.config.workspace_root) / self.config.directories.mdx_v1),
-                               str(Path(self.config.workspace_root) / self.config.directories.mdx_v2)]
-                
-                manager.spec_generator.generate_tracking_files(
-                    "all", manager.success_count, manager.error_count,
-                    manager.mdx_parser.enum_patterns, structures_count,
-                    enums_count, source_dirs, manager.all_methods
-                )
+            # NEW: Call tracking file generat
+            self.log("📊 Generating OpenAPI tracking files...")
+            enums_count = len(manager.mdx_parser.enum_patterns)
+            structures_count = len(manager.mdx_parser.common_structures)
+            source_dirs = [str(Path(self.config.workspace_root) / self.config.directories.mdx_v1),
+                            str(Path(self.config.workspace_root) / self.config.directories.mdx_v2)]
             
+            manager.spec_generator.generate_tracking_files(
+                "all", manager.success_count, manager.error_count,
+                manager.mdx_parser.enum_patterns, structures_count,
+                enums_count, source_dirs, manager.all_methods
+            )
+            
+            # Show statistics about generated schemas
             stats = manager.get_stats()
             self.log(f"📊 Generation Statistics:")
             self.log(f"   • Total methods processed: {stats['files_processed']}")
@@ -243,6 +197,7 @@ class KDFTools:
             }
             version_method_counts = sort_version_method_counts(version_method_counts)
 
+            # Generate tracking files
             processed_versions = [args.version] if args.version != "all" else ["v1", "v2"]
             openapi_report_path = self._generate_openapi_tracking_files(manager, processed_versions, version_method_counts)
             if openapi_report_path:
@@ -255,7 +210,6 @@ class KDFTools:
             success = False
         finally:
             self._print_footer(command_title, success=success, report_paths=report_paths)
-
             
     def scan_rust(self, args):
         """Handle scan-rust subcommand - KDF repository scanning with async processing."""
@@ -267,8 +221,6 @@ class KDFTools:
         config = [
             f"Branch: {args.branch}",
             f"Versions: {versions}",
-            f"Clean before: {args.clean_before}",
-            f"Keep: {args.keep}"
         ]
         self._print_header(command_title, config)
 
@@ -277,11 +229,6 @@ class KDFTools:
 
         async def main():
             nonlocal output_paths, success
-            if args.clean_before:
-                self.logger.clean("Cleaning up old Rust scan files before generation...")
-                if not self._cleanup_before_generation(['rust'], args.dry_run, args.keep):
-                    self.log("Cleanup failed, continuing anyway...", "warning")
-
             scanner = KDFScanner(
                 config=self.config,
                 repo_path=self.config.directories.kdf_repo_path,
@@ -327,18 +274,11 @@ class KDFTools:
 
         config_lines = [
             f"Versions: {versions}",
-            f"Clean before: {args.clean_before}",
-            f"Keep: {args.keep}"
         ]
         self._print_header(command_title, config_lines)
         
         success = False
         try:
-            if args.clean_before:
-                self.logger.clean("Cleaning up old MDX scan files before generation...")
-                if not self._cleanup_before_generation(['mdx'], args.dry_run, args.keep):
-                    self.log("Cleanup failed, continuing anyway...", "warning")
-
             # Get current git branch of the repository
             try:
                 result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
@@ -375,25 +315,23 @@ class KDFTools:
                 method_paths_data = self._generate_mdx_method_paths_data(
                     doc_results, versions, current_branch
                 )
-                paths_output_path = self.config.directories.reports_dir / f"report-kdf_mdx_method_paths.json"
-                print(f"💾 Saved documentation paths to: {paths_output_path}")  
-
-                safe_write_json(paths_output_path, method_paths_data)
-                report_paths.append(str(paths_output_path))
+                mdx_method_paths_report = self.config.directories.mdx_method_paths_report
+                safe_write_json(mdx_method_paths_report, method_paths_data)
+                report_paths.append(str(mdx_method_paths_report))
                 
-                print(f"💾 Saved documentation paths to: {paths_output_path}")
+                print(f"💾 Saved documentation paths to: {mdx_method_paths_report}")
                 
                 # STEP 2: Generate methods file from the paths data (secondary data source)
                 methods_data = self._generate_mdx_methods_from_paths_file(
-                    paths_output_path, current_branch, versions
+                    mdx_method_paths_report, current_branch, versions
                 )
-                methods_output_path = self.config.directories.reports_dir / f"report-kdf_mdx_methods.json"
-                safe_write_json(methods_output_path, methods_data)
-                report_paths.append(str(methods_output_path))
-                print(f"💾 Saved documentation methods to: {methods_output_path}")
+                mdx_methods_report = self.config.directories.mdx_methods_report
+                safe_write_json(mdx_methods_report, methods_data)
+                report_paths.append(str(mdx_methods_report))
+                print(f"💾 Saved documentation methods to: {mdx_methods_report}")
                 # Report success and show summary
-                self.logger.success(f"💾 Saved documentation paths to: {paths_output_path}")
-                self.logger.success(f"💾 Saved documentation methods to: {methods_output_path}")
+                self.logger.success(f"💾 Saved documentation paths to: {mdx_method_paths_report}")
+                self.logger.success(f"💾 Saved documentation methods to: {mdx_methods_report}")
                 
                 # Display summary from the paths data
                 total_documented_methods = method_paths_data["scan_metadata"]["version_method_counts"]
@@ -533,53 +471,69 @@ class KDFTools:
         return methods_data
     
     def methods_map_command(self, args):
-        """Handle map subcommand - Method mapping and OpenAPI management."""
-        self.log("Starting method mapping and OpenAPI management...")
-        
+        """Handle methods-map subcommand."""
+        command_title = "Method Mapping and OpenAPI Management"
+        config_lines = [
+            f"Command: {args.subcommand}",
+            f"Versions: {args.versions}"
+        ]
+        self._print_header(command_title, config_lines)
+        success = False
         try:
-            mapper = MethodMappingManager(verbose=self.verbose)
-            
-            # Enable debug mode if requested
-            if hasattr(args, 'debug_matching') and args.debug_matching:
-                mapper.normalizer.enable_debug_mode(True)
-                self.log("🔍 Debug mode enabled for method matching", "info")
-            
-            if args.remove:
-                # Use async version for file removal if available
-                if hasattr(mapper, 'remove_method_files_async'):
-                    run_async(mapper.remove_method_files_async(args.remove, dry_run=args.dry_run))
-                else:
-                    mapper.remove_method_files(args.remove, dry_run=args.dry_run)
-                return 0
-            
-            if args.debug:
-                # Use async version for debugging if available 
-                if hasattr(mapper, 'debug_method_matching_async'):
-                    run_async(mapper.debug_method_matching_async(args.debug))
-                else:
-                    mapper.debug_method_matching(args.debug)
-                return 0
-            
-            print("\n📋 Generating unified method mapping...")
-            
-            if hasattr(mapper, 'save_unified_mapping_async'):
-                print("💡💡💡 Using async processing for method mapping...💡💡💡")
-                run_async(mapper.save_unified_mapping_async())
+            # Load latest Rust scan data
+            rust_data = {}
+            rust_scan_files = glob.glob(str(self.config.directories.rust_methods_report))
+            if rust_scan_files:
+                with open(rust_scan_files[0], 'r') as f:
+                    rust_methods_data = json.load(f).get("repository_data", {})
+                    for v in args.versions:
+                        if v in rust_methods_data:
+                            rust_data[v] = rust_methods_data[v].get("methods", [])
             else:
-                print("💡 Not Using async processing for method mapping...💡")
-                mapper.save_unified_mapping()
+                self.logger.warning(f"No '{os.path.basename(str(self.config.directories.rust_methods_report))}' file found.")
+                self.logger.warning(f"Run 'python py/kdf_tools.py scan-rust' first")
+                return
+
+            # Load latest MDX methods data
+            mdx_methods = {}
+            mdx_scan_files = glob.glob(str(self.config.directories.mdx_methods_report))
+            if mdx_scan_files:
+                with open(mdx_scan_files[0], 'r') as f:
+                    mdx_methods_data = json.load(f).get("repository_data", {})
+                    for v in args.versions:
+                        if v in mdx_methods_data:
+                            mdx_methods[v] = mdx_methods_data[v].get("methods", [])
+            else:
+                self.logger.warning(f"No '{os.path.basename(str(self.config.directories.mdx_methods_report))}' file found.")
+                self.logger.warning(f"Run 'python py/kdf_tools.py scan-mdx' first")
+                return
+
+            # Initialize the MethodMappingManager
+            manager = MethodMappingManager(
+                config=self.config,
+                rust_methods=rust_data,
+                mdx_methods=mdx_methods,
+                verbose=self.verbose
+            )
+
+            if args.subcommand == 'generate':
+                manager.generate_mapping_file()
+            elif args.subcommand == 'update':
+                manager.update_mapping_file()
+            elif args.subcommand == 'validate':
+                manager.validate_mapping_file()
+            elif args.subcommand == 'create-drafts':
+                manager.create_draft_files()
             
-            self._generate_postman_tracking_file_from_latest_data(['v1', 'v2'])
-            
-            
-            self.log("Method mapping completed successfully!", "success")
-            return 0
+            success = True
         except Exception as e:
-            self.log(f"Method mapping failed: {e}", "error")
-            return 1
-    
+            self.logger.error(f"An error occurred: {e}")
+            self.logger.error(traceback.format_exc())
+        finally:
+            self._print_footer(command_title, success=success)
+
     def postman_command(self, args):
-        """Handle postman subcommand - Generate Postman collections."""
+        """Handle postman subcommand - Postman collection generation."""
         command_title = "Postman Collection Generation"
         versions = args.versions
         if "all" in versions:
@@ -587,19 +541,11 @@ class KDFTools:
         
         config_lines = [
             f"Versions: {versions}",
-            f"Clean before: {args.clean_before}",
-            f"Keep: {args.keep}"
         ]
         self._print_header(command_title, config_lines)
         
         success = False
         try:
-            # Auto-cleanup generated files if requested
-            if args.clean_before:
-                self.logger.clean("Cleaning up old Postman collections before generation...")
-                if not self._cleanup_before_generation(['postman'], args.dry_run, args.keep):
-                    self.log("Cleanup failed, continuing anyway...", "warning")
-            
             # Step 1: Generate method paths file first (like other commands)
             self.logger.info("🗺️ Generating method mapping with Postman hotlinks...")
             mapper = MethodMappingManager(config=self.config, verbose=self.verbose)
@@ -780,35 +726,6 @@ class KDFTools:
             self.log(f"JSON extraction failed: {e}", "error")
             return 1
     
-    def cleanup_command(self, args):
-        """Handle cleanup subcommand - removes old generated files."""
-        command_title = "Cleanup Old Files"
-        config_lines = [
-            f"Categories: {args.categories}",
-            f"Keep: {args.keep}",
-            f"Dry run: {args.dry_run}"
-        ]
-        self._print_header(command_title, config_lines)
-        
-        success = False
-        try:
-            categories_to_clean = args.categories
-            if "all" in categories_to_clean:
-                categories_to_clean = [c for c in self.CLEANUP_CATEGORIES if c != 'all']
-            
-            self._cleanup_before_generation(
-                categories=categories_to_clean,
-                dry_run=args.dry_run,
-                keep_count=args.keep
-            )
-            success = True
-        except Exception as e:
-            self.log(f"An error occurred during cleanup: {e}", "error")
-
-        self._print_footer(command_title, success=success)
-        return 0 if success else 1
-
-
     def review_draft_quality_command(self, args):
         """Handle review-draft-quality subcommand - Compare generated docs with live versions."""
         self.log("Starting draft quality analysis...")
@@ -1156,81 +1073,9 @@ class KDFTools:
         self.log(f"📊 V1: {extraction_stats['v1']['total_examples_found']} examples from {extraction_stats['v1']['methods_with_examples']} methods")
         self.log(f"📊 V2: {extraction_stats['v2']['total_examples_found']} examples from {extraction_stats['v2']['methods_with_examples']} methods")
 
-    def _cleanup_before_generation(self, categories: List[str], dry_run: bool = False, keep_count: int = 0) -> bool:
-        """
-        Cleanup old generated files based on category.
-
-        NEW: Added 'rust' category for scan-rust cleanup.
-        """
-        self.logger.clean(f"Starting cleanup for categories: {categories} (keeping {keep_count} recent files)...")
-        
-        base_dirs = {
-            "openapi": self.config.directories.openapi_main.parent,
-            "postman": self.config.directories.postman_collections,
-            "reports": self.config.directories.reports_dir,
-            "rust": self.config.directories.reports_dir,
-            "mdx": self.config.directories.reports_dir
-        }
-        
-        file_patterns = {
-            "openapi": "report-kdf_openapi*.json",
-            "rust": "report-kdf_rust_method*.json",
-            "postman": "report-kdf_postman*.json",
-            "mdx": "report-kdf_mdx_method*.json"
-        }
-        
-        all_cleaned = True
-        for category in categories:
-            if category not in base_dirs:
-                self.log(f"Unknown cleanup category: {category}", "warning")
-                continue
-
-            dir_path = base_dirs[category]
-            pattern = file_patterns[category]
-            
-            if not dir_path.exists():
-                self.logger.clean(f"Directory not found for category '{category}': {dir_path}")
-                continue
-
-            self.logger.clean(f"Scanning for '{pattern}' in '{dir_path}'...")
-            
-            try:
-                # Find all matching files and sort them by modification time
-                files = sorted(
-                    [p for p in dir_path.glob(pattern) if p.is_file()],
-                    key=os.path.getmtime,
-                    reverse=True
-                )
-                
-                if not files:
-                    self.logger.clean(f"No files to clean for category '{category}'.")
-                    continue
-                
-                files_to_delete = files[keep_count:]
-                
-                if not files_to_delete:
-                    self.log(f"No old files to delete for category '{category}'.")
-                    continue
-
-                self.log(f"Found {len(files_to_delete)} file(s) to delete for category '{category}':")
-                for f in files_to_delete:
-                    relative_path = self.config.directories.get_relative_path(f)
-                    self.log(f"  - Deleting {relative_path}")
-                    if not dry_run:
-                        try:
-                            f.unlink()
-                            self.logger.info(f"🗑️ File delete completed: {relative_path}")
-                        except Exception as e:
-                            self.log(f"    -> Failed to delete: {e}", "error")
-                            all_cleaned = False
-            except Exception as e:
-                self.log(f"Error while cleaning category '{category}': {e}", "error")
-                all_cleaned = False
-        
-        if dry_run:
-            self.log("Dry run complete. No files were deleted.", "info")
-        
-        return all_cleaned
+    def _generate_postman_tracking_file_from_latest_data(self, versions: List[str]) -> None:
+        """Placeholder for generating Postman tracking file."""
+        pass
 
     def setup_postman_parser(self, subparsers):
         """Setup parser for the postman command."""
@@ -1242,14 +1087,6 @@ class KDFTools:
         parser.add_argument(
             '--versions', nargs='+', default=['all'],
             help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
-        )
-        parser.add_argument(
-            '--clean-before', action='store_true',
-            help='Clean up old Postman files before running.'
-        )
-        parser.add_argument(
-            '--keep', type=int, default=3,
-            help='Number of recent files to keep during cleanup.'
         )
         parser.set_defaults(func=self.postman_command)
 
@@ -1264,26 +1101,6 @@ class KDFTools:
             '--version', type=str, default='v2',
             help='Specify the API version to process.'
         )
-        parser.add_argument(
-            '--clean-before', action='store_true',
-            help='Clean up old OpenAPI files before running.'
-        )
-        parser.add_argument(
-            '--keep', type=int, default=3,
-            help='Number of recent files to keep during cleanup.'
-        )
-        parser.add_argument(
-            '--process-schemas', action='store_true',
-            help='Only process and generate schemas for enums and structures.'
-        )
-        parser.add_argument(
-            '--process-methods', action='store_true',
-            help='Only process and generate OpenAPI specs for methods.'
-        )
-        parser.add_argument(
-            '--link-schemas', action='store_true',
-            help='Only link schemas in existing method specs.'
-        )
         parser.set_defaults(func=self.openapi_command)
 
     def setup_scan_mdx_parser(self, subparsers):
@@ -1297,15 +1114,26 @@ class KDFTools:
             '--versions', nargs='+', default=['all'],
             help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
         )
-        parser.add_argument(
-            '--clean-before', action='store_true',
-            help='Clean up old scan files before running.'
-        )
-        parser.add_argument(
-            '--keep', type=int, default=3,
-            help='Number of recent files to keep during cleanup.'
-        )
         parser.set_defaults(func=self.scan_mdx_command)
+
+    
+    def setup_scan_rust_parser(self, subparsers):
+        """Setup parser for the scan-rust command."""
+        parser = subparsers.add_parser(
+            'scan-rust', 
+            help='Scan KDF Rust repository for RPC methods.',
+            description='Scans the Komodo DeFi Framework Rust repository to find RPC methods.'
+        )
+        parser.add_argument(
+            '--branch', type=str, default='dev',
+            help='Specify the branch of the KDF repository to scan.'
+        )
+        parser.add_argument(
+            '--versions', nargs='+', default=['v2', 'v1'],
+            help="List of versions to scan (e.g., v1 v2). Default: ['v2', 'v1']"
+        )
+        parser.set_defaults(func=self.scan_rust)
+
 
     def setup_map_methods_parser(self, subparsers):
         """Setup parser for the map-methods command."""
@@ -1337,32 +1165,7 @@ class KDFTools:
             '--versions', nargs='+', default=['all'],
             help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
         )
-        parser.add_argument(
-            '--clean-before', action='store_true',
-            help='Clean up old JSON example files before running.'
-        )
-        parser.add_argument(
-            '--keep', type=int, default=3,
-            help='Number of recent files to keep during cleanup.'
-        )
         parser.set_defaults(func=self.json_extract_command)
-
-    def setup_cleanup_parser(self, subparsers):
-        """Setup parser for the cleanup command."""
-        parser = subparsers.add_parser(
-            'cleanup',
-            help='Clean up old temporary files.',
-            description='Removes old generated files from various tool operations.'
-        )
-        parser.add_argument(
-            '--categories', nargs='+', choices=self.CLEANUP_CATEGORIES, default=['all'],
-            help=f"Categories to clean. Choices: {self.CLEANUP_CATEGORIES}"
-        )
-        parser.add_argument(
-            '--keep', type=int, default=3,
-            help='Number of recent files to keep for each category.'
-        )
-        parser.set_defaults(func=self.cleanup_command)
 
     def setup_review_draft_quality_parser(self, subparsers):
         """Setup parser for the review-draft-quality command."""
@@ -1482,131 +1285,79 @@ class KDFTools:
         )
         parser.set_defaults(func=self.gap_analysis_command)
 
-    def _generate_postman_tracking_file_from_latest_data(self, versions: List[str]) -> None:
-        """Placeholder for generating Postman tracking file."""
-        pass
-
-    def setup_scan_rust_parser(self, subparsers):
-        """Setup parser for the scan-rust command."""
-        parser = subparsers.add_parser(
-            'scan-rust', 
-            help='Scan KDF Rust repository for RPC methods.',
-            description='Scans the Komodo DeFi Framework Rust repository to find RPC methods.'
-        )
-        parser.add_argument(
-            '--branch', type=str, default='dev',
-            help='Specify the branch of the KDF repository to scan.'
-        )
-        parser.add_argument(
-            '--versions', nargs='+', default=['v2', 'v1'],
-            help="List of versions to scan (e.g., v1 v2). Default: ['v2', 'v1']"
-        )
-        parser.add_argument(
-            '--clean-before', action='store_true',
-            help='Clean up old scan files before running.'
-        )
-        parser.add_argument(
-            '--keep', type=int, default=3,
-            help='Number of recent files to keep during cleanup.'
-        )
-        parser.set_defaults(func=self.scan_rust)
-
     def gap_analysis_command(self, args):
         """Handle gap-analysis subcommand."""
-        command_title = "Documentation Gap Analysis"
+        command_title = "Gap Analysis"
         config = [
-            f"Versions: {args.versions}"
+            f"Versions: {args.versions}",
         ]
         self._print_header(command_title, config)
-        success = False
-        try:
-            # Load latest Rust scan data
-            rust_data = {}
-            rust_scan_files = glob.glob(os.path.join(str(self.config.directories.reports_dir), "report-kdf_rust_methods.json"))
-            if rust_scan_files:
-                latest_rust_scan = max(rust_scan_files, key=os.path.getctime)
-                self.log(f"Found latest Rust methods file: {os.path.basename(latest_rust_scan)}")
-                with open(latest_rust_scan, 'r') as f:
-                    rust_methods_data = json.load(f).get("repository_data", {})
-                    for v in args.versions:
-                        if v in rust_methods_data:
-                            rust_data[v] = rust_methods_data[v].get("methods", [])
-            else:
-                self.log(f"⚠️  No 'report-kdf_rust_methods.json' file found.", "warning")
-                self.log(f"   Run 'python py/kdf_tools.py scan-rust' first", "warning")
-                return
+        
+        # Load Rust methods
+        rust_methods = {}
+        rust_scan_files = glob.glob(str(self.config.directories.rust_methods_report))
+        if rust_scan_files:
+            with open(rust_scan_files[0], 'r') as f:
+                rust_data = json.load(f)
+            for version in args.versions:
+                if version in rust_data['repository_data']:
+                    rust_methods[version] = set(rust_data['repository_data'][version]['methods'])
+        else:
+            self.logger.warning(f"No '{os.path.basename(str(self.config.directories.rust_methods_report))}' file found.")
+            self.logger.warning("Please run 'scan-rust' first.")
+            return
+        
+        # Load MDX methods
+        mdx_methods = {}
+        mdx_scan_files = glob.glob(str(self.config.directories.mdx_methods_report))
+        if mdx_scan_files:
+            with open(mdx_scan_files[0], 'r') as f:
+                mdx_data = json.load(f)
+            for version in args.versions:
+                if version in mdx_data['repository_data']:
+                    mdx_methods[version] = set(mdx_data['repository_data'][version]['methods'])
+        else:
+            self.logger.warning(f"No '{os.path.basename(str(self.config.directories.mdx_methods_report))}' file found.")
+            self.logger.warning("Please run 'scan-mdx' first.")
+            return
 
-            # Load latest MDX methods data
-            mdx_methods = {}
-            mdx_scan_files = glob.glob(os.path.join(str(self.config.directories.reports_dir), "report-kdf_mdx_methods.json"))
-            if mdx_scan_files:
-                latest_mdx_scan = max(mdx_scan_files, key=os.path.getctime)
-                self.log(f"Found latest MDX methods file: {os.path.basename(latest_mdx_scan)}")
-                with open(latest_mdx_scan, 'r') as f:
-                    mdx_methods_data = json.load(f).get("repository_data", {})
-                    for v in args.versions:
-                        if v in mdx_methods_data:
-                            mdx_methods[v] = mdx_methods_data[v].get("methods", [])
-            else:
-                self.log(f"⚠️  No 'report-kdf_mdx_methods.json' file found.", "warning")
-                self.log(f"   Run 'python py/kdf_tools.py scan-mdx' first", "warning")
-                return
+        # Perform gap analysis
+        gap_report = {}
+        for v in args.versions:
+            if v not in rust_methods or v not in mdx_methods:
+                continue
+            self.log(f"🔍 Processing {v.upper()}...")
+            rust_method_set = rust_methods[v]
+            doc_method_set = mdx_methods[v]
 
-            # Perform Gap Analysis
-            self.log("📊 Performing Gap Analysis...")
-            gap_analysis_data = {
-                "rust_methods_without_mdx": {v: [] for v in args.versions},
-                "mdx_methods_without_rust": {v: [] for v in args.versions},
-                "statistics": {}
+            missing_in_docs = sorted(list(rust_method_set - doc_method_set))
+            extra_in_docs = sorted(list(doc_method_set - rust_method_set))
+
+            gap_report[v] = {
+                "missing_in_docs": missing_in_docs,
+                "extra_in_docs": extra_in_docs,
+                "total_rust_methods": len(rust_method_set),
+                "total_doc_methods": len(doc_method_set),
+                "undocumented_methods": len(missing_in_docs),
+                "extra_methods_in_docs": len(extra_in_docs),
+                "coverage": f"{len(doc_method_set) / len(rust_method_set) * 100:.2f}%"
             }
 
-            for v in args.versions:
-                if v not in rust_data or v not in mdx_methods:
-                    continue
-                self.log(f"🔍 Processing {v.upper()}...")
-                rust_method_set = set(rust_data.get(v, []))
-                doc_method_set = set(mdx_methods.get(v, []))
+            self.log(f"   - Total methods in Rust: {len(rust_method_set)}")
+            self.log(f"   - Total methods in MDX: {len(doc_method_set)}")
+            self.log(f"   - Coverage: {gap_report[v]['coverage']}")
+            if missing_in_docs:
+                self.log(f"   - 🚨 Undocumented methods: {len(missing_in_docs)}")
+            if extra_in_docs:
+                self.log(f"   - ⚠️  Extra methods in docs: {len(extra_in_docs)}")
 
-                missing_in_docs = sorted(list(rust_method_set - doc_method_set))
-                extra_in_docs = sorted(list(doc_method_set - rust_method_set))
+        # Save report
+        report_path = self.config.directories.kdf_gap_analysis_report
+        safe_write_json(report_path, gap_report, indent=2)
+        self.log(f"✅ 💾 Gap analysis report saved to: {report_path}")
 
-                gap_analysis_data["rust_methods_without_mdx"][v] = missing_in_docs
-                gap_analysis_data["mdx_methods_without_rust"][v] = extra_in_docs
-                
-                total_rust_methods = len(rust_method_set)
-                total_doc_methods = len(doc_method_set)
-                
-                coverage = (total_doc_methods / total_rust_methods * 100) if total_rust_methods > 0 else 0
-
-                gap_analysis_data["statistics"][v] = {
-                    "total_rust_methods": total_rust_methods,
-                    "documented_methods": total_doc_methods,
-                    "undocumented_methods": len(missing_in_docs),
-                    "extra_methods_in_docs": len(extra_in_docs),
-                    "documentation_coverage_percent": f"{coverage:.2f}%"
-                }
-
-                self.log(f"   - Total methods in Rust: {total_rust_methods}")
-                self.log(f"   - Total methods in MDX: {total_doc_methods}")
-                self.log(f"   - Coverage: {coverage:.2f}%")
-                if missing_in_docs:
-                    self.log(f"   - 🚨 Undocumented methods: {len(missing_in_docs)}")
-                if extra_in_docs:
-                    self.log(f"   - ⚠️  Extra methods in docs: {len(extra_in_docs)}")
-
-            # Save report
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_path = self.config.directories.reports_dir / "report-kdf_gap_analysis.json"
-            safe_write_json(report_path, gap_analysis_data, indent=2)
-            self.log(f"✅ 💾 Gap analysis report saved to: {report_path}")
-
-            success = True
-
-        except Exception as e:
-            self.logger.error(f"Error during gap analysis: {e}")
-            self.logger.error(traceback.format_exc())
-        finally:
-            self._print_footer(command_title, success=success)
+        success = True
+        self._print_footer(command_title, success=success)
 
     def generate_common_schemas_command(self, args):
         """Generates OpenAPI schemas for common structures and enums."""
@@ -1637,7 +1388,6 @@ class KDFTools:
         self.setup_postman_parser(subparsers)
         self.setup_map_methods_parser(subparsers)
         self.setup_json_extract_parser(subparsers)
-        self.setup_cleanup_parser(subparsers)
         self.setup_review_draft_quality_parser(subparsers)
         self.setup_scan_existing_docs_parser(subparsers)
         self.setup_generate_docs_parser(subparsers)
@@ -1657,8 +1407,6 @@ class KDFTools:
         # Add dry_run to args if not present (for commands that dont have it)
         if not hasattr(args, 'dry_run'):
             args.dry_run = False
-        if not hasattr(args, 'keep'):
-            args.keep = 3
 
         # Execute command
         if hasattr(args, 'func'):

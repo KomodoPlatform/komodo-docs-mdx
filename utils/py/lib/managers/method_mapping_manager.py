@@ -344,7 +344,7 @@ class MethodMappingManager:
         try:
             with open(output_path, 'w') as f:
                 json.dump(unified_mapping, f, indent=4)
-            self.logger.info(f"✅ Saved unified mapping to {output_path}")
+            self.logger.success(f"✅ Saved unified mapping to {output_path} [347]")
             return str(output_path)
         except IOError as e:
             self.logger.error(f"❌ Error saving unified mapping to {output_path}: {e}")
@@ -454,22 +454,17 @@ class MethodMappingManager:
         
         # Convert to JSON-serializable format with proper structure
         json_data = await self._convert_mapping_to_enhanced_json(unified)
-        
-        
-        
+
         if output_file is None:
             output_file_path = self.reports_dir / "unified_method_mapping.json"
         else:
             # If an output file is provided, make sure it's inside the reports dir
             output_file_path = self.reports_dir / Path(output_file).name
         
-        # Save to file asynchronously
-        import asyncio
-        import json
-            
         def write_json_file():
             with open(output_file_path, 'w', encoding='utf-8') as f:
                 json.dump(json_data, f, indent=2, ensure_ascii=False)
+                self.logger.info(f"✅ Saved unified mapping to {output_file_path}")
         
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, write_json_file)
@@ -664,12 +659,17 @@ class MethodMappingManager:
             }
     
     async def _load_canonical_rust_methods(self) -> Dict[str, Set[str]]:
-        """Load canonical method names from the latest Rust methods file."""
-        reports_dir = self.config._resolve_path(self.config.directories.reports_dir)
-        rust_files = glob.glob(os.path.join(reports_dir, "report-kdf_rust_methods.json"))
+        """
+        Asynchronously loads canonical Rust methods from the latest 'report-kdf_rust_methods.json' report.
+        """
+        rust_methods = {}
         
+        # Find the latest rust methods report
+        rust_files = glob.glob(str(self.config.directories.rust_methods_report))
         if not rust_files:
-            raise FileNotFoundError("No KDF Rust methods file found. Run 'kdf_tools.py scan-rust' first.")
+            if self.verbose:
+                self.logger.warning("No Rust method report found. Cannot perform gap analysis.")
+            return rust_methods
         
         # Get the most recent file
         latest_file = max(rust_files, key=lambda x: Path(x).stat().st_mtime)

@@ -176,7 +176,7 @@ class KDFScanner:
 
     async def save_repository_methods_async(self, repo_info: Dict[str, UnifiedRepositoryInfo], version_method_counts: Dict[str, int]) -> str:
 
-        file_path = self.reports_dir / "report-kdf_rust_methods.json"
+        file_path = self.config.directories.rust_methods_report
         
         metadata = ScanMetadata(
             scanner_type="RUST_METHODS_SCAN",
