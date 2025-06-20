@@ -334,7 +334,9 @@ class AsyncMethodProcessor:
                     if len(parts) >= 2:
                         # Get the parent directory name as method name
                         method_dir = parts[-2]
-                        # Convert from directory format to API format
+                        # Convert from directory format (hyphen-separated) to canonical API format (:: separated).
+                        # This assumes that the directory name uses hyphens as separators,
+                        # which is the correct convention. e.g., 'task-enable_utxo-init' -> 'task::enable_utxo::init'.
                         method_name = method_dir.replace('-', '::')
                         
                         if method_name not in method_groups:

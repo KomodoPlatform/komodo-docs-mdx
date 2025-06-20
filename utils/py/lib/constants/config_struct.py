@@ -102,6 +102,8 @@ class DirectoryConfig:
     rust_method_paths_report: str = "reports/kdf_rust_method_paths.json"
     mdx_methods_report: str = "reports/kdf_mdx_methods.json"
     mdx_method_paths_report: str = "reports/kdf_mdx_method_paths.json"
+    mdx_json_example_methods_report: str = "reports/kdf_mdx_json_example_methods.json"
+    mdx_json_example_method_paths_report: str = "reports/kdf_mdx_json_example_method_paths.json"
     unified_method_mapping_report: str = "reports/kdf_unified_method_map.json"
     kdf_gap_analysis_report: str = "reports/kdf_gap_analysis.json"
     category_mappings: str = "reports/category_mappings.json"

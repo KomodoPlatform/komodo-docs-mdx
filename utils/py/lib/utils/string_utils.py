@@ -19,13 +19,12 @@ def convert_dir_to_method_name(directory_name: str) -> str:
     """
     Convert directory/folder name to canonical method name format.
     
-    Converts folder format to canonical format:
-    - task-enable_utxo-init → task::enable_utxo::init
-    - lightning-channels-close_channel → lightning::channels::close_channel
-    - experimental-staking-delegate → experimental::staking::delegate
-    - wallet-staking-validators → wallet::staking::validators
-    - stream-balance-enable → stream::balance::enable
-    - non_fungible_tokens-get_nft_list → non_fungible_tokens::get_nft_list
+    Converts folder format (hyphen-separated) to canonical format (:: separated).
+    Underscores within method name parts are preserved.
+    
+    Examples:
+    - task-enable_utxo-init -> task::enable_utxo::init
+    - lightning-channels-close_channel -> lightning::channels::close_channel
     
     Args:
         directory_name: Directory/folder name (e.g., "task-enable_utxo-init")
@@ -36,8 +35,8 @@ def convert_dir_to_method_name(directory_name: str) -> str:
     if not directory_name:
         return ""
     
-    # Simply replace hyphens with double colons
-    # This preserves underscores within method names
+    # Simply replace hyphens with double colons.
+    # This is the designated separator for file/folder names that corresponds to '::'.
     return directory_name.replace("-", "::")
 
 
@@ -46,13 +45,12 @@ def convert_method_to_dir_name(method_name: str) -> str:
     """
     Convert canonical method name to directory/folder name format.
     
-    Converts canonical format to folder format:
-    - task::enable_utxo::init → task-enable_utxo-init
-    - lightning::channels::close_channel → lightning-channels-close_channel
-    - experimental::staking::delegate → experimental-staking-delegate
-    - wallet::staking::validators → wallet-staking-validators
-    - stream::balance::enable → stream-balance-enable
-    - non_fungible_tokens::get_nft_list → non_fungible_tokens-get_nft_list
+    Converts canonical format (:: separated) to folder format (hyphen-separated).
+    Underscores within method name parts are preserved.
+    
+    Examples:
+    - task::enable_utxo::init -> task-enable_utxo-init
+    - lightning::channels::open_channel -> lightning-channels-open_channel
     
     Args:
         method_name: Canonical method name (e.g., "task::enable_utxo::init")
@@ -63,8 +61,8 @@ def convert_method_to_dir_name(method_name: str) -> str:
     if not method_name:
         return ""
     
-    # Simply replace :: with -
-    # This preserves underscores in method names like enable_utxo
+    # Simply replace '::' with '-'.
+    # Hyphens are used in filesystem paths to represent the '::' separator from canonical names.
     return method_name.replace("::", "-")
 
 

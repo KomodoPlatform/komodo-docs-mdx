@@ -641,9 +641,9 @@ class KDFTools:
                             line_number=example.line_number,
                             description=example.description
                         )
-                        cleaned_examples.append(cleaned_example)
-                    
-                    self.logger.success(f"{method_name}: Found {len(cleaned_examples)} examples")
+                        cleaned_examples.append(cleaned_example)                    
+
+                    self.logger.info(f"{method_name:64} Found {len(cleaned_examples)} examples")
                     
                     # Store method info for tracking
                     if method_name not in all_extracted_methods:
@@ -659,7 +659,10 @@ class KDFTools:
                         for i, example in enumerate(cleaned_examples, 1):
 
                             # Clean method name for folder creation
-                            folder_name = example.method_name.replace("::", "_")
+                            # The canonical method name (e.g., 'task::enable_utxo::init') is converted to
+                            # a directory-safe format by replacing '::' with hyphens.
+                            # Underscores within method parts are preserved (e.g., 'task-enable_utxo-init').
+                            folder_name = example.method_name.replace("::", "-")
                             
                             # Define output directory based on version
                             output_dir = self.config.directories.postman_json_v1 if version == 'v1' else self.config.directories.postman_json_v2
@@ -968,8 +971,9 @@ class KDFTools:
         self.log("Generating JSON tracking files...", "info")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        self._generate_json_method_paths_file(all_extracted_methods)
-        self._generate_json_methods_file(all_extracted_methods, extraction_stats)
+        method_paths_file = self._generate_json_method_paths_file(all_extracted_methods)
+        methods_file = self._generate_json_methods_file(method_paths_file, extraction_stats)
+        return method_paths_file, methods_file
     
     def _generate_openapi_tracking_files(self, openapi_manager: OpenAPIManager, versions: List[str], version_method_counts: Dict[str, int]) -> str:
         """Generates all necessary tracking files for OpenAPI."""
@@ -981,11 +985,11 @@ class KDFTools:
             version_method_counts=version_method_counts
         )  
 
-    def _generate_json_method_paths_file(self, all_extracted_methods: Dict[str, Any]) -> None:
+    def _generate_json_method_paths_file(self, all_extracted_methods: Dict[str, Any]) -> Dict[str, Any]:
         """Creates a JSON file mapping each method to its JSON examples path."""
         self.logger.info("Generating JSON method paths file...")
-        v1_methods = [data["method_name"] for data in all_extracted_methods.values() if data["version"] == "v1"]
-        v2_methods = [data["method_name"] for data in all_extracted_methods.values() if data["version"] == "v2"]
+        v1_methods = {data["method_name"]: data["json_examples_path"] for data in all_extracted_methods.values() if data["version"] == "v1"}
+        v2_methods = {data["method_name"]: data["json_examples_path"] for data in all_extracted_methods.values() if data["version"] == "v2"}
         paths_data = {
             "scan_metadata": {
                 "generated_at": datetime.now().isoformat(),
@@ -1005,26 +1009,25 @@ class KDFTools:
             }
         }
 
-        file_path = self.config.directories.reports_dir / "report-kdf_postman_json_method_paths.json"
+        file_path = self.config.directories.mdx_json_example_method_paths_report
         safe_write_json(file_path, paths_data, indent=2)
         
         log_path = self.config.directories.get_relative_path(str(file_path))
         self.logger.save(f"Saved Postman method paths mapping to: {log_path}")
         self.log(f"📊 V1: {len(paths_data['method_paths']['v1'])} methods")
         self.log(f"📊 V2: {len(paths_data['method_paths']['v2'])} methods")
+        return paths_data
 
-    def _generate_json_methods_file(self, all_extracted_methods: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
+    def _generate_json_methods_file(self, method_paths_data: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
         """Generates a JSON file that maps each method to its extracted JSON examples."""
         self.log("Generating JSON methods file...")
-        v1_methods_data = [data for data in all_extracted_methods.values() if data["version"] == "v1"]
-        v2_methods_data = [data for data in all_extracted_methods.values() if data["version"] == "v2"]
-        v1_methods = [data["method_name"] for data in v1_methods_data]
-        v2_methods = [data["method_name"] for data in v2_methods_data]
+        v1_methods = list(method_paths_data["method_paths"]["v1"].keys())
+        v2_methods = list(method_paths_data["method_paths"]["v2"].keys())
         methods_data = {
             "scan_metadata": {
                 "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDF-JSON-Extractor v1.0.0",
-                "scanner_type": "JSON_EXTRACTOR",
+                "scanner_version": "KDF-MDX-JSON-Example-Extractor v1.0.0",
+                "scanner_type": "MDX_JSON_EXAMPLE_EXTRACTOR",
                 "total_versions": 2,
                 "total_methods": {
                     "all": len(v1_methods) + len(v2_methods),
@@ -1051,7 +1054,7 @@ class KDFTools:
                 }
             }
         }
-        file_path = self.config.directories.reports_dir / "report-kdf_postman_json_methods.json"
+        file_path = self.config.directories.mdx_json_example_methods_report
         safe_write_json(file_path, methods_data, indent=2)
         
         log_path = self.config.directories.get_relative_path(str(file_path))
