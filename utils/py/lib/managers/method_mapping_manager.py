@@ -105,12 +105,8 @@ class MethodMappingManager:
             return False
 
     async def create_unified_mapping_async(self) -> Dict[str, Dict[str, MethodMapping]]:
-        """Create unified mapping asynchronously - much faster than synchronous version."""
-        if self.verbose:
-            print("🔄 Creating unified mapping asynchronously (faster performance)...")
         
         processor = self._get_async_processor()
-        
         # Build directory configurations
         mdx_dirs = {}
         yaml_dirs = {}  
@@ -840,7 +836,7 @@ class MethodMappingManager:
         Asynchronously extracts method paths with Postman hotlinks and saves to a timestamped file.
         """
         if self.verbose:
-            self.logger.info("💾 Saving method paths with Postman hotlinks...")
+            self.logger.save("Saving method paths with Postman hotlinks...")
             
         method_paths = {}
         for version, methods in unified.items():

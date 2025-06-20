@@ -78,6 +78,8 @@ class OpenApiSchemaGenerator:
         Creates a file listing enums that are found in parameter descriptions
         but do not have a corresponding manual enum file.
         """
+        # TODO: This is a temporary file for review. It should be removed when the enums are documented.
+        # TODO: This should be a json file
         review_file = self.path_mapper.config.directories.reports_dir / "undocumented_enums_for_review.txt"
         
         manual_enums_path = self.path_mapper.config.directories.mdx_common_structures / "enums"

@@ -180,7 +180,7 @@ class AsyncFileProcessor:
         tasks = [_process_item(item) for item in items]
         
         # Execute with progress tracking
-        progress = ProgressTracker(len(tasks), "Concurrent Processing", self.logger)
+        progress = ProgressTracker(len(tasks), f"Concurrent Processing {func.__name__}", self.logger)
         results = []
         
         for completed_task in asyncio.as_completed(tasks):

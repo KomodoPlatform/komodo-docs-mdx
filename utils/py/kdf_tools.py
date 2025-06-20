@@ -224,11 +224,11 @@ class KDFTools:
         ]
         self._print_header(command_title, config)
 
-        output_paths = []
+        report_paths = []
         success = False
 
         async def main():
-            nonlocal output_paths, success
+            nonlocal report_paths, success
             scanner = KDFScanner(
                 config=self.config,
                 repo_path=self.config.directories.kdf_repo_path,
@@ -241,7 +241,7 @@ class KDFTools:
                 version_method_counts = self._calc_version_method_counts(repo_info)
                 # Save results to file
                 output_file = await scanner.save_repository_methods_async(repo_info, version_method_counts)
-                output_paths.append(output_file)
+                report_paths.append(output_file)
             
             # Additional logic for processing/reporting on repo_info
             self.logger.finish(f"Async KDF Repository scan completed:")
@@ -259,6 +259,8 @@ class KDFTools:
             if self.verbose:
                 traceback.print_exc()
             return 1
+        self._print_footer(command_title, success=success, output_paths=report_paths)
+
         
     def _calc_version_method_counts(self, repo_info: Dict[str, UnifiedRepositoryInfo]) -> Dict[str, int]:
         version_method_counts = {version: len(info.methods) for version, info in repo_info.items()}
@@ -284,19 +286,16 @@ class KDFTools:
                 result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
                                       capture_output=True, text=True, cwd=self.config.workspace_root, check=True)
                 current_branch = result.stdout.strip()
-                print(f"📋 Detected git branch: {current_branch}")
+                self.logger.info(f"Detected git branch: {current_branch}")
             except (subprocess.CalledProcessError, FileNotFoundError):
                 current_branch = "unknown"
-                print("⚠️  Could not detect git branch, using 'unknown'")
+                self.logger.warning("Could not detect git branch, using 'unknown'")
             
-            if self.verbose:
-                print("💡 Using async processing for MDX file scanning")
-                print("🗺️  Generating method-to-path mapping first, then deriving methods file")
-                print(f"📋 Versions: {', '.join(versions)}")
-                print(f"📁 Workspace root: {self.config.workspace_root}")
-                print(f"📁 Reports directory: {self.config.directories.reports_dir}")
+            self.logger.config(f"Versions: {', '.join(versions)}")
+            self.logger.folder(f"Workspace root: {self.config.workspace_root}")
+            self.logger.folder(f"Reports directory: {self.config.directories.reports_dir}")
 
-                print()
+            print()
             
             # Use async scanning for better performance
             
@@ -304,13 +303,12 @@ class KDFTools:
             doc_scanner = UnifiedScanner(verbose=self.verbose)
             
             if self.verbose:
-                self.logger.info("🔍 Scanning MDX documentation files asynchronously")
+                self.logger.scan("Scanning MDX documentation files...")
             
             # Scan documentation files
             doc_results = run_async(doc_scanner.scan_all_files_async(versions))
             
             if doc_results:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 # STEP 1: Generate method paths file (primary data source)
                 method_paths_data = self._generate_mdx_method_paths_data(
                     doc_results, versions, current_branch
@@ -319,8 +317,6 @@ class KDFTools:
                 safe_write_json(mdx_method_paths_report, method_paths_data)
                 report_paths.append(str(mdx_method_paths_report))
                 
-                print(f"💾 Saved documentation paths to: {mdx_method_paths_report}")
-                
                 # STEP 2: Generate methods file from the paths data (secondary data source)
                 methods_data = self._generate_mdx_methods_from_paths_file(
                     mdx_method_paths_report, current_branch, versions
@@ -328,22 +324,22 @@ class KDFTools:
                 mdx_methods_report = self.config.directories.mdx_methods_report
                 safe_write_json(mdx_methods_report, methods_data)
                 report_paths.append(str(mdx_methods_report))
-                print(f"💾 Saved documentation methods to: {mdx_methods_report}")
+
                 # Report success and show summary
-                self.logger.success(f"💾 Saved documentation paths to: {mdx_method_paths_report}")
-                self.logger.success(f"💾 Saved documentation methods to: {mdx_methods_report}")
+                self.logger.save(f"Saved documentation paths to: {mdx_method_paths_report}")
+                self.logger.save(f"Saved documentation methods to: {mdx_methods_report}")
                 
                 # Display summary from the paths data
                 total_documented_methods = method_paths_data["scan_metadata"]["version_method_counts"]
                 
                 print()
-                print("📊 Summary:")
+                self.logger.info("Summary:")
                 for version in versions:
                     if version in method_paths_data["method_paths"]:
                         documented = len(method_paths_data["method_paths"][version])
-                        print(f"✅ {version.upper()}: {documented} methods with paths")
+                        self.logger.info(f"{version.upper()}: {documented} methods with paths")
                 
-                print(f"\n📄 Total documented: {total_documented_methods} methods across {len(versions)} versions")
+                self.logger.finish(f"Total documented: {total_documented_methods} methods across {len(versions)} versions")
             
             success = True
             
@@ -368,7 +364,7 @@ class KDFTools:
         for version in versions:
             if version not in doc_results:
                 if self.verbose:
-                    print(f"⚠️  No documentation found for version {version}")
+                    self.logger.warning(f"No documentation found for version {version}")
                 version_method_counts[version] = 0
                 method_paths[version] = {}
                 continue
@@ -383,8 +379,8 @@ class KDFTools:
             version_method_counts[version] = len(current_version_paths)
 
             if self.verbose:
-                print(f"🔍 Processing {version.upper()} documentation...")
-                print(f"   📁 MDX files with paths: {len(current_version_paths)}")
+                self.logger.scan(f"Processing {version.upper()} documentation...")
+                self.logger.folder(f"MDX files with paths: {len(current_version_paths)}")
 
         total_documented_methods = sum(version_method_counts.values())
         version_method_counts.update({"all": total_documented_methods})
@@ -426,8 +422,7 @@ class KDFTools:
                 methods_by_version[version] = method_list
                 total_methods += len(method_list)
                 
-                if self.verbose:
-                    print(f"✅ {version.upper()}: {len(method_list)} methods with MDX documentation")
+                self.logger.info(f"{version.upper()}: {len(method_list)} methods with MDX documentation")
             else:
                 methods_by_version[version] = []
         
@@ -463,11 +458,6 @@ class KDFTools:
                     "Only includes methods with actual MDX files"
                 ]
             }
-        
-        if self.verbose:
-            print(f"📖 Derived method lists from paths file: {paths_file_path.name}")
-            print(f"📋 Only included methods with actual MDX documentation files")
-        
         return methods_data
     
     def methods_map_command(self, args):
@@ -565,7 +555,7 @@ class KDFTools:
             # Step 3: Generate tracking file - read from the method paths file we just created
             self._generate_postman_tracking_file_from_latest_data(versions)
             
-            self.logger.success("✅ Postman collection generation completed!")
+            self.logger.success("Postman collection generation completed!")
             print(summary)
             success = True
             
@@ -588,7 +578,7 @@ class KDFTools:
             
             # Get unified mapping using async for better performance (consistent with other commands)
             if self.verbose:
-                print("💡 Using async processing for method mapping...")
+                self.logger.info("Using async processing for method mapping...")
             
             unified_mapping = run_async(mapper.create_unified_mapping_async())
 
@@ -625,16 +615,14 @@ class KDFTools:
                 
                 for method_name, mapping in methods.items():
                     if not mapping.has_mdx:
-                        if self.verbose:
-                            print(f"  ⏭️  Skipping {method_name}: No MDX file found")
+                        self.logger.warning(f"Skipping {method_name}: No MDX file found")
                         continue
                     
                     # Extract examples from MDX
                     examples = extractor.extract_from_mdx_file(method_name, mapping, version)
                     
                     if not examples:
-                        if self.verbose:
-                            self.logger.info(f"{method_name}: No JSON examples found")
+                        self.logger.warning(f"{method_name}: No JSON examples found")
                         extraction_stats['methods_without_examples'] += 1
                         continue
                     
@@ -655,8 +643,7 @@ class KDFTools:
                         )
                         cleaned_examples.append(cleaned_example)
                     
-                    if self.verbose:
-                        print(f"  🔍 {method_name}: Found {len(cleaned_examples)} examples")
+                    self.logger.success(f"{method_name}: Found {len(cleaned_examples)} examples")
                     
                     # Store method info for tracking
                     if method_name not in all_extracted_methods:
@@ -697,12 +684,12 @@ class KDFTools:
                                     'example_type': example.example_type,
                                     'line_number': example.line_number
                                 })
-                                self.logger.save(f"{method_name}: Saved example {i} to {self.config.directories.get_relative_path(str(output_path))}")
+                                # self.logger.save(f"{method_name}: Saved example {i} to {self.config.directories.get_relative_path(str(output_path))}")
                     
                     version_examples += len(cleaned_examples)
                     version_methods_with_examples += 1
                 
-                self.log(f"✅ {version.upper()}: {version_count} examples extracted from {version_methods_with_examples} methods")
+                self.logger.finish(f"{version.upper()}: {version_count} examples extracted from {version_methods_with_examples} methods")
                 
                 # Update global stats
                 extraction_stats['total_extracted'] += version_count
@@ -758,9 +745,9 @@ class KDFTools:
                     pairs = analyzer.find_corresponding_files()
                     self.log(f"Would analyze {len(pairs)} document pairs:")
                     for gen, live in pairs[:10]:  # Show first 10
-                        print(f"  {gen.name} <-> {live.relative_to(analyzer.live_docs_dir)}")
+                        self.logger.info(f"  {gen.name} <-> {live.relative_to(analyzer.live_docs_dir)}")
                     if len(pairs) > 10:
-                        print(f"  ... and {len(pairs) - 10} more")
+                        self.logger.info(f"  ... and {len(pairs) - 10} more")
                 return 0
             
             # Run analysis
@@ -781,11 +768,10 @@ class KDFTools:
             summary_end = next((i for i, line in enumerate(lines) if line.startswith('## Top Improvement')), len(lines))
             summary = '\n'.join(lines[:summary_end + 10])  # Include a bit of the improvements section
             
-            print("\n" + "="*60)
-            print("DRAFT QUALITY ANALYSIS SUMMARY")
-            print("="*60)
-            print(summary)
-            print("="*60)
+            self.logger.separator("DRAFT QUALITY ANALYSIS SUMMARY")
+            self.logger.separator("="*60)
+            self.logger.info(summary)
+            self.logger.separator("="*60)
             
             if args.output:
                 self.log(f"Full report saved to: {args.output}", "success")
@@ -1023,7 +1009,7 @@ class KDFTools:
         safe_write_json(file_path, paths_data, indent=2)
         
         log_path = self.config.directories.get_relative_path(str(file_path))
-        self.log(f"✅ 💾 Saved Postman method paths mapping to: {log_path}")
+        self.logger.save(f"Saved Postman method paths mapping to: {log_path}")
         self.log(f"📊 V1: {len(paths_data['method_paths']['v1'])} methods")
         self.log(f"📊 V2: {len(paths_data['method_paths']['v2'])} methods")
 
@@ -1069,7 +1055,7 @@ class KDFTools:
         safe_write_json(file_path, methods_data, indent=2)
         
         log_path = self.config.directories.get_relative_path(str(file_path))
-        self.log(f"✅ 💾 Saved JSON extraction examples summary to: {log_path}")
+        self.logger.save(f"Saved JSON extraction examples summary to: {log_path}")
         self.log(f"📊 V1: {extraction_stats['v1']['total_examples_found']} examples from {extraction_stats['v1']['methods_with_examples']} methods")
         self.log(f"📊 V2: {extraction_stats['v2']['total_examples_found']} examples from {extraction_stats['v2']['methods_with_examples']} methods")
 
@@ -1354,7 +1340,7 @@ class KDFTools:
         # Save report
         report_path = self.config.directories.kdf_gap_analysis_report
         safe_write_json(report_path, gap_report, indent=2)
-        self.log(f"✅ 💾 Gap analysis report saved to: {report_path}")
+        self.logger.save(f"Gap analysis report saved to: {report_path}")
 
         success = True
         self._print_footer(command_title, success=success)

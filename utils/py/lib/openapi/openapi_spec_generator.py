@@ -310,9 +310,9 @@ class OpenApiSpecGenerator:
         file_path = self.reports_dir / "report-kdf_openapi_method_paths.json"
         safe_write_json(file_path, output_data, indent=2)
         
-        self.logger.save(f"✅ 💾 Saved OpenAPI method paths mapping to: {file_path}")
-        self.logger.save(f"📊 V1: {len(paths_data['v1'])} methods")
-        self.logger.save(f"📊 V2: {len(paths_data['v2'])} methods")
+        self.logger.save(f"Saved OpenAPI method paths mapping to: {file_path}")
+        self.logger.info(f"V1: {len(paths_data['v1'])} methods")
+        self.logger.info(f"V2: {len(paths_data['v2'])} methods")
         
         return str(file_path)
     

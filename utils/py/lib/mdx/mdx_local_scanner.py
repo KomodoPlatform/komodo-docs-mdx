@@ -320,7 +320,7 @@ class ExistingDocsScanner:
         await file_processor.write_json_async(output_file, serializable_patterns)
         
         if self.verbose:
-            self.logger.success(f"💾 Saved {len(self.patterns)} method patterns to {output_file}")
+            self.logger.save(f"Saved {len(self.patterns)} method patterns to {output_file}")
         
         return output_file
     
@@ -349,7 +349,7 @@ class ExistingDocsScanner:
         safe_write_json(output_file, serializable_patterns)
         
         if self.verbose:
-            self.logger.success(f"💾 Saved {len(self.patterns)} method patterns to {output_file}")
+            self.logger.save(f"Saved {len(self.patterns)} method patterns to {output_file}")
         
         return output_file
     

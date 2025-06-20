@@ -85,7 +85,7 @@ class EmojiFormatter(logging.Formatter):
         'SUCCESS': '✅ ',
         'START': '🚀 ',
         'FINISH': '🏁 ',
-        'PROGRESS': '🔄 ',
+        'PROGRESS': '› ',
         'SAVE': '💾 ',
         'SCAN': '🔍 ',
         'FETCH': '📡 ',
@@ -361,7 +361,7 @@ class ProgressTracker:
         self.start_time = datetime.now()
         
         # Calculate update frequency for performance
-        self.update_frequency = max(1, self.total // 20)
+        self.update_frequency = max(1, self.total // 3)
         
         self.logger.progress(f"{operation}: Starting ({total} items)")
     
