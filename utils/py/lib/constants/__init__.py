@@ -173,7 +173,7 @@ __all__ = [
     'PostmanMethodMapping',
     'PostmanFolder',
     
-    # OpenAPI structures
+    # OpenAPI structures and helpers
     'OpenAPIMethod',
     'PathDetail',
     
@@ -208,6 +208,5 @@ __all__ = [
     'AsyncTask',
     'ProcessingJob',
     'FactoryConfig',
-    'CreationResult',
-    
+    'CreationResult'
 ] 

@@ -76,6 +76,7 @@ class DirectoryConfig:
     # OpenAPI specification paths
     yaml_v1: str = "openapi/paths/v1"
     yaml_v2: str = "openapi/paths/v2"
+    openapi_paths: str = "openapi/paths"
     openapi_components: str = "openapi/paths/components"
     openapi_schemas: str = "openapi/paths/components/schemas"
     openapi_main: str = "openapi/openapi.yaml"
@@ -86,11 +87,6 @@ class DirectoryConfig:
     postman_collections: str = "postman/collections"
     postman_environments: str = "postman/environments"
     
-    # Output and working directories
-    output_dir: str = "output"
-    temp_dir: str = "temp"
-    backup_dir: str = "backups"
-    
     # Data and cache directories
     data_dir: str = "utils/py/data"
     reports_dir: str = "reports"
@@ -99,11 +95,12 @@ class DirectoryConfig:
 
     # Report files
     rust_methods_report: str = "reports/kdf_rust_methods.json"
-    rust_method_paths_report: str = "reports/kdf_rust_method_paths.json"
     mdx_methods_report: str = "reports/kdf_mdx_methods.json"
     mdx_method_paths_report: str = "reports/kdf_mdx_method_paths.json"
     mdx_json_example_methods_report: str = "reports/kdf_mdx_json_example_methods.json"
     mdx_json_example_method_paths_report: str = "reports/kdf_mdx_json_example_method_paths.json"
+    mdx_openapi_methods_report: str = "reports/kdf_openapi_methods.json"
+    mdx_openapi_method_paths_report: str = "reports/kdf_openapi_method_paths.json"
     unified_method_mapping_report: str = "reports/kdf_unified_method_map.json"
     kdf_gap_analysis_report: str = "reports/kdf_gap_analysis.json"
     category_mappings: str = "reports/category_mappings.json"
@@ -112,6 +109,16 @@ class DirectoryConfig:
     def __post_init__(self):
         """Resolve all path strings to absolute Path objects."""
         self._resolve_paths()
+        self._ensure_paths_exist()
+
+    def _ensure_paths_exist(self):
+        """Ensure all paths exist."""
+        for _, value in self.__dict__.items():
+            if isinstance(value, Path):
+                if not value.exists():
+                    if str(value).endswith(".json") or str(value).endswith(".yaml"):
+                        continue
+                    value.mkdir(parents=True, exist_ok=True)
 
     def _resolve_paths(self):
         """
