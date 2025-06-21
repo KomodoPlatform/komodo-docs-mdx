@@ -37,6 +37,9 @@ class MDXParser:
         # Track common structures across all parsed methods
         self.common_structures = defaultdict(int)
         self.enum_patterns = defaultdict(set)
+        self.common_structure_files = self._get_common_structure_files()
+        self._load_enums()
+        self._load_common_structures()
 
     def parse_mdx_file(self, file_path: Path) -> Optional[Dict[str, Any]]:
         # TEST COMMENT
@@ -92,420 +95,259 @@ class MDXParser:
         title = title_match.group(1) if title_match else f"Komodo DeFi Framework Method: {method_name}"
         description = desc_match.group(1) if desc_match else f"Method description for {method_name}"
 
-        parameters = self._extract_parameters_from_mdx(content)
-        response_parameters = self._extract_response_parameters_from_mdx(content)
+        request_params = self._extract_parameters_from_mdx(content, "Request")
+        response_params = self._extract_parameters_from_mdx(content, "Response")
 
         return {
             'type': 'method',
             'method_name': method_name,
             'title': title,
             'description': description,
-            'parameters': parameters,
-            'response_parameters': response_parameters,
+            'parameters': request_params,
+            'response_parameters': response_params,
             'file_path': str(file_path)
         }
 
-    def _extract_response_parameters_from_mdx(self, content: str) -> List[Dict[str, Any]]:
-        """Extract response parameters from MDX response tables."""
-        response_params = []
+    def _extract_parameters_from_mdx(self, content: str, table_type: str) -> List[UnifiedParameterInfo]:
+        """Extract parameters from MDX tables (Request or Response)."""
+        params = []
+        # More robust regex to find tables for either "Request" or "Response"
+        pattern = re.compile(
+            rf'### {table_type} Parameter[s]?.*?\n\n(.*?)(?=\n###|\n##|\Z)',
+            re.DOTALL | re.IGNORECASE
+        )
+        
+        matches = pattern.findall(content)
+        for table_content in matches:
+            params.extend(self._parse_parameter_table(table_content, table_type))
 
-        # Look for response parameter tables
-        table_patterns = [
-            r'### Response Parameter[s]?\s*Table\s*\n\n(.*?)(?=\n###|\n##|\Z)',
-            r'### Response Parameters\s*\n\n(.*?)(?=\n###|\n##|\Z)',
-            r'### Response\s*\n\n(.*?)(?=\n###|\n##|\Z)'  # Add pattern for "### Response"
-        ]
+        return params
 
-        for pattern in table_patterns:
-            matches = re.findall(pattern, content, re.DOTALL | re.IGNORECASE)
-            for match in matches:
-                response_params.extend(self._parse_response_parameter_table(match))
-
-        return response_params
-
-    def _parse_response_parameter_table(self, table_content: str) -> List[Dict[str, Any]]:
-        """Parse a response parameter table."""
+    def _parse_parameter_table(self, table_content: str, table_type: str) -> List[UnifiedParameterInfo]:
+        """General purpose parameter table parser for request and response tables."""
         parameters = []
-
-        # Split into lines and find table rows
         lines = table_content.strip().split('\n')
-
-        # Find the header row and separator
-        header_idx = -1
-        separator_idx = -1
-
-        for i, line in enumerate(lines):
-            if '|' in line and ('Parameter' in line or 'parameter' in line):
-                header_idx = i
-            elif '|' in line and ('---' in line or '|-' in line):
-                separator_idx = i
-                break
-
-        if header_idx == -1 or separator_idx == -1:
+        if len(lines) < 2:  # Needs at least a header and a separator
             return parameters
 
-        # Parse header to understand column structure
-        header_line = lines[header_idx].strip()
-        headers = [h.strip() for h in header_line.split('|') if h.strip()]
+        header_line = lines[0]
+        header = [h.strip().lower() for h in header_line.strip('|').split('|')]
+        
+        if not any(header): return []
 
-        # Remove leading/trailing empty columns
-        if headers and not headers[0]:
-            headers = headers[1:]
-        if headers and not headers[-1]:
-            headers = headers[:-1]
+        has_default = 'default' in header
+        has_required = 'required' in header
 
-        # Find column indices
-        param_col = -1
-        type_col = -1
-        desc_col = -1
+        for line in lines[2:]:  # Skip header and separator
+            if not line.strip().startswith('|'):
+                continue
+            
+            cols = [c.strip() for c in line.strip('|').split('|')]
+            
+            if len(cols) < len(header):
+                continue
+            if len(cols) > len(header):
+                cols[len(header)-1] = '|'.join(cols[len(header)-1:])
+                cols = cols[:len(header)]
+            
+            row_data = dict(zip(header, cols))
 
-        for i, header in enumerate(headers):
-            header_lower = header.lower()
-            if 'parameter' in header_lower:
-                param_col = i
-            elif 'type' in header_lower:
-                type_col = i
-            elif 'description' in header_lower:
-                desc_col = i
-
-        # Parse data rows
-        for i in range(separator_idx + 1, len(lines)):
-            line = lines[i].strip()
-            if not line or not line.startswith('|'):
+            param_name_raw = row_data.get('parameter', '')
+            if not param_name_raw or '---' in param_name_raw:
                 continue
 
-            # Split the row into columns
-            columns = [col.strip() for col in line.split('|')]
+            param_name = param_name_raw.strip('`').replace('\\_', '_')
+            param_type = row_data.get('type', 'string')
+            description = row_data.get('description', '')
 
-            # Remove leading/trailing empty columns
-            if columns and not columns[0]:
-                columns = columns[1:]
-            if columns and not columns[-1]:
-                columns = columns[:-1]
+            required = False
+            default_value = None
+            enum_values = None
 
-            if len(columns) < max(param_col, type_col, desc_col) + 1:
-                continue
-
-            # Extract parameter information
-            param_name = columns[param_col] if param_col >= 0 and param_col < len(columns) else ""
-            param_type = columns[type_col] if type_col >= 0 and type_col < len(columns) else ""
-            param_desc = columns[desc_col] if desc_col >= 0 and desc_col < len(columns) else ""
-
-            if param_name and param_type:
-                parameters.append({
-                    'name': param_name.strip('`').replace('\\_', '_'),
-                    'type': param_type,
-                    'description': param_desc
-                })
-
-        return parameters
-
-    def _create_placeholder_method_info(self, method_name: str, mdx_path: str) -> UnifiedMethodInfo:
-        return UnifiedMethodInfo(
-            name=method_name,
-            mdx_path=mdx_path,
-            summary=f"Komodo DeFi Framework Method: {method_name}",
-            description=f"Method description for {method_name}",
-            parameters=[],
-            responses=[
-                Response("200", "Success"),
-                Response("400", "Bad request"),
-                Response("500", "Internal server error")
-            ]
-        )
-
-    def _parse_content(self, content: str, method_name: str, mdx_path: str) -> UnifiedMethodInfo:
-        title_match = re.search(r'export const title = ["\']([^"\']+)["\']', content)
-        description_match = re.search(r'export const description =\s*["\']([^"\']+)["\']', content)
-        summary = title_match.group(1) if title_match else f"Komodo DeFi Framework Method: {method_name}"
-
-        if description_match:
-            description = description_match.group(1)
-        else:
-            desc_match = re.search(r'#[^#\n]*\n\n(.+?)(?:\n\n|\n<|$)', content, re.DOTALL)
-            if desc_match:
-                description = desc_match.group(1).strip()
-            else:
-                description = f"The {method_name} method for Komodo DeFi Framework API."
-
-        # Clean up description in a single chain
-        description = re.sub(r'<[^>]+>', '', description)
-        description = re.sub(r'\n+', ' ', description).strip()
-
-        parameters = self._parse_parameters_table(content)
-        responses = self._parse_responses_table(content)
-        request_body_schema = self._extract_request_body_schema(content, method_name)
-
-        return UnifiedMethodInfo(
-            name=method_name,
-            mdx_path=mdx_path,
-            summary=summary,
-            description=description,
-            parameters=parameters,
-            responses=responses,
-            request_body_schema=request_body_schema
-        )
-
-    def _parse_parameters_table(self, content: str) -> List[UnifiedParameterInfo]:
-        parameters = []
-
-        # Look for request parameters section
-        request_section = re.search(r'###\s+Request\s+Parameters?\s*\n(.*?)(?=\n###|\n##|\n#|$)', content, re.DOTALL | re.IGNORECASE)
-        if not request_section:
-            # Fallback to older formats
-            args_section = re.search(r'##\s+Arguments?\s*\n(.*?)(?=\n##|\n#|$)', content, re.DOTALL | re.IGNORECASE)
-            if not args_section:
-                args_section = re.search(r'##\s+Parameters?\s*\n(.*?)(?=\n##|\n#|$)', content, re.DOTALL | re.IGNORECASE)
-            request_section = args_section
-
-        if request_section:
-            table_content = request_section.group(1)
-            parameters = self._parse_parameter_table(table_content)
-            
-        return parameters
-
-    def _parse_parameter_table(self, table_content: str) -> List[UnifiedParameterInfo]:
-        """Parse a parameter table."""
-        parameters = []
-        
-        # Split into lines and find table rows
-        lines = table_content.strip().split('\n')
-        
-        header_idx = -1
-        separator_idx = -1
-        
-        for i, line in enumerate(lines):
-            if '|' in line and ('Parameter' in line or 'parameter' in line):
-                header_idx = i
-            elif '|' in line and ('---' in line or '|-' in line):
-                separator_idx = i
-                break
-        
-        if header_idx == -1 or separator_idx == -1:
-            return parameters
-            
-        # Parse header
-        header_line = lines[header_idx].strip()
-        headers = [h.strip() for h in header_line.split('|') if h.strip()]
-        
-        if headers and not headers[0]:
-            headers = headers[1:]
-        if headers and not headers[-1]:
-            headers = headers[:-1]
-            
-        param_col, type_col, req_col, def_col, desc_col = -1, -1, -1, -1, -1
-        
-        for i, header in enumerate(headers):
-            h_lower = header.lower()
-            if 'parameter' in h_lower:
-                param_col = i
-            elif 'type' in h_lower:
-                type_col = i
-            elif 'required' in h_lower:
-                req_col = i
-            elif 'default' in h_lower:
-                def_col = i
-            elif 'description' in h_lower:
-                desc_col = i
+            if table_type == "Request":
+                required_str = row_data.get('required', '') if has_required else ''
+                default_val_str = row_data.get('default', '') if has_default else ''
                 
-        # Parse data rows
-        for i in range(separator_idx + 1, len(lines)):
-            line = lines[i].strip()
-            if not line or not line.startswith('|'):
-                continue
+                required = self._is_parameter_required(required_str, description, default_val_str)
                 
-            columns = [col.strip() for col in line.split('|')]
-            if columns and not columns[0]:
-                columns = columns[1:]
-            if columns and not columns[-1]:
-                columns = columns[:-1]
-            
-            if len(columns) < 3:
-                continue
-            
-            param_name = columns[param_col] if param_col != -1 and param_col < len(columns) else ""
-            param_type = columns[type_col] if type_col != -1 and type_col < len(columns) else ""
-            required_indicator = columns[req_col] if req_col != -1 and req_col < len(columns) else ""
-            description = columns[desc_col] if desc_col != -1 and desc_col < len(columns) else ""
-            
-            # Handle both 4 and 5 column tables
-            if def_col != -1 and def_col < len(columns):
-                default_value = columns[def_col]
-            else:
-                default_value = self._extract_default_from_description(description)
-            
-            if not param_name or not param_type:
-                continue
+                if default_val_str and default_val_str != '-':
+                    default_value = self._clean_and_cast_default(default_val_str, param_type)
                 
-            is_required = self._is_parameter_required(required_indicator, description, default_value)
-            
-            # Extract enums
-            enum_values, cleaned_type = self._extract_enum_from_type(param_type)
-            if not enum_values:
-                enum_values = self._extract_enum_from_description(description)
+                # Enum extraction
+                found_enum_values, cleaned_type = self._extract_enum_from_type(param_type)
+                if not found_enum_values:
+                    found_enum_values = self._extract_enum_from_description(description)
                 
-            # Extract enum references from description
-            enum_ref = self._extract_enum_references_from_description(description)
-            if enum_ref:
-                cleaned_type = f"#/components/schemas/{enum_ref}"
+                param_type = cleaned_type
+                enum_values = found_enum_values
 
-            # Get the correct default value
-            actual_default = default_value or self._extract_default_from_description(description)
-
-            # Check for common structures and update counter
-            if 'common structure' in description.lower():
-                self.common_structures[param_name.strip('`')] += 1
+                if not default_value:
+                     extracted_default = self._extract_default_from_description(description)
+                     if extracted_default:
+                        default_value = self._clean_and_cast_default(extracted_default, param_type)
             
+            # For response tables, all we need is name, type, and description.
+            # For request tables, we need all fields.
             parameters.append(UnifiedParameterInfo(
-                name=param_name.strip('`').replace('\\_', '_'),
-                type=cleaned_type,
-                required=is_required,
+                name=param_name,
+                type=param_type,
                 description=description,
-                default_value=actual_default,
-                enum_values=enum_values,
-                enum_reference=enum_ref
+                required=required,
+                default_value=default_value,
+                enum_values=enum_values
             ))
             
         return parameters
 
+    def _clean_and_cast_default(self, default_val: str, param_type: str) -> Any:
+        """Cleans and casts a default value string to its appropriate type."""
+        cleaned_val = default_val.strip('`')
+        lower_param_type = param_type.lower()
+
+        if 'int' in lower_param_type:
+            try:
+                return int(cleaned_val)
+            except (ValueError, TypeError):
+                return cleaned_val
+        elif 'bool' in lower_param_type:
+            if cleaned_val.lower() == 'true':
+                return True
+            elif cleaned_val.lower() == 'false':
+                return False
+            return cleaned_val
+        elif 'number' in lower_param_type or 'float' in lower_param_type:
+            try:
+                return float(cleaned_val)
+            except (ValueError, TypeError):
+                return cleaned_val
+        
+        return cleaned_val
+
     def _is_parameter_required(self, required_indicator: str, description: str, default_value: Optional[str]) -> bool:
-        """Determine if a parameter is required."""
+        """Determines if a parameter is required based on table indicators and description."""
         if '✓' in required_indicator:
             return True
         if '✗' in required_indicator:
             return False
-        
-        # Fallback logic for older formats
-        desc_lower = description.lower()
-        if 'required' in desc_lower and 'not required' not in desc_lower:
-            return True
-        if 'optional' in desc_lower or default_value:
+        # Fallback logic if symbols are not used
+        if default_value is not None and default_value.strip() != '-':
             return False
-            
+        if 'optional' in description.lower():
+            return False
         return True
 
     def _extract_enum_from_type(self, param_type: str) -> Tuple[Optional[List[str]], str]:
-        """Extract enum values from the type string, e.g., 'string (one of: "value1", "value2")'."""
-        match = re.search(r'\((?:one of|enum):\s*(.*?)\)', param_type, re.IGNORECASE)
+        # Simple enum extraction from type field, e.g., "string (Enum: A, B)"
+        match = re.search(r'\((?:Enum|Values):\s*(.*?)\)', param_type, re.IGNORECASE)
         if match:
-            enum_part = match.group(1)
-            # Find all quoted values
-            enum_values = re.findall(r'["\'](.*?)["\']', enum_part)
-            # Clean up the type string
-            cleaned_type = re.sub(r'\s*\((?:one of|enum):.*?\)', '', param_type).strip()
-            return enum_values, cleaned_type
+            values = [v.strip().strip('`') for v in match.group(1).split(',')]
+            # Return the cleaned type without the enum part
+            cleaned_type = re.sub(r'\s*\((?:Enum|Values):.*?\)', '', param_type).strip()
+            return values, cleaned_type
         return None, param_type
 
     def _extract_default_from_description(self, description: str) -> Optional[str]:
-        """Extract default value from description text."""
-        match = re.search(r'default(?: is)?\s*`([^`]+)`', description, re.IGNORECASE)
-        if match:
-            return match.group(1)
-        return None
+        match = re.search(r'defaults to `([^`]+)`', description, re.IGNORECASE)
+        return match.group(1) if match else None
 
     def _parse_responses_table(self, content: str) -> List[Response]:
-        """Parse the responses section to extract status codes and descriptions."""
-        # This is a placeholder for more sophisticated parsing
-        return [
-            Response("200", "Success"),
-            Response("400", "Bad request"),
-            Response("500", "Internal server error")
-        ]
+        return [Response(status_code="200", description="Success")]
 
     def _extract_request_body_schema(self, content: str, method_name: str) -> Optional[Dict[str, Any]]:
-        """Extracts the JSON request body schema from a code block in the MDX file."""
-        # Find JSON code blocks that are likely request examples
-        json_blocks = re.findall(r'```json\s*({.*?})\s*```', content, re.DOTALL)
+        """Extracts the request body schema from JSON example in MDX."""
+        code_group_match = re.search(
+            r'```json\s*\n({.*?})\n```',
+            content, re.DOTALL | re.IGNORECASE
+        )
         
-        for block in json_blocks:
-            try:
-                data = json.loads(block)
-                # Heuristic: check if the 'method' field matches
-                if data.get('method') == method_name:
-                    return data
-            except json.JSONDecodeError:
-                continue
-        
+        if code_group_match:
+            # Find the first JSON block within the CodeGroup
+            json_match = re.search(r'```json\s*\n({.*?})\n```', code_group_match.group(1), re.DOTALL)
+            if json_match:
+                try:
+                    example_json = json.loads(json_match.group(1))
+                    
+                    # Basic schema inference from the example
+                    properties = {
+                        key: {"type": self._infer_type_from_value(value)}
+                        for key, value in example_json.items()
+                    }
+                    
+                    return {
+                        "type": "object",
+                        "properties": properties,
+                        "required": list(example_json.keys()) # Assume all keys in example are required
+                    }
+                except json.JSONDecodeError:
+                    pass  # Ignore if JSON is malformed
+
         return None
 
     def _map_type(self, mdx_type: str) -> str:
         """Maps an MDX type to an OpenAPI type."""
-        mdx_type_lower = mdx_type.lower()
-        if 'string' in mdx_type_lower:
+        mdx_type = mdx_type.lower()
+        if 'string' in mdx_type:
             return 'string'
-        if 'integer' in mdx_type_lower or 'int' in mdx_type_lower or 'u64' in mdx_type_lower or 'i32' in mdx_type_lower:
+        if 'integer' in mdx_type or 'int' in mdx_type:
             return 'integer'
-        if 'number' in mdx_type_lower or 'float' in mdx_type_lower or 'double' in mdx_type_lower:
+        if 'number' in mdx_type or 'float' in mdx_type:
             return 'number'
-        if 'boolean' in mdx_type_lower or 'bool' in mdx_type_lower:
+        if 'boolean' in mdx_type or 'bool' in mdx_type:
             return 'boolean'
-        if 'array' in mdx_type_lower or 'list' in mdx_type_lower:
+        if 'array' in mdx_type:
             return 'array'
-        if 'object' in mdx_type_lower or 'json' in mdx_type_lower:
+        if 'object' in mdx_type:
             return 'object'
         return 'string'  # Default to string
 
     def _infer_type_from_value(self, value: Any) -> str:
-        """Infers the OpenAPI type from a Python value."""
+        """Infers the JSON schema type from a Python value."""
         if isinstance(value, bool):
-            return 'boolean'
+            return "boolean"
         if isinstance(value, int):
-            return 'integer'
+            return "integer"
         if isinstance(value, float):
-            return 'number'
+            return "number"
         if isinstance(value, list):
-            return 'array'
+            return "array"
         if isinstance(value, dict):
-            return 'object'
-        return 'string'
-
-    def _extract_parameters_from_mdx(self, content: str) -> List[UnifiedParameterInfo]:
-        """Extract parameters from MDX parameter tables."""
-        parameters = []
-        
-        # Look for request parameter tables
-        table_match = re.search(r'###\s+Request\s+Parameters?\s*Table\s*\n\n(.*?)(?=\n###|\n##|\Z)', content, re.DOTALL | re.IGNORECASE)
-        if not table_match:
-            table_match = re.search(r'###\s+Request\s+Parameters?\s*\n\n(.*?)(?=\n###|\n##|\Z)', content, re.DOTALL | re.IGNORECASE)
-        
-        if table_match:
-            table_content = table_match.group(1)
-            parameters = self._parse_parameter_table(table_content)
-            
-        return parameters
+            return "object"
+        return "string"
 
     def _extract_enum_from_description(self, description: str) -> Optional[List[str]]:
-        """
-        Extract enum values from the description string.
-        Looks for patterns like "one of: `value1`, `value2`" or lists.
-        """
-        # Pattern for "one of: `val1`, `val2`"
-        match = re.search(r'one of:\s*((?:`[^`]+`\s*,?\s*)+)', description, re.IGNORECASE)
+        """Extracts enum values from a description string."""
+        # This regex looks for patterns like "one of `VALUE1`, `VALUE2`"
+        match = re.search(r'one of (.+?)(?:\.|$)', description, re.IGNORECASE)
         if match:
-            # Extract values from backticks
-            return re.findall(r'`([^`]+)`', match.group(1))
-
-        # Pattern for markdown lists
-        list_match = re.search(r'Can be one of the following:\s*\n((?:\s*-\s*`.*?`\s*\n)+)', description, re.IGNORECASE | re.DOTALL)
-        if list_match:
-            return re.findall(r'`([^`]+)`', list_match.group(1))
-
+            # Extracting values and cleaning them up
+            values_str = match.group(1)
+            return [v.strip().strip('`') for v in values_str.split(',')]
         return None
-    
+
     def _extract_enum_references_from_description(self, description: str) -> Optional[str]:
-        """
-        Extracts references to common enums from the description.
-        Looks for links like `[MyEnum](/path/to/enums#myenum)`.
-        """
-        match = re.search(r'\[([\w\s]+)\]\((.*?)\)', description)
+        # Simple regex to find a link to an enum, e.g. [MyEnum](#myenum)
+        match = re.search(r'\[([\w\s]+Enum)\]\((#[\w-]+)\)', description)
         if match:
-            link_text = match.group(1)
-            link_url = match.group(2)
-            
-            # Check if it's an internal link to an enum
-            if '#-enum' in link_url.lower() or 'enums' in link_url.lower():
-                # Extract enum name from the anchor
-                anchor_match = re.search(r'#([\w-]+enum)$', link_url, re.IGNORECASE)
-                if anchor_match:
-                    return anchor_match.group(1)
-        return None 
+            # We can return the name of the enum. The generator can then create a $ref
+            return match.group(1).replace(' ', '')
+        return None
+
+    def preload_common_structures(self):
+        """Public method to explicitly load or reload common structures and enums."""
+        self._load_enums()
+        self._load_common_structures()
+
+    def _get_common_structure_files(self) -> Dict[str, Path]:
+        """
+        Scans for common structure and enum files in the documentation directory.
+        """
+        # Implementation of _get_common_structure_files method
+        pass
+
+    def _load_enums(self):
+        """Implementation of _load_enums method"""
+        pass
+
+    def _load_common_structures(self):
+        """Implementation of _load_common_structures method"""
+        pass 

@@ -15,6 +15,7 @@ from typing import Dict, List, Any, Set
 from collections import defaultdict
 from datetime import datetime
 import os
+from dataclasses import fields
 
 # Import constants and path utilities
 from ..constants import (
@@ -23,15 +24,16 @@ from ..constants import (
 )
 from ..utils.path_utils import EnhancedPathMapper
 from ..mdx.mdx_parser import MDXParser
+from ..utils.logging_utils import get_logger
+from ..constants.config import get_config
 
 # Import local modules
 from .openapi_schema_factory import OpenApiSchemaFactory
 from .openapi_schema_generator import OpenApiSchemaGenerator
 from ..utils.file_utils import safe_write_json
-from ..constants.config import get_config
 from ..constants.data_structures import ScanMetadata
-from ..utils.logging_utils import get_logger
 from ..utils.data_utils import sort_version_method_counts
+from ..constants.data_structures import UnifiedMethodInfo
 
 
 class OpenApiSpecGenerator:
@@ -41,57 +43,62 @@ class OpenApiSpecGenerator:
     OpenAPI schemas, including request bodies, responses, and common components
     like enums and data structures.
     """
-    def __init__(self, config=None, path_mapper=None, mdx_parser=None, schema_creator=None, common_schema_generator=None):
+    def __init__(self, config=None, path_mapper=None, mdx_parser=None, schema_creator=None):
         self.config = config or get_config()
         self.base_path = Path(self.config.workspace_root)
         self.path_mapper = path_mapper or EnhancedPathMapper(config=self.config)
-        
-        self.mdx_parser = mdx_parser or MDXParser()
-        self.schema_creator = schema_creator or OpenApiSchemaFactory(path_mapper=self.path_mapper)
-        self.common_schema_generator = common_schema_generator or OpenApiSchemaGenerator()
-        
+        self.logger = get_logger("openapi-spec-generator")
+        self.mdx_parser = mdx_parser or MDXParser(config=self.config, path_mapper=self.path_mapper)
+        self.schema_creator = schema_creator or OpenApiSchemaFactory(
+            config=self.config,
+            path_mapper=self.path_mapper,
+            mdx_parser=self.mdx_parser
+        )
+        self.generated_files = []
+        self.error_files = []
+        self.success_count = 0
         self.all_methods = defaultdict(list)
         self.all_method_details: List[OpenAPIMethod] = []
         self.all_path_details: List[PathDetail] = []
         self.all_enums = defaultdict(set)
-        self.config = get_config()
-        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        self.reports_dir.mkdir(exist_ok=True, parents=True)
-        self.logger = get_logger("openapi-spec-generator")
 
 
-    def build_openapi_spec(self, method_info: Dict[str, Any]) -> Dict[str, Any]:
+    def build_openapi_spec(self, method_info_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
         Builds the full OpenAPI specification for a single method.
         """
-        if not method_info or not isinstance(method_info, dict):
+        if not method_info_dict or not isinstance(method_info_dict, dict):
             return {}
-            
-        method_name = method_info.get('method_name', 'unknown_method')
+        
+        # Convert the dictionary to a UnifiedMethodInfo object for the factory
+        # The dictionary keys must match the dataclass field names exactly.
+        if 'method_name' in method_info_dict:
+            method_info_dict['name'] = method_info_dict.pop('method_name')
+
+        # We filter the dict to only include keys that are fields of the dataclass.
+        info_fields = {f.name for f in fields(UnifiedMethodInfo)}
+        filtered_dict = {k: v for k, v in method_info_dict.items() if k in info_fields}
+        method_info = UnifiedMethodInfo(**filtered_dict)
+        
+        # The mdx_path is needed by the schema creator to build relative refs.
+        mdx_path = method_info_dict.get('file_path', '')
 
         return {
-            "paths": {
-                f"/{method_name}": {
-                    "post": {
-                        "summary": method_info.get('description'),
-                        "description": method_info.get('description'),
-                        "operationId": method_info.get('method_name'),
-                        "tags": [method_info.get('category', "default")],
-                        "requestBody": {
-                            "content": {
-                                "application/json": {
-                                    "schema": self.schema_creator.create_request_body_schema(
-                                        method_info, 
-                                        method_info.get('file_path')
-                                    )
-                                }
-                            }
-                        },
-                        "responses": self.schema_creator.create_response_schema(
-                            method_info,
-                            method_info.get('file_path')
-                        )
-                    }
+            f"/{method_info.name}": {
+                "post": {
+                    "summary": method_info.description,
+                    "description": method_info.description,
+                    "operationId": method_info.name,
+                    "tags": [method_info.category or "default"],
+                    "requestBody": self.schema_creator.create_request_body_schema(
+                        method_info,
+                        mdx_path
+                    ),
+                    "responses": self.schema_creator.create_response_schema(
+                        method_info.response_parameters,
+                        mdx_path,
+                        method_info
+                    )
                 }
             }
         }
@@ -130,7 +137,7 @@ class OpenApiSpecGenerator:
             ]
             yaml_base_dir = self.path_mapper.config.directories.yaml_v2
 
-        filename = f"{method_name.replace('::', '-')}.yml"
+        filename = f"{method_name.replace('::', '-')}.yaml"
         if mdx_path:
             root = self.path_mapper.config.workspace_root
             relative_mdx_path = None
@@ -188,47 +195,15 @@ class OpenApiSpecGenerator:
         """
         Creates a single OpenAPI specification file for a given category.
         """
-        if version == "v1":
-            output_path = Path(self.path_mapper.config.directories.yaml_v1) / f"{category}.yml"
-        else:
-            output_path = Path(self.path_mapper.config.directories.yaml_v2) / f"{category}.yml"
-        
-        spec = {
-            "openapi": "3.0.0",
-            "info": {
-                "title": f"Komodo DeFi Framework - {category.replace('_', ' ').title()} API",
-                "version": version,
-                "description": f"OpenAPI specification for the {category} methods."
-            },
-            "paths": {},
-            "components": {
-                "schemas": {}
-            }
-        }
-        self.logger.info(f"Generating category spec file for {category} with {len(methods)} methods")
+        self.logger.info(f"Generating specs for category {category} with {len(methods)} methods")
         for method_info in methods:
-            method_spec = self.build_openapi_spec(method_info)
-            spec["paths"].update(method_spec.get("paths", {}))
-            
-            if "components" in method_spec:
-                for comp_name, comp_schema in method_spec["components"].get("schemas", {}).items():
-                    if comp_name not in spec["components"]["schemas"]:
-                        spec["components"]["schemas"][comp_name] = comp_schema
-        
-        spec["components"]["schemas"]["ErrorResponse"] = {
-            "type": "object",
-            "properties": {
-                "error": {"type": "string"},
-                "error_path": {"type": "string"},
-                "error_trace": {"type": "string"},
-                "error_type": {"type": "string"},
-                "error_data": {"type": "object"}
-            }
-        }
-        
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w') as f:
-            yaml.dump(spec, f, sort_keys=False)
+            spec = self.build_openapi_spec(method_info)
+            self.write_openapi_file(
+                spec,
+                method_info['name'],
+                version,
+                mdx_path=method_info['file_path']
+            )
 
     def get_stats(self) -> Dict[str, Any]:
         """
@@ -276,7 +251,7 @@ class OpenApiSpecGenerator:
         
         for versioned_method_key, parsed_info in all_methods.items():
             openapi_path = parsed_info.get("openapi_path")
-            method_name = parsed_info.get("method_name")
+            method_name = parsed_info.get("name")
             version = parsed_info.get("version")
             
             if not all([openapi_path, method_name, version]):
@@ -322,19 +297,8 @@ class OpenApiSpecGenerator:
         """
         Generates a comprehensive JSON summary file of the generation process.
         """
-        path_file_name = f"report-kdf_openapi_methods.json"
-        output_file = self.reports_dir / path_file_name
-        
-        # backup existing
-        if output_file.exists():
-            backup_dir = Path(self.path_mapper.config.directories.backup_dir)
-            backup_dir.mkdir(exist_ok=True)
-            backup_path = backup_dir / f"{path_file_name}.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            output_file.rename(backup_path)
-
-        # Ensure the directory exists
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        
+        output_file = self.config.directories.mdx_openapi_methods_report        
+                
         # Separate methods by version
         v1_methods = sorted([m.name for m in self.all_method_details if 'v1' in m.openapi_path])
         v2_methods = sorted([m.name for m in self.all_method_details if 'v2' in m.openapi_path])
@@ -378,9 +342,6 @@ class OpenApiSpecGenerator:
         with open(output_file, 'w') as f:
             json.dump(output_data, f, indent=2) 
 
-    def vlog(self, message: str):
-        self.logger.info(message)
-
     def _get_yaml_files(self, directory: str) -> List[str]:
         """
         Returns a list of all YAML files in a given directory and its subdirectories.
@@ -388,7 +349,7 @@ class OpenApiSpecGenerator:
         yaml_files = []
         for root, _, files in os.walk(directory):
             for file in files:
-                if file.endswith((".yaml", ".yml")):
+                if file.endswith((".yaml", ".yaml")):
                     yaml_files.append(os.path.join(root, file))
         return yaml_files
 
@@ -396,7 +357,7 @@ class OpenApiSpecGenerator:
         """
         Writes a merged OpenAPI specification to a file.
         """
-        output_path = self.reports_dir / f"report-kdf_openapi_main_spec_{version}.yml"
+        output_path = self.reports_dir / f"report-kdf_openapi_main_spec_{version}.yaml"
         
         with open(output_path, 'w') as f:
             yaml.dump(spec, f, sort_keys=False, allow_unicode=True)
@@ -425,65 +386,3 @@ class OpenApiSpecGenerator:
                 spec = yaml.safe_load(f)
                 merged_spec.update(spec)
         return merged_spec
-
-    def _generate_openapi_methods_file(self, timestamp: str, version: str,
-                                     success_count: int, error_count: int, all_enums: Dict[str, Set[str]],
-                                     structures_count: int, enums_count: int, source_dirs: List[str], all_methods: Dict[str, Any]) -> None:
-        """
-        Generates a comprehensive JSON summary file of the generation process.
-        """
-        path_file_name = f"report-kdf_openapi_methods.json"
-        output_file = self.reports_dir / path_file_name
-        
-        # backup existing
-        if output_file.exists():
-            backup_dir = Path(self.path_mapper.config.directories.backup_dir)
-            backup_dir.mkdir(exist_ok=True)
-            backup_path = backup_dir / f"{path_file_name}.backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            output_file.rename(backup_path)
-
-        # Ensure the directory exists
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-        
-        # Separate methods by version
-        v1_methods = sorted([m.name for m in self.all_method_details if 'v1' in m.openapi_path])
-        v2_methods = sorted([m.name for m in self.all_method_details if 'v2' in m.openapi_path])
-
-        version_method_counts = {
-            'v1': len(v1_methods),
-            'v2': len(v2_methods)
-        }
-        
-        metadata = ScanMetadata(
-            scanner_type="OPENAPI_SPEC_GENERATOR",
-            scanner_version="KDF-OpenAPI-Generator v2.0.0",
-            version_method_counts=sort_version_method_counts(version_method_counts),
-            generated_during="OpenAPI spec generation",
-            method_source="MDX method files",
-            is_primary_data_source=False
-        )
-
-        output_data = {
-            "scan_metadata": metadata.to_dict(),
-            "repository_data": {
-                "v1": {
-                    "branch": "add/postman/utils", 
-                    "version": "v1",
-                    "source_type": "OPENAPI_DOCUMENTATION",
-                    "methods": v1_methods,
-                    "last_updated": datetime.now().isoformat(),
-                    "extraction_patterns_used": ["MDX file parsing"]
-                },
-                "v2": {
-                    "branch": "add/postman/utils",
-                    "version": "v2",
-                    "source_type": "OPENAPI_DOCUMENTATION",
-                    "methods": v2_methods,
-                    "last_updated": datetime.now().isoformat(),
-                    "extraction_patterns_used": ["MDX file parsing"]
-                }
-            }
-        }
-        
-        with open(output_file, 'w') as f:
-            json.dump(output_data, f, indent=2) 
