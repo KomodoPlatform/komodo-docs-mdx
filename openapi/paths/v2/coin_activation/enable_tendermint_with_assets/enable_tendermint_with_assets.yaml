@@ -1,0 +1,62 @@
+/enable_tendermint_with_assets:
+  post:
+    summary: Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS) and
+      IBC assets in a single command.
+    description: Use this method to activate Tendermint coins (COSMOS/IRIS/OSMOSIS)
+      and IBC assets in a single command.
+    operationId: enable_tendermint_with_assets
+    tags:
+    - default
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: User password for authentication.
+                example: RPC_UserP@SSW0RD
+              method:
+                type: string
+                description: Name of the method to be called.
+                enum:
+                - enable_tendermint_with_assets
+              params:
+                type: object
+                properties: {}
+            required:
+            - userpass
+            - method
+    responses:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              address:
+                type: string
+                description: An address for the activated coin
+              balance:
+                description: Only returned when `get_balances` is `true`. A standard
+                  [BalanceInfos](/komodo-defi-framework/api/common_structures/wallet/#balance-info)
+                  object.
+                $ref: ../../components/schemas/BalanceInfos.yaml
+              current_block:
+                type: integer
+                description: Block height of the coin being activated
+              ticker:
+                type: string
+                description: Ticker of the platform protocol coin, as input in the
+                  request.
+              tokens_balances:
+                description: Only returned when `get_balances` is `true`. A list of
+                  standard [AddressInfo](/komodo-defi-framework/api/common_structures/wallet/#address-info)
+                  objects, one for each token.
+                $ref: ../../components/schemas/AddressInfo.yaml
+              tokens_tickers:
+                type: array
+                description: Only returned when `get_balances` is `false`. A list
+                  of each token which was activated.
+          example: {}

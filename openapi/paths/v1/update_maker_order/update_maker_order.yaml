@@ -1,0 +1,90 @@
+/update_maker_order:
+  post:
+    summary: The update_maker_order method modifies an active order on the orderbook
+      created by the current node as a maker (or Bob).
+    description: The update_maker_order method modifies an active order on the orderbook
+      created by the current node as a maker (or Bob).
+    operationId: update_maker_order
+    tags:
+    - default
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: User password for authentication.
+                example: RPC_UserP@SSW0RD
+              method:
+                type: string
+                description: Name of the method to be called.
+                enum:
+                - update_maker_order
+              params:
+                type: object
+                properties: {}
+            required:
+            - userpass
+            - method
+    responses:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              base:
+                type: string
+                description: The base coin of the order
+              conf_settings:
+                description: A standard [ConfSettings](/komodo-defi-framework/api/common_structures/orders/#conf-settings)
+                  object.
+                $ref: ../components/schemas/ConfSettings.yaml
+              created_at:
+                type: number
+                description: Unix timestamp in milliseconds, indicating the order
+                  creation time
+              matches:
+                type: object
+                description: Contains the map of ongoing matches with other orders,
+                  empty as the order was recently created
+              max_base_vol:
+                type: string
+                description: The maximum volume of base coin available to trade; decimal
+                  representation
+              max_base_vol_rat:
+                type: string
+                description: The maximum volume of base coin available to trade; rational
+                  representation
+              min_base_vol:
+                type: string
+                description: Komodo DeFi Framework API will not match with other orders
+                  that attempt to trade less than `min_base_vol`; decimal representation
+              min_base_vol_rat:
+                type: string
+                description: Komodo DeFi Framework API will not match with other orders
+                  that attempt to trade less than `min_base_vol`; rational representation
+              price:
+                type: string
+                description: The expected amount of `rel` coin to be received per
+                  1 unit of `base` coin; decimal representation
+              price_rat:
+                type: string
+                description: The expected amount of `rel` coin to be received per
+                  1 unit of `base` coin; rational representation
+              rel:
+                type: string
+                description: The rel coin of the order
+              started_swaps:
+                type: string
+                description: UUIDs of swaps that were initiated by the order
+              updated_at:
+                type: number
+                description: Unix timestamp in milliseconds, indicating the order
+                  update time
+              uuid:
+                type: string
+                description: UUID of the updated order
+          example: {}

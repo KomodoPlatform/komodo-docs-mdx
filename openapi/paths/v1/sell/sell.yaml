@@ -1,0 +1,103 @@
+/sell:
+  post:
+    summary: The sell method issues a sell request and attempts to match an order
+      from the orderbook based on the provided arguments.
+    description: The sell method issues a sell request and attempts to match an order
+      from the orderbook based on the provided arguments.
+    operationId: sell
+    tags:
+    - default
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: User password for authentication.
+                example: RPC_UserP@SSW0RD
+              method:
+                type: string
+                description: Name of the method to be called.
+                enum:
+                - sell
+              params:
+                type: object
+                properties: {}
+            required:
+            - userpass
+            - method
+    responses:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              action:
+                type: string
+                description: The action of the request (`Sell`)
+              base:
+                type: string
+                description: The base currency of the request
+              base_amount:
+                type: string
+                description: The resulting amount of base currency that is sold if
+                  the order matches, represented as a decimal value.
+              base_amount_rat:
+                description: The resulting amount of base currency that is sold if
+                  the order matches, represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+                  object.
+                $ref: ../components/schemas/RationalValue.yaml
+              base_orderbook_ticker:
+                type: string
+                description: The ticker of the base currency if `orderbook_ticker`
+                  is configured for the base currency in `coins` file. If not defined,
+                  will return a null value.
+              conf_settings:
+                description: A standard [ConfSettings](/komodo-defi-framework/api/common_structures/orders/#conf-settings)
+                  object.
+                $ref: ../components/schemas/ConfSettings.yaml
+              dest_pub_key:
+                type: string
+                description: Reserved for future use. The `dest_pub_key` allows the
+                  user to choose the P2P node that is eligible to match with the request.
+                  This value defaults to "zero pubkey", meaning that `anyone` can
+                  match
+              match_by:
+                description: A standard [MatchBy](/komodo-defi-framework/api/common_structures/orders/#match-by)
+                  object, to filter to include only matches by pubkey or uuid. *Important:*
+                  This condition is not applied after a `GoodTillCancelled` order
+                  is converted to a `maker` request.
+                $ref: ../components/schemas/MatchBy.yaml
+              method:
+                type: string
+                description: This field is used for internal P2P interactions; the
+                  value is always equal to "request"
+              rel:
+                type: string
+                description: The rel currency of the request
+              rel_amount:
+                type: string
+                description: The minimum amount of `rel` coin that must be received
+                  in order to sell the `base_amount` of `base` (according to `price`,
+                  in decimal representation)
+              rel_amount_rat:
+                description: The minimum amount of `rel` coin that must be received
+                  in order to sell the `base_amount` of `base` (according to `price`,
+                  represented as a standard [RationalValue](/komodo-defi-framework/api/common_structures/#rational-value)
+                  object).
+                $ref: ../components/schemas/RationalValue.yaml
+              rel_orderbook_ticker:
+                type: string
+                description: The ticker of the rel currency if `orderbook_ticker`
+                  is configured for the rel currency in `coins` file. If not defined,
+                  will return a null value.
+              sender_pubkey:
+                type: string
+                description: The public key of our node
+              uuid:
+                type: string
+                description: The request uuid
+          example: {}

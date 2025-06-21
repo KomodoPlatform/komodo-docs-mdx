@@ -1,0 +1,53 @@
+/orders_history_by_filter:
+  post:
+    summary: The orders_history_by_filter method returns all orders, whether active
+      or inactive, that match the selected filters.
+    description: The orders_history_by_filter method returns all orders, whether active
+      or inactive, that match the selected filters.
+    operationId: orders_history_by_filter
+    tags:
+    - default
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: User password for authentication.
+                example: RPC_UserP@SSW0RD
+              method:
+                type: string
+                description: Name of the method to be called.
+                enum:
+                - orders_history_by_filter
+              params:
+                type: object
+                properties: {}
+            required:
+            - userpass
+            - method
+    responses:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              details:
+                type: array
+                description: Array of complete order details for every order that
+                  matches the selected filters; returns `[]` if `include_details`
+                  is false or not set
+              found_records:
+                type: number
+                description: The number of returned orders
+              orders:
+                description: Array of [OrderSummaryData](/komodo-defi-framework/api/common_structures/orders/#order-summary-data)
+                  that match the selected filters.
+                $ref: ../components/schemas/OrderSummaryData.yaml
+              warnings:
+                type: array
+                description: Array containing warnings objects
+          example: {}

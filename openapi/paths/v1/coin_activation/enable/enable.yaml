@@ -1,0 +1,69 @@
+/enable:
+  post:
+    summary: Enable a coin using the native or RPC method in the Komodo DeFi Framework
+      API.
+    description: Enable a coin using the native or RPC method in the Komodo DeFi Framework
+      API.
+    operationId: enable
+    tags:
+    - default
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: User password for authentication.
+                example: RPC_UserP@SSW0RD
+              method:
+                type: string
+                description: Name of the method to be called.
+                enum:
+                - enable
+              params:
+                type: object
+                properties: {}
+            required:
+            - userpass
+            - method
+    responses:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              address:
+                type: string
+                description: The address of the user's `coin` wallet, based on the
+                  user's passphrase
+              balance:
+                type: string
+                description: The amount of `coin` the user holds in their wallet;
+                  does not include `unspendable_balance`
+              unspendable_balance:
+                type: string
+                description: The `coin` balance that is unspendable at the moment
+                  (e.g. if the address has immature UTXOs)
+              coin:
+                type: string
+                description: The ticker of enabled coin
+              required_confirmations:
+                type: number
+                description: Komodo DeFi Framework API will wait for this number of
+                  coin's transaction confirmations during the swap
+              requires_notarization:
+                type: boolean
+                description: Whether the node must wait for a notarization of the
+                  selected coin that is performing the atomic swap transactions
+              mature_confirmations:
+                type: number
+                description: The number of coinbase transaction confirmations required
+                  to become mature; UTXO coins only
+              result:
+                type: string
+                description: The result of the request; this value either indicates
+                  `success`, or an error or other type of failure
+          example: {}

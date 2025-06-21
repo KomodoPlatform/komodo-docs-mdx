@@ -1,0 +1,60 @@
+/verify_message:
+  post:
+    summary: The method in this document allows you to verify messages for all coins
+      supported by Komodo DeFi Framework.
+    description: The method in this document allows you to verify messages for all
+      coins supported by Komodo DeFi Framework.
+    operationId: verify_message
+    tags:
+    - default
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              userpass:
+                type: string
+                description: User password for authentication.
+                example: RPC_UserP@SSW0RD
+              method:
+                type: string
+                description: Name of the method to be called.
+                enum:
+                - verify_message
+              params:
+                type: object
+                properties:
+                  address:
+                    type: string
+                    description: The address used to sign the message.
+                  coin:
+                    type: string
+                    description: The coin to verify the message with.
+                  message:
+                    type: string
+                    description: The message input via the `sign_message` method.
+                  signature:
+                    type: string
+                    description: The signature generated for the message.
+                required:
+                - address
+                - coin
+                - message
+                - signature
+            required:
+            - userpass
+            - method
+            - params
+    responses:
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              is_valid:
+                type: boolean
+                description: '`true` if the message signature is valid; `false` if
+                  it is not.'
+          example: {}
