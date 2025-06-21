@@ -30,6 +30,7 @@ class EnhancedPathMapper:
     
     def __init__(self, config: Optional[EnhancedKomodoConfig] = None):
         self.config = config or get_config()
+        self.logger = get_logger('path_utils')
         self.category_mappings = self._initialize_category_mappings()
         
     def _initialize_category_mappings(self) -> Dict[str, Dict[str, str]]:
@@ -41,10 +42,11 @@ class EnhancedPathMapper:
             mappings_path = Path(self.config._resolve_path(self.config.directories.category_mappings))
             with open(mappings_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            self.logger.error(f"!!!!!!!!!!!!! Error initializing category mappings: {e} !!!!!!!!!!!!")
             return {
-                "v2": {"_default": "misc"},
-                "v1": {"_default": "general"}
+                "v2": {"_default": "misc_cat_mapping_error"},
+                "v1": {"_default": "misc_cat_mapping_error"}
             }
     
     def get_method_path_mapping(self, method_name: str, mdx_path: str, version: str) -> PathMapping:
@@ -72,14 +74,12 @@ class EnhancedPathMapper:
         
         # Generate all paths using configuration
         try:
-            base_yaml_dir = self.config.get_directory_for_version_and_type(normalized_version, "yaml")
             base_json_dir = self.config.get_directory_for_version_and_type(normalized_version, "json")
         except Exception:
             # Fallback for unsupported versions
-            base_yaml_dir = ""
             base_json_dir = ""
         
-        openapi_path = self._generate_openapi_path(method_name, category, subcategory, base_yaml_dir)
+        openapi_path = self._generate_openapi_method_path(method_name, normalized_version, category, subcategory)
         postman_json_path = self._generate_postman_json_path(method_name, category, subcategory, base_json_dir)
         postman_collection_path = self._generate_postman_collection_path(category, subcategory, normalized_version)
         
@@ -126,7 +126,8 @@ class EnhancedPathMapper:
                 category = parts[0]
                 subcategory = None
             else:
-                category = "misc"
+                self.logger.warning(f"!!!!!!!!!!!! Error extracting category from MDX path: {parts}. Setting to misc !!!!!!!!!!!!")
+                category = "misc_extraction_error"
                 subcategory = None
             
             # Apply category mappings
@@ -135,14 +136,14 @@ class EnhancedPathMapper:
             
             return mapped_category, subcategory
             
-        except Exception:
+        except Exception as e:  
             # Fallback category extraction
-            return "misc", None
+            self.logger.warning(f"!!!!!!!!!!!! Error extracting category from MDX path: {e}. Setting to misc_error !!!!!!!!!!!!")
+            return "misc_extraction_exception", None
     
-    def _generate_openapi_path(self, method_name: str, category: str, subcategory: Optional[str], base_dir: str) -> str:
+    def _generate_openapi_method_path(self, method_name: str, version: str, category: str, subcategory: Optional[str]) -> str:
         """Generate OpenAPI YAML file path."""
-        if not base_dir:
-            return ""
+        base_dir = self.config.directories.openapi_paths
         
         # Convert method name to filename
         filename = self._method_name_to_filename(method_name) + ".yaml"
@@ -187,10 +188,9 @@ class EnhancedPathMapper:
     def get_schema_path(self, schema_name: str) -> Optional[Path]:
         """Constructs the full path to a schema file in the components directory."""
         try:
-            schemas_dir = Path(self.config.directories.schemas)
-            # Ensure schema_name is a valid filename
-            safe_schema_name = re.sub(r'[^a-zA-Z0-9_.-]', '', schema_name)
-            schema_file = schemas_dir / f"{safe_schema_name}.yml"
+            schemas_dir = Path(self.config.directories.openapi_schemas)
+            
+            schema_file = schemas_dir / f"{self._method_name_to_filename(schema_name)}.yaml"
             if schema_file.exists():
                 return schema_file
         except Exception:

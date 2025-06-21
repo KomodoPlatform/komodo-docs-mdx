@@ -44,15 +44,10 @@ class GeneratedFilesCleaner:
             'openapi': {
                 'patterns': [
                     'openapi/paths/v1/**/*.yaml',
-                    'openapi/paths/v1/**/*.yml',
                     'openapi/paths/v2/**/*.yaml',
-                    'openapi/paths/v2/**/*.yml',
                     'openapi/paths/v1/*.yaml',
-                    'openapi/paths/v1/*.yml',
                     'openapi/paths/v2/*.yaml',
-                    'openapi/paths/v2/*.yml',
                     'openapi/components/schemas/Generated.yaml',
-                    'openapi/components/schemas/Generated.yml',
                     'openapi/temp/**/*',
                 ],
                 'description': 'OpenAPI specification files',
@@ -317,7 +312,7 @@ class GeneratedFilesCleaner:
             return True
         
         # Check for generation markers in file content
-        if file_path.suffix in ['.yaml', '.yml', '.json']:
+        if file_path.suffix in ['.yaml', '.json']:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read(500)  # Just check first 500 chars
@@ -577,7 +572,7 @@ class GeneratedFilesCleaner:
         for directory in dirs_to_clean:
             if directory.is_dir():
                 for item in directory.iterdir():
-                    if item.is_file() and item.suffix in ['.yaml', '.yml']:
+                    if item.is_file() and item.suffix in ['.yaml']:
                         if self._remove_item(item):
                             removed_count += 1
                     elif item.is_dir():
@@ -591,7 +586,7 @@ class GeneratedFilesCleaner:
         """Helper to recursively clean files in a directory."""
         removed_count = 0
         for item in directory.iterdir():
-            if item.is_file() and item.suffix in ['.yaml', '.yml']:
+            if item.is_file() and item.suffix in ['.yaml']:
                 if self._remove_item(item):
                     removed_count += 1
             elif item.is_dir():

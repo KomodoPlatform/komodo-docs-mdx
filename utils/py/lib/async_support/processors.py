@@ -336,7 +336,7 @@ class YAMLProcessorStrategy(FileProcessorStrategy):
     
     def can_process(self, file_path: Path) -> bool:
         """Check if file is a YAML file."""
-        return file_path.suffix.lower() in ['.yaml', '.yml']
+        return file_path.suffix.lower() in ['.yaml', '.yaml']
     
     def process_file(self, file_path: Path) -> ProcessingResult:
         """Process YAML file."""
@@ -487,7 +487,7 @@ class FileProcessorContext:
         extensions = []
         
         # Test with dummy paths to get supported extensions
-        test_extensions = ['.json', '.mdx', '.yaml', '.yml', '.txt', '.md']
+        test_extensions = ['.json', '.mdx', '.yaml', '.txt', '.md']
         
         for ext in test_extensions:
             test_path = Path(f"test{ext}")

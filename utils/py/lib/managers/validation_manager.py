@@ -51,7 +51,7 @@ class ValidationManager:
             
         if path.suffix == ".mdx":
             return self.file_format_validator.validate_mdx_file(path)
-        elif path.suffix in [".yml", ".yaml"]:
+        elif path.suffix in [".yaml"]:
             return self.file_format_validator.validate_yaml_file(path)
         else:
             return ValidationResult(is_valid=True, errors=[], warnings=[f"No validator for file type: {path.suffix}"])

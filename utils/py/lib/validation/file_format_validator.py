@@ -131,7 +131,7 @@ class FileFormatValidator:
     def extract_method_name_from_yaml_filename(self, filename: str, version: str) -> Optional[str]:
         """
         Extracts the method name from a YAML filename, assuming it follows a convention.
-        e.g., v2_task_enable_eth_init.yml -> task::enable_eth::init
+        e.g., v2_task_enable_eth_init.yaml -> task::enable_eth::init
         
         Args:
             filename: The name of the YAML file.

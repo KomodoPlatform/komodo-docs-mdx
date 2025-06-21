@@ -506,7 +506,8 @@ def extract_category_from_method(method_name: str) -> Tuple[str, Optional[str]]:
         Tuple of (category, subcategory)
     """
     if not method_name:
-        return ("misc", None)
+        print(f"!!!!!!!!!!!! Error extracting category from method name: {method_name}. Setting to misc_empty_method_name !!!!!!!!!!!!")
+        return ("misc_empty_method_name", None)
     
     # Handle task methods
     if method_name.startswith("task::"):
@@ -552,7 +553,8 @@ def extract_category_from_method(method_name: str) -> Tuple[str, Optional[str]]:
     elif "1inch" in method_name:
         return ("integrations", "1inch")
     else:
-        return ("misc", None)
+        print(f"!!!!!!!!!!!! Error extracting category from method name: {method_name}. Setting to misc_cat_name_error !!!!!!!!!!!!")
+        return ("misc_cat_name_error", None)
 
 
 # =============================================================================
@@ -618,16 +620,7 @@ def extract_method_name_from_yaml_filename(filename: str, version: str) -> Optio
         Method name if valid, None otherwise
     """
     # Remove extension
-    name = filename.replace('.yaml', '').replace('.yml', '')
-    
-    # Convert to method format based on version
-    if version == 'v1':
-        return name
-    elif version == 'v2':
-        # Convert dashes to double colons for v2
-        return name.replace('-', '::')
-    
-    return name
+    return filename.replace('.yaml', '').replace('-', '::')
 
 
 def extract_methods_from_mdx_codeblocks(content: str, is_legacy: bool = False) -> Tuple[List[str], List[str]]:

@@ -100,7 +100,7 @@ DEFAULT_MAX_RETRIES = 3
 # File patterns
 MDX_PATTERNS = ["*.mdx", "**/*.mdx"]
 JSON_PATTERNS = ["*.json", "**/*.json"]
-YAML_PATTERNS = ["*.yaml", "*.yml", "**/*.yaml", "**/*.yml"]
+YAML_PATTERNS = ["*.yaml", "**/*.yaml"]
 FILE_PATTERNS = {
     'mdx': MDX_PATTERNS,
     'json': JSON_PATTERNS,
@@ -131,7 +131,6 @@ SUPPORTED_EXTENSIONS = {
     '.mdx': 'MDX Documentation',
     '.json': 'JSON Data',
     '.yaml': 'YAML Configuration',
-    '.yml': 'YAML Configuration',
     '.py': 'Python Script',
     '.md': 'Markdown Documentation'
 }

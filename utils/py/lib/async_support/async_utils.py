@@ -272,7 +272,7 @@ class AsyncMethodProcessor:
             yaml_files = await self.file_processor.scan_directory_async(
                 directory, "*.yaml"
             ) + await self.file_processor.scan_directory_async(
-                directory, "*.yml"
+                directory, "*.yaml"
             )
             
             # Process files concurrently

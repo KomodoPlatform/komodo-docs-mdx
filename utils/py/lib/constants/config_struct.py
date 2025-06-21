@@ -103,7 +103,7 @@ class DirectoryConfig:
     mdx_openapi_method_paths_report: str = "reports/kdf_openapi_method_paths.json"
     unified_method_mapping_report: str = "reports/kdf_unified_method_map.json"
     kdf_gap_analysis_report: str = "reports/kdf_gap_analysis.json"
-    category_mappings: str = "reports/category_mappings.json"
+    category_mappings: str = "utils/py/data/category_mappings.json"
 
 
     def __post_init__(self):
@@ -450,7 +450,30 @@ class EnhancedKomodoConfig:
         if os.path.isabs(path):
             return path
         return os.path.join(self.workspace_root, path)
-    
+
+    def get_directory_for_version_and_type(self, version: str, dir_type: str) -> str:
+        """
+        Get a specific directory path for a given version and type.
+
+        Args:
+            version: The version alias (e.g., 'v2', 'v20-dev').
+            dir_type: The type of directory ('mdx', 'yaml', 'json').
+
+        Returns:
+            The absolute path as a string.
+
+        Raises:
+            ValueError: If the mapping for the version or type does not exist.
+        """
+        version_dirs = self.directories.get_version_directories()
+        canonical_version = self.get_canonical_version(version)
+
+        if canonical_version in version_dirs:
+            if dir_type in version_dirs[canonical_version]:
+                return str(version_dirs[canonical_version][dir_type])
+            raise ValueError(f"Directory type '{dir_type}' not found for version '{version}' (canonical: '{canonical_version}').")
+        raise ValueError(f"Version '{version}' (canonical: '{canonical_version}') not found in directory configuration.")
+
     # Version mapping convenience methods
     def get_canonical_version(self, version: str) -> str:
         """Get canonical version name."""

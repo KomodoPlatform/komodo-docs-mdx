@@ -172,7 +172,7 @@ class FileInfo:
         
         if path.suffix.lower() == '.json':
             file_type = FileType.JSON
-        elif path.suffix.lower() in ['.yaml', '.yml']:
+        elif path.suffix.lower() in ['.yaml']:
             file_type = FileType.YAML
         elif path.suffix.lower() == '.mdx':
             file_type = FileType.MDX

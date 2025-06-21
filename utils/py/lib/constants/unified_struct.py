@@ -22,6 +22,7 @@ class UnifiedMethodInfo:
     name: str
     version: str
     description: Optional[str] = None
+    category: Optional[str] = None
     parameters: List['UnifiedParameterInfo'] = field(default_factory=list)
     response_parameters: List['UnifiedParameterInfo'] = field(default_factory=list)
     error_types: List['UnifiedErrorInfo'] = field(default_factory=list)
