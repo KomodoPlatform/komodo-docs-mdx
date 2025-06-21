@@ -40,16 +40,6 @@ if ! python py/kdf_tools.py scan-mdx; then
 fi
 echo
 
-# It all works nice and dandy up to here.
-# The next step is to generate the OpenAPI specifications.
-# Using the *.mdx files in src/pages/komodo-defi-framework/api/ for method,
-# enum and common structure docs as input:
-    # It must create the OpenAPI specifications in the openapi/paths/ directory.
-    # It must create the OpenAPI components in the openapi/paths/components directory.
-    # It must create the OpenAPI schemas in the openapi/paths/components/schemas directory.
-    # It must create the OpenAPI main in the openapi/openapi.yaml file.
-
-
 # Step 2: Extract JSON Examples
 # INPUT: KDF MDX documentation files
 # OUTPUT: Creates KDF RPC request/response JSON example files in postman/json/kdf/
@@ -64,6 +54,17 @@ fi
 echo
 
 
+# The next step is to generate the OpenAPI specifications.
+# Using the *.mdx files in src/pages/komodo-defi-framework/api/ for method,
+# enum and common structure docs as input:
+    # It must create the OpenAPI specifications in the openapi/paths/ directory.
+    # It must create the OpenAPI components in the openapi/paths/components directory.
+    # It must create the OpenAPI schemas in the openapi/paths/components/schemas directory.
+    # It must create the OpenAPI main in the openapi/openapi.yaml file.
+    # It must import the JSON examples from the postman/json/kdf/ directory.
+
+
+
 # Step 3: Generate OpenAPI Specifications
 # This single step now handles schemas, methods, and linking.
 echo "============== 🔧 Step 3: Generating OpenAPI specifications... ==============="
@@ -73,7 +74,6 @@ if ! python py/kdf_tools.py openapi --version all; then
     exit 1
 fi
 echo
-
 
 # Step 4: Generate Postman Collections
 # OUTPUT: Creates/updates Postman collection JSON files in postman/collections/

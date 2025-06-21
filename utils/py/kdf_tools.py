@@ -133,38 +133,19 @@ class KDFTools:
         success = False
         report_paths = []
         try:
-            # Initialize OpenAPI manager with enhanced enum/schema support
             manager = OpenAPIManager(
                 config=self.config,
                 verbose=self.verbose
             )
+            manager.openapi_command()
             
-            self.log("🔄 Processing all versions (v1 and v2) in a single run...")
-            
-            # Process v1 first
-            self.log("📂 Processing v1 (legacy methods)...")
-            # Store pre-v1 counts
-            v1_pre_count = manager.success_count
-            result_v1 = manager.generate_openapi_specs(version="v1")
-            # Calculate v1 count
-            v1_post_count = manager.success_count
-            v1_count = v1_post_count - v1_pre_count
-            self.log(f"✅ V1: Processed {v1_count} methods.")
-            
-            # Process v2 
-            self.log("📂 Processing v2 (current methods)...")
-            # Store pre-v2 counts
-            v2_pre_count = manager.success_count
-            result_v2 = manager.generate_openapi_specs(version="v2")
-            # Calculate v2 count
-            v2_post_count = manager.success_count
-            v2_count = v2_post_count - v2_pre_count
-            self.log(f"✅ V2: Processed {v2_count} methods.")
+            v1_count = len([m for m in manager.all_methods.values() if m['version'] == 'v1'])
+            v2_count = len([m for m in manager.all_methods.values() if m['version'] == 'v2'])
+            total_count = v1_count + v2_count
 
-            total_count = manager.success_count
             result = f"✅ All versions processed successfully!\n   📊 V1 methods: {v1_count}\n   📊 V2 methods: {v2_count}\n   📊 Total methods: {total_count}"
             
-            self.log(f"✅ {result}")
+            self.log(f"{result}")
             
             # NEW: Call tracking file generat
             self.log("📊 Generating OpenAPI tracking files...")
@@ -178,6 +159,10 @@ class KDFTools:
                 manager.mdx_parser.enum_patterns, structures_count,
                 enums_count, source_dirs, manager.all_methods
             )
+            
+            # Generate review files
+            self.log("📊 Generating review files...")
+            manager.common_schema_generator.generate_review_files(manager.mdx_parser.enum_patterns)
             
             # Show statistics about generated schemas
             stats = manager.get_stats()
