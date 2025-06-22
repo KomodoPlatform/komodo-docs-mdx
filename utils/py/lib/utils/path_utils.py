@@ -292,3 +292,42 @@ class EnhancedPathMapper:
         
         return created_dirs
 
+def get_method_path(target: str, method: str, version: str) -> Optional[Path]:
+    """
+    Derives the path to a method using the method paths report for the given target.
+
+    Args:
+        target: The type of target to derive the path for (e.g., 'mdx', 'json', 'openapi', 'rust').
+        method: The canonical name of the method.
+        version: The version of the method (e.g., 'v1', 'v2').
+
+    Returns:
+        The Path to the method's directory, or None if not found.
+    """
+    if target == "mdx":
+        report_path = get_config().directories.mdx_method_paths_report
+    elif target == "json":
+        report_path = get_config().directories.mdx_json_example_method_paths_report
+    elif target == "openapi":
+        report_path = get_config().directories.mdx_openapi_method_paths_report
+    elif target == "rust":
+        report_path = get_config().directories.rust_methods_report
+    else:
+        get_logger(__name__).error(f"Invalid target type: {target}")
+        return None
+    try:
+        with open(report_path, 'r') as f:
+            data = json.load(f)
+    except Exception as e:
+        get_logger(__name__).error(f"Error reading MDX method paths report from {report_path}: {e}")
+        return None
+    
+    method_paths = data.get("method_paths", {})
+    if version not in method_paths:
+        get_logger(__name__).warning(f"Version '{version}' not found in MDX method paths report.")
+        return None
+    path_str = method_paths.get(version, {}).get(method)
+    if path_str:
+        return Path(path_str)
+    get_logger(__name__).warning(f"MDX Path not found for method '{method}' in version '{version}'.")
+    return None
