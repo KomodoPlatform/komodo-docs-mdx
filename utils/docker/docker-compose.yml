@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   kdf:
     image: ${KDF_IMAGE:-kdf-image:latest}
@@ -7,10 +6,15 @@ services:
       dockerfile: Dockerfile.kdf
       args:
         KDF_BRANCH: ${KDF_BRANCH:-dev}
+        RPC_PORT: ${RPC_PORT:-7783}
     ports:
-      - "7783:7783"
+      - "${RPC_PORT:-7783}:${RPC_PORT:-7783}"
     volumes:
-      - ./utils/docker/kdf-data:/root/.kdf
-  
+      - ./kdf-db:/root/.kdf/DB
+      - ./kdf-config/MM2.json:/root/.kdf/MM2.json
+      - ./kdf-config/coins:/root/.kdf/coins
+      - ./kdf-config/.env:/root/.kdf/.env
+    command: ["/bin/sh", "-c", "/kdf/target/release/kdf "]
 volumes:
-  kdf_data: 
+  kdf-db:
+  kdf-config: 

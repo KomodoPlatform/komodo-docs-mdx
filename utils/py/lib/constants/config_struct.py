@@ -89,6 +89,7 @@ class DirectoryConfig:
     
     # Docker and containerization paths
     docker_dir: str = "utils/docker"
+    docker_dot_kdf_dir: str = "utils/docker/kdf-config"
 
     # Data and cache directories
     data_dir: str = "utils/py/data"

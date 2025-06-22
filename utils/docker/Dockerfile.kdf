@@ -5,6 +5,7 @@ LABEL MAINTAINER="Dragonhound <smk@komodoplatform.com>"
 # Add a build argument for the KDF branch
 ARG KDF_BRANCH=dev
 ARG KDF_COMMIT
+ARG RPC_PORT=7783
 
 RUN apt-get update -y
 
@@ -16,6 +17,7 @@ RUN apt-get install -y 	\
 	gcc-multilib 		\
 	git 				\
 	gnupg 				\
+	gettext-base 		\
 	libffi-dev  		\
 	libudev-dev			\
 	python-dev 			\
@@ -87,12 +89,5 @@ RUN if [ -n "$KDF_COMMIT" ]; then git checkout $KDF_COMMIT; fi
 # Build the KDF
 RUN cargo build --release
 
-# Copy and set up the entrypoint script
-COPY utils/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
 # Expose the default KDF RPC port
-EXPOSE 7783
-
-# Set the entrypoint
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+EXPOSE ${RPC_PORT}

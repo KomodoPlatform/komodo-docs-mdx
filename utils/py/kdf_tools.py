@@ -82,6 +82,11 @@ class KDFTools:
         self.verbose = True
         self.config = get_config()
         self.logger = get_logger("kdf-tools")
+        self.processor = ApiRequestProcessor(
+            config=self.config,
+            logger=self.logger
+        )
+        self.processor._load_dotenv()
         self.openapi_spec_generator = OpenApiSpecGenerator()
         if self.verbose:
             self.logger.folder(f"Workspace root: {self.config.workspace_root}")
@@ -89,7 +94,8 @@ class KDFTools:
             self.logger.folder(f"Reports directory: {self.config.directories.reports_dir}")
             self.logger.folder(f"KDF repository: {self.config.directories.kdf_repo_path}")
 
-    
+
+
     def log(self, message, level="info"):
         """Log a message with appropriate level."""
         
@@ -1362,17 +1368,15 @@ class KDFTools:
         success = False
         try:
             # Start container
-            self.start_container_command(args)
+            if self.start_container_command(args) != 0:
+                self.log("Halting due to container start failure.", "error")
+                return 1 # Exit with an error code
+
             # Give it time to initialize
-            time.sleep(30)
-            
-            processor = ApiRequestProcessor(
-                config=self.config,
-                logger=self.logger,
-                activation_type=args.activation_type,
-                kdf_branch=args.kdf_branch
-            )
-            processor.process_method_requests(
+            time.sleep(5)
+            self.processor.activation_type = args.activation_type
+            self.processor.kdf_branch = args.kdf_branch
+            self.processor.process_method_requests(
                 method=args.method,
                 version=args.version,
                 force_disable=args.force_disable
@@ -1432,7 +1436,6 @@ class KDFTools:
         config_lines = [f"Image: {image_name}"]
         self._print_header(command_title, config_lines)
         
-        docker_compose_path = self.config.directories.docker_dir
         env = os.environ.copy()
         env["KDF_BRANCH"] = args.kdf_branch
         env["KDF_IMAGE"] = image_name
@@ -1440,7 +1443,7 @@ class KDFTools:
         try:
             subprocess.run(
                 ["docker", "compose", "build"],
-                cwd=docker_compose_path, check=True, env=env
+                cwd=self.config.directories.docker_dir, check=True, env=env
             )
             self.logger.success(f"Image '{image_name}' built successfully.")
             success = True
@@ -1462,14 +1465,15 @@ class KDFTools:
         config_lines = [f"Image: {image_name}"]
         self._print_header(command_title, config_lines)
         
-        docker_compose_path = self.config.directories.docker_dir
         env = os.environ.copy()
         env["KDF_IMAGE"] = image_name
+
+        success = False
 
         try:
             subprocess.run(
                 ["docker", "compose", "up", "-d"],
-                cwd=docker_compose_path, check=True, env=env
+                cwd=self.config.directories.docker_dir, check=True, env=env
             )
             self.logger.success(f"Container for image '{image_name}' started.")
             success = True
@@ -1478,18 +1482,20 @@ class KDFTools:
             success = False
         finally:
             self._print_footer(command_title, success=success)
+        
+        return 0 if success else 1
 
     def stop_container_command(self, args):
         """Stops the KDF container."""
         command_title = "Stop KDF Container"
         self._print_header(command_title)
         
-        docker_compose_path = self.config.directories.docker_dir
+        success = False
         
         try:
             subprocess.run(
                 ["docker", "compose", "down"],
-                cwd=docker_compose_path, check=True
+                cwd=self.config.directories.docker_dir, check=True
             )
             self.logger.success("Container stopped successfully.")
             success = True

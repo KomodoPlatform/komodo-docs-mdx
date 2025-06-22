@@ -6,6 +6,7 @@ import time
 import subprocess
 from typing import Dict, Any, Set, List
 from pathlib import Path
+import sys
 
 from utils.py.lib.constants.config_struct import EnhancedKomodoConfig
 from utils.py.lib.utils.logging_utils import KomodoLogger
@@ -15,6 +16,7 @@ class ApiRequestProcessor:
     def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, activation_type: str = None, kdf_branch: str = 'dev'):
         self.config = config
         self.logger = logger
+        self._load_dotenv()
         self.activation_type = activation_type
         self.kdf_branch = kdf_branch
         self.enabled_coins: Set[str] = set()
@@ -23,15 +25,104 @@ class ApiRequestProcessor:
         self.protocol_to_activation: Dict[str, Any] = {}
 
         # Mappings and Constants
-        self.api_url = "http://127.0.0.1:7783"  # TODO: Make this configurable
+        rpc_url = os.getenv("RPC_URL", "http://127.0.0.1")
+        rpc_port = os.getenv("RPC_PORT", "7783")
+        self.api_url = f"{rpc_url}:{rpc_port}"
+        self.logger.info(f"API requests will be sent to: {self.api_url}")
         self._initialize_processor()
+
+    def _load_dotenv(self):
+        """Loads .env file from the docker data directory."""
+        dotenv_path = self.config.directories.docker_dot_kdf_dir / ".env"
+        if not dotenv_path.exists():
+            self.logger.warning(f".env file not found at {dotenv_path}. Using default values.")
+            return
+
+        self.logger.info(f"Loading environment variables from {dotenv_path}")
+        with open(dotenv_path, 'r') as f:
+            for line in f.read().splitlines():
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    # Remove surrounding quotes if they exist
+                    if value.startswith(('"', "'")) and value.endswith(('"', "'")):
+                        value = value[1:-1]
+                    os.environ[key] = value
+                    self.logger.info(f"ENV VAR: {key} = {value}")
+        self.logger.success("Successfully loaded environment variables.")
+
+    @staticmethod
+    def _get_env_var_as_bool(var_name, default=False):
+        """Gets an environment variable and converts it to a boolean."""
+        value = os.getenv(var_name, str(default)).lower()
+        return value in ['true', '1', 't', 'y', 'yes']
+
+    @staticmethod
+    def _get_env_var_as_int(var_name, default):
+        """Gets an environment variable and converts it to an integer."""
+        try:
+            return int(os.getenv(var_name, str(default)))
+        except (ValueError, TypeError):
+            return default
+
+    @staticmethod
+    def _get_env_var_as_str_array(var_name, default=[]):
+        """Gets a comma-separated string from env and converts to a list of strings."""
+        
+        value = os.getenv(var_name)
+        value = value.replace('"', '').replace("'", '').replace(',', ' ')
+        if not value:
+            return default
+        return [item.strip() for item in value.split(' ') if item.strip()]
+
+    def generate_mm2_config(self):
+        """Generates MM2.json from environment variables."""
+        output_path = self.config.directories.docker_dot_kdf_dir / "MM2.json"
+
+        # Assumes .env has been loaded into the environment by the calling script
+        config_data = {
+            "gui": os.getenv("GUI", "kdf_mdx_docs"),
+            "rpcip": "0.0.0.0",
+            "rpc_local_only": False,
+            "enable_hd": self._get_env_var_as_bool("ENABLE_HD", False),
+            "netid": self._get_env_var_as_int("NETID", 8762),
+            "rpcport": self._get_env_var_as_int("RPC_PORT", 7783),
+            "1inch_api": os.getenv("ONE_INCH_API", ""),
+            "seednodes": self._get_env_var_as_str_array("SEED_NODES", []),
+            "passphrase": os.getenv("PASSPHRASE", ""),
+            "rpc_password": os.getenv("RPC_PASSWORD", ""),
+            "use_watchers": self._get_env_var_as_bool("USE_WATCHERS", False),
+            "i_am_seed": self._get_env_var_as_bool("I_AM_SEED", False),
+            "is_bootstrap_node": self._get_env_var_as_bool("IS_BOOTSTRAP_NODE", False),
+            "disable_p2p": self._get_env_var_as_bool("DISABLE_P2P", False),
+            "use_trading_proto_v2": self._get_env_var_as_bool("USE_TRADING_PROTO_V2", False),
+            "allow_weak_password": self._get_env_var_as_bool("ALLOW_WEAK_PASSWORD", True),
+            "event_streaming_configuration": {
+                "access_control_allow_origin": "*"
+            }
+        }
+        self.logger.info(f"Config data: {config_data}")
+        value = os.getenv("SEED_NODES")
+        self.logger.info(f"SEED_NODES: {value}")
+        self.logger.info(f"config_data.seednodes: {config_data['seednodes']}")
+
+        try:
+            self.logger.info(f"Generating {output_path}...")
+            with open(output_path, 'w') as f:
+                json.dump(config_data, f, indent=4)
+            self.logger.success(f"Successfully generated {output_path}")
+        except Exception as e:
+            self.logger.error(f"Error writing to {output_path}: {e}")
+            sys.exit(1)
 
     def _initialize_processor(self):
         """Fetches coins config and updates initial enabled coins list."""
         self.logger.info("Initializing ApiRequestProcessor...")
         self._load_activation_mapping()
         self._fetch_coins_config()
-        self._update_enabled_coins()
+        self._fetch_coins_file()
+        self.generate_mm2_config()
 
     def _load_activation_mapping(self):
         """Loads the protocol_activation_mapping.json file."""
@@ -48,9 +139,9 @@ class ApiRequestProcessor:
             self.logger.error(f"Error decoding JSON from {mapping_file}: {e}")
             self.protocol_to_activation = {}
 
-    def _fetch_coins_config(self):
+    def _fetch_coins_config(self, branch: str = "master"):
         """Fetches the coins_config.json file."""
-        url = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
+        url = f"https://raw.githubusercontent.com/KomodoPlatform/coins/{branch}/utils/coins_config.json"
         try:
             self.logger.fetch(f"Fetching coins config from {url}")
             response = self.session.get(url, timeout=20)
@@ -61,8 +152,25 @@ class ApiRequestProcessor:
             self.logger.error(f"Failed to fetch coins_config.json: {e}")
             self.coins_config = {}
 
+    def _fetch_coins_file(self, branch: str = "master"):
+        """Fetches the coins file."""
+        url = f"https://raw.githubusercontent.com/KomodoPlatform/coins/{branch}/coins"
+        try:
+            self.logger.fetch(f"Fetching coins config from {url}")
+            response = self.session.get(url, timeout=20)
+            response.raise_for_status()
+            self.coins_file = response.json()
+            self.logger.success("Successfully fetched and loaded coins file.")
+        except requests.exceptions.RequestException as e:
+            self.logger.error(f"Failed to fetch coins: {e}")
+            self.coins_file = {}
+        with open(self.config.directories.docker_dot_kdf_dir / "coins", "w") as f:
+            json.dump(self.coins_file, f, indent=4)
+            self.logger.success("Successfully saved coins file.")
+
     def _make_request(self, request_body: Dict[str, Any]) -> Dict[str, Any]:
         """Wrapper for making API requests."""
+        self.logger.info(f"Sending request:\n{json.dumps(request_body, indent=2)}")
         try:
             response = self.session.post(self.api_url, json=request_body, timeout=60)
             response.raise_for_status()
@@ -100,11 +208,17 @@ class ApiRequestProcessor:
             return
 
         request_files = sorted(list(method_path.glob("request_*.json")))
+        self.logger.info(f"---------------------------------------------------------")
         self.logger.info(f"Found {len(request_files)} request files in {method_path}")
 
         for request_file in request_files:
             with open(request_file, 'r') as f:
                 request_body = json.load(f)
+
+            # Dynamically set userpass from environment variable if available
+            rpc_password = os.getenv("RPC_PASSWORD")
+            if rpc_password:
+                request_body["userpass"] = rpc_password
 
             coin = request_body.get("params", {}).get("coin")
             if coin and coin not in self.enabled_coins:
@@ -118,7 +232,7 @@ class ApiRequestProcessor:
                 self.disable_coin(coin)
 
 
-            self.logger.info(f"Executing request from {request_file.name}")
+            # self.logger.info(f"Executing request from {request_file.name}")
             response = self._make_request(request_body)
 
             if response:
@@ -126,6 +240,8 @@ class ApiRequestProcessor:
                 response_path = method_path / response_filename
                 with open(response_path, 'w') as f:
                     json.dump(response, f, indent=2)
+
+                self.logger.info(f"Response:\n{json.dumps(response, indent=2)}")
                 self.logger.save(f"Saved response to {response_path}")
 
             if "error" in response:
