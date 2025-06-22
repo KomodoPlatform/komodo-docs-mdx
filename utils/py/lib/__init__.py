@@ -28,6 +28,9 @@ from .async_support import (
     AsyncMethodProcessor, run_async
 )
 
+# API Client
+from .api_client.kdf_api_processor import ApiRequestProcessor
+
 # Scanning and analysis
 from .rust.scanner import KDFScanner
 from .constants import RustMethodDetails
@@ -76,6 +79,9 @@ __all__ = [
     # Async processing
     'AsyncMethodProcessor', 'run_async',
     
+    # API Client
+    'ApiRequestProcessor',
+    
     # Scanning and analysis
     'KDFScanner', 'RustMethodDetails', 'UnifiedParameterInfo', 'ExistingDocsScanner',
     'scan_existing_documentation', 'scan_existing_documentation_async',
@@ -114,6 +120,7 @@ PACKAGE_STRUCTURE = {
     "async_support": "Asynchronous processing utilities",
     "utils": "Supporting utilities (cache, observers, file operations, etc.)",
     "managers": "Centralized management classes (including method mapping)",
+    "api_client": "Client for interacting with KDF API",
     "reporting": "Centralized reporting functionality"
 }
 

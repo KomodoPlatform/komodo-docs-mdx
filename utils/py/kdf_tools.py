@@ -39,6 +39,7 @@ import asyncio
 import glob
 import json
 from datetime import datetime
+import time
 
 # To solve relative import issues, we add the project root to the python path.
 _script_dir = Path(__file__).parent.absolute()
@@ -71,6 +72,7 @@ from utils.py.lib.utils.data_utils import sort_version_method_counts
 
 from utils.py.lib.async_support import run_async
 from utils.py.lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
+from utils.py.lib.api_client.kdf_api_processor import ApiRequestProcessor
 
 
 class KDFTools:
@@ -1348,6 +1350,175 @@ class KDFTools:
         finally:
             self._print_footer(command_title, success=success)
 
+    def get_kdf_responses_command(self, args):
+        """Handle get-kdf-responses subcommand."""
+        command_title = "Get KDF API Responses"
+        config_lines = [
+            f"Method: {args.method}",
+            f"Version: {args.version}",
+            f"KDF Branch: {args.kdf_branch}"
+        ]
+        self._print_header(command_title, config_lines)
+        success = False
+        try:
+            # Start container
+            self.start_container_command(args)
+            # Give it time to initialize
+            time.sleep(30)
+            
+            processor = ApiRequestProcessor(
+                config=self.config,
+                logger=self.logger,
+                activation_type=args.activation_type,
+                kdf_branch=args.kdf_branch
+            )
+            processor.process_method_requests(
+                method=args.method,
+                version=args.version,
+                force_disable=args.force_disable
+            )
+            success = True
+        except Exception as e:
+            self.log(f"An error occurred during response fetching: {e}", "error")
+            self.log(traceback.format_exc(), "error")
+            success = False
+        finally:
+            # Stop container
+            self.stop_container_command(args)
+            self._print_footer(command_title, success=success)
+
+    def setup_get_kdf_responses_parser(self, subparsers):
+        """Setup parser for the get-kdf-responses command."""
+        parser = subparsers.add_parser(
+            'get-kdf-responses',
+            help='Fetch and save responses for a KDF method.',
+            description='Executes all request examples for a given method and saves the API responses.'
+        )
+        parser.add_argument(
+            '--method', type=str, required=True,
+            help='The API method to process (e.g., "my_balance").'
+        )
+        parser.add_argument(
+            '--version', type=str, default='v2',
+            help="The API version of the method (e.g., 'v1', 'v2'). Default: 'v2'"
+        )
+        parser.add_argument(
+            '--activation-type', type=str, choices=['v1', 'v2', 'task'],
+            help="Specify the activation type to use ('v1' for legacy, 'v2' for v2, 'task' for task-based). Defaults to the protocol's default in protocol_activation_mapping.json"
+        )
+        parser.add_argument(
+            '--force-disable', action='store_true',
+            help="Force disable the coin before each request (for testing activation)."
+        )
+        parser.add_argument(
+            '--kdf-branch', type=str, default='dev',
+            help='Specify the KDF branch to run tests against. Default: "dev"'
+        )
+        parser.add_argument(
+            '--commit', type=str,
+            help='Specify the commit hash to use. Defaults to the latest commit on the branch.'
+        )
+        parser.set_defaults(func=self.get_kdf_responses_command)
+
+    def build_container_command(self, args):
+        """Builds the KDF container image."""
+        command_title = "Build KDF Container"
+        commit = args.commit or self._get_latest_commit(args.kdf_branch)
+        if not commit:
+            return 1
+        
+        image_tag = f"{args.kdf_branch}-{commit[:10]}"
+        image_name = f"kdf-image:{image_tag}"
+        config_lines = [f"Image: {image_name}"]
+        self._print_header(command_title, config_lines)
+        
+        docker_compose_path = self.config.directories.docker_dir
+        env = os.environ.copy()
+        env["KDF_BRANCH"] = args.kdf_branch
+        env["KDF_IMAGE"] = image_name
+
+        try:
+            subprocess.run(
+                ["docker", "compose", "build"],
+                cwd=docker_compose_path, check=True, env=env
+            )
+            self.logger.success(f"Image '{image_name}' built successfully.")
+            success = True
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Failed to build image: {e}")
+            success = False
+        finally:
+            self._print_footer(command_title, success=success)
+
+    def start_container_command(self, args):
+        """Starts the KDF container."""
+        command_title = "Start KDF Container"
+        commit = args.commit or self._get_latest_commit(args.kdf_branch)
+        if not commit:
+            return 1
+            
+        image_tag = f"{args.kdf_branch}-{commit[:10]}"
+        image_name = f"kdf-image:{image_tag}"
+        config_lines = [f"Image: {image_name}"]
+        self._print_header(command_title, config_lines)
+        
+        docker_compose_path = self.config.directories.docker_dir
+        env = os.environ.copy()
+        env["KDF_IMAGE"] = image_name
+
+        try:
+            subprocess.run(
+                ["docker", "compose", "up", "-d"],
+                cwd=docker_compose_path, check=True, env=env
+            )
+            self.logger.success(f"Container for image '{image_name}' started.")
+            success = True
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Failed to start container: {e}")
+            success = False
+        finally:
+            self._print_footer(command_title, success=success)
+
+    def stop_container_command(self, args):
+        """Stops the KDF container."""
+        command_title = "Stop KDF Container"
+        self._print_header(command_title)
+        
+        docker_compose_path = self.config.directories.docker_dir
+        
+        try:
+            subprocess.run(
+                ["docker", "compose", "down"],
+                cwd=docker_compose_path, check=True
+            )
+            self.logger.success("Container stopped successfully.")
+            success = True
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Failed to stop container: {e}")
+            success = False
+        finally:
+            self._print_footer(command_title, success=success)
+
+    def _get_latest_commit(self, branch: str) -> str:
+        """Gets the latest commit hash for a given branch from the KDF repository."""
+        self.logger.info(f"Fetching latest commit for branch '{branch}'...")
+        try:
+            repo_url = "https://github.com/KomodoPlatform/komodo-defi-framework.git"
+            result = subprocess.run(
+                ['git', 'ls-remote', repo_url, f'refs/heads/{branch}'],
+                capture_output=True, text=True, check=True
+            )
+            if result.stdout:
+                commit_hash = result.stdout.split()[0]
+                self.logger.success(f"Latest commit on '{branch}': {commit_hash[:10]}")
+                return commit_hash
+            else:
+                self.logger.error(f"Could not find branch '{branch}' in remote repository.")
+                return None
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Error fetching latest commit for branch '{branch}': {e.stderr}")
+            return None
+
     def main(self):
         """Main entry point for the KDF Tools CLI."""
         parser = argparse.ArgumentParser(
@@ -1366,7 +1537,22 @@ class KDFTools:
         self.setup_scan_existing_docs_parser(subparsers)
         self.setup_generate_docs_parser(subparsers)
         self.setup_gap_analysis_parser(subparsers)
+        self.setup_get_kdf_responses_parser(subparsers)
         
+        # Container management commands
+        build_parser = subparsers.add_parser('build-container', help='Build KDF container image.')
+        build_parser.add_argument('--kdf-branch', type=str, default='dev', help='KDF branch to build.')
+        build_parser.add_argument('--commit', type=str, help='Commit hash to build.')
+        build_parser.set_defaults(func=self.build_container_command)
+
+        start_parser = subparsers.add_parser('start-container', help='Start KDF container.')
+        start_parser.add_argument('--kdf-branch', type=str, default='dev', help='KDF branch to use.')
+        start_parser.add_argument('--commit', type=str, help='Commit hash to use.')
+        start_parser.set_defaults(func=self.start_container_command)
+
+        stop_parser = subparsers.add_parser('stop-container', help='Stop KDF container.')
+        stop_parser.set_defaults(func=self.stop_container_command)
+
         # New parser for generate-common-schemas
         common_schemas_parser = subparsers.add_parser(
             "generate-common-schemas",

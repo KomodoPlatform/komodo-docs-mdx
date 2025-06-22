@@ -1,0 +1,98 @@
+FROM docker.io/debian:buster-slim
+LABEL MAINTAINER="Dragonhound <smk@komodoplatform.com>"
+
+
+# Add a build argument for the KDF branch
+ARG KDF_BRANCH=dev
+ARG KDF_COMMIT
+
+RUN apt-get update -y
+
+RUN apt-get install -y 	\
+	build-essential 	\
+	ca-certificates 	\
+	cmake 			 	\
+	curl 				\
+	gcc-multilib 		\
+	git 				\
+	gnupg 				\
+	libffi-dev  		\
+	libudev-dev			\
+	python-dev 			\
+	python3 			\
+	python3-pip 		\
+	sudo				\
+	unzip				\
+	wget 				\
+	zip
+
+# Install protoc
+RUN PROTOC_VERSION="21.12" && \
+    PROTOC_ZIP="protoc-${PROTOC_VERSION}-linux-x86_64.zip" && \
+    wget "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/${PROTOC_ZIP}" && \
+    unzip -o "${PROTOC_ZIP}" -d /usr/local && \
+    chmod +x /usr/local/bin/protoc && \
+    rm -f "${PROTOC_ZIP}"
+
+RUN pip3 install --upgrade pip
+RUN pip3 install paramiko
+
+RUN apt install -y  			\
+	software-properties-common 	\
+	lsb-release 				\
+	gnupg
+
+RUN curl --output llvm.sh https://apt.llvm.org/llvm.sh
+
+RUN chmod +x llvm.sh
+
+RUN ./llvm.sh 16
+
+RUN rm ./llvm.sh
+
+RUN ln -s /usr/bin/clang-16 /usr/bin/clang
+
+ENV AR=/usr/bin/llvm-ar-16
+ENV CC=/usr/bin/clang-16
+
+RUN mkdir -m 0755 -p /etc/apt/keyrings
+
+RUN curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+RUN echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+RUN apt-get update -y
+
+RUN apt-get install -y 	  \
+	docker-ce 			  \
+	docker-ce-cli 		  \
+	containerd.io 		  \
+	docker-buildx-plugin
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+ENV PATH="/root/.cargo/bin:$PATH"
+
+# Clone the Komodo DeFi Framework repository
+RUN git clone https://github.com/KomodoPlatform/komodo-defi-framework.git /kdf
+WORKDIR /kdf
+# Checkout the specified branch
+RUN git checkout $KDF_BRANCH
+RUN git pull
+# If a commit is specified, checkout that commit
+RUN if [ -n "$KDF_COMMIT" ]; then git checkout $KDF_COMMIT; fi
+
+# Build the KDF
+RUN cargo build --release
+
+# Copy and set up the entrypoint script
+COPY utils/docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Expose the default KDF RPC port
+EXPOSE 7783
+
+# Set the entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

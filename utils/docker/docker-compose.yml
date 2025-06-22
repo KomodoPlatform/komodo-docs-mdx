@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  kdf:
+    image: ${KDF_IMAGE:-kdf-image:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.kdf
+      args:
+        KDF_BRANCH: ${KDF_BRANCH:-dev}
+    ports:
+      - "7783:7783"
+    volumes:
+      - ./utils/docker/kdf-data:/root/.kdf
+  
+volumes:
+  kdf_data: 

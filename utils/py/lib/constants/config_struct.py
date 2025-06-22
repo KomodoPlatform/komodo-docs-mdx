@@ -87,6 +87,9 @@ class DirectoryConfig:
     postman_collections: str = "postman/collections"
     postman_environments: str = "postman/environments"
     
+    # Docker and containerization paths
+    docker_dir: str = "utils/docker"
+
     # Data and cache directories
     data_dir: str = "utils/py/data"
     reports_dir: str = "reports"
