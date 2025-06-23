@@ -93,6 +93,7 @@ class DirectoryConfig:
 
     # Data and cache directories
     data_dir: str = "utils/py/data"
+    templates_dir: str = "templates"
     reports_dir: str = "reports"
     cache_dir: str = "cache"
     kdf_repo_path: str = "utils/kdf_repo"

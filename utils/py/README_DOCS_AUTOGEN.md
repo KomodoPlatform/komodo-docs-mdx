@@ -1,7 +1,7 @@
 # KDF Documentation Auto-Generator
 
 A comprehensive tool that automatically generates documentation for missing KDF API methods by analyzing the KDF repository and populating MDX templates.
-
+https://github.com/KomodoPlatform/komodo-docs-mdx/blob/85064f797d51899ccc33ed9d1193dc83e094ef36/utils/py/kdf_docs_autogen.py
 ## Features
 
 - 🔍 **Automatic Method Discovery**: Loads missing methods from `unified_method_mapping.json`

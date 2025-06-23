@@ -41,6 +41,7 @@ import json
 from datetime import datetime
 import time
 from collections import defaultdict
+import re
 
 # To solve relative import issues, we add the project root to the python path.
 _script_dir = Path(__file__).parent.absolute()
@@ -75,6 +76,76 @@ from utils.py.lib.utils.data_utils import sort_version_method_counts
 from utils.py.lib.async_support import run_async
 from utils.py.lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
 from utils.py.lib.api_client.kdf_api_processor import ApiRequestProcessor
+
+
+class MdxScanner:
+    def __init__(self, config, logger):
+        self.config = config
+        self.logger = logger
+        self.workspace_root = Path(self.config.workspace_root)
+        self.mdx_docs_path = self.workspace_root / 'src' / 'pages'
+
+    def scan(self, versions: List[str]):
+        # The existing scan logic can remain here
+        pass
+
+    def generate_api_methods_table(self):
+        self.logger.info("Generating API methods table for index.mdx...")
+        paths_file = self.config.directories.mdx_method_paths_report
+        template_file = self.workspace_root / 'templates' / 'methods_table.template'
+        output_file = self.workspace_root / 'src' / 'pages' / 'komodo-defi-framework' / 'api' / 'index.mdx'
+
+        if not paths_file.exists():
+            self.logger.error(f"Method paths file not found: {paths_file}")
+            self.logger.error("Please run the 'scan-mdx' command first to generate the report.")
+            return
+
+        with open(paths_file, 'r') as f:
+            paths_data = json.load(f)
+
+        methods = defaultdict(lambda: {"legacy": "", "v20": "", "v20-dev": ""})
+        
+        for method_name, file_path_str in paths_data['method_paths']['v1'].items():
+            link = self._create_link(method_name, file_path_str)
+            methods[method_name]['legacy'] = link
+
+        for method_name, file_path_str in paths_data['method_paths']['v2'].items():
+            link = self._create_link(method_name, file_path_str)
+            if '/api/v20-dev/' in file_path_str:
+                methods[method_name]['v20-dev'] = link
+            elif '/api/v20/' in file_path_str:
+                methods[method_name]['v20'] = link
+        
+        sorted_methods = sorted(methods.keys())
+
+        table_rows = []
+        for method_name in sorted_methods:
+            row = f"| {methods[method_name]['legacy']} | {methods[method_name]['v20']} | {methods[method_name]['v20-dev']} |"
+            table_rows.append(row)
+
+        with open(template_file, 'r') as f:
+            template_content = f.read()
+
+        final_content = template_content + "\n" + "\n".join(table_rows)
+
+        with open(output_file, 'w') as f:
+            f.write(final_content)
+        
+        self.logger.save(f"Successfully generated API methods table at: {output_file}")
+
+    def _create_link(self, method_name, file_path_str):
+        doc_path_obj = Path(file_path_str).relative_to(self.mdx_docs_path)
+        doc_path = "/" + doc_path_obj.parent.as_posix()
+        slug = self._slugify(method_name)
+        escaped_name = method_name.replace('_', '\\_')
+        return f"[{escaped_name}]({doc_path}/#{slug})"
+
+    @staticmethod
+    def _slugify(text):
+        text = text.split("{{")[0].strip()
+        text = re.sub(r'[:_\\s]+', '-', text)
+        text = re.sub(r'[^a-zA-Z0-9\\-]', '', text)
+        return text.lower()
 
 
 class KDFTools:
@@ -354,90 +425,27 @@ class KDFTools:
         return sort_version_method_counts(version_method_counts)
     
     def scan_mdx_command(self, args):
-        """Handle MDX-only scanning - extract method names from MDX documentation files."""
-        command_title = "MDX Documentation Scan"
-        versions = args.versions
-        report_paths = []
-        if 'all' in versions:
-            versions = ['v1', 'v2']
-
+        """Scans MDX files for Komodo DeFi Framework methods."""
+        command_title = "Scan MDX Documentation"
         config_lines = [
-            f"Versions: {versions}",
+            f"Versions to scan: {args.versions}",
+            f"Repo branch: {args.branch}"
         ]
         self._print_header(command_title, config_lines)
         
-        success = False
-        try:
-            # Get current git branch of the repository
-            try:
-                result = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
-                                      capture_output=True, text=True, cwd=self.config.workspace_root, check=True)
-                current_branch = result.stdout.strip()
-                self.logger.info(f"Detected git branch: {current_branch}")
-            except (subprocess.CalledProcessError, FileNotFoundError):
-                current_branch = "unknown"
-                self.logger.warning("Could not detect git branch, using 'unknown'")
-            
-            self.logger.config(f"Versions: {', '.join(versions)}")
-            self.logger.folder(f"Workspace root: {self.config.workspace_root}")
-            self.logger.folder(f"Reports directory: {self.config.directories.reports_dir}")
-
-            print()
-            
-            # Use async scanning for better performance
-            
-            # Initialize documentation scanner
-            doc_scanner = UnifiedScanner(verbose=self.verbose)
-            
-            if self.verbose:
-                self.logger.scan("Scanning MDX documentation files...")
-            
-            # Scan documentation files
-            doc_results = run_async(doc_scanner.scan_all_files_async(versions))
-            
-            if doc_results:
-                # STEP 1: Generate method paths file (primary data source)
-                method_paths_data = self._generate_mdx_method_paths_data(
-                    doc_results, versions, current_branch
-                )
-                mdx_method_paths_report = self.config.directories.mdx_method_paths_report
-                safe_write_json(mdx_method_paths_report, method_paths_data)
-                report_paths.append(str(mdx_method_paths_report))
-                
-                # STEP 2: Generate methods file from the paths data (secondary data source)
-                methods_data = self._generate_mdx_methods_from_paths_file(
-                    mdx_method_paths_report, current_branch, versions
-                )
-                mdx_methods_report = self.config.directories.mdx_methods_report
-                safe_write_json(mdx_methods_report, methods_data)
-                report_paths.append(str(mdx_methods_report))
-
-                # Report success and show summary
-                self.logger.save(f"Saved documentation paths to: {mdx_method_paths_report}")
-                self.logger.save(f"Saved documentation methods to: {mdx_methods_report}")
-                
-                # Display summary from the paths data
-                total_documented_methods = method_paths_data["scan_metadata"]["version_method_counts"]
-                
-                print()
-                self.logger.info("Summary:")
-                for version in versions:
-                    if version in method_paths_data["method_paths"]:
-                        documented = len(method_paths_data["method_paths"][version])
-                        self.logger.info(f"{version.upper()}: {documented} methods with paths")
-                
-                self.logger.finish(f"Total documented: {total_documented_methods} methods across {len(versions)} versions")
-            
-            success = True
-            
-        except Exception as e:
-            self.log(f"MDX documentation scan failed: {e}", "error")
-            if self.verbose:
-                traceback.print_exc()
-            return 1
+        versions = args.versions.split(',') if args.versions and args.versions != 'all' else ['v1', 'v2']
         
-        self._print_footer(command_title, success=success, output_paths=report_paths)
-        return 0 if success else 1
+        doc_scanner = UnifiedScanner(
+            config=self.config,
+            verbose=self.verbose 
+        )
+        doc_results = run_async(doc_scanner.scan_all_files_async(versions))
+        self._generate_mdx_method_paths_data(doc_results, versions, args.branch)
+        self._generate_mdx_methods_from_paths_file(self.config.directories.mdx_method_paths_report, args.branch, versions)
+        
+        scanner = MdxScanner(self.config, self.logger)
+        scanner.generate_api_methods_table()
+        self._print_footer(command_title, success=True, output_paths=[self.config.directories.mdx_method_paths_report, self.config.directories.mdx_methods_report])
     
 
     def _generate_mdx_method_paths_data(self, doc_results, versions, current_branch):
@@ -487,10 +495,12 @@ class KDFTools:
             "method_paths": method_paths
         }
         
+        safe_write_json(self.config.directories.mdx_method_paths_report, method_paths_data)
+        self.logger.save(f"Saved documentation paths to: {self.config.directories.mdx_method_paths_report}")
         return method_paths_data
 
     def _generate_mdx_methods_from_paths_file(self, paths_file_path, current_branch, versions):
-        """Generate the methods file by deriving method lists from the paths file."""
+        """Generates a JSON report of methods from a paths file."""
         # Read the paths file that was just generated
         with open(paths_file_path, 'r', encoding='utf-8') as f:
             paths_data = json.load(f)
@@ -545,6 +555,9 @@ class KDFTools:
                     "Only includes methods with actual MDX files"
                 ]
             }
+        
+        safe_write_json(self.config.directories.mdx_methods_report, methods_data)
+        self.logger.save(f"Saved documentation paths to: {self.config.directories.mdx_methods_report}")
         return methods_data
     
     def methods_map_command(self, args):
@@ -1177,15 +1190,17 @@ class KDFTools:
         parser.set_defaults(func=self.openapi_command)
 
     def setup_scan_mdx_parser(self, subparsers):
-        """Setup parser for the scan-mdx command."""
-        parser = subparsers.add_parser(
-            'scan-mdx',
-            help='Scan MDX files for method names.',
-            description='Scans local MDX documentation to extract API method names and paths.'
+        """Sets up argument parser for the mdx_scan command."""
+        parser = subparsers.add_parser('scan-mdx', help='Scan MDX files for method info.')
+        parser.add_argument(
+            '--versions', 
+            default='all',
+            help='Comma-separated KDF versions to scan (e.g., v1,v2). Default: all'
         )
         parser.add_argument(
-            '--versions', nargs='+', default=['all'],
-            help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
+            '--branch', 
+            default='dev',
+            help='The git branch of the repo being scanned. Default: dev'
         )
         parser.set_defaults(func=self.scan_mdx_command)
 
