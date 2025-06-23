@@ -103,7 +103,7 @@ class EnhancedRepositoryAnalyzer:
                 required=True,
                 default=None,
                 description="A standard ActivationParams object containing activation configuration parameters",
-                example='{"mode": {"rpc": "Electrum", "rpc_data": {"electrum_servers": [{"url": "electrum1.cipig.net:10001"}], "electrum_rpc_password": "pass"}}}'
+                example='{"mode": {"rpc": "Electrum", "rpc_data": {"servers": [{"url": "electrum1.cipig.net:10001"}]}}}'
             ),
             "priv_key_policy": ParameterInfo(
                 name="priv_key_policy",

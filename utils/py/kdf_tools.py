@@ -40,6 +40,7 @@ import glob
 import json
 from datetime import datetime
 import time
+from collections import defaultdict
 
 # To solve relative import issues, we add the project root to the python path.
 _script_dir = Path(__file__).parent.absolute()
@@ -57,6 +58,7 @@ from utils.py.lib.mdx.mdx_generator import MdxGenerator
 from utils.py.lib.postman.postman_scanner import MdxJsonExampleExtractor, ExtractedExample
 from utils.py.lib.managers import MethodMappingManager
 from utils.py.lib.utils import safe_write_json, ensure_directory_exists
+from utils.py.lib.utils.path_utils import get_method_path
 from utils.py.lib import (
     UnifiedScanner,
     get_logger, DraftsManager,
@@ -1268,10 +1270,14 @@ class KDFTools:
         parser.set_defaults(func=self.gap_analysis_command)
 
     def gap_analysis_command(self, args):
-        """Handle gap-analysis subcommand."""
+        """Compares Rust methods with MDX documentation and generates a report."""
         command_title = "Gap Analysis"
         config = [
-            f"Versions: {args.versions}",
+            f"Branch: {args.branch}",
+            f"Versions: {'all' if args.all_versions else ', '.join(args.versions)}",
+            f"Scan Rust: {args.scan_rust}",
+            f"Scan MDX: {args.scan_mdx}",
+            f"Output format: {args.output_format}",
         ]
         self._print_header(command_title, config)
         
@@ -1357,71 +1363,78 @@ class KDFTools:
             self._print_footer(command_title, success=success)
 
     def get_kdf_responses_command(self, args):
-        """Handle get-kdf-responses subcommand."""
+        """Gets API responses for a given method and version."""
         command_title = "Get KDF API Responses"
         config_lines = [
-            f"Method: {args.method}",
-            f"Version: {args.version}",
-            f"KDF Branch: {args.kdf_branch}"
+            f"Method: {args.method if args.method else None}",
+            f"Version: {args.version if args.version else 'all'}",
+            f"KDF Branch: {args.kdf_branch}",
         ]
-        self._print_header(command_title, config_lines)
-        success = False
-        try:
-            # Start container
-            if self.start_container_command(args) != 0:
-                self.log("Halting due to container start failure.", "error")
-                return 1 # Exit with an error code
+        self._print_header(command_title, config_lines=config_lines)
+        if args.version == "all":
+            versions = ["v1", "v2"]
+        else:
+            versions = [args.version]
 
-            # Give it time to initialize
-            time.sleep(5)
-            self.processor.activation_type = args.activation_type
-            self.processor.kdf_branch = args.kdf_branch
-            self.processor.process_method_requests(
-                method=args.method,
-                version=args.version,
-                force_disable=args.force_disable
-            )
-            success = True
-        except Exception as e:
-            self.log(f"An error occurred during response fetching: {e}", "error")
-            self.log(traceback.format_exc(), "error")
-            success = False
-        finally:
-            # Stop container
-            self.stop_container_command(args)
-            self._print_footer(command_title, success=success)
+        self.start_container_command(args)
+        time.sleep(5)
+        for version in versions:
+            self.logger.info(f"Processing version: {version}")
+            if args.method is not None:
+                self.logger.info(f"Processing method: {args.method}, version: {version}")
+                self.processor.process_method_requests(
+                    method=method,
+                    version=version,
+                    force_disable=False
+                )
+            else:
+                self.logger.info(f"Processing all methods")
+                examples = self.get_json_example_method_paths()
+                self.logger.info(f"Examples: {len(examples)}")
+            for v, method_paths in examples.items():
+                for method in method_paths.keys():
+                    if method.startswith("wc"):
+                        continue
+                    if method.find("trezor") != -1:
+                        continue
+                    if method.find("metamask") != -1:
+                        continue
+                    if v not in versions:
+                        continue
+                    json_method_path = get_method_path("json", method, v)
+                    if json_method_path is None:
+                        self.logger.error(f"JSON method path not found for method: {method}, version: {v}")
+                        continue
+                    mdx_method_path = get_method_path("mdx", method, v)
+                    if mdx_method_path is None:
+                        self.logger.error(f"Method path not found for method: {method}, version: {v}")
+                        continue
+                    self.logger.info(f"MDX method path: {mdx_method_path}")
+                    self.logger.info(f"JSON method path: {json_method_path}")
+                    self.logger.info(f"Processing method: {method}, version: {v}")
+                    self.logger.info(f"--------------------------------")
+
+                    try:
+                        self.processor.process_method_requests(
+                            method=method,
+                            version=version,
+                            force_disable=False
+                        )
+                    except Exception as e:
+                        self.logger.error(f"An error occurred: {e}")
+                        self.logger.error(traceback.format_exc())
+                    time.sleep(1)
+
+        self.stop_container_command()
+        self._print_footer(command_title, success=True)
 
     def setup_get_kdf_responses_parser(self, subparsers):
-        """Setup parser for the get-kdf-responses command."""
-        parser = subparsers.add_parser(
-            'get-kdf-responses',
-            help='Fetch and save responses for a KDF method.',
-            description='Executes all request examples for a given method and saves the API responses.'
-        )
-        parser.add_argument(
-            '--method', type=str, required=True,
-            help='The API method to process (e.g., "my_balance").'
-        )
-        parser.add_argument(
-            '--version', type=str, default='v2',
-            help="The API version of the method (e.g., 'v1', 'v2'). Default: 'v2'"
-        )
-        parser.add_argument(
-            '--activation-type', type=str, choices=['v1', 'v2', 'task'],
-            help="Specify the activation type to use ('v1' for legacy, 'v2' for v2, 'task' for task-based). Defaults to the protocol's default in protocol_activation_mapping.json"
-        )
-        parser.add_argument(
-            '--force-disable', action='store_true',
-            help="Force disable the coin before each request (for testing activation)."
-        )
-        parser.add_argument(
-            '--kdf-branch', type=str, default='dev',
-            help='Specify the KDF branch to run tests against. Default: "dev"'
-        )
-        parser.add_argument(
-            '--commit', type=str,
-            help='Specify the commit hash to use. Defaults to the latest commit on the branch.'
-        )
+        """Sets up the parser for the get-kdf-responses command."""
+        parser = subparsers.add_parser('get-kdf-responses', help='Get API responses from a running KDF container.')
+        parser.add_argument('--method', type=str, required=False, default=None, help='The API method to get responses for.')
+        parser.add_argument('--version', type=str, required=False, default='all', help='The API version (e.g., v1, v2).')
+        parser.add_argument('--kdf-branch', type=str, default='dev', help='The KDF branch to use for the container.')
+        parser.add_argument('--commit', type=str, help='The commit hash to use. Defaults to the latest commit on the branch.')
         parser.set_defaults(func=self.get_kdf_responses_command)
 
     def build_container_command(self, args):
@@ -1485,25 +1498,12 @@ class KDFTools:
         
         return 0 if success else 1
 
-    def stop_container_command(self, args):
+    def stop_container_command(self):
         """Stops the KDF container."""
         command_title = "Stop KDF Container"
         self._print_header(command_title)
-        
-        success = False
-        
-        try:
-            subprocess.run(
-                ["docker", "compose", "down"],
-                cwd=self.config.directories.docker_dir, check=True
-            )
-            self.logger.success("Container stopped successfully.")
-            success = True
-        except subprocess.CalledProcessError as e:
-            self.logger.error(f"Failed to stop container: {e}")
-            success = False
-        finally:
-            self._print_footer(command_title, success=success)
+        result = self.processor.stop_container()
+        self._print_footer(command_title, success=result)
 
     def _get_latest_commit(self, branch: str) -> str:
         """Gets the latest commit hash for a given branch from the KDF repository."""
@@ -1524,6 +1524,24 @@ class KDFTools:
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Error fetching latest commit for branch '{branch}': {e.stderr}")
             return None
+
+    def get_json_example_method_paths(self):
+        """Loads method and version data from the kdf_mdx_json_example_method_paths.json report."""
+        report_path = self.config.directories.mdx_json_example_method_paths_report
+
+        if not report_path.exists():
+            self.logger.error(f"Method paths report not found at: {report_path}")
+            self.logger.error("Please run 'json-extract' first to generate it.")
+            return {}
+
+        try:
+            with open(report_path, 'r') as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            self.logger.error(f"Error decoding JSON from {report_path}")
+            return {}
+
+        return data.get("method_paths", {})
 
     def main(self):
         """Main entry point for the KDF Tools CLI."""

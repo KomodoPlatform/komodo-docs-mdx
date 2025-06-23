@@ -10,14 +10,14 @@ import sys
 
 from utils.py.lib.constants.config_struct import EnhancedKomodoConfig
 from utils.py.lib.utils.logging_utils import KomodoLogger
+from utils.py.lib.utils.path_utils import get_method_path
 
 
 class ApiRequestProcessor:
-    def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, activation_type: str = None, kdf_branch: str = 'dev'):
+    def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, kdf_branch: str = 'dev'):
         self.config = config
         self.logger = logger
         self._load_dotenv()
-        self.activation_type = activation_type
         self.kdf_branch = kdf_branch
         self.enabled_coins: Set[str] = set()
         self.session = requests.Session()
@@ -116,6 +116,18 @@ class ApiRequestProcessor:
             self.logger.error(f"Error writing to {output_path}: {e}")
             sys.exit(1)
 
+    def stop_container(self):
+        try:
+            subprocess.run(
+                ["docker", "compose", "down"],
+                cwd=self.config.directories.docker_dir, check=True
+            )
+            self.logger.success("Container stopped successfully.")
+            return True
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Failed to stop container: {e}")
+            return False
+
     def _initialize_processor(self):
         """Fetches coins config and updates initial enabled coins list."""
         self.logger.info("Initializing ApiRequestProcessor...")
@@ -177,9 +189,14 @@ class ApiRequestProcessor:
             return response.json()
         except requests.exceptions.HTTPError as http_err:
             self.logger.error(f"HTTP error occurred: {http_err} - {response.text}")
-        except requests.exceptions.RequestException as req_err:
-            self.logger.error(f"Request error occurred: {req_err}")
-        return {"error": "Request failed in _make_request"}
+            if 'Userpass is invalid' in response.text:
+                self.logger.error(f"Userpass is invalid. Please check your .env file.")
+                self.stop_container()
+                sys.exit(1)
+            return response.text
+        except Exception as e:
+            self.logger.error(f"Request error occurred: {e}")
+
 
     def _update_enabled_coins(self):
         """Calls get_enabled_coins and updates the internal set."""
@@ -195,14 +212,28 @@ class ApiRequestProcessor:
         else:
             self.logger.warning("Could not update enabled coins list.")
 
-    def get_method_path(self, method: str, version: str) -> Path:
-        """Constructs the path to the method's JSON files directory."""
-        filesystem_method_name = method.replace('::', '-')
-        version_dir = self.config.directories.postman_json_v2 if version == 'v2' else self.config.directories.postman_json_v1
-        return version_dir / filesystem_method_name
+
+    def check_coin_is_active(self, request_body: Dict[str, Any]) -> bool:
+        """Checks if the coin is active, and if not, activates it"""
+        coins_to_activate = []
+        for i in ['coin', 'ticker', 'base', 'rel']:
+            if i in request_body:
+                coin = request_body[i]
+            elif i in request_body.get("params", {}):
+                coin = request_body.get("params", {}).get(i)
+            else:
+                continue
+            coins_to_activate.append(coin)
+        for coin in coins_to_activate:
+            if coin and coin not in self.enabled_coins:
+                self.logger.warning(f"Coin '{coin}' is not enabled. Attempting activation...")
+                if not self.activate_coin(coin):
+                    self.logger.error(f"Skipping request as activation for '{coin}' failed.")
+                    return False, coin
+        return True, None
 
     def process_method_requests(self, method: str, version: str, force_disable: bool = False):
-        method_path = self.get_method_path(method, version)
+        method_path = get_method_path('json', method, version)
         if not method_path.exists():
             self.logger.error(f"Method directory not found: {method_path}")
             return
@@ -219,18 +250,11 @@ class ApiRequestProcessor:
             rpc_password = os.getenv("RPC_PASSWORD")
             if rpc_password:
                 request_body["userpass"] = rpc_password
-
-            coin = request_body.get("params", {}).get("coin")
-            if coin and coin not in self.enabled_coins:
-                self.logger.warning(f"Coin '{coin}' is not enabled. Attempting activation...")
-                if not self.activate_coin(coin):
-                    self.logger.error(f"Skipping request as activation for '{coin}' failed.")
-                    continue
             
-            if force_disable and coin:
-                self.logger.info(f"Force disabling '{coin}' before request.")
-                self.disable_coin(coin)
-
+            coins_active, coin = self.check_coin_is_active(request_body)
+            if not coins_active:
+                self.logger.error(f"Skipping request as activation for '{coin}' failed.")
+                continue
 
             # self.logger.info(f"Executing request from {request_file.name}")
             response = self._make_request(request_body)
@@ -238,28 +262,30 @@ class ApiRequestProcessor:
             if response:
                 response_filename = request_file.name.replace("request_", "response_")
                 response_path = method_path / response_filename
+
+                if "error" in response:
+                    response_path.replace("response_", "error_")
+                    error_log_path = self.config.directories.reports_dir / "request_errors.log"
+                    message_to_log = (
+                        f"----------- ERROR LOG -----------\n"
+                        f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+                        f"Method: {method}\n"
+                        f"Request File: {request_file.name}\n"
+                        f"Request Body: {json.dumps(request_body, indent=2)}\n"
+                        f"Response: {json.dumps(response, indent=2)}\n"
+                        f"---------------------------------\n\n"
+                    )
+                    self.logger.error(f"API error for {method} ({request_file.name}). See {error_log_path} for details.")
+                    with open(error_log_path, 'a') as f:
+                        f.write(message_to_log)
+
                 with open(response_path, 'w') as f:
                     json.dump(response, f, indent=2)
 
                 self.logger.info(f"Response:\n{json.dumps(response, indent=2)}")
                 self.logger.save(f"Saved response to {response_path}")
 
-            if "error" in response:
-                error_log_path = self.config.directories.reports_dir / "request_errors.log"
-                message_to_log = (
-                    f"----------- ERROR LOG -----------\n"
-                    f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
-                    f"Method: {method}\n"
-                    f"Request File: {request_file.name}\n"
-                    f"Request Body: {json.dumps(request_body, indent=2)}\n"
-                    f"Response: {json.dumps(response, indent=2)}\n"
-                    f"---------------------------------\n\n"
-                )
-                self.logger.error(f"API error for {method} ({request_file.name}). See {error_log_path} for details.")
-                with open(error_log_path, 'a') as f:
-                    f.write(message_to_log)
-
-    def activate_coin(self, ticker: str) -> bool:
+    def activate_coin(self, ticker: str, activation_type: str = 'default') -> bool:
         self.logger.info(f"Attempting to activate '{ticker}'...")
         coin_info = self.coins_config.get(ticker)
         if not coin_info:
@@ -274,13 +300,11 @@ class ApiRequestProcessor:
             return False
 
         # Determine which activation type to use
-        act_type_to_use = self.activation_type
+
+        act_type_to_use = activation_options.get(activation_type)
         if not act_type_to_use:
-            act_type_to_use = activation_options.get("default")
-            if not act_type_to_use:
-                self.logger.error(f"No default activation type for protocol '{protocol}'.")
-                return False
-            self.logger.info(f"No activation type specified, using default: '{act_type_to_use}'")
+            self.logger.error(f"No {activation_type} activation type for protocol '{protocol}'.")
+            return False
 
         activation_method = activation_options.get(act_type_to_use)
 
@@ -300,13 +324,13 @@ class ApiRequestProcessor:
                 params["contract_address"] = coin_info.get("contract_address")
         elif protocol in ["UTXO", "BCH"]:
             params["utxo_merge_params"] = {"merge_at": 10}
-            params["electrum_servers"] = coin_info.get("electrum", [])
+            params["electrum"] = coin_info.get("electrum", [])
         elif protocol == "SLP":
             params["utxo_merge_params"] = {"merge_at": 10}
-            params["electrum_servers"] = coin_info.get("electrum", [])
+            params["electrum"] = coin_info.get("electrum", [])
             # SLP might have specific token id params
         elif protocol in ["QTUM", "QRC20"]:
-            params["electrum_servers"] = coin_info.get("electrum", [])
+            params["electrum"] = coin_info.get("electrum", [])
             if "contract_address" in coin_info:
                  params["contract_address"] = coin_info.get("contract_address")
         elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
