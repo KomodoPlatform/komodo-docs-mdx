@@ -133,7 +133,7 @@ class KDFTools:
                 self.log(f"    - {path}")
         self.log("")
         
-    def report_error_responses(self, args):
+    def report_error_responses(self):
         """Generates a report of method requests that have error responses."""
         command_title = "Generate Error Response Report"
         self._print_header(command_title)
@@ -1491,6 +1491,7 @@ class KDFTools:
 
             self.start_container_command(args)
             time.sleep(5)
+            delayed_methods = []
             if args.method is None:
                 self.logger.info(f"Processing all methods")
                 examples = self.get_json_example_method_paths()
@@ -1502,8 +1503,15 @@ class KDFTools:
                     #      - perform task based operations in sequence
                     #      - etc.
                     for method, json_path in method_paths.items():
-                        if self.is_method_interactive(method):
-                            self.logger.info(f"Skipping interactive method: {method}")
+                        validator = MethodValidator(method, version, self.processor)
+                        if not validator.validate_method_for_testing():
+                            # Tests method for compatibility with `enable_hd` status in MM2.json
+                            self.logger.info(f"Skipping {method}, not valid for test case: [{version} HD: {self.processor.enable_hd}]")
+                            continue
+                        if not validator.is_method_ready(method):
+                            # Delays methods which need a prior method to be completed
+                            self.logger.info(f"Skipping not ready method: {method}")
+                            delayed_methods.append(method)
                             continue
                         if method == "stop":
                             self.logger.info(f"Skipping stop method: {method}")
@@ -1539,13 +1547,9 @@ class KDFTools:
             self.logger.error(f"Keyboard interrupt detected. Stopping container...")
         finally:
             self.stop_container_command()
+            self.report_error_responses()
             self._print_footer(command_title, success=False)
 
-    def is_method_interactive(self, method: str) -> bool:
-        """Checks if a method is interactive."""
-        if method.find("trezor") != -1 or method.find("metamask") != -1 or method.startswith("wc"):
-            return True
-        return False
 
     def setup_get_kdf_responses_parser(self, subparsers):
         """Sets up the parser for the get-kdf-responses command."""
@@ -1747,9 +1751,6 @@ class KDFTools:
         self.setup_get_kdf_responses_parser(subparsers)
         self.setup_v2_no_param_report_parser(subparsers)
 
-        # New parser for error report
-        error_report_parser = subparsers.add_parser("report-errors", help="Generate a report of methods with error responses.")
-        error_report_parser.set_defaults(func=self.report_error_responses)
 
         # Container management commands
         build_parser = subparsers.add_parser('build-container', help='Build KDF container image.')
@@ -1790,6 +1791,67 @@ class KDFTools:
         else:
             parser.print_help()
             return 1
+
+
+class MethodValidator:
+    def __init__(self, method: str, version: str, processor: ApiRequestProcessor = None):
+        self.processor = processor or KDFAPIProcessor()
+        self.method = method
+        self.version = version
+        self.enable_hd = self.processor._get_env_var_as_bool("ENABLE_HD", False)
+
+    def validate_method_for_testing(self) -> bool:
+        """Checks if a method is valid for the test case being run."""
+        if self.enable_hd and self.is_legacy_only_method():
+            return False
+        if not self.enable_hd and self.is_hd_only_method():
+            return False
+        if self.is_method_interactive():
+            return False
+        return True
+    
+    def is_hd_only_method(self) -> bool:
+        """Checks if a method is HD only."""
+        hd_only_methods = {
+            "v1": [],
+            "v2": [],
+        }
+        if self.method in hd_only_methods[self.version]:
+            return True
+        return False
+    
+    def is_legacy_only_method(self) -> bool:
+        """Checks if a method is legacy."""
+        legacy_only_methods = {
+            "v1": ["my_balance"],
+            "v2": [],
+        }
+        if self.method in legacy_only_methods[self.version]:
+            return True
+        return False
+
+    def is_method_interactive(self) -> bool:
+        """Checks if a method is interactive."""
+        if (
+            self.method.find("trezor") != -1
+            or self.method.find("user_action") != -1
+            or self.method.find("metamask") != -1
+            or self.method.startswith("wc")
+        ):
+            return True
+        return False
+
+    def is_method_ready(self) -> bool:
+        """Checks if a method is ready to be processed."""
+        method_prerequisites = {
+            "unban_pubkeys": ["ban_pubkey"],                   # TODO: pubkey must have been banned
+            "send_raw_transaction": ["task::withdraw::init"],  # TODO: The whole task needs to be completed
+            "my_swap_status": ["buy"],                         # TODO: swap must have been initiated
+            "verify_message": ["sign_message"],                # TODO: message must have been signed
+        }
+        if self.method in method_prerequisites:
+            return method_prerequisites[self.method] in self.processor.enabled_coins
+        return True
 
 def main():
     """Script entry point."""

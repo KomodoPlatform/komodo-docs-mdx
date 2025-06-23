@@ -28,6 +28,7 @@ class ApiRequestProcessor:
         rpc_url = os.getenv("RPC_URL", "http://127.0.0.1")
         rpc_port = os.getenv("RPC_PORT", "7783")
         self.api_url = f"{rpc_url}:{rpc_port}"
+        self.rpc_password = os.getenv("RPC_PASSWORD", "RPC_CONTRoL_USERP@SSW0RD")
         self.logger.info(f"API requests will be sent to: {self.api_url}")
         self._initialize_processor()
 
@@ -182,6 +183,7 @@ class ApiRequestProcessor:
         """Wrapper for making API requests."""
         self.logger.info(f"Sending request:\n{json.dumps(request_body, indent=2)}")
         try:
+            request_body["userpass"] = self.rpc_password
             response = self.session.post(self.api_url, json=request_body, timeout=60)
             response.raise_for_status()
             return response.json()
@@ -252,9 +254,7 @@ class ApiRequestProcessor:
                 request_body = json.load(f)
 
             # Dynamically set userpass from environment variable if available
-            rpc_password = os.getenv("RPC_PASSWORD")
-            if rpc_password:
-                request_body["userpass"] = rpc_password
+            request_body["userpass"] = self.rpc_password
             
             coins_active, coin = self.check_coin_is_active(request_body)
             if not coins_active:
@@ -335,6 +335,21 @@ class ApiRequestProcessor:
                 if protocol in ["QRC20"]:
                     if "contract_address" in coin_info:
                         activation_params["contract_address"] = coin_info.get("contract_address")
+
+            elif protocol == "ZHTLC":
+                zcash_params_path = os.getenv("ZCASH_PARAMS_PATH")
+                if not zcash_params_path:
+                    self.logger.warning("ZCASH_PARAMS_PATH not set, using default: /tmp/.zcash-params")
+                    zcash_params_path = "/tmp/.zcash-params"
+
+                rpc_data = {
+                    "electrum_servers": coin_info.get("electrum", []),
+                    "light_wallet_d_servers": coin_info.get("nodes", [])
+                }
+                activation_params["mode"] = {"rpc": "Light", "rpc_data": rpc_data}
+                activation_params["zcash_params_path"] = zcash_params_path
+                activation_params["scan_blocks_per_iteration"] = 100
+                activation_params["scan_interval_ms"] = 200
 
             elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
                 activation_params["rpc_urls"] = [node["url"] for node in coin_info.get("nodes", [])]
