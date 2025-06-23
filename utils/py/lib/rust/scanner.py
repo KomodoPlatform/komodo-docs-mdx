@@ -13,7 +13,7 @@ import requests
 import asyncio
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Any, Union, Tuple
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from ..utils.logging_utils import get_logger
 from ..utils import ensure_directory_exists
@@ -28,24 +28,14 @@ class KDFScanner:
 
     def __init__(self, config: Any, repo_path: Optional[Union[str, Path]] = None,
                  branch: str = "dev",
-                 cache_duration_hours: int = 1,
                  verbose: bool = True):
         self.logger = get_logger("kdf-scanner")
         self.config = config
         self.script_dir = Path(__file__).parent.parent.parent
-
         self.repo_path = Path(self.config._resolve_path(self.config.directories.kdf_repo_path))
-            
         self.branch = branch
-        self.verbose = verbose
-        self.cache_duration = timedelta(hours=cache_duration_hours)
+        self.setup_repository()
 
-        self.data_dir = Path(self.config.directories.data_dir)
-        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        
-
-        self.data_dir.mkdir(exist_ok=True, parents=True)
-        self.reports_dir.mkdir(exist_ok=True, parents=True)
 
     def setup_repository(self, force_clone: bool = False) -> bool:
         repo_url = "https://github.com/KomodoPlatform/komodo-defi-framework.git"
@@ -72,10 +62,14 @@ class KDFScanner:
         self.logger.info(f"Cloning KDF repository (branch: {self.branch})...")
         try:
             subprocess.run([
-                "git", "clone", "--depth", "1", "--branch", self.branch,
-                repo_url, str(self.repo_path)
+                "git", "clone", repo_url, str(self.repo_path)
             ], check=True, capture_output=True)
+
+            subprocess.run([
+                "git", "checkout", self.branch
+            ], cwd=self.repo_path, check=True, capture_output=True)
             self.logger.success("Repository cloned successfully.")
+
             return True
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Failed to clone repository: {e.stderr.decode()}")
@@ -114,10 +108,7 @@ class KDFScanner:
     async def scan_repository_methods_async(self, versions: List[str] = None) -> Dict[str, UnifiedRepositoryInfo]:
         if versions is None:
             versions = ["v1", "v2"]
-        
-        if self.verbose:
-            self.logger.scan(f"Scanning KDF repository {self.branch} asynchronously")
-        
+
         import asyncio
         tasks = [self._scan_version_async(version) for version in versions]
         results = await asyncio.gather(*tasks, return_exceptions=True)

@@ -1508,7 +1508,7 @@ class KDFTools:
                             # Tests method for compatibility with `enable_hd` status in MM2.json
                             self.logger.info(f"Skipping {method}, not valid for test case: [{version} HD: {self.processor.enable_hd}]")
                             continue
-                        if not validator.is_method_ready(method):
+                        if not validator.is_method_ready():
                             # Delays methods which need a prior method to be completed
                             self.logger.info(f"Skipping not ready method: {method}")
                             delayed_methods.append(method)
@@ -1799,6 +1799,16 @@ class MethodValidator:
         self.method = method
         self.version = version
         self.enable_hd = self.processor._get_env_var_as_bool("ENABLE_HD", False)
+        self.prerequisites_status = {
+            "ban_pubkey": False,             # for pubkey to be banned
+            "sign_message": False,           # for message to be signed
+            "buy": False,                    # for swap uuid to be checked
+            "unsigned_transaction": False,   # for transaction to be sent
+            "task_uuid": {
+                "withdraw": False,           # for hex to send raw transaction
+                "swap": False,               # 
+            }
+        }
 
     def validate_method_for_testing(self) -> bool:
         """Checks if a method is valid for the test case being run."""
@@ -1814,14 +1824,22 @@ class MethodValidator:
         """Checks if a method is HD only."""
         hd_only_methods = {
             "v1": [],
-            "v2": [],
+            "v2": [
+                "task::get_new_address::cancel",
+                "task::get_new_address::init",
+                "task::get_new_address::status",
+                "task::get_new_address::user_action",
+                "task::scan_for_new_addresses::cancel",
+                "task::scan_for_new_addresses::init",
+                "task::scan_for_new_addresses::status",
+            ],
         }
         if self.method in hd_only_methods[self.version]:
             return True
         return False
     
     def is_legacy_only_method(self) -> bool:
-        """Checks if a method is legacy."""
+        """Checks if a method is legacy only."""
         legacy_only_methods = {
             "v1": ["my_balance"],
             "v2": [],
@@ -1840,6 +1858,39 @@ class MethodValidator:
         ):
             return True
         return False
+    
+    def is_method_too_complex_for_now(self) -> bool:
+        """Checks if a method is too complex for now."""
+        if self.method.startswith("lightning::"):
+            return True
+        if self.method.startswith("experimental::"):
+            return True
+        if self.method.find("nft") != -1:
+            return True
+        if self.method.find("1inch") != -1:
+            return True
+        if self.method.find("market_maker_bot") != -1:
+            return True
+        if self.method.find("stat_collection") != -1:
+            return True
+        return False
+
+    def is_method_deprecated(self) -> bool:
+        """Checks if a method is deprecated."""
+        if self.method.find("enable_bch") != -1:
+            return True
+        deprecated_methods = {
+            "v1": [],
+            "v2": [
+                "task::enable_bch::cancel",
+                "task::enable_bch::init",
+                "task::enable_bch::status",
+                "task::enable_bch::user_action",
+            ]
+        }
+        if self.method in deprecated_methods[self.version]:
+            return True
+        return False
 
     def is_method_ready(self) -> bool:
         """Checks if a method is ready to be processed."""
@@ -1850,6 +1901,8 @@ class MethodValidator:
             "verify_message": ["sign_message"],                # TODO: message must have been signed
         }
         if self.method in method_prerequisites:
+            self.logger.info(f"Checking if {self.method} prerequisites are met: {method_prerequisites[self.method]}")
+
             return method_prerequisites[self.method] in self.processor.enabled_coins
         return True
 

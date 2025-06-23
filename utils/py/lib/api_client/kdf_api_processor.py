@@ -267,19 +267,6 @@ class ApiRequestProcessor:
             if response:
                 if "error" in response:
                     response_filename = request_file.name.replace("request_", "error_")
-                    error_log_path = self.config.directories.reports_dir / "request_errors.log"
-                    message_to_log = (
-                        f"----------- ERROR LOG -----------\n"
-                        f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}\n"
-                        f"Method: {method}\n"
-                        f"Request File: {request_file.name}\n"
-                        f"Request Body: {json.dumps(request_body, indent=2)}\n"
-                        f"Response: {json.dumps(response, indent=2)}\n"
-                        f"---------------------------------\n\n"
-                    )
-                    self.logger.error(f"API error for {method} ({request_file.name}). See {error_log_path} for details.")
-                    with open(error_log_path, 'a') as f:
-                        f.write(message_to_log)
                 else:
                     response_filename = request_file.name.replace("request_", "response_")
 
@@ -337,6 +324,7 @@ class ApiRequestProcessor:
                         activation_params["contract_address"] = coin_info.get("contract_address")
 
             elif protocol == "ZHTLC":
+                # TODO: Add the zcash params to the docker container
                 zcash_params_path = os.getenv("ZCASH_PARAMS_PATH")
                 if not zcash_params_path:
                     self.logger.warning("ZCASH_PARAMS_PATH not set, using default: /tmp/.zcash-params")
