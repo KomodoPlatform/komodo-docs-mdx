@@ -133,6 +133,80 @@ class KDFTools:
                 self.log(f"    - {path}")
         self.log("")
         
+    def report_error_responses(self, args):
+        """Generates a report of method requests that have error responses."""
+        command_title = "Generate Error Response Report"
+        self._print_header(command_title)
+        
+        report = {
+            "kdf_branch": "dev",
+            "methods": {
+                "v1": {},
+                "v2": {}
+            }
+        }
+        
+        postman_dirs = {
+            "v1": self.config.directories.postman_json_v1,
+            "v2": self.config.directories.postman_json_v2
+        }
+        
+        for version, version_dir in postman_dirs.items():
+            self.logger.info(f"Scanning {version} directory: {version_dir}")
+            for method_dir in version_dir.iterdir():
+                if not method_dir.is_dir():
+                    continue
+                
+                method_name = method_dir.name
+                error_files = sorted(list(method_dir.glob("error_*.json")))
+                request_files = sorted(list(method_dir.glob("request_*.json")))
+                
+                if not error_files or not request_files:
+                    continue
+
+                self.logger.info(f"Found {len(error_files)} error responses for method: {method_name}")
+
+                requests = []
+                for req_file in request_files:
+                    try:
+                        with open(req_file, 'r') as f:
+                            requests.append(json.load(f))
+                    except json.JSONDecodeError:
+                        self.logger.warning(f"Could not decode JSON from {req_file}")
+                    except Exception as e:
+                        self.logger.error(f"Error reading {req_file}: {e}")
+                
+                if not requests:
+                    self.logger.warning(f"No valid request files found for {method_name}, skipping.")
+                    continue
+
+                for i, error_file in enumerate(error_files):
+                    try:
+                        with open(error_file, 'r') as f:
+                            # The error content is a string that needs to be parsed as JSON
+                            error_content_str = f.read()
+                            error_response = json.loads(error_content_str)
+
+                        # Use a request, cycling if there are more errors than requests
+                        request_body = requests[i % len(requests)]
+                        
+                        report_method_name = f"{method_name}_{i+1}"
+
+                        report["methods"][version][report_method_name] = {
+                            "request": request_body,
+                            "error_response": error_response
+                        }
+
+                    except json.JSONDecodeError:
+                        self.logger.warning(f"Could not decode JSON from error file {error_file}")
+                    except Exception as e:
+                        self.logger.error(f"Error processing {error_file}: {e}")
+                        
+        report_path = self.config.directories.methods_error_responses_report
+        safe_write_json(report_path, report)
+        self.logger.save(f"Saved error responses report to: {report_path}")
+        self._print_footer(command_title, success=True, report_paths=[str(report_path)])
+
     def openapi_command(self, args):
         """Handle openapi subcommand - MDX to OpenAPI conversion."""
         command_title = "MDX to OpenAPI Conversion"
@@ -1214,48 +1288,44 @@ class KDFTools:
         parser.set_defaults(func=self.scan_existing_docs_command)
 
     def setup_generate_docs_parser(self, subparsers):
-        """Setup parser for the generate-docs command."""
+        """Sets up the argument parser for the `generate-docs` command."""
         parser = subparsers.add_parser(
-            'generate-docs',
-            help='Generate documentation for missing KDF methods.',
-            description='Generates documentation for missing KDF methods.'
+            "generate-docs",
+            help="Generate MDX documentation from templates for specified methods.",
+            description="This command automates the creation of MDX documentation files from pre-defined templates. It can use a list of methods from a file or allow interactive selection.",
+            formatter_class=argparse.RawTextHelpFormatter
         )
         parser.add_argument(
-            '--branch', type=str,
-            help='Branch of the repository to generate documentation for.'
+            "-m", "--methods",
+            nargs='+',
+            help="A list of one or more method names to generate documentation for."
         )
         parser.add_argument(
-            '--repo-path', type=Path,
-            help='Path to the repository containing the KDF code.'
+            "-f", "--methods-file",
+            type=str,
+            help="Path to a file containing a list of method names (one per line)."
         )
         parser.add_argument(
-            '--method', type=str,
-            help='Specific method to generate documentation for.'
+            "-i", "--interactive",
+            action="store_true",
+            help="Use interactive mode to select methods from a list."
         )
         parser.add_argument(
-            '--version', type=str,
-            help='Version of the API to generate documentation for.'
+            "-t", "--template",
+            type=str,
+            default="default",
+            help="The template to use for generation (e.g., 'default', 'comprehensive')."
         )
         parser.add_argument(
-            '--methods-file', type=Path,
-            help='Path to a file containing methods to generate documentation for.'
-        )
-        parser.add_argument(
-            '--interactive', action='store_true',
-            help='Interactively select methods to generate documentation for.'
-        )
-        parser.add_argument(
-            '--output-dir', type=Path,
-            help='Directory to save generated documentation files.'
-        )
-        parser.add_argument(
-            '--generate-summary', action='store_true',
-            help='Generate a summary report of the documentation generation process.'
+            "-o", "--output-dir",
+            type=str,
+            default=str(self.config.directories.data_dir / "generated_docs"),
+            help="The directory to save the generated MDX files."
         )
         parser.set_defaults(func=self.generate_docs_command)
 
     def setup_gap_analysis_parser(self, subparsers):
-        """Setup parser for the gap-analysis command."""
+        """Sets up the argument parser for the `gap-analysis` command."""
         parser = subparsers.add_parser(
             "gap-analysis",
             help="Perform gap analysis between Rust and MDX methods.",
@@ -1363,70 +1433,63 @@ class KDFTools:
             self._print_footer(command_title, success=success)
 
     def get_kdf_responses_command(self, args):
-        """Gets API responses for a given method and version."""
-        command_title = "Get KDF API Responses"
-        config_lines = [
-            f"Method: {args.method if args.method else None}",
-            f"Version: {args.version if args.version else 'all'}",
-            f"KDF Branch: {args.kdf_branch}",
-        ]
-        self._print_header(command_title, config_lines=config_lines)
-        if args.version == "all":
-            versions = ["v1", "v2"]
-        else:
-            versions = [args.version]
+        try:
+            """Gets API responses for a given method and version."""
+            command_title = "Get KDF API Responses"
+            config_lines = [
+                f"Method: {args.method if args.method else None}",
+                f"KDF Branch: {args.kdf_branch}",
+            ]
+            self._print_header(command_title, config_lines=config_lines)
 
-        self.start_container_command(args)
-        time.sleep(5)
-        for version in versions:
-            self.logger.info(f"Processing version: {version}")
-            if args.method is not None:
-                self.logger.info(f"Processing method: {args.method}, version: {version}")
-                self.processor.process_method_requests(
-                    method=method,
-                    version=version,
-                    force_disable=False
-                )
-            else:
+            self.start_container_command(args)
+            time.sleep(5)
+            if args.method is None:
                 self.logger.info(f"Processing all methods")
                 examples = self.get_json_example_method_paths()
-                self.logger.info(f"Examples: {len(examples)}")
-            for v, method_paths in examples.items():
-                for method in method_paths.keys():
-                    if method.startswith("wc"):
-                        continue
-                    if method.find("trezor") != -1:
-                        continue
-                    if method.find("metamask") != -1:
-                        continue
-                    if v not in versions:
-                        continue
-                    json_method_path = get_method_path("json", method, v)
-                    if json_method_path is None:
-                        self.logger.error(f"JSON method path not found for method: {method}, version: {v}")
-                        continue
-                    mdx_method_path = get_method_path("mdx", method, v)
-                    if mdx_method_path is None:
-                        self.logger.error(f"Method path not found for method: {method}, version: {v}")
-                        continue
-                    self.logger.info(f"MDX method path: {mdx_method_path}")
-                    self.logger.info(f"JSON method path: {json_method_path}")
-                    self.logger.info(f"Processing method: {method}, version: {v}")
-                    self.logger.info(f"--------------------------------")
+                self.logger.info(f"methods with examples: {len(examples)}")
+                for version, method_paths in examples.items():
+                    for method, json_path in method_paths.items():
+                        if self.is_method_interactive(method):
+                            self.logger.info(f"Skipping interactive method: {method}")
+                            continue
+                        mdx_path = get_method_path("mdx", method, version)
+                        if mdx_path is None:
+                            self.logger.error(f"Method path not found for method: {method}, version: {version}")
+                            continue
+                        self.logger.info(f"MDX method path: {mdx_path}")
+                        self.logger.info(f"JSON method path: {json_path}")
+                        self.logger.info(f"Processing method: {method}, version: {version}")
+                        self.logger.info(f"--------------------------------")
 
-                    try:
-                        self.processor.process_method_requests(
-                            method=method,
-                            version=version,
-                            force_disable=False
-                        )
-                    except Exception as e:
-                        self.logger.error(f"An error occurred: {e}")
-                        self.logger.error(traceback.format_exc())
-                    time.sleep(1)
+                        try:
+                            self.processor.process_method_request(
+                                method=method,
+                                version=version,
+                                force_disable=False
+                            )
+                        except Exception as e:
+                            self.logger.error(f"An error occurred: {e}")
+                            self.logger.error(traceback.format_exc())
+                        time.sleep(1)
 
-        self.stop_container_command()
-        self._print_footer(command_title, success=True)
+            for version in ["v1", "v2"]:
+                if args.method is not None:
+                    self.processor.process_method_request(
+                        method=method,
+                        version=version,
+                        force_disable=False
+                    )
+        except KeyboardInterrupt:
+            self.logger.error(f"Keyboard interrupt detected. Stopping container...")
+        finally:
+            self.stop_container_command()
+            self._print_footer(command_title, success=False)
+
+
+    def is_method_interactive(self, method: str) -> bool:
+        """Checks if a method is interactive."""
+        return method.find("trezor") != -1 or method.find("metamask") != -1 or method.startswith("wc")
 
     def setup_get_kdf_responses_parser(self, subparsers):
         """Sets up the parser for the get-kdf-responses command."""
@@ -1496,6 +1559,8 @@ class KDFTools:
         finally:
             self._print_footer(command_title, success=success)
         
+        time.sleep(3)
+        self.processor._update_enabled_coins()
         return 0 if success else 1
 
     def stop_container_command(self):
@@ -1543,6 +1608,67 @@ class KDFTools:
 
         return data.get("method_paths", {})
 
+    def generate_v2_no_param_methods_report(self, args):
+        """Generates a report of V2 methods that have no request parameters."""
+        command_title = "Generate V2 No-Parameter Methods Report"
+        self._print_header(command_title)
+        
+        try:
+            v2_methods_with_no_params = {}
+            v2_json_path = self.config.directories.postman_json_v2
+            
+            # Use kdf_mdx_method_paths.json to get the list of v2 methods
+            mdx_method_paths_file = self.config.directories.mdx_method_paths_report
+            with open(mdx_method_paths_file, 'r') as f:
+                mdx_method_paths = json.load(f)
+            
+            v2_methods = mdx_method_paths.get("method_paths", {}).get("v2", {})
+
+            for method_name, _ in v2_methods.items():
+                # Correctly format the method name for path lookup
+                folder_name = method_name.replace("::", "-")
+                method_folder = Path(v2_json_path) / folder_name
+                
+                if method_folder.is_dir():
+                    request_files = list(method_folder.glob("request_*.json"))
+                    if not request_files:
+                        continue
+
+                    # Check the first request file
+                    with open(request_files[0], 'r') as f:
+                        try:
+                            data = json.load(f)
+                            if "params" in data and not data["params"]:
+                                relative_path = self.config.directories.get_relative_path(str(request_files[0]))
+                                v2_methods_with_no_params[method_name] = relative_path
+                        except json.JSONDecodeError:
+                            self.logger.warning(f"Could not parse JSON for {request_files[0]}")
+
+            # Save the report
+            report_path = self.config.directories.v2_no_param_methods_report
+            report_data = {
+                "scan_metadata": {
+                    "generated_at": datetime.now().isoformat(),
+                    "report_name": "v2_methods_with_no_parameters"
+                },
+                "methods": dict(sorted(v2_methods_with_no_params.items())),
+                "count": len(v2_methods_with_no_params)
+            }
+            safe_write_json(report_path, report_data)
+            self.logger.success(f"Report generated at: {report_path}")
+
+        except Exception as e:
+            self.logger.error(f"An error occurred: {e}")
+            self.logger.error(traceback.format_exc())
+
+    def setup_v2_no_param_report_parser(self, subparsers):
+        parser = subparsers.add_parser(
+            "v2-no-param-report",
+            help="Generate a report of V2 methods that do not require any parameters.",
+            description="Scans V2 MDX files and identifies methods with no request parameters."
+        )
+        parser.set_defaults(func=self.generate_v2_no_param_methods_report)
+
     def main(self):
         """Main entry point for the KDF Tools CLI."""
         parser = argparse.ArgumentParser(
@@ -1562,7 +1688,12 @@ class KDFTools:
         self.setup_generate_docs_parser(subparsers)
         self.setup_gap_analysis_parser(subparsers)
         self.setup_get_kdf_responses_parser(subparsers)
-        
+        self.setup_v2_no_param_report_parser(subparsers)
+
+        # New parser for error report
+        error_report_parser = subparsers.add_parser("report-errors", help="Generate a report of methods with error responses.")
+        error_report_parser.set_defaults(func=self.report_error_responses)
+
         # Container management commands
         build_parser = subparsers.add_parser('build-container', help='Build KDF container image.')
         build_parser.add_argument('--kdf-branch', type=str, default='dev', help='KDF branch to build.')

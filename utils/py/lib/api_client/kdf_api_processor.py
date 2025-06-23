@@ -49,7 +49,8 @@ class ApiRequestProcessor:
                     if value.startswith(('"', "'")) and value.endswith(('"', "'")):
                         value = value[1:-1]
                     os.environ[key] = value
-                    self.logger.info(f"ENV VAR: {key} = {value}")
+                    # Uncomment to log env vars to console (for debugging)
+                    # self.logger.info(f"ENV VAR: {key} = {value}")
         self.logger.success("Successfully loaded environment variables.")
 
     @staticmethod
@@ -102,10 +103,6 @@ class ApiRequestProcessor:
                 "access_control_allow_origin": "*"
             }
         }
-        self.logger.info(f"Config data: {config_data}")
-        value = os.getenv("SEED_NODES")
-        self.logger.info(f"SEED_NODES: {value}")
-        self.logger.info(f"config_data.seednodes: {config_data['seednodes']}")
 
         try:
             self.logger.info(f"Generating {output_path}...")
@@ -135,6 +132,7 @@ class ApiRequestProcessor:
         self._fetch_coins_config()
         self._fetch_coins_file()
         self.generate_mm2_config()
+        
 
     def _load_activation_mapping(self):
         """Loads the protocol_activation_mapping.json file."""
@@ -203,14 +201,18 @@ class ApiRequestProcessor:
         self.logger.info("Updating list of enabled coins...")
         request_body = {
             "userpass": self.config.openapi.userpass,
-            "method": "get_enabled_coins"
+            "mmrpc": "2.0",
+            "method": "get_enabled_coins",
+            "id": 0
         }
         response = self._make_request(request_body)
-        if "result" in response and isinstance(response["result"], list):
-            self.enabled_coins = {coin['ticker'] for coin in response["result"]}
-            self.logger.info(f"Currently enabled coins: {self.enabled_coins}")
+        if "result" in response:
+            self.enabled_coins = {coin['ticker'] for coin in response["result"].get("coins", [])}
+            self.logger.success(f"Successfully updated list of enabled coins.")
         else:
-            self.logger.warning("Could not update enabled coins list.")
+            self.logger.error(f"Failed to update list of enabled coins.")
+        self.logger.info(f"Currently enabled coins: {self.enabled_coins}")
+        
 
 
     def check_coin_is_active(self, request_body: Dict[str, Any]) -> bool:
@@ -224,6 +226,7 @@ class ApiRequestProcessor:
             else:
                 continue
             coins_to_activate.append(coin)
+        self.logger.info(f"Method: {request_body.get('method')} needs some coins to activate: {coins_to_activate}")
         for coin in coins_to_activate:
             if coin and coin not in self.enabled_coins:
                 self.logger.warning(f"Coin '{coin}' is not enabled. Attempting activation...")
@@ -232,9 +235,11 @@ class ApiRequestProcessor:
                     return False, coin
         return True, None
 
-    def process_method_requests(self, method: str, version: str, force_disable: bool = False):
+    def process_method_request(self, method: str, version: str, force_disable: bool = False):
+        self.logger.info(f"Processing method: {method}, version: {version}")
         method_path = get_method_path('json', method, version)
-        if not method_path.exists():
+        self.logger.info(f"Method path: {method_path}")
+        if not Path(method_path).exists():
             self.logger.error(f"Method directory not found: {method_path}")
             return
 
@@ -260,11 +265,8 @@ class ApiRequestProcessor:
             response = self._make_request(request_body)
 
             if response:
-                response_filename = request_file.name.replace("request_", "response_")
-                response_path = method_path / response_filename
-
                 if "error" in response:
-                    response_path.replace("response_", "error_")
+                    response_filename = request_file.name.replace("request_", "error_")
                     error_log_path = self.config.directories.reports_dir / "request_errors.log"
                     message_to_log = (
                         f"----------- ERROR LOG -----------\n"
@@ -278,7 +280,10 @@ class ApiRequestProcessor:
                     self.logger.error(f"API error for {method} ({request_file.name}). See {error_log_path} for details.")
                     with open(error_log_path, 'a') as f:
                         f.write(message_to_log)
+                else:
+                    response_filename = request_file.name.replace("request_", "response_")
 
+                response_path = method_path / response_filename
                 with open(response_path, 'w') as f:
                     json.dump(response, f, indent=2)
 
@@ -315,27 +320,37 @@ class ApiRequestProcessor:
             self.logger.error(f"Activation method for protocol '{protocol}' (type: {act_type_to_use}) is not determined. Skipping.")
             return False
 
-        # Build params - This is a simplified version and might need expansion
         params = {"ticker": ticker}
-        # Common logic for ETH-like tokens
-        if protocol in ["ETH", "ERC20"]:
-            params["nodes"] = coin_info.get("nodes", [])
-            if "contract_address" in coin_info:
-                params["contract_address"] = coin_info.get("contract_address")
-        elif protocol in ["UTXO", "BCH"]:
-            params["utxo_merge_params"] = {"merge_at": 10}
-            params["electrum"] = coin_info.get("electrum", [])
-        elif protocol == "SLP":
-            params["utxo_merge_params"] = {"merge_at": 10}
-            params["electrum"] = coin_info.get("electrum", [])
-            # SLP might have specific token id params
-        elif protocol in ["QTUM", "QRC20"]:
-            params["electrum"] = coin_info.get("electrum", [])
-            if "contract_address" in coin_info:
-                 params["contract_address"] = coin_info.get("contract_address")
-        elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
-            params["rpc_urls"] = [node["url"] for node in coin_info.get("nodes", [])]
+        if activation_method.startswith("task::"):
+            activation_params = {}
+            if protocol in ["ETH", "ERC20"]:
+                activation_params["nodes"] = coin_info.get("nodes", [])
+                if "contract_address" in coin_info:
+                    activation_params["contract_address"] = coin_info.get("contract_address")
 
+            elif protocol in ["UTXO", "BCH", "SLP", "QTUM", "QRC20"]:
+                activation_params["utxo_merge_params"] = {"merge_at": 10}
+                rpc_data = {"servers": coin_info.get("electrum", [])}
+                activation_params["mode"] = {"rpc": "Electrum", "rpc_data": rpc_data}
+                if protocol in ["QRC20"]:
+                    if "contract_address" in coin_info:
+                        activation_params["contract_address"] = coin_info.get("contract_address")
+
+            elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
+                activation_params["rpc_urls"] = [node["url"] for node in coin_info.get("nodes", [])]
+
+            params["activation_params"] = activation_params
+        else:
+            # Legacy non-task based activations
+            if protocol in ["ETH", "ERC20"]:
+                params["nodes"] = coin_info.get("nodes", [])
+                if "contract_address" in coin_info:
+                    params["contract_address"] = coin_info.get("contract_address")
+            elif protocol in ["UTXO", "BCH", "SLP", "QTUM", "QRC20"]:
+                params["utxo_merge_params"] = {"merge_at": 10}
+                params["servers"] = coin_info.get("electrum", [])
+            elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
+                params["rpc_urls"] = [node["url"] for node in coin_info.get("nodes", [])]
 
         init_request = {
             "userpass": self.config.openapi.userpass,
@@ -385,6 +400,7 @@ class ApiRequestProcessor:
                     self._update_enabled_coins()
                     return True
                 elif status == "InProgress":
+                    self.logger.info(f"Activation in progress for '{ticker}'. Details: {details}")
                     time.sleep(5)
                     continue
                 else: # Failed, Aborted etc.

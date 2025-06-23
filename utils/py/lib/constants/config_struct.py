@@ -107,6 +107,8 @@ class DirectoryConfig:
     mdx_openapi_method_paths_report: str = "reports/kdf_openapi_method_paths.json"
     unified_method_mapping_report: str = "reports/kdf_unified_method_map.json"
     kdf_gap_analysis_report: str = "reports/kdf_gap_analysis.json"
+    v2_no_param_methods_report: str = "reports/v2_no_param_methods.json"
+    methods_error_responses_report: str = "reports/methods_error_responses.json"
     category_mappings: str = "utils/py/data/category_mappings.json"
 
 
