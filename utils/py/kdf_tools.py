@@ -669,10 +669,7 @@ class KDFTools:
             
             unified_mapping = run_async(mapper.create_unified_mapping_async())
 
-            # Handle "all" version by converting to actual supported versions
-            versions = args.versions
-            if 'all' in versions:
-                versions = ['v1', 'v2']
+            versions = ['v1', 'v2']
             
             # Initialize tracking data
             all_extracted_methods = {}
@@ -1237,10 +1234,6 @@ class KDFTools:
             help='Extract JSON examples from MDX files.',
             description='Extracts JSON request/response examples from MDX documentation.'
         )
-        parser.add_argument(
-            '--versions', nargs='+', default=['all'],
-            help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
-        )
         parser.set_defaults(func=self.json_extract_command)
 
     def setup_review_draft_quality_parser(self, subparsers):
@@ -1450,6 +1443,38 @@ class KDFTools:
         finally:
             self._print_footer(command_title, success=success)
 
+    def clean_json_files(self):
+        """Removes all request, response, and error JSON files from Postman directories."""
+        self.logger.info("Cleaning existing JSON files...")
+
+        postman_dirs = [
+            self.config.directories.postman_json_v1,
+            self.config.directories.postman_json_v2
+        ]
+
+        patterns = ["request_*.json", "response_*.json", "error_*.json"]
+        deleted_count = 0
+
+        for p_dir in postman_dirs:
+            if not p_dir.exists():
+                self.logger.warning(f"Directory not found, skipping clean: {p_dir}")
+                continue
+
+            self.logger.info(f"Cleaning files in {p_dir}...")
+            # Use rglob to recursively find files in subdirectories
+            for pattern in patterns:
+                for file_path in p_dir.rglob(pattern):
+                    try:
+                        file_path.unlink()
+                        deleted_count += 1
+                    except OSError as e:
+                        self.logger.error(f"Error deleting file {file_path}: {e}")
+
+        if deleted_count > 0:
+            self.logger.success(f"Successfully deleted {deleted_count} JSON files.")
+        else:
+            self.logger.info("No JSON files found to clean.")
+
     def get_kdf_responses_command(self, args):
         try:
             """Gets API responses for a given method and version."""
@@ -1460,6 +1485,10 @@ class KDFTools:
             ]
             self._print_header(command_title, config_lines=config_lines)
 
+            if args.clean:
+                self.clean_json_files()
+                self.json_extract_command(args)
+
             self.start_container_command(args)
             time.sleep(5)
             if args.method is None:
@@ -1467,9 +1496,17 @@ class KDFTools:
                 examples = self.get_json_example_method_paths()
                 self.logger.info(f"methods with examples: {len(examples)}")
                 for version, method_paths in examples.items():
+                    # TODO: We need to add some method order logic here so we can do:
+                    #      - unban a banned pubkey
+                    #      - send a raw transaction
+                    #      - perform task based operations in sequence
+                    #      - etc.
                     for method, json_path in method_paths.items():
                         if self.is_method_interactive(method):
                             self.logger.info(f"Skipping interactive method: {method}")
+                            continue
+                        if method == "stop":
+                            self.logger.info(f"Skipping stop method: {method}")
                             continue
                         mdx_path = get_method_path("mdx", method, version)
                         if mdx_path is None:
@@ -1504,10 +1541,11 @@ class KDFTools:
             self.stop_container_command()
             self._print_footer(command_title, success=False)
 
-
     def is_method_interactive(self, method: str) -> bool:
         """Checks if a method is interactive."""
-        return method.find("trezor") != -1 or method.find("metamask") != -1 or method.startswith("wc")
+        if method.find("trezor") != -1 or method.find("metamask") != -1 or method.startswith("wc"):
+            return True
+        return False
 
     def setup_get_kdf_responses_parser(self, subparsers):
         """Sets up the parser for the get-kdf-responses command."""
@@ -1516,6 +1554,7 @@ class KDFTools:
         parser.add_argument('--version', type=str, required=False, default='all', help='The API version (e.g., v1, v2).')
         parser.add_argument('--kdf-branch', type=str, default='dev', help='The KDF branch to use for the container.')
         parser.add_argument('--commit', type=str, help='The commit hash to use. Defaults to the latest commit on the branch.')
+        parser.add_argument('--clean', action='store_true', help='Remove all existing request/response/error json files in postman/json/kdf before running.')
         parser.set_defaults(func=self.get_kdf_responses_command)
 
     def build_container_command(self, args):
@@ -1588,24 +1627,24 @@ class KDFTools:
         result = self.processor.stop_container()
         self._print_footer(command_title, success=result)
 
-    def _get_latest_commit(self, branch: str) -> str:
+    def _get_latest_commit(self, kdf_branch: str) -> str:
         """Gets the latest commit hash for a given branch from the KDF repository."""
-        self.logger.info(f"Fetching latest commit for branch '{branch}'...")
+        self.logger.info(f"Fetching latest commit for branch '{kdf_branch}'...")
         try:
             repo_url = "https://github.com/KomodoPlatform/komodo-defi-framework.git"
             result = subprocess.run(
-                ['git', 'ls-remote', repo_url, f'refs/heads/{branch}'],
+                ['git', 'ls-remote', repo_url, f'refs/heads/{kdf_branch}'],
                 capture_output=True, text=True, check=True
             )
             if result.stdout:
                 commit_hash = result.stdout.split()[0]
-                self.logger.success(f"Latest commit on '{branch}': {commit_hash[:10]}")
+                self.logger.success(f"Latest commit on '{kdf_branch}': {commit_hash[:10]}")
                 return commit_hash
             else:
-                self.logger.error(f"Could not find branch '{branch}' in remote repository.")
+                self.logger.error(f"Could not find branch '{kdf_branch}' in remote repository.")
                 return None
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Error fetching latest commit for branch '{branch}': {e.stderr}")
+            self.logger.error(f"Error fetching latest commit for kdf_branch '{kdf_branch}': {e.stderr}")
             return None
 
     def get_json_example_method_paths(self):
