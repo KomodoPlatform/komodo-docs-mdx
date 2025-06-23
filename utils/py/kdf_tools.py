@@ -1354,11 +1354,6 @@ class KDFTools:
         """Compares Rust methods with MDX documentation and generates a report."""
         command_title = "Gap Analysis"
         config = [
-            f"Branch: {args.branch}",
-            f"Versions: {'all' if args.all_versions else ', '.join(args.versions)}",
-            f"Scan Rust: {args.scan_rust}",
-            f"Scan MDX: {args.scan_mdx}",
-            f"Output format: {args.output_format}",
         ]
         self._print_header(command_title, config)
         
