@@ -137,30 +137,27 @@ class KDFTools:
         """Generates a report of method requests that have error responses."""
         command_title = "Generate Error Response Report"
         self._print_header(command_title)
-        
-        report = {
-            "kdf_branch": "dev",
-            "methods": {
-                "v1": {},
-                "v2": {}
-            }
+
+        methods_with_errors = {
+            "v1": {},
+            "v2": {}
         }
-        
+
         postman_dirs = {
             "v1": self.config.directories.postman_json_v1,
             "v2": self.config.directories.postman_json_v2
         }
-        
+
         for version, version_dir in postman_dirs.items():
             self.logger.info(f"Scanning {version} directory: {version_dir}")
             for method_dir in version_dir.iterdir():
                 if not method_dir.is_dir():
                     continue
-                
+
                 method_name = method_dir.name
                 error_files = sorted(list(method_dir.glob("error_*.json")))
                 request_files = sorted(list(method_dir.glob("request_*.json")))
-                
+
                 if not error_files or not request_files:
                     continue
 
@@ -175,7 +172,7 @@ class KDFTools:
                         self.logger.warning(f"Could not decode JSON from {req_file}")
                     except Exception as e:
                         self.logger.error(f"Error reading {req_file}: {e}")
-                
+
                 if not requests:
                     self.logger.warning(f"No valid request files found for {method_name}, skipping.")
                     continue
@@ -183,16 +180,13 @@ class KDFTools:
                 for i, error_file in enumerate(error_files):
                     try:
                         with open(error_file, 'r') as f:
-                            # The error content is a string that needs to be parsed as JSON
                             error_content_str = f.read()
                             error_response = json.loads(error_content_str)
 
-                        # Use a request, cycling if there are more errors than requests
                         request_body = requests[i % len(requests)]
-                        
                         report_method_name = f"{method_name}_{i+1}"
 
-                        report["methods"][version][report_method_name] = {
+                        methods_with_errors[version][report_method_name] = {
                             "request": request_body,
                             "error_response": error_response
                         }
@@ -201,7 +195,31 @@ class KDFTools:
                         self.logger.warning(f"Could not decode JSON from error file {error_file}")
                     except Exception as e:
                         self.logger.error(f"Error processing {error_file}: {e}")
-                        
+
+        v1_count = len(methods_with_errors["v1"])
+        v2_count = len(methods_with_errors["v2"])
+        all_count = v1_count + v2_count
+
+        scan_metadata = {
+            "scanner_type": "ERROR_RESPONSE_SCAN",
+            "scanner_version": "KDFTools v1.0.0",
+            "generated_at": datetime.now().isoformat(),
+            "generated_during": "error_report_scan",
+            "method_source": "Postman JSON examples (dev branch)",
+            "is_primary_data_source": False,
+            "total_error_responses_found": {
+                "all": all_count,
+                "v1": v1_count,
+                "v2": v2_count
+            }
+        }
+        
+        report = {
+            "scan_metadata": scan_metadata,
+            "kdf_branch": "dev",
+            "methods": methods_with_errors
+        }
+
         report_path = self.config.directories.methods_error_responses_report
         safe_write_json(report_path, report)
         self.logger.save(f"Saved error responses report to: {report_path}")
