@@ -377,10 +377,16 @@ class KDFTools:
             versions = ['v1', 'v2']
             
         config = [
-            f"Branch: {args.branch}",
+            f"Branch: {args.kdf_branch}",
             f"Versions: {versions}",
         ]
         self._print_header(command_title, config)
+
+        if args.kdf_branch:
+            if not self._switch_kdf_branch(args.kdf_branch):
+                self.logger.error(f"Could not switch to branch {args.kdf_branch}. Aborting rust-scan.")
+                self._print_footer(command_title, success=False)
+                return
 
         report_paths = []
         success = False
@@ -390,7 +396,7 @@ class KDFTools:
             scanner = KDFScanner(
                 config=self.config,
                 repo_path=self.config.directories.kdf_repo_path,
-                branch=args.branch,
+                branch=args.kdf_branch,
                 verbose=self.verbose
             )
             
@@ -1213,8 +1219,8 @@ class KDFTools:
             description='Scans the Komodo DeFi Framework Rust repository to find RPC methods.'
         )
         parser.add_argument(
-            '--branch', type=str, default='dev',
-            help='Specify the branch of the KDF repository to scan.'
+            '--kdf-branch', type=str, default='dev',
+            help='Specify the branch of the KDF repository to scan and check out.'
         )
         parser.add_argument(
             '--versions', nargs='+', default=['v2', 'v1'],
@@ -1495,38 +1501,63 @@ class KDFTools:
             ]
             self._print_header(command_title, config_lines=config_lines)
 
+            if args.kdf_branch:
+                if not self._switch_kdf_branch(args.kdf_branch):
+                    self.logger.error(f"Could not switch to branch {args.kdf_branch}. Aborting.")
+                    self._print_footer(command_title, success=False)
+                    return
+
             if args.clean:
                 self.clean_json_files()
                 self.json_extract_command(args)
 
             self.start_container_command(args)
             time.sleep(5)
-            delayed_methods = []
-            if args.method is None:
-                self.logger.info(f"Processing all methods")
+            
+            if args.method:
+                # Process a single method if specified
+                versions_to_process = [args.version] if args.version != 'all' else ['v1', 'v2']
+                for version in versions_to_process:
+                    self.logger.info(f"Processing single method: {args.method}, version: {version}")
+                    self.processor.process_method_request(
+                        method=args.method,
+                        version=version
+                    )
+            else:
+                # Process all methods with sequencing
+                self.logger.info("Processing all methods with sequencing...")
                 examples = self.get_json_example_method_paths()
-                self.logger.info(f"methods with examples: {len(examples)}")
+                
                 for version, method_paths in examples.items():
-                    # TODO: We need to add some method order logic here so we can do:
-                    #      - unban a banned pubkey
-                    #      - send a raw transaction
-                    #      - perform task based operations in sequence
-                    #      - etc.
-                    for method, json_path in method_paths.items():
+                    self.logger.info(f"--- Processing version: {version.upper()} ---")
+                    
+                    all_methods_in_version = set(method_paths.keys())
+                    
+                    # Create an ordered execution plan
+                    execution_plan = self._create_execution_plan(all_methods_in_version)
+                    
+                    self.logger.info(f"Execution plan for {version.upper()} created with {len(execution_plan)} methods.")
+
+                    delayed_methods = []
+                    for method in execution_plan:
                         validator = MethodValidator(method, version, self.processor)
+                        
                         if not validator.validate_method_for_testing():
-                            # Tests method for compatibility with `enable_hd` status in MM2.json
                             self.logger.info(f"Skipping {method}, not valid for test case: [{version} HD: {self.processor.enable_hd}]")
                             continue
+
                         if not validator.is_method_ready():
                             # Delays methods which need a prior method to be completed
                             self.logger.info(f"Skipping not ready method: {method}")
                             delayed_methods.append(method)
                             continue
+                            
                         if method == "stop":
                             self.logger.info(f"Skipping stop method: {method}")
                             continue
+
                         mdx_path = get_method_path("mdx", method, version)
+                        json_path = get_method_path("json", method, version)
                         if mdx_path is None:
                             self.logger.error(f"Method path not found for method: {method}, version: {version}")
                             continue
@@ -1538,28 +1569,95 @@ class KDFTools:
                         try:
                             self.processor.process_method_request(
                                 method=method,
-                                version=version,
-                                force_disable=False
+                                version=version
                             )
                         except Exception as e:
-                            self.logger.error(f"An error occurred: {e}")
+                            self.logger.error(f"An error occurred while processing {method}: {e}")
                             self.logger.error(traceback.format_exc())
+                            # Save the error to a file so it can be reported
+                            error_content = {
+                                "error": f"Failed to process method '{method}': {str(e)}",
+                                "error_type": "PROCESSOR_EXECUTION_ERROR",
+                                "traceback": traceback.format_exc()
+                            }
+                            error_filename = f"error_processor_failed.json"
+                            folder_name = method.replace("::", "-")
+                            output_dir = self.config.directories.postman_json_v1 if version == 'v1' else self.config.directories.postman_json_v2
+                            example_dir = output_dir / folder_name
+                            ensure_directory_exists(example_dir)
+                            error_path = example_dir / error_filename
+                            safe_write_json(error_path, error_content)
                         time.sleep(1)
 
-            for version in ["v1", "v2"]:
-                if args.method is not None:
-                    self.processor.process_method_request(
-                        method=method,
-                        version=version,
-                        force_disable=False
-                    )
         except KeyboardInterrupt:
-            self.logger.error(f"Keyboard interrupt detected. Stopping container...")
+            self.logger.error("Keyboard interrupt detected. Stopping container...")
         finally:
             self.stop_container_command()
             self.report_error_responses()
             self._print_footer(command_title, success=False)
 
+
+    def _create_execution_plan(self, all_methods: set) -> List[str]:
+        """Creates an ordered list of methods to execute, prioritizing sequences."""
+        
+        # Get activation methods from the processor
+        activation_methods = self.processor.activation_methods
+
+        # Define method sequences here. This could be moved to a config file later.
+        method_sequences = [
+            # Pubkey banning sequence
+            ["ban_pubkey", "list_banned_pubkeys", "unban_pubkeys"],
+            # Swap sequence
+            ["buy", "my_swap_status"],
+            ["sell", "my_swap_status"],
+            # Non-task activation sequences
+            ["enable_eth_with_tokens", "enable_erc20"],
+            ["enable_tendermint_with_assets", "enable_tendermint_token"],
+            # Generic task sequences
+            *[
+                [f"task::{group}::{suffix}" for suffix in ["init", "status", "cancel"]]
+                for group in [
+                    "withdraw",
+                    "enable_bch",
+                    "enable_utxo",
+                    "enable_eth",
+                    "enable_qtum",
+                    "enable_sia",
+                    "enable_tendermint",
+                    "enable_z_coin",
+                    "get_new_address",
+                    "scan_for_new_addresses",
+                ]
+            ],
+            # Message signing sequence
+            ["sign_message", "verify_message"],
+            # Send raw tx sequence
+            ["get_unsigned_transaction", "send_raw_transaction"],
+        ]
+
+        execution_plan = []
+        processed_in_sequence = set()
+
+        # 1. Add activation methods first, if they exist in the set of methods to run
+        for method in sorted(list(activation_methods)):
+            if method in all_methods:
+                execution_plan.append(method)
+                processed_in_sequence.add(method)
+        
+        self.logger.info(f"Prioritized {len(processed_in_sequence)} activation methods.")
+
+        # 2. Add methods from defined sequences to the plan
+        for sequence in method_sequences:
+            for method_in_seq in sequence:
+                if method_in_seq in all_methods and method_in_seq not in processed_in_sequence:
+                    execution_plan.append(method_in_seq)
+                    processed_in_sequence.add(method_in_seq)
+        
+        # 3. Add all other methods that are not part of any sequence, sorted alphabetically
+        remaining_methods = sorted(list(all_methods - processed_in_sequence))
+        execution_plan.extend(remaining_methods)
+        
+        return execution_plan
 
     def setup_get_kdf_responses_parser(self, subparsers):
         """Sets up the parser for the get-kdf-responses command."""
@@ -1573,56 +1671,27 @@ class KDFTools:
 
     def build_container_command(self, args):
         """Builds the KDF container image."""
-        command_title = "Build KDF Container"
-        commit = args.commit or self._get_latest_commit(args.kdf_branch)
-        if not commit:
-            return 1
-        
-        image_tag = f"{args.kdf_branch}-{commit[:10]}"
-        image_name = f"kdf-image:{image_tag}"
-        config_lines = [f"Image: {image_name}"]
-        self._print_header(command_title, config_lines)
-        
-        env = os.environ.copy()
-        env["KDF_BRANCH"] = args.kdf_branch
-        env["KDF_IMAGE"] = image_name
-
-        try:
-            subprocess.run(
-                ["docker", "compose", "build"],
-                cwd=self.config.directories.docker_dir, check=True, env=env
-            )
-            self.logger.success(f"Image '{image_name}' built successfully.")
-            success = True
-        except subprocess.CalledProcessError as e:
-            self.logger.error(f"Failed to build image: {e}")
-            success = False
-        finally:
-            self._print_footer(command_title, success=success)
+        self.logger.warning("The 'build-container' command is deprecated. The container is now built automatically when started.")
+        self.start_container_command(args)
 
     def start_container_command(self, args):
         """Starts the KDF container."""
         command_title = "Start KDF Container"
-        commit = args.commit or self._get_latest_commit(args.kdf_branch)
-        if not commit:
-            return 1
-            
-        image_tag = f"{args.kdf_branch}-{commit[:10]}"
-        image_name = f"kdf-image:{image_tag}"
-        config_lines = [f"Image: {image_name}"]
+        config_lines = [f"KDF Branch (from local repo): {args.kdf_branch}"]
         self._print_header(command_title, config_lines)
-        
-        env = os.environ.copy()
-        env["KDF_IMAGE"] = image_name
 
         success = False
-
         try:
+            # Path to the docker-compose.yml file in the parent 'utils' directory
+            utils_dir = self.config.directories.docker_dir.parent
+            compose_file_path = utils_dir / "docker-compose.yml"
+            # The --build flag ensures the container is rebuilt if the Dockerfile or source has changed.
             subprocess.run(
-                ["docker", "compose", "up", "-d"],
-                cwd=self.config.directories.docker_dir, check=True, env=env
+                ["docker", "compose", "--file", str(compose_file_path), "up", "--build", "-d"],
+                check=True,
+                cwd=utils_dir
             )
-            self.logger.success(f"Container for image '{image_name}' started.")
+            self.logger.success(f"Container started successfully.")
             success = True
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Failed to start container: {e}")
@@ -1630,8 +1699,10 @@ class KDFTools:
         finally:
             self._print_footer(command_title, success=success)
         
-        time.sleep(3)
-        self.processor._update_enabled_coins()
+        if success:
+            time.sleep(5)  # Give the container a moment to initialize
+            self.processor._update_enabled_coins()
+        
         return 0 if success else 1
 
     def stop_container_command(self):
@@ -1641,25 +1712,46 @@ class KDFTools:
         result = self.processor.stop_container()
         self._print_footer(command_title, success=result)
 
-    def _get_latest_commit(self, kdf_branch: str) -> str:
-        """Gets the latest commit hash for a given branch from the KDF repository."""
-        self.logger.info(f"Fetching latest commit for branch '{kdf_branch}'...")
+    def _switch_kdf_branch(self, branch_name: str):
+        """Checks out the specified branch in the local KDF repository."""
+        kdf_repo_path = self.config.directories.kdf_repo_path
+        if not kdf_repo_path.exists() or not (kdf_repo_path / ".git").exists():
+            self.logger.error(f"KDF repository not found at {kdf_repo_path}. Please clone it first.")
+            return False
+
+        self.logger.info(f"Switching local KDF repository to branch '{branch_name}'...")
+
         try:
-            repo_url = "https://github.com/KomodoPlatform/komodo-defi-framework.git"
-            result = subprocess.run(
-                ['git', 'ls-remote', repo_url, f'refs/heads/{kdf_branch}'],
-                capture_output=True, text=True, check=True
+            # Fetch the latest changes from origin
+            subprocess.run(
+                ["git", "fetch", "origin"],
+                cwd=kdf_repo_path, check=True, capture_output=True, text=True
             )
-            if result.stdout:
-                commit_hash = result.stdout.split()[0]
-                self.logger.success(f"Latest commit on '{kdf_branch}': {commit_hash[:10]}")
-                return commit_hash
-            else:
-                self.logger.error(f"Could not find branch '{kdf_branch}' in remote repository.")
-                return None
+
+            # Checkout the branch
+            checkout_result = subprocess.run(
+                ["git", "checkout", branch_name],
+                cwd=kdf_repo_path, check=True, capture_output=True, text=True
+            )
+            if self.verbose:
+                if checkout_result.stdout: self.logger.info(checkout_result.stdout.strip())
+                if checkout_result.stderr: self.logger.info(checkout_result.stderr.strip())
+
+            # Pull the latest changes for that branch
+            pull_result = subprocess.run(
+                ["git", "pull", "origin", branch_name],
+                cwd=kdf_repo_path, check=True, capture_output=True, text=True
+            )
+            if self.verbose and pull_result.stdout:
+                self.logger.info(pull_result.stdout.strip())
+            
+            self.logger.success(f"Successfully switched to and updated branch '{branch_name}'.")
+            return True
+
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Error fetching latest commit for kdf_branch '{kdf_branch}': {e.stderr}")
-            return None
+            self.logger.error(f"Failed to switch to branch '{branch_name}': {e}")
+            self.logger.error(f"Stderr: {e.stderr}")
+            return False
 
     def get_json_example_method_paths(self):
         """Loads method and version data from the kdf_mdx_json_example_method_paths.json report."""
@@ -1805,22 +1897,12 @@ class KDFTools:
 
 class MethodValidator:
     def __init__(self, method: str, version: str, processor: ApiRequestProcessor = None):
-        self.processor = processor or KDFAPIProcessor()
+        self.processor = processor or ApiRequestProcessor()
         self.logger = get_logger("method-validator")
         self.method = method
         self.version = version
         self.enable_hd = self.processor._get_env_var_as_bool("ENABLE_HD", False)
-        self.prerequisites_status = {
-            "ban_pubkey": False,             # for pubkey to be banned
-            "sign_message": False,           # for message to be signed
-            "buy": False,                    # for swap uuid to be checked
-            "unsigned_transaction": False,   # for transaction to be sent
-            "task_uuid": {
-                "withdraw": False,           # for hex to send raw transaction
-                "swap": False,               # 
-            }
-        }
-
+        
     def validate_method_for_testing(self) -> bool:
         """Checks if a method is valid for the test case being run."""
         if self.enable_hd and self.is_legacy_only_method():
@@ -1828,6 +1910,10 @@ class MethodValidator:
         if not self.enable_hd and self.is_hd_only_method():
             return False
         if self.is_method_interactive():
+            return False
+        if self.is_method_too_complex_for_now():
+            return False
+        if self.is_method_deprecated():
             return False
         return True
     
@@ -1904,18 +1990,41 @@ class MethodValidator:
         return False
 
     def is_method_ready(self) -> bool:
-        """Checks if a method is ready to be processed."""
+        """Checks if a method's prerequisites have been met."""
         method_prerequisites = {
-            "unban_pubkeys": ["ban_pubkey"],                   # TODO: pubkey must have been banned
-            "send_raw_transaction": ["task::withdraw::init"],  # TODO: The whole task needs to be completed
-            "my_swap_status": ["buy"],                         # TODO: swap must have been initiated
-            "verify_message": ["sign_message"],                # TODO: message must have been signed
+            "unban_pubkeys": ["ban_pubkey"],
+            "send_raw_transaction": ["get_unsigned_transaction"],
+            "my_swap_status": ["buy", "sell"],  # Can depend on either
+            "verify_message": ["sign_message"],
         }
-        if self.method in method_prerequisites:
-            self.logger.info(f"Checking if {self.method} prerequisites are met: {method_prerequisites[self.method]}")
+        
+        # Add task-based prerequisites dynamically
+        if "::" in self.method and not self.method.endswith("::init"):
+            parts = self.method.split("::")
+            task_group = "::".join(parts[:-1])
+            init_method = f"{task_group}::init"
+            if self.method not in method_prerequisites:
+                method_prerequisites[self.method] = []
+            method_prerequisites[self.method].append(init_method)
+            
 
-            # return method_prerequisites[self.method] in self.processor.completed_methods
-            return False
+        if self.method in method_prerequisites:
+            prereqs = method_prerequisites[self.method]
+            
+            # For methods with multiple possible prerequisites (like my_swap_status)
+            if self.method == "my_swap_status":
+                if any(p in self.processor.completed_methods for p in prereqs):
+                    return True
+                else:
+                    self.logger.warning(f"Prerequisites for {self.method} not met. Need one of: {prereqs}")
+                    return False
+
+            # For methods with specific prerequisites
+            for prereq in prereqs:
+                if prereq not in self.processor.completed_methods:
+                    self.logger.warning(f"Prerequisite '{prereq}' for method '{self.method}' has not been completed.")
+                    return False
+        
         return True
 
 def main():

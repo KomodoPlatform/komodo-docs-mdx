@@ -23,6 +23,9 @@ class ApiRequestProcessor:
         self.session = requests.Session()
         self.coins_config: Dict[str, Any] = {}
         self.protocol_to_activation: Dict[str, Any] = {}
+        self.method_results_cache: Dict[str, Any] = {}
+        self.completed_methods: Set[str] = set()
+        self.activation_methods: Set[str] = set()
 
         # Mappings and Constants
         rpc_url = os.getenv("RPC_URL", "http://127.0.0.1")
@@ -143,7 +146,14 @@ class ApiRequestProcessor:
             self.logger.info(f"Loading activation mapping from {mapping_file}")
             with open(mapping_file, 'r') as f:
                 self.protocol_to_activation = json.load(f)
-            self.logger.success("Successfully loaded protocol activation mapping.")
+
+            # Populate activation_methods set
+            for activations in self.protocol_to_activation.values():
+                for method_name in activations.values():
+                    if method_name:
+                        self.activation_methods.add(method_name)
+            
+            self.logger.success(f"Successfully loaded protocol activation mapping and identified {len(self.activation_methods)} activation methods.")
         except FileNotFoundError:
             self.logger.error(f"Activation mapping file not found at: {mapping_file}")
             self.protocol_to_activation = {}
@@ -197,6 +207,7 @@ class ApiRequestProcessor:
             return response.text
         except Exception as e:
             self.logger.error(f"Request error occurred: {e}")
+            return None
 
 
     def _update_enabled_coins(self):
@@ -229,6 +240,8 @@ class ApiRequestProcessor:
             else:
                 continue
             coins_to_activate.append(coin)
+        if len(coins_to_activate) == 0:
+            return True, None
         self.logger.info(f"Method: {request_body.get('method')} needs some coins to activate: {coins_to_activate}")
         for coin in coins_to_activate:
             if coin and coin not in self.enabled_coins:
@@ -238,7 +251,11 @@ class ApiRequestProcessor:
                     return False, coin
         return True, None
 
-    def process_method_request(self, method: str, version: str, force_disable: bool = False):
+    def is_activation_method(self, method: str) -> bool:
+        """Checks if a method is a known coin activation method."""
+        return method in self.activation_methods
+
+    def process_method_request(self, method: str, version: str):
         self.logger.info(f"Processing method: {method}, version: {version}")
         method_path = get_method_path('json', method, version)
         self.logger.info(f"Method path: {method_path}")
@@ -254,29 +271,119 @@ class ApiRequestProcessor:
             with open(request_file, 'r') as f:
                 request_body = json.load(f)
 
-            # Dynamically set userpass from environment variable if available
-            request_body["userpass"] = self.rpc_password
+                # For activation methods, ensure coin is disabled first for a clean test
+                if self.is_activation_method(method):
+                    params = request_body.get("params", {})
+                    ticker = params.get("ticker")
+                    if ticker and ticker in self.enabled_coins:
+                        self.logger.warning(f"Coin '{ticker}' is already enabled for activation test. Disabling first.")
+                        if self.disable_coin(ticker):
+                            time.sleep(1)  # Give a moment for the state to update
+                        else:
+                            self.logger.error(f"Failed to disable '{ticker}', skipping activation test for this example.")
+                            continue
+
+                # Inject cached data from previous method calls
+                request_body = self._inject_cached_data(method, request_body)
+
+                # Dynamically set userpass from environment variable if available
+                request_body["userpass"] = self.rpc_password
+                
+                coins_active, coin = self.check_coin_is_active(request_body)
+                if not coins_active:
+                    self.logger.error(f"Skipping request as activation for '{coin}' failed.")
+                    continue
+
+                # self.logger.info(f"Executing request from {request_file.name}")
+                response = self._make_request(request_body)
+
+                if response:
+                    if "error" in response:
+                        response_filename = request_file.name.replace("request_", "error_")
+                    else:
+                        # Cache successful response data for subsequent calls
+                        self._cache_response_data(method, response)
+                        self.completed_methods.add(method)
+                        response_filename = request_file.name.replace("request_", "response_")
+
+                    response_path = method_path / response_filename
+                    with open(response_path, 'w') as f:
+                        json.dump(response, f, indent=2)
+
+                    self.logger.info(f"Response:\n{json.dumps(response, indent=2)}")
+                    self.logger.save(f"Saved response to {response_path}")
+
+    def _inject_cached_data(self, method: str, request_body: Dict[str, Any]) -> Dict[str, Any]:
+        """Injects cached data from previous requests into the current request body."""
+        params = request_body.get("params", {})
+
+        # Handle task-based methods
+        if "::" in method and not method.endswith("::init"):
+            task_group = "::".join(method.split("::")[:-1])
+            task_cache = self.method_results_cache.get("tasks", {}).get(task_group, {})
+            if "task_id" in task_cache:
+                self.logger.info(f"Injecting task_id {task_cache['task_id']} into request for {method}")
+                params['task_id'] = task_cache['task_id']
+
+        # Handle swap status
+        if method == "my_swap_status":
+            swap_cache = self.method_results_cache.get("swaps", [])
+            if swap_cache:
+                latest_swap = swap_cache[-1]
+                if "uuid" in latest_swap:
+                    self.logger.info(f"Injecting uuid {latest_swap['uuid']} into request for {method}")
+                    params['uuid'] = latest_swap['uuid']
+
+        # Handle message verification
+        if method == "verify_message":
+            signature_cache = self.method_results_cache.get("signatures", {})
+            if "signature" in signature_cache:
+                self.logger.info(f"Injecting signature for {method}")
+                params.update(signature_cache)
+
+        # Handle sending raw transaction
+        if method == "send_raw_transaction":
+            tx_cache = self.method_results_cache.get("unsigned_tx", {})
+            if "tx_hex" in tx_cache:
+                self.logger.info(f"Injecting tx_hex into request for {method}")
+                params['tx_hex'] = tx_cache['tx_hex']
+                
+        request_body['params'] = params
+        return request_body
+
+    def _cache_response_data(self, method: str, response: Dict[str, Any]):
+        """Caches relevant data from a successful response for later use."""
+        result = response.get("result", {})
+        if not result:
+            return
+
+        # Cache task_id for all init methods
+        if method.endswith("::init") and "task_id" in result:
+            task_group = "::".join(method.split("::")[:-1])
+            if "tasks" not in self.method_results_cache:
+                self.method_results_cache["tasks"] = {}
+            self.method_results_cache["tasks"][task_group] = {"task_id": result["task_id"]}
+            self.logger.info(f"Cached task_id for {task_group}: {result['task_id']}")
+
+        # Cache swap UUIDs
+        if method in ["buy", "sell"] and "uuid" in result:
+            if "swaps" not in self.method_results_cache:
+                self.method_results_cache["swaps"] = []
+            self.method_results_cache["swaps"].append({"uuid": result["uuid"]})
+            self.logger.info(f"Cached swap uuid: {result['uuid']}")
+
+        # Cache signature data
+        if method == "sign_message" and "signature" in result:
+            self.method_results_cache["signatures"] = {
+                "signature": result["signature"],
+                "pubkey": result.get("pubkey")
+            }
+            self.logger.info(f"Cached message signature.")
             
-            coins_active, coin = self.check_coin_is_active(request_body)
-            if not coins_active:
-                self.logger.error(f"Skipping request as activation for '{coin}' failed.")
-                continue
-
-            # self.logger.info(f"Executing request from {request_file.name}")
-            response = self._make_request(request_body)
-
-            if response:
-                if "error" in response:
-                    response_filename = request_file.name.replace("request_", "error_")
-                else:
-                    response_filename = request_file.name.replace("request_", "response_")
-
-                response_path = method_path / response_filename
-                with open(response_path, 'w') as f:
-                    json.dump(response, f, indent=2)
-
-                self.logger.info(f"Response:\n{json.dumps(response, indent=2)}")
-                self.logger.save(f"Saved response to {response_path}")
+        # Cache unsigned transaction hex
+        if method == "get_unsigned_transaction" and "tx_hex" in result:
+            self.method_results_cache["unsigned_tx"] = {"tx_hex": result["tx_hex"]}
+            self.logger.info(f"Cached unsigned transaction hex.")
 
     def activate_coin(self, ticker: str, activation_type: str = 'default') -> bool:
         self.logger.info(f"Attempting to activate '{ticker}'...")

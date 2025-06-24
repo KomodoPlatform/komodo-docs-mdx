@@ -1,20 +1,22 @@
 services:
   kdf:
-    image: ${KDF_IMAGE:-kdf-image:latest}
+    image: kdf-dev-env:latest
     build:
       context: .
       dockerfile: Dockerfile.kdf
       args:
-        KDF_BRANCH: ${KDF_BRANCH:-sia-rc-cleanup}
+        # This can still be used by the final image
         RPC_PORT: ${RPC_PORT:-7783}
     ports:
       - "${RPC_PORT:-7783}:${RPC_PORT:-7783}"
+      - "42845:42845" # TCP p2p
+      - "42855:42855" # WSS p2p
     volumes:
-      - ./kdf-db:/root/.kdf/DB
-      - ./kdf-config/MM2.json:/root/.kdf/MM2.json
-      - ./kdf-config/coins:/root/.kdf/coins
-      - ./kdf-config/.env:/root/.kdf/.env
-    command: ["/bin/sh", "-c", "/kdf/target/release/kdf "]
+      - ./docker/kdf-db:/root/.kdf/DB
+      - ./docker/kdf-config/MM2.json:/root/.kdf/MM2.json
+      - ./docker/kdf-config/coins:/root/.kdf/coins
+      - ./docker/kdf-config/.env:/root/.kdf/.env
+
+
 volumes:
-  kdf-db:
-  kdf-config: 
+  kdf-db: {} 
