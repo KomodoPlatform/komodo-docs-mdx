@@ -1806,6 +1806,7 @@ class KDFTools:
 class MethodValidator:
     def __init__(self, method: str, version: str, processor: ApiRequestProcessor = None):
         self.processor = processor or KDFAPIProcessor()
+        self.logger = get_logger("method-validator")
         self.method = method
         self.version = version
         self.enable_hd = self.processor._get_env_var_as_bool("ENABLE_HD", False)
@@ -1913,7 +1914,8 @@ class MethodValidator:
         if self.method in method_prerequisites:
             self.logger.info(f"Checking if {self.method} prerequisites are met: {method_prerequisites[self.method]}")
 
-            return method_prerequisites[self.method] in self.processor.enabled_coins
+            # return method_prerequisites[self.method] in self.processor.completed_methods
+            return False
         return True
 
 def main():

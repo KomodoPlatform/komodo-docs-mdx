@@ -53,6 +53,7 @@ class ApiRequestProcessor:
                     # Uncomment to log env vars to console (for debugging)
                     # self.logger.info(f"ENV VAR: {key} = {value}")
         self.logger.success("Successfully loaded environment variables.")
+        self.enable_hd = self._get_env_var_as_bool("ENABLE_HD", False)
 
     @staticmethod
     def _get_env_var_as_bool(var_name, default=False):
@@ -341,6 +342,28 @@ class ApiRequestProcessor:
 
             elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
                 activation_params["rpc_urls"] = [node["url"] for node in coin_info.get("nodes", [])]
+
+            elif protocol == "SIA":
+                nodes = coin_info.get("nodes", [])
+                if not nodes:
+                    self.logger.error(f"Missing 'nodes' for SIA coin '{ticker}'.")
+                    return False
+                
+                server_url = nodes[0].get("url")
+                if not server_url:
+                    self.logger.error(f"Missing 'url' in node configuration for SIA coin '{ticker}'.")
+                    return False
+
+                # Password for the SIA wallet daemon, should be in coin config
+                password = coin_info.get("password")
+                if password is None: # check for None to allow empty string
+                    self.logger.error(f"Missing 'password' in config for SIA coin '{ticker}'.")
+                    return False
+
+                activation_params["client_conf"] = {
+                    "server_url": server_url,
+                    "password": password
+                }
 
             params["activation_params"] = activation_params
         else:

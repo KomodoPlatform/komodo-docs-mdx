@@ -81,13 +81,13 @@ ENV PATH="/root/.cargo/bin:$PATH"
 RUN git clone https://github.com/KomodoPlatform/komodo-defi-framework.git /kdf
 WORKDIR /kdf
 # Checkout the specified branch
-RUN git checkout $KDF_BRANCH
+RUN git checkout sia-rc-cleanup
 RUN git pull
 # If a commit is specified, checkout that commit
 RUN if [ -n "$KDF_COMMIT" ]; then git checkout $KDF_COMMIT; fi
 
 # Build the KDF
-RUN cargo build --release
+RUN cargo build --release --features "enable-sia,run-sia-functional-tests"
 
 # Expose the default KDF RPC port
 EXPOSE ${RPC_PORT}
