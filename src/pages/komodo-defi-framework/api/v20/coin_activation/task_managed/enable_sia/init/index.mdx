@@ -6,6 +6,11 @@ export const description = "Initializes the activation of the SIA coin.";
 ## task::enable\_sia::init {{label : 'task::enable_sia::init', tag : 'API-v2'}}
 
 This method starts the task of activating the SIA coin. It returns a task ID that can be used with the `status` and `user_action` methods to monitor and complete the activation process.
+<Note>
+  For SIA protocol coins, use the legacy [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history) method. 
+  The v2 [my\_tx\_history](/komodo-defi-framework/api/v20/wallet/tx/my_tx_history/#my-tx-history) method is not yet compatible.
+</Note>
+
 
 ### Request Parameters
 
@@ -29,17 +34,18 @@ This method starts the task of activating the SIA coin. It returns a task ID tha
 <CodeGroup title="Initialize SIA Activation" tag="POST" label="task::enable_sia::init">
   ```json
   {
+    "userpass": "{{userpass}}",
     "mmrpc": "2.0",
-    "userpass": "RPC_UserP@SSW0RD",
     "method": "task::enable_sia::init",
     "params": {
-      "ticker": "SC",
-      "activation_params": {
+        "ticker": "SC",
         "tx_history": true,
-        "client_conf": {
-            "server_url": "https://api.siascan.com/wallet/api"
+        "activation_params": {
+            "client_conf": {
+                "server_url": "https://api.siascan.com/wallet/api",
+                "password": "password"
+            }
         }
-      }
     }
   }
   ```
@@ -52,7 +58,7 @@ This method starts the task of activating the SIA coin. It returns a task ID tha
   {
     "mmrpc": "2.0",
     "result": {
-      "task_id": 1
+        "task_id": 1
     },
     "id": null
   }
