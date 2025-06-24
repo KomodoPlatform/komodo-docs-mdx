@@ -96,7 +96,7 @@ class DirectoryConfig:
     templates_dir: str = "templates"
     reports_dir: str = "reports"
     cache_dir: str = "cache"
-    kdf_repo_path: str = "utils/kdf_repo"
+    kdf_repo_path: str = "utils/docker/kdf_repo"
 
     # Report files
     rust_methods_report: str = "reports/kdf_rust_methods.json"

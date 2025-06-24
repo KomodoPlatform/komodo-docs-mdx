@@ -7,9 +7,11 @@ Analyzes KDF method patterns from Rust source code and existing documentation.
 
 from pathlib import Path
 from typing import Dict, List, Any
+import re
 
 from .enhanced_analyzer import EnhancedRepositoryAnalyzer, ParameterInfo
 from ..mdx.mdx_local_scanner import ExistingDocsScanner
+from ..constants import EnhancedKomodoConfig
 
 
 class MethodPatternAnalyzer:
@@ -32,9 +34,8 @@ class MethodPatternAnalyzer:
             if repo_path:
                 actual_repo_path = Path(repo_path)
             else:
-                # Default to data/kdf_repo relative to the current script
-                script_dir = Path(__file__).parent.parent.parent
-                actual_repo_path = script_dir / "data" / "kdf_repo"
+                config = EnhancedKomodoConfig()
+                actual_repo_path = config.directories.kdf_repo_path
             
             self.local_scanner = KDFScanner(repo_path=actual_repo_path)
             

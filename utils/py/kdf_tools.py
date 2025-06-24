@@ -1680,16 +1680,36 @@ class KDFTools:
         config_lines = [f"KDF Branch (from local repo): {args.kdf_branch}"]
         self._print_header(command_title, config_lines)
 
-        success = False
-        try:
-            # Path to the docker-compose.yml file in the parent 'utils' directory
-            utils_dir = self.config.directories.docker_dir.parent
-            compose_file_path = utils_dir / "docker-compose.yml"
-            # The --build flag ensures the container is rebuilt if the Dockerfile or source has changed.
+        kdf_repo_path = self.config.directories.kdf_repo_path
+        if not kdf_repo_path.exists():
+            self.logger.error(f"KDF repository not found at '{kdf_repo_path}'.")
+            self.logger.error("Please run 'git clone <kdf_repo_url>' to clone it.")
+            self._print_footer(command_title, success=False)
+            return
+
+        current_branch = self._switch_kdf_branch(args.kdf_branch)
+        if not current_branch:
+            self._print_footer(command_title, success=False)
+            return
+            
+        self._print_header(command_title, config_lines=[
+            f"KDF Branch (from local repo): {current_branch}"
+        ])
+
+        # Path to the docker-compose.yml file in the 'utils/docker' directory
+        compose_file_path = self.config.directories.docker_dir / "docker-compose.yml"
+        
+        if not compose_file_path.exists():
+            self.logger.error(f"docker-compose.yml not found at: {compose_file_path}")
+            self._print_footer(command_title, success=False)
+            return
+
+        try:            
+            # Run docker-compose
             subprocess.run(
-                ["docker", "compose", "--file", str(compose_file_path), "up", "--build", "-d"],
+                ['docker', 'compose', '--file', str(compose_file_path), 'up', '--build', '-d'],
                 check=True,
-                cwd=utils_dir
+                cwd=self.config.directories.docker_dir
             )
             self.logger.success(f"Container started successfully.")
             success = True
@@ -2026,6 +2046,19 @@ class MethodValidator:
                     return False
         
         return True
+
+    def _get_current_git_branch(self, repo_path):
+        """Gets the current Git branch of a repository."""
+        try:
+            # The CWD needs to be the repo path for this command to work correctly.
+            result = subprocess.run(
+                ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                capture_output=True, text=True, check=True, cwd=repo_path
+            )
+            return result.stdout.strip()
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Failed to get current branch for repo at '{repo_path}': {e}")
+            return None
 
 def main():
     """Script entry point."""
