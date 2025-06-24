@@ -7,16 +7,18 @@ services:
       args:
         # This can still be used by the final image
         RPC_PORT: ${RPC_PORT:-7783}
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
     ports:
       - "${RPC_PORT:-7783}:${RPC_PORT:-7783}"
       - "42845:42845" # TCP p2p
       - "42855:42855" # WSS p2p
     volumes:
-      - ./docker/kdf-db:/root/.kdf/DB
-      - ./docker/kdf-config/MM2.json:/root/.kdf/MM2.json
-      - ./docker/kdf-config/coins:/root/.kdf/coins
-      - ./docker/kdf-config/.env:/root/.kdf/.env
-
+      - ./kdf-db:/home/kdfuser/.kdf/DB
+      - ./kdf-config/MM2.json:/home/kdfuser/.kdf/MM2.json
+      - ./kdf-config/coins:/home/kdfuser/.kdf/coins
+      - ./kdf-config/.env:/home/kdfuser/.kdf/.env
+    
 
 volumes:
   kdf-db: {} 

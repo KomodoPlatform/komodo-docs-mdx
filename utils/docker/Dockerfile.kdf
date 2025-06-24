@@ -57,6 +57,12 @@ RUN cargo build --release --features "enable-sia,run-sia-functional-tests"
 FROM docker.io/debian:buster-slim AS final
 
 ARG RPC_PORT=7783
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+# Create a non-root user and group
+RUN groupadd --gid $GROUP_ID kdfuser && \
+    useradd --uid $USER_ID --gid $GROUP_ID --create-home --shell /bin/bash kdfuser
 
 # Copy the compiled binary from the builder stage
 COPY --from=builder /app/target/release/kdf /usr/local/bin/kdf
@@ -64,6 +70,13 @@ COPY --from=builder /app/target/release/kdf /usr/local/bin/kdf
 # Copy and set up the entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Create and set permissions for the .kdf directory
+RUN mkdir -p /home/kdfuser/.kdf && \
+    chown -R kdfuser:kdfuser /home/kdfuser/.kdf
+
+USER kdfuser
+WORKDIR /home/kdfuser
 
 EXPOSE ${RPC_PORT}
 

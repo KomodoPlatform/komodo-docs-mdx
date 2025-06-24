@@ -26,6 +26,8 @@ class ApiRequestProcessor:
         self.method_results_cache: Dict[str, Any] = {}
         self.completed_methods: Set[str] = set()
         self.activation_methods: Set[str] = set()
+        self.v1_methods: Set[str] = set()
+        self.v2_methods: Set[str] = set()
 
         # Mappings and Constants
         rpc_url = os.getenv("RPC_URL", "http://127.0.0.1")
@@ -134,10 +136,31 @@ class ApiRequestProcessor:
         """Fetches coins config and updates initial enabled coins list."""
         self.logger.info("Initializing ApiRequestProcessor...")
         self._load_activation_mapping()
+        self._load_mdx_methods()
         self._fetch_coins_config()
         self._fetch_coins_file()
         self.generate_mm2_config()
         
+
+    def _load_mdx_methods(self):
+        """Loads the kdf_mdx_methods.json file to determine method versions."""
+        mdx_methods_path = self.config.directories.mdx_methods_report
+        if not mdx_methods_path.exists():
+            self.logger.error(f"MDX methods report not found at: {mdx_methods_path}")
+            self.logger.error("Please run 'kdf-tools scan-mdx' to generate it.")
+            return
+
+        try:
+            self.logger.info(f"Loading mdx methods from {mdx_methods_path}")
+            with open(mdx_methods_path, 'r') as f:
+                mdx_methods_data = json.load(f)
+            
+            self.v1_methods = set(mdx_methods_data.get("repository_data", {}).get("v1", {}).get("methods", []))
+            self.v2_methods = set(mdx_methods_data.get("repository_data", {}).get("v2", {}).get("methods", []))
+            
+            self.logger.success(f"Successfully loaded {len(self.v1_methods)} v1 methods and {len(self.v2_methods)} v2 methods.")
+        except Exception as e:
+            self.logger.error(f"Error loading MDX methods report from {mdx_methods_path}: {e}")
 
     def _load_activation_mapping(self):
         """Loads the protocol_activation_mapping.json file."""
@@ -204,10 +227,13 @@ class ApiRequestProcessor:
                 self.logger.error(f"Userpass is invalid. Please check your .env file.")
                 self.stop_container()
                 sys.exit(1)
-            return response.text
+            try:
+                return response.json()
+            except json.JSONDecodeError:
+                return {"error": response.text}
         except Exception as e:
             self.logger.error(f"Request error occurred: {e}")
-            return None
+            return {"error": str(e)}
 
 
     def _update_enabled_coins(self):
@@ -283,6 +309,16 @@ class ApiRequestProcessor:
                             self.logger.error(f"Failed to disable '{ticker}', skipping activation test for this example.")
                             continue
 
+                # For kmd_rewards_info, ensure KMD is specified.
+                # TODO: This is a hack to ensure KMD is enabled for kmd_rewards_info.
+                # We should find a better way to do this. It is not a valid parameter for kmd_rewards_info.
+                if method == "kmd_rewards_info":
+                    if "params" in request_body:
+                        if "coin" not in request_body["params"]:
+                            request_body["params"]["coin"] = "KMD"
+                    elif "coin" not in request_body:
+                        request_body["coin"] = "KMD"
+                        
                 # Inject cached data from previous method calls
                 request_body = self._inject_cached_data(method, request_body)
 
@@ -420,6 +456,8 @@ class ApiRequestProcessor:
             activation_params = {}
             if protocol in ["ETH", "ERC20"]:
                 activation_params["nodes"] = coin_info.get("nodes", [])
+                # The task-based ETH activation method requires this parameter, even if empty.
+                activation_params["erc20_tokens_requests"] = []
                 if "contract_address" in coin_info:
                     activation_params["contract_address"] = coin_info.get("contract_address")
 
@@ -485,24 +523,43 @@ class ApiRequestProcessor:
             elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
                 params["rpc_urls"] = [node["url"] for node in coin_info.get("nodes", [])]
 
-        init_request = {
-            "userpass": self.config.openapi.userpass,
-            "method": activation_method,
-            "params": params
-        }
+        if activation_method in self.v2_methods:
+            init_request = {
+                "userpass": self.config.openapi.userpass,
+                "method": activation_method,
+                "mmrpc": "2.0",
+                "params": params
+            }
+        else: # v1 method
+            init_request = {
+                "userpass": self.config.openapi.userpass,
+                "method": activation_method,
+                **params
+            }
         
         self.logger.info(f"Sending activation request for '{ticker}' with method '{activation_method}'")
         init_response = self._make_request(init_request)
 
+        # Handle "already initialized" error by disabling and retrying
+        if init_response and init_response.get("error") and "already initialized" in init_response["error"]:
+            self.logger.warning(f"Coin '{ticker}' already initialized. Disabling and retrying.")
+            if self.disable_coin(ticker):
+                time.sleep(1)  # Give a moment for the state to update
+                self.logger.info(f"Retrying activation for '{ticker}'...")
+                init_response = self._make_request(init_request)
+            else:
+                self.logger.error(f"Failed to disable '{ticker}', cannot proceed with activation.")
+                return False
+
         # Handle task-based vs direct activation
-        if activation_method.startswith("task::"):
-            if "result" in init_response and "task_id" in init_response["result"]:
+        if activation_method in self.v2_methods:
+            if init_response and "result" in init_response and "task_id" in init_response["result"]:
                 task_id = init_response["result"]["task_id"]
                 return self._poll_task_status(task_id, ticker, activation_method)
             else:
                 self.logger.error(f"Task-based activation init failed for '{ticker}': {init_response}")
                 return False
-        else:
+        else: # v1
             # Handle legacy/direct activation
             if init_response and "result" in init_response and "error" not in init_response:
                 self.logger.success(f"Successfully activated '{ticker}' with direct method.")
@@ -521,6 +578,7 @@ class ApiRequestProcessor:
             status_request = {
                 "userpass": self.config.openapi.userpass,
                 "method": status_method,
+                "mmrpc": "2.0",
                 "params": {"task_id": task_id}
             }
             status_response = self._make_request(status_request)
@@ -546,12 +604,12 @@ class ApiRequestProcessor:
         return False
         
     def disable_coin(self, ticker: str) -> bool:
-        """Disables a coin."""
+        """Disables a coin. This is always a v1 method."""
         self.logger.info(f"Disabling coin '{ticker}'...")
         request_body = {
             "userpass": self.config.openapi.userpass,
             "method": "disable_coin",
-            "params": {"coin": ticker}
+            "coin": ticker
         }
         response = self._make_request(request_body)
         if response and response.get("result", {}).get("status") == "success":

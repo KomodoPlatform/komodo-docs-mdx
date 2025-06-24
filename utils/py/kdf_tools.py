@@ -1610,6 +1610,8 @@ class KDFTools:
             # Swap sequence
             ["buy", "my_swap_status"],
             ["sell", "my_swap_status"],
+            # KMD rewards
+            ["kmd_rewards_info"],
             # Non-task activation sequences
             ["enable_eth_with_tokens", "enable_erc20"],
             ["enable_tendermint_with_assets", "enable_tendermint_token"],
