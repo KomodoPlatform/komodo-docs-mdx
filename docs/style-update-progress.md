@@ -62,7 +62,7 @@ This document tracks the progress of updating all MDX files in `/src/pages/komod
 | src/pages/komodo-defi-framework/api/legacy/orderbook/index.mdx                                               | ✅ Compliant   |
 | src/pages/komodo-defi-framework/api/legacy/orderbook_depth/index.mdx                                         | ✅ Compliant   |
 | src/pages/komodo-defi-framework/api/legacy/orders_history_by_filter/index.mdx                                | ✅ Compliant   |
-| src/pages/komodo-defi-framework/api/legacy/rational_number_note/index.mdx                                    | ✅ Compliant   |
+| src/pages/komodo-defi-framework/api/common_structures/rational_number_note/index.mdx                                    | ✅ Compliant   |
 | src/pages/komodo-defi-framework/api/legacy/recover_funds_of_swap/index.mdx                                   | ✅ Compliant   |
 | src/pages/komodo-defi-framework/api/legacy/sell/index.mdx                                                    | ✅ Compliant   |
 | src/pages/komodo-defi-framework/api/legacy/send_raw_transaction/index.mdx                                    | ✅ Compliant   |
