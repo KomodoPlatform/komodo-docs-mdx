@@ -164,8 +164,9 @@ class KDFTools:
         if self.verbose:
             self.logger.folder(f"Workspace root: {self.config.workspace_root}")
             self.logger.folder(f"Data directory: {self.config.directories.data_dir}")
-            self.logger.folder(f"Reports directory: {self.config.directories.reports_dir}")
             self.logger.folder(f"KDF repository: {self.config.directories.kdf_repo_path}")
+            self.logger.folder(f"Reports directory: {self.config.directories.reports_dir}")
+            self.logger.folder(f"Branched reports directory: {self.config.directories.branched_reports_dir}")
 
 
 
@@ -883,7 +884,7 @@ class KDFTools:
                 self.log(f"Full report saved to: {args.output}", "success")
             else:
                 import glob
-                latest_report_files = glob.glob(str(self.config.directories.reports_dir / "draft_quality_report.md"))
+                latest_report_files = glob.glob(str(self.config.directories.branched_reports_dir / "draft_quality_report.md"))
                 if latest_report_files:
                     latest_report = max(latest_report_files, key=lambda p: Path(p).stat().st_mtime)
                     self.log(f"Full report saved to: {latest_report}", "success")

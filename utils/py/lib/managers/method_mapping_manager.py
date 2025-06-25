@@ -52,8 +52,7 @@ class MethodMappingManager:
         
         # Configure directories for UnifiedScanner using enhanced config
         self.unified_scanner = UnifiedScanner(verbose=verbose, config=self.config)
-        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        self.reports_dir.mkdir(parents=True, exist_ok=True)
+        self.branched_reports_dir = Path(self.config._resolve_path(self.config.directories.branched_reports_dir))
         
         # Add async processor for performance improvements
         self.async_processor = None
@@ -334,8 +333,8 @@ class MethodMappingManager:
     
     def save_unified_mapping(self, unified_mapping, filename="unified_method_mapping.json"):
         """Saves the unified mapping to a file in the data directory."""
-        self.reports_dir.mkdir(parents=True, exist_ok=True)
-        output_path = self.reports_dir / filename
+
+        output_path = self.branched_reports_dir / filename
         
         try:
             with open(output_path, 'w') as f:
@@ -348,7 +347,7 @@ class MethodMappingManager:
 
     def load_unified_mapping(self, filename="unified_method_mapping.json"):
         """Loads the unified mapping from a file in the data directory."""
-        file_path = self.reports_dir / filename
+        file_path = self.branched_reports_dir / filename
         if not file_path.exists():
             self.logger.warning(f"⚠️  Could not find unified mapping file: {file_path}")
             return None
@@ -361,17 +360,12 @@ class MethodMappingManager:
 
     def save_method_paths(self, method_paths, filename="kdf_postman_method_paths.json"):
         """Saves the method paths with Postman hotlinks."""
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
         # separate filename from extension
         parts = filename.split('.')
         base_name = parts[0]
         extension = parts[1] if len(parts) > 1 else 'json'
-        
-        timestamped_filename = f"{base_name}.{extension}"
-        
-        self.reports_dir.mkdir(parents=True, exist_ok=True)
-        output_path = self.reports_dir / timestamped_filename
+        output_path = self.branched_reports_dir / f"{base_name}.{extension}"
         
         try:
             with open(output_path, 'w') as f:
@@ -428,11 +422,8 @@ class MethodMappingManager:
                 method_paths_data["method_paths"][version] = dict(sorted(version_methods.items()))
         
         # Save to dedicated method paths file
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         output_filename = f"kdf_postman_method_paths.json"
-        
-        self.reports_dir.mkdir(parents=True, exist_ok=True)
-        output_file = self.reports_dir / output_filename
+        output_file = self.branched_reports_dir / output_filename
 
         def write_method_paths_file():
             with open(output_file, 'w', encoding='utf-8') as f:
@@ -452,10 +443,10 @@ class MethodMappingManager:
         json_data = await self._convert_mapping_to_enhanced_json(unified)
 
         if output_file is None:
-            output_file_path = self.reports_dir / "unified_method_mapping.json"
+            output_file_path = self.branched_reports_dir / "unified_method_mapping.json"
         else:
             # If an output file is provided, make sure it's inside the reports dir
-            output_file_path = self.reports_dir / Path(output_file).name
+            output_file_path = self.branched_reports_dir / Path(output_file).name
         
         def write_json_file():
             with open(output_file_path, 'w', encoding='utf-8') as f:
@@ -619,8 +610,8 @@ class MethodMappingManager:
             missing_stats = self._generate_missing_statistics(rust_methods, documented_methods, missing_methods)
             
             # Get the source file reference
-            reports_dir = self.config._resolve_path(self.config.directories.reports_dir)
-            rust_files = glob.glob(os.path.join(reports_dir, "report-kdf_rust_methods.json"))
+            branched_reports_dir = self.config._resolve_path(self.config.directories.branched_reports_dir)
+            rust_files = glob.glob(os.path.join(branched_reports_dir, "kdf_rust_methods.json"))
             rust_file_name = Path(max(rust_files, key=lambda x: Path(x).stat().st_mtime)).name if rust_files else "unknown"
             
             return {
@@ -656,7 +647,7 @@ class MethodMappingManager:
     
     async def _load_canonical_rust_methods(self) -> Dict[str, Set[str]]:
         """
-        Asynchronously loads canonical Rust methods from the latest 'report-kdf_rust_methods.json' report.
+        Asynchronously loads canonical Rust methods from the latest 'kdf_rust_methods.json' report.
         """
         rust_methods = {}
         
@@ -847,10 +838,9 @@ class MethodMappingManager:
             }
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"report-kdf_postman_collection_method_paths.json"
+        filename = f"kdf_postman_collection_method_paths.json"
         
-        self.reports_dir.mkdir(parents=True, exist_ok=True)
-        output_path = self.reports_dir / filename
+        output_path = self.branched_reports_dir / filename
 
         def write_method_paths_file():
             try:

@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 from .enums import ValidationLevel, VersionStatus, DeploymentEnvironment
+from ..utils.path_utils import get_current_git_branch
 
 
 # =============================================================================
@@ -66,6 +67,9 @@ class CoinConfig:
 class DirectoryConfig:
     """Enhanced configuration for directory paths with version support."""
     workspace_root: str  # The absolute path to the workspace root
+    kdf_branch: Optional[str] = None
+    mdx_branch: Optional[str] = None
+    branched_reports_dir: Optional[str] = None
 
     # MDX documentation paths
     mdx_v1: str = "src/pages/komodo-defi-framework/api/legacy"
@@ -98,19 +102,22 @@ class DirectoryConfig:
     cache_dir: str = "cache"
     kdf_repo_path: str = "utils/docker/kdf_repo"
 
-    # Report files
-    rust_methods_report: str = "reports/kdf_rust_methods.json"
-    mdx_methods_report: str = "reports/kdf_mdx_methods.json"
-    mdx_method_paths_report: str = "reports/kdf_mdx_method_paths.json"
-    mdx_json_example_methods_report: str = "reports/kdf_mdx_json_example_methods.json"
-    mdx_json_example_method_paths_report: str = "reports/kdf_mdx_json_example_method_paths.json"
-    mdx_openapi_methods_report: str = "reports/kdf_openapi_methods.json"
-    mdx_openapi_method_paths_report: str = "reports/kdf_openapi_method_paths.json"
-    unified_method_mapping_report: str = "reports/kdf_unified_method_map.json"
-    kdf_gap_analysis_report: str = "reports/kdf_gap_analysis.json"
-    v2_no_param_methods_report: str = "reports/v2_no_param_methods.json"
-    methods_error_responses_report: str = "reports/methods_error_responses.json"
+    # Reference files
     category_mappings: str = "utils/py/data/category_mappings.json"
+
+    # Report filenames
+    rust_methods_report: str = "kdf_rust_methods.json"
+    mdx_methods_report: str = "kdf_mdx_methods.json"
+    mdx_method_paths_report: str = "kdf_mdx_method_paths.json"
+    mdx_json_example_methods_report: str = "kdf_mdx_json_example_methods.json"
+    mdx_json_example_method_paths_report: str = "kdf_mdx_json_example_method_paths.json"
+    mdx_openapi_methods_report: str = "kdf_openapi_methods.json"
+    mdx_openapi_method_paths_report: str = "kdf_openapi_method_paths.json"
+    unified_method_mapping_report: str = "kdf_unified_method_map.json"
+    kdf_gap_analysis_report: str = "kdf_gap_analysis.json"
+    v2_no_param_methods_report: str = "v2_no_param_methods.json"
+    methods_error_responses_report: str = "methods_error_responses.json"
+
 
 
     def __post_init__(self):
@@ -132,9 +139,37 @@ class DirectoryConfig:
         Converts all string paths in the configuration to absolute pathlib.Path objects.
         """
         root = Path(self.workspace_root)
+        
+        # Resolve non-report paths first
         for name, value in self.__dict__.items():
-            if isinstance(value, str) and name != 'workspace_root':
+            if isinstance(value, str) and 'report' not in name and name != 'workspace_root' and name != 'kdf_branch':
                 setattr(self, name, root / value)
+                
+        # Resolve report paths into a subdirectory based on kdf_branch
+        if self.kdf_branch:
+            reports_base_dir = root / self.reports_dir / self.kdf_branch
+        else:
+            reports_base_dir = root / self.reports_dir
+
+        self.branched_reports_dir = reports_base_dir  # Update reports_dir to include branch
+        if not self.branched_reports_dir.exists():
+            self.branched_reports_dir.mkdir(parents=True, exist_ok=True)
+
+        report_attributes = [
+            "rust_methods_report", "mdx_methods_report", "mdx_method_paths_report",
+            "mdx_json_example_methods_report", "mdx_json_example_method_paths_report",
+            "mdx_openapi_methods_report", "mdx_openapi_method_paths_report",
+            "unified_method_mapping_report", "kdf_gap_analysis_report",
+            "v2_no_param_methods_report", "methods_error_responses_report"
+        ]
+
+        for attr in report_attributes:
+            original_path = getattr(self, attr)  # e.g., "reports/kdf_rust_methods.json"
+            file_name = Path(original_path).name
+            setattr(self, attr, reports_base_dir / file_name)
+
+        # Manually resolve any remaining important paths
+        self.category_mappings = root / self.category_mappings
 
     def get_version_directories(self) -> Dict[str, Dict[str, Path]]:
         """Get directories organized by version and type."""
@@ -414,6 +449,8 @@ class EnhancedKomodoConfig:
     # Environment and deployment settings
     environment: DeploymentEnvironment = DeploymentEnvironment.DEVELOPMENT
     workspace_root: Optional[str] = None
+    kdf_branch: Optional[str] = None
+    mdx_branch: Optional[str] = None
     
     # Feature flags
     enable_async_processing: bool = True
@@ -428,9 +465,22 @@ class EnhancedKomodoConfig:
     def __post_init__(self):
         """Post-initialization setup."""
         self._resolve_workspace_root()
-        self.directories = DirectoryConfig(workspace_root=self.workspace_root)
+        self._get_git_branches()
+        self.directories = DirectoryConfig(
+            workspace_root=self.workspace_root,
+            kdf_branch=self.kdf_branch,
+            mdx_branch=self.mdx_branch
+        )
         self._setup_logging()
     
+    def _get_git_branches(self):
+        """Get git branches for MDX and KDF repos."""
+        self.mdx_branch = get_current_git_branch(self.workspace_root)
+        kdf_repo_path = Path(self.workspace_root) / "utils" / "docker" / "kdf_repo"
+        self.kdf_branch = get_current_git_branch(str(kdf_repo_path))
+        if not self.kdf_branch or self.kdf_branch == 'unknown':
+            self.kdf_branch = "dev"  # Fallback
+
     def _setup_logging(self):
         """Configure logging based on settings."""
         import logging

@@ -205,8 +205,7 @@ class DraftsManager:
         
         # Output directory for reports
         self.config = get_config()
-        self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
-        self.reports_dir.mkdir(exist_ok=True)
+        self.branched_reports_dir = Path(self.config._resolve_path(self.config.directories.branched_reports_dir))
         
         # Initialize utility components
         self.document_analyzer = DocumentAnalyzer()
@@ -521,7 +520,7 @@ class DraftsManager:
         # Save report
         if output_file is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = self.reports_dir / f"quality_report.md"
+            output_file = self.branched_reports_dir / f"quality_report.md"
         
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(markdown_report)

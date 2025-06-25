@@ -282,7 +282,7 @@ class OpenApiSpecGenerator:
             "method_paths": paths_data
         }
 
-        file_path = self.reports_dir / "report-kdf_openapi_method_paths.json"
+        file_path = self.branched_reports_dir / "kdf_openapi_method_paths.json"
         safe_write_json(file_path, output_data, indent=2)
         
         self.logger.save(f"Saved OpenAPI method paths mapping to: {file_path}")
@@ -357,7 +357,7 @@ class OpenApiSpecGenerator:
         """
         Writes a merged OpenAPI specification to a file.
         """
-        output_path = self.reports_dir / f"report-kdf_openapi_main_spec_{version}.yaml"
+        output_path = self.branched_reports_dir / f"kdf_openapi_main_spec_{version}.yaml"
         
         with open(output_path, 'w') as f:
             yaml.dump(spec, f, sort_keys=False, allow_unicode=True)

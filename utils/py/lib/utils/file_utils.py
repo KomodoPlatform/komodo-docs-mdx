@@ -390,7 +390,7 @@ def cleanup_old_files(directory: str, pattern: str, keep_count: int = 3, verbose
     
     Args:
         directory: Directory to search for files
-        pattern: Glob pattern to match files (e.g., "report-kdf_rust_method*.json")
+        pattern: Glob pattern to match files (e.g., "kdf_rust_method*.json")
         keep_count: Number of most recent files to keep (default: 3)
         verbose: Whether to log cleanup actions
         
@@ -458,13 +458,13 @@ def cleanup_old_files(directory: str, pattern: str, keep_count: int = 3, verbose
         Dictionary with cleanup results for each file type
     """
     cleanup_patterns = {
-        "rust_methods": "report-kdf_rust_method*.json",
-        "mdx_methods": "report-kdf_mdx_method*.json",
-        "openapi_methods": "report-kdf_openapi_method*.json",
-        "json_methods": "report-kdf_json_method*.json",
-        "postman_methods": "report-kdf_postman_method*.json",
-        "method_mapping": "report-kdf_method_mapping.json",
-        "unified_method_mapping": "report-kdf_unified_method_mapping.json",
+        "rust_methods": "kdf_rust_method*.json",
+        "mdx_methods": "kdf_mdx_method*.json",
+        "openapi_methods": "kdf_openapi_method*.json",
+        "json_methods": "kdf_json_method*.json",
+        "postman_methods": "kdf_postman_method*.json",
+        "method_mapping": "kdf_method_mapping.json",
+        "unified_method_mapping": "kdf_unified_method_mapping.json",
     }
     
     results = {}

@@ -38,6 +38,7 @@ class GeneratedFilesCleaner:
         self.dry_run = dry_run
         self.logger = get_logger("FileCleaner") if verbose else None
         self.reports_dir = Path(self.config._resolve_path(self.config.directories.reports_dir))
+        self.branched_reports_dir = Path(self.config._resolve_path(self.config.directories.branched_reports_dir))
         
         # Define categories of generated files that need cleanup
         self.FILE_CATEGORIES = {
@@ -93,7 +94,8 @@ class GeneratedFilesCleaner:
             },
             'report_files': {
                 'patterns': [
-                    f'{self.reports_dir}/**/*.json'
+                    f'{self.reports_dir}/**/*.json',
+                    f'{self.branched_reports_dir}/**/*.json'
                 ],
                 'description': 'Timestamped report files in the reports subdirectory',
                 'preserve_dirs': [],
@@ -615,18 +617,19 @@ class GeneratedFilesCleaner:
         
         # Group files by pattern
         patterns = [
-            "report-kdf_rust_method*.json", "report-kdf_mdx_method*.json",
-            "report-kdf_openapi_method*.json", "report-kdf_postman_json_method*.json",
-            "report-kdf_gap_analysis.json"
+            "kdf_rust_method*.json", "kdf_mdx_method*.json",
+            "kdf_openapi_method*.json", "kdf_postman_json_method*.json",
+            "kdf_gap_analysis.json"
         ]
         
         removed_count = 0
         for pattern in patterns:
-            files = sorted(self.reports_dir.glob(pattern), key=lambda f: f.stat().st_mtime, reverse=True)
-            if len(files) > keep_count:
-                for f in files[keep_count:]:
-                    if self._remove_item(f):
-                        removed_count += 1
+            for dirpath in [self.reports_dir, self.branched_reports_dir]:
+                files = sorted(dirpath.glob(pattern), key=lambda f: f.stat().st_mtime, reverse=True)
+                if len(files) > keep_count:
+                    for f in files[keep_count:]:
+                        if self._remove_item(f):
+                            removed_count += 1
         
         self._log(f"Removed {removed_count} old report files.", "success")
         return removed_count
