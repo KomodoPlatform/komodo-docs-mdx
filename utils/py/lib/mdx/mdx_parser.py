@@ -16,8 +16,8 @@ from dataclasses import dataclass
 
 # Import path utilities
 from ..constants.config import get_config
-from ..utils.path_utils import EnhancedPathMapper
-from ..constants import UnifiedParameterInfo, UnifiedMethodInfo
+from ..managers.path_mapping_manager import EnhancedPathMapper
+from ..constants import UnifiedParameterInfo
 
 
 # Create a simple Response class for backward compatibility
@@ -87,6 +87,11 @@ class MDXParser:
         if not method_match:
             return None
 
+        if 'legacy' in str(file_path):
+            version = 'v1'
+        else:
+            version = 'v2'
+
         method_name = method_match.group(1).replace('\\_', '_')
 
         title_match = re.search(r'export const title = ["\']([^"\']+)["\']', content)
@@ -100,6 +105,7 @@ class MDXParser:
 
         return {
             'type': 'method',
+            'version': version,
             'method_name': method_name,
             'title': title,
             'description': description,

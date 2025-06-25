@@ -48,25 +48,6 @@ class PostmanReportGenerator(BaseReporter):
                     ""
                 ])
         
-        report_lines.extend([
-            f"📊 Results:",
-            f"   Collections generated: {total_collections}",
-            f"   Environments generated: {total_environments}",
-            "",
-            "🚀 Next Steps:",
-            "1. Import the collection files into Postman",
-            "2. Import the environment files",
-            "3. Update the 'userpass' environment variable",
-            "4. Set the 'kdf_url' to your KDF instance",
-            "5. Start testing the API!",
-            "",
-            "📚 Documentation:",
-            "- Collection includes comprehensive test scripts",
-            "- Each request has detailed descriptions",
-            "- Environment variables are pre-configured",
-            "- Folders organize methods by functionality"
-        ])
-        
         return "\n".join(report_lines)
     
     def generate_scanning_report(self, scan_results: Dict[str, Dict]) -> str:

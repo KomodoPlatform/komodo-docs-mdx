@@ -10,6 +10,7 @@ Moved from mapping/mapping.py to managers/ for better organization.
 """
 
 import os
+import sys
 import json
 from datetime import datetime
 from pathlib import Path
@@ -25,7 +26,7 @@ from ..utils import (
     find_best_match, get_logger,
     extract_category_from_method
 )
-from ..utils.path_utils import EnhancedPathMapper
+from ..managers.path_mapping_manager import EnhancedPathMapper
 from ..postman.parser import PostmanCollectionParser
 from ..utils.logging_utils import get_logger
 from ..constants.config import EnhancedKomodoConfig, get_config
@@ -76,6 +77,24 @@ class MethodMappingManager:
             self.async_processor = AsyncMethodProcessor()
         return self.async_processor
 
+    def create_unified_mapping(self, scan_mdx=True, scan_yaml=True, scan_json=True):
+        """
+        Create a unified mapping of methods synchronously.
+
+        Args:
+            scan_mdx (bool): Whether to scan MDX files.
+            scan_yaml (bool): Whether to scan YAML files.
+            scan_json (bool): Whether to scan JSON example files.
+
+        Returns:
+            Dict[str, Dict[str, MethodMapping]]: The unified mapping.
+        """
+        return asyncio.run(self.create_unified_mapping_async(
+            scan_mdx=scan_mdx,
+            scan_yaml=scan_yaml,
+            scan_json=scan_json
+        ))
+
     def _is_overview_method(self, method_name: str, mdx_path: str) -> bool:
         """
         Check if a method corresponds to an overview page by examining the MDX content.
@@ -103,7 +122,7 @@ class MethodMappingManager:
                 self.logger.warning(f"Could not check overview status for {method_name}: {e}")
             return False
 
-    async def create_unified_mapping_async(self) -> Dict[str, Dict[str, MethodMapping]]:
+    async def create_unified_mapping_async(self, scan_mdx=True, scan_yaml=True, scan_json=True) -> Dict[str, Dict[str, MethodMapping]]:
         
         processor = self._get_async_processor()
         # Build directory configurations
@@ -135,14 +154,35 @@ class MethodMappingManager:
         canonical_methods = self._load_canonical_methods()
         
         # Scan all file types concurrently using AsyncMethodProcessor
-        mdx_task = processor.scan_mdx_files_async(mdx_dirs)
-        yaml_task = processor.scan_yaml_files_async(yaml_dirs) 
-        example_task = processor.scan_json_examples_async(json_dirs)
-        
-        # Wait for all scans to complete concurrently
-        mdx_mappings, yaml_mappings, example_mappings = await asyncio.gather(
-            mdx_task, yaml_task, example_task
-        )
+        tasks = []
+        if scan_mdx:
+            tasks.append(processor.scan_mdx_files_async(mdx_dirs))
+        if scan_yaml:
+            tasks.append(processor.scan_yaml_files_async(yaml_dirs))
+        if scan_json:
+            tasks.append(processor.scan_json_examples_async(json_dirs))
+
+        if not tasks:
+            self.logger.warning("No scan tasks were specified. Returning empty mapping.")
+            return {}
+
+        results = await asyncio.gather(*tasks)
+
+        result_map = {}
+        task_names = []
+        if scan_mdx:
+            task_names.append("mdx")
+        if scan_yaml:
+            task_names.append("yaml")
+        if scan_json:
+            task_names.append("json")
+
+        for i, name in enumerate(task_names):
+            result_map[name] = results[i]
+
+        mdx_mappings = result_map.get("mdx", {})
+        yaml_mappings = result_map.get("yaml", {})
+        example_mappings = result_map.get("json", {})
         
         # Merge v2-dev into v2 right after scanning to ensure consistent path handling
         if 'v2' in mdx_mappings and 'v2-dev' in mdx_mappings:
@@ -278,16 +318,26 @@ class MethodMappingManager:
         pass
     
     def _load_canonical_methods(self) -> Dict[str, List[str]]:
-        """Load canonical method names from KDF repository using enhanced config."""
+        """Load canonical method names from the MDX method paths report."""
         canonical_methods = {"v1": [], "v2": []}
         
         try:
-            # Try to load from main OpenAPI file
-            openapi_file = self.config._resolve_path(self.config.directories.openapi_main)
-            if os.path.exists(openapi_file):
-                # This would parse the OpenAPI file to extract method names
-                # For now, return empty lists as placeholder
-                pass
+            paths_file = self.config.directories.mdx_method_paths_report
+            if paths_file.exists():
+                with open(paths_file, 'r') as f:
+                    data = json.load(f)
+                
+                v1_methods = data.get("method_paths", {}).get("v1", {})
+                v2_methods = data.get("method_paths", {}).get("v2", {})
+                
+                canonical_methods["v1"] = sorted(list(v1_methods.keys()))
+                canonical_methods["v2"] = sorted(list(v2_methods.keys()))
+                
+                if self.verbose:
+                    self.logger.info(f"Loaded {len(canonical_methods['v1'])} V1 and {len(canonical_methods['v2'])} V2 canonical methods.")
+            else:
+                self.logger.warning(f"Canonical methods file not found: {paths_file}")
+
         except Exception as e:
             if self.verbose:
                 self.logger.warning(f"Could not load canonical methods: {e}")
@@ -386,7 +436,6 @@ class MethodMappingManager:
                 "generated_at": datetime.now().isoformat(),
                 "scanner_version": "KDF Method Path Mapper with Postman Hotlinks v1.0.0",
                 "scanner_type": "METHOD_PATH_MAPPING_WITH_POSTMAN_HOTLINKS",
-                "total_versions": len([v for v in unified.keys() if v in ['v1', 'v2']]),
                 "total_methods_with_mdx_paths": sum(
                     len([m for m in methods.values() if m.has_mdx])
                     for methods in unified.values()

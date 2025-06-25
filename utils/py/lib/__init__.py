@@ -21,7 +21,7 @@ from .constants import (
 from .managers.method_mapping_manager import MethodMappingManager
 from .constants import MethodMapping
 
-from .utils.path_utils import EnhancedPathMapper
+from .managers.path_mapping_manager import EnhancedPathMapper
 
 # Async processing capabilities
 from .async_support import (

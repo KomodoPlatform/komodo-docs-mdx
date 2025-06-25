@@ -215,7 +215,7 @@ class PostmanJSONProcessor:
         json_files = []
         for root, dirs, files in os.walk(json_directory):
             for file in files:
-                if file.endswith('.json'):
+                if file.startswith('request_') and file.endswith('.json'):
                     json_files.append(os.path.join(root, file))
         
         if not json_files:
@@ -237,6 +237,7 @@ class PostmanJSONProcessor:
                     json_data = json.load(f)
                 
                 if 'method' not in json_data:
+                    
                     if self.verbose:
                         self.logger.debug(f"Skipping {json_file}: No 'method' field")
                     continue

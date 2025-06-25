@@ -5,13 +5,13 @@ Configuration Data Structures
 Dataclass definitions for configuration and settings management
 in the Komodo DeFi Framework documentation tools.
 """
-
+import os
+import subprocess
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 from .enums import ValidationLevel, VersionStatus, DeploymentEnvironment
-from ..utils.path_utils import get_current_git_branch
 
 
 # =============================================================================
@@ -562,3 +562,25 @@ class EnhancedKomodoConfig:
         if not include_deprecated:
             versions = [v for v in versions if not self.is_version_deprecated(v)]
         return sorted(versions)
+
+
+def get_current_git_branch(repo_path: str) -> str:
+    """Gets the current git branch for a given repository path."""
+    try:
+        repo_path_str = str(repo_path)
+        if not os.path.isdir(os.path.join(repo_path_str, '.git')):
+            # self.logger.warning(f"No .git directory found in {repo_path_str}, cannot determine branch.")
+            return "unknown"
+        
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=repo_path_str,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        # self.logger.error(f"Could not determine git branch for {repo_path}: {e}")
+        return "unknown"
+

@@ -13,7 +13,7 @@ import os
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
-import yaml
+from ..utils.data_utils import is_confirmed_empty_params_method
 
 from ..constants import (
     EnhancedKomodoConfig,
@@ -22,10 +22,9 @@ from ..constants import (
 )
 from ..utils import get_logger
 from ..constants.config import get_config
-from ..utils.path_utils import EnhancedPathMapper
+from ..managers.path_mapping_manager import EnhancedPathMapper
 from ..mdx.mdx_parser import MDXParser
 from .openapi_helpers import (
-    EnhancedJSONSchema,
     openapi_property,
     openapi_schema
 )
@@ -47,7 +46,7 @@ class OpenApiSchemaFactory:
         self.mdx_parser = mdx_parser
         
         if self.path_mapper is None:
-            self.logger.warning("PathMapper not provided to OpenApiSchemaFactory. Reference generation will be disabled.")
+            self.logger.warning("EnhancedPathMapper not provided to OpenApiSchemaFactory. Reference generation will be disabled.")
             
     def _get_ref_path(self, schema_name: str) -> Optional[str]:
         """
@@ -120,31 +119,68 @@ class OpenApiSchemaFactory:
 
     def create_request_body_schema(self, method_info: UnifiedMethodInfo, mdx_path: str) -> Optional[Dict[str, Any]]:
         """
-        Creates the complete requestBody object for an OpenAPI operation.
+        Creates the complete requestBody object for an OpenAPI operation,
+        differentiating between V1 and V2 method structures.
         """
         params_schema = self.create_parameter_schema(method_info.parameters, mdx_path, method_info)
-        
-        # We need to wrap the method's parameters inside a 'params' object,
-        # and add 'userpass' and 'method' at the top level.
-        
-        top_level_properties = {
-            'userpass': openapi_property(
-                type="string",
-                description="User password for authentication.",
-                example="RPC_UserP@SSW0RD"
-            ),
-            'method': openapi_property(
-                type="string",
-                description="Name of the method to be called.",
-                enum=[method_info.name]
-            ),
-            'params': params_schema
-        }
+        is_v2 = 'legacy' not in mdx_path
 
-        required_top_level = ['userpass', 'method']
-        # If there are any required fields in the params schema, 'params' itself is required.
-        if params_schema.get('required'):
-            required_top_level.append('params')
+        if is_v2:
+            # V2 structure: userpass, method, mmrpc, and an optional 'params' object.
+            top_level_properties = {
+                'userpass': openapi_property(
+                    type="string",
+                    description="User password for authentication.",
+                    example="RPC_UserP@SSW0RD"
+                ),
+                'method': openapi_property(
+                    type="string",
+                    description="Name of the method to be called.",
+                    enum=[method_info.name]
+                ),
+                'mmrpc': openapi_property(
+                    type="string",
+                    description="The version of the Komodo DeFi SDK RPC protocol. Must be exactly '2.0'",
+                    example="2.0"
+                )
+            }
+            required_top_level = ['userpass', 'method', 'mmrpc']
+            
+            if 'properties' in params_schema:
+                if len(params_schema['properties']) == 0:
+                    if not is_confirmed_empty_params_method(method_info.name, method_info.version):
+                        self.logger.debug(f"{method_info.name} {method_info.version} has empty params_schema.properties: {mdx_path}")
+            
+            # The 'params' object is optional and only included if the method has parameters.
+            if params_schema.get('properties'):
+                top_level_properties['params'] = params_schema
+
+        else:
+            # V1 structure: userpass, method, and all other params at the top level.
+            top_level_properties = {
+                'userpass': openapi_property(
+                    type="string",
+                    description="User password for authentication.",
+                    example="RPC_UserP@SSW0RD"
+                ),
+                'method': openapi_property(
+                    type="string",
+                    description="Name of the method to be called.",
+                    enum=[method_info.name]
+                )
+            }
+            required_top_level = ['userpass', 'method']
+            # Add parameters from the 'params' schema directly to the top level.
+            
+            if 'properties' in params_schema:
+                top_level_properties.update(params_schema['properties'])
+                if len(params_schema['properties']) == 0:
+                    if not is_confirmed_empty_params_method(method_info.name, method_info.version):
+                        self.logger.debug(f"{method_info.name} {method_info.version} has empty params_schema.properties: {mdx_path}")
+
+            # Add required fields from the params schema to the top level required list.
+            if 'required' in params_schema:
+                required_top_level.extend(params_schema['required'])
 
         final_schema = openapi_schema(top_level_properties, required_top_level)
 
@@ -166,26 +202,26 @@ class OpenApiSchemaFactory:
             # All paths in config are relative to the workspace root already.
             schema_file_path = self.config.directories.openapi_schemas / f"{schema_name}.yaml"
             start_dir = None
-            self.logger.info(f"---------------------------------------------------------")
-            self.logger.info(f"Getting relative ref path for {schema_name} from {mdx_path}")
-            self.logger.info(f"schema_file_path: {schema_file_path}")
+            # self.logger.info(f"---------------------------------------------------------")
+            # self.logger.info(f"Getting relative ref path for {schema_name} from {mdx_path}")
+            # self.logger.info(f"schema_file_path: {schema_file_path}")
             if method_info and self.path_mapper:
                 path_mapping = self.path_mapper.get_method_path_mapping(
                     method_name=method_info.name, mdx_path=mdx_path, version=method_info.version
                 )
                 method_yaml_path = Path(path_mapping.openapi_path)
-                self.logger.info(f"method_yaml_path: {method_yaml_path}")
+                # self.logger.info(f"method_yaml_path: {method_yaml_path}")
                 start_dir = method_yaml_path.parent
                 # The starting point for the relative path is the directory containing the method's OpenAPI file.
             else:
                 # For a common schema referencing another, or if no method info,
                 # the start dir is the schemas dir itself.
                 start_dir = self.config.directories.openapi_schemas
-            self.logger.info(f"start_dir: {start_dir}")
+            #self.logger.info(f"start_dir: {start_dir}")
 
             # os.path.relpath calculates the relative path from start_dir to schema_file_path.
             relative_path = os.path.relpath(str(schema_file_path), str(start_dir))
-            self.logger.info(f"relative_path: {relative_path}")
+            # self.logger.info(f"relative_path: {relative_path}")
             # Normalize path separators for URL format.
             return relative_path.replace("\\", "/")
 

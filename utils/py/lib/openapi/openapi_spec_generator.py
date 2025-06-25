@@ -7,7 +7,6 @@ converting parsed MDX information into OpenAPI specification format. It handles
 the creation of schemas, parameters, responses, and the final OpenAPI file.
 """
 
-import re
 import yaml
 import json
 from pathlib import Path
@@ -22,14 +21,13 @@ from ..constants import (
     OpenAPIMethod,
     PathDetail
 )
-from ..utils.path_utils import EnhancedPathMapper
+from ..managers.path_mapping_manager import EnhancedPathMapper
 from ..mdx.mdx_parser import MDXParser
 from ..utils.logging_utils import get_logger
 from ..constants.config import get_config
 
 # Import local modules
 from .openapi_schema_factory import OpenApiSchemaFactory
-from .openapi_schema_generator import OpenApiSchemaGenerator
 from ..utils.file_utils import safe_write_json
 from ..constants.data_structures import ScanMetadata
 from ..utils.data_utils import sort_version_method_counts
@@ -121,13 +119,14 @@ class OpenApiSpecGenerator:
             }
         }
 
-    def write_openapi_file(self, spec: Dict[str, Any], method_name: str, version: str, 
-                          output_dir: str = None, dry_run: bool = False, mdx_path: str = "") -> str:
+    def write_openapi_file(self, spec: Dict[str, Any],
+                           method_name: str, 
+                           mdx_path: str) -> str:
         """
         Writes a given OpenAPI specification to a YAML file.
         """
         # Determine base directories based on version
-        if version == 'v1':
+        if 'legacy' in mdx_path:
             mdx_base_dirs = [self.path_mapper.config.directories.mdx_v1]
             yaml_base_dir = self.path_mapper.config.directories.yaml_v1
         else: # v2 and v2-dev
@@ -149,7 +148,7 @@ class OpenApiSpecGenerator:
                 try:
                     relative_mdx_path = Path(mdx_path).relative_to(Path(root) / src_dir)
                     break
-                except ValueError:
+                except ValueError as e:
                     continue
             
             if relative_mdx_path is None:
@@ -169,10 +168,9 @@ class OpenApiSpecGenerator:
         
         
         
-        if not dry_run:
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w', encoding='utf-8') as f:
-                yaml.dump(spec, f, allow_unicode=True, sort_keys=False)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            yaml.dump(spec, f, allow_unicode=True, sort_keys=False)
         
         return str(output_path)
 
@@ -201,7 +199,6 @@ class OpenApiSpecGenerator:
             self.write_openapi_file(
                 spec,
                 method_info['name'],
-                version,
                 mdx_path=method_info['file_path']
             )
 

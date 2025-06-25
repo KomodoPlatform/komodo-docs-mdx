@@ -18,14 +18,18 @@ from .file_utils import (
     validate_file_exists
 )
 
-# Import dataclasses from constants
-from ..constants import FileType, FileInfo, UnifiedOperationResult, UnifiedBatchResult, ParameterAnalysis, MethodAnalysis, FileOperationError
+# Import dataclasses from constants submodules
+from ..constants.enums import FileType
+from ..constants.data_structures import FileInfo, ParameterAnalysis, MethodAnalysis
+from ..constants.unified_struct import UnifiedOperationResult, UnifiedBatchResult
+from ..constants.exceptions import FileOperationError
 
 # Batch processing
 from .batch_processor import BatchFileProcessor, batch_read_json_files, batch_write_json_files
 
 # Path utilities
-from .path_utils import EnhancedPathMapper, PathMapping
+from ..managers.path_mapping_manager import EnhancedPathMapper
+from ..constants.data_structures import PathMapping
 
 # String processing
 from .string_utils import (

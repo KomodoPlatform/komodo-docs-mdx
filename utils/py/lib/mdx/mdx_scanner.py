@@ -458,7 +458,6 @@ class UnifiedScanner:
             Summary statistics
         """
         summary = {
-            'total_versions': len(scan_results),
             'by_version': {},
             'totals': {
                 'mdx_files': 0,

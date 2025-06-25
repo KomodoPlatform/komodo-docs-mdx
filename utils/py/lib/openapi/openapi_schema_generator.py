@@ -20,7 +20,7 @@ from .openapi_schema_factory import OpenApiSchemaFactory
 from ..mdx.mdx_parser import MDXParser
 from ..constants.config_struct import EnhancedKomodoConfig
 from openapi_pydantic import Info, OpenAPI
-from ..utils.path_utils import EnhancedPathMapper
+from ..managers.path_mapping_manager import EnhancedPathMapper
 from ..utils.file_utils import ensure_directory_exists
 from ..utils.logging_utils import get_logger
 from ..constants import UnifiedParameterInfo
@@ -276,7 +276,7 @@ class OpenApiSchemaGenerator:
         ensure_directory_exists(self.common_schemas_path)
         filename = f"{name}.yaml"
         output_file_path = Path(self.common_schemas_path) / filename
-        self.logger.info(f"Writing schema for {name} to {output_file_path}")
+        # self.logger.info(f"Writing schema for {name} to {output_file_path}")
         with open(output_file_path, 'w', encoding='utf-8') as f_out:
             yaml.dump(schema, f_out, sort_keys=False, allow_unicode=True)
 

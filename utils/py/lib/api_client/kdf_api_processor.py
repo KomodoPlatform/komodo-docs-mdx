@@ -1,22 +1,22 @@
 import json
 import os
 import requests
-import logging
 import time
 import subprocess
-from typing import Dict, Any, Set, List
+from typing import Dict, Any, Set
 from pathlib import Path
 import sys
 
 from utils.py.lib.constants.config_struct import EnhancedKomodoConfig
 from utils.py.lib.utils.logging_utils import KomodoLogger
-from utils.py.lib.utils.path_utils import get_method_path
+from utils.py.lib.managers.path_mapping_manager import EnhancedPathMapper
 
 
 class ApiRequestProcessor:
     def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, kdf_branch: str = 'dev'):
         self.config = config
         self.logger = logger
+        self.path_mapper = EnhancedPathMapper(config=self.config)
         self._load_dotenv()
         self.kdf_branch = kdf_branch
         self.enabled_coins: Set[str] = set()
@@ -44,7 +44,6 @@ class ApiRequestProcessor:
             self.logger.warning(f".env file not found at {dotenv_path}. Using default values.")
             return
 
-        self.logger.info(f"Loading environment variables from {dotenv_path}")
         with open(dotenv_path, 'r') as f:
             for line in f.read().splitlines():
                 line = line.strip()
@@ -144,7 +143,7 @@ class ApiRequestProcessor:
 
     def _load_mdx_methods(self):
         """Loads the kdf_mdx_methods.json file to determine method versions."""
-        mdx_methods_path = self.config.directories.mdx_methods_report
+        mdx_methods_path = self.config.directories.branched_reports_dir / self.config.directories.mdx_methods_report
         if not mdx_methods_path.exists():
             self.logger.error(f"MDX methods report not found at: {mdx_methods_path}")
             self.logger.error("Please run 'kdf-tools scan-mdx' to generate it.")
@@ -283,7 +282,7 @@ class ApiRequestProcessor:
 
     def process_method_request(self, method: str, version: str):
         self.logger.info(f"Processing method: {method}, version: {version}")
-        method_path = get_method_path('json', method, version)
+        method_path = self.path_mapper.get_method_path('json', method, version)
         self.logger.info(f"Method path: {method_path}")
         if not Path(method_path).exists():
             self.logger.error(f"Method directory not found: {method_path}")

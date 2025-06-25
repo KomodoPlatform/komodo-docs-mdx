@@ -9,7 +9,8 @@ Note: All dataclasses have been moved to constants.data_structures
 """
 
 # Import all data structures from constants
-from ..constants import FileInfo, UnifiedOperationResult, UnifiedBatchResult
+from ..constants.data_structures import FileInfo
+from ..constants.unified_struct import UnifiedOperationResult, UnifiedBatchResult
 
 # Re-export for backwards compatibility
 __all__ = ['FileInfo', 'UnifiedOperationResult', 'UnifiedBatchResult'] 

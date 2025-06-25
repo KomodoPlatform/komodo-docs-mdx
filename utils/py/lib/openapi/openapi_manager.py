@@ -18,8 +18,8 @@ from ..utils import get_logger
 from .openapi_spec_generator import OpenApiSpecGenerator
 from .openapi_schema_generator import OpenApiSchemaGenerator
 from ..mdx.mdx_parser import MDXParser
-from ..utils.path_utils import EnhancedPathMapper
-from ..constants import OpenAPIMethod, PathDetail, get_config
+from ..managers.path_mapping_manager import EnhancedPathMapper
+from ..constants import get_config
 from .openapi_schema_factory import OpenApiSchemaFactory
 
 
@@ -31,14 +31,17 @@ class OpenAPIManager:
     categorized OpenAPI specs.
     """
 
-    def __init__(self, config=None, verbose: bool = True):
+    def __init__(self, config=None, verbose: bool = True, logger=None, mdx_parser=None, path_mapper=None):
         self.config = config if config else get_config()
-        self.logger = get_logger("openapi-manager")
+        self.logger = logger if logger else get_logger("openapi-manager")
         self.verbose = verbose
         
         # Initialize components with correct dependency injection
-        self.path_mapper = EnhancedPathMapper(config=self.config)
-        self.mdx_parser = MDXParser(config=self.config, path_mapper=self.path_mapper)
+        self.path_mapper = EnhancedPathMapper(self.config)
+        self.mdx_parser = MDXParser(
+            config=self.config,
+            path_mapper=self.path_mapper
+        )
         
         self.schema_factory = OpenApiSchemaFactory(
             config=self.config,
@@ -64,6 +67,11 @@ class OpenAPIManager:
         self.error_count = 0
         self.enum_count = 0
         self.structure_count = 0
+        self.mdx_source_dirs = [
+            self.config.directories.mdx_v1,
+            self.config.directories.mdx_v2,
+            self.config.directories.mdx_v2_dev
+        ]
 
     def _initialize(self):
         """
@@ -89,9 +97,8 @@ class OpenAPIManager:
         # Step 2: Post-process the generated schemas to resolve nested references.
         self.common_schema_generator.resolve_nested_references()
 
-        # Step 3: Process method files for each version.
-        self._process_and_generate_specs(is_v2=False)  # Process v1
-        self._process_and_generate_specs(is_v2=True)   # Process v2
+        # Step 3: Process method files.
+        self._process_and_generate_specs()
 
         # Step 4: Generate the main openapi.yaml file that bundles everything.
         self.generate_main_openapi_file()
@@ -99,52 +106,39 @@ class OpenAPIManager:
         self.logger.info("OpenAPI generation process finished.")
         self.logger.info(f"Total successful methods processed: {self.success_count}")
 
-    def _get_source_directories(self, is_v2: bool) -> List[Path]:
-        """
-        Defines source directories based on version
-        """
-        source_dirs = []
-        if not is_v2:
-            source_dirs.append(self.config.directories.mdx_v1)
-        else:
-            source_dirs.append(self.config.directories.mdx_v2)
-            source_dirs.append(self.config.directories.mdx_v2_dev)
-        
-        return [d for d in source_dirs if d and d.exists()]
+    def _process_and_generate_specs(self):
+        versions = ["v1", "v2"]
+        self.logger.info(f"Processing versions: {versions}")
+        for version in versions:
+            if not self.mdx_source_dirs:
+                self.logger.warning(f"No source directories found for version {version}. Skipping.")
+                return
 
-    def _process_and_generate_specs(self, is_v2: bool):
-        version = "v2" if is_v2 else "v1"
-        self.logger.info(f"Processing version: {version}")
-        
-        source_dirs = self._get_source_directories(is_v2)
-        if not source_dirs:
-            self.logger.warning(f"No source directories found for version {version}. Skipping.")
-            return
+            files_to_process = []
+            for dir_path in self.mdx_source_dirs:
+                if dir_path.exists():
+                    files_to_process.extend(sorted(dir_path.rglob("*.mdx")))
+            
+            version_methods = {}
+            for file_path in files_to_process:
+                try:
+                    parsed_info = self.mdx_parser.parse_mdx_file(file_path)
+                    if parsed_info and parsed_info.get('type') == 'method':
+                        method_name = parsed_info['method_name']
+                        parsed_info['version'] = version
+                        version_methods[method_name] = parsed_info
+                        
+                        spec = self.spec_generator.build_openapi_spec(parsed_info)
+                        self.spec_generator.write_openapi_file(
+                            spec, method_name, mdx_path=str(file_path)
+                        )
+                        self.success_count += 1
+                except Exception as e:
+                    self.logger.error(f"Failed to process {file_path}: {e}")
+                    self.error_count += 1
+            
+            self.all_methods.update(version_methods)
 
-        files_to_process = []
-        for dir_path in source_dirs:
-            if dir_path.exists():
-                files_to_process.extend(sorted(dir_path.rglob("*.mdx")))
-        
-        version_methods = {}
-        for file_path in files_to_process:
-            try:
-                parsed_info = self.mdx_parser.parse_mdx_file(file_path)
-                if parsed_info and parsed_info.get('type') == 'method':
-                    method_name = parsed_info['method_name']
-                    parsed_info['version'] = version
-                    version_methods[method_name] = parsed_info
-                    
-                    spec = self.spec_generator.build_openapi_spec(parsed_info)
-                    self.spec_generator.write_openapi_file(
-                        spec, method_name, version, mdx_path=str(file_path)
-                    )
-                    self.success_count += 1
-            except Exception as e:
-                self.logger.error(f"Failed to process {file_path}: {e}", exc_info=self.verbose)
-                self.error_count += 1
-        
-        self.all_methods.update(version_methods)
 
     def generate_main_openapi_file(self):
         """
@@ -247,7 +241,7 @@ class OpenAPIManager:
                 if doc_type in ['enum', 'structure']:
                     spec = self.spec_generator.build_component_spec(parsed_info)
                     self.spec_generator.write_openapi_file(
-                        spec, name, 'v2', mdx_path=str(mdx_file)
+                        spec, name, mdx_path=str(mdx_file)
                     )
                     self.logger.save(f"Schema created for [{name}]")
                     if doc_type == 'enum':
@@ -316,7 +310,7 @@ class OpenAPIManager:
     def _write_main_openapi_file(self, spec: Dict, version: str):
         """
         Writes the main, aggregated OpenAPI specification to a file.
-        The output path is determined by the PathMapper.
+        The output path is determined by the EnhancedPathMapper.
         """
         output_path = self.path_mapper.openapi_path / f"main_openapi_spec_{version}.yaml"
         
@@ -335,6 +329,7 @@ class OpenAPIManager:
         
         # Define directories to scan for spec files
         spec_dirs = [
+            Path(self.config.workspace_root) / self.path_mapper.config.directories.yaml_v1,
             Path(self.config.workspace_root) / self.path_mapper.config.directories.yaml_v2,
             Path(self.config.workspace_root) / self.path_mapper.config.directories.openapi_main
         ]

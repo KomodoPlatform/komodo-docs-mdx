@@ -505,10 +505,6 @@ def extract_category_from_method(method_name: str) -> Tuple[str, Optional[str]]:
     Returns:
         Tuple of (category, subcategory)
     """
-    if not method_name:
-        print(f"!!!!!!!!!!!! Error extracting category from method name: {method_name}. Setting to misc_empty_method_name !!!!!!!!!!!!")
-        return ("misc_empty_method_name", None)
-    
     # Handle task methods
     if method_name.startswith("task::"):
         parts = method_name.split("::")
@@ -518,15 +514,25 @@ def extract_category_from_method(method_name: str) -> Tuple[str, Optional[str]]:
             
             if base_task.startswith("enable_"):
                 return ("coin_activation", "task_managed")
-            elif base_task == "create_new_account":
+            elif base_task.find('account') != -1:
                 return ("wallet", "task_managed")
-            elif base_task == "withdraw":
+            elif base_task.find('wallet') != -1:
+                return ("wallet", "task_managed")
+            else:
+                return ("task_managed", base_task.replace("_", "-"))
+        elif len(parts) == 2:
+            base_task = parts[1]
+            if base_task.startswith("enable_"):
+                return ("coin_activation", "task_managed")
+            elif base_task.find('account') != -1:
+                return ("wallet", "task_managed")
+            elif base_task.find('wallet') != -1:
                 return ("wallet", "task_managed")
             else:
                 return ("task_managed", base_task.replace("_", "-"))
     
     # Handle lightning methods
-    elif method_name.startswith("lightning::"):
+    elif method_name.find("lightning") != -1:
         parts = method_name.split("::")
         if len(parts) >= 3:
             subcategory = parts[1]  # channels, nodes, payments
@@ -538,23 +544,24 @@ def extract_category_from_method(method_name: str) -> Tuple[str, Optional[str]]:
         return ("streaming", None)
     
     # Handle wallet methods
-    elif method_name.startswith("wallet::"):
+    elif method_name.find("wallet") != -1:
         parts = method_name.split("::")
         if len(parts) >= 3:
-            subcategory = parts[1]  # staking
+            subcategory = parts[1]
             return ("wallet", subcategory)
         return ("wallet", None)
     
     # Handle other common patterns
-    elif any(keyword in method_name for keyword in ["swap", "order", "trade"]):
+    elif any(keyword in method_name for keyword in ["swap", "order", "trade", "buy", "sell", "setprice"]):
         return ("trading", None)
     elif any(keyword in method_name for keyword in ["nft", "non_fungible"]):
         return ("nft", None)
     elif "1inch" in method_name:
-        return ("integrations", "1inch")
+        return ("1inch", None)
+    elif "experimental" in method_name:
+        return ("experimental", None)
     else:
-        print(f"!!!!!!!!!!!! Error extracting category from method name: {method_name}. Setting to misc_cat_name_error !!!!!!!!!!!!")
-        return ("misc_cat_name_error", None)
+        return ("misc", None)
 
 
 # =============================================================================
@@ -589,21 +596,16 @@ def extract_method_name_from_mdx_content(content: str) -> Optional[str]:
 
 def is_overview_page(content: str) -> bool:
     """
-    Check if MDX content represents an overview page.
-    
-    Overview pages have 'tag : overview' or 'tag : structures' in their heading metadata.
-    These pages are not individual API methods but documentation organization pages.
-    
-    Args:
-        content: MDX file content
-        
-    Returns:
-        True if this is an overview page, False otherwise
+    Check if the MDX content suggests it's an overview page by looking for a 'tag: overview'.
     """
-    # Look for the overview or structures tag pattern in method headings
-    # Updated pattern to account for escaped characters like \_
-    overview_pattern = r'##\s+[a-zA-Z0-9_:.\\-]+\s*\{\{[^}]*tag\s*:\s*["\'](?:overview|structures)["\'][^}]*\}\}'
-    return bool(re.search(overview_pattern, content))
+    # Pattern to find ## headings with a 'tag: overview'
+    overview_pattern = r'##\s+.*\{\{.*tag\s*:\s*["\']overview["\'].*\}\}'
+    
+    # Search for the pattern in the content
+    if re.search(overview_pattern, content, re.IGNORECASE):
+        return True
+    
+    return False
 
 
 def extract_method_name_from_yaml_filename(filename: str, version: str) -> Optional[str]:
@@ -856,4 +858,23 @@ def _levenshtein_distance(s1: str, s2: str) -> int:
             current_row.append(min(insertions, deletions, substitutions))
         previous_row = current_row
     
-    return previous_row[-1] 
+    return previous_row[-1]
+
+
+def get_file_content_with_frontmatter(file_path: str) -> str:
+    """
+    Reads the entire content of a file, including frontmatter.
+    
+    Args:
+        file_path (str): The path to the file.
+        
+    Returns:
+        str: The content of the file.
+    """
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except Exception as e:
+        # Assuming a logger is available or just print
+        print(f"Error reading file {file_path}: {e}")
+        return "" 

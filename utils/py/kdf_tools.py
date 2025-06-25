@@ -14,21 +14,18 @@ Available Commands:
 - gap-analysis: Compare Rust methods with MDX documentation
 - map_methods: Method mapping and OpenAPI management
 - json-extract: Extract JSON examples from MDX files
+- error-report: Generate a report of method requests that have error responses
+- get-kdf-responses: Get KDF responses for a given method
+- build-container: Build the KDF container
+- start-container: Start the KDF container
+- stop-container: Stop the KDF container
+- switch-kdf-branch: Switch the KDF branch
+- get-json-example-method-paths: Get the JSON example method paths
+- generate-v2-no-param-methods-report: Generate a report of V2 methods that don't have parameters
 
-Recommended Workflows:
-    kdf_tools.py openapi --version v2
-    kdf_tools.py postman --versions v2
-
-Examples:
-    kdf_tools.py openapi --version v2 # Generate OpenAPI
-    kdf_tools.py postman              # Generate Postman
-
-Global Options:
-    --dry-run: Show what would be done without making changes
 """
 
 import sys
-import argparse
 import os
 from pathlib import Path
 import subprocess
@@ -59,7 +56,7 @@ from utils.py.lib.mdx.mdx_generator import MdxGenerator
 from utils.py.lib.postman.postman_scanner import MdxJsonExampleExtractor, ExtractedExample
 from utils.py.lib.managers import MethodMappingManager
 from utils.py.lib.utils import safe_write_json, ensure_directory_exists
-from utils.py.lib.utils.path_utils import get_method_path
+from utils.py.lib.managers.path_mapping_manager import EnhancedPathMapper
 from utils.py.lib import (
     UnifiedScanner,
     get_logger, DraftsManager,
@@ -78,90 +75,26 @@ from utils.py.lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
 from utils.py.lib.api_client.kdf_api_processor import ApiRequestProcessor
 
 
-class MdxScanner:
-    def __init__(self, config, logger):
-        self.config = config
-        self.logger = logger
-        self.workspace_root = Path(self.config.workspace_root)
-        self.mdx_docs_path = self.workspace_root / 'src' / 'pages'
-
-    def scan(self, versions: List[str]):
-        # The existing scan logic can remain here
-        pass
-
-    def generate_api_methods_table(self):
-        self.logger.info("Generating API methods table for index.mdx...")
-        paths_file = self.config.directories.mdx_method_paths_report
-        template_file = self.workspace_root / 'templates' / 'methods_table.template'
-        output_file = self.workspace_root / 'src' / 'pages' / 'komodo-defi-framework' / 'api' / 'index.mdx'
-
-        if not paths_file.exists():
-            self.logger.error(f"Method paths file not found: {paths_file}")
-            self.logger.error("Please run the 'scan-mdx' command first to generate the report.")
-            return
-
-        with open(paths_file, 'r') as f:
-            paths_data = json.load(f)
-
-        methods = defaultdict(lambda: {"legacy": "", "v20": "", "v20-dev": ""})
-        
-        for method_name, file_path_str in paths_data['method_paths']['v1'].items():
-            link = self._create_link(method_name, file_path_str)
-            methods[method_name]['legacy'] = link
-
-        for method_name, file_path_str in paths_data['method_paths']['v2'].items():
-            link = self._create_link(method_name, file_path_str)
-            if '/api/v20-dev/' in file_path_str:
-                methods[method_name]['v20-dev'] = link
-            elif '/api/v20/' in file_path_str:
-                methods[method_name]['v20'] = link
-        
-        sorted_methods = sorted(methods.keys())
-
-        table_rows = []
-        for method_name in sorted_methods:
-            row = f"| {methods[method_name]['legacy']} | {methods[method_name]['v20']} | {methods[method_name]['v20-dev']} |"
-            table_rows.append(row)
-
-        with open(template_file, 'r') as f:
-            template_content = f.read()
-
-        final_content = template_content + "\n" + "\n".join(table_rows)
-
-        with open(output_file, 'w') as f:
-            f.write(final_content)
-        
-        self.logger.save(f"Successfully generated API methods table at: {output_file}")
-
-    def _create_link(self, method_name, file_path_str):
-        doc_path_obj = Path(file_path_str).relative_to(self.mdx_docs_path)
-        doc_path = "/" + doc_path_obj.parent.as_posix()
-        slug = self._slugify(method_name)
-        escaped_name = method_name.replace('_', '\\_')
-        return f"[{escaped_name}]({doc_path}/#{slug})"
-
-    @staticmethod
-    def _slugify(text):
-        text = text.split("{{")[0].strip()
-        text = re.sub(r'[:_\\s]+', '-', text)
-        text = re.sub(r'[^a-zA-Z0-9\\-]', '', text)
-        return text.lower()
-
-
 class KDFTools:
     """Unified KDF Tools CLI."""
     
     def __init__(self):
         self.verbose = True
         self.config = get_config()
+        self.workspace_root = Path(self.config.workspace_root)
+        self.mdx_docs_path = self.workspace_root / 'src' / 'pages'
         self.logger = get_logger("kdf-tools")
-        self.processor = ApiRequestProcessor(
-            config=self.config,
-            logger=self.logger
-        )
-        self.processor._load_dotenv()
-        self.openapi_spec_generator = OpenApiSpecGenerator()
-        if self.verbose:
+        
+        if '-h' in sys.argv or '--help' in sys.argv:
+            print()
+        else:
+            self.processor = ApiRequestProcessor(
+                config=self.config,
+                logger=self.logger
+            )
+            self.processor._load_dotenv()
+            self.openapi_spec_generator = OpenApiSpecGenerator()
+            self.path_mapper = EnhancedPathMapper(config=self.config)
             self.logger.folder(f"Workspace root: {self.config.workspace_root}")
             self.logger.folder(f"Data directory: {self.config.directories.data_dir}")
             self.logger.folder(f"KDF repository: {self.config.directories.kdf_repo_path}")
@@ -204,6 +137,64 @@ class KDFTools:
             for path in report_paths:
                 self.log(f"    - {path}")
         self.log("")
+        
+    def _generate_api_methods_table(self):
+        self.logger.info("Generating API methods table for index.mdx...")
+        paths_file = self.config.directories.mdx_method_paths_report
+        template_file = self.workspace_root / 'templates' / 'methods_table.template'
+        output_file = self.workspace_root / 'src' / 'pages' / 'komodo-defi-framework' / 'api' / 'index.mdx'
+
+        if not paths_file.exists():
+            self.logger.error(f"Method paths file not found: {paths_file}")
+            self.logger.error("Please run the 'scan-mdx' command first to generate the report.")
+            return
+
+        with open(paths_file, 'r') as f:
+            paths_data = json.load(f)
+
+        methods = defaultdict(lambda: {"legacy": "", "v20": "", "v20-dev": ""})
+        
+        for method_name, file_path_str in paths_data['method_paths']['v1'].items():
+            link = self._create_link_for_api_table(method_name, file_path_str)
+            methods[method_name]['legacy'] = link
+
+        for method_name, file_path_str in paths_data['method_paths']['v2'].items():
+            link = self._create_link_for_api_table(method_name, file_path_str)
+            if '/api/v20-dev/' in file_path_str:
+                methods[method_name]['v20-dev'] = link
+            elif '/api/v20/' in file_path_str:
+                methods[method_name]['v20'] = link
+        
+        sorted_methods = sorted(methods.keys())
+
+        table_rows = []
+        for method_name in sorted_methods:
+            row = f"| {methods[method_name]['legacy']} | {methods[method_name]['v20']} | {methods[method_name]['v20-dev']} |"
+            table_rows.append(row)
+
+        with open(template_file, 'r') as f:
+            template_content = f.read()
+
+        final_content = template_content + "\n" + "\n".join(table_rows)
+
+        with open(output_file, 'w') as f:
+            f.write(final_content)
+        
+        self.logger.save(f"Successfully generated API methods table at: {output_file}")
+
+    def _create_link_for_api_table(self, method_name, file_path_str):
+        doc_path_obj = Path(file_path_str).relative_to(self.mdx_docs_path)
+        doc_path = "/" + doc_path_obj.parent.as_posix()
+        slug = self._slugify_for_api_table(method_name)
+        escaped_name = method_name.replace('_', '\\_')
+        return f"[{escaped_name}]({doc_path}/#{slug})"
+
+    @staticmethod
+    def _slugify_for_api_table(text):
+        text = text.split("{{")[0].strip()
+        text = re.sub(r'[:_\\s]+', '-', text)
+        text = re.sub(r'[^a-zA-Z0-9\\-]', '', text)
+        return text.lower()
         
     def report_error_responses(self):
         """Generates a report of method requests that have error responses."""
@@ -309,7 +300,9 @@ class KDFTools:
         try:
             manager = OpenAPIManager(
                 config=self.config,
-                verbose=self.verbose
+                verbose=self.verbose,
+                logger=self.logger,
+                path_mapper=self.path_mapper
             )
             manager.openapi_command()
             
@@ -357,7 +350,7 @@ class KDFTools:
             version_method_counts = sort_version_method_counts(version_method_counts)
 
             # Generate tracking files
-            processed_versions = [args.version] if args.version != "all" else ["v1", "v2"]
+            processed_versions = ["v1", "v2"]
             openapi_report_path = self._generate_openapi_tracking_files(manager, processed_versions, version_method_counts)
             if openapi_report_path:
                 report_paths.append(openapi_report_path)
@@ -373,9 +366,7 @@ class KDFTools:
     def scan_rust(self, args):
         """Handle scan-rust subcommand - KDF repository scanning with async processing."""
         command_title = "KDF Repository Scan"
-        versions = args.versions
-        if 'all' in versions:
-            versions = ['v1', 'v2']
+        versions = ['v1', 'v2']
             
         config = [
             f"Branch: {args.kdf_branch}",
@@ -433,29 +424,27 @@ class KDFTools:
     
     def scan_mdx_command(self, args):
         """Scans MDX files for Komodo DeFi Framework methods."""
+        branch = self.config.mdx_branch
         command_title = "Scan MDX Documentation"
         config_lines = [
-            f"Versions to scan: {args.versions}",
-            f"Repo branch: {args.branch}"
         ]
         self._print_header(command_title, config_lines)
         
-        versions = args.versions.split(',') if args.versions and args.versions != 'all' else ['v1', 'v2']
+        versions = ['v1', 'v2']
         
         doc_scanner = UnifiedScanner(
             config=self.config,
             verbose=self.verbose 
         )
         doc_results = run_async(doc_scanner.scan_all_files_async(versions))
-        self._generate_mdx_method_paths_data(doc_results, versions, args.branch)
-        self._generate_mdx_methods_from_paths_file(self.config.directories.mdx_method_paths_report, args.branch, versions)
+        self._generate_mdx_method_paths_data(doc_results, versions)
+        self._generate_mdx_methods_from_paths_file(self.config.directories.mdx_method_paths_report, versions)
         
-        scanner = MdxScanner(self.config, self.logger)
-        scanner.generate_api_methods_table()
+        self._generate_api_methods_table()
         self._print_footer(command_title, success=True, output_paths=[self.config.directories.mdx_method_paths_report, self.config.directories.mdx_methods_report])
     
 
-    def _generate_mdx_method_paths_data(self, doc_results, versions, current_branch):
+    def _generate_mdx_method_paths_data(self, doc_results, versions):
         """
         Generate the method paths data structure (primary data source).
         This version uses the ScanMetadata dataclass for standardized metadata.
@@ -506,13 +495,13 @@ class KDFTools:
         self.logger.save(f"Saved documentation paths to: {self.config.directories.mdx_method_paths_report}")
         return method_paths_data
 
-    def _generate_mdx_methods_from_paths_file(self, paths_file_path, current_branch, versions):
+    def _generate_mdx_methods_from_paths_file(self, paths_file_path, versions):
         """Generates a JSON report of methods from a paths file."""
         # Read the paths file that was just generated
         with open(paths_file_path, 'r', encoding='utf-8') as f:
             paths_data = json.load(f)
         
-        # Extract method names ONLY from the method_paths keys (methods with actual MDX files)
+        # Extract method names ONLY from the method_paths keys (methods with actual MDX documentation files)
         methods_by_version = {}
         method_paths = paths_data.get("method_paths", {})
         total_methods = 0
@@ -551,7 +540,7 @@ class KDFTools:
         # Add version-specific data
         for version in versions:
             methods_data["repository_data"][version] = {
-                "branch": current_branch,
+                "branch": self.config.mdx_branch,
                 "version": version,
                 "source_type": "MDX_DOCUMENTATION",
                 "methods": methods_by_version.get(version, []),
@@ -570,58 +559,16 @@ class KDFTools:
     def methods_map_command(self, args):
         """Handle methods-map subcommand."""
         command_title = "Method Mapping and OpenAPI Management"
-        config_lines = [
-            f"Command: {args.subcommand}",
-            f"Versions: {args.versions}"
-        ]
+        config_lines = []
         self._print_header(command_title, config_lines)
         success = False
         try:
-            # Load latest Rust scan data
-            rust_data = {}
-            rust_scan_files = glob.glob(str(self.config.directories.rust_methods_report))
-            if rust_scan_files:
-                with open(rust_scan_files[0], 'r') as f:
-                    rust_methods_data = json.load(f).get("repository_data", {})
-                    for v in args.versions:
-                        if v in rust_methods_data:
-                            rust_data[v] = rust_methods_data[v].get("methods", [])
-            else:
-                self.logger.warning(f"No '{os.path.basename(str(self.config.directories.rust_methods_report))}' file found.")
-                self.logger.warning(f"Run 'python py/kdf_tools.py scan-rust' first")
-                return
-
-            # Load latest MDX methods data
-            mdx_methods = {}
-            mdx_scan_files = glob.glob(str(self.config.directories.mdx_methods_report))
-            if mdx_scan_files:
-                with open(mdx_scan_files[0], 'r') as f:
-                    mdx_methods_data = json.load(f).get("repository_data", {})
-                    for v in args.versions:
-                        if v in mdx_methods_data:
-                            mdx_methods[v] = mdx_methods_data[v].get("methods", [])
-            else:
-                self.logger.warning(f"No '{os.path.basename(str(self.config.directories.mdx_methods_report))}' file found.")
-                self.logger.warning(f"Run 'python py/kdf_tools.py scan-mdx' first")
-                return
-
             # Initialize the MethodMappingManager
             manager = MethodMappingManager(
                 config=self.config,
-                rust_methods=rust_data,
-                mdx_methods=mdx_methods,
                 verbose=self.verbose
             )
-
-            if args.subcommand == 'generate':
-                manager.generate_mapping_file()
-            elif args.subcommand == 'update':
-                manager.update_mapping_file()
-            elif args.subcommand == 'validate':
-                manager.validate_mapping_file()
-            elif args.subcommand == 'create-drafts':
-                manager.create_draft_files()
-            
+            run_async(manager.save_unified_mapping_async())
             success = True
         except Exception as e:
             self.logger.error(f"An error occurred: {e}")
@@ -632,9 +579,7 @@ class KDFTools:
     def postman_command(self, args):
         """Handle postman subcommand - Postman collection generation."""
         command_title = "Postman Collection Generation"
-        versions = args.versions
-        if "all" in versions:
-            versions = ["v1", "v2"]
+        versions = ["v1", "v2"]
         
         config_lines = [
             f"Versions: {versions}",
@@ -687,7 +632,7 @@ class KDFTools:
             if self.verbose:
                 self.logger.info("Using async processing for method mapping...")
             
-            unified_mapping = run_async(mapper.create_unified_mapping_async())
+            unified_mapping = mapper.create_unified_mapping(scan_yaml=False, scan_json=False)
 
             versions = ['v1', 'v2']
             
@@ -758,40 +703,39 @@ class KDFTools:
                             'examples_count': len(cleaned_examples),
                             'examples': []
                         }
-                    if not args.dry_run:
                     # Save each example
-                        for i, example in enumerate(cleaned_examples, 1):
+                    for i, example in enumerate(cleaned_examples, 1):
 
-                            # Clean method name for folder creation
-                            # The canonical method name (e.g., 'task::enable_utxo::init') is converted to
-                            # a directory-safe format by replacing '::' with hyphens.
-                            # Underscores within method parts are preserved (e.g., 'task-enable_utxo-init').
-                            folder_name = example.method_name.replace("::", "-")
-                            
-                            # Define output directory based on version
-                            output_dir = self.config.directories.postman_json_v1 if version == 'v1' else self.config.directories.postman_json_v2
-                            
-                            # Create full path for the example file
-                            example_dir = output_dir / folder_name
-                            
-                            ensure_directory_exists(example_dir)
+                        # Clean method name for folder creation
+                        # The canonical method name (e.g., 'task::enable_utxo::init') is converted to
+                        # a directory-safe format by replacing '::' with hyphens.
+                        # Underscores within method parts are preserved (e.g., 'task-enable_utxo-init').
+                        folder_name = example.method_name.replace("::", "-")
+                        
+                        # Define output directory based on version
+                        output_dir = self.config.directories.postman_json_v1 if version == 'v1' else self.config.directories.postman_json_v2
+                        
+                        # Create full path for the example file
+                        example_dir = output_dir / folder_name
+                        
+                        ensure_directory_exists(example_dir)
 
-                            # Generate filename
-                            filename = f"{example.example_type}_{i}.json"
-                            output_path = example_dir / filename
-                            all_extracted_methods[method_name].update({
-                                'json_examples_path': str(example_dir),
+                        # Generate filename
+                        filename = f"{example.example_type}_{i}.json"
+                        output_path = example_dir / filename
+                        all_extracted_methods[method_name].update({
+                            'json_examples_path': str(example_dir),
+                        })
+                        if self._save_json_example(output_path, example):
+                            version_count += 1
+                            # Track example info
+                            all_extracted_methods[method_name]['examples'].append({
+                                'example_num': i,
+                                'description': example.description,
+                                'example_type': example.example_type,
+                                'line_number': example.line_number
                             })
-                            if self._save_json_example(output_path, example):
-                                version_count += 1
-                                # Track example info
-                                all_extracted_methods[method_name]['examples'].append({
-                                    'example_num': i,
-                                    'description': example.description,
-                                    'example_type': example.example_type,
-                                    'line_number': example.line_number
-                                })
-                                # self.logger.save(f"{method_name}: Saved example {i} to {self.config.directories.get_relative_path(str(output_path))}")
+                            # self.logger.save(f"{method_name}: Saved example {i} to {self.config.directories.get_relative_path(str(output_path))}")
                     
                     version_examples += len(cleaned_examples)
                     version_methods_with_examples += 1
@@ -810,8 +754,7 @@ class KDFTools:
                     extraction_stats[version]['methods_with_examples'] = version_methods_with_examples
             
             # Generate tracking files
-            if not args.dry_run:
-                self._generate_json_tracking_files(all_extracted_methods, extraction_stats)
+            self._generate_json_tracking_files(all_extracted_methods, extraction_stats)
             
             self.log(f"🎯 Total: {extraction_stats['total_extracted']} JSON examples extracted from {extraction_stats['methods_with_examples']} methods", "success")
             return 0
@@ -843,19 +786,6 @@ class KDFTools:
                 generated_docs_dir=args.generated_dir,
                 live_docs_dir=args.live_dir
             )
-            
-            if args.dry_run:
-                # Show what would be analyzed
-                if args.generated and args.live:
-                    self.log(f"Would analyze:\n  Generated: {args.generated}\n  Live: {args.live}")
-                else:
-                    pairs = analyzer.find_corresponding_files()
-                    self.log(f"Would analyze {len(pairs)} document pairs:")
-                    for gen, live in pairs[:10]:  # Show first 10
-                        self.logger.info(f"  {gen.name} <-> {live.relative_to(analyzer.live_docs_dir)}")
-                    if len(pairs) > 10:
-                        self.logger.info(f"  ... and {len(pairs) - 10} more")
-                return 0
             
             # Run analysis
             self.log("🔍 Analyzing documentation quality...")
@@ -965,63 +895,29 @@ class KDFTools:
             # Determine which methods to generate
             selected_methods = []
             
-            if args.method:
-                # Generate specific method
-                version = args.version or "v2"
-                selected_methods = [(args.method, version)]
-                self.log(f"🎯 Generating documentation for specific method: {args.method} ({version})")
+            # Load all missing methods from unified mapping
+            missing_methods = asyncio.run(generator.load_missing_methods())
             
-            elif args.methods_file:
-                # Load methods from file
-                import json
-                with open(args.methods_file, 'r') as f:
-                    methods_data = json.load(f)
-                
-                if isinstance(methods_data, dict):
-                    # Format: {"v2": ["method1", "method2"], "v1": ["method3"]}
-                    for version, methods in methods_data.items():
-                        for method in methods:
-                            selected_methods.append((method, version))
-                elif isinstance(methods_data, list):
-                    # Format: [{"method": "method1", "version": "v2"}, ...]
-                    for item in methods_data:
-                        if isinstance(item, dict):
-                            method = item.get("method", "")
-                            version = item.get("version", "v2")
-                            if method:
-                                selected_methods.append((method, version))
-                        elif isinstance(item, str):
-                            # Just method names, assume v2
-                            selected_methods.append((item, "v2"))
-                
-                self.log(f"📋 Loaded {len(selected_methods)} methods from file")
+            if not missing_methods:
+                self.log("⚠️  No missing methods found in unified mapping", "warning")
+                return 1
             
-            else:
-                # Load all missing methods from unified mapping
-                import asyncio
-                missing_methods = asyncio.run(generator.load_missing_methods())
-                
-                if not missing_methods:
-                    self.log("⚠️  No missing methods found in unified mapping", "warning")
-                    return 1
-                
-                # Convert to list of tuples
-                for version, methods in missing_methods.items():
-                    for method in methods:
-                        selected_methods.append((method, version))
-                
-                # Show options and let user select (if interactive)
-                if args.interactive and selected_methods:
-                    selected_methods = self._select_methods_interactively(selected_methods)
-                
-                self.log(f"📋 Found {len(selected_methods)} missing methods to generate")
+            # Convert to list of tuples
+            for version, methods in missing_methods.items():
+                for method in methods:
+                    selected_methods.append((method, version))
             
+            # Show options and let user select (if interactive)
+            if args.interactive and selected_methods:
+                selected_methods = self._select_methods_interactively(selected_methods)
+            
+            self.log(f"📋 Found {len(selected_methods)} missing methods to generate")
+        
             if not selected_methods:
                 self.log("❌ No methods selected for generation", "error")
                 return 1
             
             # Generate the documentation
-            import asyncio
             generated_files = asyncio.run(
                 generator.generate_documentation_for_methods(selected_methods)
             )
@@ -1132,7 +1028,6 @@ class KDFTools:
                 "generated_at": datetime.now().isoformat(),
                 "scanner_version": "KDF-MDX-JSON-Example-Extractor v1.0.0",
                 "scanner_type": "MDX_JSON_EXAMPLE_EXTRACTOR",
-                "total_versions": 2,
                 "total_methods": {
                     "all": len(v1_methods) + len(v2_methods),
                     "v1": len(v1_methods),
@@ -1177,10 +1072,6 @@ class KDFTools:
             help='Generate Postman collections from OpenAPI specs.',
             description='Converts OpenAPI specifications into Postman collections for easier API testing and integration.'
         )
-        parser.add_argument(
-            '--versions', nargs='+', default=['all'],
-            help="List of versions to process (e.g., v1 v2 all). Default: ['all']"
-        )
         parser.set_defaults(func=self.postman_command)
 
     def setup_openapi_parser(self, subparsers):
@@ -1190,25 +1081,11 @@ class KDFTools:
             help='Generate OpenAPI specs from MDX documentation.',
             description='Processes MDX documentation files to create OpenAPI specifications'
         )
-        parser.add_argument(
-            '--version', type=str, default='v2',
-            help='Specify the API version to process.'
-        )
         parser.set_defaults(func=self.openapi_command)
 
     def setup_scan_mdx_parser(self, subparsers):
         """Sets up argument parser for the mdx_scan command."""
         parser = subparsers.add_parser('scan-mdx', help='Scan MDX files for method info.')
-        parser.add_argument(
-            '--versions', 
-            default='all',
-            help='Comma-separated KDF versions to scan (e.g., v1,v2). Default: all'
-        )
-        parser.add_argument(
-            '--branch', 
-            default='dev',
-            help='The git branch of the repo being scanned. Default: dev'
-        )
         parser.set_defaults(func=self.scan_mdx_command)
 
     
@@ -1222,10 +1099,6 @@ class KDFTools:
         parser.add_argument(
             '--kdf-branch', type=str, default='dev',
             help='Specify the branch of the KDF repository to scan and check out.'
-        )
-        parser.add_argument(
-            '--versions', nargs='+', default=['v2', 'v1'],
-            help="List of versions to scan (e.g., v1 v2). Default: ['v2', 'v1']"
         )
         parser.set_defaults(func=self.scan_rust)
 
@@ -1364,12 +1237,6 @@ class KDFTools:
             help="Perform gap analysis between Rust and MDX methods.",
             description="Compares methods found in the Rust repository against those documented in MDX files."
         )
-        parser.add_argument(
-            "--versions",
-            nargs="+",
-            default=["v1", "v2"],
-            help="List of API versions to process (e.g., v1 v2)."
-        )
         parser.set_defaults(func=self.gap_analysis_command)
 
     def gap_analysis_command(self, args):
@@ -1378,14 +1245,14 @@ class KDFTools:
         config = [
         ]
         self._print_header(command_title, config)
-        
+        versions = ['v1', 'v2']
         # Load Rust methods
         rust_methods = {}
         rust_scan_files = glob.glob(str(self.config.directories.rust_methods_report))
         if rust_scan_files:
             with open(rust_scan_files[0], 'r') as f:
                 rust_data = json.load(f)
-            for version in args.versions:
+            for version in versions:
                 if version in rust_data['repository_data']:
                     rust_methods[version] = set(rust_data['repository_data'][version]['methods'])
         else:
@@ -1399,7 +1266,7 @@ class KDFTools:
         if mdx_scan_files:
             with open(mdx_scan_files[0], 'r') as f:
                 mdx_data = json.load(f)
-            for version in args.versions:
+            for version in versions:
                 if version in mdx_data['repository_data']:
                     mdx_methods[version] = set(mdx_data['repository_data'][version]['methods'])
         else:
@@ -1409,7 +1276,7 @@ class KDFTools:
 
         # Perform gap analysis
         gap_report = {}
-        for v in args.versions:
+        for v in versions:
             if v not in rust_methods or v not in mdx_methods:
                 continue
             self.log(f"🔍 Processing {v.upper()}...")
@@ -1517,7 +1384,7 @@ class KDFTools:
             
             if args.method:
                 # Process a single method if specified
-                versions_to_process = [args.version] if args.version != 'all' else ['v1', 'v2']
+                versions_to_process = ['v1', 'v2']
                 for version in versions_to_process:
                     self.logger.info(f"Processing single method: {args.method}, version: {version}")
                     self.processor.process_method_request(
@@ -1557,8 +1424,8 @@ class KDFTools:
                             self.logger.info(f"Skipping stop method: {method}")
                             continue
 
-                        mdx_path = get_method_path("mdx", method, version)
-                        json_path = get_method_path("json", method, version)
+                        mdx_path = self.path_mapper.get_method_path("mdx", method, version)
+                        json_path = self.path_mapper.get_method_path("json", method, version)
                         if mdx_path is None:
                             self.logger.error(f"Method path not found for method: {method}, version: {version}")
                             continue
@@ -1666,7 +1533,6 @@ class KDFTools:
         """Sets up the parser for the get-kdf-responses command."""
         parser = subparsers.add_parser('get-kdf-responses', help='Get API responses from a running KDF container.')
         parser.add_argument('--method', type=str, required=False, default=None, help='The API method to get responses for.')
-        parser.add_argument('--version', type=str, required=False, default='all', help='The API version (e.g., v1, v2).')
         parser.add_argument('--kdf-branch', type=str, default='dev', help='The KDF branch to use for the container.')
         parser.add_argument('--commit', type=str, help='The commit hash to use. Defaults to the latest commit on the branch.')
         parser.add_argument('--clean', action='store_true', help='Remove all existing request/response/error json files in postman/json/kdf before running.')
@@ -1728,7 +1594,7 @@ class KDFTools:
         
         return 0 if success else 1
 
-    def stop_container_command(self):
+    def stop_container_command(self, args):
         """Stops the KDF container."""
         command_title = "Stop KDF Container"
         self._print_header(command_title)
@@ -1901,11 +1767,6 @@ class KDFTools:
 
         args = parser.parse_args()
         
-        
-        # Add dry_run to args if not present (for commands that dont have it)
-        if not hasattr(args, 'dry_run'):
-            args.dry_run = False
-
         # Execute command
         if hasattr(args, 'func'):
             return args.func(args)
