@@ -572,6 +572,29 @@ You can use either the `derivation_path` on its own, or the `account_id`, `chain
 | address\_id      | integer |     ✗    |   `-`   | `ADDRESS_ID` child in the `m/44'/COIN'/ACCOUNT_ID'/CHAIN/ADDRESS_ID` BIP44 derivation path.                                                                                                                                                                                   |
 | chain            | string  |     ✗    |   `-`   | `Internal`, or `External`. External is used for addresses that are meant to be visible outside of the wallet (e.g. for receiving payments). Internal is used for addresses which are not meant to be visible outside of the wallet and is used for return transaction change. |
 
+### AccountId
+
+Identifier used across GUI-storage methods to reference a stored account.
+
+| Parameter      | Type    | Required | Description                                                                |
+| -------------- | ------- | :------: | -------------------------------------------------------------------------- |
+| type           | string  |     ✓    | Defines account kind. Possible values: `iguana`, `hd`, `hw`.               |
+| account\_idx   | integer |     ✗    | Only when `type` = `hd`. Index of the HD account (starting at 0).          |
+| device\_pubkey | string  |     ✗    | Only when `type` = `hw`. Hex-encoded pubkey of the hardware wallet device. |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  ```json
+  // Iguana account
+  { "type": "iguana" }
+
+  // HD account #2
+  { "type": "hd", "account_idx": 2 }
+
+  // Hardware-wallet account
+  { "type": "hw", "device_pubkey": "0xdeadbeefcafebabe..." }
+  ```
+</CollapsibleSection>
+
 ## Error types
 
 #### NotSufficientBalance
@@ -699,6 +722,47 @@ This is a union type that can have one of two structures:
     "accrued_rewards": {
       "NotAccruedReason": "UtxoAmountLessThanTen"
     }
+  }
+  ```
+</CollapsibleSection>
+
+### EnabledAccountId
+
+Represents the identifier of an account that can be set as the **enabled** (active) GUI-storage account.
+
+| Parameter    | Type    | Required | Description                                                                                  |
+| ------------ | ------- | :------: | -------------------------------------------------------------------------------------------- |
+| type         | string  |     ✓    | Account kind. Accepted values are `iguana` and `hd`.                                         |
+| account\_idx | integer |     ✗    | Required only when `type` = `hd`. The index of the HD account to enable (starting from `0`). |
+
+<CollapsibleSection expandedText="Hide Examples" collapsedText="Show Examples">
+  ```json
+  // Iguana account
+  { "type": "iguana" }
+
+  // HD account (account #0)
+  { "type": "hd", "account_idx": 0 }
+  ```
+</CollapsibleSection>
+
+### NewAccount
+
+Used when creating a brand-new account via the `gui_storage::enable_account` method (when `policy` = `new`) or the `gui_storage::add_account` method.
+
+| Parameter    | Type             | Required | Description                                                              |
+| ------------ | ---------------- | :------: | ------------------------------------------------------------------------ |
+| account\_id  | EnabledAccountId |     ✓    | Identifier of the new account.                                           |
+| name         | string           |     ✓    | User-friendly name for the account (maximum 255 characters).             |
+| description  | string           |     ✗    | Optional longer description (maximum 600 characters).                    |
+| balance\_usd | string (numeric) |     ✗    | Optional initial USD balance shown in GUIs. If omitted, defaults to `0`. |
+
+<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
+  ```json
+  {
+    "account_id": { "type": "hd", "account_idx": 0 },
+    "name": "HD-0",
+    "description": "Hardware HD account",
+    "balance_usd": "0"
   }
   ```
 </CollapsibleSection>
