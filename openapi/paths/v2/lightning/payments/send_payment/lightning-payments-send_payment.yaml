@@ -21,12 +21,30 @@
                 description: Name of the method to be called.
                 enum:
                 - lightning::payments::send_payment
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin to send payment from.
+                  invoice:
+                    type: string
+                    description: The Lightning invoice to pay.
+                  amount:
+                    type: string
+                    description: Amount to pay (if not specified in invoice).
+                required:
+                - coin
+                - invoice
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

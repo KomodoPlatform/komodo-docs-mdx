@@ -22,12 +22,29 @@
                 description: Name of the method to be called.
                 enum:
                 - withdraw
-              params:
-                type: object
-                properties: {}
+              coin:
+                type: string
+                description: The name of the coin the user desires to withdraw
+              to:
+                type: string
+                description: Coins are withdrawn to this address
+              amount:
+                type: string
+                description: The amount the user desires to withdraw, ignored when
+                  `max=true`
+              max:
+                type: boolean
+                description: Withdraw the maximum available amount
+                default: false
+              fee:
+                description: Optional. A standard [FeeInfo](/komodo-defi-framework/api/common_structures/wallet/#fee-info)
+                  object.
+                $ref: ../../components/schemas/FeeInfo.yaml
             required:
             - userpass
             - method
+            - coin
+            - to
     responses:
       description: Successful response
       content:

@@ -20,12 +20,76 @@
                 description: Name of the method to be called.
                 enum:
                 - 1inch_v6_0_classic_swap_quote
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  base:
+                    type: string
+                    description: Base coin name
+                  rel:
+                    type: string
+                    description: Rel coin name (must be from the same EVM chain as
+                      the base coin)
+                  amount:
+                    type: string
+                    description: Swap amount (in coins units)
+                  fee:
+                    type: number
+                    description: 'Partner fee, percentage of src token amount will
+                      be sent to referrer address, min: 0; max: 3. Should be the same
+                      for quote and swap.'
+                  protocols:
+                    type: string
+                    description: 'Specify liquidity sources e.g.: \&protocols=WETH,CURVE,BALANCER,...,ZRX
+                      (by default - all used)'
+                  gas_price:
+                    type: string
+                    description: Network price per gas, in Gwei. 1inch takes in account
+                      gas expenses to determine exchange route. Should be the same
+                      for a quote and swap
+                  complexity_level:
+                    type: string
+                    description: 'Maximum number of token-connectors to be used in
+                      a transaction, min: 0; max: 3'
+                  parts:
+                    type: string
+                    description: 'Limit maximum number of parts each main route parts
+                      can be split into. Should be the same for a quote and swap.
+                      max: 100'
+                  main_route_parts:
+                    type: string
+                    description: 'Limit maximum number of main route parts. Should
+                      be the same for a quote and swap. max: 50'
+                  gas_limit:
+                    type: string
+                    description: 'Maximum amount of gas for a swap. Should be the
+                      same for a quote and swap. max: 11500000'
+                  include_tokens_info:
+                    type: boolean
+                    description: Return fromToken and toToken info in response
+                  include_protocols:
+                    type: boolean
+                    description: Return used swap protocols in response
+                  include_gas:
+                    type: boolean
+                    description: Include estimated gas in return value
+                  connector_tokens:
+                    type: boolean
+                    description: Token-connectors can be specified via this parameter.
+                      If not set, default token-connectors will be used
+                required:
+                - base
+                - rel
+                - amount
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

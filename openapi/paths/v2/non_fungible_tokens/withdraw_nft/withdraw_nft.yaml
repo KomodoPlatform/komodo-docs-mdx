@@ -22,12 +22,30 @@
                 description: Name of the method to be called.
                 enum:
                 - withdraw_nft
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  type:
+                    type: string
+                    description: The contract type of the NFT to withdraw. Either
+                      `withdraw_erc721` or `withdraw_erc1155`.
+                    default: '-'
+                  withdraw_data:
+                    description: A standard [WithdrawNftData](/komodo-defi-framework/api/common_structures/nfts/#withdraw-nft-data)
+                      object.
+                    $ref: ../../components/schemas/WithdrawNftData.yaml
+                required:
+                - type
+                - withdraw_data
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

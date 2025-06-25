@@ -20,12 +20,29 @@
                 description: Name of the method to be called.
                 enum:
                 - lightning::nodes::connect_to_node
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  coin:
+                    type: string
+                    description: The coin ticker you would like to connect to a node
+                      on.
+                  node_address:
+                    type: string
+                    description: Lightning node addresses always have a format of
+                      `node_pubkey`@`ip_address`:`port`.
+                required:
+                - coin
+                - node_address
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

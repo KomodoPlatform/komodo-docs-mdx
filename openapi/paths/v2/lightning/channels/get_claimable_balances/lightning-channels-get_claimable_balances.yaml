@@ -22,12 +22,28 @@
                 description: Name of the method to be called.
                 enum:
                 - lightning::channels::get_claimable_balances
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin you would like to view claimable
+                      balances for.
+                  include_open_channels_balances:
+                    type: boolean
+                    description: If `true`, includes balances from open channels.
+                    default: false
+                required:
+                - coin
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

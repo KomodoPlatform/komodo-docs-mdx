@@ -22,12 +22,32 @@
                 description: Name of the method to be called.
                 enum:
                 - lightning::payments::list_payments_by_filter
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin for the payments.
+                  filter:
+                    type: object
+                    description: A standard LightningPaymentsFilter object.
+                  paging_options:
+                    type: object
+                    description: A standard Pagination object.
+                  limit:
+                    type: integer
+                    description: Maximum number of results to return.
+                required:
+                - coin
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

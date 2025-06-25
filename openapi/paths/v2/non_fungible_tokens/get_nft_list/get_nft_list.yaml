@@ -22,12 +22,47 @@
                 description: Name of the method to be called.
                 enum:
                 - get_nft_list
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  chains:
+                    description: List of networks to scan for NFTs. See [NftNetworkEnum](/komodo-defi-framework/api/common_structures/enums/#nft-network-enum)
+                      for allowed values.
+                    $ref: ../../components/schemas/NftNetworkEnum.yaml
+                  filters:
+                    description: A standard [NftFilter](/komodo-defi-framework/api/common_structures/nfts/#nft-filter)
+                      object.
+                    $ref: ../../components/schemas/NftFilter.yaml
+                  limit:
+                    type: integer
+                    description: The number of NFTs displayed per page in response.
+                    default: 10
+                  max:
+                    type: boolean
+                    description: If `true`, response will return all NFTs without
+                      pagination, and will ignore the `limit` and `page_number` values.
+                    default: false
+                  page_number:
+                    type: integer
+                    description: The page offset for items in response.
+                    default: 1
+                  protect_from_spam:
+                    type: boolean
+                    description: If `true`, any potential spam link found in collection
+                      name, token name, or symbol will be replaced with `URL redacted
+                      for user protection`.
+                    default: false
+                required:
+                - chains
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

@@ -20,12 +20,27 @@
                 description: Name of the method to be called.
                 enum:
                 - enable_erc20
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  ticker:
+                    type: string
+                    description: Ticker of the ERC20-like token you want to enable.
+                  activation_params:
+                    description: A standard [TokenActivationParams](/komodo-defi-framework/api/common_structures/nfts/#token-activation-params)
+                      object.
+                    $ref: ../../components/schemas/TokenActivationParams.yaml
+                required:
+                - ticker
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

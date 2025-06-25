@@ -22,6 +22,11 @@
                 description: Name of the method to be called.
                 enum:
                 - withdraw
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
                 properties:
@@ -68,7 +73,7 @@
             required:
             - userpass
             - method
-            - params
+            - mmrpc
     responses:
       description: Successful response
       content:
@@ -125,6 +130,11 @@
                 description: The hash of the generated transaction.
               tx_hex:
                 type: string
-                description: transaction bytes in hexadecimal format; use this value
-                  as input for [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/)
+                description: Transaction bytes in hexadecimal format; use this value
+                  as input for [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/).
+                  Not used for Sia protocol coins.
+              tx_json:
+                type: object
+                description: For Sia protocol coins only. The transaction details
+                  in JSON format. Use this value as input for [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/).
           example: {}

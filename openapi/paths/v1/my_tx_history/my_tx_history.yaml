@@ -20,12 +20,33 @@
                 description: Name of the method to be called.
                 enum:
                 - my_tx_history
-              params:
-                type: object
-                properties: {}
+              coin:
+                type: string
+                description: The name of the coin for the history request
+              from_id:
+                type: string
+                description: Komodo DeFi Framework API will skip records until it
+                  reaches this ID, skipping the `from_id` as well; track the `internal_id`
+                  of the last displayed transaction to find the value of this field
+                  for the next page
+              limit:
+                type: number
+                description: Limits the number of returned transactions; ignored if
+                  `max = true`
+                default: 10.0
+              max:
+                type: boolean
+                description: Whether to return all available records; defaults to
+                  `false`
+                default: false
+              page_number:
+                type: number
+                description: Komodo DeFi Framework API will return limit swaps from
+                  the selected page; this param will be ignored if from\_id is set.
             required:
             - userpass
             - method
+            - coin
     responses:
       description: Successful response
       content:
@@ -56,7 +77,7 @@
                 description: A standard [SyncStatus](/komodo-defi-framework/api/common_structures/#sync-status)
                   object. Provides the information that helps to track the progress
                   of transaction history preloading at background
-                $ref: ../components/schemas/SyncStatus.yaml
+                $ref: ../../components/schemas/SyncStatus.yaml
               total:
                 type: number
                 description: The total number of transactions available

@@ -22,12 +22,28 @@
                 description: Name of the method to be called.
                 enum:
                 - task::enable_lightning::status
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  task_id:
+                    type: integer
+                    description: The task id returned from `task::enable_lightning::init`.
+                  forget_if_finished:
+                    type: boolean
+                    description: If `false`, the status of the `task_id` will still
+                      be available after the task has completed.
+                    default: true
+                required:
+                - task_id
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

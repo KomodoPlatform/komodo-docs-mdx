@@ -21,12 +21,33 @@
                 description: Name of the method to be called.
                 enum:
                 - lightning::channels::update_channel
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin you would like to update channel
+                      configuration options for.
+                  uuid:
+                    type: string
+                    description: Unique channel identifier.
+                  channel_options:
+                    description: A standard [LightningChannelOptions](/komodo-defi-framework/api/common_structures/lightning/#lightning-channel-options)
+                      object.
+                    $ref: ../../components/schemas/LightningChannelOptions.yaml
+                required:
+                - coin
+                - uuid
+                - channel_options
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

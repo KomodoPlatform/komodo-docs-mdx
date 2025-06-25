@@ -22,12 +22,22 @@
                 description: Name of the method to be called.
                 enum:
                 - unban_pubkeys
-              params:
-                type: object
-                properties: {}
+              pubkey:
+                type: string
+                description: The pubkey to ban
+              unban_by.data:
+                type: string
+                description: A list of pubkeys to unban. Only required when `type`
+                  is `Few`.
+              unban_by.type:
+                description: A standard [UnbanTypeEnum](/komodo-defi-framework/api/common_structures/enums/#unban-type-enum)
+                  enum. Whether to unban all pubkeys or specific ones from a list
+                $ref: ../../components/schemas/UnbanTypeEnum.yaml
             required:
             - userpass
             - method
+            - pubkey
+            - unban_by.type
     responses:
       description: Successful response
       content:

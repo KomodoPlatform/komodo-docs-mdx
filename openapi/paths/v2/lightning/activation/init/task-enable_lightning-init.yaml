@@ -21,12 +21,28 @@
                 description: Name of the method to be called.
                 enum:
                 - task::enable_lightning::init
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  activation_params:
+                    description: A standard [LightningActivationParams](/komodo-defi-framework/api/common_structures/lightning/#lightning-activation-params)
+                      object.
+                    $ref: ../../components/schemas/LightningActivationParams.yaml
+                  ticker:
+                    type: string
+                    description: Ticker of coin to activate.
+                required:
+                - activation_params
+                - ticker
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:

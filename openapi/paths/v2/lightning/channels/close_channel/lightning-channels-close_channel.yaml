@@ -21,12 +21,34 @@
                 description: Name of the method to be called.
                 enum:
                 - lightning::channels::close_channel
+              mmrpc:
+                type: string
+                description: The version of the Komodo DeFi SDK RPC protocol. Must
+                  be exactly '2.0'
+                example: '2.0'
               params:
                 type: object
-                properties: {}
+                properties:
+                  coin:
+                    type: string
+                    description: The ticker of the coin for the channel to close.
+                  channel_id:
+                    type: string
+                    description: The channel ID to close.
+                  force:
+                    type: boolean
+                    description: If `true`, the channel will be force-closed.
+                    default: false
+                  target_height:
+                    type: integer
+                    description: The target block height for closing the channel.
+                required:
+                - coin
+                - channel_id
             required:
             - userpass
             - method
+            - mmrpc
     responses:
       description: Successful response
       content:
