@@ -12,6 +12,8 @@ import re
 import yaml
 from pathlib import Path
 from typing import Dict, List, Any, Set, Optional
+import json
+from datetime import datetime
 
 from ..constants.config import get_config
 from .openapi_schema_factory import OpenApiSchemaFactory
@@ -93,29 +95,46 @@ class OpenApiSchemaGenerator:
 
     def _output_undocumented_enums_for_review(self, all_enums: Dict[str, Set[str]]):
         """
-        Creates a file listing enums that are found in parameter descriptions
+        Creates a JSON file listing enums that are found in parameter descriptions
         but do not have a corresponding manual enum file.
         """
-        # TODO: This is a temporary file for review. It should be removed when the enums are documented.
-        # TODO: This should be a json file
-        review_file = self.path_mapper.config.directories.reports_dir / "undocumented_enums_for_review.txt"
+        review_file = self.path_mapper.config.directories.branched_reports_dir / "undocumented_enums_for_review.json"
         
         manual_enums_path = self.path_mapper.config.directories.mdx_common_structures / "enums"
         existing_enums = {p.stem for p in manual_enums_path.glob("*.mdx")}
         
+        undocumented_enums_data = {}
+        for enum_name, values in sorted(all_enums.items()):
+            if enum_name not in existing_enums:
+                sorted_values = sorted(list(values))
+                undocumented_enums_data[enum_name] = {
+                    "values": sorted_values,
+                    "potential_schema": {
+                        "type": "string",
+                        "enum": sorted_values
+                    }
+                }
+        
+        if not undocumented_enums_data:
+            # No undocumented enums, no need to create a report.
+            return
+
+        report = {
+            "scan_metadata": {
+                "scanner_type": "UNDOCUMENTED_ENUM_SCAN",
+                "scanner_version": "1.0.0",
+                "generated_at": datetime.now().isoformat(),
+                "kdf_branch": self.path_mapper.config.kdf_branch,
+                "mdx_branch": self.path_mapper.config.mdx_branch,
+                "description": "Enums found in parameter descriptions that do not have a dedicated documentation file."
+            },
+            "undocumented_enums": undocumented_enums_data
+        }
+
         with open(review_file, 'w') as f:
-            f.write("## Enums for Review ##\n")
-            f.write("The following enums were found in documentation but do not have a dedicated enum file.\n")
-            
-            for enum_name, values in sorted(all_enums.items()):
-                if enum_name not in existing_enums:
-                    f.write(f"### {enum_name}\n")
-                    f.write("```yaml\n")
-                    f.write(f"type: string\n")
-                    f.write(f"enum:\n")
-                    for value in sorted(list(values)):
-                        f.write(f"  - {value}\n")
-                    f.write("```\n\n")
+            json.dump(report, f, indent=2)
+
+        self.logger.info(f"Undocumented enums report created at: {review_file}")
 
     def _generate_individual_structure_files(self):
         """
