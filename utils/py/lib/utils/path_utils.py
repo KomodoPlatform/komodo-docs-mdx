@@ -13,12 +13,33 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from functools import lru_cache
 import json
+import subprocess
 
 # Import enhanced configuration system
 from ..constants.config import get_config, EnhancedKomodoConfig
 from ..constants.enums import VersionStatus
 from ..constants.data_structures import PathMapping
 from ..utils.logging_utils import get_logger
+
+def get_current_git_branch(repo_path: str) -> str:
+    """Gets the current git branch for a given repository path."""
+    try:
+        repo_path_str = str(repo_path)
+        if not os.path.isdir(os.path.join(repo_path_str, '.git')):
+            # self.logger.warning(f"No .git directory found in {repo_path_str}, cannot determine branch.")
+            return "unknown"
+        
+        result = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=repo_path_str,
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        return result.stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        # self.logger.error(f"Could not determine git branch for {repo_path}: {e}")
+        return "unknown"
 
 class EnhancedPathMapper:
     """
