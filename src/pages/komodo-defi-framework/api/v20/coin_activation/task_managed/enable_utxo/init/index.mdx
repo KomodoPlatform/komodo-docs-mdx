@@ -9,11 +9,11 @@ Use this method for task managed activation of UTXO coins like KMD, LTC, BTC & D
 
 ### Request Parameter Table
 
-| Parameter          | Type   | Required |      Default     | Description                                                                                                                                                                     |
-| ------------------ | ------ | :------: | :--------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ticker             | string |     ✓    |         -        | Ticker of the UTXO-based coin you want to enable.                                                                                                                               |
-| activation\_params | object |     ✓    |         -        | A standard [ActivationParams](/komodo-defi-framework/api/common_structures/activation/#activation-params) object containing activation configuration parameters for UTXO coins. |
-| priv\_key\_policy  | string |     ✗    | `ContextPrivKey` | Value can be [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum).                                                |
+| Parameter          | Type   | Required |            Default           | Description                                                                                                                                                                                                                                                                                              |
+| ------------------ | ------ | :------: | :--------------------------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ticker             | string |     ✓    |               -              | Ticker of the UTXO-based coin you want to enable.                                                                                                                                                                                                                                                        |
+| activation\_params | object |     ✓    |               -              | A standard [ActivationParams](/komodo-defi-framework/api/common_structures/activation/#activation-params) object containing activation configuration parameters for UTXO coins.                                                                                                                          |
+| priv\_key\_policy  | object |     ✗    | `{"type": "ContextPrivKey"}` | Object specifying the policy to access a private key during activation. Must include a `type` field from [PrivKeyActivationPolicyEnum](/komodo-defi-framework/api/common_structures/enums/#priv-key-activation-policy-enum). When using `WalletConnect`, also add a `data` field with the session topic. |
 
 ### Response Parameter Table
 
@@ -50,9 +50,11 @@ Use this method for task managed activation of UTXO coins like KMD, LTC, BTC & D
           }
         },
         "scan_policy": "scan_if_new_wallet",
-        "priv_key_policy": "Trezor",
         "min_addresses_number": 3,
         "gap_limit": 20
+      },
+      "priv_key_policy": {
+        "type": "Trezor"
       }
     }
   }
