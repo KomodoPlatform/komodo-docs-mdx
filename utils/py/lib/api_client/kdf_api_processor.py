@@ -105,6 +105,8 @@ class ApiRequestProcessor:
             "disable_p2p": self._get_env_var_as_bool("DISABLE_P2P", False),
             "use_trading_proto_v2": self._get_env_var_as_bool("USE_TRADING_PROTO_V2", False),
             "allow_weak_password": self._get_env_var_as_bool("ALLOW_WEAK_PASSWORD", True),
+            "wallet_name": os.getenv("WALLET_NAME", "active_wallet"),
+            "wallet_password": os.getenv("WALLET_PASSWORD", "1c@N-n0t-Di3"),
             "event_streaming_configuration": {
                 "access_control_allow_origin": "*"
             }

@@ -60,12 +60,20 @@ echo
 # REPORT: reports/kdf_json_examples.json
 # STRUCTURE: Organized by version and method, with multiple examples per method
 # PURPOSE: Provide bidirectional JSON example sharing between Postman collections and MDX documentation
-echo "============== 📊 Step 2: Extracting JSON examples from MDX files... ==============="
+echo "============== 📊 Step 2A: Extracting JSON examples from MDX files... ==============="
 if ! python py/kdf_tools.py json-extract; then
     echo "❌ Step 2 failed: JSON example extraction"
     exit 1
 fi
 echo
+
+echo "============== 📊 Step 2B: Getting KDF responses... ==============="
+if ! python py/kdf_tools.py get-kdf-responses; then
+    echo "❌ Step 2B failed: Getting KDF responses"
+    exit 1
+fi
+echo
+
 
 
 # The next step is to generate the OpenAPI specifications.
@@ -144,6 +152,3 @@ echo
 echo "===================================================================="
 echo "==  ✅ KDF Documentation Sync completed successfully at $(date)"  ==
 echo "===================================================================="
-
-echo "To launch a docker container to test KDF requests and collect responses, run:"
-echo "python py/kdf_tools.py get-kdf-responses"

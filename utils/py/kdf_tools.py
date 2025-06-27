@@ -1460,7 +1460,6 @@ class KDFTools:
         except KeyboardInterrupt:
             self.logger.error("Keyboard interrupt detected. Stopping container...")
         finally:
-            self.stop_container_command()
             self.report_error_responses()
             self._print_footer(command_title, success=False)
 

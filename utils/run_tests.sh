@@ -2,10 +2,6 @@
 
 cd "$(dirname "$0")"
 
-source py/.venv/bin/activate
-
-python3 py/kdf_tools.py scan-mdx 
-
 npm ci --prefix js
 #node js/get_file_author_data.js
 node js/validate_update_internal_links_userpass.js

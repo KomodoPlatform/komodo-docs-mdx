@@ -1,6 +1,7 @@
 # Stage 1: Build Environment
 # This stage installs all system-level dependencies and the Rust toolchain.
 # It is cached and only rebuilt when system dependencies change.
+# syntax=docker/dockerfile:1.4
 FROM docker.io/debian:buster-slim AS build-env
 
 LABEL MAINTAINER="Dragonhound <smk@komodoplatform.com>"
@@ -47,14 +48,23 @@ WORKDIR /app
 COPY ./kdf_repo .
 
 # Build the binary.
-# This step is re-run when source code changes, but it benefits from Cargo's
-# incremental compilation and the cached build environment from the previous stage.
-RUN cargo build --release --features "enable-sia,run-sia-functional-tests"
+#
+# Using BuildKit cache mounts keeps the Cargo registry, git checkouts and the
+# target directory across builds, so changing a single crate no longer forces
+# a full re-compile of the entire dependency graph.
+#
+# To benefit from this you need Docker BuildKit (enabled by default in Docker
+# Compose v2 or by setting `DOCKER_BUILDKIT=1`).
+# --features "enable-sia,run-sia-functional-tests"
+RUN --mount=type=cache,id=cargo-registry,target=/root/.cargo/registry \
+    --mount=type=cache,id=cargo-git,target=/root/.cargo/git \
+    cargo build --release 
 
 # ---
 # Stage 3: Final runtime image
 # This creates a minimal image containing only the compiled binary.
 FROM docker.io/debian:buster-slim AS final
+
 
 ARG RPC_PORT=7783
 ARG USER_ID=1000
@@ -71,14 +81,17 @@ COPY --from=builder /app/target/release/kdf /usr/local/bin/kdf
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Install small debug utilities (curl, wget) in the runtime image (as root)
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends procps htop curl wget ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create and set permissions for the .kdf directory
 RUN mkdir -p /home/kdfuser/.kdf && \
     chown -R kdfuser:kdfuser /home/kdfuser/.kdf
 
 USER kdfuser
 WORKDIR /home/kdfuser
-
-EXPOSE ${RPC_PORT}
 
 # Set the entrypoint to run the KDF application.
 # It can now also accept other commands, like 'bash'.
