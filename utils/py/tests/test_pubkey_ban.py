@@ -55,17 +55,8 @@ def rpc(userpass: str, method: str, params: Dict[str, object] | None = None) -> 
     return helper.send_method(method, params or {}, id=0)
 
 
-# Docker helper – ensure container is up and capture node context
-# ---------------------------------------------------------------------------
-
-
-def ensure_node_ready() -> None:
-    helper.ensure_container()
-    helper.capture_context()
-
-
 def main() -> None:
-    ensure_node_ready()
+    helper.ensure_node_ready()
 
     vers_resp = helper.call_version()
     print("Node version:", vers_resp.get("result"))

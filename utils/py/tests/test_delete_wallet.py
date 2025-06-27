@@ -118,9 +118,7 @@ def main() -> None:
     wallet_to_delete = DELETE_WALLET_NAME
     delete_pass = DELETE_WALLET_PW
 
-    helper.ensure_container()
-    helper.capture_context()
-
+    helper.ensure_node_ready()
     _cycle_wallets()
 
     info = rpc(userpass, "get_wallet_names", {})

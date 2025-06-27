@@ -14,10 +14,31 @@ Dependencies (install in the venv if missing):
     pip install rich qrcode-terminal
 """
 
-import json
-import os
+# ------------------------------------------------------------
+# Path boot-strapper so the script works regardless of the
+# directory it is executed from (repo root or sub-folder).
+# ------------------------------------------------------------
+
 import sys
 from pathlib import Path
+
+# Walk up from this file until we locate the repository root –
+# identified by the presence of the top-level 'utils' folder.
+_HERE = Path(__file__).resolve()
+_WORKSPACE_ROOT = next((p for p in _HERE.parents if (p / "utils").exists()), None)
+
+if _WORKSPACE_ROOT and str(_WORKSPACE_ROOT) not in sys.path:
+    sys.path.insert(0, str(_WORKSPACE_ROOT))
+
+# ------------------------------------------------------------
+# Standard library imports (after path fix).
+# ------------------------------------------------------------
+
+import json
+import os
+import argparse
+import subprocess
+
 from typing import Any, Dict, Optional, List
 
 # Third-party, optional imports. We handle absence gracefully.
@@ -171,22 +192,34 @@ def main():
 def _handle_new_connection(processor: ApiRequestProcessor, console: Console):
     console.print("[bold]Create a new WalletConnect connection[/]")
 
-    # Allow user to supply a JSON file path with required_namespaces or accept defaults
-    path = Prompt.ask(
-        "Path to JSON with required_namespaces (leave blank for default EIP155 + Cosmos example)",
-        default="",
-        show_default=False,
-    ).strip()
+    console.print("\n[bold]Select required namespaces configuration:[/]")
+    console.print("[1] EIP155 only (Ethereum)")
+    console.print("[2] Cosmos only")
+    console.print("[3] Both (EIP155 + Cosmos) [default]")
 
-    if path:
-        try:
-            with open(path, "r") as f:
-                required_namespaces = json.load(f)
-        except Exception as e:
-            console.print(f"[red]Failed to load JSON: {e}[/]")
-            return
-    else:
-        # Minimal example – ETH mainnet & Cosmoshub
+    choice = Prompt.ask("Choose 1, 2, or 3", choices=["1", "2", "3"], default="3")
+
+    if choice == "1":
+        required_namespaces = {
+            "eip155": {
+                "chains": ["eip155:1"],
+                "methods": [
+                    "eth_sendTransaction",
+                    "eth_signTransaction",
+                    "personal_sign",
+                ],
+                "events": ["accountsChanged", "chainChanged"],
+            }
+        }
+    elif choice == "2":
+        required_namespaces = {
+            "cosmos": {
+                "chains": ["cosmos:cosmoshub-4"],
+                "methods": ["cosmos_signDirect", "cosmos_signAmino", "cosmos_getAccounts"],
+                "events": [],
+            }
+        }
+    else:  # "3" – both
         required_namespaces = {
             "eip155": {
                 "chains": ["eip155:1"],
@@ -233,7 +266,7 @@ def _handle_list_sessions(processor: ApiRequestProcessor, console: Console):
         console.print(f"[red]Error: {resp['error']}[/]")
         return
 
-    sessions = resp.get("result", {}).get("sessions", [])
+    sessions = resp.get("result", {}).get("sessions") or []
     if not sessions:
         console.print("[yellow]No active sessions.[/]")
         return
@@ -250,7 +283,7 @@ def _handle_list_sessions(processor: ApiRequestProcessor, console: Console):
             [
                 chain
                 for ns in sess.get("namespaces", {}).values()
-                for chain in ns.get("chains", [])
+                for chain in (ns.get("chains") or [])
             ]
         )
         table.add_row(sess.get("topic"), wallet_name, chains, str(sess.get("expiry")))
@@ -262,7 +295,8 @@ def _prompt_topic(processor: ApiRequestProcessor, console: Console) -> Optional[
     """Prompt the user for a session topic, offering a list if available."""
     req = {"method": "wc_get_sessions", "mmrpc": "2.0", "params": {}, "id": 0}
     resp = processor._make_request(req)
-    session_topics = [s.get("topic") for s in resp.get("result", {}).get("sessions", [])]
+    sessions_raw = resp.get("result", {}).get("sessions") or []
+    session_topics = [s.get("topic") for s in sessions_raw if s]
     if not session_topics:
         console.print("[yellow]No sessions found.[/]")
         return None
@@ -319,9 +353,6 @@ def _handle_delete_session(processor: ApiRequestProcessor, console: Console):
 # --------------------------------------------------------------------------------------
 # Container management helpers
 # --------------------------------------------------------------------------------------
-
-import argparse
-import subprocess
 
 
 def _compose_file(cfg: EnhancedKomodoConfig):

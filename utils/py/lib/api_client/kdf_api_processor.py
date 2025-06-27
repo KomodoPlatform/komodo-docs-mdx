@@ -445,6 +445,18 @@ class ApiRequestProcessor:
 
         activation_method = activation_options.get(act_type_to_use)
 
+        # ------------------------------------------------------------------
+        # Override: Tendermint **token** activation should use the dedicated
+        # `task::enable_tendermint_token::init` method when available instead
+        # of the generic platform-coin init. This prevents parameter mismatch
+        # errors and aligns with the current API docs (@/enable_tendermint_token).
+        # ------------------------------------------------------------------
+        if protocol == "TENDERMINTTOKEN":
+            # Currently Tendermint tokens are enabled via the v2 non-task method
+            # `enable_tendermint_token`. Adjust if/when the task variant is
+            # implemented in Rust.
+            activation_method = "enable_tendermint_token"
+
         if activation_method is None:
             self.logger.error(f"Activation type '{act_type_to_use}' not available for protocol '{protocol}'.")
             return False
@@ -457,10 +469,11 @@ class ApiRequestProcessor:
             activation_params = {}
             if protocol in ["ETH", "ERC20"]:
                 activation_params["nodes"] = coin_info.get("nodes", [])
-                # The task-based ETH activation method requires this parameter, even if empty.
                 activation_params["erc20_tokens_requests"] = []
-                if "contract_address" in coin_info:
-                    activation_params["contract_address"] = coin_info.get("contract_address")
+                if "swap_contract_address" in coin_info:
+                    activation_params["swap_contract_address"] = coin_info["swap_contract_address"]
+                if "fallback_swap_contract" in coin_info:
+                    activation_params["fallback_swap_contract"] = coin_info["fallback_swap_contract"]
 
             elif protocol in ["UTXO", "BCH", "SLP", "QTUM", "QRC20"]:
                 activation_params["utxo_merge_params"] = {"merge_at": 10}
@@ -487,7 +500,42 @@ class ApiRequestProcessor:
                 activation_params["scan_interval_ms"] = 200
 
             elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
-                activation_params["rpc_urls"] = [node["url"] for node in coin_info.get("nodes", [])]
+                # ------------------------------------------------------------------
+                # Tendermint (Cosmos-SDK) assets use a struct defined in
+                # `TendermintActivationParams` (see
+                # coins_activation/src/tendermint_with_assets_activation.rs).
+                # Required fields:
+                #   • nodes          – Vec<RpcNode> (objects {url,komodo_proxy})
+                # Optional fields:
+                #   • tokens_params  – array (token activations)
+                #   • tx_history, get_balances, path_to_address, activation_params …
+                # The list of RPC endpoints is stored in coins_config under
+                # `rpc_urls`. We translate them to the expected `nodes` format.
+                # ------------------------------------------------------------------
+
+                raw_nodes = coin_info.get("rpc_urls", [])
+                nodes: list[dict] = []
+                for n in raw_nodes:
+                    if isinstance(n, dict):
+                        # already in the desired shape or contains extras
+                        nodes.append(n)
+                    else:
+                        # plain URL string – wrap into object
+                        nodes.append({"url": n})
+
+                if protocol == "TENDERMINT":
+                    # Platform coin activation – nodes live at top level.
+                    params.update({
+                        "nodes": nodes,
+                        # sensible defaults matching Rust code
+                        "tx_history": False,
+                        "get_balances": True,
+                        "tokens_params": [],  # no tokens in this simple activation
+                    })
+                else:
+                    # For tokens we do not include nodes (they inherit via platform),
+                    # so no special handling here.
+                    pass
 
             elif protocol == "SIA":
                 nodes = coin_info.get("nodes", [])
@@ -511,7 +559,11 @@ class ApiRequestProcessor:
                     "password": password
                 }
 
-            params["activation_params"] = activation_params
+            # For ETH platform coin with tokens we must flatten
+            if activation_method == "task::enable_eth::init":
+                params = {"ticker": ticker, **activation_params}
+            elif activation_params:  # only include when non-empty (e.g., not needed for TENDERMINT coins)
+                params["activation_params"] = activation_params
         else:
             # Legacy non-task based activations
             if protocol in ["ETH", "ERC20"]:
@@ -522,7 +574,7 @@ class ApiRequestProcessor:
                 params["utxo_merge_params"] = {"merge_at": 10}
                 params["servers"] = coin_info.get("electrum", [])
             elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
-                params["rpc_urls"] = [node["url"] for node in coin_info.get("nodes", [])]
+                params["rpc_urls"] = [node.get("url") if isinstance(node, dict) else node for node in coin_info.get("rpc_urls", [])]
 
         if activation_method in self.v2_methods:
             init_request = {
@@ -541,16 +593,21 @@ class ApiRequestProcessor:
         self.logger.info(f"Sending activation request for '{ticker}' with method '{activation_method}'")
         init_response = self._make_request(init_request)
 
-        # Handle "already initialized" error by disabling and retrying
-        if init_response and init_response.get("error") and "already initialized" in init_response["error"]:
-            self.logger.warning(f"Coin '{ticker}' already initialized. Disabling and retrying.")
-            if self.disable_coin(ticker):
-                time.sleep(1)  # Give a moment for the state to update
-                self.logger.info(f"Retrying activation for '{ticker}'...")
-                init_response = self._make_request(init_request)
-            else:
-                self.logger.error(f"Failed to disable '{ticker}', cannot proceed with activation.")
-                return False
+        # ------------------------------------------------------------------
+        # Graceful handling when coin is already active
+        # ------------------------------------------------------------------
+
+        if init_response and (
+            init_response.get("error_type") == "CoinIsAlreadyActivated"
+            or (
+                isinstance(init_response.get("error"), str)
+                and "activated already" in init_response["error"].lower()
+            )
+        ):
+            self.logger.info(f"Coin '{ticker}' is already active – skipping activation.")
+            # Refresh enabled coins to keep internal state in sync
+            self._update_enabled_coins()
+            return True
 
         # Handle task-based vs direct activation
         if activation_method in self.v2_methods:
@@ -619,4 +676,70 @@ class ApiRequestProcessor:
             return True
         else:
             self.logger.error(f"Failed to disable '{ticker}': {response}")
-            return False 
+            return False
+
+    # ------------------------------------------------------------------
+    # Generic task polling (usable outside coin activation)
+    # ------------------------------------------------------------------
+
+    def poll_task_status(
+        self,
+        status_method: str,
+        task_id: int,
+        *,
+        timeout: int = 120,
+        sleep_seconds: int = 5,
+    ) -> Dict[str, Any] | None:
+        """Poll *status_method* until the task completes or *timeout* seconds pass.
+
+        Returns the final `result` object on success, or ``None`` if the task
+        fails or times out.
+
+        Success criteria:
+        • If the response contains a `status` field, we treat `status == 'Ok'` as
+          success and `status == 'Error'` as failure.
+        • If there is no `status` field but keys such as `wallet_balance` or
+          `details` are present, we consider the task complete and successful.
+        """
+
+        self.logger.info(f"Polling {status_method} for task_id {task_id} …")
+
+        start = time.time()
+        while time.time() - start < timeout:
+            req_body = {
+                "userpass": self.config.openapi.userpass,
+                "method": status_method,
+                "mmrpc": "2.0",
+                "params": {"task_id": task_id, "forget_if_finished": False},
+            }
+
+            resp = self._make_request(req_body)
+
+            if not resp or "result" not in resp:
+                self.logger.warning(f"{status_method} returned unexpected response: {resp}")
+                time.sleep(sleep_seconds)
+                continue
+
+            result = resp["result"]
+
+            # 1. Explicit status field handling
+            status = result.get("status")
+            if status:
+                if status == "Ok":
+                    self.logger.success(f"Task {task_id} completed successfully.")
+                    return result
+                if status in {"Error", "Failed", "Aborted"}:
+                    self.logger.error(f"Task {task_id} failed: {result}")
+                    return None
+
+            # 2. Heuristic: presence of wallet_balance/details indicates completion
+            if any(k in result for k in ("wallet_balance", "details")):
+                self.logger.success(f"Task {task_id} completed (no explicit status field).")
+                return result
+
+            # Not completed yet; wait.
+            self.logger.debug(f"Waiting for task {task_id} via {status_method}…")
+            time.sleep(sleep_seconds)
+
+        self.logger.error(f"Polling timed out for task {task_id} via {status_method}.")
+        return None 

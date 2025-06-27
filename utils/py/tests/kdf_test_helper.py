@@ -195,4 +195,26 @@ class KDFTestHelper:
         report_path.parent.mkdir(parents=True, exist_ok=True)
         report_path.write_text(json.dumps(context, indent=2))
         print(f"Saved node context to {report_path}")
-        return context 
+        return context
+
+    # ---------------------------------------------------------------------
+    # Convenience helpers for tests
+    # ---------------------------------------------------------------------
+
+    def ensure_node_ready(self) -> None:
+        """Ensure container is running and node context captured.
+
+        Most integration tests require the node to be up before executing RPCs.
+        This helper wraps ``ensure_container`` and ``capture_context`` so tests
+        can prepare the environment with a single call.
+        """
+        # Proactively start the stack; if it's already running `docker compose up` is a no-op.
+        try:
+            self.docker_compose(["up", "-d"])
+        except Exception as exc:
+            print("docker compose up failed (it may already be running):", exc)
+
+        # Wait until RPC responds.
+        self.ensure_container(retries=6, wait_seconds=5)
+        # Store context for debugging/reporting; ignore return value.
+        self.capture_context() 

@@ -37,6 +37,19 @@ ENV CC=/usr/bin/clang-16
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:$PATH"
 
+# ------------------------------------------------------------------
+# Fetch Zcash Groth16 parameters required by ZHTLC coins (ARRR, ZEC, etc.)
+# Doing this in the build-env stage ensures the layer is cached and we
+# don't re-download the ~900 MB params on every rebuild.
+# ------------------------------------------------------------------
+
+ENV ZCASH_PARAMS_PATH=/tmp/.zcash-params
+RUN mkdir -p "$ZCASH_PARAMS_PATH" && \
+    wget -qO /tmp/fetch-params.sh https://raw.githubusercontent.com/KomodoPlatform/komodo/master/zcutil/fetch-params-alt.sh && \
+    chmod +x /tmp/fetch-params.sh && \
+    /tmp/fetch-params.sh --dir "$ZCASH_PARAMS_PATH" && \
+    rm /tmp/fetch-params.sh
+
 # ---
 # Stage 2: KDF Builder
 # This stage builds the KDF binary. It uses the build-env and caches dependencies.
@@ -89,6 +102,10 @@ RUN apt-get update -y && \
 # Create and set permissions for the .kdf directory
 RUN mkdir -p /home/kdfuser/.kdf && \
     chown -R kdfuser:kdfuser /home/kdfuser/.kdf
+
+# Copy the already-downloaded Zcash parameters from the build stage
+ENV ZCASH_PARAMS_PATH=/tmp/.zcash-params
+COPY --from=build-env "$ZCASH_PARAMS_PATH" "$ZCASH_PARAMS_PATH"
 
 USER kdfuser
 WORKDIR /home/kdfuser
