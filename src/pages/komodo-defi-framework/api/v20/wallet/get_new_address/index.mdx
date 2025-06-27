@@ -23,11 +23,9 @@ The `get_new_address` method derives the next unused address from a BIP-44 HD wa
 
 ### Response Parameters
 
-| Parameter | Type   | Description                                             |
-| --------- | ------ | ------------------------------------------------------- |
-| id        | number | Derivation index of the new address within the chain.   |
-| address   | string | Newly derived address.                                  |
-| balance   | string | Current spendable balance of the address (usually `0`). |
+| Parameter    | Type   | Description                                                                                                   |
+| ------------ | ------ | ------------------------------------------------------------------------------------------------------------- |
+| new\_address | object | A standard [NewAddressInfo](/komodo-defi-framework/api/common_structures/wallet/#new-address-info) object containing `address`, `derivation_path`, `chain`, and `balance`. |
 
 ### Awaiting / Hardware-Wallet States
 
@@ -60,9 +58,17 @@ When used with a hardware wallet, the RPC may respond with an `error` containing
   {
     "mmrpc": "2.0",
     "result": {
-      "id": 42,
-      "address": "bc1q99pjyg5jkdmrr2jf4l7m23vn83y7gy0y0w9nw3",
-      "balance": "0"
+      "new_address": {
+        "address": "RTCo64FD272B7F49cZqxbhhWhCDK2wmDYY",
+        "derivation_path": "m/44'/141'/0'/0/7",
+        "chain": "External",
+        "balance": {
+          "KMD": {
+            "spendable": "0",
+            "unspendable": "0"
+          }
+        }
+      }
     },
     "id": 0
   }
