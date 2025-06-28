@@ -46,6 +46,50 @@ services:
       - ./kdf-config/coins:/home/kdfuser/.kdf/coins:ro
 
   # ---------------------------------------------------------------------
+  # Tertiary KDF node (node-C) – HD wallet compiled to WASM. Useful for
+  # wasm-based HD activation and RPC testing.
+  # ---------------------------------------------------------------------
+  kdf_node_c_wasm:
+    image: kdf-dev-env-wasm:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.kdf.wasm
+      args:
+        RPC_PORT: ${RPC_PORT_NODE_C:-7785}
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    ports:
+      - "${RPC_PORT_NODE_C:-7785}:${RPC_PORT_NODE_C:-7785}"  # RPC HTTP
+      - "42847:42845"  # TCP p2p
+      - "42857:42855"  # WSS p2p
+    volumes:
+      - ./kdf-db-node-c:/home/node/.kdf/DB
+      - ./kdf-config-node-c/MM2.json:/home/node/.kdf/MM2.json
+      - ./kdf-config/coins:/home/node/.kdf/coins:ro
+
+  # ---------------------------------------------------------------------
+  # Quaternary KDF node (node-D) – Non-HD wallet compiled to WASM.
+  # Useful for wasm-based non-HD activation and RPC testing.
+  # ---------------------------------------------------------------------
+  kdf_node_d_wasm:
+    image: kdf-dev-env-wasm:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.kdf.wasm
+      args:
+        RPC_PORT: ${RPC_PORT_NODE_D:-7786}
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    ports:
+      - "${RPC_PORT_NODE_D:-7786}:${RPC_PORT_NODE_D:-7786}"
+      - "42848:42845"  # TCP p2p
+      - "42858:42855"  # WSS p2p
+    volumes:
+      - ./kdf-db-node-d:/home/node/.kdf/DB
+      - ./kdf-config-node-d/MM2.json:/home/node/.kdf/MM2.json
+      - ./kdf-config/coins:/home/node/.kdf/coins:ro
+
+  # ---------------------------------------------------------------------
   # Ganache – lightweight EVM dev-chain used by WalletConnect / EVM tests.
   # Exposes JSON-RPC on 8545 with deterministic accounts pre-funded.
   # Resource footprint: ~200 MB RAM, negligible CPU when idle.
@@ -64,4 +108,6 @@ services:
 
 volumes:
   kdf-db: {}
-  kdf-db-node-b: {} 
+  kdf-db-node-b: {}
+  kdf-db-node-c: {}
+  kdf-db-node-d: {} 

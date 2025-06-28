@@ -1,0 +1,86 @@
+# ---------------------------------------------------------------------
+# Dockerfile.kdf.wasm – Build and run the Komodo DeFi Framework (KDF)
+# inside a WASM runtime. This image compiles the `mm2_bin_lib` crate to
+# WebAssembly (target `nodejs`) using `wasm-pack`, then launches a simple
+# Node.js runner that spins up the KDF instance via `mm2_main`.
+# ---------------------------------------------------------------------
+# syntax=docker/dockerfile:1.4
+
+###########################
+# 1️⃣  Build stage – Rust  #
+###########################
+FROM docker.io/debian:10 AS builder
+
+# -- Install system deps -------------------------------------------------
+RUN apt-get update -y && \
+    apt-get install -y --no-install-recommends \
+	build-essential 	\
+	cmake 			 	\
+    ca-certificates 	\
+    curl             	\
+    wget             	\
+    unzip             	\
+	libudev-dev			\
+    gnupg               \
+    git                 \
+    pkg-config          \
+    lsb-release         \
+    software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add the wasm32 target so Cargo can build for it.
+RUN curl --output llvm.sh https://apt.llvm.org/llvm.sh && \
+    chmod +x llvm.sh && \
+    ./llvm.sh 16 && \
+    rm ./llvm.sh && \
+    ln -s /usr/bin/clang-16 /usr/bin/clang
+
+ENV AR=/usr/bin/llvm-ar-16
+ENV CC=/usr/bin/clang-16
+
+# -- Install rust, protobuf, wasm-pack ----------------------------------------------------
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --profile minimal --default-toolchain nightly-2023-06-01 -y
+ENV PATH="/root/.cargo/bin:$PATH"
+RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | bash -s -- -y
+RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v25.3/protoc-25.3-linux-x86_64.zip
+RUN unzip protoc-25.3-linux-x86_64.zip && mv ./include/google /usr/include/google
+  
+# -- Compile KDF to WASM --------------------------------------------------
+WORKDIR /app
+
+# Copy source code into the image. Keeping this COPY separate from the
+# previous RUN ensures the dependency layers are cached.
+COPY ./kdf_repo .
+
+# Build the wasm package for Node.js using wasm-pack. Output goes to
+# /tmp/kdf-wasm so we can copy it in the final stage.
+RUN --mount=type=cache,id=cargo-registry,target=/root/.cargo/registry \
+    --mount=type=cache,id=cargo-git,target=/root/.cargo/git \
+    wasm-pack build mm2src/mm2_bin_lib \
+      --release \
+      --target nodejs \
+      --out-dir /tmp/kdf-wasm
+
+###########################################
+# 2️⃣  Runtime stage – Node.js & WASM  #
+###########################################
+FROM node:20-slim AS runtime
+
+# Use the non-root "node" user already present in the base image (UID 1000)
+USER node
+WORKDIR /home/node
+
+# Copy the compiled wasm pkg from the build stage.
+COPY --from=builder /tmp/kdf-wasm ./kdf
+
+# ---------------- Runner script ----------------
+# This small JS script boots the WASM module and starts KDF using the
+# configuration mounted at `/home/node/.kdf/MM2.json` (mounted via
+# docker-compose bind-mounts).
+RUN printf "import init, { mm2_main, LogLevel } from './mm2/mm2lib.js';\nimport fs from 'fs';\n\n(async () => {\n  await init();\n  const confPath = process.env.MM2_CONFIG || '/home/node/.kdf/MM2.json';\n  const rawConf  = fs.readFileSync(confPath, 'utf8');\n  const conf     = JSON.parse(rawConf);\n  const params   = { conf, log_level: LogLevel.Info };\n  // Simple log handler that prints everything to stdout.\n  function handleLog(level, line) {\n    console.log(`[${level}] ${line}`);\n  }\n  mm2_main(params, handleLog);\n  // Keep the container running.\n  process.stdin.resume();\n})();\n" > /home/node/run_mm2.js
+
+# The main entrypoint simply starts the Node.js script.
+ENTRYPOINT ["node", "run_mm2.js"]
+
+# Expose the default RPC port; the exact port is mapped via docker-compose.
+EXPOSE 7785 
