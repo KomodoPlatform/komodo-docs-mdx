@@ -77,10 +77,7 @@ COPY --from=builder /tmp/kdf-wasm ./kdf
 # This small JS script boots the WASM module and starts KDF using the
 # configuration mounted at `/home/node/.kdf/MM2.json` (mounted via
 # docker-compose bind-mounts).
-RUN printf "import init, { mm2_main, LogLevel } from './mm2/mm2lib.js';\nimport fs from 'fs';\n\n(async () => {\n  await init();\n  const confPath = process.env.MM2_CONFIG || '/home/node/.kdf/MM2.json';\n  const rawConf  = fs.readFileSync(confPath, 'utf8');\n  const conf     = JSON.parse(rawConf);\n  const params   = { conf, log_level: LogLevel.Info };\n  // Simple log handler that prints everything to stdout.\n  function handleLog(level, line) {\n    console.log(`[${level}] ${line}`);\n  }\n  mm2_main(params, handleLog);\n  // Keep the container running.\n  process.stdin.resume();\n})();\n" > /home/node/run_mm2.js
+RUN echo 'import init from "./kdf/mm2lib.js"; init();' > /home/node/run_mm2.js
 
 # The main entrypoint simply starts the Node.js script.
 ENTRYPOINT ["node", "run_mm2.js"]
-
-# Expose the default RPC port; the exact port is mapped via docker-compose.
-EXPOSE 7785 

@@ -8,12 +8,10 @@ services:
       context: .
       dockerfile: Dockerfile.kdf
       args:
-        # This can still be used by the final image
-        RPC_PORT: ${RPC_PORT:-7783}
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
     ports:
-      - "${RPC_PORT:-7783}:${RPC_PORT:-7783}"
+      - "8778:8778"
       - "42845:42845" # TCP p2p
       - "42855:42855" # WSS p2p
     volumes:
@@ -33,17 +31,17 @@ services:
       context: .
       dockerfile: Dockerfile.kdf
       args:
-        RPC_PORT: ${RPC_PORT_NODE_B:-7784}
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
     ports:
-      - "${RPC_PORT_NODE_B:-7784}:${RPC_PORT_NODE_B:-7784}"
+      - "8779:8779"
       - "42846:42845"  # forward container 42845 → host 42846 (TCP)
       - "42856:42855"  # forward container 42855 → host 42856 (WSS)
     volumes:
       - ./kdf-db-node-b:/home/kdfuser/.kdf/DB
       - ./kdf-config-node-b/MM2.json:/home/kdfuser/.kdf/MM2.json
       - ./kdf-config/coins:/home/kdfuser/.kdf/coins:ro
+      - ./kdf-config/.env:/home/kdfuser/.kdf/.env
 
   # ---------------------------------------------------------------------
   # Tertiary KDF node (node-C) – HD wallet compiled to WASM. Useful for
@@ -55,17 +53,18 @@ services:
       context: .
       dockerfile: Dockerfile.kdf.wasm
       args:
-        RPC_PORT: ${RPC_PORT_NODE_C:-7785}
+        RPC_PORT: ${RPC_PORT_NODE_C:-8780}
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
     ports:
-      - "${RPC_PORT_NODE_C:-7785}:${RPC_PORT_NODE_C:-7785}"  # RPC HTTP
+      - "${RPC_PORT_NODE_C:-8780}:${RPC_PORT_NODE_C:-8780}"  # RPC HTTP
       - "42847:42845"  # TCP p2p
       - "42857:42855"  # WSS p2p
     volumes:
       - ./kdf-db-node-c:/home/node/.kdf/DB
       - ./kdf-config-node-c/MM2.json:/home/node/.kdf/MM2.json
       - ./kdf-config/coins:/home/node/.kdf/coins:ro
+      - ./kdf-config/.env:/home/node/.kdf/.env
 
   # ---------------------------------------------------------------------
   # Quaternary KDF node (node-D) – Non-HD wallet compiled to WASM.
@@ -77,17 +76,18 @@ services:
       context: .
       dockerfile: Dockerfile.kdf.wasm
       args:
-        RPC_PORT: ${RPC_PORT_NODE_D:-7786}
+        RPC_PORT: ${RPC_PORT_NODE_D:-8781}
         USER_ID: ${UID:-1000}
         GROUP_ID: ${GID:-1000}
     ports:
-      - "${RPC_PORT_NODE_D:-7786}:${RPC_PORT_NODE_D:-7786}"
+      - "${RPC_PORT_NODE_D:-8781}:${RPC_PORT_NODE_D:-8781}"
       - "42848:42845"  # TCP p2p
       - "42858:42855"  # WSS p2p
     volumes:
       - ./kdf-db-node-d:/home/node/.kdf/DB
       - ./kdf-config-node-d/MM2.json:/home/node/.kdf/MM2.json
       - ./kdf-config/coins:/home/node/.kdf/coins:ro
+      - ./kdf-config/.env:/home/node/.kdf/.env
 
   # ---------------------------------------------------------------------
   # Ganache – lightweight EVM dev-chain used by WalletConnect / EVM tests.

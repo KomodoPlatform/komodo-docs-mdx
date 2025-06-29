@@ -45,7 +45,7 @@ class KDFTestHelper:
     """Utility wrapper around KDF docker-compose and RPC calls."""
 
     DEFAULT_RPC_PORT = "8778"
-    DEFAULT_RPC_PASSWORD = "RPC_CONTRoL_USERP@SSW0RD"
+    DEFAULT_RPC_PASSWORD = "RPC_UserP@SSW0RD"
     RPC_URL_TEMPLATE = "http://127.0.0.1:{port}"
 
     def __init__(

@@ -3,19 +3,27 @@ import os
 import requests
 import time
 import subprocess
-from typing import Dict, Any, Set
+import copy
+from typing import Dict, Any, Set, Optional, List
 from pathlib import Path
 import sys
 
-from utils.py.lib.constants.config_struct import EnhancedKomodoConfig
+from utils.py.lib.constants.config_struct import EnhancedKomodoConfig, NodeConfig
 from utils.py.lib.utils.logging_utils import KomodoLogger
 from utils.py.lib.managers.path_mapping_manager import EnhancedPathMapper
+from utils.py.lib.utils import (
+    get_logger,
+)
+from utils.py.lib.utils.file_utils import safe_write_json
+from utils.py.lib.utils.file_utils import ensure_directory_exists
+from utils.py.lib.managers.git_manager import GitManager
 
 
 class ApiRequestProcessor:
     def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, kdf_branch: str = 'dev'):
         self.config = config
         self.logger = logger
+        self.git_manager = GitManager(self.logger)
         self.path_mapper = EnhancedPathMapper(config=self.config)
         self._load_dotenv()
         self.kdf_branch = kdf_branch
@@ -30,11 +38,8 @@ class ApiRequestProcessor:
         self.v2_methods: Set[str] = set()
 
         # Mappings and Constants
-        rpc_url = os.getenv("RPC_URL", "http://127.0.0.1")
-        rpc_port = os.getenv("RPC_PORT", "7783")
-        self.api_url = f"{rpc_url}:{rpc_port}"
-        self.rpc_password = os.getenv("RPC_PASSWORD", "RPC_CONTRoL_USERP@SSW0RD")
-        self.logger.info(f"API requests will be sent to: {self.api_url}")
+        self.enable_hd = self._get_env_var_as_bool("ENABLE_HD", False)
+        self.path_mapper = EnhancedPathMapper(config=self.config)
         self._initialize_processor()
 
     def _load_dotenv(self):
@@ -83,22 +88,56 @@ class ApiRequestProcessor:
             return default
         return [item.strip() for item in value.split(' ') if item.strip()]
 
-    def generate_mm2_config(self):
-        """Generates MM2.json from environment variables."""
-        output_path = self.config.directories.docker_dot_kdf_dir / "MM2.json"
+    def generate_mm2_config_for_node(self, node_config: NodeConfig, mm2_path: str):
+        """Generates an MM2.json file for a specific node."""
+        config_data = self.get_mm2_data()
 
-        # Assumes .env has been loaded into the environment by the calling script
+        # Override defaults with node-specific values
+        config_data['rpcport'] = node_config.port
+        config_data['enable_hd'] = node_config.hd_mode
+        config_data['userpass'] = node_config.userpass
+
+        # Unique wallet name and password for each node
+        node_name = node_config.name
+        config_data['wallet_name'] = f"{node_name}_wallet"
+        config_data['wallet_password'] = f"Sup3rS3cur3-{node_name}-P@ssw0rd"
+
+        # Special handling for wasm nodes if needed
+        if node_config.wasm_mode:
+            # Add any wasm-specific config overrides here
+            pass
+        
+        self.logger.info(f"Generating MM2.json for {node_name} at {mm2_path}")
+        ensure_directory_exists(Path(mm2_path).parent)
+        safe_write_json(mm2_path, config_data)
+
+
+    def generate_mm2_config(self):
+        """
+        Generates MM2.json files for all configured nodes.
+        The base configuration is loaded from .env, then customized for each node.
+        """
+        self.logger.info("Generating MM2 config files for all nodes...")
+        for node_cfg in self.config.nodes:
+            node_dir = self.config.directories.docker_dir / f"kdf-config-{node_cfg.name.replace('_', '-')}"
+            mm2_path = node_dir / "MM2.json"
+            self.generate_mm2_config_for_node(node_cfg, str(mm2_path))
+
+    def get_mm2_data(self):
+        """
+        Constructs the base MM2.json data from environment variables.
+        """
         config_data = {
             "gui": os.getenv("GUI", "kdf_mdx_docs"),
             "rpcip": "0.0.0.0",
             "rpc_local_only": False,
-            "enable_hd": self._get_env_var_as_bool("ENABLE_HD", False),
+            "enable_hd": self.enable_hd,
             "netid": self._get_env_var_as_int("NETID", 8762),
             "rpcport": self._get_env_var_as_int("RPC_PORT", 7783),
             "1inch_api": os.getenv("ONE_INCH_API", ""),
             "seednodes": self._get_env_var_as_str_array("SEED_NODES", []),
             "passphrase": os.getenv("PASSPHRASE", ""),
-            "rpc_password": os.getenv("RPC_PASSWORD", ""),
+            "userpass": os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD"),
             "use_watchers": self._get_env_var_as_bool("USE_WATCHERS", False),
             "i_am_seed": self._get_env_var_as_bool("I_AM_SEED", False),
             "is_bootstrap_node": self._get_env_var_as_bool("IS_BOOTSTRAP_NODE", False),
@@ -111,15 +150,7 @@ class ApiRequestProcessor:
                 "access_control_allow_origin": "*"
             }
         }
-
-        try:
-            self.logger.info(f"Generating {output_path}...")
-            with open(output_path, 'w') as f:
-                json.dump(config_data, f, indent=4)
-            self.logger.success(f"Successfully generated {output_path}")
-        except Exception as e:
-            self.logger.error(f"Error writing to {output_path}: {e}")
-            sys.exit(1)
+        return config_data
 
     def stop_container(self):
         try:
@@ -214,12 +245,11 @@ class ApiRequestProcessor:
             json.dump(self.coins_file, f, indent=4)
             self.logger.success("Successfully saved coins file.")
 
-    def _make_request(self, request_body: Dict[str, Any]) -> Dict[str, Any]:
+    def _make_request(self, url: str, request_body: Dict[str, Any]) -> Dict[str, Any]:
         """Wrapper for making API requests."""
-        self.logger.info(f"Sending request:\n{json.dumps(request_body, indent=2)}")
+        self.logger.info(f"Sending request to {url}:\n{json.dumps(request_body, indent=2)}")
         try:
-            request_body["userpass"] = self.rpc_password
-            response = self.session.post(self.api_url, json=request_body, timeout=60)
+            response = self.session.post(url, json=request_body, timeout=60)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as http_err:
@@ -237,16 +267,19 @@ class ApiRequestProcessor:
             return {"error": str(e)}
 
 
-    def _update_enabled_coins(self):
+    def _update_enabled_coins(self, node: Optional[NodeConfig] = None):
         """Calls get_enabled_coins and updates the internal set."""
-        self.logger.info("Updating list of enabled coins...")
+        target_node = node or self.config.nodes[0]
+        self.logger.info(f"Updating list of enabled coins from node: {target_node.name}")
+
+        node_url = target_node.api_url
         request_body = {
-            "userpass": self.config.openapi.userpass,
+            "userpass": target_node.userpass,
             "mmrpc": "2.0",
             "method": "get_enabled_coins",
             "id": 0
         }
-        response = self._make_request(request_body)
+        response = self._make_request(node_url, request_body)
         if "result" in response:
             self.enabled_coins = {coin['ticker'] for coin in response["result"].get("coins", [])}
             self.logger.success(f"Successfully updated list of enabled coins.")
@@ -324,31 +357,37 @@ class ApiRequestProcessor:
                 request_body = self._inject_cached_data(method, request_body)
 
                 # Dynamically set userpass from environment variable if available
-                request_body["userpass"] = self.rpc_password
+                request_body["userpass"] = self.config.nodes[0].userpass
                 
                 coins_active, coin = self.check_coin_is_active(request_body)
                 if not coins_active:
                     self.logger.error(f"Skipping request as activation for '{coin}' failed.")
                     continue
 
-                # self.logger.info(f"Executing request from {request_file.name}")
-                response = self._make_request(request_body)
+                # Determine example number from filename e.g., request_1.json → 1
+                try:
+                    example_number = int(request_file.stem.split("_")[1])
+                except (IndexError, ValueError):
+                    example_number = 1  # default fallback
 
-                if response:
-                    if "error" in response:
-                        response_filename = request_file.name.replace("request_", "error_")
-                    else:
-                        # Cache successful response data for subsequent calls
-                        self._cache_response_data(method, response)
-                        self.completed_methods.add(method)
-                        response_filename = request_file.name.replace("request_", "response_")
+                # Send to all local Docker nodes and save individual responses
+                node_responses = self.send_request_to_all_nodes(
+                    request_body=request_body,
+                    method_name=method,
+                    output_dir=method_path,
+                    example_number=example_number,
+                )
 
-                    response_path = method_path / response_filename
-                    with open(response_path, 'w') as f:
-                        json.dump(response, f, indent=2)
+                # Use node_a (or first) as baseline for caching and further logic
+                baseline_resp = node_responses.get("node_a") or next(iter(node_responses.values()))
 
-                    self.logger.info(f"Response:\n{json.dumps(response, indent=2)}")
-                    self.logger.save(f"Saved response to {response_path}")
+                # Cache data from baseline response if successful
+                if baseline_resp and "error" not in baseline_resp:
+                    self._cache_response_data(method, baseline_resp)
+                    self.completed_methods.add(method)
+
+                # Compare responses and log differences (optional for now)
+                compare_node_responses(node_responses, logger=self.logger)
 
     def _inject_cached_data(self, method: str, request_body: Dict[str, Any]) -> Dict[str, Any]:
         """Injects cached data from previous requests into the current request body."""
@@ -422,8 +461,9 @@ class ApiRequestProcessor:
             self.method_results_cache["unsigned_tx"] = {"tx_hex": result["tx_hex"]}
             self.logger.info(f"Cached unsigned transaction hex.")
 
-    def activate_coin(self, ticker: str, activation_type: str = 'default') -> bool:
-        self.logger.info(f"Attempting to activate '{ticker}'...")
+    def activate_coin(self, ticker: str, activation_type: str = 'default', node: Optional[NodeConfig] = None) -> bool:
+        target_node = node or self.config.nodes[0]
+        self.logger.info(f"Attempting to activate '{ticker}' on node '{target_node.name}'...")
         coin_info = self.coins_config.get(ticker)
         if not coin_info:
             self.logger.error(f"'{ticker}' not found in coins_config.json.")
@@ -578,20 +618,22 @@ class ApiRequestProcessor:
 
         if activation_method in self.v2_methods:
             init_request = {
-                "userpass": self.config.openapi.userpass,
+                "userpass": target_node.userpass,
                 "method": activation_method,
                 "mmrpc": "2.0",
                 "params": params
             }
         else: # v1 method
             init_request = {
-                "userpass": self.config.openapi.userpass,
+                "userpass": target_node.userpass,
                 "method": activation_method,
                 **params
             }
         
         self.logger.info(f"Sending activation request for '{ticker}' with method '{activation_method}'")
-        init_response = self._make_request(init_request)
+        # Activation requests are always sent to node_a
+        node_url = target_node.api_url
+        init_response = self._make_request(node_url, init_request)
 
         # ------------------------------------------------------------------
         # Graceful handling when coin is already active
@@ -606,14 +648,14 @@ class ApiRequestProcessor:
         ):
             self.logger.info(f"Coin '{ticker}' is already active – skipping activation.")
             # Refresh enabled coins to keep internal state in sync
-            self._update_enabled_coins()
+            self._update_enabled_coins(node=target_node)
             return True
 
         # Handle task-based vs direct activation
         if activation_method in self.v2_methods:
             if init_response and "result" in init_response and "task_id" in init_response["result"]:
                 task_id = init_response["result"]["task_id"]
-                return self._poll_task_status(task_id, ticker, activation_method)
+                return self._poll_task_status(task_id, ticker, activation_method, node=target_node)
             else:
                 self.logger.error(f"Task-based activation init failed for '{ticker}': {init_response}")
                 return False
@@ -621,32 +663,34 @@ class ApiRequestProcessor:
             # Handle legacy/direct activation
             if init_response and "result" in init_response and "error" not in init_response:
                 self.logger.success(f"Successfully activated '{ticker}' with direct method.")
-                self._update_enabled_coins()
+                self._update_enabled_coins(node=target_node)
                 return True
             else:
                 self.logger.error(f"Direct activation failed for '{ticker}': {init_response}")
                 return False
 
-    def _poll_task_status(self, task_id: int, ticker: str, init_method: str) -> bool:
+    def _poll_task_status(self, task_id: int, ticker: str, init_method: str, node: Optional[NodeConfig] = None) -> bool:
         # Derives the status method from the init method. e.g., task::enable_utxo::init -> task::enable_utxo::status
         status_method = init_method.replace("::init", "::status")
+        target_node = node or self.config.nodes[0]
 
-        self.logger.info(f"Polling status for task {task_id} using {status_method}")
+        self.logger.info(f"Polling status for task {task_id} on node {target_node.name} using {status_method}")
         for _ in range(20):  # Poll for max 100 seconds
             status_request = {
-                "userpass": self.config.openapi.userpass,
+                "userpass": target_node.userpass,
                 "method": status_method,
                 "mmrpc": "2.0",
                 "params": {"task_id": task_id}
             }
-            status_response = self._make_request(status_request)
+            node_url = target_node.api_url
+            status_response = self._make_request(node_url, status_request)
             if status_response and "result" in status_response:
                 status = status_response["result"].get("status")
                 details = status_response["result"].get("details")
                 self.logger.info(f"Activation status for '{ticker}' (Task {task_id}): {status}")
                 if status == "Ok":
                     self.logger.success(f"Successfully activated '{ticker}'. Details: {details}")
-                    self._update_enabled_coins()
+                    self._update_enabled_coins(node=target_node)
                     return True
                 elif status == "InProgress":
                     self.logger.info(f"Activation in progress for '{ticker}'. Details: {details}")
@@ -658,21 +702,23 @@ class ApiRequestProcessor:
             else:
                 self.logger.error(f"Failed to get status for task {task_id}: {status_response}")
                 return False
-        self.logger.error(f"Polling timed out for task {task_id} for coin '{ticker}'.")
+        self.logger.error(f"Polling timed out for task {task_id} via {status_method}.")
         return False
         
-    def disable_coin(self, ticker: str) -> bool:
+    def disable_coin(self, ticker: str, node: Optional[NodeConfig] = None) -> bool:
         """Disables a coin. This is always a v1 method."""
-        self.logger.info(f"Disabling coin '{ticker}'...")
+        target_node = node or self.config.nodes[0]
+        self.logger.info(f"Disabling coin '{ticker}' on node {target_node.name}...")
         request_body = {
-            "userpass": self.config.openapi.userpass,
+            "userpass": target_node.userpass,
             "method": "disable_coin",
             "coin": ticker
         }
-        response = self._make_request(request_body)
+        node_url = target_node.api_url
+        response = self._make_request(node_url, request_body)
         if response and response.get("result", {}).get("status") == "success":
             self.logger.success(f"Successfully disabled '{ticker}'.")
-            self._update_enabled_coins()
+            self._update_enabled_coins(node=target_node)
             return True
         else:
             self.logger.error(f"Failed to disable '{ticker}': {response}")
@@ -687,6 +733,7 @@ class ApiRequestProcessor:
         status_method: str,
         task_id: int,
         *,
+        node: Optional[NodeConfig] = None,
         timeout: int = 120,
         sleep_seconds: int = 5,
     ) -> Dict[str, Any] | None:
@@ -701,19 +748,19 @@ class ApiRequestProcessor:
         • If there is no `status` field but keys such as `wallet_balance` or
           `details` are present, we consider the task complete and successful.
         """
-
-        self.logger.info(f"Polling {status_method} for task_id {task_id} …")
+        target_node = node or self.config.nodes[0]
+        self.logger.info(f"Polling {status_method} for task_id {task_id} on node {target_node.name}…")
 
         start = time.time()
         while time.time() - start < timeout:
             req_body = {
-                "userpass": self.config.openapi.userpass,
+                "userpass": target_node.userpass,
                 "method": status_method,
                 "mmrpc": "2.0",
                 "params": {"task_id": task_id, "forget_if_finished": False},
             }
-
-            resp = self._make_request(req_body)
+            node_url = target_node.api_url
+            resp = self._make_request(node_url, req_body)
 
             if not resp or "result" not in resp:
                 self.logger.warning(f"{status_method} returned unexpected response: {resp}")
@@ -743,3 +790,104 @@ class ApiRequestProcessor:
 
         self.logger.error(f"Polling timed out for task {task_id} via {status_method}.")
         return None 
+
+    def send_request_to_all_nodes(
+        self,
+        request_body: Dict[str, Any],
+        method_name: str,
+        output_dir: Path,
+        example_number: int,
+    ) -> Dict[str, Dict[str, Any]]:
+        """Send *request_body* to every locally running KDF docker node.
+    
+        Nodes are detected via the standard port environment variables that mirror
+        those used in *utils/docker/docker-compose.yml*.
+    
+        A JSON response (or error) is saved for each node using the naming scheme
+        required by the sync script:
+    
+            {method_name}-{example_number}-{hd_mode}-{wasm_mode}-{response|error}.json
+            {method_name}-{hd_mode}-{wasm_mode}-{response|error}.json  (when no example #)
+    
+        The file is stored in *output_dir* which should correspond to the directory
+        where *py/kdf_tools.py get-kdf-responses* stores its examples.
+    
+        Returns a mapping ``{node_key: response_dict}`` that can later be passed to
+        :pyfunc:`compare_node_responses`.
+        """
+    
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+    
+        nodes_cfg = self.config.nodes
+    
+        responses: Dict[str, Dict[str, Any]] = {}
+    
+        for node in nodes_cfg:
+            body = copy.deepcopy(request_body)
+            body["userpass"] = node.userpass
+    
+            resp_json = self._make_request(node.api_url, body)
+            responses[node.name] = resp_json
+    
+            # ------------------------------------------------------------------
+            # Persist response to disk following the expected naming convention
+            # ------------------------------------------------------------------
+            hd_flag = "hd" if node.hd_mode else "nonhd"
+            wasm_flag = "wasm" if node.wasm_mode else "native"
+            suffix = "error" if "error" in resp_json else "response"
+    
+            file_stem = f"{method_name}-{example_number}-{hd_flag}-{wasm_flag}-{suffix}.json"
+            file_path = output_dir / file_stem
+            try:
+                with open(file_path, "w") as fp:
+                    json.dump(resp_json, fp, indent=2)
+                self.logger.save(f"Saved {suffix} from {node.name} → {file_path}")
+            except IOError as ioe:
+                self.logger.error(f"Failed to write response file {file_path}: {ioe}")
+    
+        return responses
+
+# ================================================================
+# Helper utilities for multi-node testing
+# ================================================================
+
+def compare_node_responses(
+    responses: Dict[str, Dict[str, Any]],
+    logger: Optional[KomodoLogger] = None,
+) -> Dict[str, Any]:
+    """Simple comparator for multi-node responses.
+
+    Takes the mapping produced by :pyfunc:`send_request_to_all_nodes` and
+    returns a summary dict highlighting nodes whose responses deviate from the
+    baseline (first entry in the mapping).
+    """
+
+    logger = logger or KomodoLogger("multi-node-request")
+
+    if not responses:
+        logger.warning("No responses provided for comparison.")
+        return {}
+
+    # Establish baseline from the first node inserted into the dict
+    baseline_node, baseline_resp = next(iter(responses.items()))
+    baseline_serialised = json.dumps(baseline_resp, sort_keys=True)
+
+    diff_summary: Dict[str, Any] = {}
+
+    for node, resp in responses.items():
+        serialised = json.dumps(resp, sort_keys=True)
+        if serialised != baseline_serialised:
+            diff_summary[node] = {
+                "matches_baseline": False,
+                "differences": {
+                    "baseline": baseline_resp,
+                    "current": resp,
+                },
+            }
+            logger.warning(f"❌ Response from {node} differs from {baseline_node}.")
+        else:
+            diff_summary[node] = {"matches_baseline": True}
+            logger.info(f"✅ Response from {node} matches baseline.")
+
+    return diff_summary 

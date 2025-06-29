@@ -36,7 +36,7 @@ pip install pytest requests
 | `START_KDF_CONTAINER` | `1` | When **`1`**, `pytest` will automatically run `docker compose up -d --build` <br/>and tear it down after the tests.  Set to **`0`** if you want to manage the node lifecycle yourself. |
 | `RPC_URL` | `http://127.0.0.1` | Base URL where the daemon listens. |
 | `RPC_PORT` | `7783` | RPC port exposed by the compose stack. |
-| `RPC_PASSWORD` | `RPC_CONTRoL_USERP@SSW0RD` | Authentication token used for every JSON-RPC call. |
+| `RPC_PASSWORD` | `RPC_UserP@SSW0RD` | Authentication token used for every JSON-RPC call. |
 | `WALLET_DIR` | – | Absolute path to the directory that stores the Z-coin wallet DB. <br/>Used by the *locked notes* test; omit to skip that test. |
 | `ZCOIN_TICKER` | `ARRR` | Ticker used in the locked notes test. |
 | `ZCOIN_WITHDRAW_AMOUNT` | `0.0001` | Withdrawal amount for the locked notes test. |

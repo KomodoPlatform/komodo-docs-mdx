@@ -19,7 +19,7 @@ arguments:
 * `RPC_URL` Base URL of the RPC endpoint (default: `http://127.0.0.1`)
 * `RPC_PORT` Port of the RPC service (default: `8778`)
 * `RPC_PASSWORD` RPC authentication token (default:
-  `RPC_CONTRoL_USERP@SSW0RD`)
+  `RPC_UserP@SSW0RD`)
 * `WALLET_DIR` Path that contains the Z-coin wallet DB (required for the
   locked notes test).
 * `ZCOIN_TICKER` Ticker symbol for the Z-coin test (default: `ARRR`).
@@ -214,7 +214,7 @@ class TestKDFMethods:
         """Ensure legacy and v2 RPC dispatchers return the same result."""
 
         legacy_req = {
-            "userpass": os.getenv("RPC_PASSWORD", "RPC_CONTRoL_USERP@SSW0RD"),
+            "userpass": os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD"),
             "method": "get_public_key",
             "id": 2,
         }

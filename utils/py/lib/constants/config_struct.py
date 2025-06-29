@@ -116,7 +116,7 @@ class DirectoryConfig:
     unified_method_mapping_report: str = "kdf_unified_method_map.json"
     kdf_gap_analysis_report: str = "kdf_gap_analysis.json"
     v2_no_param_methods_report: str = "v2_no_param_methods.json"
-    methods_error_responses_report: str = "methods_error_responses.json"
+    kdf_error_responses_report: str = "kdf_error_responses.json"
 
 
 
@@ -160,7 +160,7 @@ class DirectoryConfig:
             "mdx_json_example_methods_report", "mdx_json_example_method_paths_report",
             "mdx_openapi_methods_report", "mdx_openapi_method_paths_report",
             "unified_method_mapping_report", "kdf_gap_analysis_report",
-            "v2_no_param_methods_report", "methods_error_responses_report"
+            "v2_no_param_methods_report", "kdf_error_responses_report"
         ]
 
         for attr in report_attributes:
@@ -437,6 +437,17 @@ class VersionMappingConfig:
 
 
 @dataclass
+class NodeConfig:
+    """Represents the configuration for a single test node."""
+    name: str
+    port: int
+    api_url: str
+    hd_mode: bool = False
+    wasm_mode: bool = False
+    userpass: Optional[str] = None
+
+
+@dataclass
 class EnhancedKomodoConfig:
     """Enhanced configuration with flexible directory management and version handling."""
     
@@ -445,6 +456,40 @@ class EnhancedKomodoConfig:
     versions: Dict[str, VersionConfig] = field(default_factory=VersionConfig.create_version_configs)
     version_mapping: VersionMappingConfig = field(default_factory=VersionMappingConfig)
     openapi: OpenAPIConfig = field(default_factory=OpenAPIConfig)
+    nodes: List[NodeConfig] = field(default_factory=lambda: [
+        NodeConfig(
+            name="node_a",
+            port=int(os.getenv("RPC_PORT", "7783")),
+            api_url=f"{os.getenv('RPC_URL', 'http://127.0.0.1')}:{int(os.getenv('RPC_PORT', '8778'))}",
+            hd_mode=False,
+            wasm_mode=False,
+            userpass=os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD")
+        ),
+        NodeConfig(
+            name="node_b",
+            port=int(os.getenv("RPC_PORT_NODE_B", "8779")),
+            api_url=f"{os.getenv('RPC_URL', 'http://127.0.0.1')}:{int(os.getenv('RPC_PORT_NODE_B', '8779'))}",
+            hd_mode=False,
+            wasm_mode=False,
+            userpass=os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD")
+        ),
+        NodeConfig(
+            name="node_c",
+            port=int(os.getenv("RPC_PORT_NODE_C", "8780")),
+            api_url=f"{os.getenv('RPC_URL', 'http://127.0.0.1')}:{int(os.getenv('RPC_PORT_NODE_C', '8780'))}",
+            hd_mode=True,
+            wasm_mode=True,
+            userpass=os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD")
+        ),
+        NodeConfig(
+            name="node_d",
+            port=int(os.getenv("RPC_PORT_NODE_D", "8781")),
+            api_url=f"{os.getenv('RPC_URL', 'http://127.0.0.1')}:{int(os.getenv('RPC_PORT_NODE_D', '8781'))}",
+            hd_mode=False,
+            wasm_mode=True,
+            userpass=os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD")
+        ),
+    ])
     
     # Environment and deployment settings
     environment: DeploymentEnvironment = DeploymentEnvironment.DEVELOPMENT

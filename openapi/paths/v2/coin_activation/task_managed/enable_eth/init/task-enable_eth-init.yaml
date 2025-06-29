@@ -28,61 +28,68 @@
               params:
                 type: object
                 properties:
+                  nodes:
+                    type: array
+                    description: One or more RPC nodes used to communicate with the
+                      Ethereum network. Each object must include a `url` (string)
+                      and may include `komodo_proxy` (boolean).
+                  swap_contract_address:
+                    type: string
+                    description: Address of the Komodo atomic-swap smart-contract
+                      deployed on the target chain.
                   ticker:
                     type: string
-                    description: Ticker of the ETH-based coin you want to enable.
-                  mode:
-                    description: A standard [ActivationMode](/komodo-defi-framework/api/common_structures/activation/#activation-mode)
-                      object.
-                    $ref: ../../components/schemas/ActivationMode.yaml
-                  eth_node_urls:
-                    type: string
-                    description: A list of ETH node URLs, used for validation of EVM
-                      token transactions. It's recommended to add as many servers
-                      as possible. The URLs list can be found at [https://ethnodes.com/](https://ethnodes.com/).
-                  evm_tokens_requests:
-                    description: A list of standard [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request)
-                      objects.
-                    $ref: ../../components/schemas/TokensRequest.yaml
-                  address_format:
-                    description: Overwrites the address format from coins file, if
-                      set. A standard [AddressFormat](/komodo-defi-framework/api/common_structures/wallet/#address-format)
-                      object.
-                    $ref: ../../components/schemas/AddressFormat.yaml
-                  allow_evm_unsafe_conf:
+                    description: Ticker of the ETH-based platform coin you want to
+                      enable.
+                  contract_supports_watchers:
                     type: boolean
-                    description: If true, allows eth\_node\_urls to be empty. **Warning:**
-                      it is highly unsafe to do so as it may lead to invalid EVM transactions
-                      generation and tokens burning.
+                    description: Set to `true` if the deployed swap contract supports
+                      watcher extensions.
                     default: false
+                  erc20_tokens_requests:
+                    type: array
+                    description: Token activation requests to execute along with the
+                      platform coin.
+                  fallback_swap_contract:
+                    type: string
+                    description: Optional fallback contract address used when the
+                      primary `swap_contract_address` fails.
+                  gap_limit:
+                    type: integer
+                    description: HD-wallet gap-limit to use when scanning for used
+                      addresses.
+                    default: 20
                   get_balances:
                     type: boolean
-                    description: If false, coin and token balances will not be returned
-                      in the response, and the response will be returned more quickly.
+                    description: When `false`, balances are not queried after activation,
+                      making the call return faster.
                     default: true
+                  path_to_address:
+                    type: object
+                    description: Explicit HD path of the address to use for swaps.
+                      Applies only to HD wallets.
+                  priv_key_policy:
+                    type: object
+                    description: Determines where the private key comes from.
+                    default: '{ "type": "ContextPrivKey" }'
                   required_confirmations:
                     type: integer
-                    description: Confirmations to wait for steps in swap.
+                    description: Number of block confirmations to wait for critical
+                      swap steps.
                     default: 3
-                  requires_notarization:
-                    type: boolean
-                    description: Has no effect on ETH.
-                    default: true
-                  tx_history:
-                    type: boolean
-                    description: If true the Komodo DeFi Framework API will preload
-                      transaction history as a background process. Must be set to
-                      true to use the [my\_tx\_history](/komodo-defi-framework/api/legacy/my_tx_history/#my-tx-history)
-                      method.
-                    default: true
-                  utxo_merge_params:
-                    description: A standard [UtxoMergeParams](/komodo-defi-framework/api/common_structures/activation/#utxo-merge-params)
-                      object. Used to reduce a wallet's UTXO count in cases where
-                      it is causing significantly slower RPC responses.
-                    $ref: ../../components/schemas/UtxoMergeParams.yaml
+                  rpc_mode:
+                    type: string
+                    description: Set to `"Metamask"` when activating through MetaMask
+                      (web only).
+                    default: '"Default"'
+                  swap_v2_contracts:
+                    type: object
+                    description: 'Advanced: addresses of maker-, taker- and NFT-swap
+                      V2 contracts, if they differ from the defaults.'
                 required:
+                - nodes
+                - swap_contract_address
                 - ticker
-                - mode
             required:
             - userpass
             - method

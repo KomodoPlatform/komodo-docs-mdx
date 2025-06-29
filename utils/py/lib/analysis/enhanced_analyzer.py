@@ -12,6 +12,7 @@ Uses pattern matching and method categorization for intelligent parameter infere
 """
 
 import re
+import json
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Any, Union

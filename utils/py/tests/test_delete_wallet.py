@@ -59,7 +59,7 @@ def _write_mm2(wallet_name: str, wallet_pw: str):
             "seed02.kmdefi.net",
         ],
         "passphrase": "movie near museum glare gossip clerk adapt chair inch child erupt verify",
-        "rpc_password": "RPC_CONTRoL_USERP@SSW0RD",
+        "rpc_password": "RPC_UserP@SSW0RD",
         "use_watchers": False,
         "i_am_seed": False,
         "is_bootstrap_node": False,
@@ -113,7 +113,7 @@ def rpc(userpass: str, method: str, params: dict) -> dict:
 
 def main() -> None:
     cfg = json.loads(MM2_FILE.read_text())
-    userpass = cfg.get("rpc_password", "RPC_CONTRoL_USERP@SSW0RD")
+    userpass = cfg.get("rpc_password", "RPC_UserP@SSW0RD")
     active_pass = ACTIVE_WALLET_PW
     wallet_to_delete = DELETE_WALLET_NAME
     delete_pass = DELETE_WALLET_PW

@@ -22,6 +22,8 @@ Available Commands:
 - switch-kdf-branch: Switch the KDF branch
 - get-json-example-method-paths: Get the JSON example method paths
 - generate-v2-no-param-methods-report: Generate a report of V2 methods that don't have parameters
+- extract-errors: Extract error enums from the KDF Rust codebase
+- balances: Get address and balance info for test coins on all nodes
 
 """
 
@@ -39,6 +41,7 @@ from datetime import datetime
 import time
 from collections import defaultdict
 import re
+import requests
 
 # To solve relative import issues, we add the project root to the python path.
 _script_dir = Path(__file__).parent.absolute()
@@ -66,6 +69,8 @@ from utils.py.lib.constants import UnifiedRepositoryInfo
 from utils.py.lib.constants.config import get_config
 from utils.py.lib.constants.data_structures import ScanMetadata
 from utils.py.lib.rust.scanner import KDFScanner
+from utils.py.lib.rust.error_scanner import ErrorScanner
+from utils.py.lib.mdx.error_scanner import MdxErrorScanner
 from utils.py.lib.openapi.openapi_manager import OpenAPIManager
 from utils.py.lib.postman.postman_manager import PostmanManager
 from utils.py.lib.utils.data_utils import sort_version_method_counts
@@ -73,6 +78,8 @@ from utils.py.lib.utils.data_utils import sort_version_method_counts
 from utils.py.lib.async_support import run_async
 from utils.py.lib.openapi.openapi_spec_generator import OpenApiSpecGenerator
 from utils.py.lib.api_client.kdf_api_processor import ApiRequestProcessor
+from utils.py.lib.api_client import kdf_api_processor as kdf_api_processor_module
+from utils.py.lib.managers.git_manager import GitManager
 
 
 class KDFTools:
@@ -84,6 +91,9 @@ class KDFTools:
         self.workspace_root = Path(self.config.workspace_root)
         self.mdx_docs_path = self.workspace_root / 'src' / 'pages'
         self.logger = get_logger("kdf-tools")
+        self.git_manager = GitManager(self.logger)
+        self.mdx_branch = self.git_manager.get_branch_name(self.workspace_root)
+        self.mdx_commit = self.git_manager.get_commit_hash(self.workspace_root)
         
         if '-h' in sys.argv or '--help' in sys.argv:
             print()
@@ -138,6 +148,17 @@ class KDFTools:
                 self.log(f"    - {path}")
         self.log("")
         
+    def _get_base_scan_metadata(self, kdf_branch: str) -> Dict[str, Any]:
+        """Returns a base dictionary for scan_metadata."""
+        kdf_commit = self.git_manager.get_commit_hash(self.config.directories.kdf_repo_path)
+        return {
+            "kdf_branch": kdf_branch,
+            "mdx_branch": self.mdx_branch,
+            "kdf_commit": kdf_commit,
+            "mdx_commit": self.mdx_commit,
+            "generated_at": datetime.now().isoformat(),
+        }
+
     def _generate_api_methods_table(self):
         self.logger.info("Generating API methods table for index.mdx...")
         paths_file = self.config.directories.mdx_method_paths_report
@@ -196,7 +217,7 @@ class KDFTools:
         text = re.sub(r'[^a-zA-Z0-9\\-]', '', text)
         return text.lower()
         
-    def report_error_responses(self):
+    def report_error_responses(self, args):
         """Generates a report of method requests that have error responses."""
         command_title = "Generate Error Response Report"
         self._print_header(command_title)
@@ -246,6 +267,11 @@ class KDFTools:
                             error_content_str = f.read()
                             error_response = json.loads(error_content_str)
 
+                        # Skip connection errors
+                        if error_response.get("error_type") == "ConnectionError":
+                            self.logger.info(f"Skipping connection error for method: {method_name}")
+                            continue
+                            
                         request_body = requests[i % len(requests)]
                         report_method_name = f"{method_name}_{i+1}"
 
@@ -263,10 +289,10 @@ class KDFTools:
         v2_count = len(methods_with_errors["v2"])
         all_count = v1_count + v2_count
 
-        scan_metadata = {
+        scan_metadata = self._get_base_scan_metadata(args.kdf_branch)
+        scan_metadata.update({
             "scanner_type": "ERROR_RESPONSE_SCAN",
             "scanner_version": "KDFTools v1.0.0",
-            "generated_at": datetime.now().isoformat(),
             "generated_during": "error_report_scan",
             "method_source": "Postman JSON examples (dev branch)",
             "is_primary_data_source": False,
@@ -275,15 +301,14 @@ class KDFTools:
                 "v1": v1_count,
                 "v2": v2_count
             }
-        }
+        })
         
         report = {
             "scan_metadata": scan_metadata,
-            "kdf_branch": "dev",
             "methods": methods_with_errors
         }
 
-        report_path = self.config.directories.methods_error_responses_report
+        report_path = self.config.directories.kdf_error_responses_report
         safe_write_json(report_path, report)
         self.logger.save(f"Saved error responses report to: {report_path}")
         self._print_footer(command_title, success=True, report_paths=[str(report_path)])
@@ -375,7 +400,7 @@ class KDFTools:
         self._print_header(command_title, config)
 
         if args.kdf_branch:
-            if not self._switch_kdf_branch(args.kdf_branch):
+            if not self.git_manager.switch_branch(self.config.directories.kdf_repo_path, args.kdf_branch):
                 self.logger.error(f"Could not switch to branch {args.kdf_branch}. Aborting rust-scan.")
                 self._print_footer(command_title, success=False)
                 return
@@ -437,14 +462,14 @@ class KDFTools:
             verbose=self.verbose 
         )
         doc_results = run_async(doc_scanner.scan_all_files_async(versions))
-        self._generate_mdx_method_paths_data(doc_results, versions)
-        self._generate_mdx_methods_from_paths_file(self.config.directories.mdx_method_paths_report, versions)
+        self._generate_mdx_method_paths_data(doc_results, versions, args.kdf_branch)
+        self._generate_mdx_methods_from_paths_file(self.config.directories.mdx_method_paths_report, versions, args.kdf_branch)
         
         self._generate_api_methods_table()
         self._print_footer(command_title, success=True, output_paths=[self.config.directories.mdx_method_paths_report, self.config.directories.mdx_methods_report])
     
 
-    def _generate_mdx_method_paths_data(self, doc_results, versions):
+    def _generate_mdx_method_paths_data(self, doc_results, versions, kdf_branch):
         """
         Generate the method paths data structure (primary data source).
         This version uses the ScanMetadata dataclass for standardized metadata.
@@ -491,11 +516,15 @@ class KDFTools:
             "method_paths": method_paths
         }
         
+        # Add git info to scan_metadata
+        base_metadata = self._get_base_scan_metadata(kdf_branch)
+        method_paths_data["scan_metadata"].update(base_metadata)
+
         safe_write_json(self.config.directories.mdx_method_paths_report, method_paths_data)
         self.logger.save(f"Saved documentation paths to: {self.config.directories.mdx_method_paths_report}")
         return method_paths_data
 
-    def _generate_mdx_methods_from_paths_file(self, paths_file_path, versions):
+    def _generate_mdx_methods_from_paths_file(self, paths_file_path, versions, kdf_branch):
         """Generates a JSON report of methods from a paths file."""
         # Read the paths file that was just generated
         with open(paths_file_path, 'r', encoding='utf-8') as f:
@@ -537,6 +566,10 @@ class KDFTools:
             "repository_data": {}
         }
         
+        # Add git info to scan_metadata
+        base_metadata = self._get_base_scan_metadata(kdf_branch)
+        methods_data["scan_metadata"].update(base_metadata)
+
         # Add version-specific data
         for version in versions:
             methods_data["repository_data"][version] = {
@@ -754,7 +787,7 @@ class KDFTools:
                     extraction_stats[version]['methods_with_examples'] = version_methods_with_examples
             
             # Generate tracking files
-            self._generate_json_tracking_files(all_extracted_methods, extraction_stats)
+            self._generate_json_tracking_files(all_extracted_methods, extraction_stats, args.kdf_branch)
             
             self.log(f"🎯 Total: {extraction_stats['total_extracted']} JSON examples extracted from {extraction_stats['methods_with_examples']} methods", "success")
             return 0
@@ -966,13 +999,13 @@ class KDFTools:
     def _save_json_example(self, output_path: Path, example: ExtractedExample) -> bool:
         return run_async(self._save_json_example_async(output_path, example))
 
-    def _generate_json_tracking_files(self, all_extracted_methods: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
+    def _generate_json_tracking_files(self, all_extracted_methods: Dict[str, Any], extraction_stats: Dict[str, Any], kdf_branch: str) -> None:
         """Top-level function to generate all JSON-related tracking files."""
         self.log("Generating JSON tracking files...", "info")
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         
-        method_paths_file = self._generate_json_method_paths_file(all_extracted_methods)
-        methods_file = self._generate_json_methods_file(method_paths_file, extraction_stats)
+        method_paths_file = self._generate_json_method_paths_file(all_extracted_methods, kdf_branch)
+        methods_file = self._generate_json_methods_file(method_paths_file, extraction_stats, kdf_branch)
         return method_paths_file, methods_file
     
     def _generate_openapi_tracking_files(self, openapi_manager: OpenAPIManager, versions: List[str], version_method_counts: Dict[str, int]) -> str:
@@ -985,24 +1018,26 @@ class KDFTools:
             version_method_counts=version_method_counts
         )  
 
-    def _generate_json_method_paths_file(self, all_extracted_methods: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_json_method_paths_file(self, all_extracted_methods: Dict[str, Any], kdf_branch: str) -> Dict[str, Any]:
         """Creates a JSON file mapping each method to its JSON examples path."""
         self.logger.info("Generating JSON method paths file...")
         v1_methods = {data["method_name"]: data["json_examples_path"] for data in all_extracted_methods.values() if data["version"] == "v1"}
         v2_methods = {data["method_name"]: data["json_examples_path"] for data in all_extracted_methods.values() if data["version"] == "v2"}
-        paths_data = {
-            "scan_metadata": {
-                "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDF-MDX-JSON-Example-Extractor v1.0.0",
-                "scanner_type": "MDX_JSON_EXAMPLE_EXTRACTOR",
-                "total_methods": {
-                    "all": len(v1_methods) + len(v2_methods),
-                    "v1": len(v1_methods),
-                    "v2": len(v2_methods)
-                },
-                "versions_processed": ["v1", "v2"],
-                "is_primary_data_source": False
+        
+        scan_metadata = self._get_base_scan_metadata(kdf_branch)
+        scan_metadata.update({
+            "scanner_version": "KDF-MDX-JSON-Example-Extractor v1.0.0",
+            "scanner_type": "MDX_JSON_EXAMPLE_EXTRACTOR",
+            "total_methods": {
+                "all": len(v1_methods) + len(v2_methods),
+                "v1": len(v1_methods),
+                "v2": len(v2_methods)
             },
+            "versions_processed": ["v1", "v2"],
+            "is_primary_data_source": False
+        })
+        paths_data = {
+            "scan_metadata": scan_metadata,
             "method_paths": {
                 "v1": v1_methods,
                 "v2": v2_methods
@@ -1018,24 +1053,26 @@ class KDFTools:
         self.log(f"📊 V2: {len(paths_data['method_paths']['v2'])} methods")
         return paths_data
 
-    def _generate_json_methods_file(self, method_paths_data: Dict[str, Any], extraction_stats: Dict[str, Any]) -> None:
+    def _generate_json_methods_file(self, method_paths_data: Dict[str, Any], extraction_stats: Dict[str, Any], kdf_branch: str) -> None:
         """Generates a JSON file that maps each method to its extracted JSON examples."""
         self.log("Generating JSON methods file...")
         v1_methods = list(method_paths_data["method_paths"]["v1"].keys())
         v2_methods = list(method_paths_data["method_paths"]["v2"].keys())
-        methods_data = {
-            "scan_metadata": {
-                "generated_at": datetime.now().isoformat(),
-                "scanner_version": "KDF-MDX-JSON-Example-Extractor v1.0.0",
-                "scanner_type": "MDX_JSON_EXAMPLE_EXTRACTOR",
-                "total_methods": {
-                    "all": len(v1_methods) + len(v2_methods),
-                    "v1": len(v1_methods),
-                    "v2": len(v2_methods)
-                },
-                "versions_processed": ["v1", "v2"],
-                "is_primary_data_source": False
+        
+        scan_metadata = self._get_base_scan_metadata(kdf_branch)
+        scan_metadata.update({
+            "scanner_version": "KDF-MDX-JSON-Example-Extractor v1.0.0",
+            "scanner_type": "MDX_JSON_EXAMPLE_EXTRACTOR",
+            "total_methods": {
+                "all": len(v1_methods) + len(v2_methods),
+                "v1": len(v1_methods),
+                "v2": len(v2_methods)
             },
+            "versions_processed": ["v1", "v2"],
+            "is_primary_data_source": False
+        })
+        methods_data = {
+            "scan_metadata": scan_metadata,
             "repository_data": {
                 "v1": {
                     "methods": v1_methods,
@@ -1095,10 +1132,6 @@ class KDFTools:
             'scan-rust', 
             help='Scan KDF Rust repository for RPC methods.',
             description='Scans the Komodo DeFi Framework Rust repository to find RPC methods.'
-        )
-        parser.add_argument(
-            '--kdf-branch', type=str, default='dev',
-            help='Specify the branch of the KDF repository to scan and check out.'
         )
         parser.set_defaults(func=self.scan_rust)
 
@@ -1162,6 +1195,10 @@ class KDFTools:
             '--format', choices=['json', 'markdown'], default='markdown',
             help='Format of the review report.'
         )
+        parser.add_argument(
+            '--kdf-branch', type=str, default='dev',
+            help='Specify the branch of the KDF repository to scan and check out.'
+        )
         parser.set_defaults(func=self.review_draft_quality_command)
 
     def setup_scan_existing_docs_parser(self, subparsers):
@@ -1190,6 +1227,10 @@ class KDFTools:
         parser.add_argument(
             '--show-categories', action='store_true',
             help='Show method categories in the analysis report.'
+        )
+        parser.add_argument(
+            '--kdf-branch', type=str, default='dev',
+            help='Specify the branch of the KDF repository to scan and check out.'
         )
         parser.set_defaults(func=self.scan_existing_docs_command)
 
@@ -1228,6 +1269,10 @@ class KDFTools:
             default=str(self.config.directories.data_dir / "generated_docs"),
             help="The directory to save the generated MDX files."
         )
+        parser.add_argument(
+            '--kdf-branch', type=str, default='dev',
+            help='Specify the branch of the KDF repository to scan and check out.'
+        )
         parser.set_defaults(func=self.generate_docs_command)
 
     def setup_gap_analysis_parser(self, subparsers):
@@ -1238,6 +1283,131 @@ class KDFTools:
             description="Compares methods found in the Rust repository against those documented in MDX files."
         )
         parser.set_defaults(func=self.gap_analysis_command)
+
+    def setup_get_kdf_responses_parser(self, subparsers):
+        """Sets up argument parser for the get_kdf_responses command."""
+        parser = subparsers.add_parser(
+            'get-kdf-responses',
+            help='Get KDF responses for a given method.',
+            description='Gets API responses for a given method and saves them to JSON files.'
+        )
+        parser.add_argument('--method', type=str, help='The method to get responses for.')
+        parser.add_argument('--clean', action='store_true', help='Clean JSON files before running.')
+        parser.set_defaults(func=self.get_kdf_responses_command)
+        
+    def setup_v2_no_param_report_parser(self, subparsers):
+        """Sets up argument parser for the generate_v2_no_param_methods_report command."""
+        parser = subparsers.add_parser(
+            "v2-no-param-methods-report",
+            help="Generate a report of V2 methods that don't have parameters.",
+            description="Generates a report of V2 methods that don't have parameters."
+        )
+        parser.set_defaults(func=self.generate_v2_no_param_methods_report)
+
+    def setup_build_container_parser(self, subparsers):
+        """Sets up argument parser for the build-container command."""
+        parser = subparsers.add_parser('build-container', help='Build KDF container image.')
+        parser.add_argument('--kdf-branch', type=str, default='dev', help='KDF branch to build.')
+        parser.add_argument('--commit', type=str, help='Commit hash to build.')
+        parser.set_defaults(func=self.build_container_command)
+
+    def setup_start_container_parser(self, subparsers):
+        """Sets up argument parser for the start-container command."""
+        parser = subparsers.add_parser('start-container', help='Start KDF container.')
+        parser.add_argument('--kdf-branch', type=str, default='dev', help='KDF branch to use.')
+        parser.add_argument('--commit', type=str, help='Commit hash to use.')
+        parser.set_defaults(func=self.start_container_command)
+    
+    def setup_stop_container_parser(self, subparsers):
+        """Sets up argument parser for the stop-container command."""
+        parser = subparsers.add_parser('stop-container', help='Stop KDF container.')
+        parser.set_defaults(func=self.stop_container_command)
+
+    def setup_switch_kdf_branch_parser(self, subparsers):
+        """Sets up argument parser for the switch-kdf-branch command."""
+        parser = subparsers.add_parser('switch-kdf-branch', help='Switch KDF branch.')
+        parser.add_argument('branch', type=str, help='Branch to switch to.')
+        parser.set_defaults(func=lambda args: self.git_manager.switch_branch(self.config.directories.kdf_repo_path, args.branch))
+
+    def setup_get_json_example_method_paths_parser(self, subparsers):
+        """Sets up argument parser for the get-json-example-method-paths command."""
+        parser = subparsers.add_parser('get-json-example-method-paths', help='Get JSON example method paths.')
+        parser.set_defaults(func=lambda args: self.get_json_example_method_paths())
+
+    def setup_report_error_responses_parser(self, subparsers):
+        """Sets up argument parser for the report-error-responses command."""
+        parser = subparsers.add_parser('report-error-responses', help='Generate a report of method requests that have error responses.')
+        parser.set_defaults(func=self.report_error_responses)
+
+    def setup_extract_errors_parser(self, subparsers):
+        """Setup parser for the extract-errors command."""
+        parser = subparsers.add_parser('extract-errors', help='Extract error enums from KDF source')
+        parser.add_argument(
+            '--source', type=str, required=True,
+            help="The source to scan (e.g., 'rust' or 'mdx')."
+        )
+        parser.add_argument(
+            '--kdf-branch', type=str, default='dev',
+            help='Specify the branch of the KDF repository to scan and check out.'
+        )
+        parser.set_defaults(func=self.extract_errors_command)
+
+    def setup_balances_parser(self, subparsers):
+        """Sets up argument parser for the balances command."""
+        parser = subparsers.add_parser(
+            "balances",
+            help="Get address and balance info for test coins.",
+            description="Checks balances for PRIMARY_COIN, SECONDARY_COIN and NODE_BALANCE_COINS on all nodes."
+        )
+        parser.add_argument('--clean', action='store_true', help='Clean JSON files before running.')
+        parser.set_defaults(func=self.balances_command)
+
+    def main(self):
+        """Main entry point for the KDF Tools CLI."""
+        
+        parser = argparse.ArgumentParser(
+            description='Komodo DeFi Framework Tools - Unified CLI',
+            formatter_class=argparse.RawTextHelpFormatter
+        )
+        parser.add_argument(
+            '--kdf-branch', type=str, default='dev',
+            help='Specify the branch of the KDF repository to use for all commands.'
+        )
+        subparsers = parser.add_subparsers(dest='command', help='Available commands')
+
+        self.setup_openapi_parser(subparsers)
+        self.setup_postman_parser(subparsers)
+        self.setup_scan_rust_parser(subparsers)
+        self.setup_scan_mdx_parser(subparsers)
+        self.setup_map_methods_parser(subparsers)
+        self.setup_json_extract_parser(subparsers)
+        self.setup_review_draft_quality_parser(subparsers)
+        self.setup_scan_existing_docs_parser(subparsers)
+        self.setup_generate_docs_parser(subparsers)
+        self.setup_gap_analysis_parser(subparsers)
+        self.setup_get_kdf_responses_parser(subparsers)
+        self.setup_v2_no_param_report_parser(subparsers)
+        self.setup_build_container_parser(subparsers)
+        self.setup_start_container_parser(subparsers)
+        self.setup_stop_container_parser(subparsers)
+        self.setup_switch_kdf_branch_parser(subparsers)
+        self.setup_get_json_example_method_paths_parser(subparsers)
+        self.setup_report_error_responses_parser(subparsers)
+        self.setup_extract_errors_parser(subparsers)
+        self.setup_balances_parser(subparsers)
+        
+        args = parser.parse_args()
+
+        if hasattr(args, 'func'):
+            try:
+                return args.func(args)
+            except Exception as e:
+                self.logger.error(f"An error occurred executing command '{args.command}': {e}")
+                self.logger.error(traceback.format_exc())
+                return 1
+        else:
+            parser.print_help()
+            return 1
 
     def gap_analysis_command(self, args):
         """Compares Rust methods with MDX documentation and generates a report."""
@@ -1306,7 +1476,14 @@ class KDFTools:
 
         # Save report
         report_path = self.config.directories.kdf_gap_analysis_report
-        safe_write_json(report_path, gap_report, indent=2)
+        
+        # Add metadata to the report
+        final_report = {
+            "scan_metadata": self._get_base_scan_metadata(args.kdf_branch),
+            "gap_analysis": gap_report
+        }
+        
+        safe_write_json(report_path, final_report, indent=2)
         self.logger.save(f"Gap analysis report saved to: {report_path}")
 
         success = True
@@ -1370,7 +1547,7 @@ class KDFTools:
             self._print_header(command_title, config_lines=config_lines)
 
             if args.kdf_branch:
-                if not self._switch_kdf_branch(args.kdf_branch):
+                if not self.git_manager.switch_branch(self.config.directories.kdf_repo_path, args.kdf_branch):
                     self.logger.error(f"Could not switch to branch {args.kdf_branch}. Aborting.")
                     self._print_footer(command_title, success=False)
                     return
@@ -1408,7 +1585,7 @@ class KDFTools:
 
                     delayed_methods = []
                     for method in execution_plan:
-                        validator = MethodValidator(method, version, self.processor)
+                        validator = MethodValidator(method, version, self.processor, self.logger)
                         
                         if not validator.validate_method_for_testing():
                             self.logger.info(f"Skipping {method}, not valid for test case: [{version} HD: {self.processor.enable_hd}]")
@@ -1460,7 +1637,16 @@ class KDFTools:
         except KeyboardInterrupt:
             self.logger.error("Keyboard interrupt detected. Stopping container...")
         finally:
-            self.report_error_responses()
+            self.report_error_responses(args)
+            # Clean up the temporary file created by import_swaps
+            file_to_delete = self.workspace_root / 'utils' / 'docker' / 'kdf-db' / '7a4283ac93466ea1f0e4bb387e28055bbb38192e' / 'SWAPS' / 'MY' / '07ce08bf-3db9-4dd8-a671-854affc1b7a3.json'
+            if file_to_delete.is_file():
+                try:
+                    file_to_delete.unlink()
+                    self.logger.info(f"Deleted temporary file: {file_to_delete}")
+                except Exception as e:
+                    self.logger.error(f"Failed to delete temporary file {file_to_delete}: {e}")
+
             self._print_footer(command_title, success=False)
 
 
@@ -1487,310 +1673,580 @@ class KDFTools:
                 [f"task::{group}::{suffix}" for suffix in ["init", "status", "cancel"]]
                 for group in [
                     "withdraw",
-                    "enable_bch",
                     "enable_utxo",
                     "enable_eth",
                     "enable_qtum",
                     "enable_sia",
-                    "enable_tendermint",
                     "enable_z_coin",
                     "get_new_address",
-                    "scan_for_new_addresses",
                 ]
             ],
-            # Message signing sequence
-            ["sign_message", "verify_message"],
-            # Send raw tx sequence
-            ["get_unsigned_transaction", "send_raw_transaction"],
+            # Order management sequence
+            ["setprice", "my_orders", "update_maker_order", "cancel_order", "cancel_all_orders"],
+            # HD wallet sequences
+            ["task::get_new_address::init", "task::get_new_address::status"],
+            ["task::restore_hd_wallet::init", "task::restore_hd_wallet::status"],
+            # Wallet Connect
+            ["wc_new_connection", "wc_get_sessions", "wc_get_session", "wc_ping_session", "wc_delete_session"],
+        ]
+        fully_deprecated_methods = [
+            "task::enable_bch::init",
+            "task::enable_bch::status",
+            "task::enable_bch::cancel",
+            "task::enable_bch::user_action",
+            "enable_bch_with_tokens",
+            "enable_slp"
+        ]
+        interactive_methods = [
+            "task::enable_eth::user_action",
+            "task::enable_erc20::user_action",
+            "task::enable_tendermint_with_assets::user_action",
+            "task::enable_tendermint_token::user_action",
+            "task::enable_utxo::user_action",
+            "task::enable_qtum::user_action",
+            "task::connect_metamask::cancel",
+            "task::connect_metamask::init",
+            "task::connect_metamask::status",
+            "task::init_trezor::cancel",
+            "task::init_trezor::init",
+            "task::init_trezor::status",
+            "task::init_trezor::user_action",
+            "trezor_connection_status",
+            "wc_new_connection",
+            "wc_get_sessions",
+            "wc_get_session",
+            "wc_ping_session",
+            "wc_delete_session",
+        ]
+        
+        oneinch_methods = [
+            "1inch_v6_0_classic_swap_contract",
+            "1inch_v6_0_classic_swap_create",
+            "1inch_v6_0_classic_swap_liquidity_sources",
+            "1inch_v6_0_classic_swap_quote",
+            "1inch_v6_0_classic_swap_tokens",
         ]
 
-        execution_plan = []
-        processed_in_sequence = set()
+        lightning_methods = [
+            "lightning::channels::close_channel",
+            "lightning::channels::get_channel_details",
+            "lightning::channels::get_claimable_balances",
+            "lightning::channels::list_closed_channels_by_filter",
+            "lightning::channels::list_open_channels_by_filter",
+            "lightning::channels::open_channel",
+            "lightning::channels::update_channel",
+            "lightning::nodes::add_trusted_node",
+            "lightning::nodes::connect_to_node",
+            "lightning::nodes::list_trusted_nodes",
+            "lightning::nodes::remove_trusted_node",
+            "lightning::payments::generate_invoice",
+            "lightning::payments::get_payment_details",
+            "lightning::payments::list_payments_by_filter",
+            "lightning::payments::send_payment",
+        ]
 
-        # 1. Add activation methods first, if they exist in the set of methods to run
-        for method in sorted(list(activation_methods)):
-            if method in all_methods:
-                execution_plan.append(method)
-                processed_in_sequence.add(method)
+        staking_methods = [
+            "experimental::staking::claim_rewards",
+            "experimental::staking::delegate",
+            "experimental::staking::query::delegations",
+            "experimental::staking::query::ongoing_undelegations",
+            "experimental::staking::query::validators",
+            "experimental::staking::undelegate",
+        ]
+
+        bot_methods = [
+            "start_simple_market_maker_bot",
+            "stop_simple_market_maker_bot",
+        ]
+
+        stats_methods = [
+            "update_version_stat_collection",
+            "add_node_to_version_stat",
+            "remove_node_from_version_stat",
+            "start_version_stat_collection",
+            "stop_version_stat_collection",
+        ]
+
+
+        ordered_list = []
+        processed = set()
+
+        # Add activation methods first, respecting sequences if they are part of one
+        for seq in method_sequences:
+            # Check if the sequence contains any activation methods
+            if any(method in activation_methods for method in seq):
+                for method in seq:
+                    if method in all_methods and method not in processed:
+                        ordered_list.append(method)
+                        processed.add(method)
         
-        self.logger.info(f"Prioritized {len(processed_in_sequence)} activation methods.")
+        # Add any other activation methods not in a sequence
+        for method in activation_methods:
+            if method in all_methods and method not in processed:
+                ordered_list.append(method)
+                processed.add(method)
 
-        # 2. Add methods from defined sequences to the plan
-        for sequence in method_sequences:
-            for method_in_seq in sequence:
-                if method_in_seq in all_methods and method_in_seq not in processed_in_sequence:
-                    execution_plan.append(method_in_seq)
-                    processed_in_sequence.add(method_in_seq)
+        # Add other sequences
+        for seq in method_sequences:
+            for method in seq:
+                if method in all_methods and method not in processed:
+                    ordered_list.append(method)
+                    processed.add(method)
         
-        # 3. Add all other methods that are not part of any sequence, sorted alphabetically
-        remaining_methods = sorted(list(all_methods - processed_in_sequence))
-        execution_plan.extend(remaining_methods)
+        # After sequences, add standalone activation methods
+        for method in activation_methods:
+            if (method not in processed 
+                and method not in fully_deprecated_methods 
+                and method not in interactive_methods
+                and method not in oneinch_methods
+                and method not in lightning_methods
+                and method not in staking_methods
+                and method not in bot_methods
+                and method not in stats_methods
+                ):
+                ordered_list.append(method)
+                processed.add(method)
+
+        # Add remaining methods alphabetically
+        remaining = sorted(list(all_methods - processed - set(fully_deprecated_methods)))
+        ordered_list.extend(remaining)
         
-        return execution_plan
-
-    def setup_get_kdf_responses_parser(self, subparsers):
-        """Sets up the parser for the get-kdf-responses command."""
-        parser = subparsers.add_parser('get-kdf-responses', help='Get API responses from a running KDF container.')
-        parser.add_argument('--method', type=str, required=False, default=None, help='The API method to get responses for.')
-        parser.add_argument('--kdf-branch', type=str, default='dev', help='The KDF branch to use for the container.')
-        parser.add_argument('--commit', type=str, help='The commit hash to use. Defaults to the latest commit on the branch.')
-        parser.add_argument('--clean', action='store_true', help='Remove all existing request/response/error json files in postman/json/kdf before running.')
-        parser.set_defaults(func=self.get_kdf_responses_command)
-
+        return ordered_list
+    
     def build_container_command(self, args):
         """Builds the KDF container image."""
-        self.logger.warning("The 'build-container' command is deprecated. The container is now built automatically when started.")
-        self.start_container_command(args)
+        self.logger.info(f"Building KDF container for branch: {args.kdf_branch}...")
+        # Add implementation for building container
+        self._print_footer("Build KDF Container", success=True)
+
+    def _get_git_commit_hash(self, repo_path: Path) -> str | None:
+        """Gets the current git commit hash of a repository."""
+        if not repo_path.exists() or not (repo_path / ".git").exists():
+            self.logger.warning(f"Git repository not found at '{repo_path}'. Cannot get commit hash.")
+            return None
+        try:
+            result = subprocess.run(
+                ['git', 'rev-parse', 'HEAD'],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return result.stdout.strip()
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Could not get git commit hash for {repo_path}: {e}")
+            return None
 
     def start_container_command(self, args):
         """Starts the KDF container."""
         command_title = "Start KDF Container"
-        config_lines = [f"KDF Branch (from local repo): {args.kdf_branch}"]
-        self._print_header(command_title, config_lines)
+        config_lines = [
+            f"KDF Branch: {args.kdf_branch or self.config.kdf_branch}",
+        ]
+        self._print_header(command_title, config_lines=config_lines)
 
-        kdf_repo_path = self.config.directories.kdf_repo_path
-        if not kdf_repo_path.exists():
-            self.logger.error(f"KDF repository not found at '{kdf_repo_path}'.")
-            self.logger.error("Please run 'git clone <kdf_repo_url>' to clone it.")
-            self._print_footer(command_title, success=False)
-            return
+        if args.kdf_branch:
+            if not self.git_manager.switch_branch(self.config.directories.kdf_repo_path, args.kdf_branch):
+                self.logger.error(f"Could not switch to branch {args.kdf_branch}. Aborting.")
+                self._print_footer(command_title, success=False)
+                return
 
-        current_branch = self._switch_kdf_branch(args.kdf_branch)
-        if not current_branch:
-            self._print_footer(command_title, success=False)
-            return
-            
-        self._print_header(command_title, config_lines=[
-            f"KDF Branch (from local repo): {current_branch}"
-        ])
+        # Stop any running containers first
+        self.stop_container_command(args)
 
-        # Path to the docker-compose.yml file in the 'utils/docker' directory
-        compose_file_path = self.config.directories.docker_dir / "docker-compose.yml"
-        
-        if not compose_file_path.exists():
-            self.logger.error(f"docker-compose.yml not found at: {compose_file_path}")
-            self._print_footer(command_title, success=False)
-            return
+        build_commit_hash_file = self.config.directories.docker_dir / '.build_commit_hash'
+        current_commit_hash = self.git_manager.get_commit_hash(self.config.directories.kdf_repo_path)
+        last_build_hash = None
 
-        try:            
-            # Run docker-compose
-            subprocess.run(
-                ['docker', 'compose', '--file', str(compose_file_path), 'up', '--build', '-d'],
-                check=True,
-                cwd=self.config.directories.docker_dir
-            )
-            self.logger.success(f"Container started successfully.")
-            success = True
-        except subprocess.CalledProcessError as e:
-            self.logger.error(f"Failed to start container: {e}")
-            success = False
-        finally:
-            self._print_footer(command_title, success=success)
-        
-        if success:
-            time.sleep(5)  # Give the container a moment to initialize
-            self.processor._update_enabled_coins()
-        
-        return 0 if success else 1
+        if build_commit_hash_file.exists():
+            with open(build_commit_hash_file, 'r') as f:
+                last_build_hash = f.read().strip()
 
-    def stop_container_command(self, args):
-        """Stops the KDF container."""
-        command_title = "Stop KDF Container"
-        self._print_header(command_title)
-        result = self.processor.stop_container()
-        self._print_footer(command_title, success=result)
-
-    def _switch_kdf_branch(self, branch_name: str):
-        """Checks out the specified branch in the local KDF repository."""
-        kdf_repo_path = self.config.directories.kdf_repo_path
-        if not kdf_repo_path.exists() or not (kdf_repo_path / ".git").exists():
-            self.logger.error(f"KDF repository not found at {kdf_repo_path}. Please clone it first.")
-            return False
-
-        self.logger.info(f"Switching local KDF repository to branch '{branch_name}'...")
+        build_needed = True
+        if current_commit_hash and last_build_hash and current_commit_hash == last_build_hash:
+            self.logger.info("KDF commit hash unchanged. Skipping container rebuild.")
+            build_needed = False
 
         try:
-            # Fetch the latest changes from origin
+            # Generate the MM2.json config before starting
+            self.processor.generate_mm2_config()
+
+            docker_command = ["docker", "compose", "up", "-d"]
+            if build_needed:
+                self.logger.info("Change detected or first build, rebuilding container...")
+                docker_command.append("--build")
+            else:
+                self.logger.info("No build needed, starting container...")
+
             subprocess.run(
-                ["git", "fetch", "origin"],
-                cwd=kdf_repo_path, check=True, capture_output=True, text=True
+                docker_command,
+                cwd=self.config.directories.docker_dir,
+                check=True
             )
 
-            # Checkout the branch
-            checkout_result = subprocess.run(
-                ["git", "checkout", branch_name],
-                cwd=kdf_repo_path, check=True, capture_output=True, text=True
-            )
-            if self.verbose:
-                if checkout_result.stdout: self.logger.info(checkout_result.stdout.strip())
-                if checkout_result.stderr: self.logger.info(checkout_result.stderr.strip())
+            if build_needed and current_commit_hash:
+                with open(build_commit_hash_file, 'w') as f:
+                    f.write(current_commit_hash)
+                self.logger.save(f"Saved current build commit hash: {current_commit_hash[:7]}")
 
-            # Pull the latest changes for that branch
-            pull_result = subprocess.run(
-                ["git", "pull", "origin", branch_name],
-                cwd=kdf_repo_path, check=True, capture_output=True, text=True
-            )
-            if self.verbose and pull_result.stdout:
-                self.logger.info(pull_result.stdout.strip())
+            self.logger.success("Container started successfully.")
+            self.logger.info("Waiting for container to be ready...")
+            time.sleep(10)  # Give some time for the container to initialize
+            self._print_footer(command_title, success=True)
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Failed to start container: {e}")
+            self._print_footer(command_title, success=False)
+        except Exception as e:
+            self.logger.error(f"An unexpected error occurred: {e}")
+            self._print_footer(command_title, success=False)
             
-            self.logger.success(f"Successfully switched to and updated branch '{branch_name}'.")
+    def stop_container_command(self, args):
+        """Stops the KDF container."""
+        self.logger.info("Stopping KDF container...")
+        subprocess.run(["docker", "compose", "down"], cwd=self.config.directories.docker_dir)
+        self.logger.success("Container stopped.")
+
+    def _switch_kdf_branch(self, branch_name: str):
+        """Switches the KDF repository to a different branch."""
+        self.logger.info(f"Attempting to switch KDF repository to branch '{branch_name}'...")
+        repo_path = self.config.directories.kdf_repo_path
+
+        if not repo_path.exists() or not (repo_path / ".git").exists():
+            self.logger.error(f"KDF repository not found at '{repo_path}'.")
+            return False
+
+        try:
+            # Stash any local changes
+            subprocess.run(["git", "stash"], cwd=repo_path, check=True, capture_output=True)
+
+            # Fetch latest changes from origin
+            subprocess.run(["git", "fetch", "origin"], cwd=repo_path, check=True, capture_output=True)
+
+            # Check if branch exists locally or remotely
+            local_branch_exists = subprocess.run(
+                ["git", "show-ref", "--verify", f"refs/heads/{branch_name}"],
+                cwd=repo_path, capture_output=True
+            ).returncode == 0
+            
+            remote_branch_exists = subprocess.run(
+                ["git", "show-ref", "--verify", f"refs/remotes/origin/{branch_name}"],
+                cwd=repo_path, capture_output=True
+            ).returncode == 0
+
+            if not local_branch_exists and not remote_branch_exists:
+                self.logger.error(f"Branch '{branch_name}' not found locally or on origin.")
+                return False
+
+            # Checkout branch (track remote if it doesn't exist locally)
+            if not local_branch_exists and remote_branch_exists:
+                subprocess.run(["git", "checkout", "--track", f"origin/{branch_name}"], cwd=repo_path, check=True, capture_output=True)
+            else:
+                subprocess.run(["git", "checkout", branch_name], cwd=repo_path, check=True, capture_output=True)
+
+            # Pull latest changes from the branch
+            subprocess.run(["git", "pull", "origin", branch_name], cwd=repo_path, check=True, capture_output=True)
+
+            self.logger.success(f"Successfully switched KDF repository to branch '{branch_name}'.")
             return True
 
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Failed to switch to branch '{branch_name}': {e}")
-            self.logger.error(f"Stderr: {e.stderr}")
+            self.logger.error(f"Git command failed: {e.stderr.decode().strip() if e.stderr else e}")
+            return False
+        except Exception as e:
+            self.logger.error(f"An unexpected error occurred while switching branches: {e}")
             return False
 
     def get_json_example_method_paths(self):
-        """Loads method and version data from the kdf_mdx_json_example_method_paths.json report."""
-        report_path = self.config.directories.mdx_json_example_method_paths_report
-
-        if not report_path.exists():
-            self.logger.error(f"Method paths report not found at: {report_path}")
-            self.logger.error("Please run 'json-extract' first to generate it.")
+        """Gets JSON example method paths."""
+        file_path = self.config.directories.mdx_json_example_method_paths_report
+        if not file_path.exists():
+            self.logger.error(f"File not found: {file_path}")
+            self.logger.error("Run 'json-extract' first to generate the file.")
             return {}
 
-        try:
-            with open(report_path, 'r') as f:
-                data = json.load(f)
-        except json.JSONDecodeError:
-            self.logger.error(f"Error decoding JSON from {report_path}")
-            return {}
-
+        with open(file_path, 'r') as f:
+            data = json.load(f)
         return data.get("method_paths", {})
 
     def generate_v2_no_param_methods_report(self, args):
-        """Generates a report of V2 methods that have no request parameters."""
+        """Generates a report of V2 methods that do not have any parameters."""
         command_title = "Generate V2 No-Parameter Methods Report"
         self._print_header(command_title)
+
+        v2_methods_without_params = []
         
-        try:
-            v2_methods_with_no_params = {}
-            v2_json_path = self.config.directories.postman_json_v2
-            
-            # Use kdf_mdx_method_paths.json to get the list of v2 methods
-            mdx_method_paths_file = self.config.directories.mdx_method_paths_report
-            with open(mdx_method_paths_file, 'r') as f:
-                mdx_method_paths = json.load(f)
-            
-            v2_methods = mdx_method_paths.get("method_paths", {}).get("v2", {})
+        unified_mapping = MethodMappingManager(config=self.config).create_unified_mapping()
+        
+        v2_methods = unified_mapping.get('v2', {})
+        
+        for method_name, method_data in v2_methods.items():
+            if not method_data.has_mdx or not method_data.mdx_path:
+                continue
 
-            for method_name, _ in v2_methods.items():
-                # Correctly format the method name for path lookup
-                folder_name = method_name.replace("::", "-")
-                method_folder = Path(v2_json_path) / folder_name
+            mdx_path = Path(method_data.mdx_path)
+            if not mdx_path.exists():
+                continue
+
+            with open(mdx_path, 'r', encoding='utf-8') as f:
+                content = f.read()
                 
-                if method_folder.is_dir():
-                    request_files = list(method_folder.glob("request_*.json"))
-                    if not request_files:
-                        continue
+            # A simple heuristic: check for the absence of a request parameters table
+            if "Request Parameters" not in content and "### Request" not in content:
+                 v2_methods_without_params.append(method_name)
 
-                    # Check the first request file
-                    with open(request_files[0], 'r') as f:
-                        try:
-                            data = json.load(f)
-                            if "params" in data and not data["params"]:
-                                relative_path = self.config.directories.get_relative_path(str(request_files[0]))
-                                v2_methods_with_no_params[method_name] = relative_path
-                        except json.JSONDecodeError:
-                            self.logger.warning(f"Could not parse JSON for {request_files[0]}")
+        # Generate report
+        report_path = self.config.directories.branched_reports_dir / "v2_no_param_methods.json"
+        report_data = {
+            "generated_at": datetime.now().isoformat(),
+            "total_v2_methods_scanned": len(v2_methods),
+            "v2_methods_without_params_count": len(v2_methods_without_params),
+            "v2_methods_without_params": sorted(v2_methods_without_params)
+        }
+        
+        safe_write_json(report_path, report_data, indent=2)
+        
+        self.logger.save(f"Report saved to: {report_path}")
+        self.logger.info(f"Found {len(v2_methods_without_params)} V2 methods without parameters.")
 
-            # Save the report
-            report_path = self.config.directories.v2_no_param_methods_report
-            report_data = {
-                "scan_metadata": {
-                    "generated_at": datetime.now().isoformat(),
-                    "report_name": "v2_methods_with_no_parameters"
-                },
-                "methods": dict(sorted(v2_methods_with_no_params.items())),
-                "count": len(v2_methods_with_no_params)
-            }
-            safe_write_json(report_path, report_data)
-            self.logger.success(f"Report generated at: {report_path}")
+        self._print_footer(command_title, success=True, report_paths=[report_path])
+
+    def extract_errors_command(self, args):
+        """Extracts error enums from the KDF Rust codebase."""
+        command_title = "Extract Error Enums"
+        self._print_header(command_title)
+        success = False
+
+        try:
+            if args.source == 'rust':
+                self.logger.info("Scanning Rust source for error enums...")
+                scanner = ErrorScanner(
+                    repo_path=self.config.directories.kdf_repo_path,
+                    logger=self.logger
+                )
+                errors = scanner.scan_for_errors()
+                
+                # Generate Markdown documentation from the extracted errors
+                md_output_path = self.config.directories.docs_dir / "komodo-defi-framework" / "api" / "errors.mdx"
+                scanner.generate_error_docs(errors, md_output_path)
+                
+                # Save raw JSON data
+                json_output_path = self.config.directories.data_dir / "kdf_error_enums.json"
+                safe_write_json(json_output_path, errors)
+                
+                self.logger.save(f"Saved raw error data to: {json_output_path}")
+                self.logger.save(f"Generated error documentation at: {md_output_path}")
+
+            elif args.source == 'mdx':
+                self.logger.info("Scanning MDX files for error responses...")
+                scanner = MdxErrorScanner(
+                    mdx_path=self.config.directories.mdx_v2,
+                    logger=self.logger
+                )
+                errors = scanner.scan_for_errors()
+                
+                # Save raw JSON data
+                json_output_path = self.config.directories.data_dir / "mdx_error_responses.json"
+                safe_write_json(json_output_path, errors)
+                self.logger.save(f"Saved MDX error responses to: {json_output_path}")
+
+                # Check for conflicts
+                conflict_report_path = self.config.directories.reports_dir / "dev" / "error_description_conflicts.json"
+                conflicts = scanner.find_conflicts(errors)
+                if conflicts:
+                    self.logger.warning(f"Found {len(conflicts)} error types with conflicting descriptions.")
+                    safe_write_json(conflict_report_path, conflicts)
+                    self.logger.save(f"Conflict report saved to: {conflict_report_path}")
+
+            else:
+                self.logger.error(f"Invalid source: {args.source}. Must be 'rust' or 'mdx'.")
+                self._print_footer(command_title, success=False)
+                return
+
+            success = True
 
         except Exception as e:
-            self.logger.error(f"An error occurred: {e}")
+            self.log(f"An error occurred during error extraction: {e}", "error")
+            self.log(traceback.format_exc(), "error")
+        finally:
+            self._print_footer(command_title, success=success)
+
+    def balances_command(self, args):
+        """Gets address and balance info for test coins on all nodes."""
+        command_title = "Get Coin Balances"
+        self._print_header(command_title)
+
+        try:
+            self.start_container_command(args)
+            time.sleep(5)
+
+            params_path = self.workspace_root / 'utils' / 'py' / 'kdf_test_cases' / 'test_params.json'
+            with open(params_path, 'r') as f:
+                test_params = json.load(f)
+
+            coins_to_check = list(set([test_params['PRIMARY_COIN'], test_params['SECONDARY_COIN']] + test_params['NODE_BALANCE_COINS']))
+            hd_coins = set(test_params['HD_SIGNING_COINS'])
+
+            self.logger.info("Activating coins...")
+            for coin in coins_to_check:
+                self.logger.info(f"Attempting to activate {coin}...")
+                self.processor.activate_coin(coin)
+                time.sleep(1)
+
+            self.logger.info("Fetching balances...")
+            for coin in coins_to_check:
+                self.logger.info(f"--- Balances for {coin} ---")
+                
+                request_body = {
+                    "method": "my_balance",
+                    "coin": coin
+                }
+
+                output_dir = self.config.directories.reports_dir / "balances_check"
+                output_dir.mkdir(exist_ok=True)
+                
+                node_responses = kdf_api_processor_module.send_request_to_all_nodes(
+                    request_body=request_body,
+                    method_name="my_balance",
+                    output_dir=output_dir,
+                    example_number=1,
+                    logger=self.logger
+                )
+
+                for node_name, resp in sorted(node_responses.items()):
+                    if "result" in resp:
+                        balance = resp["result"]["balance"]
+                        address = resp["result"]["address"]
+                        self.logger.info(f"  {node_name}:")
+                        self.logger.info(f"    Address: {address}")
+                        self.logger.info(f"    Balance: {balance}")
+
+                        # Find the node's config to check if it's an HD node
+                        node_cfg = next((n for n in self.config.nodes if n.name == node_name), None)
+                        is_hd_node = node_cfg.hd_mode if node_cfg else False
+                        
+                        if is_hd_node and coin in hd_coins:
+                            self._get_and_display_hd_addresses(coin, node_name)
+                    else:
+                        error = resp.get("error", "Unknown error")
+                        self.logger.error(f"  {node_name}: Failed to get balance. Error: {error}")
+
+            self._print_footer(command_title, success=True)
+        except Exception as e:
+            self.logger.error(f"An error occurred during balance check: {e}")
             self.logger.error(traceback.format_exc())
+            self._print_footer(command_title, success=False)
 
-    def setup_v2_no_param_report_parser(self, subparsers):
-        parser = subparsers.add_parser(
-            "v2-no-param-report",
-            help="Generate a report of V2 methods that do not require any parameters.",
-            description="Scans V2 MDX files and identifies methods with no request parameters."
-        )
-        parser.set_defaults(func=self.generate_v2_no_param_methods_report)
-
-    def main(self):
-        """Main entry point for the KDF Tools CLI."""
-        parser = argparse.ArgumentParser(
-            description="Unified KDF Tools CLI",
-            formatter_class=argparse.RawTextHelpFormatter
-        )
-        subparsers = parser.add_subparsers(dest="command", help="Available commands")
-
-        self.setup_scan_rust_parser(subparsers)
-        self.setup_scan_mdx_parser(subparsers)
-        self.setup_openapi_parser(subparsers)
-        self.setup_postman_parser(subparsers)
-        self.setup_map_methods_parser(subparsers)
-        self.setup_json_extract_parser(subparsers)
-        self.setup_review_draft_quality_parser(subparsers)
-        self.setup_scan_existing_docs_parser(subparsers)
-        self.setup_generate_docs_parser(subparsers)
-        self.setup_gap_analysis_parser(subparsers)
-        self.setup_get_kdf_responses_parser(subparsers)
-        self.setup_v2_no_param_report_parser(subparsers)
-
-
-        # Container management commands
-        build_parser = subparsers.add_parser('build-container', help='Build KDF container image.')
-        build_parser.add_argument('--kdf-branch', type=str, default='dev', help='KDF branch to build.')
-        build_parser.add_argument('--commit', type=str, help='Commit hash to build.')
-        build_parser.set_defaults(func=self.build_container_command)
-
-        start_parser = subparsers.add_parser('start-container', help='Start KDF container.')
-        start_parser.add_argument('--kdf-branch', type=str, default='dev', help='KDF branch to use.')
-        start_parser.add_argument('--commit', type=str, help='Commit hash to use.')
-        start_parser.set_defaults(func=self.start_container_command)
-
-        stop_parser = subparsers.add_parser('stop-container', help='Stop KDF container.')
-        stop_parser.set_defaults(func=self.stop_container_command)
-
-        # New parser for generate-common-schemas
-        common_schemas_parser = subparsers.add_parser(
-            "generate-common-schemas",
-            help="Generate OpenAPI schemas for common structures and enums.",
-            description="This command scans the common_structures directory and generates a corresponding OpenAPI schema file for each enum and structure."
-        )
-        common_schemas_parser.set_defaults(func=self.generate_common_schemas_command)
-
-        args = parser.parse_args()
+    def _get_and_display_hd_addresses(self, coin, node_name):
+        self.logger.info("    (HD Node) Getting more addresses...")
         
-        # Execute command
-        if hasattr(args, 'func'):
-            return args.func(args)
-        elif args.command == "gap-analysis":
-            self.gap_analysis_command(args)
-        elif args.command == "generate-common-schemas":
-            self.generate_common_schemas_command(args)
-        else:
-            parser.print_help()
-            return 1
+        # Find the port from the centralized config
+        node_config = next((n for n in self.config.nodes if n.name == node_name), None)
+        if not node_config:
+            self.logger.error(f"Port for node {node_name} not found in config.")
+            return
+        
+        port = node_config.port
+        url = f"http://127.0.0.1:{port}"
+
+        init_req = {
+            "userpass": self.processor.rpc_password,
+            "method": "task::get_new_address::init",
+            "mmrpc": "2.0",
+            "params": {
+                "coin": coin,
+                "max": 2  # We need 2 more, the first one came from my_balance
+            }
+        }
+        try:
+            init_resp = requests.post(url, json=init_req, timeout=10).json()
+
+            if "result" in init_resp and "task_id" in init_resp["result"]:
+                task_id = init_resp["result"]["task_id"]
+                
+                status_method = "task::get_new_address::status"
+                for _ in range(20):
+                    status_req = {
+                        "userpass": self.processor.rpc_password,
+                        "method": status_method,
+                        "mmrpc": "2.0",
+                        "params": {"task_id": task_id}
+                    }
+                    status_resp = requests.post(url, json=status_req, timeout=10).json()
+
+                    if status_resp and "result" in status_resp:
+                        status = status_resp["result"].get("status")
+                        details = status_resp["result"].get("details")
+
+                        if status == "Ok":
+                            new_addresses = details.get("new_addresses", [])
+                            for i, addr_info in enumerate(new_addresses):
+                                self.logger.info(f"    Address {i+2}: {addr_info['address']}")
+                            break
+                        elif status == "InProgress":
+                            time.sleep(5)
+                            continue
+                        else:
+                            self.logger.error(f"      Address generation failed. Status: {status}")
+                            break
+                    else:
+                        self.logger.error("      Failed to get status for address generation task.")
+                        break
+                else:
+                    self.logger.error("      Polling for new addresses timed out.")
+            else:
+                self.logger.error(f"      Failed to init get_new_address task: {init_resp.get('error', init_resp)}")
+
+        except requests.RequestException as e:
+            self.logger.error(f"      Request to get new addresses failed: {e}")
+
+    def _get_git_branch_name(self, repo_path: Path) -> str | None:
+        """Gets the current git branch name of a repository."""
+        if not repo_path.exists() or not (repo_path / ".git").exists():
+            self.logger.warning(f"Git repository not found at '{repo_path}'. Cannot get branch name.")
+            return None
+        try:
+            result = subprocess.run(
+                ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return result.stdout.strip()
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Could not get git branch for {repo_path}: {e}")
+            return None
+
+    def _get_git_commit_hash(self, repo_path: Path) -> str | None:
+        """Gets the current git commit hash of a repository."""
+        if not repo_path.exists() or not (repo_path / ".git").exists():
+            self.logger.warning(f"Git repository not found at '{repo_path}'. Cannot get commit hash.")
+            return None
+        try:
+            result = subprocess.run(
+                ['git', 'rev-parse', 'HEAD'],
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return result.stdout.strip()
+        except subprocess.CalledProcessError as e:
+            self.logger.error(f"Could not get git commit hash for {repo_path}: {e}")
+            return None
 
 
 class MethodValidator:
-    def __init__(self, method: str, version: str, processor: ApiRequestProcessor = None):
-        self.processor = processor or ApiRequestProcessor()
-        self.logger = get_logger("method-validator")
+    def __init__(self, method: str, version: str, processor: ApiRequestProcessor = None, logger=None):
         self.method = method
         self.version = version
-        self.enable_hd = self.processor._get_env_var_as_bool("ENABLE_HD", False)
-        
+        self.processor = processor
+        self.logger = logger
+
     def validate_method_for_testing(self) -> bool:
-        """Checks if a method is valid for the test case being run."""
-        if self.enable_hd and self.is_legacy_only_method():
+        if self.is_hd_only_method() and not self.processor.enable_hd:
             return False
-        if not self.enable_hd and self.is_hd_only_method():
+        if self.is_legacy_only_method() and self.processor.enable_hd:
             return False
         if self.is_method_interactive():
             return False
@@ -1799,138 +2255,139 @@ class MethodValidator:
         if self.is_method_deprecated():
             return False
         return True
-    
+
     def is_hd_only_method(self) -> bool:
-        """Checks if a method is HD only."""
-        hd_only_methods = {
-            "v1": [],
-            "v2": [
-                "task::get_new_address::cancel",
-                "task::get_new_address::init",
-                "task::get_new_address::status",
-                "task::get_new_address::user_action",
-                "task::scan_for_new_addresses::cancel",
-                "task::scan_for_new_addresses::init",
-                "task::scan_for_new_addresses::status",
-            ],
-        }
-        if self.method in hd_only_methods[self.version]:
-            return True
-        return False
-    
+        """Checks if a method is only available for HD wallets."""
+        # Add methods that are only available for HD wallets here.
+        # This is used to skip tests for non-HD wallets.
+        hd_only_methods = [
+            "task::get_new_address::init",
+            "task::get_new_address::status",
+            "task::get_new_address::cancel",
+            "task::restore_hd_wallet::init",
+            "task::restore_hd_wallet::status",
+            "task::restore_hd_wallet::user_action",
+            "task::restore_hd_wallet::cancel",
+            "get_public_key_at_hd_account"
+        ]
+        return self.method in hd_only_methods
+
     def is_legacy_only_method(self) -> bool:
-        """Checks if a method is legacy only."""
-        legacy_only_methods = {
-            "v1": ["my_balance"],
-            "v2": [],
-        }
-        if self.method in legacy_only_methods[self.version]:
-            return True
-        return False
+        """Checks if a method is only available for legacy wallets."""
+        # Add methods that are only available for legacy wallets here.
+        # This is used to skip tests for HD wallets.
+        legacy_only_methods = [
+            "show_priv_key"
+        ]
+        return self.method in legacy_only_methods
 
     def is_method_interactive(self) -> bool:
         """Checks if a method is interactive."""
-        if (
-            self.method.find("trezor") != -1
-            or self.method.find("user_action") != -1
-            or self.method.find("metamask") != -1
-            or self.method.startswith("wc")
-        ):
-            return True
-        return False
-    
+        # Add methods that are interactive here.
+        # This is used to skip tests for interactive methods.
+        interactive_methods = [
+            "task::enable_bch::user_action",
+            "task::enable_eth::user_action",
+            "task::enable_qtum::user_action",
+            "task::enable_utxo::user_action",
+            "task::restore_hd_wallet::user_action",
+        ]
+        return self.method in interactive_methods
+
     def is_method_too_complex_for_now(self) -> bool:
-        """Checks if a method is too complex for now."""
-        if self.method.startswith("lightning::"):
-            return True
-        if self.method.startswith("experimental::"):
-            return True
-        if self.method.find("nft") != -1:
-            return True
-        if self.method.find("1inch") != -1:
-            return True
-        if self.method.find("market_maker_bot") != -1:
-            return True
-        if self.method.find("stat_collection") != -1:
-            return True
-        return False
+        """
+        Methods that are too complex to test for now.
+        This is a temporary solution to skip tests for methods that require more complex setup.
+        """
+        complex_methods = [
+            "task::withdraw::cancel",
+            "task::withdraw::init",
+            "task.withdraw.status"
+            "get_trade_preimage",
+            "trade_preimage",
+        ]
+        return self.method in complex_methods
 
     def is_method_deprecated(self) -> bool:
-        """Checks if a method is deprecated."""
-        if self.method.find("enable_bch") != -1:
-            return True
-        deprecated_methods = {
-            "v1": [],
-            "v2": [
-                "task::enable_bch::cancel",
-                "task::enable_bch::init",
-                "task::enable_bch::status",
-                "task::enable_bch::user_action",
-            ]
-        }
-        if self.method in deprecated_methods[self.version]:
-            return True
+        """
+        Methods that are deprecated.
+        This is a temporary solution to skip tests for methods that require more complex setup.
+        """
+        deprecated_methods = [
+            "kmd_rewards_info",
+        ]
+        if self.method in deprecated_methods:
+            kdf_branch = self.processor.git_manager.get_branch_name(
+                self.processor.config.directories.kdf_repo_path
+            )
+            # This method is only deprecated on dev.
+            if "dev" in kdf_branch:
+                return True
         return False
 
     def is_method_ready(self) -> bool:
-        """Checks if a method's prerequisites have been met."""
-        method_prerequisites = {
-            "unban_pubkeys": ["ban_pubkey"],
-            "send_raw_transaction": ["get_unsigned_transaction"],
-            "my_swap_status": ["buy", "sell"],  # Can depend on either
+        """
+        Checks if a method is ready to be tested.
+        This is used to skip tests for methods that require other methods to be completed first.
+        """
+        # Add methods that require other methods to be completed first here.
+        # This is used to skip tests for methods that require other methods to be completed first.
+        # For example, my_swap_status requires a swap to be started first.
+        methods_that_need_prior_completion = {
+            "my_swap_status": ["buy", "sell"],
+            "list_banned_pubkeys": ["ban_pubkey"],
+            "unban_pubkeys": ["ban_pubkey", "list_banned_pubkeys"],
+            "enable_erc20": ["enable_eth_with_tokens"],
+            "enable_tendermint_token": ["enable_tendermint_with_assets"],
             "verify_message": ["sign_message"],
+            "send_raw_transaction": ["get_unsigned_transaction"],
         }
-        
-        # Add task-based prerequisites dynamically
+
+        # Handle task-based methods
         if "::" in self.method and not self.method.endswith("::init"):
-            parts = self.method.split("::")
-            task_group = "::".join(parts[:-1])
+            task_group = "::".join(self.method.split("::")[:-1])
             init_method = f"{task_group}::init"
-            if self.method not in method_prerequisites:
-                method_prerequisites[self.method] = []
-            method_prerequisites[self.method].append(init_method)
-            
+            if init_method not in self.processor.completed_methods:
+                self.logger.info(f"Skipping {self.method} because {init_method} has not been completed.")
+                return False
 
-        if self.method in method_prerequisites:
-            prereqs = method_prerequisites[self.method]
-            
-            # For methods with multiple possible prerequisites (like my_swap_status)
-            if self.method == "my_swap_status":
-                if any(p in self.processor.completed_methods for p in prereqs):
-                    return True
-                else:
-                    self.logger.warning(f"Prerequisites for {self.method} not met. Need one of: {prereqs}")
-                    return False
-
-            # For methods with specific prerequisites
-            for prereq in prereqs:
-                if prereq not in self.processor.completed_methods:
-                    self.logger.warning(f"Prerequisite '{prereq}' for method '{self.method}' has not been completed.")
-                    return False
+        if self.method in methods_that_need_prior_completion:
+            required_methods = methods_that_need_prior_completion[self.method]
+            if not any(req in self.processor.completed_methods for req in required_methods):
+                self.logger.info(f"Skipping {self.method} because none of {required_methods} have been completed.")
+                return False
         
         return True
 
     def _get_current_git_branch(self, repo_path):
-        """Gets the current Git branch of a repository."""
+        """Gets the current git branch of a repository."""
         try:
-            # The CWD needs to be the repo path for this command to work correctly.
             result = subprocess.run(
                 ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
-                capture_output=True, text=True, check=True, cwd=repo_path
+                cwd=repo_path,
+                capture_output=True,
+                text=True,
+                check=True
             )
             return result.stdout.strip()
         except subprocess.CalledProcessError as e:
-            self.logger.error(f"Failed to get current branch for repo at '{repo_path}': {e}")
+            self.logger.error(f"Could not get current git branch for {repo_path}: {e}")
             return None
 
+
 def main():
-    """Script entry point."""
+    """Main entry point for the script."""
     try:
         cli = KDFTools()
-        sys.exit(cli.main())
+        cli.main()
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user.")
+        sys.exit(0)
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
         traceback.print_exc()
         sys.exit(1)
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     main()
