@@ -1293,6 +1293,7 @@ class KDFTools:
         )
         parser.add_argument('--method', type=str, help='The method to get responses for.')
         parser.add_argument('--clean', action='store_true', help='Clean JSON files before running.')
+        parser.add_argument('--substitute-defaults', action='store_true', help='Use test parameter substitution for coin/ticker fields.')
         parser.set_defaults(func=self.get_kdf_responses_command)
         
     def setup_v2_no_param_report_parser(self, subparsers):
@@ -1551,6 +1552,9 @@ class KDFTools:
                     self.logger.error(f"Could not switch to branch {args.kdf_branch}. Aborting.")
                     self._print_footer(command_title, success=False)
                     return
+
+            # Propagate substitute-defaults preference to the API processor
+            self.processor.substitute_defaults = getattr(args, 'substitute_defaults', False)
 
             if args.clean:
                 self.clean_json_files()
@@ -2086,11 +2090,13 @@ class KDFTools:
             coins_to_check = list(set([test_params['PRIMARY_COIN'], test_params['SECONDARY_COIN']] + test_params['NODE_BALANCE_COINS']))
             hd_coins = set(test_params['HD_SIGNING_COINS'])
 
-            self.logger.info("Activating coins...")
-            for coin in coins_to_check:
-                self.logger.info(f"Attempting to activate {coin}...")
-                self.processor.activate_coin(coin)
-                time.sleep(1)
+            self.logger.info("Activating coins on all nodes...")
+            for node in self.config.nodes:
+                self.logger.info(f"Checking node: {node.name}")
+                for coin in coins_to_check:
+                    self.logger.info(f"Attempting to activate {coin} on {node.name}...")
+                    self.processor.activate_coin(coin, node=node)
+                    time.sleep(1)
 
             self.logger.info("Fetching balances...")
             for coin in coins_to_check:
@@ -2104,12 +2110,11 @@ class KDFTools:
                 output_dir = self.config.directories.reports_dir / "balances_check"
                 output_dir.mkdir(exist_ok=True)
                 
-                node_responses = kdf_api_processor_module.send_request_to_all_nodes(
+                node_responses = self.processor.send_request_to_all_nodes(
                     request_body=request_body,
                     method_name="my_balance",
                     output_dir=output_dir,
-                    example_number=1,
-                    logger=self.logger
+                    example_number=1
                 )
 
                 for node_name, resp in sorted(node_responses.items()):

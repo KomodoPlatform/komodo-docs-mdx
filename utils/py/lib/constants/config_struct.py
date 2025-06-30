@@ -442,9 +442,9 @@ class NodeConfig:
     name: str
     port: int
     api_url: str
+    userpass: str
     hd_mode: bool = False
     wasm_mode: bool = False
-    userpass: Optional[str] = None
 
 
 @dataclass
@@ -459,35 +459,35 @@ class EnhancedKomodoConfig:
     nodes: List[NodeConfig] = field(default_factory=lambda: [
         NodeConfig(
             name="node_a",
-            port=int(os.getenv("RPC_PORT", "7783")),
-            api_url=f"{os.getenv('RPC_URL', 'http://127.0.0.1')}:{int(os.getenv('RPC_PORT', '8778'))}",
+            port=8778,
+            api_url="http://127.0.0.1:8778",
             hd_mode=False,
             wasm_mode=False,
-            userpass=os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD")
+            userpass="RPC_UserP@SSW0RD"
         ),
         NodeConfig(
             name="node_b",
-            port=int(os.getenv("RPC_PORT_NODE_B", "8779")),
-            api_url=f"{os.getenv('RPC_URL', 'http://127.0.0.1')}:{int(os.getenv('RPC_PORT_NODE_B', '8779'))}",
+            port=8779,
+            api_url="http://127.0.0.1:8779",
             hd_mode=False,
             wasm_mode=False,
-            userpass=os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD")
+            userpass="RPC_UserP@SSW0RD"
         ),
         NodeConfig(
             name="node_c",
-            port=int(os.getenv("RPC_PORT_NODE_C", "8780")),
-            api_url=f"{os.getenv('RPC_URL', 'http://127.0.0.1')}:{int(os.getenv('RPC_PORT_NODE_C', '8780'))}",
+            port=8780,
+            api_url="http://127.0.0.1:8780",
             hd_mode=True,
             wasm_mode=True,
-            userpass=os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD")
+            userpass="RPC_UserP@SSW0RD"
         ),
         NodeConfig(
             name="node_d",
-            port=int(os.getenv("RPC_PORT_NODE_D", "8781")),
-            api_url=f"{os.getenv('RPC_URL', 'http://127.0.0.1')}:{int(os.getenv('RPC_PORT_NODE_D', '8781'))}",
+            port=8781,
+            api_url="http://127.0.0.1:8781",
             hd_mode=False,
             wasm_mode=True,
-            userpass=os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD")
+            userpass="RPC_UserP@SSW0RD"
         ),
     ])
     

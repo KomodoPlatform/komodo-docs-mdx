@@ -20,22 +20,26 @@ from utils.py.lib.managers.git_manager import GitManager
 
 
 class ApiRequestProcessor:
-    def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, kdf_branch: str = 'dev'):
+    def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, kdf_branch: str = 'dev', substitute_defaults: bool = True):
         self.config = config
         self.logger = logger
+        self.substitute_defaults = substitute_defaults
         self.git_manager = GitManager(self.logger)
         self.path_mapper = EnhancedPathMapper(config=self.config)
         self._load_dotenv()
         self.kdf_branch = kdf_branch
-        self.enabled_coins: Set[str] = set()
+        self.enabled_coins: Dict[str, Set[str]] = {node.name: set() for node in self.config.nodes}
         self.session = requests.Session()
         self.coins_config: Dict[str, Any] = {}
         self.protocol_to_activation: Dict[str, Any] = {}
-        self.method_results_cache: Dict[str, Any] = {}
-        self.completed_methods: Set[str] = set()
+        self.method_results_cache: Dict[str, Dict[str, Any]] = {node.name: {} for node in self.config.nodes}
+        self.completed_methods: Dict[str, Set[str]] = {node.name: set() for node in self.config.nodes}
         self.activation_methods: Set[str] = set()
         self.v1_methods: Set[str] = set()
         self.v2_methods: Set[str] = set()
+        
+        # Cache for test parameter constants (utils/py/kdf_test_cases/test_params.json)
+        self._test_params: Dict[str, Any] = {}
 
         # Mappings and Constants
         self.enable_hd = self._get_env_var_as_bool("ENABLE_HD", False)
@@ -137,7 +141,7 @@ class ApiRequestProcessor:
             "1inch_api": os.getenv("ONE_INCH_API", ""),
             "seednodes": self._get_env_var_as_str_array("SEED_NODES", []),
             "passphrase": os.getenv("PASSPHRASE", ""),
-            "userpass": os.getenv("RPC_PASSWORD", "RPC_UserP@SSW0RD"),
+            "rpc_password": "RPC_UserP@SSW0RD",
             "use_watchers": self._get_env_var_as_bool("USE_WATCHERS", False),
             "i_am_seed": self._get_env_var_as_bool("I_AM_SEED", False),
             "is_bootstrap_node": self._get_env_var_as_bool("IS_BOOTSTRAP_NODE", False),
@@ -245,9 +249,61 @@ class ApiRequestProcessor:
             json.dump(self.coins_file, f, indent=4)
             self.logger.success("Successfully saved coins file.")
 
+    # =============================================================
+    # Test parameter substitution helpers
+    # =============================================================
+
+    def _load_test_params(self) -> None:
+        """Load constants from utils/py/kdf_test_cases/test_params.json once."""
+        if self._test_params:
+            return
+        test_params_path = Path(__file__).resolve().parent.parent / "kdf_test_cases" / "test_params.json"
+        try:
+            with open(test_params_path, "r") as fp:
+                self._test_params = json.load(fp)
+                self.logger.debug(f"Loaded test params from {test_params_path}")
+        except FileNotFoundError:
+            self.logger.warning(f"test_params.json not found at {test_params_path}; default substitution disabled.")
+        except json.JSONDecodeError as exc:
+            self.logger.error(f"Could not parse {test_params_path}: {exc}")
+
+    def _substitute_default_params(self, body: Dict[str, Any]) -> Dict[str, Any]:
+        """Return copy of *body* with coin/ticker/base/rel substituted from test params."""
+        self._load_test_params()
+        self.logger.info(f"************************************************")
+        self.logger.info(f"Substitute defaults for: {body}")
+        if not self._test_params:
+            return body
+        primary = self._test_params.get("PRIMARY_COIN")
+        secondary = self._test_params.get("SECONDARY_COIN")
+        mapping = {
+            "coin": primary,
+            "ticker": primary,
+            "base": primary,
+            "rel": secondary,
+            "my_coin": primary,
+            "other_coin": secondary
+        }
+        new_body = copy.deepcopy(body)
+        for k, v in mapping.items():
+            if v is None:
+                continue
+            if k in new_body:
+                new_body[k] = v
+            params = new_body.get("params")
+            if isinstance(params, dict) and k in params:
+                params[k] = v
+        self.logger.info(f"Substituted defaults to: {new_body}")
+        self.logger.info(f"************************************************")
+        return new_body
+
     def _make_request(self, url: str, request_body: Dict[str, Any]) -> Dict[str, Any]:
         """Wrapper for making API requests."""
-        self.logger.info(f"Sending request to {url}:\n{json.dumps(request_body, indent=2)}")
+        self.logger.info(f"Making rpc request to {url}")
+        if self.substitute_defaults:
+            self.logger.info(f"Subbing defaults")
+            request_body = self._substitute_default_params(request_body)
+        self.logger.info(f"Sending rpc request to {url}:\n{json.dumps(request_body, indent=2)}")
         try:
             response = self.session.post(url, json=request_body, timeout=60)
             response.raise_for_status()
@@ -281,15 +337,15 @@ class ApiRequestProcessor:
         }
         response = self._make_request(node_url, request_body)
         if "result" in response:
-            self.enabled_coins = {coin['ticker'] for coin in response["result"].get("coins", [])}
-            self.logger.success(f"Successfully updated list of enabled coins.")
+            self.enabled_coins[target_node.name] = {coin['ticker'] for coin in response["result"].get("coins", [])}
+            self.logger.success(f"Successfully updated list of enabled coins for node '{target_node.name}'.")
         else:
-            self.logger.error(f"Failed to update list of enabled coins.")
-        self.logger.info(f"Currently enabled coins: {self.enabled_coins}")
+            self.logger.error(f"Failed to update list of enabled coins for node '{target_node.name}'.")
+        self.logger.info(f"Currently enabled coins for node '{target_node.name}': {self.enabled_coins[target_node.name]}")
         
 
 
-    def check_coin_is_active(self, request_body: Dict[str, Any]) -> bool:
+    def check_coin_is_active(self, request_body: Dict[str, Any], node: NodeConfig) -> bool:
         """Checks if the coin is active, and if not, activates it"""
         coins_to_activate = []
         for i in ['coin', 'ticker', 'base', 'rel']:
@@ -304,10 +360,10 @@ class ApiRequestProcessor:
             return True, None
         self.logger.info(f"Method: {request_body.get('method')} needs some coins to activate: {coins_to_activate}")
         for coin in coins_to_activate:
-            if coin and coin not in self.enabled_coins:
-                self.logger.warning(f"Coin '{coin}' is not enabled. Attempting activation...")
-                if not self.activate_coin(coin):
-                    self.logger.error(f"Skipping request as activation for '{coin}' failed.")
+            if coin and coin not in self.enabled_coins[node.name]:
+                self.logger.warning(f"Coin '{coin}' is not enabled on node '{node.name}'. Attempting activation...")
+                if not self.activate_coin(coin, node=node):
+                    self.logger.error(f"Skipping request as activation for '{coin}' on node '{node.name}' failed.")
                     return False, coin
         return True, None
 
@@ -335,12 +391,15 @@ class ApiRequestProcessor:
                 if self.is_activation_method(method):
                     params = request_body.get("params", {})
                     ticker = params.get("ticker")
-                    if ticker and ticker in self.enabled_coins:
-                        self.logger.warning(f"Coin '{ticker}' is already enabled for activation test. Disabling first.")
-                        if self.disable_coin(ticker):
+                    # Using first node as baseline for this check.
+                    # This check is a preliminary step before sending to all nodes.
+                    baseline_node = self.config.nodes[0]
+                    if ticker and ticker in self.enabled_coins[baseline_node.name]:
+                        self.logger.warning(f"Coin '{ticker}' is already enabled for activation test on node '{baseline_node.name}'. Disabling first.")
+                        if self.disable_coin(ticker, node=baseline_node):
                             time.sleep(1)  # Give a moment for the state to update
                         else:
-                            self.logger.error(f"Failed to disable '{ticker}', skipping activation test for this example.")
+                            self.logger.error(f"Failed to disable '{ticker}' on node '{baseline_node.name}', skipping activation test for this example.")
                             continue
 
                 # For kmd_rewards_info, ensure KMD is specified.
@@ -353,16 +412,8 @@ class ApiRequestProcessor:
                     elif "coin" not in request_body:
                         request_body["coin"] = "KMD"
                         
-                # Inject cached data from previous method calls
-                request_body = self._inject_cached_data(method, request_body)
-
-                # Dynamically set userpass from environment variable if available
-                request_body["userpass"] = self.config.nodes[0].userpass
-                
-                coins_active, coin = self.check_coin_is_active(request_body)
-                if not coins_active:
-                    self.logger.error(f"Skipping request as activation for '{coin}' failed.")
-                    continue
+                # Note: Data injection and coin activation checks are now handled inside send_request_to_all_nodes
+                # on a per-node basis.
 
                 # Determine example number from filename e.g., request_1.json → 1
                 try:
@@ -379,87 +430,91 @@ class ApiRequestProcessor:
                 )
 
                 # Use node_a (or first) as baseline for caching and further logic
-                baseline_resp = node_responses.get("node_a") or next(iter(node_responses.values()))
+                baseline_node = self.config.nodes[0]
+                baseline_resp = node_responses.get(baseline_node.name) or next(iter(node_responses.values()))
 
                 # Cache data from baseline response if successful
                 if baseline_resp and "error" not in baseline_resp:
-                    self._cache_response_data(method, baseline_resp)
-                    self.completed_methods.add(method)
+                    self._cache_response_data(method, baseline_resp, baseline_node)
+                    self.completed_methods[baseline_node.name].add(method)
 
                 # Compare responses and log differences (optional for now)
                 compare_node_responses(node_responses, logger=self.logger)
 
-    def _inject_cached_data(self, method: str, request_body: Dict[str, Any]) -> Dict[str, Any]:
+    def _inject_cached_data(self, method: str, request_body: Dict[str, Any], node: NodeConfig) -> Dict[str, Any]:
         """Injects cached data from previous requests into the current request body."""
         params = request_body.get("params", {})
+        node_cache = self.method_results_cache[node.name]
 
         # Handle task-based methods
         if "::" in method and not method.endswith("::init"):
             task_group = "::".join(method.split("::")[:-1])
-            task_cache = self.method_results_cache.get("tasks", {}).get(task_group, {})
+            task_cache = node_cache.get("tasks", {}).get(task_group, {})
             if "task_id" in task_cache:
-                self.logger.info(f"Injecting task_id {task_cache['task_id']} into request for {method}")
+                self.logger.info(f"Injecting task_id {task_cache['task_id']} into request for {method} on node {node.name}")
                 params['task_id'] = task_cache['task_id']
 
         # Handle swap status
         if method == "my_swap_status":
-            swap_cache = self.method_results_cache.get("swaps", [])
+            swap_cache = node_cache.get("swaps", [])
             if swap_cache:
                 latest_swap = swap_cache[-1]
                 if "uuid" in latest_swap:
-                    self.logger.info(f"Injecting uuid {latest_swap['uuid']} into request for {method}")
+                    self.logger.info(f"Injecting uuid {latest_swap['uuid']} into request for {method} on node {node.name}")
                     params['uuid'] = latest_swap['uuid']
 
         # Handle message verification
         if method == "verify_message":
-            signature_cache = self.method_results_cache.get("signatures", {})
+            signature_cache = node_cache.get("signatures", {})
             if "signature" in signature_cache:
-                self.logger.info(f"Injecting signature for {method}")
+                self.logger.info(f"Injecting signature for {method} on node {node.name}")
                 params.update(signature_cache)
 
         # Handle sending raw transaction
         if method == "send_raw_transaction":
-            tx_cache = self.method_results_cache.get("unsigned_tx", {})
+            tx_cache = node_cache.get("unsigned_tx", {})
             if "tx_hex" in tx_cache:
-                self.logger.info(f"Injecting tx_hex into request for {method}")
+                self.logger.info(f"Injecting tx_hex into request for {method} on node {node.name}")
                 params['tx_hex'] = tx_cache['tx_hex']
                 
         request_body['params'] = params
         return request_body
 
-    def _cache_response_data(self, method: str, response: Dict[str, Any]):
+    def _cache_response_data(self, method: str, response: Dict[str, Any], node: NodeConfig):
         """Caches relevant data from a successful response for later use."""
         result = response.get("result", {})
         if not result:
             return
+        
+        node_cache = self.method_results_cache[node.name]
 
         # Cache task_id for all init methods
         if method.endswith("::init") and "task_id" in result:
             task_group = "::".join(method.split("::")[:-1])
-            if "tasks" not in self.method_results_cache:
-                self.method_results_cache["tasks"] = {}
-            self.method_results_cache["tasks"][task_group] = {"task_id": result["task_id"]}
-            self.logger.info(f"Cached task_id for {task_group}: {result['task_id']}")
+            if "tasks" not in node_cache:
+                node_cache["tasks"] = {}
+            node_cache["tasks"][task_group] = {"task_id": result["task_id"]}
+            self.logger.info(f"Cached task_id for {task_group} on node {node.name}: {result['task_id']}")
 
         # Cache swap UUIDs
         if method in ["buy", "sell"] and "uuid" in result:
-            if "swaps" not in self.method_results_cache:
-                self.method_results_cache["swaps"] = []
-            self.method_results_cache["swaps"].append({"uuid": result["uuid"]})
-            self.logger.info(f"Cached swap uuid: {result['uuid']}")
+            if "swaps" not in node_cache:
+                node_cache["swaps"] = []
+            node_cache["swaps"].append({"uuid": result["uuid"]})
+            self.logger.info(f"Cached swap uuid on node {node.name}: {result['uuid']}")
 
         # Cache signature data
         if method == "sign_message" and "signature" in result:
-            self.method_results_cache["signatures"] = {
+            node_cache["signatures"] = {
                 "signature": result["signature"],
                 "pubkey": result.get("pubkey")
             }
-            self.logger.info(f"Cached message signature.")
+            self.logger.info(f"Cached message signature on node {node.name}.")
             
         # Cache unsigned transaction hex
         if method == "get_unsigned_transaction" and "tx_hex" in result:
-            self.method_results_cache["unsigned_tx"] = {"tx_hex": result["tx_hex"]}
-            self.logger.info(f"Cached unsigned transaction hex.")
+            node_cache["unsigned_tx"] = {"tx_hex": result["tx_hex"]}
+            self.logger.info(f"Cached unsigned transaction hex on node {node.name}.")
 
     def activate_coin(self, ticker: str, activation_type: str = 'default', node: Optional[NodeConfig] = None) -> bool:
         target_node = node or self.config.nodes[0]
@@ -826,13 +881,25 @@ class ApiRequestProcessor:
         for node in nodes_cfg:
             body = copy.deepcopy(request_body)
             body["userpass"] = node.userpass
-    
+            
+            # Apply test parameter substitution if enabled so that activation checks use correct tickers
+            if self.substitute_defaults:
+                body = self._substitute_default_params(body)
+            
+            # Inject cached data from previous method calls for this specific node
+            body = self._inject_cached_data(method_name, body, node)
+            
+            # Check for coin activation for this specific node
+            coins_active, coin = self.check_coin_is_active(body, node)
+            if not coins_active:
+                self.logger.error(f"Skipping request for method '{method_name}' on node '{node.name}' as activation for '{coin}' failed.")
+                responses[node.name] = {"error": f"Coin activation failed for {coin}"}
+                continue
+
             resp_json = self._make_request(node.api_url, body)
             responses[node.name] = resp_json
     
-            # ------------------------------------------------------------------
             # Persist response to disk following the expected naming convention
-            # ------------------------------------------------------------------
             hd_flag = "hd" if node.hd_mode else "nonhd"
             wasm_flag = "wasm" if node.wasm_mode else "native"
             suffix = "error" if "error" in resp_json else "response"
@@ -848,9 +915,9 @@ class ApiRequestProcessor:
     
         return responses
 
-# ================================================================
+# =============================================================
 # Helper utilities for multi-node testing
-# ================================================================
+# =============================================================
 
 def compare_node_responses(
     responses: Dict[str, Dict[str, Any]],

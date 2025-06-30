@@ -1,8 +1,8 @@
 # ---------------------------------------------------------------------
 # Dockerfile.kdf.wasm – Build and run the Komodo DeFi Framework (KDF)
 # inside a WASM runtime. This image compiles the `mm2_bin_lib` crate to
-# WebAssembly (target `nodejs`) using `wasm-pack`, then launches a simple
-# Node.js runner that spins up the KDF instance via `mm2_main`.
+# WebAssembly (target `web`), then uses Puppeteer to run it in a headless
+# Chrome instance. An RPC bridge allows communication with the WASM module.
 # ---------------------------------------------------------------------
 # syntax=docker/dockerfile:1.4
 
@@ -58,7 +58,7 @@ RUN --mount=type=cache,id=cargo-registry,target=/root/.cargo/registry \
     --mount=type=cache,id=cargo-git,target=/root/.cargo/git \
     wasm-pack build mm2src/mm2_bin_lib \
       --release \
-      --target nodejs \
+      --target web \
       --out-dir /tmp/kdf-wasm
 
 ###########################################
@@ -66,18 +66,30 @@ RUN --mount=type=cache,id=cargo-registry,target=/root/.cargo/registry \
 ###########################################
 FROM node:20-slim AS runtime
 
+# Install puppeteer dependencies
+RUN apt-get update && apt-get install -yq --no-install-recommends wget gnupg ca-certificates && \
+    wget --quiet -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg && \
+    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list && \
+    apt-get update && \
+    apt-get install -yq --no-install-recommends google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
+
 # Use the non-root "node" user already present in the base image (UID 1000)
 USER node
 WORKDIR /home/node
 
-# Copy the compiled wasm pkg from the build stage.
-COPY --from=builder /tmp/kdf-wasm ./kdf
+# Copy package.json and install dependencies first to leverage caching
+COPY --chown=node:node wasm_runner/package.json wasm_runner/package-lock.json* ./
+RUN npm install
 
-# ---------------- Runner script ----------------
-# This small JS script boots the WASM module and starts KDF using the
-# configuration mounted at `/home/node/.kdf/MM2.json` (mounted via
-# docker-compose bind-mounts).
-RUN echo 'import init from "./kdf/mm2lib.js"; init();' > /home/node/run_mm2.js
+# Copy the rest of our application files
+COPY --chown=node:node wasm_runner/ ./
 
-# The main entrypoint simply starts the Node.js script.
-ENTRYPOINT ["node", "run_mm2.js"]
+# Copy the compiled wasm pkg from the build stage into the public directory
+COPY --from=builder --chown=node:node /tmp/kdf-wasm ./public/kdf
+
+# Build the vite project
+RUN npm run build
+
+# The main entrypoint starts the Node.js server.
+ENTRYPOINT ["node", "server.cjs"]
