@@ -1,0 +1,113 @@
+services:
+  # ---------------------------------------------------------------------
+  # Primary KDF node used by most existing tests (alias: node-A)
+  # ---------------------------------------------------------------------
+  kdf_node_a:
+    image: kdf-dev-env:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.kdf
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    ports:
+      - "8778:8778"
+      - "42845:42845" # TCP p2p
+      - "42855:42855" # WSS p2p
+    volumes:
+      - ./kdf-db:/home/kdfuser/.kdf/DB
+      - ./kdf-config/MM2.json:/home/kdfuser/.kdf/MM2.json
+      - ./kdf-config/coins:/home/kdfuser/.kdf/coins
+      - ./kdf-config/.env:/home/kdfuser/.kdf/.env
+
+  # ---------------------------------------------------------------------
+  # Secondary KDF node (node-B) – used for maker/taker or peer-to-peer tests.
+  # It listens on a different RPC & p2p port and stores data in its own
+  # bind-mount to avoid conflicts with node-A.
+  # ---------------------------------------------------------------------
+  kdf_node_b:
+    image: kdf-dev-env:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.kdf
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    ports:
+      - "8779:8779"
+      - "42846:42845"  # forward container 42845 → host 42846 (TCP)
+      - "42856:42855"  # forward container 42855 → host 42856 (WSS)
+    volumes:
+      - ./kdf-db-node-b:/home/kdfuser/.kdf/DB
+      - ./kdf-config-node-b/MM2.json:/home/kdfuser/.kdf/MM2.json
+      - ./kdf-config/coins:/home/kdfuser/.kdf/coins:ro
+      - ./kdf-config/.env:/home/kdfuser/.kdf/.env
+
+  # ---------------------------------------------------------------------
+  # Tertiary KDF node (node-C) – HD wallet compiled to WASM. Useful for
+  # wasm-based HD activation and RPC testing.
+  # ---------------------------------------------------------------------
+  kdf_node_c_wasm:
+    image: kdf-dev-env-wasm:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.kdf.wasm
+      args:
+        RPC_PORT: 8780
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    ports:
+      - "8780:8780"  # RPC HTTP
+      - "42847:42845"  # TCP p2p
+      - "42857:42855"  # WSS p2p
+    volumes:
+      - ./kdf-db-node-c:/home/node/.kdf/DB
+      - ./kdf-config-node-c/MM2.json:/home/node/.kdf/MM2.json
+      - ./kdf-config/coins:/home/node/.kdf/coins:ro
+      - ./kdf-config/.env:/home/node/.kdf/.env
+
+  # ---------------------------------------------------------------------
+  # Quaternary KDF node (node-D) – Non-HD wallet compiled to WASM.
+  # Useful for wasm-based non-HD activation and RPC testing.
+  # ---------------------------------------------------------------------
+  kdf_node_d_wasm:
+    image: kdf-dev-env-wasm:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.kdf.wasm
+      args:
+        RPC_PORT: 8781
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
+    ports:
+      - "8781:8780"
+      - "42848:42845"  # TCP p2p
+      - "42858:42855"  # WSS p2p
+    volumes:
+      - ./kdf-db-node-d:/home/node/.kdf/DB
+      - ./kdf-config-node-d/MM2.json:/home/node/.kdf/MM2.json
+      - ./kdf-config/coins:/home/node/.kdf/coins:ro
+      - ./kdf-config/.env:/home/node/.kdf/.env
+
+  # ---------------------------------------------------------------------
+  # Ganache – lightweight EVM dev-chain used by WalletConnect / EVM tests.
+  # Exposes JSON-RPC on 8545 with deterministic accounts pre-funded.
+  # Resource footprint: ~200 MB RAM, negligible CPU when idle.
+  # ---------------------------------------------------------------------
+  ganache:
+    image: trufflesuite/ganache:v7.7.7
+    command: [
+      "--host", "0.0.0.0",
+      "--port", "8545",
+      "--chain.chainId", "1337",
+      "--wallet.totalAccounts", "10",
+      "--wallet.defaultBalance", "1000"
+    ]
+    ports:
+      - "8545:8545"
+
+volumes:
+  kdf-db: {}
+  kdf-db-node-b: {}
+  kdf-db-node-c: {}
+  kdf-db-node-d: {} 
