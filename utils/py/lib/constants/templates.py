@@ -24,7 +24,7 @@ class ExampleTemplates:
             'basic_activation': {
                 'description': 'Basic activation with minimal parameters',
                 'params': {
-                    'coin': 'RICK',
+                    'coin': 'DOC',
                     'activation_params': {
                         'mode': {
                             'rpc': 'https://rick.kmd.earth',
@@ -36,7 +36,7 @@ class ExampleTemplates:
             'with_custom_confirmations': {
                 'description': 'Activation with custom confirmation requirements',
                 'params': {
-                    'coin': 'MORTY',
+                    'coin': 'MARTY',
                     'activation_params': {
                         'mode': {
                             'rpc': 'https://morty.kmd.earth',
@@ -114,8 +114,8 @@ class ExampleTemplates:
             'basic_order': {
                 'description': 'Basic trading order',
                 'params': {
-                    'base': 'RICK',
-                    'rel': 'MORTY',
+                    'base': 'DOC',
+                    'rel': 'MARTY',
                     'price': '1.0',
                     'volume': '10.0'
                 }
@@ -136,11 +136,11 @@ class ExampleTemplates:
                 'description': 'Market maker configuration',
                 'params': {
                     'pairs': [
-                        {'base': 'RICK', 'rel': 'MORTY'},
+                        {'base': 'DOC', 'rel': 'MARTY'},
                         {'base': 'KMD', 'rel': 'BTC'}
                     ],
                     'spreads': {
-                        'RICK/MORTY': '0.02',
+                        'DOC/MARTY': '0.02',
                         'KMD/BTC': '0.01'
                     }
                 }

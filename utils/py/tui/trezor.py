@@ -37,16 +37,21 @@ class TrezorTUI:
         self.processor: ApiRequestProcessor = self.tools.processor
         self.last_task_id: Optional[int] = None
         self.branch = EnhancedKomodoConfig().kdf_branch or "unknown"
+        # Active node starts with first in config
+        self.active_node = self.processor.config.nodes[0]
 
     # --------------------------- RPC helpers ---------------------------
     def _rpc(self, method: str, params: dict | None = None):
+        # Inject userpass and target the first configured node
+        node = self.active_node
         body = {
             "method": method,
             "mmrpc": "2.0",
             "params": params or {},
             "id": 0,
+            "userpass": node.userpass,
         }
-        resp = self.processor._make_request(body)
+        resp = self.processor._make_request(node.api_url, body)
         if "error" in resp:
             raise RuntimeError(resp["error"])
         return resp.get("result", {})
@@ -123,13 +128,15 @@ class TrezorTUI:
         while True:
             self.console.print(
                 Panel(
-                    "[1] Init Trezor\n[2] Status\n[3] Send PIN\n[4] Send Passphrase\n[5] Cancel Init\n[6] Connection status\n[q] Quit",
+                    f"[0] Select node (current: {self.active_node.name})\n[1] Init Trezor\n[2] Status\n[3] Send PIN\n[4] Send Passphrase\n[5] Cancel Init\n[6] Connection status\n[q] Quit",
                     title=f"Trezor TUI ({self.branch})",
                     subtitle="Choose an action",
                 )
             )
             choice = Prompt.ask("Your choice").strip().lower()
-            if choice == "1":
+            if choice == "0":
+                self._select_node()
+            elif choice == "1":
                 self.init_device()
             elif choice == "2":
                 self.status()
@@ -145,6 +152,24 @@ class TrezorTUI:
                 break
             else:
                 self.console.print("[yellow]Unknown option[/]")
+
+    # --------------------------- node selection -------------------------
+
+    def _select_node(self):
+        nodes = self.processor.config.nodes
+        self.console.print("[bold]Select node to use:[/]")
+        for idx, node in enumerate(nodes, 1):
+            self.console.print(f"[{idx}] {node.name} – {node.api_url}")
+        choice = Prompt.ask("Choice (Enter to cancel)")
+        if not choice:
+            return
+        if choice.isdigit():
+            idx = int(choice)
+            if 1 <= idx <= len(nodes):
+                self.active_node = nodes[idx-1]
+                self.console.print(f"[cyan]Switched to node {self.active_node.name} ({self.active_node.api_url})[/]")
+                return
+        self.console.print("[yellow]Invalid selection – node unchanged.[/]")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ import copy
 from typing import Dict, Any, Set, Optional, List
 from pathlib import Path
 import sys
+import concurrent.futures  # for ThreadPoolExecutor in send_request_to_all_nodes
 
 from utils.py.lib.constants.config_struct import EnhancedKomodoConfig, NodeConfig
 from utils.py.lib.utils.logging_utils import KomodoLogger
@@ -20,7 +21,7 @@ from utils.py.lib.managers.git_manager import GitManager
 
 
 class ApiRequestProcessor:
-    def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, kdf_branch: str = 'dev', substitute_defaults: bool = True):
+    def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, kdf_branch: str = 'dev', substitute_defaults: bool = False):
         self.config = config
         self.logger = logger
         self.substitute_defaults = substitute_defaults
@@ -100,6 +101,7 @@ class ApiRequestProcessor:
         config_data['rpcport'] = node_config.port
         config_data['enable_hd'] = node_config.hd_mode
         config_data['userpass'] = node_config.userpass
+        config_data['passphrase'] = node_config.passphrase
 
         # Unique wallet name and password for each node
         node_name = node_config.name
@@ -257,7 +259,8 @@ class ApiRequestProcessor:
         """Load constants from utils/py/kdf_test_cases/test_params.json once."""
         if self._test_params:
             return
-        test_params_path = Path(__file__).resolve().parent.parent / "kdf_test_cases" / "test_params.json"
+        # Use centralized path from DirectoryConfig for test parameters
+        test_params_path = self.config.directories.test_params_json
         try:
             with open(test_params_path, "r") as fp:
                 self._test_params = json.load(fp)
@@ -270,8 +273,23 @@ class ApiRequestProcessor:
     def _substitute_default_params(self, body: Dict[str, Any]) -> Dict[str, Any]:
         """Return copy of *body* with coin/ticker/base/rel substituted from test params."""
         self._load_test_params()
-        self.logger.info(f"************************************************")
-        self.logger.info(f"Substitute defaults for: {body}")
+
+        # Skip substitution for methods that rely on the *exact* coin values passed
+        # by the caller. Substituting these values would lead to incorrect behaviour
+        # or failed requests. Currently the following methods are exempt:
+        #   • convert_utxo_address – converting between specific UTXO coins must use
+        #     the tickers provided in the example (e.g., BTC → RVN).
+        #   • get_kdf_responses   – metadata-style call that should always use the
+        #     supplied parameters (if any) without alteration.
+        skip_substitution_methods = {"convert_utxo_address"}
+
+        method_name = body.get("method")
+        if method_name in skip_substitution_methods:
+            self.logger.debug(
+                f"Skipping default parameter substitution for method '{method_name}'."
+            )
+            return body
+
         if not self._test_params:
             return body
         primary = self._test_params.get("PRIMARY_COIN")
@@ -293,17 +311,12 @@ class ApiRequestProcessor:
             params = new_body.get("params")
             if isinstance(params, dict) and k in params:
                 params[k] = v
-        self.logger.info(f"Substituted defaults to: {new_body}")
-        self.logger.info(f"************************************************")
         return new_body
 
     def _make_request(self, url: str, request_body: Dict[str, Any]) -> Dict[str, Any]:
         """Wrapper for making API requests."""
-        self.logger.info(f"Making rpc request to {url}")
         if self.substitute_defaults:
-            self.logger.info(f"Subbing defaults")
             request_body = self._substitute_default_params(request_body)
-        self.logger.info(f"Sending rpc request to {url}:\n{json.dumps(request_body, indent=2)}")
         try:
             response = self.session.post(url, json=request_body, timeout=60)
             response.raise_for_status()
@@ -470,13 +483,27 @@ class ApiRequestProcessor:
                 self.logger.info(f"Injecting signature for {method} on node {node.name}")
                 params.update(signature_cache)
 
+        # Remove erroneous Order UUID caching section (if present)
+        # Handle order-related methods that require a previously obtained order UUID
+        if method in ["cancel_order", "order_status", "update_maker_order"]:
+            orders_cache = node_cache.get("orders", [])
+            if orders_cache:
+                latest_order = orders_cache[-1]
+                if "uuid" in latest_order:
+                    self.logger.info(
+                        f"Injecting order uuid {latest_order['uuid']} into request for {method} on node {node.name}"
+                    )
+                    # Set for both v1 (top-level) and v2 (nested params) possibilities
+                    request_body["uuid"] = latest_order["uuid"]
+                    params["uuid"] = latest_order["uuid"]
+
         # Handle sending raw transaction
         if method == "send_raw_transaction":
             tx_cache = node_cache.get("unsigned_tx", {})
             if "tx_hex" in tx_cache:
                 self.logger.info(f"Injecting tx_hex into request for {method} on node {node.name}")
                 params['tx_hex'] = tx_cache['tx_hex']
-                
+
         request_body['params'] = params
         return request_body
 
@@ -502,6 +529,13 @@ class ApiRequestProcessor:
                 node_cache["swaps"] = []
             node_cache["swaps"].append({"uuid": result["uuid"]})
             self.logger.info(f"Cached swap uuid on node {node.name}: {result['uuid']}")
+
+        # Cache order UUIDs from setprice for later cancellation or updates
+        if method == "setprice" and "uuid" in result:
+            if "orders" not in node_cache:
+                node_cache["orders"] = []
+            node_cache["orders"].append({"uuid": result["uuid"]})
+            self.logger.info(f"Cached order uuid on node {node.name}: {result['uuid']}")
 
         # Cache signature data
         if method == "sign_message" and "signature" in result:
@@ -645,9 +679,13 @@ class ApiRequestProcessor:
 
                 # Password for the SIA wallet daemon, should be in coin config
                 password = coin_info.get("password")
-                if password is None: # check for None to allow empty string
-                    self.logger.error(f"Missing 'password' in config for SIA coin '{ticker}'.")
-                    return False
+                if password is None:
+                    # Fallback to environment variable or empty string if not set.
+                    password = os.getenv("SIA_WALLET_PASSWORD", "")
+                    if password == "":
+                        self.logger.warning(
+                            f"'password' not specified for SIA coin '{ticker}'. Using empty string."
+                        )
 
                 activation_params["client_conf"] = {
                     "server_url": server_url,
@@ -742,7 +780,6 @@ class ApiRequestProcessor:
             if status_response and "result" in status_response:
                 status = status_response["result"].get("status")
                 details = status_response["result"].get("details")
-                self.logger.info(f"Activation status for '{ticker}' (Task {task_id}): {status}")
                 if status == "Ok":
                     self.logger.success(f"Successfully activated '{ticker}'. Details: {details}")
                     self._update_enabled_coins(node=target_node)
@@ -853,57 +890,111 @@ class ApiRequestProcessor:
         output_dir: Path,
         example_number: int,
     ) -> Dict[str, Dict[str, Any]]:
-        """Send *request_body* to every locally running KDF docker node.
+        """Send *request_body* to every locally running KDF docker node in parallel.
     
-        Nodes are detected via the standard port environment variables that mirror
-        those used in *utils/docker/docker-compose.yml*.
-    
-        A JSON response (or error) is saved for each node using the naming scheme
-        required by the sync script:
-    
-            {method_name}-{example_number}-{hd_mode}-{wasm_mode}-{response|error}.json
-            {method_name}-{hd_mode}-{wasm_mode}-{response|error}.json  (when no example #)
-    
-        The file is stored in *output_dir* which should correspond to the directory
-        where *py/kdf_tools.py get-kdf-responses* stores its examples.
-    
-        Returns a mapping ``{node_key: response_dict}`` that can later be passed to
-        :pyfunc:`compare_node_responses`.
+        Previously this function iterated over nodes sequentially which slowed down the
+        overall scan considerably. We now leverage ``concurrent.futures.ThreadPoolExecutor``
+        to dispatch the HTTP POST requests concurrently – one per docker node. This
+        typically cuts the waiting time by ~4× on the default 4-node setup.
         """
-    
+
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
-    
+
         nodes_cfg = self.config.nodes
-    
+
+        # Shared responses mapping to be returned at the end
         responses: Dict[str, Dict[str, Any]] = {}
-    
-        for node in nodes_cfg:
+
+        # ------------------------------------------------------------------
+        # Helper executed in a worker thread for exactly one *node*.
+        # ------------------------------------------------------------------
+        def _process_single_node(node: NodeConfig) -> tuple[str, Dict[str, Any]]:
+            """Send the request to *node* and persist the response on disk.
+
+            Returns a tuple ``(node.name, response_json)`` for aggregation by the
+            outer scope.
+            """
+
             body = copy.deepcopy(request_body)
             body["userpass"] = node.userpass
-            
-            # Apply test parameter substitution if enabled so that activation checks use correct tickers
-            if self.substitute_defaults:
+            self.logger.debug(f"Making {body['method']} request to {node.name} ({node.api_url})")
+            # Apply test parameter substitution if enabled and this is NOT an activation method
+            if self.substitute_defaults and not self.is_activation_method(method_name):
                 body = self._substitute_default_params(body)
-            
-            # Inject cached data from previous method calls for this specific node
+
+            # Inject cached data relevant for this node
             body = self._inject_cached_data(method_name, body, node)
-            
-            # Check for coin activation for this specific node
+
+            # Activate coins if needed; on failure we early-return
             coins_active, coin = self.check_coin_is_active(body, node)
             if not coins_active:
-                self.logger.error(f"Skipping request for method '{method_name}' on node '{node.name}' as activation for '{coin}' failed.")
-                responses[node.name] = {"error": f"Coin activation failed for {coin}"}
-                continue
+                self.logger.error(
+                    f"Skipping request for method '{method_name}' on node '{node.name}' "
+                    f"as activation for '{coin}' failed."
+                )
+                resp_json: Dict[str, Any] = {"error": f"Coin activation failed for {coin}"}
+            else:
+                # ------------------------------------------------------------------
+                # Special handling for `disable_coin` tests
+                # ------------------------------------------------------------------
+                if method_name == "disable_coin":
+                    # Ensure the target coin is active before attempting to disable.
+                    # Although `check_coin_is_active` should have activated it already,
+                    # the explicit check keeps the intent crystal-clear and guards
+                    # against future refactors.
+                    target_coin = (
+                        body.get("coin")
+                        or (body.get("params", {}).get("coin") if isinstance(body.get("params"), dict) else None)
+                    )
+                    if target_coin and target_coin not in self.enabled_coins[node.name]:
+                        self.logger.info(
+                            f"Coin '{target_coin}' is not active on node '{node.name}' – activating before disable test."
+                        )
+                        if not self.activate_coin(target_coin, node=node):
+                            self.logger.error(
+                                f"Unable to activate '{target_coin}' on node '{node.name}'. Skipping disable_coin test."
+                            )
+                            resp_json = {"error": f"Pre-activation failed for {target_coin}"}
+                            # Persist the error response later in the function
+                        else:
+                            # With coin now active, proceed to disable
+                            resp_json = self._make_request(node.api_url, body)
+                    else:
+                        # Coin is active already – normal flow
+                        resp_json = self._make_request(node.api_url, body)
+                else:
+                    # Regular (non-disable_coin) request flow
+                    resp_json = self._make_request(node.api_url, body)
 
-            resp_json = self._make_request(node.api_url, body)
-            responses[node.name] = resp_json
-    
-            # Persist response to disk following the expected naming convention
+                # ------------------------------------------------------------------
+                # Re-enable the coin after a successful `disable_coin` test so that
+                # subsequent examples running in the same session have the coin
+                # available as expected.
+                # ------------------------------------------------------------------
+                if method_name == "disable_coin":
+                    target_coin = (
+                        body.get("coin")
+                        or (body.get("params", {}).get("coin") if isinstance(body.get("params"), dict) else None)
+                    )
+                    if (
+                        target_coin
+                        and isinstance(resp_json, dict)
+                        and resp_json.get("result", {}).get("status") == "success"
+                    ):
+                        self.logger.info(
+                            f"Re-enabling coin '{target_coin}' on node '{node.name}' after disable_coin test."
+                        )
+                        # Ignore activation failure here; log only.
+                        if not self.activate_coin(target_coin, node=node):
+                            self.logger.warning(
+                                f"Failed to re-enable '{target_coin}' on node '{node.name}' after disable_coin test."
+                            )
+
+            # Persist response/error JSON to disk following naming convention
             hd_flag = "hd" if node.hd_mode else "nonhd"
             wasm_flag = "wasm" if node.wasm_mode else "native"
             suffix = "error" if "error" in resp_json else "response"
-    
             file_stem = f"{method_name}-{example_number}-{hd_flag}-{wasm_flag}-{suffix}.json"
             file_path = output_dir / file_stem
             try:
@@ -912,7 +1003,25 @@ class ApiRequestProcessor:
                 self.logger.save(f"Saved {suffix} from {node.name} → {file_path}")
             except IOError as ioe:
                 self.logger.error(f"Failed to write response file {file_path}: {ioe}")
-    
+
+            return node.name, resp_json
+
+        # ------------------------------------------------------------------
+        # Dispatch requests concurrently.
+        # ------------------------------------------------------------------
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(nodes_cfg)) as executor:
+            # Submit tasks – returns mapping future → node_name implicitly carried via closure
+            future_to_node = {executor.submit(_process_single_node, node): node for node in nodes_cfg}
+
+            for future in concurrent.futures.as_completed(future_to_node):
+                node_name = future_to_node[future].name
+                try:
+                    n_name, resp = future.result()
+                    responses[n_name] = resp
+                except Exception as exc:
+                    self.logger.error(f"Unhandled exception while processing node '{node_name}': {exc}")
+                    responses[node_name] = {"error": str(exc)}
+
         return responses
 
 # =============================================================
@@ -957,4 +1066,4 @@ def compare_node_responses(
             diff_summary[node] = {"matches_baseline": True}
             logger.info(f"✅ Response from {node} matches baseline.")
 
-    return diff_summary 
+    return diff_summary

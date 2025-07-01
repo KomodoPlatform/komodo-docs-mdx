@@ -54,12 +54,14 @@ COPY ./kdf_repo .
 
 # Build the wasm package for Node.js using wasm-pack. Output goes to
 # /tmp/kdf-wasm so we can copy it in the final stage.
+#  --features "enable-sia"
 RUN --mount=type=cache,id=cargo-registry,target=/root/.cargo/registry \
     --mount=type=cache,id=cargo-git,target=/root/.cargo/git \
     wasm-pack build mm2src/mm2_bin_lib \
       --release \
       --target web \
-      --out-dir /tmp/kdf-wasm
+      --out-dir /tmp/kdf-wasm \
+      --features "enable-sia"
 
 ###########################################
 # 2️⃣  Runtime stage – Node.js & WASM  #

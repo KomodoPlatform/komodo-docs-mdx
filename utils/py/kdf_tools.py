@@ -1642,6 +1642,10 @@ class KDFTools:
             self.logger.error("Keyboard interrupt detected. Stopping container...")
         finally:
             self.report_error_responses(args)
+            # Generate comparison report across docker nodes
+            self.report_node_response_comparison(args)
+            # Generate consolidated node balances report
+            self.report_node_balances(args)
             # Clean up the temporary file created by import_swaps
             file_to_delete = self.workspace_root / 'utils' / 'docker' / 'kdf-db' / '7a4283ac93466ea1f0e4bb387e28055bbb38192e' / 'SWAPS' / 'MY' / '07ce08bf-3db9-4dd8-a671-854affc1b7a3.json'
             if file_to_delete.is_file():
@@ -1653,6 +1657,139 @@ class KDFTools:
 
             self._print_footer(command_title, success=False)
 
+    def report_node_response_comparison(self, args):
+        """Generates a report comparing responses returned by each docker node for every request example.
+
+        The report structure mirrors other *_report helpers and is saved under
+        <reports>/<branch>/kdf_node_response_comparison.json.
+        """
+        command_title = "Generate Node Response Comparison Report"
+        self._print_header(command_title)
+
+        # Prepare containers for aggregated data
+        methods_summary: Dict[str, Dict[str, Any]] = {"v1": {}, "v2": {}}
+        differing_methods: Dict[str, List[str]] = {"v1": [], "v2": []}
+
+        postman_dirs = {
+            "v1": self.config.directories.postman_json_v1,
+            "v2": self.config.directories.postman_json_v2,
+        }
+
+        # Helper: map hd/wasm flags to a readable node key
+        def _node_key(hd_flag: str, wasm_flag: str) -> str:
+            return f"{hd_flag}-{wasm_flag}"  # e.g., hd-native, nonhd-wasm
+
+        for version, version_dir in postman_dirs.items():
+            self.logger.info(f"Scanning JSON example directory for {version}: {version_dir}")
+            for method_dir in version_dir.iterdir():
+                if not method_dir.is_dir():
+                    continue
+
+                # Collect response files (both success & error)
+                json_files = list(method_dir.glob("*-*-*-*.json"))  # broad match matching at least 3 hyphens
+                if not json_files:
+                    continue
+
+                # Organise by example number (may be absent)
+                examples: Dict[str, Dict[str, Any]] = {}
+                for jf in json_files:
+                    stem = jf.stem  # e.g., my_method-1-hd-native-response
+                    parts = stem.split("-")
+                    if len(parts) < 4:
+                        continue  # malformed name
+
+                    suffix = parts[-1]  # response/error
+                    wasm_flag = parts[-2]
+                    hd_flag = parts[-3]
+
+                    # Determine example number (optional)
+                    example_part = parts[-4]
+                    example_number = None
+                    method_name_tokens: List[str]
+                    if example_part.isdigit():
+                        example_number = example_part
+                        method_name_tokens = parts[:-4]
+                    else:
+                        method_name_tokens = parts[:-3]
+
+                    method_name = "-".join(method_name_tokens)
+                    report_key = f"{method_name}_{example_number}" if example_number else method_name
+
+                    # Load JSON content to enable deep comparison later
+                    try:
+                        with open(jf, "r") as fp:
+                            content_json = json.load(fp)
+                    except Exception as e:
+                        self.logger.error(f"Failed to load JSON from {jf}: {e}")
+                        continue
+
+                    node_label = _node_key(hd_flag, wasm_flag)
+                    resp_type = "error" if suffix == "error" else "success"
+
+                    if report_key not in examples:
+                        examples[report_key] = {}
+                    examples[report_key][node_label] = {
+                        "type": resp_type,
+                        "content": content_json,
+                    }
+
+                # Evaluate each example for this method
+                for report_key, node_data in examples.items():
+                    # Determine if all nodes returned identical responses (content equality)
+                    baseline_json_str: str | None = None
+                    all_same = True
+                    for nd in node_data.values():
+                        json_str = json.dumps(nd["content"], sort_keys=True)
+                        if baseline_json_str is None:
+                            baseline_json_str = json_str
+                        elif json_str != baseline_json_str:
+                            all_same = False
+                    methods_summary[version][report_key] = {
+                        "nodes": {n: d["type"] for n, d in node_data.items()},
+                        "all_responses_same": all_same,
+                    }
+                    if not all_same:
+                        differing_methods[version].append(report_key)
+
+        # Sort methods alphabetically for deterministic output
+        for ver in ["v1", "v2"]:
+            # Sort differing methods lists
+            differing_methods[ver] = sorted(set(differing_methods[ver]))
+            # Sort keys of methods_summary dictionaries
+            methods_summary[ver] = {
+                k: methods_summary[ver][k] for k in sorted(methods_summary[ver].keys())
+            }
+
+        # Counts
+        v1_diff_cnt = len(differing_methods["v1"])
+        v2_diff_cnt = len(differing_methods["v2"])
+        total_diff_cnt = v1_diff_cnt + v2_diff_cnt
+
+        scan_metadata = self._get_base_scan_metadata(args.kdf_branch)
+        scan_metadata.update({
+            "scanner_type": "NODE_RESPONSE_COMPARISON",
+            "scanner_version": "KDFTools v1.0.0",
+            "generated_during": "node_response_comparison_scan",
+            "method_source": "Postman JSON examples (dev branch)",
+            "is_primary_data_source": False,
+            "total_methods_differing": {
+                "all": total_diff_cnt,
+                "v1": v1_diff_cnt,
+                "v2": v2_diff_cnt,
+            },
+        })
+
+        final_report = {
+            "scan_metadata": scan_metadata,
+            "methods": methods_summary,
+            "differing_methods": differing_methods,
+        }
+
+        # Save report
+        report_path = self.config.directories.branched_reports_dir / "kdf_node_response_comparison.json"
+        safe_write_json(report_path, final_report, indent=2)
+        self.logger.save(f"Node response comparison report saved to: {report_path}")
+        self._print_footer(command_title, success=True, report_paths=[str(report_path)])
 
     def _create_execution_plan(self, all_methods: set) -> List[str]:
         """Creates an ordered list of methods to execute, prioritizing sequences."""
@@ -2083,7 +2220,8 @@ class KDFTools:
             self.start_container_command(args)
             time.sleep(5)
 
-            params_path = self.workspace_root / 'utils' / 'py' / 'kdf_test_cases' / 'test_params.json'
+            # Use centralized path from DirectoryConfig for test parameters
+            params_path = self.config.directories.test_params_json
             with open(params_path, 'r') as f:
                 test_params = json.load(f)
 
@@ -2094,7 +2232,6 @@ class KDFTools:
             for node in self.config.nodes:
                 self.logger.info(f"Checking node: {node.name}")
                 for coin in coins_to_check:
-                    self.logger.info(f"Attempting to activate {coin} on {node.name}...")
                     self.processor.activate_coin(coin, node=node)
                     time.sleep(1)
 
@@ -2239,6 +2376,127 @@ class KDFTools:
         except subprocess.CalledProcessError as e:
             self.logger.error(f"Could not get git commit hash for {repo_path}: {e}")
             return None
+
+    def report_node_balances(self, args):
+        """Generates a consolidated report of coin addresses and balances per test node.
+
+        The report is saved to ``reports/kdf_node_balances.json`` and is intended to
+        be consumed by funding scripts so that test wallets can be pre-funded.
+        Structure::
+
+            {
+              "scan_metadata": {...},
+              "balances": {
+                  "node_a": {
+                      "KMD": {
+                          "RDux85r5X…": "0"
+                      },
+                      "LTC": {
+                          "Labc123…": "12.34"
+                      }
+                  },
+                  "node_b": {...}
+              }
+            }
+        """
+
+        command_title = "Generate Node Balances Report"
+        self._print_header(command_title)
+
+        try:
+            # ------------------------------------------------------------------
+            # Determine which coins we need to query. We reuse the same logic as
+            # the dedicated `balances` command so that the behaviour is
+            # consistent.
+            # ------------------------------------------------------------------
+            params_path = self.config.directories.test_params_json
+            with open(params_path, "r", encoding="utf-8") as fp:
+                test_params = json.load(fp)
+
+            coins_to_check: list[str] = list(
+                set(
+                    [
+                        test_params.get("PRIMARY_COIN"),
+                        test_params.get("SECONDARY_COIN"),
+                        *test_params.get("NODE_BALANCE_COINS", []),
+                    ]
+                )
+            )
+            coins_to_check = [c for c in coins_to_check if c]  # filter None
+
+            # Container for aggregated balances
+            balances: Dict[str, Dict[str, Dict[str, str]]] = {}
+
+            # We will store the raw responses under a temp directory to avoid
+            # clashing with the main get-kdf-responses outputs.
+            output_dir = self.config.directories.reports_dir / "balances_scan"
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            for idx, coin in enumerate(coins_to_check, start=1):
+                request_body = {
+                    "method": "my_balance",
+                    "coin": coin,
+                }
+
+                node_responses = self.processor.send_request_to_all_nodes(
+                    request_body=request_body,
+                    method_name="my_balance",
+                    output_dir=output_dir,
+                    example_number=idx,
+                )
+
+                for node_name, resp in node_responses.items():
+                    # Normalise response structure – handle v1 plain vs v2 wrapped
+                    data = resp.get("result", resp)
+                    if not isinstance(data, dict):
+                        continue
+
+                    address = data.get("address")
+                    balance = data.get("balance")
+                    coin_ticker = data.get("coin", coin)
+
+                    if address is None or balance is None:
+                        # Record error or incomplete data instead of skipping
+                        error_msg = resp.get("error") or "incomplete_response"
+                        node_entry = balances.setdefault(node_name, {})
+                        coin_entry = node_entry.setdefault(coin_ticker, {})
+                        coin_entry["error"] = error_msg
+                        continue
+
+                    node_entry = balances.setdefault(node_name, {})
+                    coin_entry = node_entry.setdefault(coin_ticker, {})
+                    coin_entry[address] = balance
+
+            # ------------------------------------------------------------------
+            # Build scan metadata and persist report
+            # ------------------------------------------------------------------
+            scan_metadata = self._get_base_scan_metadata(args.kdf_branch)
+            scan_metadata.update(
+                {
+                    "scanner_type": "NODE_BALANCES_SCAN",
+                    "scanner_version": "KDFTools v1.0.0",
+                    "generated_during": "get_kdf_responses_scan",
+                    "method_source": "my_balance API calls",
+                    "is_primary_data_source": True,
+                    "coins_checked": sorted(coins_to_check),
+                    "total_nodes": len(self.config.nodes),
+                }
+            )
+
+            final_report = {
+                "scan_metadata": scan_metadata,
+                "balances": balances,
+            }
+
+            report_path = self.config.directories.reports_dir / "kdf_node_balances.json"
+            safe_write_json(report_path, final_report, indent=2)
+            self.logger.save(f"Node balances report saved to: {report_path}")
+
+            self._print_footer(command_title, success=True, report_paths=[str(report_path)])
+        except Exception as exc:
+            self.logger.error(f"Failed to generate node balances report: {exc}")
+            self.logger.error(traceback.format_exc())
+            self._print_footer(command_title, success=False)
 
 
 class MethodValidator:

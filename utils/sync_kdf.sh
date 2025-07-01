@@ -30,6 +30,14 @@ echo "==================================================================="
 echo "============== 🚀🚀🚀 KDF Branch: $KDF_BRANCH"
 echo "============== 🚀🚀🚀 MDX Branch: $MDX_BRANCH"
 
+# Step 0: Show balances
+echo "============== 📊 Step 0: Show balances... ==============="
+if ! python py/kdf_tools.py --kdf-branch $KDF_BRANCH balances; then
+    echo "❌ Step 0 failed: Show balances"
+    exit 1
+fi
+echo
+
 # Step 1A: Scan KDF Rust Repository
 # INPUT: KDF Rust repository
 # REPORT: reports/kdf_rust_methods.json
@@ -74,7 +82,7 @@ echo
 # STRUCTURE: Organized by version and method, with multiple examples per method
 # PURPOSE: Provide bidirectional JSON example sharing between Postman collections and MDX documentation
 echo "============== 📊 Step 2B: Getting KDF responses... ==============="
-if ! python py/kdf_tools.py --kdf-branch $KDF_BRANCH get-kdf-responses; then
+if ! python py/kdf_tools.py --kdf-branch $KDF_BRANCH get-kdf-responses --substitute-defaults; then
     echo "❌ Step 2B failed: Getting KDF responses"
     exit 1
 fi

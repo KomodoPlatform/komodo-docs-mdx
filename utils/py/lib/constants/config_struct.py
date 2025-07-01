@@ -102,6 +102,9 @@ class DirectoryConfig:
     cache_dir: str = "cache"
     kdf_repo_path: str = "utils/docker/kdf_repo"
 
+    # Test parameters file (JSON) used across various scripts/tests
+    test_params_json: str = "utils/py/kdf_test_cases/test_params.json"
+
     # Reference files
     category_mappings: str = "utils/py/data/category_mappings.json"
 
@@ -142,14 +145,23 @@ class DirectoryConfig:
         
         # Resolve non-report paths first
         for name, value in self.__dict__.items():
-            if isinstance(value, str) and 'report' not in name and name != 'workspace_root' and name != 'kdf_branch':
+            if (
+                isinstance(value, str)
+                and 'report' not in name  # skip individual report file names handled later
+                and name not in {'workspace_root', 'kdf_branch'}
+            ):
                 setattr(self, name, root / value)
                 
-        # Resolve report paths into a subdirectory based on kdf_branch
+        # Explicitly resolve top-level reports_dir (plural) which was skipped above
+        if isinstance(self.reports_dir, str):
+            self.reports_dir = root / self.reports_dir
+
+        # Build reports base directory (include branch subfolder when set)
+        reports_root_path = Path(self.reports_dir)
         if self.kdf_branch:
-            reports_base_dir = root / self.reports_dir / self.kdf_branch
+            reports_base_dir = reports_root_path / self.kdf_branch
         else:
-            reports_base_dir = root / self.reports_dir
+            reports_base_dir = reports_root_path
 
         self.branched_reports_dir = reports_base_dir  # Update reports_dir to include branch
         if not self.branched_reports_dir.exists():
@@ -170,6 +182,9 @@ class DirectoryConfig:
 
         # Manually resolve any remaining important paths
         self.category_mappings = root / self.category_mappings
+        # Resolve test_params_json (handled here explicitly in case it was skipped)
+        if isinstance(self.test_params_json, str):
+            self.test_params_json = root / self.test_params_json
 
     def get_version_directories(self) -> Dict[str, Dict[str, Path]]:
         """Get directories organized by version and type."""
@@ -443,8 +458,10 @@ class NodeConfig:
     port: int
     api_url: str
     userpass: str
+    passphrase: str
     hd_mode: bool = False
     wasm_mode: bool = False
+    
 
 
 @dataclass
@@ -457,37 +474,45 @@ class EnhancedKomodoConfig:
     version_mapping: VersionMappingConfig = field(default_factory=VersionMappingConfig)
     openapi: OpenAPIConfig = field(default_factory=OpenAPIConfig)
     nodes: List[NodeConfig] = field(default_factory=lambda: [
+        # Native (non-HD) node
         NodeConfig(
-            name="node_a",
+            name="kdf_native_nonhd",
             port=8778,
             api_url="http://127.0.0.1:8778",
             hd_mode=False,
             wasm_mode=False,
-            userpass="RPC_UserP@SSW0RD"
+            userpass="RPC_UserP@SSW0RD",
+            passphrase="movie near museum glare gossip clerk adapt chair inch child erupt verify"
         ),
+        # Native HD node
         NodeConfig(
-            name="node_b",
+            name="kdf_native_hd",
             port=8779,
             api_url="http://127.0.0.1:8779",
-            hd_mode=False,
+            hd_mode=True,
             wasm_mode=False,
-            userpass="RPC_UserP@SSW0RD"
+            userpass="RPC_UserP@SSW0RD",
+            passphrase="clever measure tired have excuse lava box job forest labor kitchen device"
         ),
+        # WASM HD node
         NodeConfig(
-            name="node_c",
+            name="kdf_wasm_hd",
             port=8780,
             api_url="http://127.0.0.1:8780",
             hd_mode=True,
             wasm_mode=True,
-            userpass="RPC_UserP@SSW0RD"
+            userpass="RPC_UserP@SSW0RD",
+            passphrase="evil game choice book glad motor old family slender famous black cancel"
         ),
+        # WASM non-HD node
         NodeConfig(
-            name="node_d",
+            name="kdf_wasm_nonhd",
             port=8781,
             api_url="http://127.0.0.1:8781",
             hd_mode=False,
             wasm_mode=True,
-            userpass="RPC_UserP@SSW0RD"
+            userpass="RPC_UserP@SSW0RD",
+            passphrase="super sick hybrid myself useful bulb horror slice silk royal guess machine"
         ),
     ])
     

@@ -22,8 +22,7 @@ Dependencies (install in the venv if missing):
 import sys
 from pathlib import Path
 
-# Walk up from this file until we locate the repository root –
-# identified by the presence of the top-level 'utils' folder.
+# Path utilities to locate workspace root
 _HERE = Path(__file__).resolve()
 _WORKSPACE_ROOT = next((p for p in _HERE.parents if (p / "utils").exists()), None)
 
@@ -118,6 +117,29 @@ def _choose(names: List[str], console: Console) -> Optional[str]:
 
 
 # --------------------------------------------------------------------------------------
+# Local RPC helper – ensures correct URL and userpass for requests
+# --------------------------------------------------------------------------------------
+
+def _rpc(processor: ApiRequestProcessor, body: Dict[str, Any]) -> Dict[str, Any]:
+    """Send *body* to the first configured node with userpass injected."""
+
+    node = ACTIVE_NODE  # defined in main scope below
+    full_body = dict(body)  # shallow copy is enough here
+    full_body.setdefault("userpass", node.userpass)
+
+    # Some KDF RPC methods expect the "params" field to be **absent** when there
+    # are no parameters.  Passing an explicit empty object (`{}`) can cause the
+    # daemon to complain with errors like:
+    #   "Error parsing request: invalid type: null, expected struct …"
+    # To keep the TUI compatible with such endpoints, drop the field when it is
+    # an empty dict.
+    if full_body.get("params") == {}:
+        full_body.pop("params")
+
+    return processor._make_request(node.api_url, full_body)
+
+
+# --------------------------------------------------------------------------------------
 # Core TUI application
 # --------------------------------------------------------------------------------------
 
@@ -135,10 +157,15 @@ def main():
     tools = KDFTools()
     processor = tools.processor  # reuse underlying ApiRequestProcessor
 
-    console.print("[green]Ready.[/]")
+    # Active node for RPCs – starts with first in config
+    global ACTIVE_NODE  # type: ignore
+    ACTIVE_NODE = processor.config.nodes[0]
+
+    console.print(f"[green]Ready. Using node: {ACTIVE_NODE.name} ({ACTIVE_NODE.api_url})[/]")
 
     def _menu_text() -> str:
         return (
+            f"[0] Select node (current: {ACTIVE_NODE.name})\n"
             "[1] New connection\n"
             "[2] List sessions\n"
             "[3] Get session details\n"
@@ -157,7 +184,10 @@ def main():
         )
         choice = Prompt.ask("Your choice").strip().lower()
 
-        if choice == "1":
+        if choice == "0":
+            ACTIVE_NODE = _select_node(processor, console, ACTIVE_NODE)
+            console.print(f"[cyan]Switched to node {ACTIVE_NODE.name} ({ACTIVE_NODE.api_url})[/]")
+        elif choice == "1":
             _handle_new_connection(processor, console)
         elif choice == "2":
             _handle_list_sessions(processor, console)
@@ -244,7 +274,7 @@ def _handle_new_connection(processor: ApiRequestProcessor, console: Console):
         "id": 0,
     }
 
-    resp = processor._make_request(req)
+    resp = _rpc(processor, req)
     if "error" in resp:
         console.print(f"[red]Error: {resp['error']}[/]")
         return
@@ -261,7 +291,7 @@ def _handle_new_connection(processor: ApiRequestProcessor, console: Console):
 
 def _handle_list_sessions(processor: ApiRequestProcessor, console: Console):
     req = {"method": "wc_get_sessions", "mmrpc": "2.0", "params": {}, "id": 0}
-    resp = processor._make_request(req)
+    resp = _rpc(processor, req)
     if "error" in resp:
         console.print(f"[red]Error: {resp['error']}[/]")
         return
@@ -294,7 +324,7 @@ def _handle_list_sessions(processor: ApiRequestProcessor, console: Console):
 def _prompt_topic(processor: ApiRequestProcessor, console: Console) -> Optional[str]:
     """Prompt the user for a session topic, offering a list if available."""
     req = {"method": "wc_get_sessions", "mmrpc": "2.0", "params": {}, "id": 0}
-    resp = processor._make_request(req)
+    resp = _rpc(processor, req)
     sessions_raw = resp.get("result", {}).get("sessions") or []
     session_topics = [s.get("topic") for s in sessions_raw if s]
     if not session_topics:
@@ -316,7 +346,7 @@ def _handle_get_session(processor: ApiRequestProcessor, console: Console):
         "params": {"topic": topic},
         "id": 0,
     }
-    resp = processor._make_request(req)
+    resp = _rpc(processor, req)
     console.print_json(json.dumps(resp, indent=2))
 
 
@@ -330,7 +360,7 @@ def _handle_ping_session(processor: ApiRequestProcessor, console: Console):
         "params": {"topic": topic},
         "id": 0,
     }
-    resp = processor._make_request(req)
+    resp = _rpc(processor, req)
     console.print(resp)
 
 
@@ -346,7 +376,7 @@ def _handle_delete_session(processor: ApiRequestProcessor, console: Console):
         "params": {"topic": topic},
         "id": 0,
     }
-    resp = processor._make_request(req)
+    resp = _rpc(processor, req)
     console.print(resp)
 
 
@@ -396,6 +426,28 @@ def _switch_branch_and_restart(tools: KDFTools, console: Console, new_branch: st
     # Start with new branch (build may occur automatically)
     args = argparse.Namespace(kdf_branch=new_branch, commit=None, clean=False)
     tools.start_container_command(args)
+
+
+# Node chooser helper ----------------------------------------------------
+
+def _select_node(processor: ApiRequestProcessor, console: Console, current_node):
+    """Prompt user to choose a node from processor.config.nodes.
+
+    Returns the selected NodeConfig (or the current_node if cancelled)."""
+
+    nodes = processor.config.nodes
+    console.print("[bold]Select node to use:[/]")
+    for idx, node in enumerate(nodes, 1):
+        console.print(f"[{idx}] {node.name} – {node.api_url}")
+    choice = Prompt.ask("Choice (Enter to cancel)")
+    if not choice:
+        return current_node
+    if choice.isdigit():
+        idx = int(choice)
+        if 1 <= idx <= len(nodes):
+            return nodes[idx-1]
+    console.print("[yellow]Invalid selection – keeping previous node.[/]")
+    return current_node
 
 
 if __name__ == "__main__":
