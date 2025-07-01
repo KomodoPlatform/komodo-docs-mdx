@@ -106,6 +106,20 @@ services:
     ports:
       - "8545:8545"
 
+  # ---------------------------------------------------------------------
+  # trezord – lightweight side-car that proxies USB ↔ HTTP (port 21325)
+  # ---------------------------------------------------------------------
+  trezord:
+    build:
+      context: https://github.com/trezor/trezord-go.git
+      dockerfile: Dockerfile
+    image: local/trezord-go:edge
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - "/dev/bus/usb:/dev/bus/usb"
+    network_mode: host
+
 volumes:
   kdf-db-native-nonhd: {}
   kdf-db-native-hd: {}

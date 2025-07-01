@@ -66,3 +66,42 @@ When adding new JSON examples:
 4. **Align with MDX**: Ensure JSON examples match the examples in MDX documentation
 
 Refer to the **[Style Guide MDX Example Standards](STYLE_GUIDE.md#mdx-example-standards)** for complete guidelines on creating meaningful, non-duplicate examples.
+
+## Hardware Wallet Support (Trezor)
+
+The Docker stack now ships a dedicated **`trezord`** service.  It mounts the host's USB bus and exposes the familiar Bridge API on `http://127.0.0.1:21325`.
+
+```bash
+# start everything (including trezord side-car)
+docker compose -f utils/docker/docker-compose.yml up -d --build
+```
+
+Nothing inside the KDF containers needs to change – they continue to discover the bridge at `127.0.0.1:21325` (or `host.docker.internal:21325` on non-Linux Docker engines).
+
+If you unplug / plug the Trezor the side-car will pick it up automatically.
+
+### Linux udev Rule (required for real devices)
+
+On Linux the Trezor's USB interfaces are created with root-only permissions.  Install the official rule once so that non-root processes (and our `trezord` side-car) can access the device:
+
+```bash
+# 1. Download the rule
+sudo curl -fsSL \
+  https://raw.githubusercontent.com/trezor/trezor-common/master/udev/51-trezor.rules \
+  -o /etc/udev/rules.d/51-trezor.rules
+
+# 2. Reload udev and re-plug the device
+sudo udevadm control --reload-rules && sudo udevadm trigger
+
+# 3. (Optional) make sure your user is in the plugdev group
+sudo usermod -aG plugdev $USER
+```
+
+After re-plugging the Trezor you should see something like:
+
+```bash
+ls -l /dev/hidraw* | grep trezor
+# crw-rw-r-- 1 root plugdev 237, 0 Jun 30 15:42 /dev/hidraw0
+```
+
+Once this is in place the `trezord` container can talk to the hardware without "No such device" errors.
