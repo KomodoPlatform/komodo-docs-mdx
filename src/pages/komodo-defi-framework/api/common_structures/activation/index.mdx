@@ -85,20 +85,6 @@ The `ActivationParams` object defines additional parameters used for activation.
   load during ZHTLC coin activation.
 </Note>
 
-### ActivationRpcData
-
-Contains information about electrum & lightwallet\_d servers for coins being used in `Electrum` or `Light` mode.
-
-| Parameter                 | Type              | Description                                                                                                                                                                                                                                                     |
-| ------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| light\_wallet\_d\_servers | list              | ZHTLC only. A list of urls which are hosting lightwallet\_d servers for a coin.                                                                                                                                                                                 |
-| electrum\_servers         | list of objects   | ZHTLC only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                                        |
-| electrum                  | list of objects   | QTUM & UTXO coins only. A list of standard [ActivationServers](/komodo-defi-framework/api/common_structures/activation/#activation-servers) objects.                                                                                                            |
-| sync\_params              | integer or string | ZHTLC coins only. Optional, defaults to two days ago. Defines where to start scanning blockchain data upon initial activation. Options: `"earliest"` (the coin's sapling\_activation\_height), `height` (a specific block height) or `date` (a unix timestamp). |
-
-<DevComment>
-  `electrum` and `electrum_servers` are both used for the same purpose. This should be consolidated in the API.
-</DevComment>
 
 ### ActivationServers
 
@@ -165,28 +151,6 @@ Contains information electrum servers for coins being used in `Electrum` or `Lig
       "min_addresses_number": 3,
       "gap_limit": 20
   }
-  }
-  ```
-</CollapsibleSection>
-
-### AddressDerivationPath
-
-The `AddressDerivationPath` object defines the account / change / address\_index of the [derivation path](https://medium.com/mycrypto/wtf-is-a-derivation-path-c3493ca2eb52) used for your wallet. Using different values for `account_id` or `address_id` parameters will result in a different address and private key for each combination. The `chain` parameter is used to specify if the change from a transaction. Set to `External` for addresses that are intended to be visible outside of the wallet (e.g. for receiving payments). `Internal` is used for addresses which are not meant to be visible outside of the wallet and is used to return the leftover change from a transaction.
-
-| Parameter   | Type    | Required |   Default  | Description                                            |
-| ----------- | ------- | :------: | :--------: | ------------------------------------------------------ |
-| account\_id | integer |     ✗    |     `0`    | Used as a layer of separation or hierarchy.            |
-| chain       | string  |     ✗    | `External` | Accepted values are `External` (0) and `Internal` (1). |
-| address\_id | integer |     ✗    |     `0`    | Used as a layer of separation or hierarchy.            |
-
-<CollapsibleSection expandedText="Hide Example" collapsedText="Show Example">
-  ```json
-  {
-      "path_to_address": {
-          "account_id": 0,
-          "chain": "External",
-          "address_id": 1
-      }
   }
   ```
 </CollapsibleSection>
