@@ -82,7 +82,7 @@ echo
 # STRUCTURE: Organized by version and method, with multiple examples per method
 # PURPOSE: Provide bidirectional JSON example sharing between Postman collections and MDX documentation
 echo "============== 📊 Step 2B: Getting KDF responses... ==============="
-if ! python py/kdf_tools.py --kdf-branch $KDF_BRANCH get-kdf-responses --substitute-defaults; then
+if ! python py/kdf_tools.py --kdf-branch $KDF_BRANCH get-kdf-responses; then
     echo "❌ Step 2B failed: Getting KDF responses"
     exit 1
 fi
