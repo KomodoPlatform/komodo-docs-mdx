@@ -78,7 +78,6 @@ RUN --mount=type=cache,id=cargo-registry,target=/root/.cargo/registry \
 # This creates a minimal image containing only the compiled binary.
 FROM docker.io/debian:buster-slim AS final
 
-
 ARG USER_ID=1000
 ARG GROUP_ID=1000
 
@@ -98,13 +97,14 @@ RUN apt-get update -y && \
     apt-get install -y --no-install-recommends procps htop curl wget ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
+# Copy the already-downloaded Zcash parameters from the build stage
+RUN mkdir -p /home/kdfuser/.zcash-params && \
+COPY --from=build-env /tmp/.zcash-params /home/kdfuser/.zcash-params
+RUN chown -R kdfuser:kdfuser /home/kdfuser/.zcash-params
+
 # Create and set permissions for the .kdf directory
 RUN mkdir -p /home/kdfuser/.kdf && \
-    chown -R kdfuser:kdfuser /home/kdfuser/.kdf
-
-# Copy the already-downloaded Zcash parameters from the build stage
-ENV ZCASH_PARAMS_PATH=/tmp/.zcash-params
-COPY --from=build-env "$ZCASH_PARAMS_PATH" "$ZCASH_PARAMS_PATH"
+chown -R kdfuser:kdfuser /home/kdfuser/.kdf
 
 USER kdfuser
 WORKDIR /home/kdfuser
