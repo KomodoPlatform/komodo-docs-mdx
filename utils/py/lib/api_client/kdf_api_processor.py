@@ -550,7 +550,28 @@ class ApiRequestProcessor:
             node_cache["unsigned_tx"] = {"tx_hex": result["tx_hex"]}
             self.logger.info(f"Cached unsigned transaction hex on node {node.name}.")
 
-    def activate_coin(self, ticker: str, activation_type: str = 'default', node: Optional[NodeConfig] = None) -> bool:
+    def activate_coin(self, ticker: str, activation_type: str = 'default', node: Optional[NodeConfig] = None, priv_key_policy: Optional[str | Dict[str, Any]] = None) -> bool:
+        """Activate *ticker* on *node*.
+
+        Parameters
+        ----------
+        ticker : str
+            Coin ticker to activate.
+        activation_type : str, optional
+            Which activation variant to use (``default``, ``task``, ``v1`` …).
+            Defaults to ``'default'`` which defers to the mapping in
+            ``protocol_activation_mapping.json``.
+        node : NodeConfig | None, optional
+            Target node configuration. If ``None`` the first configured node
+            will be used.
+        priv_key_policy : dict | None, optional
+            Optional ``priv_key_policy`` object to include in the activation
+            request (e.g. ``{"type": "Trezor"}``).
+        """
+
+        # The *priv_key_policy* parameter is optional for Trezor / WalletConnect activation.
+        # If not specified, *priv_key_policy* is not included in the activation request, and defaults to `ContextPrivKey`.
+
         target_node = node or self.config.nodes[0]
         self.logger.info(f"Attempting to activate '{ticker}' on node '{target_node.name}'...")
         coin_info = self.coins_config.get(ticker)
@@ -616,12 +637,18 @@ class ApiRequestProcessor:
                 # TODO: Add the zcash params to the docker container
                 zcash_params_path = os.getenv("ZCASH_PARAMS_PATH")
                 if not zcash_params_path:
-                    self.logger.warning("ZCASH_PARAMS_PATH not set, using default: /tmp/.zcash-params")
-                    zcash_params_path = "/tmp/.zcash-params"
+                    default_path = str(Path.home() / ".zcash-params")
+                    self.logger.warning(
+                        f"ZCASH_PARAMS_PATH not set, using default: {default_path}"
+                    )
+                    zcash_params_path = default_path
 
                 rpc_data = {
                     "electrum_servers": coin_info.get("electrum", []),
-                    "light_wallet_d_servers": coin_info.get("nodes", [])
+                    # Prefer explicit light-walletd list when provided in coins config;
+                    # fall back to generic nodes array for backward compatibility.
+                    "light_wallet_d_servers": coin_info.get("light_wallet_d_servers")
+                    or coin_info.get("nodes", [])
                 }
                 activation_params["mode"] = {"rpc": "Light", "rpc_data": rpc_data}
                 activation_params["zcash_params_path"] = zcash_params_path
@@ -709,27 +736,94 @@ class ApiRequestProcessor:
             elif protocol in ["TENDERMINT", "TENDERMINTTOKEN"]:
                 params["rpc_urls"] = [node.get("url") if isinstance(node, dict) else node for node in coin_info.get("rpc_urls", [])]
 
+        # --------------------------------------------------------------
+        # Inject custom priv_key_policy (e.g., Trezor). Different protocols
+        # still expect different representations during the transition phase:
+        #   • UTXO-family & QTUM tasks accept a *string* value – "Trezor".
+        #   • ETH, ERC20, Tendermint & Z-HTLC tasks expect an *object*
+        #     {"type": "Trezor"}.
+        # To simplify caller-side code we accept either representation and
+        # normalise it here based on *protocol*.
+        # --------------------------------------------------------------
+        if priv_key_policy is not None:
+            string_protocols = {"UTXO", "QTUM"}
+            object_protocols = {"ETH", "TENDERMINT", "TENDERMINTTOKEN"} # Tendermint for WC, not trezor.
+            incompatible = {"ZHTLC", "SIA"}
+
+            if isinstance(priv_key_policy, dict):
+                # Caller passed the object form; down-convert for protocols that
+                # still use the legacy string representation (when safe to do).
+                if protocol in string_protocols and priv_key_policy.keys() == {"type"}:
+                    params["activation_params"]["priv_key_policy"] = priv_key_policy["type"]
+                else:
+                    params["priv_key_policy"] = priv_key_policy
+            else:  # str
+                if protocol in object_protocols:
+                    params["priv_key_policy"] = {"type": priv_key_policy}
+                else:
+                    params["activation_params"]["priv_key_policy"] = priv_key_policy
+
         if activation_method in self.v2_methods:
+            # Prepare status log container for this activation
+            self.last_status_responses = []  # type: ignore[attr-defined]
             init_request = {
                 "userpass": target_node.userpass,
                 "method": activation_method,
                 "mmrpc": "2.0",
                 "params": params
             }
+            # ------------------------------------------------------------------
+            # Expose the final activation request so that external tools (e.g.,
+            # interactive TUIs) can inspect and display it when activation fails.
+            # We intentionally overwrite on every invocation to keep only the
+            # most recent request/response pair.
+            # ------------------------------------------------------------------
+            self.last_request = init_request  # type: ignore[attr-defined]
         else: # v1 method
             init_request = {
                 "userpass": target_node.userpass,
                 "method": activation_method,
                 **params
             }
+            # Same exposure for legacy v1 paths
+            self.last_request = init_request  # type: ignore[attr-defined]
         
         self.logger.info(f"Sending activation request for '{ticker}' with method '{activation_method}'")
         # Activation requests are always sent to node_a
         node_url = target_node.api_url
         init_response = self._make_request(node_url, init_request)
 
+        # Cache the raw response for external inspection/debugging
+        self.last_response = init_response  # type: ignore[attr-defined]
+
         # ------------------------------------------------------------------
-        # Graceful handling when coin is already active
+        # If the platform coin is already activated, disable it first and
+        # retry the activation exactly once using the same parameters.
+        # ------------------------------------------------------------------
+        if (
+            init_response
+            and init_response.get("error_type") == "PlatformIsAlreadyActivated"
+        ):
+            self.logger.warning(
+                f"Platform coin '{ticker}' already active on node '{target_node.name}'. "
+                "Disabling and retrying activation …"
+            )
+            if not self.disable_coin(ticker, node=target_node):
+                self.logger.error(f"Unable to disable '{ticker}' – aborting re-activation.")
+                return False
+            time.sleep(1)
+            # Retry once – prevent infinite recursion by not looping again if
+            # the second attempt also hits the same error.
+            return self.activate_coin(
+                ticker,
+                activation_type=activation_type,
+                node=target_node,
+                priv_key_policy=priv_key_policy,
+            )
+
+        # ------------------------------------------------------------------
+        # Graceful handling when coin (non-platform) is already active – we
+        # simply refresh our local cache and exit successfully.
         # ------------------------------------------------------------------
 
         if init_response and (
@@ -777,6 +871,11 @@ class ApiRequestProcessor:
             }
             node_url = target_node.api_url
             status_response = self._make_request(node_url, status_request)
+
+            # Append to status log for external inspection
+            if hasattr(self, "last_status_responses"):
+                self.last_status_responses.append(status_response)  # type: ignore[attr-defined]
+
             if status_response and "result" in status_response:
                 status = status_response["result"].get("status")
                 details = status_response["result"].get("details")
@@ -808,7 +907,7 @@ class ApiRequestProcessor:
         }
         node_url = target_node.api_url
         response = self._make_request(node_url, request_body)
-        if response and response.get("result", {}).get("status") == "success":
+        if response and response.get("result", {}).get("coin") == ticker:
             self.logger.success(f"Successfully disabled '{ticker}'.")
             self._update_enabled_coins(node=target_node)
             return True

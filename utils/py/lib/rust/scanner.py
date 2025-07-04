@@ -19,6 +19,7 @@ from ..utils.logging_utils import get_logger
 from ..utils import ensure_directory_exists
 from ..constants import RustMethodDetails, UnifiedRepositoryInfo
 from ..constants.data_structures import ScanMetadata
+from ..constants.method_groups import KdfMethods
 
 
 class KDFScanner:
@@ -109,7 +110,6 @@ class KDFScanner:
         if versions is None:
             versions = ["v1", "v2"]
 
-        import asyncio
         tasks = [self._scan_version_async(version) for version in versions]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -125,7 +125,6 @@ class KDFScanner:
         return repository_info
 
     async def _scan_version_async(self, version: str) -> Optional[Tuple[str, UnifiedRepositoryInfo]]:
-        import asyncio
         loop = asyncio.get_event_loop()
         source_content = None
         url = None
@@ -241,7 +240,7 @@ class KDFScanner:
 
             if source_content:
                 methods = self._extract_methods_from_source(source_content, version)
-                all_methods[version] = sorted(list(methods))
+                all_methods[version] = sorted(list(methods-KdfMethods.removed))
         return all_methods
     
     def _extract_methods_from_source(self, source_content: str, version: str) -> Set[str]:
