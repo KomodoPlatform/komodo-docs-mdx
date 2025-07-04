@@ -146,6 +146,14 @@ class KdfMethods:
         # UI helpers (e.g. walletconnect TUI) to handle the quirk uniformly.
     ]
 
+    no_auth = {
+        "version",
+        "orderbook",
+        "help",
+        "metrics",
+        "stats_swap_status",
+    }
+
     removed = {
         "autoprice",
         "fundvalue",
