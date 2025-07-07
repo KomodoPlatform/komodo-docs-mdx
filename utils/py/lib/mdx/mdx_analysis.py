@@ -6,10 +6,14 @@ Provides utilities for analyzing MDX documents, extracting sections,
 calculating similarities, and validating content structure.
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import re
 from typing import Dict, List, Tuple
 from difflib import SequenceMatcher
-from utils.py.lib.utils.logging_utils import get_logger
+from lib.utils.logging_utils import get_logger
 
 
 class DocumentAnalyzer:

@@ -31,7 +31,7 @@ class EnhancedRepositoryAnalyzer:
     def __init__(self, repo_path: Optional[Union[str, Path]] = None, 
                  default_branch: str = "dev", verbose: bool = True):
         """Initialize the enhanced repository analyzer."""
-        self.repo_path = Path(repo_path) if repo_path else Path(__file__).parent.parent.parent / "data" / "kdf_repo"
+        self.repo_path = Path(repo_path) if repo_path else Path(__file__).parent.parent.parent / "data" / "komodo-defi-framework"
         self.default_branch = default_branch
         self.verbose = verbose
         self.logger = self._setup_logger()

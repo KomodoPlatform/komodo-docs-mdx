@@ -57,8 +57,8 @@ FROM build-env AS builder
 
 WORKDIR /app
 
-# Copy the kdf_repo source code from the build context.
-COPY ./kdf_repo .
+# Copy the komodo-defi-framework source code from the build context.
+COPY ./komodo-defi-framework .
 
 # Build the binary.
 #
@@ -98,7 +98,7 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy the already-downloaded Zcash parameters from the build stage
-RUN mkdir -p /home/kdfuser/.zcash-params && \
+RUN mkdir -p /home/kdfuser/.zcash-params
 COPY --from=build-env /tmp/.zcash-params /home/kdfuser/.zcash-params
 RUN chown -R kdfuser:kdfuser /home/kdfuser/.zcash-params
 

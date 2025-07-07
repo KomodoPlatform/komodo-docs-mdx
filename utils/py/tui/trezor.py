@@ -18,6 +18,7 @@ import time
 from typing import Optional
 import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 try:
     from rich.console import Console
@@ -39,8 +40,8 @@ if _WORKSPACE_ROOT and str(_WORKSPACE_ROOT) not in sys.path:
 
 # Internal imports (require workspace root on sys.path)
 from utils.py.kdf_tools import KDFTools
-from utils.py.lib.constants.config_struct import EnhancedKomodoConfig, NodeConfig
-from utils.py.lib.api_client.kdf_api_processor import ApiRequestProcessor
+from lib.constants.config_struct import EnhancedKomodoConfig, NodeConfig
+from lib.api_client.kdf_api_processor import ApiRequestProcessor
 
 class TrezorTUI:
     def __init__(self):
@@ -687,7 +688,7 @@ class TrezorTUI:
             self.console.print(
                 Panel(
                     f"[1] Init Trezor\n[2] Status\n[3] Send PIN\n[4] Send Passphrase\n[5] Cancel Init\n[6] Connection status\n[7] Coin Activation Init\n[8] Coin Activation Status\n[9] Coin Activation Send PIN\n[10] Coin Activation Send Passphrase\n[11] Cancel Coin Activation\n[12] Account Balance Init\n[13] Account Balance Status\n[14] Create Account Init\n[15] Create Account Status\n[16] Create Account Send PIN\n[17] Get New Address Init\n[18] Get New Address Status\n[19] Get New Address Send PIN\n[20] Scan Addresses Init\n[21] Scan Addresses Status\n[22] Withdraw Init\n[23] Withdraw Status\n[24] Withdraw Send PIN\n[25] Withdraw Cancel\n[26] Broadcast Raw Transaction\n[q] Quit",
-                    title=f"Trezor TUI ({self.branch})",
+                    title=f"Trezor TUI (Branch: {self.branch})",
                     subtitle="Choose an action",
                 )
             )

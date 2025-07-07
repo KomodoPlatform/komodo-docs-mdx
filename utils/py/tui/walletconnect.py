@@ -21,13 +21,7 @@ Dependencies (install in the venv if missing):
 
 import sys
 from pathlib import Path
-
-# Path utilities to locate workspace root
-_HERE = Path(__file__).resolve()
-_WORKSPACE_ROOT = next((p for p in _HERE.parents if (p / "utils").exists()), None)
-
-if _WORKSPACE_ROOT and str(_WORKSPACE_ROOT) not in sys.path:
-    sys.path.insert(0, str(_WORKSPACE_ROOT))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 # ------------------------------------------------------------
 # Standard library imports (after path fix).
@@ -57,10 +51,10 @@ except ImportError:
     qrcode = None  # type: ignore
 
 # Internal library imports – the main reason we are here
-from utils.py.lib.constants.config_struct import EnhancedKomodoConfig
-from utils.py.lib.constants.method_groups import KdfMethods
-from utils.py.lib.utils.logging_utils import KomodoLogger
-from utils.py.lib.api_client.kdf_api_processor import ApiRequestProcessor
+from lib.constants.config_struct import EnhancedKomodoConfig
+from lib.constants.method_groups import KdfMethods
+from lib.utils.logging_utils import KomodoLogger
+from lib.api_client.kdf_api_processor import ApiRequestProcessor
 from utils.py.kdf_tools import KDFTools
 
 
@@ -210,7 +204,7 @@ def main():
 
     while True:
         console.print(
-            Panel(_menu_text(), title=f"WalletConnect TUI ({active_branch})", subtitle="Choose an action")
+            Panel(_menu_text(), title=f"WalletConnect TUI (Branch: {active_branch})", subtitle="Choose an action")
         )
         choice = Prompt.ask("Your choice").strip().lower()
 

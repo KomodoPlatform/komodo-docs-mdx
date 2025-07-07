@@ -8,7 +8,7 @@ in the Komodo DeFi Framework documentation tools.
 import os
 import subprocess
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
 
 from .enums import ValidationLevel, VersionStatus, DeploymentEnvironment
@@ -69,59 +69,57 @@ class DirectoryConfig:
     workspace_root: str  # The absolute path to the workspace root
     kdf_branch: Optional[str] = None
     mdx_branch: Optional[str] = None
-    branched_reports_dir: Optional[str] = None
+    branched_reports_dir: Optional[Path] = None  # Will be set to Path in __post_init__
 
-    # MDX documentation paths
-    mdx_v1: str = "src/pages/komodo-defi-framework/api/legacy"
-    mdx_v2: str = "src/pages/komodo-defi-framework/api/v20"
-    mdx_v2_dev: str = "src/pages/komodo-defi-framework/api/v20-dev"
-    mdx_common_structures: str = "src/pages/komodo-defi-framework/api/common_structures"
+    # MDX documentation paths - these become Path objects after __post_init__
+    mdx_v1: Union[str, Path] = "src/pages/komodo-defi-framework/api/legacy"
+    mdx_v2: Union[str, Path] = "src/pages/komodo-defi-framework/api/v20"
+    mdx_v2_dev: Union[str, Path] = "src/pages/komodo-defi-framework/api/v20-dev"
+    mdx_common_structures: Union[str, Path] = "src/pages/komodo-defi-framework/api/common_structures"
     
-    # OpenAPI specification paths
-    yaml_v1: str = "openapi/paths/v1"
-    yaml_v2: str = "openapi/paths/v2"
-    openapi_paths: str = "openapi/paths"
-    openapi_components: str = "openapi/paths/components"
-    openapi_schemas: str = "openapi/paths/components/schemas"
-    openapi_main: str = "openapi/openapi.yaml"
+    # OpenAPI specification paths - these become Path objects after __post_init__
+    yaml_v1: Union[str, Path] = "openapi/paths/v1"
+    yaml_v2: Union[str, Path] = "openapi/paths/v2"
+    openapi_paths: Union[str, Path] = "openapi/paths"
+    openapi_components: Union[str, Path] = "openapi/paths/components"
+    openapi_schemas: Union[str, Path] = "openapi/paths/components/schemas"
+    openapi_main: Union[str, Path] = "openapi/openapi.yaml"
     
-    # Postman collection paths
-    postman_json_v1: str = "postman/json/kdf/v1"
-    postman_json_v2: str = "postman/json/kdf/v2"
-    postman_collections: str = "postman/collections"
-    postman_environments: str = "postman/environments"
+    # Postman collection paths - these become Path objects after __post_init__
+    postman_json_v1: Union[str, Path] = "postman/json/kdf/v1"
+    postman_json_v2: Union[str, Path] = "postman/json/kdf/v2"
+    postman_collections: Union[str, Path] = "postman/collections"
+    postman_environments: Union[str, Path] = "postman/environments"
     
-    # Docker and containerization paths
-    docker_dir: str = "utils/docker"
-    docker_dot_kdf_dir: str = "utils/docker/kdf-config"
+    # Docker and containerization paths - these become Path objects after __post_init__
+    docker_dir: Union[str, Path] = "utils/docker"
+    docker_dot_kdf_dir: Union[str, Path] = "utils/docker/kdf-config"
 
-    # Data and cache directories
-    data_dir: str = "utils/py/data"
-    templates_dir: str = "templates"
-    reports_dir: str = "reports"
-    cache_dir: str = "cache"
-    kdf_repo_path: str = "utils/docker/kdf_repo"
+    # Data and cache directories - these become Path objects after __post_init__
+    data_dir: Union[str, Path] = "utils/py/data"
+    templates_dir: Union[str, Path] = "templates"
+    reports_dir: Union[str, Path] = "reports"
+    cache_dir: Union[str, Path] = "cache"
+    kdf_repo_path: Union[str, Path] = "utils/docker/komodo-defi-framework"
 
     # Test parameters file (JSON) used across various scripts/tests
-    test_params_json: str = "utils/py/kdf_test_cases/test_params.json"
+    test_params_json: Union[str, Path] = "utils/py/kdf_test_cases/test_params.json"
 
-    # Reference files
-    category_mappings: str = "utils/py/data/category_mappings.json"
+    # Reference files - these become Path objects after __post_init__
+    category_mappings: Union[str, Path] = "utils/py/data/category_mappings.json"
 
-    # Report filenames
-    rust_methods_report: str = "kdf_rust_methods.json"
-    mdx_methods_report: str = "kdf_mdx_methods.json"
-    mdx_method_paths_report: str = "kdf_mdx_method_paths.json"
-    mdx_json_example_methods_report: str = "kdf_mdx_json_example_methods.json"
-    mdx_json_example_method_paths_report: str = "kdf_mdx_json_example_method_paths.json"
-    mdx_openapi_methods_report: str = "kdf_openapi_methods.json"
-    mdx_openapi_method_paths_report: str = "kdf_openapi_method_paths.json"
-    unified_method_mapping_report: str = "kdf_unified_method_map.json"
-    kdf_gap_analysis_report: str = "kdf_gap_analysis.json"
-    v2_no_param_methods_report: str = "v2_no_param_methods.json"
-    kdf_error_responses_report: str = "kdf_error_responses.json"
-
-
+    # Report filenames - these become Path objects after __post_init__
+    rust_methods_report: Union[str, Path] = "kdf_rust_methods.json"
+    mdx_methods_report: Union[str, Path] = "kdf_mdx_methods.json"
+    mdx_method_paths_report: Union[str, Path] = "kdf_mdx_method_paths.json"
+    mdx_json_example_methods_report: Union[str, Path] = "kdf_mdx_json_example_methods.json"
+    mdx_json_example_method_paths_report: Union[str, Path] = "kdf_mdx_json_example_method_paths.json"
+    mdx_openapi_methods_report: Union[str, Path] = "kdf_openapi_methods.json"
+    mdx_openapi_method_paths_report: Union[str, Path] = "kdf_openapi_method_paths.json"
+    unified_method_mapping_report: Union[str, Path] = "kdf_unified_method_map.json"
+    kdf_gap_analysis_report: Union[str, Path] = "kdf_gap_analysis.json"
+    v2_no_param_methods_report: Union[str, Path] = "v2_no_param_methods.json"
+    kdf_error_responses_report: Union[str, Path] = "kdf_error_responses.json"
 
     def __post_init__(self):
         """Resolve all path strings to absolute Path objects."""
@@ -140,6 +138,7 @@ class DirectoryConfig:
     def _resolve_paths(self):
         """
         Converts all string paths in the configuration to absolute pathlib.Path objects.
+        After this method runs, all path attributes are Path objects, not strings.
         """
         root = Path(self.workspace_root)
         
@@ -148,7 +147,7 @@ class DirectoryConfig:
             if (
                 isinstance(value, str)
                 and 'report' not in name  # skip individual report file names handled later
-                and name not in {'workspace_root', 'kdf_branch'}
+                and name not in {'workspace_root', 'kdf_branch', 'mdx_branch'}
             ):
                 setattr(self, name, root / value)
                 
@@ -186,7 +185,7 @@ class DirectoryConfig:
         if isinstance(self.test_params_json, str):
             self.test_params_json = root / self.test_params_json
 
-    def get_version_directories(self) -> Dict[str, Dict[str, Path]]:
+    def get_version_directories(self) -> Dict[str, Dict[str, Union[str, Path]]]:
         """Get directories organized by version and type."""
         return {
             "v1": {
@@ -545,11 +544,15 @@ class EnhancedKomodoConfig:
     
     def _get_git_branches(self):
         """Get git branches for MDX and KDF repos."""
-        self.mdx_branch = get_current_git_branch(self.workspace_root)
-        kdf_repo_path = Path(self.workspace_root) / "utils" / "docker" / "kdf_repo"
-        self.kdf_branch = get_current_git_branch(str(kdf_repo_path))
-        if not self.kdf_branch or self.kdf_branch == 'unknown':
-            self.kdf_branch = "dev"  # Fallback
+        if self.workspace_root:
+            self.mdx_branch = get_current_git_branch(self.workspace_root)
+            kdf_repo_path = Path(self.workspace_root) / "utils" / "docker" / "komodo-defi-framework"
+            self.kdf_branch = get_current_git_branch(str(kdf_repo_path))
+            if not self.kdf_branch or self.kdf_branch == 'unknown':
+                self.kdf_branch = "dev"  # Fallback
+        else:
+            self.mdx_branch = "dev"
+            self.kdf_branch = "dev"
 
     def _setup_logging(self):
         """Configure logging based on settings."""

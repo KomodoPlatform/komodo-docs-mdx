@@ -43,9 +43,9 @@ from rich.prompt import Prompt, Confirm
 from rich.table import Table
 from rich.panel import Panel
 
-from utils.py.lib.constants.config_struct import EnhancedKomodoConfig, NodeConfig
-from utils.py.lib.utils.logging_utils import get_logger
-from utils.py.lib.api_client.kdf_api_processor import ApiRequestProcessor
+from constants.config_struct import EnhancedKomodoConfig, NodeConfig
+from lib.utils.logging_utils import get_logger
+from lib.api_client.kdf_api_processor import ApiRequestProcessor
 
 
 class WithdrawChain:

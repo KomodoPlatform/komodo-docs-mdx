@@ -28,7 +28,6 @@ from ..constants.exceptions import FileOperationError
 from .batch_processor import BatchFileProcessor, batch_read_json_files, batch_write_json_files
 
 # Path utilities
-from ..managers.path_mapping_manager import EnhancedPathMapper
 from ..constants.data_structures import PathMapping
 
 # String processing
@@ -98,7 +97,6 @@ __all__ = [
     'batch_write_json_files',
     
     # Path utilities
-    'EnhancedPathMapper',
     'PathMapping',
     
     # String operations

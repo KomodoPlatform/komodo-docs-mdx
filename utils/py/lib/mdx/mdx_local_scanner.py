@@ -198,7 +198,7 @@ class ExistingDocsScanner:
                     name=param_name,
                     type=param_type,
                     required=required,
-                    default=default,
+                    default_value=default,
                     description=description
                 ))
         

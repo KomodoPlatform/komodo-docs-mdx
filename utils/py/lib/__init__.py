@@ -41,6 +41,11 @@ from .mdx.mdx_scanner import UnifiedScanner
 # Documentation Generation
 from .mdx.mdx_generator import MdxGenerator
 
+# Synchronization functionality
+from .sync import (
+    MDXExtractor, PostmanExtractor, MDXUpdater, PostmanUpdater,
+    BidirectionalSyncManager, SyncConfig, SyncResult, RequestData
+)
 
 # OpenAPI generation
 from .managers import (
@@ -90,6 +95,10 @@ __all__ = [
     # Documentation Generation
     'MdxGenerator', 'generate_missing_documentation', 'generate_missing_documentation_async',
     
+    # Synchronization
+    'MDXExtractor', 'PostmanExtractor', 'MDXUpdater', 'PostmanUpdater',
+    'BidirectionalSyncManager', 'SyncConfig', 'SyncResult', 'RequestData',
+    
     # OpenAPI generation
     'OpenAPIManager',
     
@@ -121,7 +130,8 @@ PACKAGE_STRUCTURE = {
     "utils": "Supporting utilities (cache, observers, file operations, etc.)",
     "managers": "Centralized management classes (including method mapping)",
     "api_client": "Client for interacting with KDF API",
-    "reporting": "Centralized reporting functionality"
+    "reporting": "Centralized reporting functionality",
+    "sync": "Bidirectional synchronization between MDX and Postman"
 }
 
 def print_package_structure():
@@ -129,7 +139,7 @@ def print_package_structure():
     print("Komodo Documentation Library v2.0.0-lean - Package Structure:")
     print("=" * 60)
     for package, description in PACKAGE_STRUCTURE.items():
-        print(f"📦 {package:15} - {description}")
+        print(f"* {package:15} - {description}")
     print("=" * 60)
     print("Use: from lib.{package} import {Class} for organized imports")
     print("Or:  from lib import {Class} for backward compatibility") 

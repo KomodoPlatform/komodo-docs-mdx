@@ -248,7 +248,7 @@ class RepositoryTestUtilities:
         """Test setting up the local repository."""
         try:
             from ..rust.scanner import KDFScanner
-            return KDFScanner(repo_path="data/kdf_repo").setup_repository(force_clone=False)
+            return KDFScanner(repo_path="data/komodo-defi-framework").setup_repository(force_clone=False)
         except Exception as e:
             self.logger.error(f"Repository setup test failed: {e}")
             return False

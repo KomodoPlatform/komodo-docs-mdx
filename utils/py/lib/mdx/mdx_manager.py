@@ -10,17 +10,19 @@ This manager orchestrates the entire process from file discovery to final report
 providing comprehensive analysis and actionable recommendations.
 """
 
-import os
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 from typing import Dict, List,  Optional, Union
 from datetime import datetime
 
-from ..utils.logging_utils import get_logger
-from ..constants import DocumentDifference, QualityReport
+from lib.utils.logging_utils import get_logger
+from lib.constants import DocumentDifference, QualityReport
 from .mdx_analysis import DocumentAnalyzer
 from ..validation.style_validator import StyleValidator
 from .mdx_draft_matching import DocumentDiscoveryScanner
-from utils.py.lib.constants.config import get_config
+from lib.constants.config import get_config
 
 
 class QualityReportGenerator:

@@ -7,21 +7,23 @@ import copy
 from typing import Dict, Any, Set, Optional, List
 from pathlib import Path
 import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import concurrent.futures  # for ThreadPoolExecutor in send_request_to_all_nodes
 
-from utils.py.lib.constants.config_struct import EnhancedKomodoConfig, NodeConfig
-from utils.py.lib.utils.logging_utils import KomodoLogger
-from utils.py.lib.managers.path_mapping_manager import EnhancedPathMapper
-from utils.py.lib.utils import (
+from lib.constants.config_struct import EnhancedKomodoConfig, NodeConfig
+from lib.utils.logging_utils import KomodoLogger
+from lib.managers.path_mapping_manager import EnhancedPathMapper
+from lib.utils import (
     get_logger,
 )
-from utils.py.lib.utils.file_utils import safe_write_json
-from utils.py.lib.utils.file_utils import ensure_directory_exists
-from utils.py.lib.managers.git_manager import GitManager
+from lib.utils.file_utils import safe_write_json
+from lib.utils.file_utils import ensure_directory_exists
+from lib.managers.git_manager import GitManager
 
 
 class ApiRequestProcessor:
-    def __init__(self, config: EnhancedKomodoConfig, logger: KomodoLogger, kdf_branch: str = 'dev', substitute_defaults: bool = False):
+    def __init__(self, config: EnhancedKomodoConfig,
+     logger: KomodoLogger, kdf_branch: str = 'dev', substitute_defaults: bool = False):
         self.config = config
         self.logger = logger
         self.substitute_defaults = substitute_defaults

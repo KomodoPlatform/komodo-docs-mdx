@@ -2,7 +2,7 @@
 
 > Branch / PR under test: [komodo-defi-framework#2491](https://github.com/KomodoPlatform/komodo-defi-framework/pull/2491)
 >
-> Changelog reference: utils/docker/kdf_repo/CHANGELOG.md – section **v2.5.0-beta – 2025-06-23**
+> Changelog reference: utils/docker/komodo-defi-framework/CHANGELOG.md – section **v2.5.0-beta – 2025-06-23**
 
 This document enumerates every manual & automated test that *must* pass before the 2.5.0-beta release candidate can be signed-off.  
 Tests are grouped by functional area and are mapped 1-to-1 with planned **pytest** modules (listed at the end of the file).  

@@ -31,9 +31,9 @@ if str(_ROOT) not in sys.path:
 import requests
 
 # Now that path is set, import project modules
-from utils.py.lib.api_client.kdf_api_processor import ApiRequestProcessor
-from utils.py.lib.constants.config import get_config
-from utils.py.lib.utils.logging_utils import set_config_provider, get_logger
+from lib.api_client.kdf_api_processor import ApiRequestProcessor
+from constants.config import get_config
+from lib.utils.logging_utils import set_config_provider, get_logger
 
 # Ensure logger uses config provider
 set_config_provider(get_config)

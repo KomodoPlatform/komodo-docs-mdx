@@ -129,3 +129,4 @@ class UnifiedRepositoryInfo:
     directories: List[str]
     last_scan: datetime
     scan_duration: float
+    methods: List[str] = field(default_factory=list)
