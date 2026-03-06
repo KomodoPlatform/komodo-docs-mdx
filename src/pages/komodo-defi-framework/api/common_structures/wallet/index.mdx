@@ -151,6 +151,10 @@ Where the value indicates:
 
 The `FeeInfo` response object includes the following items for [withdraw (v2)](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) requests:
 
+<Note>
+  TRON withdrawals do not support manual fee parameters. Fees are auto-estimated based on bandwidth and energy consumption. Omit the `fee` field for TRON/TRC20 withdrawals.
+</Note>
+
 <CompactTable source="common-structures/wallet.FeeInfo" />
 
 ### HistoryTarget
@@ -376,6 +380,34 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
     "coin": "IRIS",
     "amount": "0.038553",
     "gas_limit": 100000
+  }
+  ```
+
+  #### Example of Tron type (native TRX transfer)
+
+  ```json
+  {
+    "type": "Tron",
+    "coin": "TRX",
+    "bandwidth_used": 250,
+    "energy_used": 0,
+    "bandwidth_fee": "0.25",
+    "energy_fee": "0",
+    "total_fee": "0.25"
+  }
+  ```
+
+  #### Example of Tron type (TRC20 token transfer)
+
+  ```json
+  {
+    "type": "Tron",
+    "coin": "TRX",
+    "bandwidth_used": 345,
+    "energy_used": 29650,
+    "bandwidth_fee": "0.345",
+    "energy_fee": "12.453",
+    "total_fee": "12.798"
   }
   ```
 
