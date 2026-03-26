@@ -383,19 +383,45 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
   }
   ```
 
-  #### Example of Tron type (native TRX transfer)
+  #### Example of Tron type (native TRX transfer to activated address)
 
   ```json
   {
     "type": "Tron",
     "coin": "TRX",
-    "bandwidth_used": 250,
+    "bandwidth_used": 265,
     "energy_used": 0,
-    "bandwidth_fee": "0.25",
-    "energy_fee": "0",
-    "total_fee": "0.25"
+    "bandwidth_fee": "0.265000",
+    "energy_fee": "0.000000",
+    "total_fee": "0.265000"
   }
   ```
+
+  #### Example of Tron type (native TRX transfer to unactivated address)
+
+  When sending TRX to an address that has never been activated on the Tron blockchain,
+  an `account_creation_fee` is included. This fee is burned by the network to create
+  the destination account. The fee is charged to the sender on top of the transfer
+  amount — the recipient receives the full amount.
+
+  ```json
+  {
+    "type": "Tron",
+    "coin": "TRX",
+    "bandwidth_used": 265,
+    "energy_used": 0,
+    "bandwidth_fee": "0.100000",
+    "energy_fee": "0.000000",
+    "account_creation_fee": "1.000000",
+    "total_fee": "1.100000"
+  }
+  ```
+
+  <Note>
+    The `account_creation_fee` field is only present for native TRX transfers to
+    unactivated addresses. It is omitted (not `null`) for transfers to existing
+    addresses and for all TRC20 token transfers.
+  </Note>
 
   #### Example of Tron type (TRC20 token transfer)
 
@@ -405,9 +431,9 @@ The `WithdrawFee` object varies depending on the coin or token type. Refer to th
     "coin": "TRX",
     "bandwidth_used": 345,
     "energy_used": 29650,
-    "bandwidth_fee": "0.345",
-    "energy_fee": "12.453",
-    "total_fee": "12.798"
+    "bandwidth_fee": "0.345000",
+    "energy_fee": "12.453000",
+    "total_fee": "12.798000"
   }
   ```
 
