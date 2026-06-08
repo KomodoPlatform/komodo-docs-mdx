@@ -7,7 +7,7 @@ The Komodo DeFi Framework supports ETH(Ethereum) and many other EVM type platfor
 Additionally, it supports ERC20 tokens on the ETH chain, associated ERC20 like tokens on the rest of the EVM platform coin chains, and TRC20 tokens on TRON. Using this method, you can enable a platform coin along with multiple ERC20/TRC20 like tokens of the platform coin chain in a single command.
 
 <Note>
-  TRON (TRX) is currently supported in **wallet-only mode**. You can activate TRX and TRC20 tokens for balance queries and withdrawals, but atomic swaps are not yet available for TRON-based coins.
+  TRON (TRX) is currently supported in **wallet-only mode**. You can activate TRX and TRC20 tokens for balance queries and withdrawals, but atomic swaps are not yet available for TRON-based coins. TRC20 tokens additionally support [gasless transfers via GasFree](/komodo-defi-framework/tutorials/tron-gasfree/) — see the `tron_gasless_provider` parameter below.
 </Note>
 
 ### Request Parameters
@@ -154,6 +154,58 @@ Additionally, it supports ERC20 tokens on the ETH chain, associated ERC20 like t
                     "type": "Iguana"
                 },
                 "pubkey": "04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b",
+                "balances": {
+                    "USDT-TRC20": {
+                        "spendable": "10.000000",
+                        "unspendable": "0"
+                    }
+                }
+            }
+        },
+        "nfts_infos": {}
+    },
+    "id": null
+  }
+  ```
+</CollapsibleSection>
+
+#### Request for TRON (TRX) with gasless TRC20 transfers (GasFree)
+
+To enable [gasless TRC20 transfers](/komodo-defi-framework/tutorials/tron-gasfree/), pass a `tron_gasless_provider` (a standard [TronGaslessProviderConfig](/komodo-defi-framework/api/common_structures/activation/#tron-gasless-provider-config)) when activating the TRON platform coin, and an optional per-token `gasless` constraint on each TRC20 [TokensRequest](/komodo-defi-framework/api/common_structures/activation/#tokens-request). Once activated, the response includes each address's `gasfree_address`, and gasless withdrawals become available through the [withdraw](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) `fee_method: "gasless"` option.
+
+<Note>
+  Set `service` to `"komodo_proxy"` to route requests through the Komodo proxy instead of supplying your own GasFree API credentials. See [TronGaslessProviderConfig](/komodo-defi-framework/api/common_structures/activation/#tron-gasless-provider-config).
+</Note>
+
+<CodeGroup title="" tag="POST" label="enable_eth_with_tokens" mm2MethodDecorate="true" source="v2/coin_activation.EnableEthWithTokensTrxGasFree" />
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+        "current_block": 68000000,
+        "eth_addresses_infos": {
+            "TDcxD6E5wTzvqCJd4RfkGfw9NkCBdvYcV9": {
+                "derivation_method": {
+                    "type": "Iguana"
+                },
+                "pubkey": "04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b",
+                "balances": {
+                    "spendable": "50.000000",
+                    "unspendable": "0"
+                }
+            }
+        },
+        "erc20_addresses_infos": {
+            "TDcxD6E5wTzvqCJd4RfkGfw9NkCBdvYcV9": {
+                "derivation_method": {
+                    "type": "Iguana"
+                },
+                "pubkey": "04d8064eece4fa5c0f8dc0267f68cee9bdd527f9e88f3594a323428718c391ecc2a91c9ce32b6fc5489c49e33b688423b655177168afee1b128be9b2fee67e3f3b",
+                "gasfree_address": "TNER12mMVWruqopsW9FQtKxCGfZcEtb3ER",
                 "balances": {
                     "USDT-TRC20": {
                         "spendable": "10.000000",
