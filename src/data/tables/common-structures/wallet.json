@@ -24,7 +24,14 @@
         "type": "object",
         "required": true,
         "description": "A standard [BalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#balance-info) object."
+      },
+      {
+        "parameter": "gasfree_address",
+        "type": "string",
+        "required": false,
+        "description": "TRON GasFree tokens only. The deterministic GasFree custody address (derived via TVM CREATE2) for this address. Present only when the platform coin/token was activated with a [TronGaslessProviderConfig](/komodo-defi-framework/api/common_structures/activation/#tron-gasless-provider-config); omitted otherwise. See [TRON GasFree transfers](/komodo-defi-framework/tutorials/tron-gasfree/)."
       }
+    
     ]
   },
   "AccountAddressInfo_1": {
@@ -288,6 +295,12 @@
         "description": "A standard [BalanceInfo](/komodo-defi-framework/api/common_structures/wallet/#balance-info) object."
       },
       {
+        "parameter": "gasfree_address",
+        "type": "string",
+        "required": false,
+        "description": "TRON GasFree tokens only. The deterministic GasFree custody address (derived via TVM CREATE2) for this address. Present only when the platform coin/token was activated with a [TronGaslessProviderConfig](/komodo-defi-framework/api/common_structures/activation/#tron-gasless-provider-config); omitted otherwise. See [TRON GasFree transfers](/komodo-defi-framework/tutorials/tron-gasfree/)."
+      },
+      {
         "parameter": "chain",
         "type": "string",
         "required": true,
@@ -538,13 +551,13 @@
         "parameter": "max_fee",
         "type": "numeric string",
         "required": false,
-        "description": "Optional. Maximum provider fee (in token units) you authorize for the gasless transfer. The signed TIP-712 permit binds this cap, so the provider cannot charge more. Defaults to the token's activation-time `gasless.transfer_max_fee` when set."
+        "description": "Optional. Maximum provider fee (in token units) you authorize for the gasless transfer. The signed TIP-712 permit binds this cap, so the provider cannot charge more. When both this and the token's activation-time `gasless.transfer_max_fee` are set, the lower of the two is bound into the permit; when neither is set, the provider's quoted total fee is bound."
       },
       {
         "parameter": "deadline_seconds",
         "type": "integer",
         "required": false,
-        "description": "Optional. How long (in seconds) the signed permit stays valid for the provider to submit on-chain."
+        "description": "Optional, defaults to `300`. How long (in seconds) the signed permit stays valid for the provider to submit on-chain. Must be greater than zero."
       }
     ]
   },
@@ -674,7 +687,7 @@
         "parameter": "signed_max_fee",
         "type": "numeric string",
         "required": false,
-        "description": "`TronGasless` type only. The maximum fee the user authorized in the signed TIP-712 permit. Omitted when no cap was set."
+        "description": "`TronGasless` type only. The fee cap actually bound into the signed TIP-712 permit: the request/activation cap when one was set, otherwise the provider's quoted total fee. Always present in the `withdraw` response."
       },
       {
         "parameter": "trace_id",
