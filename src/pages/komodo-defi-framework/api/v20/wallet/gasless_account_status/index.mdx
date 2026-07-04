@@ -1,0 +1,120 @@
+export const title = "Komodo DeFi Framework Method: GasFree Account Status";
+export const description = "The gasless::account_status method returns a snapshot of the user's TRON GasFree custody account: balances, fees, activation state, and provider availability.";
+
+# GasFree Account Status
+
+## gasless::account\_status {{label : 'gasless::account_status', tag : 'API-v2'}}
+
+Returns a read-only snapshot of the user's [TRON GasFree](/komodo-defi-framework/tutorials/tron-gasfree/) custody account for a gasless-enabled TRC20 token.
+
+The custody account is the deterministic CREATE2 address derived from the user's TRON address. In a custody-first wallet it acts as the user's token account: deposits are received into it, its balance is the spendable balance, and gasless transfers settle from it with fees paid in the token — the user never needs TRX.
+
+The snapshot combines a provider preflight (activation state, frozen amount, current fees, and the largest amount sendable right now) with the raw on-chain balance. When the GasFree provider cannot be reached, the method degrades rather than failing: `provider_available` is `false` and only `gasfree_address` and `on_chain_balance` (read directly from the chain, no provider auth needed) are populated.
+
+`max_withdrawable` matches the amount a `withdraw` request with `"max": true` would sign, so clients can display it without drift.
+
+### Request Parameters
+
+| Parameter | Type   | Description                                                                       |
+| --------- | ------ | --------------------------------------------------------------------------------- |
+| coin      | string | The TRON GasFree TRC20 token to query. Must be activated with a GasFree provider. |
+
+### Response Parameters
+
+| Parameter           | Type             | Description                                                                                                                                                                                                                                                                           |
+| ------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| gasfree\_address    | string           | The locally-derived CREATE2 custody address the token settles from. Always present.                                                                                                                                                                                                   |
+| on\_chain\_balance  | string (numeric) | Raw TRC20 balance held at the custody address, in token units. Always present (falls back to a direct on-chain read when the provider is unreachable).                                                                                                                                |
+| provider\_available | boolean          | Whether the GasFree provider preflight succeeded. When `false`, all provider-derived fields below are `null` and gasless transfers cannot be built right now.                                                                                                                         |
+| active              | boolean          | Optional. Whether the custody account has been activated on chain. The first transfer from an inactive account additionally pays `activation_fee`.                                                                                                                                    |
+| frozen\_balance     | string (numeric) | Optional. Amount locked by an in-flight transfer, in token units. Does not include any pending activation fee, which is reported separately as `activation_fee`.                                                                                                                      |
+| spendable\_balance  | string (numeric) | Optional. `on_chain_balance - frozen_balance` — the balance not locked by a pending transfer.                                                                                                                                                                                         |
+| transfer\_fee       | string (numeric) | Optional. Per-transfer provider fee, charged in the token.                                                                                                                                                                                                                            |
+| activation\_fee     | string (numeric) | Optional. One-time account activation fee charged in the token on the first transfer. Omitted (`null`) whenever the provider reports no activation charge — in practice, exactly when the account is already active — so its presence signals that the next transfer pays activation. |
+| max\_withdrawable   | string (numeric) | Optional. Largest amount the user can gaslessly send now, with transfer (and, if inactive, activation) fees already netted out. Matches the withdraw `max` amount.                                                                                                                    |
+
+#### 📌 Examples
+
+<CodeGroup title="" tag="POST" label="gasless::account_status" mm2MethodDecorate="true">
+  ```json
+  {
+    "mmrpc": "2.0",
+    "userpass": "RPC_UserP@SSW0RD",
+    "method": "gasless::account_status",
+    "params": {
+      "coin": "USDT-TRC20"
+    },
+    "id": 0
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (provider reachable, account not yet activated)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "gasfree_address": "TPRN9HuCCTUuEsw5DsPBM8CQGRq77Aey5g",
+      "active": false,
+      "on_chain_balance": "25.000000",
+      "frozen_balance": "0",
+      "spendable_balance": "25.000000",
+      "transfer_fee": "1.000000",
+      "activation_fee": "1.000000",
+      "max_withdrawable": "23.000000",
+      "provider_available": true
+    },
+    "id": 0
+  }
+  ```
+
+  #### Response (provider unreachable — on-chain fallback)
+
+  ```json
+  {
+    "mmrpc": "2.0",
+    "result": {
+      "gasfree_address": "TPRN9HuCCTUuEsw5DsPBM8CQGRq77Aey5g",
+      "active": null,
+      "on_chain_balance": "25.000000",
+      "frozen_balance": null,
+      "spendable_balance": null,
+      "transfer_fee": null,
+      "activation_fee": null,
+      "max_withdrawable": null,
+      "provider_available": false
+    },
+    "id": 0
+  }
+  ```
+</CollapsibleSection>
+
+### Error Types
+
+| Error Type           | Description                                                                                                                                                                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CoinNotFound         | The specified coin was not found or is not activated.                                                                                                                                                                                         |
+| NotEthCoin           | The specified coin is not an EVM/TRON coin.                                                                                                                                                                                                   |
+| CoinNotSupported     | The coin does not support GasFree account status (only TRON GasFree TRC20 tokens do).                                                                                                                                                         |
+| GaslessNotConfigured | The coin has no GasFree provider configured.                                                                                                                                                                                                  |
+| TronRpcUnavailable   | The TRON RPC client is not initialized for the coin (on-chain fallback impossible).                                                                                                                                                           |
+| ProviderError        | The GasFree provider returned an error that prevented even the degraded snapshot — including a custody-address mismatch between the provider and the locally-derived CREATE2 address (a safety hard-error, never reported as a zero balance). |
+| InternalError        | An internal error occurred.                                                                                                                                                                                                                   |
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  ##### Error (Gasless Not Configured)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Coin 'USDT-TRC20' has no GasFree provider configured",
+      "error_path": "gasless",
+      "error_trace": "gasless:80]",
+      "error_type": "GaslessNotConfigured",
+      "error_data": "USDT-TRC20",
+      "id": 0
+  }
+  ```
+</CollapsibleSection>
