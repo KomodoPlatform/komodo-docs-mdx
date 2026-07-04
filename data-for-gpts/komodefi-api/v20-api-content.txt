@@ -6540,6 +6540,88 @@ Here is an example of the stream data you should be able to see in [http://local
     "id": null
 }
 ```
+export const title = "Komodo DeFi Framework Method: Enable GasFree Trace Streaming";
+export const description = "Using this method, you can stream live status updates for TRON GasFree (gasless) TRC20 transfers.";
+
+# Enable GasFree Trace Streaming
+
+## stream::gasless\_trace::enable {{label : 'stream::gasless_trace::enable', tag : 'API-v2'}}
+
+Streams live status updates for [TRON GasFree](/komodo-defi-framework/tutorials/tron-gasfree/) (gasless) TRC20 transfers of a given token. Once enabled, every gasless transfer submitted for that coin via [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) is tracked automatically, and the stream emits an event each time a tracked transfer changes state, until it reaches a terminal state (`confirmed` or `failed`).
+
+### Request Parameters
+
+The coin must be an activated TRON GasFree TRC20 token (i.e. activated with a `tron_gasless_provider`). The polling interval follows the provider's `status_poll_interval_ms` set at activation. Disable the stream with [stream::disable](/komodo-defi-framework/api/v20/streaming/disable/).
+
+### Response Parameters
+
+#### 📌 Examples
+
+```json
+{
+  "userpass": "RPC_UserP@SSW0RD",
+  "method": "stream::gasless_trace::enable",
+  "mmrpc": "2.0",
+  "params": {
+    "coin": "USDT-TRC20",
+    "client_id": 1
+  }
+}
+```
+
+```json
+{
+    "mmrpc": "2.0",
+    "result": {
+        "streamer_id": "GASLESS_TRACE:USDT-TRC20"
+    },
+    "id": null
+}
+```
+
+### Streamed Events
+
+Each event carries the tracked transfer's `trace_id` and its current status. The status fields are described below.
+
+Example of the stream data visible at [http://localhost:7783/event-stream?id=1](http://localhost:7783/event-stream?id=1) as a transfer progresses:
+
+`data: {"_type":"GASLESS_TRACE:USDT-TRC20","message":{"coin":"USDT-TRC20","trace_id":"6c3ff67e-0bf4-4c09-91ca-0c7c254b01a0","state":"on_chain","tx_hash_on_chain":"2222222222222222222222222222222222222222222222222222222222222222","block_height":57175988,"confirmed_at":1747909638,"final_fee":"2.000000","failure_reason":null}}`
+
+When polling the provider fails, an error event is emitted instead, carrying the `coin`, `trace_id`, and an `error` message:
+
+`data: {"_type":"GASLESS_TRACE:USDT-TRC20","message":{"coin":"USDT-TRC20","trace_id":"6c3ff67e-0bf4-4c09-91ca-0c7c254b01a0","error":"Request to GasFree provider timed out"}}`
+
+The same status fields are returned synchronously (without a stream) by the [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) method, which is useful for one-off polling.
+
+### Error Types
+
+##### Error (Coin Not Supported)
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Coin 'KMD' does not support GasFree trace streaming",
+    "error_path": "gasless_trace",
+    "error_trace": "gasless_trace:67]",
+    "error_type": "CoinNotSupported",
+    "error_data": "KMD",
+    "id": null
+}
+```
+
+##### Error (Gasless Not Configured)
+
+```json
+{
+    "mmrpc": "2.0",
+    "error": "Coin 'USDT-TRC20' has no GasFree provider configured",
+    "error_path": "gasless_trace",
+    "error_trace": "gasless_trace:74]",
+    "error_type": "GaslessNotConfigured",
+    "error_data": "USDT-TRC20",
+    "id": null
+}
+```
 export const title = "Komodo DeFi Framework Method: Enable Heartbeat Streaming";
 export const description = "Using this method, you can enable heartbeat events streaming.";
 
@@ -12359,7 +12441,7 @@ export const description = "The gasless::trace_status method returns the current
 
 Returns the current status of a submitted [TRON GasFree](/komodo-defi-framework/tutorials/tron-gasfree/) (gasless) TRC20 transfer, identified by the `trace_id` returned from [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) when the gasless transfer was submitted.
 
-This is a one-off poll; call it periodically until the transfer reaches a terminal state (`confirmed` or `failed`).
+This is a one-off poll. To receive live updates as the transfer progresses, use [stream::gasless\_trace::enable](/komodo-defi-framework/api/v20/streaming/gasless_trace_enable/) instead.
 
 ### Request Parameters
 
@@ -15831,7 +15913,7 @@ This method generates a raw transaction which should then be broadcast using [se
 | broadcast            | bool             | Optional, defaults to `false`. When `false`, signed transaction hex must be broadcast manually with [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/). Must be set to `true` for Metamask managed transactions.                                                                                                                |
 | expiration\_seconds  | integer          | Optional. Transaction expiration window in seconds. Currently only used by TRON (default 60s). Sets how long the signed transaction remains valid for broadcast.                                                                                                                                                                                               |
 | fee\_method          | string           | TRON only. Optional. Selects the fee rail: `native` (default — pay the TRX bandwidth/energy fee) or `gasless` (route a TRC20 transfer through [GasFree](/komodo-defi-framework/tutorials/tron-gasfree/), paying the fee in the token). Requires a `tron_gasless_provider` configured at activation and the token opted in via its `gasless` activation config. |
-| gasless              | object           | TRON only. Optional. A standard [GaslessWithdrawOptions](/komodo-defi-framework/api/common_structures/wallet/#gasless-withdraw-options) object constraining the gasless transfer (max fee, deadline). Only valid together with `fee_method: "gasless"`.                                                                                                        |
+| gasless              | object           | TRON only. Optional. A standard [GaslessWithdrawOptions](/komodo-defi-framework/api/common_structures/wallet/#gasless-withdraw-options) object constraining the gasless transfer (max fee, deadline, native fallback). Only valid together with `fee_method: "gasless"`.                                                                                       |
 
 ### Response
 
@@ -16576,7 +16658,8 @@ A gasless withdrawal does not produce a broadcastable `tx_hex`. Instead it retur
     "amount": "5",
     "fee_method": "gasless",
     "gasless": {
-      "max_fee": "5"
+      "max_fee": "5",
+      "fallback_to_native": false
     }
   },
   "id": 0
@@ -16676,7 +16759,7 @@ To execute the transfer, submit the signed authorization to the provider with [s
 }
 ```
 
-The fee is paid in the token: `spent_by_me` (and `my_balance_change`) include the token-denominated provider fee (`total_token_fee`) on top of the transfer amount — in the example above, 5 USDT transferred + 2 USDT fee = 7 USDT spent. Track the submitted transfer by polling [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) with the returned `trace_id`.
+The fee is paid in the token: `spent_by_me` (and `my_balance_change`) include the token-denominated provider fee (`total_token_fee`) on top of the transfer amount — in the example above, 5 USDT transferred + 2 USDT fee = 7 USDT spent. Track the submitted transfer with [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/), or subscribe to live updates via [stream::gasless\_trace::enable](/komodo-defi-framework/api/v20/streaming/gasless_trace_enable/), using the returned `trace_id`.
 
 HD-wallet withdrawals additionally include an `hd_from` object in the relay payload identifying the signing address. Pass the whole payload back to `send_raw_transaction` **verbatim** — `hd_from` is required there to validate wallet ownership, and any unknown extra key in `tx_json` is rejected.
 
@@ -16684,7 +16767,7 @@ HD-wallet withdrawals additionally include an `hd_from` object in the relay payl
 
 #### Gasless (GasFree) errors
 
-A gasless withdrawal that cannot be served always returns an error — there is no automatic fallback to a native (TRX-paid) transfer. These errors arrive with `error_type: "Gasless"` and the specific variant nested in `error_data`:
+A gasless withdrawal that cannot be served returns an error, unless `gasless.fallback_to_native: true` was set — in that case, deterministic gasless-unavailable conditions (no provider, insufficient GasFree balance, unsupported token) fall back to a normal native (TRX-paid) transfer instead. These errors arrive with `error_type: "Gasless"` and the specific variant nested in `error_data`:
 
 | Variant                                 | HTTP status | Description                                                                                                                                   |
 | --------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |

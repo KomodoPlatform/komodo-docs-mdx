@@ -22,7 +22,7 @@ This method generates a raw transaction which should then be broadcast using [se
 | broadcast            | bool             | Optional, defaults to `false`. When `false`, signed transaction hex must be broadcast manually with [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/). Must be set to `true` for Metamask managed transactions.                                                                                                                |
 | expiration\_seconds  | integer          | Optional. Transaction expiration window in seconds. Currently only used by TRON (default 60s). Sets how long the signed transaction remains valid for broadcast.                                                                                                                                                                                               |
 | fee\_method          | string           | TRON only. Optional. Selects the fee rail: `native` (default — pay the TRX bandwidth/energy fee) or `gasless` (route a TRC20 transfer through [GasFree](/komodo-defi-framework/tutorials/tron-gasfree/), paying the fee in the token). Requires a `tron_gasless_provider` configured at activation and the token opted in via its `gasless` activation config. |
-| gasless              | object           | TRON only. Optional. A standard [GaslessWithdrawOptions](/komodo-defi-framework/api/common_structures/wallet/#gasless-withdraw-options) object constraining the gasless transfer (max fee, deadline). Only valid together with `fee_method: "gasless"`.                                                                                                        |
+| gasless              | object           | TRON only. Optional. A standard [GaslessWithdrawOptions](/komodo-defi-framework/api/common_structures/wallet/#gasless-withdraw-options) object constraining the gasless transfer (max fee, deadline, native fallback). Only valid together with `fee_method: "gasless"`.                                                                                       |
 
 ### Response
 
@@ -834,7 +834,8 @@ A gasless withdrawal does not produce a broadcastable `tx_hex`. Instead it retur
       "amount": "5",
       "fee_method": "gasless",
       "gasless": {
-        "max_fee": "5"
+        "max_fee": "5",
+        "fallback_to_native": false
       }
     },
     "id": 0
@@ -942,7 +943,7 @@ To execute the transfer, submit the signed authorization to the provider with [s
 </CollapsibleSection>
 
 <Note>
-  The fee is paid in the token: `spent_by_me` (and `my_balance_change`) include the token-denominated provider fee (`total_token_fee`) on top of the transfer amount — in the example above, 5 USDT transferred + 2 USDT fee = 7 USDT spent. Track the submitted transfer by polling [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) with the returned `trace_id`.
+  The fee is paid in the token: `spent_by_me` (and `my_balance_change`) include the token-denominated provider fee (`total_token_fee`) on top of the transfer amount — in the example above, 5 USDT transferred + 2 USDT fee = 7 USDT spent. Track the submitted transfer with [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/), or subscribe to live updates via [stream::gasless\_trace::enable](/komodo-defi-framework/api/v20/streaming/gasless_trace_enable/), using the returned `trace_id`.
 </Note>
 
 <Note>
@@ -953,7 +954,7 @@ To execute the transfer, submit the signed authorization to the provider with [s
 
 #### Gasless (GasFree) errors
 
-A gasless withdrawal that cannot be served always returns an error — there is no automatic fallback to a native (TRX-paid) transfer. These errors arrive with `error_type: "Gasless"` and the specific variant nested in `error_data`:
+A gasless withdrawal that cannot be served returns an error, unless `gasless.fallback_to_native: true` was set — in that case, deterministic gasless-unavailable conditions (no provider, insufficient GasFree balance, unsupported token) fall back to a normal native (TRX-paid) transfer instead. These errors arrive with `error_type: "Gasless"` and the specific variant nested in `error_data`:
 
 | Variant                                 | HTTP status | Description                                                                                                                                   |
 | --------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |

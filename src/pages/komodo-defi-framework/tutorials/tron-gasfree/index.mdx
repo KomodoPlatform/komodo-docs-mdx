@@ -18,7 +18,7 @@ Each user address has a deterministic **GasFree custody address** — a smart-co
 2.  **Fund** the GasFree custody address with the token you want to transfer gaslessly. To inspect the custody account at any time — balance, activation state, current fees, and the largest gaslessly-sendable amount — use [gasless::account\_status](/komodo-defi-framework/api/v20/wallet/gasless_account_status/).
 3.  **Withdraw** with `fee_method: "gasless"` ([withdraw](/komodo-defi-framework/api/v20/wallet/tx/withdraw/)). The framework computes the provider fee, signs a TIP-712 `PermitTransferMessage` authorizing `{token, serviceProvider, user, receiver, value, maxFee, deadline, nonce}`, and returns the signed authorization (a `relay_type: "tron_gasfree"` payload) plus a `TronGasless` fee breakdown.
 4.  **Submit** the signed authorization to the provider via [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) (passed as a `tx_json` object). The provider pays the TRX gas, settles the transfer on-chain, and the call returns a `trace_id`.
-5.  **Track** the transfer by polling [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) using the `trace_id`.
+5.  **Track** the transfer with [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) (one-off poll) or [stream::gasless\_trace::enable](/komodo-defi-framework/api/v20/streaming/gasless_trace_enable/) (live updates) using the `trace_id`.
 
 <Note>
   If the GasFree custody address has never been used, the first transfer also pays a one-time **activation fee** (in the token), reported as `activation_fee` in the `TronGasless` fee details.
@@ -36,7 +36,7 @@ Fees are paid in the transferred token, not in TRX:
 *   `activation_fee` — a one-time fee, charged in the token, when the GasFree custody address is inactive and must be activated on its first transfer (omitted otherwise).
 *   `total_token_fee` — the total charged in the token (`transfer_fee` + `activation_fee`).
 
-You can cap the fee you are willing to pay with the `gasless.max_fee` option at withdraw time (which is bound into the signed permit), or at activation time with a per-token `gasless.transfer_max_fee`. A gasless withdrawal that cannot be served (no provider, insufficient GasFree balance, unsupported token) returns an error — there is no automatic fallback to a TRX-paid transfer. To send a normal native transfer instead, omit `fee_method` (or set it to `native`).
+You can cap the fee you are willing to pay with the `gasless.max_fee` option at withdraw time (which is bound into the signed permit), or at activation time with a per-token `gasless.transfer_max_fee`. Set `gasless.fallback_to_native: true` to fall back to a normal TRX-paid transfer when a gasless transfer is unavailable.
 
 <Note>
   The signed permit embeds a **deadline**: `now + gasless.deadline_seconds` from the withdraw request, default **300 s** (`deadline_seconds` must be greater than zero). The GasFree provider advertises its own accepted deadline range (currently 60–600 s). If the deadline passes before the authorization is submitted, `send_raw_transaction` fails with `GaslessAuthorizationExpired` — run a fresh `withdraw` to re-quote and re-sign.
@@ -60,3 +60,4 @@ The `service` field of the [`tron_gasless_provider`](/komodo-defi-framework/api/
 *   [withdraw](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) — create a gasless transfer (`fee_method: "gasless"`).
 *   [send\_raw\_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) — submit the signed transfer to the provider.
 *   [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) — poll a transfer's status.
+*   [stream::gasless\_trace::enable](/komodo-defi-framework/api/v20/streaming/gasless_trace_enable/) — stream live transfer status.

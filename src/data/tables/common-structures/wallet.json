@@ -558,6 +558,13 @@
         "type": "integer",
         "required": false,
         "description": "Optional, defaults to `300`. How long (in seconds) the signed permit stays valid for the provider to submit on-chain. Must be greater than zero."
+      },
+      {
+        "parameter": "fallback_to_native",
+        "type": "boolean",
+        "required": false,
+        "default": "false",
+        "description": "Optional. When `true`, if a gasless transfer is unavailable (e.g. no provider configured or the token is ineligible) the withdrawal falls back to a normal native (TRX-paid) transfer instead of returning an error."
       }
     ]
   },
@@ -693,7 +700,7 @@
         "parameter": "trace_id",
         "type": "string",
         "required": false,
-        "description": "`TronGasless` type only. `null` in the `withdraw` response — the transfer is not submitted yet. The tracking id is returned by [send_raw_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) when the signed transfer is broadcast to the provider, then used with [gasless::trace_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/)."
+        "description": "`TronGasless` type only. `null` in the `withdraw` response — the transfer is not submitted yet. The tracking id is returned by [send_raw_transaction](/komodo-defi-framework/api/legacy/send_raw_transaction/) when the signed transfer is broadcast to the provider, then used with [gasless::trace_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) or [stream::gasless_trace::enable](/komodo-defi-framework/api/v20/streaming/gasless_trace_enable/)."
       }
     ]
   },
