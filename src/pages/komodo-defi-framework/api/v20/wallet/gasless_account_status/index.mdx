@@ -9,7 +9,7 @@ Returns a read-only snapshot of the user's [TRON GasFree](/komodo-defi-framework
 
 The custody account is the deterministic CREATE2 address derived from the user's TRON address. In a custody-first wallet it acts as the user's token account: deposits are received into it, its balance is the spendable balance, and gasless transfers settle from it with fees paid in the token — the user never needs TRX.
 
-The snapshot combines a provider preflight (activation state, frozen amount, current fees, and the largest amount sendable right now) with the raw on-chain balance. When the provider preflight fails for any reason (provider unreachable, authentication failure, provider-side error), the method degrades rather than failing: `provider_available` is `false` and only `gasfree_address` and `on_chain_balance` (read directly from the chain, no provider auth needed) are populated.
+The snapshot combines a provider preflight (activation state, frozen amount, current fees, and the largest amount sendable right now) with the raw on-chain balance. If the provider preflight fails with a connectivity, authorization, rate-limit, or upstream provider class error (`Transport`, `Timeout`, `Unauthorized`, `Forbidden`, `RateLimited`, or `Upstream`), the method degrades instead of failing: `availability` is `provider_unreachable`, `service_provider` is `null`, and only `gasfree_address` plus `on_chain_balance` (read directly from the chain, no provider auth needed) are populated. Provider identity mismatches, custody-address mismatches, token-decimal mismatches, invalid provider responses, and other non-degradable failures are returned as errors.
 
 `max_withdrawable` matches the amount a `withdraw` request with `"max": true` would sign, so clients can display it without drift.
 
@@ -21,17 +21,25 @@ The snapshot combines a provider preflight (activation state, frozen amount, cur
 
 ### Response Parameters
 
-| Parameter           | Type             | Description                                                                                                                                                                                                                                                                           |
-| ------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| gasfree\_address    | string           | The locally-derived CREATE2 custody address the token settles from. Always present.                                                                                                                                                                                                   |
-| on\_chain\_balance  | string (numeric) | Raw TRC20 balance held at the custody address, in token units. Always present (falls back to a direct on-chain read when the provider preflight fails).                                                                                                                               |
-| provider\_available | boolean          | Whether the GasFree provider preflight succeeded. When `false`, all provider-derived fields below are `null` and gasless transfers cannot be built right now.                                                                                                                         |
-| active              | boolean          | Optional. Whether the custody account has been activated on chain. The first transfer from an inactive account additionally pays `activation_fee`.                                                                                                                                    |
-| frozen\_balance     | string (numeric) | Optional. Amount locked by an in-flight transfer, in token units. Does not include any pending activation fee, which is reported separately as `activation_fee`.                                                                                                                      |
-| spendable\_balance  | string (numeric) | Optional. `on_chain_balance - frozen_balance` — the balance not locked by a pending transfer.                                                                                                                                                                                         |
-| transfer\_fee       | string (numeric) | Optional. Per-transfer provider fee, charged in the token.                                                                                                                                                                                                                            |
-| activation\_fee     | string (numeric) | Optional. One-time account activation fee charged in the token on the first transfer. Omitted (`null`) whenever the provider reports no activation charge — in practice, exactly when the account is already active — so its presence signals that the next transfer pays activation. |
-| max\_withdrawable   | string (numeric) | Optional. Largest amount the user can gaslessly send now, with transfer (and, if inactive, activation) fees already netted out. Matches the withdraw `max` amount.                                                                                                                    |
+| Parameter          | Type             | Description                                                                                                                                                                                                                 |
+| ------------------ | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| gasfree\_address   | string           | The locally-derived CREATE2 custody address the token settles from. Always present.                                                                                                                                         |
+| service\_provider  | string \| null   | GasFree service provider identity used for provider-reachable status data. Present for `available`, `pending_transfer`, and `token_unsupported`; `null` for `provider_unreachable`.                                         |
+| availability      | string enum      | Always present. One of `available`, `pending_transfer`, `token_unsupported`, or `provider_unreachable`.                                                                                                                     |
+| active             | boolean \| null  | Whether the custody account has been activated on chain. `null` when `availability` is `token_unsupported` or `provider_unreachable`. The first transfer from an inactive account additionally pays `activation_fee`.       |
+| on\_chain\_balance | string (numeric) | Raw TRC20 balance held at the custody address, in token units. Always present; when the provider preflight does not provide a balance, KDF reads it directly from chain.                                                     |
+| frozen\_balance    | string \| null   | Amount locked by an in-flight transfer, in token units. `null` when `availability` is `token_unsupported` or `provider_unreachable`. Does not include any pending activation fee, which is reported separately.              |
+| spendable\_balance | string \| null   | `on_chain_balance - frozen_balance` — the balance not locked by a pending transfer. `null` whenever `frozen_balance` is `null`.                                                                                              |
+| transfer\_fee      | string \| null   | Per-transfer provider fee, charged in the token. `null` when `availability` is `token_unsupported` or `provider_unreachable`.                                                                                               |
+| activation\_fee    | string \| null   | One-time account activation fee charged in the token on the first transfer. `null` when the account is already active, the activation fee is zero, the provider is unreachable, or the token is unsupported.                 |
+| max\_withdrawable  | string \| null   | Largest amount the user can gaslessly send now, with transfer and activation fees already netted out. Matches the withdraw `max` amount. Present only when `availability` is `available`; `null` for all other values.       |
+
+#### Availability values and nullable fields
+
+- `available`: provider data is usable. `service_provider`, `active`, `frozen_balance`, `spendable_balance`, `transfer_fee`, and `max_withdrawable` are populated. `activation_fee` is populated only when the next transfer must pay a non-zero activation fee.
+- `pending_transfer`: provider data is usable, but an in-flight transfer blocks new submissions. Provider-derived balance and fee fields remain populated, but `max_withdrawable` is `null`.
+- `token_unsupported`: the provider was reached and its identity is known, but the token is not enrolled for GasFree transfers. `service_provider` remains populated; `active`, `frozen_balance`, `spendable_balance`, `transfer_fee`, `activation_fee`, and `max_withdrawable` are `null`.
+- `provider_unreachable`: KDF degraded to an on-chain balance-only response. `service_provider` and every provider-derived field (`active`, `frozen_balance`, `spendable_balance`, `transfer_fee`, `activation_fee`, and `max_withdrawable`) are `null`.
 
 #### 📌 Examples
 
@@ -57,14 +65,15 @@ The snapshot combines a provider preflight (activation state, frozen amount, cur
     "mmrpc": "2.0",
     "result": {
       "gasfree_address": "TPRN9HuCCTUuEsw5DsPBM8CQGRq77Aey5g",
+      "service_provider": "TKtWbdzEq5ss9vTS9kwRhBp5mXmBfBns3E",
+      "availability": "available",
       "active": false,
       "on_chain_balance": "25.000000",
       "frozen_balance": "0",
       "spendable_balance": "25.000000",
       "transfer_fee": "1.000000",
       "activation_fee": "1.000000",
-      "max_withdrawable": "23.000000",
-      "provider_available": true
+      "max_withdrawable": "23.000000"
     },
     "id": 0
   }
@@ -77,14 +86,15 @@ The snapshot combines a provider preflight (activation state, frozen amount, cur
     "mmrpc": "2.0",
     "result": {
       "gasfree_address": "TPRN9HuCCTUuEsw5DsPBM8CQGRq77Aey5g",
+      "service_provider": null,
+      "availability": "provider_unreachable",
       "active": null,
       "on_chain_balance": "25.000000",
       "frozen_balance": null,
       "spendable_balance": null,
       "transfer_fee": null,
       "activation_fee": null,
-      "max_withdrawable": null,
-      "provider_available": false
+      "max_withdrawable": null
     },
     "id": 0
   }
@@ -93,14 +103,18 @@ The snapshot combines a provider preflight (activation state, frozen amount, cur
 
 ### Error Types
 
-| Error Type           | Description                                                                                                                                                                                                                                                                                                                                  |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CoinNotFound         | The specified coin was not found or is not activated.                                                                                                                                                                                                                                                                                        |
-| NotEthCoin           | The specified coin is not an EVM/TRON coin.                                                                                                                                                                                                                                                                                                  |
-| CoinNotSupported     | The coin does not support GasFree account status (only TRON GasFree TRC20 tokens do).                                                                                                                                                                                                                                                        |
-| GaslessNotConfigured | The coin has no GasFree provider configured.                                                                                                                                                                                                                                                                                                 |
-| ProviderError        | A hard provider error that prevented even the degraded snapshot — notably a custody-address mismatch between the provider and the locally-derived CREATE2 address (a safety hard-error, never reported as a zero balance). Ordinary provider failures do not surface here; they degrade to the `provider_available: false` snapshot instead. |
-| InternalError        | An internal error occurred (including an uninitialized TRON RPC client, which makes the on-chain fallback impossible).                                                                                                                                                                                                                       |
+| Error Type               | HTTP Status | Description                                                                                                                                                                                            |
+| ------------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CoinNotFound             | 404         | The specified coin was not found or is not activated.                                                                                                                                                  |
+| NotEthCoin               | 400         | The specified coin is not an EVM/TRON coin.                                                                                                                                                            |
+| CoinNotSupported         | 400         | The coin does not support GasFree account status (only TRON GasFree TRC20 tokens do).                                                                                                                  |
+| GaslessNotConfigured     | 503         | The coin has no GasFree provider configured.                                                                                                                                                           |
+| TronRpcUnavailable       | 503         | The TRON RPC client is not initialized for the coin, so KDF cannot read the custody address balance from chain.                                                                                        |
+| ProviderIdentityMismatch | 502         | The configured `service_provider` is not offered by the provider API.                                                                                                                                  |
+| GasfreeAddressMismatch   | 502         | The provider-reported GasFree custody address differs from KDF's locally-derived CREATE2 address. This is a safety hard error and is never reported as a zero balance or degraded status.              |
+| TokenDecimalMismatch     | 502         | The provider-reported token decimals differ from KDF's local token configuration.                                                                                                                       |
+| ProviderError            | 502         | A hard provider error that prevented a status response, such as an invalid provider response or provider bad request. Connectivity, authorization, rate-limit, and upstream preflight failures degrade. |
+| InternalError            | 500         | An internal error occurred.                                                                                                                                                                            |
 
 <CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
   ##### Error (Gasless Not Configured)

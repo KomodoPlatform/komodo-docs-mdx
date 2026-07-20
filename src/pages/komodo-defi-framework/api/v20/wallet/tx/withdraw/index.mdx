@@ -822,6 +822,8 @@ When `fee_method` is `gasless`, the TRC20 token is transferred through a [GasFre
 
 A gasless withdrawal does not produce a broadcastable `tx_hex`. Instead it returns a **signed GasFree authorization** (the `relay_type: "tron_gasfree"` payload) together with a `fee_details` object of type [`TronGasless`](/komodo-defi-framework/api/common_structures/wallet/#withdraw-fee). The `fee_details.trace_id` is `null` at this stage — the transfer has not yet been submitted.
 
+When `max: true` is used with `fee_method: "gasless"`, KDF first preflights the GasFree transfer with a transfer value of `0`, then derives the signed authorization amount from that preflight response. Pending-transfer, unsupported-token, provider identity/address mismatch, and token-decimal mismatch states return their specific typed errors before any max amount is computed, rather than a generic zero-balance error.
+
 <CodeGroup title="Withdraw" tag="POST" label="withdraw" mm2MethodDecorate="true">
   ```json
   {
@@ -868,7 +870,7 @@ A gasless withdrawal does not produce a broadcastable `tx_hex`. Instead it retur
         "nonce": "9",
         "sig": "1c8f...e01b"
       },
-      "created_at": "2026-04-23T20:47:34Z",
+      "created_at": "2025-04-23T20:47:34Z",
       "from": ["TMVQGm1qAQYVdetCeGRRkTWYYrLXuHK2HC"],
       "to": ["TJM1BE5wq1VdHh3gwjUeyaVkvZp9DVYCfC"],
       "total_amount": "5",
@@ -924,7 +926,7 @@ To execute the transfer, submit the signed authorization to the provider with [s
         "nonce": "9",
         "sig": "1c8f...e01b"
       },
-      "created_at": "2026-04-23T20:47:34Z"
+      "created_at": "2025-04-23T20:47:34Z"
     }
   }
   ```
@@ -954,18 +956,21 @@ To execute the transfer, submit the signed authorization to the provider with [s
 
 #### Gasless (GasFree) errors
 
-A gasless withdrawal that cannot be served returns an error, unless `gasless.fallback_to_native: true` was set — in that case, deterministic gasless-unavailable conditions (no provider, insufficient GasFree balance, unsupported token) fall back to a normal native (TRX-paid) transfer instead. These errors arrive with `error_type: "Gasless"` and the specific variant nested in `error_data`:
+A gasless withdrawal that cannot be served returns an error, unless `gasless.fallback_to_native: true` was set — in that case, bounded deterministic gasless-unavailable conditions fall back to a normal native (TRX-paid) transfer instead. This fallback covers no provider or missing `tron_gasless_token_config`, unsupported token, insufficient GasFree custody balance, `NotSufficientBalance`, `NotSufficientBalanceForActivation`, and `ZeroBalanceToWithdrawMax`. It does **not** cover provider identity/address or token-decimal mismatches, pending transfers, max-fee-exceeded, quote-expired, connectivity/auth/provider-upstream errors, or other non-deterministic failures.
+
+GasFree withdraw variants such as `Unavailable`, `PendingTransfer`, `MaxFeeExceeded`, balance errors, `QuoteExpired`, `ProviderRejected`, `InvalidProviderResponse`, and `TraceNotFound` are nested under `error_type: "Gasless"` with the specific variant in `error_data`. Runtime provider errors do not all use that shape: invalid provider responses, identity/address/decimal mismatches, and provider bad requests map into `Gasless`, while auth/connectivity/upstream classes surface as top-level `Transport`, and `InvalidRequest`/`Internal`/`NotImplemented` surface as top-level `InternalError`.
 
 | Variant                                 | HTTP status | Description                                                                                                                                   |
 | --------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | Unavailable                             | 503         | Gasless is not available for this coin or request (e.g. no provider configured, or the token was not activated with `gasless.enabled: true`). |
 | PendingTransfer                         | 409         | A gasless transfer is already pending for this account; wait for settlement and retry.                                                        |
-| MaxFeeExceeded                          | 400         | The provider's quoted fee exceeds the requested `max_fee` cap.                                                                                |
+| MaxFeeExceeded                          | 400         | The provider's quoted total fee (transfer fee plus any one-time activation fee) exceeds the requested `max_fee` cap.                          |
 | InsufficientGasFreeBalance              | 400         | Not enough tokens in the GasFree custody address to cover amount + transfer fee. Carries `coin`, `available`, and `required` amounts.         |
 | InsufficientGasFreeBalanceForActivation | 400         | As above, but the account is not yet activated, so the one-time `activation_fee` is included in `required`.                                   |
 | QuoteExpired                            | 400         | The signed quote expired before submission; request a new withdrawal.                                                                         |
 | ProviderRejected                        | 502         | The GasFree provider rejected the transfer.                                                                                                   |
 | InvalidProviderResponse                 | 502         | The GasFree provider returned an invalid response.                                                                                            |
+| TraceNotFound                           | 404         | Gasless transfer trace was not found.                                                                                                         |
 
 An `InvalidFee` error (not nested under `Gasless`) is returned when `gasless` options are sent without `fee_method: "gasless"`, or when `deadline_seconds` is `0`.
 

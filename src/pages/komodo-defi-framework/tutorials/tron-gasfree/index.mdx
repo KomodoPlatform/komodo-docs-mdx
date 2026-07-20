@@ -36,7 +36,7 @@ Fees are paid in the transferred token, not in TRX:
 *   `activation_fee` — a one-time fee, charged in the token, when the GasFree custody address is inactive and must be activated on its first transfer (omitted otherwise).
 *   `total_token_fee` — the total charged in the token (`transfer_fee` + `activation_fee`).
 
-You can cap the fee you are willing to pay with the `gasless.max_fee` option at withdraw time (which is bound into the signed permit), or at activation time with a per-token `gasless.transfer_max_fee`. Set `gasless.fallback_to_native: true` to fall back to a normal TRX-paid transfer when a gasless transfer is unavailable.
+You can cap the total token-denominated GasFree fee you are willing to pay — `transfer_fee` plus, on the account's first transfer, the one-time `activation_fee` — with the `gasless.max_fee` option at withdraw time (which is bound into the signed permit), or at activation time with a per-token `gasless.transfer_max_fee`. Set `gasless.fallback_to_native: true` to fall back to a normal TRX-paid transfer when a gasless transfer is unavailable.
 
 <Note>
   The signed permit embeds a **deadline**: `now + gasless.deadline_seconds` from the withdraw request, default **300 s** (`deadline_seconds` must be greater than zero). The GasFree provider advertises its own accepted deadline range (currently 60–600 s). If the deadline passes before the authorization is submitted, `send_raw_transaction` fails with `GaslessAuthorizationExpired` — run a fresh `withdraw` to re-quote and re-sign.
@@ -50,7 +50,7 @@ The `service` field of the [`tron_gasless_provider`](/komodo-defi-framework/api/
 *   **`komodo_proxy`** — requests are routed through the Komodo proxy, which holds the GasFree credentials on your behalf. No API secret is stored on the node; the node authenticates to the proxy with its libp2p key.
 
 <Note>
-  When `service_provider` is not pinned in the activation config, the framework resolves it lazily on the **first gasless withdraw or submit** after activation: it fetches the provider list, keeps a configured address if the API still offers it (otherwise it falls back to the first listed provider, with a warning), and **caches the resolved address for the lifetime of the activation**. Switching providers therefore requires re-activating the token/platform coin.
+  When `service_provider` is not pinned in the activation config, the framework resolves it lazily on the **first gasless operation** (`gasless::account_status`, a gasless withdraw, or a submit) after activation, and uses the first provider returned by the GasFree API. If a pinned provider is present in the fetched list, it is kept; if the list is fetched successfully but does not include the pinned provider, that operation fails with `ProviderIdentityMismatch` — activation itself does not fetch or validate the provider list. If fetching the provider list fails and `service_provider` was configured, the framework logs a warning and uses the configured address. The resolved address is **cached for the lifetime of the activation**; switching providers therefore requires re-activating the token/platform coin.
 </Note>
 
 ## Related methods
