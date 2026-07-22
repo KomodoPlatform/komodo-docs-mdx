@@ -61,6 +61,8 @@ When polling the provider fails, an error event is emitted instead, carrying the
 
 `data: {"_type":"GASLESS_TRACE:USDT-TRC20","message":{"coin":"USDT-TRC20","trace_id":"6c3ff67e-0bf4-4c09-91ca-0c7c254b01a0","error":"Request to GasFree provider timed out"}}`
 
+Repeated identical errors are deduplicated — an error event is only re-emitted when the message changes. Polling for a trace stops permanently after too many consecutive failures: 10 for deterministic errors (e.g. an invalid provider response), or 200 for connectivity-class errors (timeouts, rate limits, provider outages — roughly 10 minutes at the default 3-second interval). The final error event's message ends with `stopped polling after N consecutive trace status errors`; after that, use [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) to check the transfer manually.
+
 <Note>
   The same status fields are returned synchronously (without a stream) by the [gasless::trace\_status](/komodo-defi-framework/api/v20/wallet/gasless_trace_status/) method, which is useful for one-off polling.
 </Note>
