@@ -54,5 +54,377 @@
         "description": "An internal server error occurred."
       }
     ]
+  },
+  "SmartAccountRegisterRequest": {
+    "data": [
+      {
+        "parameter": "coin",
+        "type": "string",
+        "required": true,
+        "description": "The ticker of an activated EVM coin or token. The registration is held by this coin's platform coin and is shared with all of its tokens, but not with other platform coins."
+      },
+      {
+        "parameter": "safe_address",
+        "type": "string",
+        "required": true,
+        "description": "The Gnosis Pay card Safe address, as returned by the Gnosis Pay API. Must be [EIP-55](https://eips.ethereum.org/EIPS/eip-55) checksummed: an all-lowercase address containing any of the letters `a`-`f` is rejected with `InvalidSafeAddress`, as is the zero address."
+      },
+      {
+        "parameter": "from",
+        "type": "object",
+        "required": false,
+        "description": "Optional. A standard [WithdrawFromInfo](/komodo-defi-framework/api/common_structures/wallet/#withdraw-from-info) object selecting which owner EOA controls the Safe. Omit it for single-address (Iguana) wallets, where the wallet's only address is used. Required for HD wallets, where omitting it returns `FromAddressRequired`."
+      }
+    ]
+  },
+  "SmartAccountRegisterResponse": {
+    "data": [
+      {
+        "parameter": "coin",
+        "type": "string",
+        "required": true,
+        "description": "The ticker from the request, echoed back."
+      },
+      {
+        "parameter": "owner_address",
+        "type": "string",
+        "required": true,
+        "description": "The owner EOA the card Safe was registered under, in EIP-55 checksummed form. This is the address the on-chain `isOwner` check passed for, and the address whose balance and activation responses will now carry `smart_account_address`."
+      },
+      {
+        "parameter": "smart_account_address",
+        "type": "string",
+        "required": true,
+        "description": "The registered card Safe, in EIP-55 checksummed form. Always the `safe_address` from the request, re-encoded as a checksummed address."
+      }
+    ]
+  },
+  "SmartAccountRegisterErrors": {
+    "data": [
+      {
+        "parameter": "NoSuchCoin",
+        "type": "object",
+        "required": false,
+        "description": "400. The `coin` is not activated. `error_data` carries the requested `coin`."
+      },
+      {
+        "parameter": "NotEthCoin",
+        "type": "object",
+        "required": false,
+        "description": "400. The `coin` is activated but is not an EVM or TRON coin. `error_data` carries the requested `coin`."
+      },
+      {
+        "parameter": "UnsupportedCoinType",
+        "type": "object",
+        "required": false,
+        "description": "400. The `coin` is of a kind card Safes do not apply to: a TRON coin, or an NFT coin. `error_data` carries the requested `coin`."
+      },
+      {
+        "parameter": "InvalidSafeAddress",
+        "type": "object",
+        "required": false,
+        "description": "400. `safe_address` is not a `0x` prefixed 20-byte hex string, fails the EIP-55 checksum (`reason` is then `Invalid address checksum`), or is the zero address (`reason` is `zero address`). `error_data` carries the `reason`."
+      },
+      {
+        "parameter": "FromAddressRequired",
+        "type": "none",
+        "required": false,
+        "description": "400. The wallet is an HD wallet and `from` was omitted, so no single owner address could be resolved. This variant carries no `error_data` field at all."
+      },
+      {
+        "parameter": "InvalidFromAddress",
+        "type": "string",
+        "required": false,
+        "description": "400. `from` was supplied but did not resolve to an address of this wallet, for example an unknown `account_id` or a `derivation_path` whose coin type does not match the coin. `error_data` is the reason, produced by the same address resolver [withdraw](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) uses."
+      },
+      {
+        "parameter": "NotSafeOwner",
+        "type": "object",
+        "required": false,
+        "description": "403. The ownership check completed and the resolved owner address is not an owner of this Safe. `error_data` carries `owner_address` and `safe_address`. Not retryable — either the Safe address or the selected address is wrong."
+      },
+      {
+        "parameter": "OwnerCheckFailed",
+        "type": "string",
+        "required": false,
+        "description": "502. The on-chain ownership check could not be completed, for example because the coin's RPC nodes were unreachable. `error_data` carries the underlying error. Retry with backoff, but bound the retries: the same error is returned when the address does not answer like a Safe at all, which retrying will not fix."
+      }
+    ]
+  },
+  "SmartAccountSignTypedDataRequest": {
+    "data": [
+      {
+        "parameter": "coin",
+        "type": "string",
+        "required": true,
+        "description": "The ticker of an activated EVM coin or token. Must be the coin used for [smart_account::register](/komodo-defi-framework/api/v20/wallet/smart_account/register/), or another token of the same platform coin; the registry is shared across a platform coin and its tokens. The coin's chain id must also equal `domain.chainId`."
+      },
+      {
+        "parameter": "typed_data",
+        "type": "object",
+        "required": true,
+        "description": "The EIP-712 payload returned by Gnosis Pay, in the standard `eth_signTypedData_v4` shape. Its members are documented in the `typed_data` table below. Unknown members at this level are rejected by the dispatcher as `InvalidRequest`."
+      },
+      {
+        "parameter": "from",
+        "type": "object",
+        "required": false,
+        "description": "Optional. A standard [WithdrawFromInfo](/komodo-defi-framework/api/common_structures/wallet/#withdraw-from-info) object selecting which owner EOA signs. Omit it for single-address (Iguana) wallets. Required for HD wallets, where omitting it returns `FromAddressRequired`. The resolved address is also the owner whose registered Safe is looked up."
+      }
+    ]
+  },
+  "Eip712TypedData": {
+    "data": [
+      {
+        "parameter": "types",
+        "type": "object",
+        "required": true,
+        "description": "A map of EIP-712 type name to an array of `{name, type}` field definitions. The entry named by `primaryType` must match the canonical field list exactly, in field names, field types and field order. An `EIP712Domain` entry is optional: when present it must be exactly `chainId` (`uint256`) followed by `verifyingContract` (`address`), and when absent it is inferred from `domain`. Extra entries that no signed type refers to are ignored rather than rejected."
+      },
+      {
+        "parameter": "domain",
+        "type": "object",
+        "required": true,
+        "description": "The EIP-712 domain. It must have exactly two members, `chainId` and `verifyingContract`, both non-null, and nothing else: `name`, `version` and `salt` are rejected with `InvalidTypedData` even though they are standard EIP-712 fields. Key order here is irrelevant; order matters only in the `types.EIP712Domain` entry. Unknown members are rejected."
+      },
+      {
+        "parameter": "primaryType",
+        "type": "string",
+        "required": true,
+        "description": "`SafeTx` or `ModuleTx`. Any other value is rejected with `UnsupportedPrimaryType`."
+      },
+      {
+        "parameter": "message",
+        "type": "object",
+        "required": true,
+        "description": "The values of the `primaryType` fields. `uint256` and `uint8` members accept a `0x` hex string, a decimal string, or a JSON number; `bytes` and `bytes32` members must be `0x` hex strings, never arrays. Extra members here are neither rejected nor hashed, since only the fields declared in `types[primaryType]` are encoded, so a GUI must not treat them as validated."
+      }
+    ]
+  },
+  "SmartAccountSignTypedDataResponse": {
+    "data": [
+      {
+        "parameter": "coin",
+        "type": "string",
+        "required": true,
+        "description": "The ticker from the request, echoed back."
+      },
+      {
+        "parameter": "owner_address",
+        "type": "string",
+        "required": true,
+        "description": "The owner EOA whose key produced `signature`, in EIP-55 checksummed form."
+      },
+      {
+        "parameter": "verifying_contract",
+        "type": "string",
+        "required": true,
+        "description": "The `domain.verifyingContract` from the request, in EIP-55 checksummed form."
+      },
+      {
+        "parameter": "verifying_contract_kind",
+        "type": "string",
+        "required": true,
+        "description": "`registered_safe` when the payload targets the registered card Safe itself (`SafeTx`), or `zodiac_modifier` when it targets a Zodiac modifier verified on-chain to act on that Safe (`ModuleTx`)."
+      },
+      {
+        "parameter": "typed_data_hash",
+        "type": "string",
+        "required": true,
+        "description": "The `0x` prefixed 32-byte EIP-712 digest that was signed, `keccak256(0x1901 || domainSeparator || hashStruct(primaryType, message))`. Both accepted domain dialects hash identically, so the same payload written either way yields the same digest."
+      },
+      {
+        "parameter": "signature",
+        "type": "string",
+        "required": true,
+        "description": "The `0x` prefixed 65-byte owner signature over `typed_data_hash`: 130 hex characters, `r || s || v`, with `v` of `0x1b` or `0x1c` (27 or 28). A plain EOA ECDSA signature, which is what a Safe's `checkSignatures` expects for an owner, not an EIP-1271 contract signature."
+      },
+      {
+        "parameter": "intent",
+        "type": "object",
+        "required": true,
+        "description": "A human-readable summary of what was signed, for GUI confirmation. Its shape depends on `primaryType`: see the `intent (SafeTx)` and `intent (ModuleTx)` tables below."
+      }
+    ]
+  },
+  "SmartAccountIntentSafeTx": {
+    "data": [
+      {
+        "parameter": "type",
+        "type": "string",
+        "required": true,
+        "description": "Always `SafeTx`. Discriminates this intent shape from `ModuleTx`."
+      },
+      {
+        "parameter": "to",
+        "type": "string",
+        "required": true,
+        "description": "The call target, in EIP-55 checksummed form."
+      },
+      {
+        "parameter": "value",
+        "type": "string",
+        "required": true,
+        "description": "The native-token value of the call, as a **decimal** string in the chain's smallest unit, even when the request supplied hex."
+      },
+      {
+        "parameter": "data",
+        "type": "string",
+        "required": true,
+        "description": "The call data, echoed verbatim from `message.data`. KDF does not decode it; a GUI that wants to name the action must decode it itself."
+      },
+      {
+        "parameter": "operation",
+        "type": "string",
+        "required": true,
+        "description": "`CALL` when `message.operation` was `0`, or `DELEGATECALL` when it was `1`. Any other value is rejected with `InvalidTypedData`. `DELEGATECALL` runs the target's code in the Safe's own context and should be surfaced prominently for user confirmation."
+      },
+      {
+        "parameter": "safe_tx_gas",
+        "type": "string",
+        "required": true,
+        "description": "`message.safeTxGas` as a decimal string."
+      },
+      {
+        "parameter": "base_gas",
+        "type": "string",
+        "required": true,
+        "description": "`message.baseGas` as a decimal string."
+      },
+      {
+        "parameter": "gas_price",
+        "type": "string",
+        "required": true,
+        "description": "`message.gasPrice` as a decimal string. `0` means the Safe transaction is relayed without a gas refund."
+      },
+      {
+        "parameter": "gas_token",
+        "type": "string",
+        "required": true,
+        "description": "The token any gas refund is paid in, in EIP-55 checksummed form. The zero address means the chain's native token."
+      },
+      {
+        "parameter": "refund_receiver",
+        "type": "string",
+        "required": true,
+        "description": "The gas-refund recipient, in EIP-55 checksummed form. The zero address means whoever submits the transaction."
+      },
+      {
+        "parameter": "nonce",
+        "type": "string",
+        "required": true,
+        "description": "The Safe transaction nonce as a decimal string. It comes from the Gnosis Pay payload; KDF neither fetches nor validates it, so replay protection is not KDF's responsibility."
+      }
+    ]
+  },
+  "SmartAccountIntentModuleTx": {
+    "data": [
+      {
+        "parameter": "type",
+        "type": "string",
+        "required": true,
+        "description": "Always `ModuleTx`. Discriminates this intent shape from `SafeTx`."
+      },
+      {
+        "parameter": "modifier",
+        "type": "string",
+        "required": true,
+        "description": "The Zodiac modifier the signature authorises, in EIP-55 checksummed form. Always equal to `verifying_contract`, and verified on-chain to act on the registered Safe."
+      },
+      {
+        "parameter": "data",
+        "type": "string",
+        "required": true,
+        "description": "The modifier call data, echoed verbatim from `message.data`. A `ModuleTx` intent has no `to`, `value` or `operation`, so this and `modifier` are the whole of what KDF can tell a GUI about the action."
+      },
+      {
+        "parameter": "salt",
+        "type": "string",
+        "required": true,
+        "description": "The 32-byte `0x` prefixed salt from `message.salt`, echoed verbatim."
+      }
+    ]
+  },
+  "SmartAccountSignTypedDataErrors": {
+    "data": [
+      {
+        "parameter": "NoSuchCoin",
+        "type": "object",
+        "required": false,
+        "description": "400. The `coin` is not activated. `error_data` carries the requested `coin`."
+      },
+      {
+        "parameter": "NotEthCoin",
+        "type": "object",
+        "required": false,
+        "description": "400. The `coin` is activated but is not an EVM or TRON coin. `error_data` carries the requested `coin`."
+      },
+      {
+        "parameter": "UnsupportedCoinType",
+        "type": "object",
+        "required": false,
+        "description": "400. The `coin` is of a kind card Safes do not apply to: a TRON coin, or an NFT coin. `error_data` carries the requested `coin`."
+      },
+      {
+        "parameter": "FromAddressRequired",
+        "type": "none",
+        "required": false,
+        "description": "400. The wallet is an HD wallet and `from` was omitted, so no single owner address could be resolved. This variant carries no `error_data` field at all."
+      },
+      {
+        "parameter": "InvalidFromAddress",
+        "type": "string",
+        "required": false,
+        "description": "400. `from` was supplied but did not resolve to an address of this wallet. `error_data` is the reason, produced by the same address resolver [withdraw](/komodo-defi-framework/api/v20/wallet/tx/withdraw/) uses."
+      },
+      {
+        "parameter": "NoRegisteredSafe",
+        "type": "object",
+        "required": false,
+        "description": "412. No card Safe is registered for the resolved owner EOA. This is a precondition failure rather than a problem with the payload: call [smart_account::register](/komodo-defi-framework/api/v20/wallet/smart_account/register/) for this owner and retry. It is raised before `typed_data` is inspected at all, and it is also what a KDF restart or a coin re-activation produces, since the registry is in-memory. `error_data` carries `owner_address`."
+      },
+      {
+        "parameter": "InvalidTypedData",
+        "type": "string",
+        "required": false,
+        "description": "400. `typed_data` failed validation. Covers a `domain` that is not exactly `{chainId, verifyingContract}`, a `types` entry that does not match the canonical field list, a member that cannot be parsed as its declared type, a `SafeTx` `operation` other than `0` or `1`, and a failure to hash the payload. `error_data` is the specific reason."
+      },
+      {
+        "parameter": "UnsupportedPrimaryType",
+        "type": "string",
+        "required": false,
+        "description": "400. `primaryType` is neither `SafeTx` nor `ModuleTx`. `error_data` is the rejected value."
+      },
+      {
+        "parameter": "ChainIdMismatch",
+        "type": "object",
+        "required": false,
+        "description": "403. `domain.chainId` is not the activated coin's chain id, so the payload is bound to a different chain. `error_data` carries `expected`, a number, the coin's chain id, and `actual`, a string, the value from the payload."
+      },
+      {
+        "parameter": "VerifyingContractNotRegisteredSafe",
+        "type": "object",
+        "required": false,
+        "description": "403. A `SafeTx` whose `domain.verifyingContract` is some contract other than the registered card Safe. `error_data` carries `expected`, the registered Safe, and `actual`, the contract in the payload."
+      },
+      {
+        "parameter": "ModifierNotLinkedToSafe",
+        "type": "object",
+        "required": false,
+        "description": "403. A `ModuleTx` whose modifier's `avatar()` and `target()` views completed but did not both return the registered Safe, so the modifier is not authorised to act on it. `error_data` carries `modifier`, `safe`, `avatar` and `target`, which is enough for a GUI to say which one mismatched. Not retryable."
+      },
+      {
+        "parameter": "OnChainCheckFailed",
+        "type": "string",
+        "required": false,
+        "description": "502. The modifier's `avatar()` or `target()` `eth_call` could not be completed, or did not return an address. `error_data` is the reason. Retryable with backoff; deliberately distinct from `ModifierNotLinkedToSafe` so a flaky RPC node never looks like a security rejection."
+      },
+      {
+        "parameter": "SigningFailed",
+        "type": "string",
+        "required": false,
+        "description": "500. The owner key could not sign the digest. This is also the variant returned for MetaMask, Trezor and WalletConnect activations, whose signing policies this method does not support. `error_data` is the underlying reason. Not retryable."
+      }
+    ]
   }
 }
