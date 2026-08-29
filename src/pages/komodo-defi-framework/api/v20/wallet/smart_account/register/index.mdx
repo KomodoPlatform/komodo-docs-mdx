@@ -1,0 +1,254 @@
+export const title = "Komodo DeFi Framework Method: Smart Account Register";
+export const description =
+  "The smart_account::register method verifies on-chain that your key owns a Gnosis Pay card Safe, and then tracks the Safe for the current session.";
+
+# Smart Account: Register
+
+## smart\_account::register {{label : 'smart_account::register', tag : 'API-v2'}}
+
+The `smart_account::register` method tells the Komodo DeFi Framework that a Gnosis Pay card Safe belongs to one of your addresses. KDF verifies the claim on-chain before accepting it, and then tracks the Safe so that it appears as `smart_account_address` on balance and activation responses for that address, and so that [smart\_account::sign\_typed\_data](/komodo-defi-framework/api/v20/wallet/smart_account/sign_typed_data/) will sign payloads for it.
+
+Registering does **not** deploy, configure, fund or modify the Safe. Gnosis Pay deploys and operates the Safe server-side; KDF is only a signer and a reader. Nothing is broadcast, and no transaction fee is paid.
+
+<Note>
+  The registration is held in memory and is lost on a KDF restart or a coin re-activation — call this method on **startup**, not only during onboarding. See [Scope and Lifetime](/komodo-defi-framework/api/v20/wallet/smart_account/register/#scope-and-lifetime) below.
+</Note>
+
+## What a Registration Covers
+
+A registration is keyed by the **exact owner EOA** it was made for.
+
+*   `smart_account_address` appears only on responses for that one address. Sibling HD addresses in the same account do not carry it, even though they share a seed.
+*   The same Safe can legitimately be registered under two different owner EOAs, if both pass the `isOwner` check. Two of your addresses may therefore report the same `smart_account_address`. A client that keys card state by Safe address rather than by owner address will collide on this.
+*   Registering an address that already has a registration replaces it. There is no explicit unregister method.
+
+## Scope and Lifetime
+
+The registry is an in-memory cache. After a KDF restart, or after re-activating the platform coin, `smart_account_address` **silently disappears** and [smart\_account::sign\_typed\_data](/komodo-defi-framework/api/v20/wallet/smart_account/sign_typed_data/) returns `NoRegisteredSafe` (HTTP 412). Nothing on-chain is lost; one `register` call restores it.
+
+### Request Parameters
+
+<CompactTable source="v2/wallet.SmartAccountRegisterRequest" />
+
+### Response Parameters
+
+<CompactTable source="v2/wallet.SmartAccountRegisterResponse" />
+
+#### 📌 Examples
+
+<Note type="info">
+  The `error_path` and `error_trace` values below are illustrative.
+</Note>
+
+##### Single-address (Iguana) wallet
+
+<CodeGroup title="Register a card Safe" tag="POST" label="smart_account::register" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "smart_account::register",
+    "params": {
+      "coin": "XDAI",
+      "safe_address": "0x5aFE000000000000000000000000000000000001"
+    },
+    "id": 0
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Register Response" collapsedText="Show Register Response">
+  ### Response (success)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "coin": "XDAI",
+          "owner_address": "0x083C32B38e8050473f6999e22f670d1404235592",
+          "smart_account_address": "0x5aFE000000000000000000000000000000000001"
+      },
+      "id": 0
+  }
+  ```
+</CollapsibleSection>
+
+##### HD wallet
+
+`from` selects which derived address owns the Safe. This example uses the `derivation_path` form; the `account_id` / `chain` / `address_id` form is equally valid here.
+
+<CodeGroup title="Register a card Safe (HD Wallet)" tag="POST" label="smart_account::register" mm2MethodDecorate="true">
+  ```json
+  {
+    "userpass": "RPC_UserP@SSW0RD",
+    "mmrpc": "2.0",
+    "method": "smart_account::register",
+    "params": {
+      "coin": "XDAI",
+      "safe_address": "0x5aFE000000000000000000000000000000000001",
+      "from": {
+        "derivation_path": "m/44'/60'/0'/0/0"
+      }
+    },
+    "id": 1
+  }
+  ```
+</CodeGroup>
+
+<CollapsibleSection expandedText="Hide Register (HD Wallet) Response" collapsedText="Show Register (HD Wallet) Response">
+  ### Response (HD, success)
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "result": {
+          "coin": "XDAI",
+          "owner_address": "0x083C32B38e8050473f6999e22f670d1404235592",
+          "smart_account_address": "0x5aFE000000000000000000000000000000000001"
+      },
+      "id": 1
+  }
+  ```
+</CollapsibleSection>
+
+### Error Types
+
+<CompactTable source="v2/wallet.SmartAccountRegisterErrors" />
+
+<CollapsibleSection expandedText="Hide Error Responses" collapsedText="Show Error Responses">
+  #### ⚠️ Error Responses
+
+  ##### NoSuchCoin
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "No such coin: XDAI",
+      "error_path": "smart_account.lp_coins",
+      "error_trace": "smart_account:104] lp_coins:5122]",
+      "error_type": "NoSuchCoin",
+      "error_data": {
+          "coin": "XDAI"
+      },
+      "id": null
+  }
+  ```
+
+  ##### NotEthCoin
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Coin 'KMD' is not an EVM/TRON coin",
+      "error_path": "smart_account",
+      "error_trace": "smart_account:107]",
+      "error_type": "NotEthCoin",
+      "error_data": {
+          "coin": "KMD"
+      },
+      "id": null
+  }
+  ```
+
+  ##### UnsupportedCoinType
+
+  Returned for a TRON coin, and for an NFT coin. Neither holds a card Safe's fungible balance.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Gnosis Pay Safe is not supported for this coin type (TRX)",
+      "error_path": "smart_account",
+      "error_trace": "smart_account:112]",
+      "error_type": "UnsupportedCoinType",
+      "error_data": {
+          "coin": "TRX"
+      },
+      "id": null
+  }
+  ```
+
+  ##### InvalidSafeAddress
+
+  An all-lowercase `safe_address`. The zero address produces the same variant with `"reason": "zero address"`.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Invalid Safe address: Invalid address checksum",
+      "error_path": "smart_account",
+      "error_trace": "smart_account:123]",
+      "error_type": "InvalidSafeAddress",
+      "error_data": {
+          "reason": "Invalid address checksum"
+      },
+      "id": null
+  }
+  ```
+
+  ##### FromAddressRequired
+
+  This variant carries no `error_data` field. The wallet is an HD wallet, so `from` must be supplied.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "'from' is required to select the owner address for an HD wallet",
+      "error_path": "smart_account.service",
+      "error_trace": "smart_account:132] service:52]",
+      "error_type": "FromAddressRequired",
+      "id": null
+  }
+  ```
+
+  ##### InvalidFromAddress
+
+  `error_data` is the underlying reason from the shared withdraw address resolver — here, an `account_id` that does not exist in this wallet.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Invalid 'from' owner selector: Unknown '3' account",
+      "error_path": "smart_account.service",
+      "error_trace": "smart_account:132] service:44]",
+      "error_type": "InvalidFromAddress",
+      "error_data": "Unknown '3' account",
+      "id": null
+  }
+  ```
+
+  ##### NotSafeOwner
+
+  The ownership check completed and the address is not an owner. Not retryable.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "Address 0x083C32B38e8050473f6999e22f670d1404235592 is not an owner of Safe 0x5aFE000000000000000000000000000000000001",
+      "error_path": "smart_account",
+      "error_trace": "smart_account:141]",
+      "error_type": "NotSafeOwner",
+      "error_data": {
+          "owner_address": "0x083C32B38e8050473f6999e22f670d1404235592",
+          "safe_address": "0x5aFE000000000000000000000000000000000001"
+      },
+      "id": null
+  }
+  ```
+
+  ##### OwnerCheckFailed
+
+  The ownership check could not be completed. Retryable with backoff.
+
+  ```json
+  {
+      "mmrpc": "2.0",
+      "error": "On-chain Safe ownership check failed: Transport: All the current rpc nodes are unavailable.",
+      "error_path": "smart_account.service",
+      "error_trace": "smart_account:137] service:70]",
+      "error_type": "OwnerCheckFailed",
+      "error_data": "Transport: All the current rpc nodes are unavailable.",
+      "id": null
+  }
+  ```
+</CollapsibleSection>

@@ -1,0 +1,45 @@
+export const title = "Komodo DeFi Framework Method Overview: Smart Account Methods";
+export const description =
+  "This document provides an overview of the smart account methods, which register and sign for a Gnosis Pay card Safe from the Komodo DeFi Framework.";
+
+# Smart Account Methods Overview
+
+## smart\_account {{label : 'smart_account', tag : 'overview'}}
+
+*   [Register](/komodo-defi-framework/api/v20/wallet/smart_account/register/)
+*   [Sign Typed Data](/komodo-defi-framework/api/v20/wallet/smart_account/sign_typed_data/)
+
+The `smart_account` methods let the Komodo DeFi Framework act for a [Gnosis Pay](https://gnosispay.com/) card [Safe](https://safe.global/) — a smart contract account on Gnosis Chain that holds the funds backing a payment card. Gnosis Pay deploys and operates the Safe; its owner is the EOA whose key KDF holds. KDF is only a **signer and a reader** — it never deploys, configures or broadcasts, and pays no transaction fee. `sign_typed_data` signs only the two payload schemas it recognises, checks them against the registered Safe and the activated chain, and returns a readable `intent` describing what the signature authorises — so a client is never asked to approve an opaque hash.
+
+## The Recurring Flow
+
+Every privileged card operation — setting a spending limit, moving funds out of the Safe, changing an owner — follows the same four steps:
+
+1.  The client asks Gnosis Pay to perform the operation, and the Gnosis Pay API returns an [EIP-712](https://eips.ethereum.org/EIPS/eip-712) typed-data payload describing it.
+2.  The client passes that payload to [smart\_account::sign\_typed\_data](/komodo-defi-framework/api/v20/wallet/smart_account/sign_typed_data/), which validates it and signs its digest with the owner key.
+3.  The client submits the returned signature to Gnosis Pay.
+4.  Gnosis Pay relays the signed operation on-chain.
+
+## Registration Is a Precondition
+
+[smart\_account::register](/komodo-defi-framework/api/v20/wallet/smart_account/register/) must have succeeded for the same owner EOA before `sign_typed_data` will sign anything. Until it has, `sign_typed_data` returns `NoRegisteredSafe` (HTTP 412).
+
+The registration is held in memory and is lost on a KDF restart or a coin re-activation, so `NoRegisteredSafe` means "re-register", not "this user has no card". See [Scope and Lifetime](/komodo-defi-framework/api/v20/wallet/smart_account/register/#scope-and-lifetime).
+
+Once registered, the Safe surfaces as an optional `smart_account_address` field on balance and activation responses for that address — see [AddressInfo](/komodo-defi-framework/api/common_structures/wallet/#address-info) and the other shared address structures. Reading it back is how a client checks whether a registration is currently live:
+
+```json
+{
+  "address": "0x083C32B38e8050473f6999e22f670d1404235592",
+  "balance": "0.526",
+  "unspendable_balance": "0",
+  "coin": "XDAI",
+  "smart_account_address": "0x5aFE000000000000000000000000000000000001"
+}
+```
+
+Its absence means the registration is gone and [smart\_account::register](/komodo-defi-framework/api/v20/wallet/smart_account/register/) must be called again.
+
+<Note type="warning">
+  **Signing needs a locally held key.** `sign_typed_data` signs with a key KDF holds itself, so coins activated through **MetaMask**, **Trezor** or **WalletConnect** cannot use it — it fails with `SigningFailed` (HTTP 500). Only seed-derived activations, single-address (Iguana) and HD, can sign. `register` does not sign and is unaffected. The Gnosis Chain coin must also be activated before either method can be used; the examples on both method pages use `XDAI`, the Gnosis Chain platform coin.
+</Note>

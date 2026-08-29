@@ -15,12 +15,13 @@ The `my_balance` method returns the current balance of the specified `coin`.
 
 #### Response
 
-| Structure            | Type             | Description                                                                                   |
-| -------------------- | ---------------- | --------------------------------------------------------------------------------------------- |
-| address              | string           | the address that holds the coins                                                              |
-| balance              | string (numeric) | the number of coins in the address; does not include `unspendable_balance`                    |
-| unspendable\_balance | string (numeric) | the `coin` balance that is unspendable at the moment (e.g. if the address has immature UTXOs) |
-| coin                 | string           | the name of the coin                                                                          |
+| Structure               | Type             | Description                                                                                                                                                                                                                                                                             |
+| ----------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| address                 | string           | the address that holds the coins                                                                                                                                                                                                                                                        |
+| balance                 | string (numeric) | the number of coins in the address; does not include `unspendable_balance`                                                                                                                                                                                                              |
+| unspendable\_balance    | string (numeric) | the `coin` balance that is unspendable at the moment (e.g. if the address has immature UTXOs)                                                                                                                                                                                           |
+| coin                    | string           | the name of the coin                                                                                                                                                                                                                                                                    |
+| smart\_account\_address | string           | Optional. EVM coins only. The registered Gnosis Pay card Safe for this address's owner EOA. Only present once [smart\_account::register](/komodo-defi-framework/api/v20/wallet/smart_account/register/) has succeeded for this exact address in the current session; omitted otherwise. |
 
 #### 📌 Examples
 
@@ -45,6 +46,20 @@ The `my_balance` method returns the current balance of the specified `coin`.
     "balance": "60.00253836",
     "unspendable_balance": "0.1",
     "coin": "HELLOWORLD"
+  }
+  ```
+</CollapsibleSection>
+
+<CollapsibleSection expandedText="Hide Response" collapsedText="Show Response">
+  #### Response (EVM coin with a registered card Safe)
+
+  ```json
+  {
+    "address": "0x083C32B38e8050473f6999e22f670d1404235592",
+    "balance": "0.526",
+    "unspendable_balance": "0",
+    "coin": "XDAI",
+    "smart_account_address": "0x5aFE000000000000000000000000000000000001"
   }
   ```
 </CollapsibleSection>
